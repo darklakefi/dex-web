@@ -22,13 +22,13 @@ To create a production bundle:
 npx nx build web
 ```
 
-To see all available targets to run for a project, run:
+To run the linter:
 
 ```sh
 npx nx biome-lint web
 ```
 
-To run the linter:
+To see all available targets to run for a project, run:
 
 ```sh
 npx nx show project web
