@@ -22,6 +22,12 @@ To create a production bundle:
 npx nx build web
 ```
 
+To run the linter:
+
+```sh
+npx nx biome-lint web
+```
+
 To see all available targets to run for a project, run:
 
 ```sh
@@ -77,4 +83,3 @@ And join the Nx community:
 - [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
 - [Our Youtube channel](https://www.youtube.com/@nxdevtools)
 - [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-  > > > > > > > 8184f17 (Initial commit)

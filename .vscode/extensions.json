@@ -1,8 +1,8 @@
 {
   "recommendations": [
-    "nrwl.angular-console",
-    "esbenp.prettier-vscode",
+    "biomejs.biome",
     "ms-playwright.playwright",
-    "firsttris.vscode-jest-runner"
+    "firsttris.vscode-jest-runner",
+    "vivaxy.vscode-conventional-commits"
   ]
 }
