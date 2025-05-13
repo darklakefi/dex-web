@@ -25,6 +25,12 @@ npx nx build web
 To see all available targets to run for a project, run:
 
 ```sh
+npx nx biome-lint web
+```
+
+To run the linter:
+
+```sh
 npx nx show project web
 ```
 
