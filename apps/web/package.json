@@ -3,7 +3,22 @@
   "version": "0.0.1",
   "private": true,
   "nx": {
-    "name": "web"
+    "name": "web",
+    "targets": {
+      "biome-lint": {
+        "executor": "@gitopslovers/nx-biome:biome-lint",
+        "outputs": [
+          "{options.outputFile}"
+        ],
+        "options": {
+          "lintFilePatterns": [
+            "apps/web/**/*.ts"
+          ],
+          "write": false,
+          "unsafe": false
+        }
+      }
+    }
   },
   "dependencies": {
     "next": "~15.2.4",

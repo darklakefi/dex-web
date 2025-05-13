@@ -5,6 +5,21 @@
   "nx": {
     "implicitDependencies": [
       "web"
-    ]
+    ],
+    "targets": {
+      "biome-lint": {
+        "executor": "@gitopslovers/nx-biome:biome-lint",
+        "outputs": [
+          "{options.outputFile}"
+        ],
+        "options": {
+          "lintFilePatterns": [
+            "apps/web-e2e/**/*.ts"
+          ],
+          "write": false,
+          "unsafe": false
+        }
+      }
+    }
   }
 }

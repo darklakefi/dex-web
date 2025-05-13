@@ -11,7 +11,8 @@
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/src/test-setup.[jt]s",
-      "!{projectRoot}/test-setup.[jt]s"
+      "!{projectRoot}/test-setup.[jt]s",
+      "!{projectRoot}/biome.json"
     ],
     "sharedGlobals": [
       "{workspaceRoot}/.circleci/config.yml"
@@ -62,6 +63,13 @@
       "dependsOn": [
         "^build"
       ]
+    },
+    "lint-biome": {
+      "inputs": [
+        "default",
+        "{workspaceRoot}/biome.json"
+      ],
+      "cache": true
     }
   },
   "generators": {
