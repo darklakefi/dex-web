@@ -22,6 +22,18 @@ To create a production bundle:
 npx nx build web
 ```
 
+To run the unit tests:
+
+```sh
+npx nx test web
+```
+
+To run the end-to-end tests:
+
+```sh
+npx nx e2e web-e2e
+```
+
 To run the linter:
 
 ```sh

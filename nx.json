@@ -1,22 +1,16 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s",
       "!{projectRoot}/biome.json"
     ],
-    "sharedGlobals": [
-      "{workspaceRoot}/.circleci/config.yml"
-    ]
+    "sharedGlobals": ["{workspaceRoot}/.circleci/config.yml"]
   },
   "nxCloudId": "68230a98f7a32c3a8df14adf",
   "plugins": [
@@ -52,23 +46,18 @@
       }
     },
     {
-      "plugin": "@nx/jest/plugin",
+      "plugin": "@nx/vite/plugin",
       "options": {
-        "targetName": "test"
+        "testTargetName": "test"
       }
     }
   ],
   "targetDefaults": {
     "test": {
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "lint-biome": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/biome.json"
-      ],
+      "inputs": ["default", "{workspaceRoot}/biome.json"],
       "cache": true
     }
   },
