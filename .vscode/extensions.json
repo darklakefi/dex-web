@@ -3,6 +3,7 @@
     "biomejs.biome",
     "ms-playwright.playwright",
     "vivaxy.vscode-conventional-commits",
-    "bradlc.vscode-tailwindcss"
+    "bradlc.vscode-tailwindcss",
+    "vitest.explorer"
   ]
 }
