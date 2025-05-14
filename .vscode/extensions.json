@@ -3,6 +3,7 @@
     "biomejs.biome",
     "ms-playwright.playwright",
     "firsttris.vscode-jest-runner",
-    "vivaxy.vscode-conventional-commits"
+    "vivaxy.vscode-conventional-commits",
+    "bradlc.vscode-tailwindcss"
   ]
 }
