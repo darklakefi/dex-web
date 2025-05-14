@@ -40,6 +40,7 @@
 		"autoprefixer": "10.4.13",
 		"happy-dom": "~9.20.3",
 		"jiti": "2.4.2",
+		"lefthook": "^1.11.12",
 		"nx": "21.0.3",
 		"postcss": "^8.5.3",
 		"tailwindcss": "^4.1.6",
