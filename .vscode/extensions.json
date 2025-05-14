@@ -1,9 +1,10 @@
 {
-  "recommendations": [
-    "biomejs.biome",
-    "ms-playwright.playwright",
-    "vivaxy.vscode-conventional-commits",
-    "bradlc.vscode-tailwindcss",
-    "vitest.explorer"
-  ]
+	"recommendations": [
+		"biomejs.biome",
+		"ms-playwright.playwright",
+		"vivaxy.vscode-conventional-commits",
+		"bradlc.vscode-tailwindcss",
+		"vitest.explorer",
+		"EditorConfig.EditorConfig"
+	]
 }
