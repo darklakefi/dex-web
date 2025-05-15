@@ -1,72 +1,72 @@
 {
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "production": [
-      "default",
-      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
-      "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/src/test-setup.[jt]s",
-      "!{projectRoot}/test-setup.[jt]s",
-      "!{projectRoot}/biome.json"
-    ],
-    "sharedGlobals": ["{workspaceRoot}/.circleci/config.yml"]
-  },
-  "nxCloudId": "68230a98f7a32c3a8df14adf",
-  "plugins": [
-    {
-      "plugin": "@nx/js/typescript",
-      "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        },
-        "build": {
-          "targetName": "build",
-          "configName": "tsconfig.lib.json",
-          "buildDepsName": "build-deps",
-          "watchDepsName": "watch-deps"
-        }
-      }
-    },
-    {
-      "plugin": "@nx/next/plugin",
-      "options": {
-        "startTargetName": "start",
-        "buildTargetName": "build",
-        "devTargetName": "dev",
-        "serveStaticTargetName": "serve-static",
-        "buildDepsTargetName": "build-deps",
-        "watchDepsTargetName": "watch-deps"
-      }
-    },
-    {
-      "plugin": "@nx/playwright/plugin",
-      "options": {
-        "targetName": "e2e"
-      }
-    },
-    {
-      "plugin": "@nx/vite/plugin",
-      "options": {
-        "testTargetName": "test"
-      }
-    }
-  ],
-  "targetDefaults": {
-    "test": {
-      "dependsOn": ["^build"]
-    },
-    "lint-biome": {
-      "inputs": ["default", "{workspaceRoot}/biome.json"],
-      "cache": true
-    }
-  },
-  "generators": {
-    "@nx/next": {
-      "application": {
-        "style": "tailwind",
-        "linter": "none"
-      }
-    }
-  }
+	"$schema": "./node_modules/nx/schemas/nx-schema.json",
+	"namedInputs": {
+		"default": ["{projectRoot}/**/*", "sharedGlobals"],
+		"production": [
+			"default",
+			"!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+			"!{projectRoot}/tsconfig.spec.json",
+			"!{projectRoot}/src/test-setup.[jt]s",
+			"!{projectRoot}/test-setup.[jt]s",
+			"!{projectRoot}/biome.json"
+		],
+		"sharedGlobals": ["{workspaceRoot}/.circleci/config.yml"]
+	},
+	"nxCloudId": "68230a98f7a32c3a8df14adf",
+	"plugins": [
+		{
+			"plugin": "@nx/js/typescript",
+			"options": {
+				"typecheck": {
+					"targetName": "typecheck"
+				},
+				"build": {
+					"targetName": "build",
+					"configName": "tsconfig.lib.json",
+					"buildDepsName": "build-deps",
+					"watchDepsName": "watch-deps"
+				}
+			}
+		},
+		{
+			"plugin": "@nx/next/plugin",
+			"options": {
+				"startTargetName": "start",
+				"buildTargetName": "build",
+				"devTargetName": "dev",
+				"serveStaticTargetName": "serve-static",
+				"buildDepsTargetName": "build-deps",
+				"watchDepsTargetName": "watch-deps"
+			}
+		},
+		{
+			"plugin": "@nx/playwright/plugin",
+			"options": {
+				"targetName": "e2e"
+			}
+		},
+		{
+			"plugin": "@nx/vite/plugin",
+			"options": {
+				"testTargetName": "test"
+			}
+		}
+	],
+	"targetDefaults": {
+		"test": {
+			"dependsOn": ["^build"]
+		},
+		"biome-lint": {
+			"inputs": ["default", "{workspaceRoot}/biome.json"],
+			"cache": true
+		}
+	},
+	"generators": {
+		"@nx/next": {
+			"application": {
+				"style": "tailwind",
+				"linter": "none"
+			}
+		}
+	}
 }
