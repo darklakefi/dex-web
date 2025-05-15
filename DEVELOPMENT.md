@@ -32,7 +32,7 @@ This repository is managed as an [Nx](https://nx.dev/) monorepo, enabling:
 
 Before you begin, make sure you have the following installed **on your local machine**:
 
-### 1. Node.js (≥ 24.0.0)
+### 1. Node.js (≥ 22.0.0)
 
 - **Recommended:** Use a version manager like [nvm](https://github.com/nvm-sh/nvm) or [asdf](https://asdf-vm.com/).
 - **Check version:**
@@ -41,12 +41,12 @@ Before you begin, make sure you have the following installed **on your local mac
   ```
 - **Install (macOS/Linux):**
   ```sh
-  nvm install 24
-  nvm use 24
+  nvm install 22
+  nvm use 22
   ```
 - **Install (Homebrew, macOS):**
   ```sh
-  brew install node@24
+  brew install node@22
   ```
 
 ### 2. pnpm (10.11.0)
