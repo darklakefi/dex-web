@@ -8,7 +8,10 @@
 			"!{projectRoot}/tsconfig.spec.json",
 			"!{projectRoot}/src/test-setup.[jt]s",
 			"!{projectRoot}/test-setup.[jt]s",
-			"!{projectRoot}/biome.json"
+			"!{projectRoot}/biome.json",
+			"!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
+			"!{projectRoot}/.storybook/**/*",
+			"!{projectRoot}/tsconfig.storybook.json"
 		],
 		"sharedGlobals": ["{workspaceRoot}/.circleci/config.yml"]
 	},
@@ -60,6 +63,15 @@
 				"watchDepsTargetName": "watch-deps",
 				"buildDepsTargetName": "build-deps",
 				"typecheckTargetName": "typecheck"
+			}
+		},
+		{
+			"plugin": "@nx/storybook/plugin",
+			"options": {
+				"serveStorybookTargetName": "storybook",
+				"buildStorybookTargetName": "build-storybook",
+				"testStorybookTargetName": "test-storybook",
+				"staticStorybookTargetName": "static-storybook"
 			}
 		}
 	],
