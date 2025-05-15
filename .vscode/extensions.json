@@ -5,6 +5,7 @@
 		"vivaxy.vscode-conventional-commits",
 		"bradlc.vscode-tailwindcss",
 		"vitest.explorer",
-		"EditorConfig.EditorConfig"
+		"EditorConfig.EditorConfig",
+		"nrwl.angular-console"
 	]
 }
