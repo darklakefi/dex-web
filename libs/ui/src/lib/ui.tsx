@@ -1,6 +1,6 @@
 export function Ui() {
 	return (
-		<div className={styles.container}>
+		<div>
 			<h1>Welcome to Ui!</h1>
 		</div>
 	);

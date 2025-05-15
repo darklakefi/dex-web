@@ -1,7 +1,6 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 
 import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
-import react from "@vitejs/plugin-react";
 import { mergeConfig } from "vite";
 
 const config: StorybookConfig = {
@@ -14,7 +13,7 @@ const config: StorybookConfig = {
 
 	viteFinal: async (config) =>
 		mergeConfig(config, {
-			plugins: [react(), nxViteTsPaths()],
+			plugins: [nxViteTsPaths()],
 		}),
 };
 
