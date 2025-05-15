@@ -6,7 +6,6 @@
 		"bradlc.vscode-tailwindcss",
 		"vitest.explorer",
 		"EditorConfig.EditorConfig",
-		"nrwl.angular-console",
-		"esbenp.prettier-vscode"
+		"nrwl.angular-console"
 	]
 }
