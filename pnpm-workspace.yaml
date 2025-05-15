@@ -1,5 +1,6 @@
 packages:
   - apps/*
+  - libs/*
 onlyBuiltDependencies:
   - "@biomejs/biome"
   - "@parcel/watcher"

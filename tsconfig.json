@@ -1,6 +1,9 @@
 {
 	"extends": "./tsconfig.base.json",
 	"compileOnSave": false,
+	"compilerOptions": {
+		"baseUrl": "."
+	},
 	"files": [],
 	"references": [
 		{
@@ -8,6 +11,9 @@
 		},
 		{
 			"path": "./apps/web"
+		},
+		{
+			"path": "./libs/ui"
 		}
 	],
 	"ts-node": {

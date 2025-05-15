@@ -1,9 +1,6 @@
+import { ExampleButton } from "@dex-fe-web/ui";
+
 export default function Index() {
-	/*
-	 * Replace the elements below with your own.
-	 *
-	 * Note: The corresponding styles are in the ./index.tailwind file.
-	 */
 	return (
 		<div>
 			<div className="wrapper">
@@ -13,6 +10,7 @@ export default function Index() {
 							<span> Hello there, </span>
 							Welcome web 👋
 						</h1>
+						<ExampleButton variant="secondary">Click me</ExampleButton>
 					</div>
 				</div>
 			</div>

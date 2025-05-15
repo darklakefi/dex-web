@@ -1,6 +1,7 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
+		"baseUrl": ".",
 		"jsx": "preserve",
 		"noEmit": true,
 		"emitDeclarationOnly": false,
@@ -17,7 +18,8 @@
 			}
 		],
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@dex-fe-web/ui": ["../../libs/ui/src/index.ts"]
 		},
 		"types": ["node"],
 		"outDir": "dist",
@@ -41,5 +43,10 @@
 		"src/**/*.spec.ts",
 		"src/**/*.test.ts",
 		".next"
+	],
+	"references": [
+		{
+			"path": "../../libs/ui/tsconfig.json"
+		}
 	]
 }

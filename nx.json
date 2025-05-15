@@ -16,6 +16,7 @@
 		"sharedGlobals": ["{workspaceRoot}/.circleci/config.yml"]
 	},
 	"nxCloudId": "68230a98f7a32c3a8df14adf",
+
 	"plugins": [
 		{
 			"plugin": "@nx/js/typescript",
