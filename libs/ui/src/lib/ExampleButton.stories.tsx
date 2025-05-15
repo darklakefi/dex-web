@@ -9,14 +9,25 @@ const meta: Meta<typeof ExampleButton> = {
 export default meta;
 type Story = StoryObj<typeof ExampleButton>;
 
-export const Primary = {
-	args: {},
-};
-
-export const Heading: Story = {
-	args: {},
+export const Primary: Story = {
+	args: {
+		children: "Click me",
+	},
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		expect(canvas.getByText(/Click me/gi)).toBeTruthy();
+		expect(canvas.getByText(/Click me/gi).className).toContain("bg-blue-500");
+	},
+};
+
+export const Secondary: Story = {
+	args: {
+		children: "Click me",
+		variant: "secondary",
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		expect(canvas.getByText(/Click me/gi)).toBeTruthy();
+		expect(canvas.getByText(/Click me/gi).className).toContain("bg-red-500");
 	},
 };
