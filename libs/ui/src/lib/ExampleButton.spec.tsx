@@ -1,10 +1,10 @@
 import { render } from "@testing-library/react";
 
-import Ui from "./ui";
+import ExampleButton from "./ExampleButton";
 
-describe("Ui", () => {
+describe("ExampleButton", () => {
 	it("should render successfully", () => {
-		const { baseElement } = render(<Ui />);
+		const { baseElement } = render(<ExampleButton />);
 		expect(baseElement).toBeTruthy();
 	});
 });
