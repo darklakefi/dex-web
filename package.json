@@ -33,6 +33,7 @@
 		"@storybook/react-vite": "9.0.0-rc.0",
 		"@storybook/test": "9.0.0-alpha.2",
 		"@storybook/test-runner": "^0.22.0",
+		"@svgr/webpack": "^8.1.0",
 		"@swc-node/register": "~1.9.2",
 		"@swc/cli": "~0.6.0",
 		"@swc/core": "~1.5.29",

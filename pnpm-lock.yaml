@@ -78,6 +78,9 @@ importers:
       '@storybook/test-runner':
         specifier: ^0.22.0
         version: 0.22.0(@swc/helpers@0.5.17)(@types/node@20.17.47)(babel-plugin-macros@3.1.0)(storybook@9.0.0-rc.0(@testing-library/dom@10.4.0)(prettier@2.8.8))(ts-node@10.9.1(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.17.47)(typescript@5.8.3))
+      '@svgr/webpack':
+        specifier: ^8.1.0
+        version: 8.1.0(typescript@5.8.3)
       '@swc-node/register':
         specifier: ~1.9.2
         version: 1.9.2(@swc/core@1.5.29(@swc/helpers@0.5.17))(@swc/types@0.1.21)(typescript@5.8.3)
