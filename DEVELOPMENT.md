@@ -13,6 +13,7 @@
 - [Conventional Commits](#conventional-commits)
 - [Signed Commits](#signed-commits)
 - [Common Nx Commands](#common-nx-commands)
+- [Storybook](#storybook)
 - [Recommended Extensions](#recommended-extensions)
 - [Troubleshooting](#troubleshooting)
 - [Further Reading](#further-reading)
@@ -230,6 +231,32 @@ We require that all commits are signed to verify authorship and improve security
 | Test       | `npx nx test web`       |
 | Lint       | `npx nx biome-lint web` |
 | E2E        | `npx nx e2e web-e2e`    |
+
+## Storybook
+
+Storybook is used for developing and documenting UI components in isolation. It provides a sandbox environment to build, test, and showcase components.
+
+### Running Storybook
+
+```sh
+npx nx storybook ui
+```
+
+This will start the Storybook development server, typically available at [http://localhost:6006](http://localhost:6006).
+
+### Key Features
+
+- **Component Development**: Build and test components in isolation
+- **Documentation**: Auto-generated documentation for components
+- **Visual Testing**: Compare component states and catch visual regressions
+- **Interactive Testing**: Test component interactions and states
+
+### Best Practices
+
+- Write stories for all reusable components
+- Include component documentation and usage examples
+- Use controls to demonstrate different component states
+- Add relevant component props and their descriptions
 
 ## Recommended Extensions
 

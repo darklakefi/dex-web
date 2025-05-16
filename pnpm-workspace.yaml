@@ -1,4 +1,12 @@
 packages:
   - apps/*
+  - libs/*
 onlyBuiltDependencies:
+  - "@biomejs/biome"
+  - "@parcel/watcher"
+  - "@swc/core"
+  - "@tailwindcss/oxide"
+  - esbuild
   - lefthook
+  - nx
+  - sharp
