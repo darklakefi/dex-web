@@ -20,22 +20,15 @@ type JSXElement =
   | "span"
   | "div";
 
-const typographyVariants = cva("", {
+const typographyVariants = cva("font-normal", {
   variants: {
     variant: {
-      // biome-ignore lint/nursery/useSortedClasses: <explanation>
-      heading: "font-normal text-3xl leading-3xl tracking-normal text-brand-20",
-      heading1:
-        // biome-ignore lint/nursery/useSortedClasses: <explanation>
-        "font-normal text-3xl leading-3xl tracking-normal text-brand-30",
-      // biome-ignore lint/nursery/useSortedClasses: <explanation>
-      body: "font-normal text-3xl leading-3xl tracking-normal text-brand-20",
-      // biome-ignore lint/nursery/useSortedClasses: <explanation>
-      body1: "font-normal text-3xl leading-4xl tracking-wider text-brand-30",
-      // biome-ignore lint/nursery/useSortedClasses: <explanation>
-      body2: "font-normal text-lg leading-2xl tracking-wide text-brand-30",
-      // biome-ignore lint/nursery/useSortedClasses: <explanation>
-      link: "font-normal text-lg leading-2xl tracking-wide text-brand-30 underline",
+      heading: "text-3xl text-brand-20 leading-3xl tracking-normal",
+      heading1: "text-3xl text-brand-30 leading-3xl tracking-normal",
+      body: "text-3xl text-brand-20 leading-3xl tracking-normal",
+      body1: "text-3xl text-brand-30 leading-4xl tracking-wider",
+      body2: "text-brand-30 text-lg leading-xl tracking-wide",
+      link: "text-brand-30 text-lg leading-xl tracking-wide underline",
     },
   },
 });
