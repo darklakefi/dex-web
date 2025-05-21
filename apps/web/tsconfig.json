@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "jsx": "preserve",
     "noEmit": true,
     "emitDeclarationOnly": false,
@@ -17,14 +16,9 @@
         "name": "next"
       }
     ],
-    "paths": {
-      "@/*": ["./src/*"],
-      "@dex-fe-web/ui": ["../../libs/ui/src/index.ts"]
-    },
     "types": ["node"],
     "outDir": "dist",
-    "rootDir": "src",
-    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
   "include": [
     "../../apps/web/.next/types/**/*.ts",
@@ -43,10 +37,5 @@
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
     ".next"
-  ],
-  "references": [
-    {
-      "path": "../../libs/ui/tsconfig.json"
-    }
   ]
 }
