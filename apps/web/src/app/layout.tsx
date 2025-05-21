@@ -1,4 +1,19 @@
+import localFont from "next/font/local";
 import "./global.css";
+
+const bitsumishiRegular = localFont({
+  src: "./bitsumishi-regular.woff2",
+  weight: "400",
+  style: "normal",
+  variable: "--font-bitsumishi-regular",
+});
+
+const classicConsoleNeue = localFont({
+  src: "./classic-console-neue.woff2",
+  weight: "400",
+  style: "normal",
+  variable: "--font-classic-console-neue",
+});
 
 export const metadata = {
   title: "Welcome to web",
@@ -11,7 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={`${bitsumishiRegular.variable} ${classicConsoleNeue.variable} font-sans`}
+    >
       <body>{children}</body>
     </html>
   );
