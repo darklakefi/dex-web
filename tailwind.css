@@ -24,4 +24,7 @@
   --tracking-normal: 0px;
   --tracking-wide: 0.01em;
   --tracking-wider: 0.02em;
+
+  --font-sans: var(--font-classic-console-neue), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-display: var(--font-bitsumishi-regular), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
