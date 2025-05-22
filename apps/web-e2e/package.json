@@ -1,19 +1,5 @@
 {
   "name": "web-e2e",
   "version": "0.0.1",
-  "private": true,
-  "nx": {
-    "implicitDependencies": ["web"],
-    "targets": {
-      "biome-lint": {
-        "executor": "@gitopslovers/nx-biome:biome-lint",
-        "outputs": ["{options.outputFile}"],
-        "options": {
-          "lintFilePatterns": ["apps/web-e2e/**/*.{ts,tsx}"],
-          "write": false,
-          "unsafe": false
-        }
-      }
-    }
-  }
+  "private": true
 }

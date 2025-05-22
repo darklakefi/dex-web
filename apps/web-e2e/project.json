@@ -1,0 +1,15 @@
+{
+  "name": "web-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": ["web"],
+
+  "targets": {
+    "lint": {
+      "command": "biome check  --write --config-path=apps/web-e2e/biome.json --verbose apps/web-e2e/**/*",
+      "cache": true
+    }
+  },
+  "sourceRoot": "apps/web-e2e/src",
+  "projectType": "application",
+  "tags": []
+}
