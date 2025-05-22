@@ -18,5 +18,5 @@
     "type": "commonjs"
   },
   "sourceMaps": true,
-  "exclude": [".*\\.spec.tsx?$",".*\\.test.tsx?$",".*.js$",".*.d.ts$"]
+  "exclude": [".*\\.spec.tsx?$", ".*\\.test.tsx?$", ".*.js$", ".*.d.ts$"]
 }

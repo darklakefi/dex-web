@@ -1,15 +1,15 @@
 {
-	"name": "ui",
-	"$schema": "../../node_modules/nx/schemas/project-schema.json",
-	"sourceRoot": "libs/ui/src",
-	"projectType": "library",
-	"tags": [],
-	"// targets": "to see all targets run: nx show project ui --web",
-	"targets": {
-		"storybook": {
-			"options": {
-				"port": 6006
-			}
-		}
-	}
+  "name": "ui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/ui/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project ui --web",
+  "targets": {
+    "storybook": {
+      "options": {
+        "port": 6006
+      }
+    }
+  }
 }
