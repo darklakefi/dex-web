@@ -11,7 +11,7 @@ const boxVariants = cva(
       },
       background: {
         base: "bg-green-70",
-        highlight: "border-green-40 bg-green-60",
+        highlight: "border border-green-40 bg-green-60",
       },
     },
     defaultVariants: {
