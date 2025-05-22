@@ -4,16 +4,16 @@
 @source "./apps/web/src";
 
 @theme {
-  --color-brand-10: #2CFF8E;
-  --color-brand-20: #35D688;
-  --color-brand-30: #1A9A56;
-  --color-brand-40: #0D4F2B;
-  --color-brand-50: #09351D;
-  --color-brand-60: #062916;
-  --color-brand-70: #041C0F;
-  --color-brand-80: #03160B;
-  --color-brand-90: #010F06;
-  --color-brand-100: #010503;
+  --color-green-10: #2CFF8E;
+  --color-green-20: #35D688;
+  --color-green-30: #1A9A56;
+  --color-green-40: #0D4F2B;
+  --color-green-50: #09351D;
+  --color-green-60: #062916;
+  --color-green-70: #041C0F;
+  --color-green-80: #03160B;
+  --color-green-90: #010F06;
+  --color-green-100: #010503;
 
   --text-3xl: 28px;
   --leading-xl: 24px;
