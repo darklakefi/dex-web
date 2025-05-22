@@ -23,14 +23,14 @@ npx nx dev web
 
 ## Common Commands
 
-| Task       | Command                 |
-| ---------- | ----------------------- |
-| Dev server | `npx nx dev web`        |
-| Build      | `npx nx build web`      |
-| Test       | `npx nx test web`       |
-| Lint       | `npx nx biome-lint web` |
-| E2E        | `npx nx e2e web-e2e`    |
-| Storybook  | `npx nx storybook ui`   |
+| Task       | Command               |
+| ---------- | --------------------- |
+| Dev server | `npx nx dev web`      |
+| Build      | `npx nx build web`    |
+| Test       | `npx nx test web`     |
+| Lint       | `npx nx lint web`     |
+| E2E        | `npx nx e2e web-e2e`  |
+| Storybook  | `npx nx storybook ui` |
 
 ## Project Structure
 
