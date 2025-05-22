@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "@storybook/test";
-import { Box } from "./Box";
+import { TextInput } from "./TextInput";
 const meta = {
-  component: Box,
-  title: "Box",
-} satisfies Meta<typeof Box>;
+  component: TextInput,
+  title: "TextInput",
+} satisfies Meta<typeof TextInput>;
 
 export default meta;
 
@@ -12,9 +12,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Default = {
   args: {
-    children: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    background: "base",
-    padding: "md",
+    name: "firstName",
+    label: "First Name",
+    value: "John",
+    onChange: () => {},
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -23,13 +24,5 @@ export const Default = {
         /Lorem ipsum dolor sit amet, consectetur adipiscing elit./gi,
       ),
     ).toBeTruthy();
-  },
-} satisfies Story;
-
-export const Highlight = {
-  args: {
-    children: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    background: "highlight",
-    padding: "md",
   },
 } satisfies Story;
