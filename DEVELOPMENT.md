@@ -127,7 +127,7 @@ For experienced users:
   ```
 - **Run linter:**
   ```sh
-  npx nx biome-lint web
+  npx nx lint web
   ```
 - **Run E2E tests:**
   ```sh
@@ -224,13 +224,13 @@ We require that all commits are signed to verify authorship and improve security
 
 ## Common Nx Commands
 
-| Task       | Command                 |
-| ---------- | ----------------------- |
-| Dev server | `npx nx dev web`        |
-| Build      | `npx nx build web`      |
-| Test       | `npx nx test web`       |
-| Lint       | `npx nx biome-lint web` |
-| E2E        | `npx nx e2e web-e2e`    |
+| Task       | Command              |
+| ---------- | -------------------- |
+| Dev server | `npx nx dev web`     |
+| Build      | `npx nx build web`   |
+| Test       | `npx nx test web`    |
+| Lint       | `npx nx lint web`    |
+| E2E        | `npx nx e2e web-e2e` |
 
 ## Storybook
 

@@ -1,0 +1,13 @@
+{
+  "name": "web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "targets": {
+    "lint": {
+      "command": "biome check  --write --config-path=apps/web/biome.json --verbose apps/web/**/*",
+      "cache": true
+    }
+  },
+  "sourceRoot": "apps/web/src",
+  "projectType": "application",
+  "tags": []
+}

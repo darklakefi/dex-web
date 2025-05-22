@@ -2,20 +2,6 @@
   "name": "@dex-fe-web/web",
   "version": "0.0.1",
   "private": true,
-  "nx": {
-    "name": "web",
-    "targets": {
-      "biome-lint": {
-        "executor": "@gitopslovers/nx-biome:biome-lint",
-        "outputs": ["{options.outputFile}"],
-        "options": {
-          "lintFilePatterns": ["apps/web/**/*.{ts,tsx}"],
-          "write": false,
-          "unsafe": false
-        }
-      }
-    }
-  },
   "dependencies": {
     "next": "~15.3.2",
     "react": "19.0.0",
