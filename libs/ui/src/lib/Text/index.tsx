@@ -13,12 +13,14 @@ export enum TextVariantEnum {
 const textVariants = cva("font-normal", {
   variants: {
     variant: {
-      heading: "text-3xl text-green-20 leading-3xl tracking-normal",
-      heading1: "text-3xl text-green-30 leading-3xl tracking-normal",
-      body: "text-3xl text-green-20 leading-3xl tracking-normal",
-      body1: "text-3xl text-green-30 leading-4xl tracking-wider",
-      body2: "text-green-30 text-lg leading-xl tracking-wide",
-      link: "text-green-30 text-lg leading-xl tracking-wide underline",
+      heading:
+        "font-display text-3xl text-green-20 leading-3xl tracking-normal",
+      heading1:
+        "font-display text-3xl text-green-30 leading-3xl tracking-normal",
+      body: "font-display text-3xl text-green-20 leading-3xl tracking-normal",
+      body1: "font-sans text-3xl text-green-30 leading-4xl tracking-wider",
+      body2: "font-sans text-green-30 text-lg leading-xl tracking-wide",
+      link: "font-sans text-green-30 text-lg leading-xl tracking-wide underline",
     },
   },
 });
@@ -39,7 +41,7 @@ const variantMap: { [key: string]: ElementType } = {
 
 type VariantTextProps = Omit<TextProps, "variant">;
 
-const Text: React.FC<TextProps> & {
+export const Text: React.FC<TextProps> & {
   Heading: React.FC<VariantTextProps>;
   Heading1: React.FC<VariantTextProps>;
   Body: React.FC<VariantTextProps>;
