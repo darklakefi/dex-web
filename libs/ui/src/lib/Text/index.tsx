@@ -13,12 +13,25 @@ export enum TextVariantEnum {
 const textVariants = cva("font-normal", {
   variants: {
     variant: {
-      heading: "text-3xl text-green-20 leading-3xl tracking-normal",
-      heading1: "text-3xl text-green-30 leading-3xl tracking-normal",
-      body: "text-3xl text-green-20 leading-3xl tracking-normal",
-      body1: "text-3xl text-green-30 leading-4xl tracking-wider",
-      body2: "text-green-30 text-lg leading-xl tracking-wide",
-      link: "text-green-30 text-lg leading-xl tracking-wide underline",
+      heading: "font-display text-3xl leading-3xl tracking-normal",
+      heading1: "font-display text-3xl leading-3xl tracking-normal",
+      body: "font-display text-3xl leading-3xl tracking-normal",
+      body1: "font-sans text-3xl leading-4xl tracking-wider",
+      body2: "font-sans text-lg leading-xl tracking-wide",
+      link: "font-sans text-lg leading-xl tracking-wide underline",
+    },
+  },
+});
+
+const textColorVariants = cva("", {
+  variants: {
+    variant: {
+      heading: "text-green-20",
+      heading1: "text-green-30",
+      body: "text-green-20",
+      body1: "text-green-30",
+      body2: "text-green-30",
+      link: "text-green-30",
     },
   },
 });
@@ -26,6 +39,7 @@ const textVariants = cva("font-normal", {
 type TextPropsVariantProps = VariantProps<typeof textVariants>;
 interface TextProps extends TextPropsVariantProps {
   children: React.ReactNode;
+  color?: string;
 }
 
 const variantMap: { [key: string]: ElementType } = {
@@ -39,17 +53,22 @@ const variantMap: { [key: string]: ElementType } = {
 
 type VariantTextProps = Omit<TextProps, "variant">;
 
-const Text: React.FC<TextProps> & {
+export const Text: React.FC<TextProps> & {
   Heading: React.FC<VariantTextProps>;
   Heading1: React.FC<VariantTextProps>;
   Body: React.FC<VariantTextProps>;
   Body1: React.FC<VariantTextProps>;
   Body2: React.FC<VariantTextProps>;
   Link: React.FC<VariantTextProps>;
-} = ({ children, variant, ...props }) => {
+} = ({ children, variant, color, ...props }) => {
   const Component = variantMap[variant || TextVariantEnum.Body] as ElementType;
+  const baseClasses = textVariants({ variant });
+  const className = color
+    ? `${baseClasses} ${color}`
+    : `${baseClasses} ${textColorVariants({ variant })}`;
+
   return (
-    <Component className={textVariants({ variant })} {...props}>
+    <Component className={className} {...props}>
       {children}
     </Component>
   );
