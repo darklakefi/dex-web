@@ -27,11 +27,11 @@ const textVariants = cva("font-normal", {
 const textColorVariants = cva("", {
   variants: {
     variant: {
-      heading: "text-green-20",
-      heading1: "text-green-30",
+      heading: "text-green-200",
+      heading1: "text-green-300",
       body: "text-green-200",
       body1: "text-green-300",
-      body2: "text-green-30",
+      body2: "text-green-300",
       link: "text-green-300",
     },
   },

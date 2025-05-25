@@ -8,7 +8,7 @@ describe("Button", () => {
       const { container } = render(
         <Button variant="primary">Base Button</Button>,
       );
-      expect(container.querySelector("button")).toHaveClass("bg-green-10");
+      expect(container.querySelector("button")).toHaveClass("bg-green-100");
       expect(screen.getByText("Base Button")).toBeInTheDocument();
     });
 
@@ -34,7 +34,7 @@ describe("Button", () => {
   describe("Button Variants", () => {
     it("should render Primary button", () => {
       const { container } = render(<Button.Primary>Primary</Button.Primary>);
-      expect(container.querySelector("button")).toHaveClass("bg-green-10");
+      expect(container.querySelector("button")).toHaveClass("bg-green-100");
       expect(screen.getByText("Primary")).toBeInTheDocument();
     });
 
@@ -42,7 +42,7 @@ describe("Button", () => {
       const { container } = render(
         <Button.PrimaryDark>Primary Dark</Button.PrimaryDark>,
       );
-      expect(container.querySelector("button")).toHaveClass("bg-green-70");
+      expect(container.querySelector("button")).toHaveClass("bg-green-700");
       expect(screen.getByText("Primary Dark")).toBeInTheDocument();
     });
 
@@ -50,7 +50,7 @@ describe("Button", () => {
       const { container } = render(
         <Button.Secondary>Secondary</Button.Secondary>,
       );
-      expect(container.querySelector("button")).toHaveClass("bg-green-50");
+      expect(container.querySelector("button")).toHaveClass("bg-green-500");
       expect(screen.getByText("Secondary")).toBeInTheDocument();
     });
 
