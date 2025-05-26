@@ -36,7 +36,7 @@ const textColorVariants = cva("", {
     variant: {
       primary: "text-green-700",
       "primary-dark": "text-green-100",
-      secondary: "text-green-200",
+      secondary: "text-green-200 hover:text-green-100",
       tertiary: "text-green-300 hover:text-green-200",
     },
   },
@@ -62,6 +62,10 @@ export const Button: React.FC<ButtonProps> & {
   Secondary: React.FC<VariantButtonProps>;
   Tertiary: React.FC<VariantButtonProps>;
 } = ({ variant, text, disabled, children, ...props }) => {
+
+  const TextComponent =
+    variant === ButtonVariantEnum.Tertiary ? Text.Link : Text.Body2;
+
   return (
     <button
       className={buttonVariants({ variant, disabled })}
@@ -71,9 +75,12 @@ export const Button: React.FC<ButtonProps> & {
       {children
         ? children
         : text && (
-            <Text.Body2 color={textColorVariants({ variant })}>
+            <TextComponent
+              color={textColorVariants({ variant })}
+              className="uppercase"
+            >
               {text}
-            </Text.Body2>
+            </TextComponent>
           )}
     </button>
   );

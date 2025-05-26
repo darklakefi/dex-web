@@ -37,12 +37,6 @@ const textColorVariants = cva("", {
   },
 });
 
-type TextPropsVariantProps = VariantProps<typeof textVariants>;
-interface TextProps extends TextPropsVariantProps {
-  children: React.ReactNode;
-  color?: string;
-}
-
 const variantMap: { [key: string]: ElementType } = {
   [TextVariantEnum.Heading]: "h1",
   [TextVariantEnum.Heading1]: "h1",
@@ -51,6 +45,12 @@ const variantMap: { [key: string]: ElementType } = {
   [TextVariantEnum.Body2]: "p",
   [TextVariantEnum.Link]: "div",
 };
+
+type TextPropsVariantProps = VariantProps<typeof textVariants>;
+interface TextProps extends TextPropsVariantProps, React.ComponentProps<"div"> {
+  children: React.ReactNode;
+  color?: string;
+}
 
 type VariantTextProps = Omit<TextProps, "variant">;
 
@@ -61,15 +61,15 @@ export const Text: React.FC<TextProps> & {
   Body1: React.FC<VariantTextProps>;
   Body2: React.FC<VariantTextProps>;
   Link: React.FC<VariantTextProps>;
-} = ({ children, variant, color, ...props }) => {
+} = ({ children, variant, color, className = "", ...props }) => {
   const Component = variantMap[variant || TextVariantEnum.Body] as ElementType;
   const baseClasses = textVariants({ variant });
-  const className = color
+  const overrideClasses = color
     ? `${baseClasses} ${color}`
     : `${baseClasses} ${textColorVariants({ variant })}`;
 
   return (
-    <Component className={className} {...props}>
+    <Component className={`${overrideClasses} ${className}`} {...props}>
       {children}
     </Component>
   );
