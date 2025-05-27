@@ -63,7 +63,11 @@ export const Button: React.FC<ButtonProps> & {
   Tertiary: React.FC<VariantButtonProps>;
 } = ({ variant, text, disabled, children, ...props }) => {
   return (
-    <button className={buttonVariants({ variant, disabled })} {...props}>
+    <button
+      className={buttonVariants({ variant, disabled })}
+      disabled={disabled}
+      {...props}
+    >
       {children
         ? children
         : text && (
