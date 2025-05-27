@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "@storybook/test";
-import { Box } from "./Box";
+import Box from "./index";
 const meta = {
   component: Box,
   title: "Box",
