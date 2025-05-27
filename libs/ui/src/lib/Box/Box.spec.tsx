@@ -1,7 +1,7 @@
 /// <reference types="@vitest/browser/context" />
 import { render } from "@testing-library/react";
 
-import { Box } from "./index";
+import { Box } from "./Box";
 
 describe("Box", () => {
   it("should render successfully without props", () => {
