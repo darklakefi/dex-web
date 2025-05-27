@@ -1,8 +1,7 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";
-import { Box } from "./Box";
 
-const textInputVariants = cva("size-full p-2", {
+const textInputVariants = cva("peer p-2 placeholder-transparent", {
   variants: {},
   defaultVariants: {},
 });
@@ -27,23 +26,21 @@ export function TextInput({
   ...props
 }: TextInputProps) {
   return (
-    <Box padding="none" background="highlight" className="font-sans">
-      <label
-        htmlFor={name}
-        className={twMerge(
-          "size-full p-2 text-green-30",
-          !value ? "" : "hidden",
-        )}
-      >
-        {label}
-      </label>
+    <label className="relative border border-green-30 bg-green-60 p-2 font-sans text-green-30">
       <input
         onChange={onChange}
         value={value}
         name={name}
-        className={textInputVariants()}
+        placeholder={label}
+        className={twMerge(
+          textInputVariants(),
+          !value ? "caret-transparent" : "",
+        )}
         {...props}
       />
-    </Box>
+      <span className="absolute top-2 left-2 hidden text-green-30 peer-placeholder-shown:block">
+        {label}
+      </span>
+    </label>
   );
 }
