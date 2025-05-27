@@ -13,12 +13,12 @@ export enum TextVariantEnum {
 const textVariants = cva("font-normal", {
   variants: {
     variant: {
-      heading: "text-3xl text-green-20 leading-3xl tracking-normal",
-      heading1: "text-3xl text-green-30 leading-3xl tracking-normal",
-      body: "text-3xl text-green-20 leading-3xl tracking-normal",
-      body1: "text-3xl text-green-30 leading-4xl tracking-wider",
-      body2: "text-green-30 text-lg leading-xl tracking-wide",
-      link: "text-green-30 text-lg leading-xl tracking-wide underline",
+      heading: "text-3xl text-green-200 leading-3xl tracking-normal",
+      heading1: "text-3xl text-green-300 leading-3xl tracking-normal",
+      body: "text-3xl text-green-200 leading-3xl tracking-normal",
+      body1: "text-3xl text-green-300 leading-4xl tracking-wider",
+      body2: "text-green-300 text-lg leading-xl tracking-wide",
+      link: "text-green-300 text-lg leading-xl tracking-wide underline",
     },
   },
 });

@@ -1,10 +1,13 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";
 
-const textInputVariants = cva("peer p-2 placeholder-transparent", {
-  variants: {},
-  defaultVariants: {},
-});
+const textInputVariants = cva(
+  "peer flex p-2 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-500",
+  {
+    variants: {},
+    defaultVariants: {},
+  },
+);
 
 type TextInputVariants = VariantProps<typeof textInputVariants>;
 
@@ -26,7 +29,7 @@ export function TextInput({
   ...props
 }: TextInputProps) {
   return (
-    <label className="relative border border-green-30 bg-green-60 p-2 font-sans text-green-30">
+    <label className="relative inline-flex border border-green-300 bg-green-600 font-sans text-green-300">
       <input
         onChange={onChange}
         value={value}
@@ -38,7 +41,7 @@ export function TextInput({
         )}
         {...props}
       />
-      <span className="absolute top-2 left-2 hidden text-green-30 peer-placeholder-shown:block">
+      <span className="act invisible absolute top-2 left-2 text-green-300 peer-placeholder-shown:visible peer-focus:text-green-400 peer-active:text-green-400">
         {label}
       </span>
     </label>

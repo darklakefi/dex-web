@@ -18,7 +18,7 @@ describe("Box", () => {
 
     const boxElement = baseElement.querySelector(".p-6");
     expect(boxElement).toBeTruthy();
-    expect(boxElement).toHaveClass("bg-green-70");
+    expect(boxElement).toHaveClass("bg-green-700");
   });
 
   it("should allow custom props to be passed through", () => {
