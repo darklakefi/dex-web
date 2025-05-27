@@ -1,5 +1,5 @@
 import { type VariantProps, cva } from "class-variance-authority";
-import Text from "../Text";
+import Text from "../Text/Text";
 
 export enum ButtonVariantEnum {
   Primary = "primary",
