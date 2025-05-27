@@ -12,7 +12,7 @@ const boxVariants = cva(
         lg: "p-6",
       },
       background: {
-        base: "bg-green-70",
+        base: "bg-green-700",
         highlight: "border border-green-400 bg-green-600",
       },
     },
