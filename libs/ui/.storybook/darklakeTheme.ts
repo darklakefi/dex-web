@@ -6,7 +6,6 @@ export const darklakeTheme = create({
   brandUrl: "https://darklake.fi",
   brandImage: "https://darklake.fi/images/logo-h-darklake-beta.svg",
   brandTarget: "_self",
-
   colorPrimary: "#09351D",
   colorSecondary: "#4A63D2",
   appBg: "#041C0F",
