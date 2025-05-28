@@ -6,6 +6,7 @@ import * as path from "node:path";
 /// <reference types='vitest' />
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
+import svgr from "vite-plugin-svgr";
 
 export default defineConfig(() => ({
   root: __dirname,
@@ -14,6 +15,7 @@ export default defineConfig(() => ({
     react(),
     tailwindcss(),
     nxViteTsPaths(),
+    svgr(),
     nxCopyAssetsPlugin(["*.md"]),
     dts({
       entryRoot: "src",

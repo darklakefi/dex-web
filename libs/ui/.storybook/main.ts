@@ -5,18 +5,22 @@ import { mergeConfig } from "vite";
 
 const config: StorybookConfig = {
   stories: ["../src/lib/**/*.@(mdx|stories.@(js|jsx|ts|tsx))"],
-  addons: ["@storybook/addon-docs", "@storybook/addon-essentials"],
+  managerHead: () => `
+    <link rel="preload" href="bitsumishi-regular.woff2" as="font" type="font/woff2" />
+    <link rel="preload" href="classic-console-neue.woff2" as="font" type="font/woff2" />
+  `,
+  addons: [
+    "@storybook/addon-docs",
+    "@storybook/addon-essentials",
+    "@storybook/addon-themes",
+    "@storybook/addon-a11y",
+  ],
   staticDirs: ["../public"],
   framework: {
     name: "@storybook/react-vite",
-    options: {},
-  },
-  typescript: {
-    reactDocgen: "react-docgen-typescript",
-    reactDocgenTypescriptOptions: {
-      compilerOptions: {
-        allowSyntheticDefaultImports: false,
-        esModuleInterop: false,
+    options: {
+      builder: {
+        viteConfigPath: "vite.config.mts",
       },
     },
   },

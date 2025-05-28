@@ -1,6 +1,6 @@
 import { addons } from "@storybook/manager-api";
-import { themes } from "@storybook/theming";
+import { darklakeTheme } from "./darklakeTheme";
 
 addons.setConfig({
-  theme: themes.dark,
+  theme: darklakeTheme,
 });
