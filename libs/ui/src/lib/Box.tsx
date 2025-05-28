@@ -1,17 +1,19 @@
 import { type VariantProps, cva } from "class-variance-authority";
+import { twMerge } from "tailwind-merge";
 
 const boxVariants = cva(
-  "mb-2 flex items-start justify-start gap-3 text-green-20",
+  "mb-2 flex items-start justify-start gap-3 text-green-200",
   {
     variants: {
       padding: {
+        none: "p-0",
         sm: "p-2",
         md: "p-5",
         lg: "p-6",
       },
       background: {
-        base: "bg-green-70",
-        highlight: "border border-green-40 bg-green-60",
+        base: "bg-green-700",
+        highlight: "border border-green-400 bg-green-600",
       },
     },
     defaultVariants: {
@@ -28,12 +30,19 @@ interface BoxProps extends React.HTMLAttributes<HTMLDivElement>, BoxVariants {}
 /**
  * The Box component is a generic container for grouping other components.
  */
-export function Box({ children, padding, background, ...props }: BoxProps) {
+export function Box({
+  children,
+  padding,
+  background,
+  className,
+  ...props
+}: BoxProps) {
   return (
-    <div className={boxVariants({ padding, background })} {...props}>
+    <div
+      className={twMerge(boxVariants({ padding, background }), className)}
+      {...props}
+    >
       {children}
     </div>
   );
 }
-
-export default Box;
