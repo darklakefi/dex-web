@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "target": "es2022",
@@ -13,9 +15,10 @@
     "noImplicitOverride": true,
     "module": "preserve",
     "noEmit": true,
-    "lib": ["es2022", "dom", "dom.iterable"],
+    "lib": ["es2022"],
     "paths": {
       "@dex-fe-web/ui": ["./libs/ui/src/index.ts"]
     }
-  }
+  },
+  "exclude": ["node_modules", "dist"]
 }

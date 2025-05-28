@@ -2,14 +2,16 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "preserve",
-    "noEmit": true,
     "emitDeclarationOnly": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["es2022", "dom", "dom.iterable"],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
+    "module": "preserve",
+    "noEmit": true,
+
     "incremental": true,
     "plugins": [
       {
@@ -17,7 +19,7 @@
       }
     ],
     "types": ["node"],
-    "outDir": "dist",
+    "outDir": "../../dist",
     "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
   "include": [
