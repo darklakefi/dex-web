@@ -75,6 +75,9 @@ importers:
       '@storybook/addon-essentials':
         specifier: 9.0.0-alpha.12
         version: 9.0.0-alpha.12(storybook@9.0.0(@testing-library/dom@10.4.0)(prettier@2.8.8))
+      '@storybook/addon-themes':
+        specifier: ^9.0.0
+        version: 9.0.0(storybook@9.0.0(@testing-library/dom@10.4.0)(prettier@2.8.8))
       '@storybook/manager-api':
         specifier: 9.0.0-alpha.1
         version: 9.0.0-alpha.1(storybook@9.0.0(@testing-library/dom@10.4.0)(prettier@2.8.8))
@@ -2542,6 +2545,11 @@ packages:
     resolution: {integrity: sha512-I7opVIK8bNUYSC+P+b8AwP6sE2pFyXH5F0gz8WA0pdkRcxerQmYnhlsXrI5T0QMu79tZnjVNrQTUrqpy/Z5oqQ==}
     peerDependencies:
       storybook: ^9.0.0-alpha.12
+
+  '@storybook/addon-themes@9.0.0':
+    resolution: {integrity: sha512-lOF1RrkyDRxgok3/ZcWI5IBb8PhTdQrT2OLFPWxBf8qUZKhtGDvbxdh6q4H+Kju9GV/mTvy4x4L6F9RAmf7x7A==}
+    peerDependencies:
+      storybook: ^9.0.0
 
   '@storybook/builder-vite@9.0.0':
     resolution: {integrity: sha512-0idj9v6ttbuT8ms/N7J4y1x034XM1vgAbfpJHUaO0+AcRoER3/hOiVG6563mE/uDFe+DXyf1BZk6n/VvhtgQcA==}
@@ -11054,6 +11062,11 @@ snapshots:
   '@storybook/addon-outline@9.0.0-alpha.12(storybook@9.0.0(@testing-library/dom@10.4.0)(prettier@2.8.8))':
     dependencies:
       '@storybook/global': 5.0.0
+      storybook: 9.0.0(@testing-library/dom@10.4.0)(prettier@2.8.8)
+      ts-dedent: 2.2.0
+
+  '@storybook/addon-themes@9.0.0(storybook@9.0.0(@testing-library/dom@10.4.0)(prettier@2.8.8))':
+    dependencies:
       storybook: 9.0.0(@testing-library/dom@10.4.0)(prettier@2.8.8)
       ts-dedent: 2.2.0
 

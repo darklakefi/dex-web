@@ -32,6 +32,7 @@
     "@playwright/test": "^1.52.0",
     "@storybook/addon-docs": "^9.0.0",
     "@storybook/addon-essentials": "9.0.0-alpha.12",
+    "@storybook/addon-themes": "^9.0.0",
     "@storybook/manager-api": "9.0.0-alpha.1",
     "@storybook/react-vite": "^9.0.0",
     "@storybook/test": "9.0.0-alpha.2",
