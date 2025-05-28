@@ -16,6 +16,12 @@ const textVariants = cva("font-normal", {
       body2: "font-sans text-lg leading-6 tracking-wide",
       link: "font-sans text-lg leading-xl tracking-wide underline",
     },
+    textCase: {
+      uppercase: "uppercase",
+      lowercase: "lowercase",
+      capitalize: "capitalize",
+      "normal-case": "normal-case",
+    },
   },
 });
 
@@ -41,6 +47,7 @@ type TextPropsVariantProps = VariantProps<typeof textVariants>;
 interface TextProps extends TextPropsVariantProps, React.ComponentProps<"div"> {
   children: React.ReactNode;
   color?: string;
+  textCase?: "uppercase" | "lowercase" | "capitalize" | "normal-case";
 }
 
 type VariantTextProps = Omit<TextProps, "variant">;
@@ -50,9 +57,16 @@ export const Text: React.FC<TextProps> & {
   Body1: React.FC<VariantTextProps>;
   Body2: React.FC<VariantTextProps>;
   Link: React.FC<VariantTextProps>;
-} = ({ children, variant, color, className = "", ...props }) => {
+} = ({
+  children,
+  variant,
+  color,
+  textCase = "uppercase",
+  className = "",
+  ...props
+}) => {
   const Component = variantMap[variant || TextVariantEnum.Body1] as ElementType;
-  const baseClasses = textVariants({ variant });
+  const baseClasses = textVariants({ variant, textCase });
   const overrideClasses = color
     ? `${baseClasses} ${color}`
     : `${baseClasses} ${textColorVariants({ variant })}`;
