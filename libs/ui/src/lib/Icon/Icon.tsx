@@ -24,7 +24,10 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
 export function Icon({ name, title, className, ...props }: IconProps) {
   const IconSvgComponent = lazy(() => import(`./icons/${name}.svg?react`));
   if (!IconSvgComponent) return null;
-  const classNames = twMerge("size-6 fill-current stroke-current", className);
+  const classNames = twMerge(
+    "size-6 text-green-100 fill-current stroke-current",
+    className,
+  );
   return (
     <Suspense fallback={<div className={classNames} />}>
       <IconSvgComponent className={classNames} {...props} />
