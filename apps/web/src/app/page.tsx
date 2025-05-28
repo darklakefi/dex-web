@@ -1,4 +1,5 @@
 import { Button, Text, Box } from "@dex-fe-web/ui";
+import { truncate } from "@dex-fe-web/utils";
 
 export default function Index() {
   return (
@@ -14,6 +15,9 @@ export default function Index() {
                 <Button.PrimaryDark text="Click me" />
                 <Button.Secondary text="Click me" />
                 <Button.Tertiary text="Click me" />
+                <Text.Body1>
+                  {truncate("63RVzWobK3MzvHdMSKiXYnnAthFCVhPRzxWqaN4p4rP5")}
+                </Text.Body1>
               </div>
             </Box>
           </div>
