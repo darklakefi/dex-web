@@ -13,6 +13,7 @@ const config: StorybookConfig = {
     "@storybook/addon-docs",
     "@storybook/addon-essentials",
     "@storybook/addon-themes",
+    "@storybook/addon-a11y",
   ],
   staticDirs: ["../public"],
   framework: {

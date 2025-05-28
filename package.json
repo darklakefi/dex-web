@@ -30,6 +30,7 @@
     "@nx/web": "21.1.2",
     "@nx/workspace": "21.1.2",
     "@playwright/test": "^1.52.0",
+    "@storybook/addon-a11y": "^9.0.0",
     "@storybook/addon-docs": "^9.0.0",
     "@storybook/addon-essentials": "9.0.0-alpha.12",
     "@storybook/addon-themes": "^9.0.0",
