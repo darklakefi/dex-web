@@ -23,14 +23,15 @@ npx nx dev web
 
 ## Common Commands
 
-| Task       | Command               |
-| ---------- | --------------------- |
-| Dev server | `npx nx dev web`      |
-| Build      | `npx nx build web`    |
-| Test       | `npx nx test web`     |
-| Lint       | `npx nx lint web`     |
-| E2E        | `npx nx e2e web-e2e`  |
-| Storybook  | `npx nx storybook ui` |
+| Task       | Command               | Description |
+| ---------- | --------------------- | ----------- |
+| Dev server | `npx nx dev web`      | Start the development server |
+| Build      | `npx nx build web`    | Build the web application |
+| Test Web   | `npx nx test web`     | Run web application tests |
+| Test Utils | `npx nx test utils`   | Run utility library tests |
+| Lint       | `npx nx lint web`     | Lint the web application |
+| E2E        | `npx nx e2e web-e2e`  | Run end-to-end tests |
+| Storybook  | `npx nx storybook ui` | Start Storybook for UI components |
 
 ## Project Structure
 
