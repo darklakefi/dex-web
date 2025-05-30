@@ -16,8 +16,8 @@ export default function Index() {
                 <Button.Secondary text="Click me" />
                 <Button.Tertiary text="Click me" />
                 <Button.Primary text="Click me" isLoading />
-                <Button.Primary text="Click me" leadingIcon="plus" />
-                <Button.Primary text="Click me" trailingIcon="plus" />
+                <Button.Primary text="Click me" leadingIcon="play" />
+                <Button.Primary text="Click me" trailingIcon="play" />
                 <Button.PrimaryDark icon="trending" />
                 <Text.Body1>
                   {truncate("63RVzWobK3MzvHdMSKiXYnnAthFCVhPRzxWqaN4p4rP5")}
