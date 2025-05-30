@@ -60,4 +60,8 @@
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
+
+  --tracking-normal: 0px;
+  --tracking-wide: 0.01em;
+  --tracking-wider: 0.02em;
 }
