@@ -67,3 +67,43 @@ export const TertiaryDisabled: Story = {
     text: "Tertiary",
   },
 };
+
+export const LeadingIcon: Story = {
+  args: {
+    variant: "primary",
+    text: "Primary",
+    leadingIcon: "play",
+  },
+};
+
+export const TrailingIcon: Story = {
+  args: {
+    variant: "primary",
+    text: "Primary",
+    trailingIcon: "play",
+  },
+};
+
+export const LeadingAndTrailingIcon: Story = {
+  args: {
+    variant: "primary",
+    text: "Primary",
+    leadingIcon: "play",
+    trailingIcon: "trending",
+  },
+};
+
+export const IconOnly: Story = {
+  args: {
+    variant: "primary",
+    icon: "play",
+  },
+};
+
+export const PrimaryLoading: Story = {
+  args: {
+    variant: "primary",
+    text: "Primary",
+    isLoading: true,
+  },
+};

@@ -31,6 +31,55 @@ describe("Button", () => {
     });
   });
 
+  describe("Button Icons", () => {
+    it("should render with leading icon", () => {
+      const { container } = render(
+        <Button variant="primary" leadingIcon="check">
+          Button with Leading Icon
+        </Button>,
+      );
+      expect(container.querySelector("button")).toHaveClass(
+        "flex",
+        "items-center",
+        "gap-2",
+      );
+      expect(container.querySelector("svg")).toBeInTheDocument();
+      expect(screen.getByText("Button with Leading Icon")).toBeInTheDocument();
+    });
+
+    it("should render with trailing icon", () => {
+      const { container } = render(
+        <Button variant="primary" trailingIcon="arrow-right">
+          Button with Trailing Icon
+        </Button>,
+      );
+      expect(container.querySelector("button")).toHaveClass(
+        "flex",
+        "items-center",
+        "gap-2",
+      );
+      expect(container.querySelector("svg")).toBeInTheDocument();
+      expect(screen.getByText("Button with Trailing Icon")).toBeInTheDocument();
+    });
+
+    it("should render icon-only button", () => {
+      const { container } = render(<Button variant="primary" icon="plus" />);
+      expect(container.querySelector("button")).toHaveClass("p-2.5");
+      expect(container.querySelector("svg")).toBeInTheDocument();
+      expect(container.querySelector("button")?.textContent).toBe("");
+    });
+
+    it("should show loading icon when isLoading is true", () => {
+      const { container } = render(
+        <Button variant="primary" isLoading leadingIcon="check">
+          Loading Button
+        </Button>,
+      );
+      expect(container.querySelector("svg")).toHaveClass("animate-spin");
+      expect(container.querySelector("button")).toBeDisabled();
+    });
+  });
+
   describe("Button Variants", () => {
     it("should render Primary button", () => {
       const { container } = render(<Button.Primary>Primary</Button.Primary>);
