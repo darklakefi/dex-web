@@ -92,13 +92,13 @@ export const Button: React.FC<ButtonProps> & {
 
   const className = twMerge(
     buttonVariants({ variant, disabled: isDisabled }),
-    TrailingIcon || LeadingIcon ? "flex items-center gap-2" : "",
+    TrailingIcon || LeadingIcon ? "flex items-center justify-center gap-2" : "",
   );
 
   if (icon && !text && !children) {
     return (
       <button
-        className={twMerge(className, "p-2.5")}
+        className={twMerge(className, "w-fit p-2.5")}
         disabled={isDisabled}
         {...props}
       >
