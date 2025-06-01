@@ -15,20 +15,6 @@ export const Heading: Story = {
   },
 };
 
-export const Heading1: Story = {
-  args: {
-    children: "Heading1",
-    variant: "heading1",
-  },
-};
-
-export const Body: Story = {
-  args: {
-    children: "Body",
-    variant: "body",
-  },
-};
-
 export const Body1: Story = {
   args: {
     children: "Body1",
@@ -40,6 +26,14 @@ export const Body2: Story = {
   args: {
     children: "Body2",
     variant: "body2",
+  },
+};
+
+export const Body2Lowercase: Story = {
+  args: {
+    children: "Body2",
+    variant: "body2",
+    textCase: "lowercase",
   },
 };
 

@@ -11,6 +11,7 @@ export type IconName =
   | "times"
   | "times-filled"
   | "trending"
+  | "loading-stripe"
   | "x";
 
 import { Suspense, lazy } from "react";

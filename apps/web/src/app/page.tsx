@@ -1,4 +1,4 @@
-import { Button, Text, Box } from "@dex-fe-web/ui";
+import { Box, Button, Text } from "@dex-fe-web/ui";
 import { truncate } from "@dex-fe-web/utils";
 
 export default function Index() {
@@ -15,6 +15,10 @@ export default function Index() {
                 <Button.PrimaryDark text="Click me" />
                 <Button.Secondary text="Click me" />
                 <Button.Tertiary text="Click me" />
+                <Button.Primary text="Click me" isLoading />
+                <Button.Primary text="Click me" leadingIcon="play" />
+                <Button.Primary text="Click me" trailingIcon="play" />
+                <Button.Secondary icon="trending" />
                 <Text.Body1>
                   {truncate("63RVzWobK3MzvHdMSKiXYnnAthFCVhPRzxWqaN4p4rP5")}
                 </Text.Body1>

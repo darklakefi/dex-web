@@ -1,5 +1,6 @@
 import { type VariantProps, cva } from "class-variance-authority";
 import type { ElementType } from "react";
+import { twMerge } from "tailwind-merge";
 
 export enum TextVariantEnum {
   Heading = "heading",
@@ -11,27 +12,17 @@ export enum TextVariantEnum {
 const textVariants = cva("font-normal", {
   variants: {
     variant: {
-      heading: "font-display text-3xl leading-7.5 tracking-normal",
-      body1: "font-sans text-3xl leading-8.5 tracking-wider",
-      body2: "font-sans text-lg leading-6 tracking-wide",
-      link: "font-sans text-lg leading-xl tracking-wide underline",
+      heading:
+        "font-display text-3xl text-green-100 leading-7.5 tracking-normal",
+      body1: "font-sans text-3xl text-green-100 leading-8.5 tracking-wider",
+      body2: "font-sans text-green-200 text-lg leading-6 tracking-wide",
+      link: "font-sans text-green-200 text-lg leading-6 tracking-wide underline",
     },
     textCase: {
       uppercase: "uppercase",
       lowercase: "lowercase",
       capitalize: "capitalize",
       "normal-case": "normal-case",
-    },
-  },
-});
-
-const textColorVariants = cva("", {
-  variants: {
-    variant: {
-      heading: "text-green-100",
-      body1: "text-green-100",
-      body2: "text-green-200",
-      link: "text-green-200",
     },
   },
 });
@@ -46,7 +37,6 @@ const variantMap: { [key: string]: ElementType } = {
 type TextPropsVariantProps = VariantProps<typeof textVariants>;
 interface TextProps extends TextPropsVariantProps, React.ComponentProps<"div"> {
   children: React.ReactNode;
-  color?: string;
   textCase?: "uppercase" | "lowercase" | "capitalize" | "normal-case";
 }
 
@@ -60,19 +50,18 @@ export const Text: React.FC<TextProps> & {
 } = ({
   children,
   variant,
-  color,
   textCase = "uppercase",
   className = "",
   ...props
 }) => {
   const Component = variantMap[variant || TextVariantEnum.Body1] as ElementType;
-  const baseClasses = textVariants({ variant, textCase });
-  const overrideClasses = color
-    ? `${baseClasses} ${color}`
-    : `${baseClasses} ${textColorVariants({ variant })}`;
+  const overrideClasses = twMerge(
+    textVariants({ variant, textCase }),
+    className,
+  );
 
   return (
-    <Component className={`${overrideClasses} ${className}`} {...props}>
+    <Component className={overrideClasses} {...props}>
       {children}
     </Component>
   );
