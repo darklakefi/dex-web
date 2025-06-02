@@ -1,5 +1,6 @@
 import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview, ReactRenderer } from "@storybook/react-vite";
+import { INITIAL_VIEWPORTS } from "storybook/viewport";
 import { darklakeTheme } from "./darklakeTheme";
 import "./global.css";
 const preview: Preview = {
@@ -8,6 +9,12 @@ const preview: Preview = {
     docs: {
       toc: true,
       theme: darklakeTheme,
+    },
+    viewport: {
+      options: INITIAL_VIEWPORTS,
+    },
+    initialGlobals: {
+      viewport: { value: "ipad", isRotated: false },
     },
   },
   decorators: [

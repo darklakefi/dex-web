@@ -6,11 +6,10 @@ interface HeaderProps {
 }
 export function Header({ children, logoSm, logoLg, button }: HeaderProps) {
   return (
-    <header className="`flex-row flex items-center justify-between bg-green-900 p-10">
+    <header className="`flex-row flex items-center justify-between gap-10 bg-green-900 p-5 md:px-6 md:py-7 xl:px-10">
       <div className="md:hidden">{logoSm}</div>
       <div className="hidden md:block">{logoLg}</div>
-
-      <nav className="flex items-baseline gap-12">{children}</nav>
+      <nav className="hidden items-baseline gap-12 md:flex">{children}</nav>
       <div>{button}</div>
     </header>
   );
