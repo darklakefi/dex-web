@@ -16,14 +16,19 @@ export const Default = {
   args: {
     children: (
       <>
-        <Text.Link className="leading-none no-underline">Home</Text.Link>
-        <Text.Link className="leading-none no-underline">About</Text.Link>
+        <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
+          Home
+        </Text.Link>
+        <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
+          About
+        </Text.Link>
         <Text.Link className="inline-flex items-baseline justify-center gap-2 leading-none no-underline">
           Contact <Icon name="external-link" className="size-4" />
         </Text.Link>
       </>
     ),
     button: <Button variant="primary">CONNECT WALLET</Button>,
-    logo: <Icon name="logo" className="h-6 w-auto stroke-none" />,
+    logoSm: <Icon name="logo-sm" className="h-6 w-auto stroke-none" />,
+    logoLg: <Icon name="logo-lg" className="h-6 w-auto stroke-none" />,
   },
 } satisfies Story;

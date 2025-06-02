@@ -8,7 +8,8 @@ import ExternalLinkIcon from "./icons/external-link.svg?react";
 import GithubIcon from "./icons/github.svg?react";
 import InfoIcon from "./icons/info.svg?react";
 import LoadingStripeIcon from "./icons/loading-stripe.svg?react";
-import LogoIcon from "./icons/logo.svg?react";
+import LogoLgIcon from "./icons/logo-lg.svg?react";
+import LogoSmIcon from "./icons/logo-sm.svg?react";
 import PlayIcon from "./icons/play.svg?react";
 import SeedlingsIcon from "./icons/seedlings.svg?react";
 import TimesFilledIcon from "./icons/times-filled.svg?react";
@@ -24,7 +25,8 @@ export type IconName =
   | "external-link"
   | "github"
   | "info"
-  | "logo"
+  | "logo-sm"
+  | "logo-lg"
   | "play"
   | "seedlings"
   | "times"
@@ -41,7 +43,8 @@ const iconComponents = {
   "external-link": ExternalLinkIcon,
   github: GithubIcon,
   info: InfoIcon,
-  logo: LogoIcon,
+  "logo-sm": LogoSmIcon,
+  "logo-lg": LogoLgIcon,
   play: PlayIcon,
   seedlings: SeedlingsIcon,
   times: TimesIcon,
