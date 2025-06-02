@@ -4,6 +4,11 @@ interface HeaderProps {
   children: React.ReactNode;
   button: React.ReactNode;
 }
+
+/**
+ * The Header component is a wrapper for the header of the application.
+ * It is used to display the header of the application.
+ */
 export function Header({ children, logoSm, logoLg, button }: HeaderProps) {
   return (
     <header className="`flex-row flex items-center justify-between gap-10 bg-green-900 p-5 md:px-6 md:py-7 xl:px-10">
