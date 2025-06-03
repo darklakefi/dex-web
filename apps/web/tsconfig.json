@@ -18,7 +18,7 @@
         "name": "next"
       }
     ],
-    "types": ["node"],
+    "types": ["node", "vite-plugin-svgr/client"],
     "outDir": "../../dist",
     "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
@@ -39,5 +39,10 @@
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
     ".next"
+  ],
+  "references": [
+    {
+      "path": "../../libs/ui"
+    }
   ]
 }

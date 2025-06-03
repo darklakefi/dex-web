@@ -15,7 +15,16 @@ export default defineConfig(() => ({
     react(),
     tailwindcss(),
     nxViteTsPaths(),
-    svgr(),
+    svgr({
+      svgrOptions: {
+        ref: true,
+        plugins: ["@svgr/plugin-svgo", "@svgr/plugin-jsx"],
+        svgoConfig: {
+          floatPrecision: 2,
+        },
+      },
+      include: "**/*.svg?react",
+    }),
     nxCopyAssetsPlugin(["*.md"]),
     dts({
       entryRoot: "src",
