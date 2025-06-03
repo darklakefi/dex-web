@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 ---
-## [0.1.0] - 2025-05-15
+## [0.2.0](https://github.com/cocogitto/cocogitto/compare/v0.1.0..v0.2.0) - 2025-06-03
 
 ### Documentation
 
@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file. See [conven
 ### Miscellaneous Chores
 
 - **(deps-dev)** Bump happy-dom in the npm_and_yarn group - ([c5c6253](https://github.com/cocogitto/cocogitto/commit/c5c6253ca9639547ad75afb15d9ad5e640be8b24)) - dependabot[bot]
-- **(release)** update CHANGELOG.md for 0.1.0 - ([](https://github.com/cocogitto/cocogitto/commit/)) - 
+- **(release)** update CHANGELOG.md for 0.1.0 - ([33d01a8](https://github.com/cocogitto/cocogitto/commit/33d01a82e29779477c398bb9540dd87dcefb51ad)) - Giovanni Colapinto
 - :sparkles: Add biome configuration file for project settings - ([e37c7fb](https://github.com/cocogitto/cocogitto/commit/e37c7fb61a541c8b7068becf80bdd46c3e0a9696)) - lewisflude
 - :sparkles: Update VSCode extensions to include biome and conventional commits - ([0ed40f8](https://github.com/cocogitto/cocogitto/commit/0ed40f8cb22d10c0f1a05121675d36868f0acb3e)) - lewisflude
 - :sparkles: Add biome linting targets and configuration for web applications - ([5974eb0](https://github.com/cocogitto/cocogitto/commit/5974eb0e6071d40234eca34587501eec3c4c7324)) - lewisflude
