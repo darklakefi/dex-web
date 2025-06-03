@@ -10,7 +10,7 @@
   "dependencies": {
     "@svgr/plugin-jsx": "^8.1.0",
     "@svgr/plugin-svgo": "^8.1.0",
-    "next": "~15.3.2",
+    "next": "~15.3.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "tailwind-merge": "^3.3.0"
