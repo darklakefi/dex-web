@@ -23,5 +23,14 @@ export default defineConfig(() => ({
       reportsDirectory: "../../coverage/apps/web",
       provider: "v8" as const,
     },
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    teardownTimeout: 10000,
+    pool: "forks",
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      },
+    },
   },
 }));
