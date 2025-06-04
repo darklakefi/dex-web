@@ -1,5 +1,5 @@
-import { Box, Button, Text } from "@dex-fe-web/ui";
-import { truncate } from "@dex-fe-web/utils";
+import { Box, Button, Text } from "@dex-web/ui";
+import { truncate } from "@dex-web/utils";
 
 export default function Index() {
   return (
