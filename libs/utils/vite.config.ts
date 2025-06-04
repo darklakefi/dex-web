@@ -3,12 +3,12 @@ import { resolve } from "node:path";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 import {
-  createBaseConfig,
   createLibraryBuildConfig,
+  createViteBaseConfig,
 } from "../../vite.config.base";
 
 export default defineConfig(() => {
-  const baseConfig = createBaseConfig({
+  const baseConfig = createViteBaseConfig({
     projectName: "utils",
     cacheDir: "../../node_modules/.vite/libs/utils",
     coverageDir: "../../coverage/libs/utils",

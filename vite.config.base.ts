@@ -1,7 +1,7 @@
 /// <reference types='vitest' />
 import type { ViteUserConfig } from "vitest/config";
 
-export const baseTestConfig = {
+export const baseVitestConfig = {
   watch: false,
   reporters: ["default"],
   coverage: {
@@ -20,7 +20,7 @@ export const baseTestConfig = {
   include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
 };
 
-export function createBaseConfig(options: {
+export function createViteBaseConfig(options: {
   projectName: string;
   cacheDir: string;
   coverageDir: string;
@@ -33,11 +33,11 @@ export function createBaseConfig(options: {
   };
 }): ViteUserConfig {
   const testConfig: NonNullable<ViteUserConfig["test"]> = {
-    ...baseTestConfig,
+    ...baseVitestConfig,
     name: options.projectName,
     environment: options.testEnvironment || "happy-dom",
     coverage: {
-      ...baseTestConfig.coverage,
+      ...baseVitestConfig.coverage,
       reportsDirectory: options.coverageDir,
     },
   };

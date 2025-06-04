@@ -16,6 +16,7 @@
     {
       "path": "../../libs/ui"
     },
+
     {
       "path": "./tsconfig.lib.json"
     },

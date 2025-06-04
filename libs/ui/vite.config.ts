@@ -1,5 +1,6 @@
-import { resolve } from "node:path";
 /// <reference types='vitest' />
+import { resolve } from "node:path";
+
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
@@ -7,12 +8,12 @@ import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 import svgr from "vite-plugin-svgr";
 import {
-  createBaseConfig,
   createLibraryBuildConfig,
+  createViteBaseConfig,
 } from "../../vite.config.base";
 
 export default defineConfig(() => {
-  const baseConfig = createBaseConfig({
+  const baseConfig = createViteBaseConfig({
     projectName: "ui",
     cacheDir: "../../node_modules/.vite/libs/ui",
     coverageDir: "../../coverage/libs/ui",

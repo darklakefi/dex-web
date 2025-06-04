@@ -1,12 +1,12 @@
-/// <reference types='vitest' />
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 import { defineConfig, mergeConfig } from "vitest/config";
-import { createBaseConfig } from "../../vite.config.base";
+/// <reference types='vitest' />
+import { createViteBaseConfig } from "../../vite.config.base";
 
 export default defineConfig(() => {
-  const baseConfig = createBaseConfig({
+  const baseConfig = createViteBaseConfig({
     projectName: "web",
     cacheDir: "../../node_modules/.vite/apps/web",
     coverageDir: "../../coverage/apps/web",
