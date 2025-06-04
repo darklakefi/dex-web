@@ -12,6 +12,7 @@ import LogoLgIcon from "./icons/logo-lg.svg";
 import LogoSmIcon from "./icons/logo-sm.svg";
 import PlayIcon from "./icons/play.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
+import TelegramIcon from "./icons/telegram.svg";
 import TimesFilledIcon from "./icons/times-filled.svg";
 import TimesIcon from "./icons/times.svg";
 import TrendingIcon from "./icons/trending.svg";
@@ -29,6 +30,7 @@ export type IconName =
   | "logo-lg"
   | "play"
   | "seedlings"
+  | "telegram"
   | "times"
   | "times-filled"
   | "trending"
@@ -47,6 +49,7 @@ const iconComponents = {
   "logo-lg": LogoLgIcon,
   play: PlayIcon,
   seedlings: SeedlingsIcon,
+  telegram: TelegramIcon,
   times: TimesIcon,
   "times-filled": TimesFilledIcon,
   trending: TrendingIcon,
