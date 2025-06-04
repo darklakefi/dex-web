@@ -2,47 +2,29 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "preserve",
-    "emitDeclarationOnly": false,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "lib": ["es2022", "dom", "dom.iterable"],
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "preserve",
-    "noEmit": true,
 
-    "incremental": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "types": ["node", "vite-plugin-svgr/client"],
-    "outDir": "../../dist",
-    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
+
+    "noEmit": true,
+    "incremental": true
   },
-  "include": [
-    "../../apps/web/.next/types/**/*.ts",
-    "../../dist/apps/web/.next/types/**/*.ts",
-    "next-env.d.ts",
-    "src/**/*.js",
-    "src/**/*.jsx",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "out-tsc",
-    "dist",
-    "node_modules",
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts",
-    ".next"
-  ],
   "references": [
     {
+      "path": "../../libs/utils"
+    },
+    {
       "path": "../../libs/ui"
+    },
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
     }
-  ]
+  ],
+  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"]
 }
