@@ -14,13 +14,29 @@ jobs:
           name: Start Nx Cloud CI Distribution
           command: pnpm dlx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
 
-      - run:
-          name: Install PNPM Package Manager
-          command: npm install --prefix=$HOME/.local -g pnpm@10
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
 
       - run:
-          name: Install Project Dependencies
-          command: pnpm install --frozen-lockfile
+          name: Install pnpm package manager
+          command: |
+            npm install --global corepack@latest
+            corepack enable
+            corepack prepare pnpm@latest-10 --activate
+            pnpm config set store-dir .pnpm-store
+
+      - run:
+          name: Install Dependencies
+          command: |
+            pnpm install
+
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .pnpm-store
 
       - nx/set-shas:
           main-branch-name: 'main'
