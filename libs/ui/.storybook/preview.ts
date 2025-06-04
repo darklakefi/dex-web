@@ -10,11 +10,17 @@ const preview: Preview = {
       toc: true,
       theme: darklakeTheme,
     },
+
     viewport: {
       options: INITIAL_VIEWPORTS,
     },
+
     initialGlobals: {
       viewport: { value: "ipad", isRotated: false },
+    },
+
+    a11y: {
+      test: "todo",
     },
   },
   decorators: [

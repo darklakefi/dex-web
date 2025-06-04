@@ -14,21 +14,21 @@ const config: StorybookConfig = {
     "@storybook/addon-essentials",
     "@storybook/addon-themes",
     "@storybook/addon-a11y",
+    "@storybook/addon-vitest",
   ],
   staticDirs: ["../public"],
-  framework: {
-    name: "@storybook/react-vite",
-    options: {
-      builder: {
-        viteConfigPath: "vite.config.mts",
-      },
+  framework: "@storybook/react-vite",
+  core: {
+    builder: {
+      name: "@storybook/builder-vite",
+      options: { viteConfigPath: "vite.config.ts" },
     },
   },
-
-  viteFinal: async (config) =>
-    mergeConfig(config, {
-      plugins: [nxViteTsPaths()],
-    }),
+  async viteFinal(config) {
+    return mergeConfig(config, {
+      plugins: [...(config.plugins ?? []), nxViteTsPaths()],
+    });
+  },
 };
 
 export default config;
