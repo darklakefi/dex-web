@@ -13,6 +13,9 @@ const nextConfig = {
   nx: {
     svgr: false,
   },
+  typescript: {
+    tsconfigPath: "./tsconfig.lib.json",
+  },
 
   webpack(config) {
     const fileLoaderRule = config.module.rules.find(

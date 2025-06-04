@@ -18,7 +18,9 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2022",
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "paths": {}
   },
+  "include": ["vite.config.base.ts"],
   "exclude": ["node_modules", "tmp"]
 }
