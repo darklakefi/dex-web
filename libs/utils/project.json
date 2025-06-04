@@ -19,11 +19,8 @@
       }
     },
     "lint": {
-      "executor": "@gitopslovers/nx-biome:check",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/utils/**/*.{ts,tsx,js,jsx}"]
-      }
+      "command": "biome check  --write --config-path=libs/utils/biome.json --verbose libs/utils/**/*",
+      "cache": true
     }
   },
   "tags": []

@@ -5,6 +5,21 @@
     "lint": {
       "command": "biome check  --write --config-path=apps/web/biome.json --verbose apps/web/**/*",
       "cache": true
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "web:build",
+        "dev": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "web:build:development",
+          "dev": true,
+          "turbo": true
+        }
+      }
     }
   },
   "sourceRoot": "apps/web/src",
