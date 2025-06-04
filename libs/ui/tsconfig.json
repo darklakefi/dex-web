@@ -1,17 +1,21 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "lib": ["es2022", "dom", "dom.iterable"]
+    "types": ["vite/client"]
   },
-  "files": [],
-  "include": [],
   "references": [
-    { "path": "./tsconfig.lib.json" },
-    { "path": "./tsconfig.spec.json" },
-    { "path": "./tsconfig.storybook.json" }
-  ],
-  "extends": "../../tsconfig.base.json"
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    },
+    {
+      "path": "./tsconfig.storybook.json"
+    }
+  ]
 }

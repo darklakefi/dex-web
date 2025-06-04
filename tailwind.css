@@ -52,8 +52,12 @@
   --color-red-900: oklch(0.2143 0.0706 25.45);
   --color-red-950: oklch(0.1517 0.0422 23.6);
 
-  --font-sans: var(--font-classic-console-neue), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-display: var(--font-bitsumishi-regular), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: var(--font-classic-console-neue), ui-sans-serif, system-ui,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+  --font-display: var(--font-bitsumishi-regular), ui-sans-serif, system-ui,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
 
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;

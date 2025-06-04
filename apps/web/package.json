@@ -1,10 +1,22 @@
 {
-  "name": "@dex-fe-web/web",
+  "name": "@dex-web/web",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "dependencies": {
     "next": "~15.3.2",
     "react": "19.0.0",
     "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@dex-web/ui": "workspace:*",
+    "@dex-web/utils": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
   }
 }

@@ -3,7 +3,8 @@
 # compiled output
 dist
 tmp
-out-tsc
+
+
 
 # dependencies
 node_modules
@@ -54,3 +55,6 @@ vitest.config.*.timestamp*
 
 
 storybook-static
+
+# Typescript
+*.tsbuildinfo

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 
 import Button from "./Button";
 
@@ -34,7 +35,7 @@ describe("Button", () => {
   describe("Button Icons", () => {
     it("should render with leading icon", () => {
       const { container } = render(
-        <Button variant="primary" leadingIcon="check">
+        <Button variant="primary" leadingIcon="checkbox-filled">
           Button with Leading Icon
         </Button>,
       );
@@ -49,7 +50,7 @@ describe("Button", () => {
 
     it("should render with trailing icon", () => {
       const { container } = render(
-        <Button variant="primary" trailingIcon="arrow-right">
+        <Button variant="primary" trailingIcon="times">
           Button with Trailing Icon
         </Button>,
       );
@@ -63,7 +64,9 @@ describe("Button", () => {
     });
 
     it("should render icon-only button", () => {
-      const { container } = render(<Button variant="primary" icon="plus" />);
+      const { container } = render(
+        <Button variant="primary" icon="external-link" />,
+      );
       expect(container.querySelector("button")).toHaveClass("p-2.5");
       expect(container.querySelector("svg")).toBeInTheDocument();
       expect(container.querySelector("button")?.textContent).toBe("");
@@ -71,7 +74,7 @@ describe("Button", () => {
 
     it("should show loading icon when isLoading is true", () => {
       const { container } = render(
-        <Button variant="primary" isLoading leadingIcon="check">
+        <Button variant="primary" isLoading leadingIcon="checkbox-empty">
           Loading Button
         </Button>,
       );

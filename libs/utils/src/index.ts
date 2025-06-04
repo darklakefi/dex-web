@@ -1,1 +1,1 @@
-export * from "./common/truncate";
+export { truncate } from "./common/truncate";

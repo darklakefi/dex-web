@@ -1,14 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
-  "compileOnSave": false,
-  "compilerOptions": {
-    "baseUrl": "."
-  },
   "files": [],
   "references": [
-    {
-      "path": "./apps/web-e2e"
-    },
     {
       "path": "./apps/web"
     },
@@ -17,12 +10,9 @@
     },
     {
       "path": "./libs/utils"
+    },
+    {
+      "path": "./apps/web-e2e"
     }
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs",
-      "moduleResolution": "node10"
-    }
-  }
+  ]
 }

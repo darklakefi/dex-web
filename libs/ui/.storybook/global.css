@@ -2,16 +2,14 @@
 
 @font-face {
   font-family: "Bitsumishi";
-  src: url("bitsumishi-regular.woff2")
-    format("woff2");
+  src: url("bitsumishi-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Classic Console Neue";
-  src: url("classic-console-neue.woff2")
-    format("woff2");
+  src: url("classic-console-neue.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
 }

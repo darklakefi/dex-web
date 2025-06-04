@@ -4,26 +4,17 @@
   "sourceRoot": "libs/utils/src",
   "projectType": "library",
   "targets": {
-    "build": {
-      "executor": "@nx/vite:build",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/libs/utils"
-      }
-    },
     "test": {
       "executor": "@nx/vite:test",
       "outputs": ["{options.reportsDirectory}"],
       "options": {
         "reportsDirectory": "../../coverage/libs/utils"
-      }
+      },
+      "cache": true
     },
     "lint": {
-      "executor": "@gitopslovers/nx-biome:check",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/utils/**/*.{ts,tsx,js,jsx}"]
-      }
+      "command": "biome check  --write --config-path=libs/utils/biome.json --verbose libs/utils/**/*",
+      "cache": true
     }
   },
   "tags": []

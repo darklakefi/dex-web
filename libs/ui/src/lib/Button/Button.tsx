@@ -44,9 +44,9 @@ interface ButtonProps
   text?: string;
   disabled?: boolean;
   isLoading?: boolean;
-  trailingIcon?: React.ReactNode | IconName;
-  leadingIcon?: React.ReactNode | IconName;
-  icon?: React.ReactNode | IconName;
+  trailingIcon?: IconName;
+  leadingIcon?: IconName;
+  icon?: IconName;
 }
 
 type VariantButtonProps = Omit<ButtonProps, "variant">;

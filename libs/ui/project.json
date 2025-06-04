@@ -6,6 +6,15 @@
       "command": "biome check  --write --config-path=libs/ui/biome.json --verbose libs/ui/**/*",
       "cache": true
     },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "reportsDirectory": "../../coverage/libs/ui",
+        "config": "libs/ui/vite.config.ts"
+      },
+      "cache": true
+    },
     "storybook": {
       "options": {
         "port": 6006

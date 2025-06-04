@@ -2,9 +2,61 @@
   "name": "web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/web",
+        "command": "next build"
+      },
+      "dependsOn": ["^build"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        {
+          "externalDependencies": ["next"]
+        }
+      ],
+      "outputs": [
+        "{projectRoot}/.next/!(cache)",
+        "{projectRoot}/.next/!(cache)/**/*"
+      ]
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "options": {
+        "config": "apps/web/vite.config.ts",
+        "reportsDirectory": "../../coverage/apps/web"
+      },
+      "dependsOn": ["^build"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        {
+          "externalDependencies": ["vitest", "@vitest/ui", "happy-dom"]
+        }
+      ],
+      "outputs": ["{options.reportsDirectory}"]
+    },
     "lint": {
       "command": "biome check  --write --config-path=apps/web/biome.json --verbose apps/web/**/*",
       "cache": true
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "web:build",
+        "dev": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "web:build:development",
+          "dev": true,
+          "turbo": true
+        }
+      }
     }
   },
   "sourceRoot": "apps/web/src",
