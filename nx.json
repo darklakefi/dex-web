@@ -13,7 +13,13 @@
       "!{projectRoot}/.storybook/**/*",
       "!{projectRoot}/tsconfig.storybook.json"
     ],
-    "sharedGlobals": ["{workspaceRoot}/.circleci/config.yml"]
+    "sharedGlobals": [
+      "{workspaceRoot}/.circleci/config.yml",
+      "{workspaceRoot}/nx.json",
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/pnpm-lock.yaml",
+      "{workspaceRoot}/tsconfig.base.json"
+    ]
   },
   "nxCloudId": "68230a98f7a32c3a8df14adf",
   "plugins": [
@@ -76,8 +82,39 @@
     }
   ],
   "targetDefaults": {
+    "build": {
+      "cache": true
+    },
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    },
+    "typecheck": {
+      "cache": true
+    },
+    "e2e": {
+      "cache": true
+    },
+    "@nx/vite:build": {
+      "cache": true,
+      "inputs": [
+        "production",
+        "^production",
+        { "externalDependencies": ["vite"] }
+      ],
+      "outputs": ["{options.outputPath}"]
+    },
+    "@nx/vite:test": {
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        { "externalDependencies": ["vitest"] }
+      ],
+      "outputs": ["{options.reportsDirectory}"]
     }
   },
   "generators": {

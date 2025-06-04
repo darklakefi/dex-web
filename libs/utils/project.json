@@ -9,14 +9,16 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/utils"
-      }
+      },
+      "cache": true
     },
     "test": {
       "executor": "@nx/vite:test",
       "outputs": ["{options.reportsDirectory}"],
       "options": {
         "reportsDirectory": "../../coverage/libs/utils"
-      }
+      },
+      "cache": true
     },
     "lint": {
       "command": "biome check  --write --config-path=libs/utils/biome.json --verbose libs/utils/**/*",

@@ -12,7 +12,8 @@
       "options": {
         "reportsDirectory": "../../coverage/libs/ui",
         "config": "libs/ui/vite.config.ts"
-      }
+      },
+      "cache": true
     },
     "storybook": {
       "options": {

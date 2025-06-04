@@ -19,6 +19,13 @@ jobs:
           keys:
             - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
 
+      - restore_cache:
+          name: Restore Nx Cache
+          keys:
+            - nx-cache-{{ arch }}-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
+            - nx-cache-{{ arch }}-{{ .Branch }}
+            - nx-cache-{{ arch }}
+
       - run:
           name: Install pnpm package manager
           command: |
@@ -44,6 +51,12 @@ jobs:
       - run:
           name: Run affected tasks
           command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint test build e2e-ci
+
+      - save_cache:
+          name: Save Nx Cache
+          key: nx-cache-{{ arch }}-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ epoch }}
+          paths:
+            - .nx/cache
 
 workflows:
   version: 2
