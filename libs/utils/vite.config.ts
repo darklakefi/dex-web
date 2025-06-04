@@ -1,33 +1,27 @@
-import { resolve } from "node:path";
+import { join } from "node:path";
 /// <reference types="vitest" />
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
-import {
-  createLibraryBuildConfig,
-  createViteBaseConfig,
-} from "../../vite.config.base";
+import { getViteProjectConfig } from "../../vite.config.base";
 
 export default defineConfig(() => {
-  const baseConfig = createViteBaseConfig({
+  const baseConfig = getViteProjectConfig({
+    rootDir: __dirname,
     projectName: "utils",
-    cacheDir: "../../node_modules/.vite/libs/utils",
-    coverageDir: "../../coverage/libs/utils",
-    testEnvironment: "jsdom",
+    buildType: "lib",
   });
 
   return mergeConfig(baseConfig, {
     plugins: [
+      nxViteTsPaths(),
       dts({
-        tsconfigPath: resolve(__dirname, "tsconfig.lib.json"),
-        entryRoot: resolve(__dirname, "src"),
+        root: "../../",
+        entryRoot: "src",
+        tsconfigPath: join(__dirname, "tsconfig.lib.json"),
+        include: ["src/**/*.ts"],
+        outDir: "dist/libs/utils",
       }),
     ],
-    build: createLibraryBuildConfig({
-      entryPath: resolve(__dirname, "src/index.ts"),
-      outputPath: "../../dist/libs/utils",
-      name: "utils",
-      formats: ["es", "cjs"],
-      external: [],
-    }),
   });
 });

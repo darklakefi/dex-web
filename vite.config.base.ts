@@ -1,7 +1,8 @@
 /// <reference types='vitest' />
+import { resolve } from "node:path";
 import type { ViteUserConfig } from "vitest/config";
 
-export const baseVitestConfig = {
+export const vitestBaseConfig = {
   watch: false,
   reporters: ["default"],
   coverage: {
@@ -17,34 +18,52 @@ export const baseVitestConfig = {
     },
   },
   globals: true,
-  include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
 };
 
-export function createViteBaseConfig(options: {
+export function getViteProjectConfig(config: {
+  rootDir: string;
+  buildType: "app" | "lib";
   projectName: string;
-  cacheDir: string;
-  coverageDir: string;
-  testEnvironment?: "happy-dom" | "jsdom" | "browser";
-  browserConfig?: {
+  externals?: string[];
+  browserSettings?: {
     enabled: boolean;
-    provider: string;
-    headless: boolean;
-    name: string;
   };
 }): ViteUserConfig {
+  const cacheDir = `../../node_modules/.vite/${config.buildType === "app" ? "apps" : "libs"}/${config.projectName}`;
+  const reportsDirectory = `../../coverage/${config.buildType === "app" ? "apps" : "libs"}/${config.projectName}`;
+  const outputDirectory = `../../dist/${config.buildType === "app" ? "apps" : "libs"}/${config.projectName}`;
   const testConfig: NonNullable<ViteUserConfig["test"]> = {
-    ...baseVitestConfig,
-    name: options.projectName,
-    environment: options.testEnvironment || "happy-dom",
+    ...vitestBaseConfig,
+    name: config.projectName,
+    environment: "happy-dom",
+    include: [
+      "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+    ],
     coverage: {
-      ...baseVitestConfig.coverage,
-      reportsDirectory: options.coverageDir,
+      ...vitestBaseConfig.coverage,
+      reportsDirectory: reportsDirectory,
     },
   };
+  const buildConfig = {
+    ...getViteBuildConfig({
+      buildType: config.buildType,
+      entryFile: resolve(config.rootDir, "src/index.ts"),
+      outputDirectory: outputDirectory,
+      libraryName: config.projectName,
+      formats: ["es"],
+      externals: config.externals,
+    }),
+  };
 
-  if (options.browserConfig) {
-    testConfig.browser = options.browserConfig;
-    if (options.browserConfig.enabled) {
+  if (config.browserSettings) {
+    testConfig.browser = {
+      enabled: config.browserSettings.enabled,
+      provider: "playwright",
+      headless: true,
+      name: "chromium",
+    };
+    if (config.browserSettings.enabled) {
       testConfig.deps = {
         web: {
           transformAssets: true,
@@ -54,34 +73,49 @@ export function createViteBaseConfig(options: {
   }
 
   return {
-    root: process.cwd(),
-    cacheDir: options.cacheDir,
+    root: config.rootDir,
+    cacheDir: cacheDir,
     test: testConfig,
   };
 }
 
-export function createLibraryBuildConfig(options: {
-  entryPath: string;
-  outputPath: string;
-  name: string;
+function getViteBuildConfig(config: {
+  entryFile: string;
+  outputDirectory: string;
+  buildType: "app" | "lib";
+  libraryName: string;
   formats?: ("es" | "cjs")[];
-  external?: string[];
+  externals?: string[];
 }) {
+  if (config.buildType === "lib") {
+    return {
+      build: {
+        outDir: config.outputDirectory,
+        emptyOutDir: true,
+        reportCompressedSize: true,
+        commonjsOptions: {
+          transformMixedEsModules: true,
+        },
+        lib: {
+          entry: config.entryFile,
+          name: config.libraryName,
+          fileName: "index",
+          formats: config.formats || ["es" as const],
+        },
+        rollupOptions: {
+          external: config.externals || [],
+        },
+      },
+    };
+  }
+
   return {
-    outDir: options.outputPath,
-    emptyOutDir: true,
-    reportCompressedSize: true,
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
-    lib: {
-      entry: options.entryPath,
-      name: options.name,
-      fileName: "index",
-      formats: options.formats || ["es" as const],
-    },
-    rollupOptions: {
-      external: options.external || [],
+    build: {
+      outDir: config.outputDirectory,
+      reportCompressedSize: true,
+      commonjsOptions: {
+        transformMixedEsModules: true,
+      },
     },
   };
 }

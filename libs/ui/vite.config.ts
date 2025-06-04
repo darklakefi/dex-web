@@ -1,49 +1,39 @@
 /// <reference types='vitest' />
-import { resolve } from "node:path";
+import { join } from "node:path";
 
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 import svgr from "vite-plugin-svgr";
-import {
-  createLibraryBuildConfig,
-  createViteBaseConfig,
-} from "../../vite.config.base";
+import { getViteProjectConfig } from "../../vite.config.base";
 
 export default defineConfig(() => {
-  const baseConfig = createViteBaseConfig({
+  const baseConfig = getViteProjectConfig({
+    rootDir: __dirname,
     projectName: "ui",
-    cacheDir: "../../node_modules/.vite/libs/ui",
-    coverageDir: "../../coverage/libs/ui",
-    testEnvironment: "browser",
-    browserConfig: {
+    buildType: "lib",
+    browserSettings: {
       enabled: true,
-      provider: "playwright",
-      headless: true,
-      name: "chromium",
     },
   });
-
   return mergeConfig(baseConfig, {
     assetsInclude: ["**/*.svg"],
     plugins: [
       react(),
       tailwindcss(),
       svgr({ include: "**/*.svg" }),
-      nxCopyAssetsPlugin(["*.md"]),
+      nxCopyAssetsPlugin(["*.md", "**/*.svg"]),
+      nxViteTsPaths(),
       dts({
-        tsconfigPath: resolve(__dirname, "tsconfig.lib.json"),
-        entryRoot: resolve(__dirname, "src"),
+        root: "../../",
+        entryRoot: "src",
+        tsconfigPath: join(__dirname, "tsconfig.lib.json"),
+        include: ["src/**/*.{ts,tsx}"],
+        outDir: "dist/libs/ui",
       }),
     ],
-    build: createLibraryBuildConfig({
-      entryPath: resolve(__dirname, "src/index.ts"),
-      outputPath: "../../dist/libs/ui",
-      name: "ui",
-      formats: ["es"],
-      external: ["react", "react-dom", "react/jsx-runtime"],
-    }),
   });
 });
