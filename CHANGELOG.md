@@ -3,6 +3,89 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 ---
+## [0.2.0](https://github.com/cocogitto/cocogitto/compare/v0.1.0..0.2.0) - 2025-06-04
+
+### Bug Fixes
+
+- **(ui)** correct highlight background style in Box component - ([3596d11](https://github.com/cocogitto/cocogitto/commit/3596d1137c974efa5078c3c12045b53d312e5f13)) - lewisflude
+- **(ui)** update color classes in Box and TextInput components for consistency - ([abcc604](https://github.com/cocogitto/cocogitto/commit/abcc604b7244b2e4162039f48f9b5e2e0bc7e198)) - lewisflude
+- **(ui)** correct background color class in Box component for consistency - ([c665a1b](https://github.com/cocogitto/cocogitto/commit/c665a1b7774d362c98dfde3f6f7be8d3b85fb69a)) - lewisflude
+- **(ui)** ensure button is disabled when the disabled prop is true - ([f409897](https://github.com/cocogitto/cocogitto/commit/f40989707e4d0deb39075b6dd8d2aa05c778b777)) - lewisflude
+- **(ui)** missing stage in Button, allow directly add class on Text - ([707da4c](https://github.com/cocogitto/cocogitto/commit/707da4ca3906800394f6c8600bef3145848883bf)) - Felix
+- **(ui)** remove unnecessary newline in darklake theme configuration - ([340ad7b](https://github.com/cocogitto/cocogitto/commit/340ad7b901ec69d42eaf199c6d065619b6697cab)) - lewisflude
+- **(ui)** align center for button with icon - ([79981e0](https://github.com/cocogitto/cocogitto/commit/79981e0b5a3a59201395baa06de40bc115e54ef1)) - Felix
+- **(ui)** update SVG inclusion pattern to support React components - ([26b8577](https://github.com/cocogitto/cocogitto/commit/26b857778510f703ac3e24408a599ccd4876a22d)) - lewisflude
+
+### Documentation
+
+- **(ui)** add documentation comment for Header component - ([4f51b56](https://github.com/cocogitto/cocogitto/commit/4f51b56ab815e029743f3fa52c51b3b92182d5ab)) - lewisflude
+
+### Features
+
+- **(tailwind)** add custom theme colors and typography styles - ([ff9fc28](https://github.com/cocogitto/cocogitto/commit/ff9fc28fc189c79dad982790ce6a3808c5efd268)) - Felix
+- **(tailwind)** add custom tracking utilities for typography - ([2453453](https://github.com/cocogitto/cocogitto/commit/245345393f89b03a8f0d96472bcf3ee9d4c58f71)) - Felix
+- **(ui)** typography component - ([606259a](https://github.com/cocogitto/cocogitto/commit/606259ab4f8195c4fa493e45cbf722a57f971f1b)) - Felix
+- **(ui)** add Box component for layout - ([c22d19f](https://github.com/cocogitto/cocogitto/commit/c22d19f864237593b1c713d2ccb73957557bd4ee)) - lewisflude
+- **(ui)** export Box and Text components from index - ([8c8cd20](https://github.com/cocogitto/cocogitto/commit/8c8cd2090a761692cef85060342e519d8b02ab03)) - lewisflude
+- **(ui)** update Box and Text components with new styles and add Storybook configuration - ([2413008](https://github.com/cocogitto/cocogitto/commit/24130086df3e036f1ea9719c0feff077240eb612)) - lewisflude
+- **(ui)** add TextInput component and integrate custom fonts into Storybook - ([30ea5db](https://github.com/cocogitto/cocogitto/commit/30ea5db9774eb1840d4297c5e16c1e2c131f5093)) - lewisflude
+- **(ui)** enhance TextInput component with state management and improved styling - ([500f3de](https://github.com/cocogitto/cocogitto/commit/500f3de64d1e703593057d80a2076472d2551569)) - lewisflude
+- **(ui)** export Button component from index file - ([cf0829c](https://github.com/cocogitto/cocogitto/commit/cf0829c9429c1cba01c62484473ed89ae90dbc28)) - lewisflude
+- **(ui)** set tailwind config breakpoint - ([6dea3aa](https://github.com/cocogitto/cocogitto/commit/6dea3aa5927b545375b81c7e20ce048133a70d94)) - Felix
+- **(ui)** restructure component imports and add Box, Button, and Text components - ([09e09c8](https://github.com/cocogitto/cocogitto/commit/09e09c8e467039dba3f0845b9702bf77ae9877a2)) - Felix
+- **(ui)** add textCase prop to Text component for text transformation options - ([9bcabb0](https://github.com/cocogitto/cocogitto/commit/9bcabb022c9599791923ffe09ce94702a0262211)) - Felix
+- **(ui)** create Icon component with various icons - ([bcdeed7](https://github.com/cocogitto/cocogitto/commit/bcdeed7eecfd785f80b84bf7da9d9db9cef79a46)) - lewisflude
+- **(ui)** add darklake theme and update Storybook configuration - ([34ed3f2](https://github.com/cocogitto/cocogitto/commit/34ed3f2fabb7a41b8e08585c027e0f20134e830d)) - lewisflude
+- **(ui)** add accessibility support with @storybook/addon-a11y to Storybook configuration - ([1459b28](https://github.com/cocogitto/cocogitto/commit/1459b28f3cc7be6d1e9e0d8689b8a3fa8c6381e9)) - lewisflude
+- **(ui)** add loading stripe icon - ([8f024d4](https://github.com/cocogitto/cocogitto/commit/8f024d44b1d6115b36542819eebbb16b4516243f)) - Felix
+- **(ui)** update Button stages, utilize tailwind merge for Text - ([a51babf](https://github.com/cocogitto/cocogitto/commit/a51babfcd3bf35566ffdce8c47cb51f58b3a3024)) - Felix
+- **(ui)** enhance Button component with loading and icon variations - ([325c899](https://github.com/cocogitto/cocogitto/commit/325c899a1d800957656a8e876d2c90b2eae3d771)) - Felix
+- **(ui)** refactor Icon component to use static imports for SVG icons and improve performance - ([9eb5946](https://github.com/cocogitto/cocogitto/commit/9eb5946f5e78a334cb1aeef3a55542c8a8370888)) - lewisflude
+- **(ui)** add new logo SVG icon to Icon component - ([36d1503](https://github.com/cocogitto/cocogitto/commit/36d1503e43aed7d0ff159b7d917ab0cef5287ddc)) - lewisflude
+- **(ui)** implement Header component with logo, navigation links, and action button - ([b78430b](https://github.com/cocogitto/cocogitto/commit/b78430bb97c06448d5b925851cb5857ecad2b1b8)) - lewisflude
+- **(ui)** update Header component to support responsive logos and improve link styling - ([41fb75c](https://github.com/cocogitto/cocogitto/commit/41fb75c43caef881c4fb4c1d4c8de3c699abec62)) - lewisflude
+- **(ui)** enhance Storybook configuration and add Header component tests - ([18ab052](https://github.com/cocogitto/cocogitto/commit/18ab052c2016df81a3a05fa1149b304bd21a3c0c)) - lewisflude
+- **(ui)** export Header and Icon components from index file - ([bfa238f](https://github.com/cocogitto/cocogitto/commit/bfa238f114c961e7e92b9017ed4cd9b19f8b876f)) - lewisflude
+- **(ui)** integrate SVGR plugins for SVG handling and update TypeScript configuration - ([9611701](https://github.com/cocogitto/cocogitto/commit/96117019d3a87c56f373fadff6e0be657ac9759f)) - lewisflude
+- **(ui)** enhance TypeScript configuration and SVG handling with SVGR options - ([ec1c771](https://github.com/cocogitto/cocogitto/commit/ec1c7715e190de63f94d60663df0891f734910bc)) - lewisflude
+- **(utils)** setup utils module - ([db050d2](https://github.com/cocogitto/cocogitto/commit/db050d24f2a1ece3a6deaa358cfc5ac21ee99fa5)) - Felix
+- add custom fonts and update Tailwind CSS theme configuration - ([f044f8d](https://github.com/cocogitto/cocogitto/commit/f044f8da540a1741f5edc3e2ce1c7fb5a9847c78)) - lewisflude
+- update font class to text component - ([02dc874](https://github.com/cocogitto/cocogitto/commit/02dc874ede112046fe604fe3f7f518fd73f33235)) - Felix
+- button component and allow overwrite color in text compononent - ([dc1b538](https://github.com/cocogitto/cocogitto/commit/dc1b538c130c2dbddce6b38d9362977ea1618bde)) - Felix
+- add chromatic dependency to enhance UI component testing - ([78f7a75](https://github.com/cocogitto/cocogitto/commit/78f7a75c46d8b250224a1dec045a2d40d01785be)) - lewisflude
+
+### Miscellaneous Chores
+
+- **(deps)** update package dependencies and versions in package.json and pnpm-lock.yaml - ([9fbb8b5](https://github.com/cocogitto/cocogitto/commit/9fbb8b5aa82d07d48f95d60cd959281758944824)) - lewisflude
+- **(tailwind)** update color palette to use oklch color format and new colours - ([19b864d](https://github.com/cocogitto/cocogitto/commit/19b864d01b44490c735b6ea1aa9a6c81c3f338c5)) - lewisflude
+- **(ui)** move text input to subdirectory - ([688c0b7](https://github.com/cocogitto/cocogitto/commit/688c0b787c964cb4666273e89f464beeda989ced)) - Felix
+- set indent style for biome - ([fb65f60](https://github.com/cocogitto/cocogitto/commit/fb65f60caa444318917f3e01a3792eec7cfa0581)) - Felix
+- standardize code formatting across configuration files and update TypeScript settings - ([7b9ced8](https://github.com/cocogitto/cocogitto/commit/7b9ced8461ead7cabff07e56129629228bc2dff4)) - lewisflude
+- update biome configurations and project structure for web and e2e applications - ([c3d92c3](https://github.com/cocogitto/cocogitto/commit/c3d92c3c773fd0a1a692ac0f6eb4dfd19f30e667)) - lewisflude
+- update lint command in documentation and standardize command table formatting - ([7bfd037](https://github.com/cocogitto/cocogitto/commit/7bfd037ec9f2d7f92d50fe5753898649b84379f4)) - lewisflude
+- update TypeScript configuration files for consistency and path adjustments - ([6077574](https://github.com/cocogitto/cocogitto/commit/60775749d4a8b227e2a5999c2df1ddaee1fcaf78)) - lewisflude
+- update TypeScript configuration files to improve project structure and compatibility - ([e0f4518](https://github.com/cocogitto/cocogitto/commit/e0f4518969c0002cafc7e52e660accddc68d228c)) - lewisflude
+- remove example button, using sub folder for ui component - ([19303fe](https://github.com/cocogitto/cocogitto/commit/19303fe69226394a517998f5146bda96b3d7f870)) - Felix
+- fix build - ([f2d99d2](https://github.com/cocogitto/cocogitto/commit/f2d99d2738506dd35115a6226eaf360cfab61508)) - Felix
+
+### Refactoring
+
+- **(ui)** update color palette for Button, Box, and Text components to use oklch color values - ([fb34f99](https://github.com/cocogitto/cocogitto/commit/fb34f99db0f6693018f49254d1df1be3e6b2c286)) - Felix
+- **(ui)** simplify Text component variants and update Tailwind CSS styles - ([503a1e3](https://github.com/cocogitto/cocogitto/commit/503a1e3fcda3345640a60ada2cbae5db2af0a855)) - Felix
+- **(ui)** enhance Icon component styles and simplify rendering - ([151182a](https://github.com/cocogitto/cocogitto/commit/151182a80187fb321583b91f1fb5deeaa3d1d2c0)) - lewisflude
+- **(ui)** update darklake theme colors and enhance Icon component styling - ([392221e](https://github.com/cocogitto/cocogitto/commit/392221e196d8eaa5960883aab31cd47ea3ca0731)) - lewisflude
+- rename typoraphy to text component - ([57cc8d3](https://github.com/cocogitto/cocogitto/commit/57cc8d3d63611135d74e2dbea8670b5f1b09f31d)) - Felix
+
+### Style
+
+- **(ui)** refine TextInput component styles for improved usability and aesthetics - ([0964f7d](https://github.com/cocogitto/cocogitto/commit/0964f7de2d039632a0477aa25d9e7a03b0bb4400)) - lewisflude
+
+### Tests
+
+- **(ui)** add unit tests for Icon component rendering and props handling - ([b7bf85f](https://github.com/cocogitto/cocogitto/commit/b7bf85f21d048d05d338af20ad150d45444a04f7)) - lewisflude
+- **(ui)** add unit tests for Header component rendering - ([24ba8d5](https://github.com/cocogitto/cocogitto/commit/24ba8d5546a1181b8efbac61e19b71925acad7c4)) - lewisflude
+
+---
 
 ## [0.1.0] - 2025-05-15
 
