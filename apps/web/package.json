@@ -1,5 +1,5 @@
 {
-  "name": "@dex-fe-web/web",
+  "name": "@dex-web/web",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -9,8 +9,8 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@dex-fe-web/ui": "workspace:*",
-    "@dex-fe-web/utils": "workspace:*"
+    "@dex-web/ui": "workspace:*",
+    "@dex-web/utils": "workspace:*"
   },
   "exports": {
     ".": {

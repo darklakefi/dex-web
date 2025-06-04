@@ -111,8 +111,8 @@ For experienced users:
 
 - Clone and install dependencies:
   ```sh
-  git clone https://github.com/darklakefi/dex-fe-web.git
-  cd dex-fe-web
+  git clone https://github.com/darklakefi/dex-web.git
+  cd dex-web
   pnpm install
   npx playwright install
   npx nx dev web

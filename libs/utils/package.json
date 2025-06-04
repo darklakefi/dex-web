@@ -1,5 +1,5 @@
 {
-  "name": "@dex-fe-web/utils",
+  "name": "@dex-web/utils",
   "version": "0.0.1",
   "type": "module",
   "module": "./src/index.ts",

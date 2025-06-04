@@ -1,5 +1,5 @@
 {
-  "name": "@dex-fe-web/ui",
+  "name": "@dex-web/ui",
   "version": "0.0.1",
   "type": "module",
   "module": "./src/index.ts",
@@ -12,6 +12,6 @@
     }
   },
   "devDependencies": {
-    "@dex-fe-web/utils": "workspace:*"
+    "@dex-web/utils": "workspace:*"
   }
 }

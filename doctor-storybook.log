@@ -15,5 +15,4 @@
 You can always recheck the health of your project by running:
 npx storybook doctor
 
-Full logs are available in /Users/lewisflude/Code/dex-fe-web/doctor-storybook.log
-
+Full logs are available in /Users/lewisflude/Code/dex-web/doctor-storybook.log
