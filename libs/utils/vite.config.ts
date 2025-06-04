@@ -1,8 +1,7 @@
+import { resolve } from "node:path";
 /// <reference types="vitest" />
 import { defineConfig } from "vite";
-import { join } from "node:path";
 import dts from "vite-plugin-dts";
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 
 export default defineConfig({
   root: __dirname,
@@ -10,10 +9,9 @@ export default defineConfig({
 
   plugins: [
     dts({
-      entryRoot: "src",
-      tsconfigPath: join(__dirname, "tsconfig.lib.json"),
+      tsconfigPath: resolve(__dirname, "tsconfig.lib.json"),
+      entryRoot: resolve(__dirname, "src"),
     }),
-    nxViteTsPaths(),
   ],
 
   // Configuration for building your library.
@@ -28,8 +26,8 @@ export default defineConfig({
       external: [],
     },
   },
-
   test: {
+    name: "utils",
     globals: true,
     cache: {
       dir: "../../node_modules/.vitest",

@@ -1,21 +1,21 @@
 import { twMerge } from "tailwind-merge";
 
-import AnalyticsIcon from "./icons/analytics.svg?react";
-import CheckboxEmptyIcon from "./icons/checkbox-empty.svg?react";
-import CheckboxFilledIcon from "./icons/checkbox-filled.svg?react";
-import ChevronDownIcon from "./icons/chevron-down.svg?react";
-import ExternalLinkIcon from "./icons/external-link.svg?react";
-import GithubIcon from "./icons/github.svg?react";
-import InfoIcon from "./icons/info.svg?react";
-import LoadingStripeIcon from "./icons/loading-stripe.svg?react";
-import LogoLgIcon from "./icons/logo-lg.svg?react";
-import LogoSmIcon from "./icons/logo-sm.svg?react";
-import PlayIcon from "./icons/play.svg?react";
-import SeedlingsIcon from "./icons/seedlings.svg?react";
-import TimesFilledIcon from "./icons/times-filled.svg?react";
-import TimesIcon from "./icons/times.svg?react";
-import TrendingIcon from "./icons/trending.svg?react";
-import XIcon from "./icons/x.svg?react";
+import AnalyticsIcon from "./icons/analytics.svg";
+import CheckboxEmptyIcon from "./icons/checkbox-empty.svg";
+import CheckboxFilledIcon from "./icons/checkbox-filled.svg";
+import ChevronDownIcon from "./icons/chevron-down.svg";
+import ExternalLinkIcon from "./icons/external-link.svg";
+import GithubIcon from "./icons/github.svg";
+import InfoIcon from "./icons/info.svg";
+import LoadingStripeIcon from "./icons/loading-stripe.svg";
+import LogoLgIcon from "./icons/logo-lg.svg";
+import LogoSmIcon from "./icons/logo-sm.svg";
+import PlayIcon from "./icons/play.svg";
+import SeedlingsIcon from "./icons/seedlings.svg";
+import TimesFilledIcon from "./icons/times-filled.svg";
+import TimesIcon from "./icons/times.svg";
+import TrendingIcon from "./icons/trending.svg";
+import XIcon from "./icons/x.svg";
 
 export type IconName =
   | "analytics"

@@ -1,36 +1,50 @@
+import { resolve } from "node:path";
+/// <reference types='vitest' />
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
-import * as path from "node:path";
-/// <reference types='vitest' />
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 import svgr from "vite-plugin-svgr";
-
-export default defineConfig(() => ({
+export default defineConfig({
   root: __dirname,
   cacheDir: "../../node_modules/.vite/libs/ui",
+  assetsInclude: ["**/*.svg"],
+
   plugins: [
     react(),
     tailwindcss(),
-    nxViteTsPaths(),
-    svgr({
-      svgrOptions: {
-        ref: true,
-        plugins: ["@svgr/plugin-svgo", "@svgr/plugin-jsx"],
-        svgoConfig: {
-          floatPrecision: 2,
-        },
-      },
-      include: "**/*.svg?react",
-    }),
+    svgr({ include: "**/*.svg" }),
     nxCopyAssetsPlugin(["*.md"]),
     dts({
-      entryRoot: "src",
-      tsconfigPath: path.join(__dirname, "tsconfig.lib.json"),
+      tsconfigPath: resolve(__dirname, "tsconfig.lib.json"),
+      entryRoot: resolve(__dirname, "src"),
     }),
   ],
+  test: {
+    watch: false,
+
+    reporters: ["default"],
+    coverage: {
+      reportsDirectory: "../../coverage/libs/ui",
+      provider: "v8",
+    },
+    deps: {
+      web: {
+        transformAssets: true,
+      },
+    },
+
+    name: "ui",
+    globals: true,
+    browser: {
+      enabled: true,
+      provider: "playwright",
+      headless: true,
+      name: "chromium",
+    },
+    include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+  },
   // Uncomment this if you are using workers.
   // worker: {
   //  plugins: [ nxViteTsPaths() ],
@@ -46,7 +60,7 @@ export default defineConfig(() => ({
     },
     lib: {
       // Could also be a dictionary or array of multiple entry points.
-      entry: "src/index.ts",
+      entry: resolve(__dirname, "src/index.ts"),
       name: "ui",
       fileName: "index",
       // Change this to the formats you want to support.
@@ -58,20 +72,4 @@ export default defineConfig(() => ({
       external: ["react", "react-dom", "react/jsx-runtime"],
     },
   },
-  test: {
-    watch: false,
-    globals: true,
-    environment: "happy-dom",
-    include: ["{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
-    reporters: ["default"],
-    browser: {
-      enabled: true,
-      provider: "playwright",
-      instances: [{ browser: "chromium", headless: true }],
-    },
-    coverage: {
-      reportsDirectory: "../../coverage/libs/ui",
-      provider: "v8" as const,
-    },
-  },
-}));
+});

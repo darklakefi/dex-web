@@ -5,7 +5,7 @@
  * @param rightLength - Maximum length of the right side of the truncated string
  * @returns Truncated string
  */
-export const truncate = (text: string, leftLength = 4, rightLength = 4) => {
+const truncate = (text: string, leftLength = 4, rightLength = 4) => {
   if (!text) return text;
 
   // If the string is shorter than or equal to the combined length, return it as is
@@ -16,3 +16,5 @@ export const truncate = (text: string, leftLength = 4, rightLength = 4) => {
 
   return `${start}...${end}`;
 };
+
+export { truncate };
