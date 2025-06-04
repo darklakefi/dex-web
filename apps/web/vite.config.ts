@@ -14,6 +14,7 @@ export default defineConfig(() => ({
     nxCopyAssetsPlugin(["*.md"]),
   ],
   test: {
+    name: "web",
     watch: false,
     globals: true,
     environment: "happy-dom",

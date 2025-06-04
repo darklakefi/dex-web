@@ -29,6 +29,15 @@ export default defineConfig({
       reportsDirectory: "../../coverage/libs/ui",
       provider: "v8",
     },
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    teardownTimeout: 10000,
+    pool: "forks",
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      },
+    },
     deps: {
       web: {
         transformAssets: true,

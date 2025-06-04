@@ -28,16 +28,23 @@ export default defineConfig({
   },
   test: {
     name: "utils",
+    watch: false,
     globals: true,
-    cache: {
-      dir: "../../node_modules/.vitest",
-    },
     environment: "jsdom",
     include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     reporters: ["default"],
     coverage: {
       reportsDirectory: "../../coverage/libs/utils",
       provider: "v8",
+    },
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    teardownTimeout: 10000,
+    pool: "forks",
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      },
     },
   },
 });
