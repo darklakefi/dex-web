@@ -9,7 +9,7 @@ export default function Index() {
           <div id="welcome">
             <Box padding="lg" background="base">
               <div className="flex flex-col gap-2">
-                <Text.Heading>Hello there,</Text.Heading>
+                <Text.Heading>Welcome</Text.Heading>
                 <Text.Body2>Welcome web 👋</Text.Body2>
                 <Button.Primary text="Click me" />
                 <Button.PrimaryDark text="Click me" />

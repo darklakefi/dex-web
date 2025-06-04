@@ -1,12 +1,18 @@
+/// <reference types='vitest' />
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import react from "@vitejs/plugin-react";
+import svgr from "vite-plugin-svgr";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig(() => ({
   root: __dirname,
   cacheDir: "../../node_modules/.vite/apps/web",
-  plugins: [react(), nxViteTsPaths(), nxCopyAssetsPlugin(["*.md"])],
+  plugins: [
+    svgr({ include: "**/*.svg" }),
+
+    react(),
+    nxCopyAssetsPlugin(["*.md"]),
+  ],
   test: {
     watch: false,
     globals: true,
