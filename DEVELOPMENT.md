@@ -27,7 +27,7 @@ This repository is managed as an [Nx](https://nx.dev/) monorepo, enabling:
 - **Task Orchestration** (build, test, lint, e2e)
 - **Code Generation** via Nx plugins
 - **Affected Commands** for efficient CI/local workflows
-- **Consistent Tooling**: Next.js 15.3.2, Vite, Playwright 1.52.0, Biome, pnpm 10.11.0
+- **Consistent Tooling**: Next.js 15.3.2, Vite, Playwright 1.52.0, Biome, pnpm 10.11.1
 
 ## Prerequisites
 
@@ -50,7 +50,7 @@ Before you begin, make sure you have the following installed **on your local mac
   brew install node@22
   ```
 
-### 2. pnpm (10.11.0)
+### 2. pnpm (10.11.1)
 
 - **Check version:**
   ```sh
@@ -58,7 +58,7 @@ Before you begin, make sure you have the following installed **on your local mac
   ```
 - **Install:**
   ```sh
-  npm install -g pnpm@10.11.0
+  npm install -g pnpm@10.11.1
   ```
 
 ### 3. Git
@@ -243,6 +243,58 @@ npx nx storybook ui
 ```
 
 This will start the Storybook development server, typically available at [http://localhost:6006](http://localhost:6006).
+
+## CircleCI
+
+CircleCI handles our continuous integration and deployment. The configuration lives in `.circleci/config.yml`.
+
+### Pipeline Overview
+
+The CI/CD pipeline includes:
+
+- Running tests across affected projects
+- Building production bundles
+- Running E2E tests
+- Deploying to staging/production
+- Caching dependencies for faster builds
+
+You can view build status and logs at [CircleCI Dashboard](https://app.circleci.com/).
+
+### Pipeline Statuses
+
+| Status     | Meaning                   |
+| ---------- | ------------------------- |
+| ✅ Success | All checks passed         |
+| ❌ Failed  | One or more checks failed |
+| ⏳ Running | Pipeline in progress      |
+
+### Local Pipeline Testing
+
+To test the pipeline locally:
+
+1. **Install CircleCI CLI:**
+
+   - **macOS/Linux:**
+     ```sh
+     curl -fLSs https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/master/install.sh | bash
+     ```
+   - **Homebrew (macOS):**
+     ```sh
+     brew install circleci
+     ```
+
+2. **Verify Docker:**
+
+   ```sh
+   docker info
+   ```
+
+   > Note: Docker Desktop or daemon must be running
+
+3. **Execute Pipeline:**
+   ```sh
+   circleci local execute main
+   ```
 
 ### Key Features
 
