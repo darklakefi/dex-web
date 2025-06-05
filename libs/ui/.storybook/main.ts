@@ -1,8 +1,5 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
-import { mergeConfig } from "vite";
-
 const config: StorybookConfig = {
   stories: ["../src/lib/**/*.@(mdx|stories.@(js|jsx|ts|tsx))"],
   managerHead: () => `
@@ -23,11 +20,6 @@ const config: StorybookConfig = {
       name: "@storybook/builder-vite",
       options: { viteConfigPath: "vite.config.ts" },
     },
-  },
-  async viteFinal(config) {
-    return mergeConfig(config, {
-      plugins: [...(config.plugins ?? []), nxViteTsPaths()],
-    });
   },
 };
 
