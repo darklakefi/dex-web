@@ -1,5 +1,4 @@
-import { withThemeByDataAttribute } from "@storybook/addon-themes";
-import type { Preview, ReactRenderer } from "@storybook/react-vite";
+import type { Preview } from "@storybook/react-vite";
 import { INITIAL_VIEWPORTS } from "storybook/viewport";
 import { darklakeTheme } from "./darklakeTheme";
 import "./global.css";
@@ -23,16 +22,6 @@ const preview: Preview = {
       test: "todo",
     },
   },
-  decorators: [
-    withThemeByDataAttribute<ReactRenderer>({
-      themes: {
-        dark: "dark",
-        light: "light",
-      },
-      defaultTheme: "dark",
-      attributeName: "data-theme",
-    }),
-  ],
 };
 
 export default preview;

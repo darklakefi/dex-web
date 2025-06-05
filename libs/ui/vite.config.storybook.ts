@@ -5,13 +5,16 @@ import { defineConfig, mergeConfig } from "vite";
 import { config } from "./vite.config";
 const dirname = path.resolve(__dirname);
 export default mergeConfig(
-  config,
+  { ...config, test: undefined },
   defineConfig({
     plugins: [storybookTest({ configDir: path.join(dirname, ".storybook") })],
     test: {
-      globals: true,
-      environment: "jsdom",
-      exclude: ["**/node_modules/**", "**/dist/**", "**/.storybook/**"],
+      browser: {
+        enabled: true,
+        provider: "playwright",
+        headless: true,
+        instances: [{ browser: "chromium" }],
+      },
     },
   }),
 );
