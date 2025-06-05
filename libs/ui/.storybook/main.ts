@@ -1,14 +1,8 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
-import { mergeConfig } from "vite";
-
 const config: StorybookConfig = {
   stories: ["../src/lib/**/*.@(mdx|stories.@(js|jsx|ts|tsx))"],
-  managerHead: () => `
-    <link rel="preload" href="bitsumishi-regular.woff2" as="font" type="font/woff2" />
-    <link rel="preload" href="classic-console-neue.woff2" as="font" type="font/woff2" />
-  `,
+
   addons: [
     "@storybook/addon-docs",
     "@storybook/addon-essentials",
@@ -21,13 +15,8 @@ const config: StorybookConfig = {
   core: {
     builder: {
       name: "@storybook/builder-vite",
-      options: { viteConfigPath: "vite.config.ts" },
+      options: { viteConfigPath: "vite.config.storybook.ts" },
     },
-  },
-  async viteFinal(config) {
-    return mergeConfig(config, {
-      plugins: [...(config.plugins ?? []), nxViteTsPaths()],
-    });
   },
 };
 
