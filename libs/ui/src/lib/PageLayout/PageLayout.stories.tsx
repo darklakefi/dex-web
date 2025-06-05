@@ -19,10 +19,8 @@ const footerArgs = FooterDefault.args;
 
 export const Default = {
   args: {
-    children: [
-      <Header {...headerArgs} key="header" />,
-      <Text key="main">Hello</Text>,
-      <Footer {...footerArgs} key="footer" />,
-    ],
+    header: <Header {...headerArgs} />,
+    children: <Text>Hello</Text>,
+    footer: <Footer {...footerArgs} />,
   },
 } satisfies Story;
