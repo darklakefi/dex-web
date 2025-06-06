@@ -5,7 +5,9 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "scripts": {},
+  "scripts": {
+    "build-storybook": "nx run $NX_TASK_TARGET_PROJECT:build-storybook"
+  },
   "private": true,
   "dependencies": {
     "next": "~15.3.3",
@@ -13,6 +15,7 @@
     "react-dom": "19.1.0",
     "tailwind-merge": "^3.3.0"
   },
+
   "devDependencies": {
     "@babel/core": "^7.27.4",
     "@babel/preset-react": "^7.27.1",
