@@ -86,6 +86,8 @@ jobs:
 
   test:
     executor: pw-noble-development
+    environment:
+      CI: true
     steps:
       - checkout
       - restore-dependencies

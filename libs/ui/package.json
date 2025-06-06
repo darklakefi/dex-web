@@ -4,6 +4,9 @@
   "type": "module",
   "module": "./src/index.ts",
   "types": "./src/index.ts",
+  "scripts": {
+    "build-storybook": "nx run ui:build-storybook"
+  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
