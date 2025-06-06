@@ -6,9 +6,9 @@ import dts from "vite-plugin-dts";
 export default defineConfig(() => {
   const baseConfig = {
     root: __dirname,
-    cacheDir: "../../node_modules/.vite/libs/utils",
+    cacheDir: "../../node_modules/.vite/libs/server",
     test: {
-      name: "utils",
+      name: "server",
       environment: "happy-dom",
       include: [
         "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
@@ -16,7 +16,7 @@ export default defineConfig(() => {
       ],
       coverage: {
         provider: "v8" as const,
-        reportsDirectory: "../../coverage/libs/utils",
+        reportsDirectory: "../../coverage/libs/server",
       },
       watch: false,
       reporters: ["default"],
@@ -40,7 +40,7 @@ export default defineConfig(() => {
       },
       lib: {
         entry: resolve(__dirname, "src/index.ts"),
-        name: "@dex-web/utils",
+        name: "@dex-web/server",
         fileName: "index",
         formats: ["es" as const],
       },
