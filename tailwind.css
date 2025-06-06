@@ -68,4 +68,7 @@
   --tracking-normal: 0px;
   --tracking-wide: 0.01em;
   --tracking-wider: 0.02em;
+
+  --shadow-sm: 4px 4px 0px 0px;
+  --shadow-xl: 12px 12px 0px 0px;
 }
