@@ -6,40 +6,34 @@ const nextConfig = {
   experimental: {
     typedRoutes: true,
   },
-
+  turbopack: {
+    rules: {
+      "*.svg": {
+        as: "*.js",
+        loaders: [
+          {
+            loader: "@svgr/webpack",
+            options: {
+              typescript: true,
+              icon: true,
+            },
+          },
+        ],
+      },
+    },
+  },
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.svg$/i,
+      use: ["@svgr/webpack"],
+    });
+    return config;
+  },
   images: {
     unoptimized: false,
   },
   nx: {
     svgr: false,
-  },
-  typescript: {
-    tsconfigPath: "./tsconfig.lib.json",
-  },
-
-  webpack(config) {
-    const fileLoaderRule = config.module.rules.find(
-      (rule: { test: { test: (arg0: string) => boolean } }) =>
-        rule.test?.test?.(".svg"),
-    );
-
-    config.module.rules.push(
-      {
-        ...fileLoaderRule,
-        test: /\.svg$/i,
-        resourceQuery: /url/,
-      },
-      {
-        test: /\.svg$/i,
-        issuer: fileLoaderRule.issuer,
-        resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] },
-        use: ["@svgr/webpack"],
-      },
-    );
-
-    fileLoaderRule.exclude = /\.svg$/i;
-
-    return config;
   },
 } satisfies NextConfig;
 

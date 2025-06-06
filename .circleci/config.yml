@@ -3,29 +3,18 @@ version: 2.1
 orbs:
   nx: nrwl/nx@1.7.0
 
-jobs:
-  main:
+executors:
+  pw-noble-development:
     docker:
-      - image: cimg/node:lts-browsers
+      - image: mcr.microsoft.com/playwright:v1.52.0-noble
+  node-development:
+    docker:
+      - image: cimg/node:lts
+
+commands:
+  setup-pnpm:
+    description: "Install and configure pnpm package manager"
     steps:
-      - checkout
-
-      - run:
-          name: Start Nx Cloud CI Distribution
-          command: pnpm dlx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
-
-      - restore_cache:
-          name: Restore pnpm Package Cache
-          keys:
-            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-
-      - restore_cache:
-          name: Restore Nx Cache
-          keys:
-            - nx-cache-{{ arch }}-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
-            - nx-cache-{{ arch }}-{{ .Branch }}
-            - nx-cache-{{ arch }}
-
       - run:
           name: Install pnpm package manager
           command: |
@@ -34,33 +23,158 @@ jobs:
             corepack prepare pnpm@latest-10 --activate
             pnpm config set store-dir .pnpm-store
 
+  restore-dependencies:
+    description: "Restore pnpm package cache and install dependencies"
+    steps:
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - setup-pnpm
       - run:
           name: Install Dependencies
           command: |
             pnpm install
 
+  save-pnpm-cache:
+    description: "Save pnpm package cache"
+    steps:
       - save_cache:
           name: Save pnpm Package Cache
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - .pnpm-store
 
+  setup-nx:
+    description: "Set up Nx SHAs for affected detection"
+    steps:
       - nx/set-shas:
           main-branch-name: 'main'
 
-      - run:
-          name: Run affected tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint test build e2e-ci
+  restore-nx-cache:
+    description: "Restore Nx cache"
+    steps:
+      - restore_cache:
+          name: Restore Nx Cache
+          keys:
+            - nx-cache-{{ arch }}-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
+            - nx-cache-{{ arch }}-{{ .Branch }}
+            - nx-cache-{{ arch }}
 
+  save-nx-cache:
+    description: "Save Nx cache"
+    steps:
       - save_cache:
           name: Save Nx Cache
           key: nx-cache-{{ arch }}-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ epoch }}
           paths:
             - .nx/cache
 
+jobs:
+  lint:
+    executor: node-development
+    steps:
+      - checkout
+      - restore-dependencies
+      - save-pnpm-cache
+      - restore-nx-cache
+      - setup-nx
+      - run:
+          name: Run affected lint tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint
+      - save-nx-cache
+
+  test:
+    executor: node-development
+    environment:
+      CI: true
+    steps:
+      - checkout
+      - restore-dependencies
+      - restore-nx-cache
+      - setup-nx
+      - run:
+          name: Run affected test tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test
+      - save-nx-cache
+
+  chromatic:
+    executor: node-development
+    steps:
+      - checkout
+      - restore-dependencies
+      - restore-nx-cache
+      - setup-nx
+      - run:
+          name: Build Storybook for Chromatic
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build-storybook
+      - run:
+          name: Run Chromatic visual tests
+          command: pnpm exec chromatic --project-token=${CHROMATIC_PROJECT_TOKEN} --storybook-build-dir libs/ui/storybook-static --exit-zero-on-changes
+      - save-nx-cache
+
+  build:
+    executor: node-development
+    steps:
+      - checkout
+      - restore-dependencies
+      - restore-nx-cache
+      - setup-nx
+      - run:
+          name: Run affected build tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
+      - save-nx-cache
+
+  end-to-end:
+    executor: pw-noble-development
+    parallelism: 4
+    steps:
+      - checkout
+      - restore-dependencies
+      - restore-nx-cache
+      - setup-nx
+      - run:
+          name: Build dependencies for e2e tests
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
+      - run:
+          name: Run Playwright tests with sharding
+          command: |
+            SHARD="$((${CIRCLE_NODE_INDEX}+1))"
+            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+
+  # deploy:
+  #   executor: node-development
+  #   steps:
+  #     - checkout
+  #     - restore-dependencies
+  #     - setup-nx
+  #     - run:
+  #         name: Deploy application
+  #         command: |
+  #           echo "Deployment command goes here"
+
 workflows:
   version: 2
 
-  ci:
+  ci-cd:
     jobs:
-      - main
+      - lint
+      - test
+      - chromatic
+
+      - build:
+          requires:
+            - lint
+            - test
+            - chromatic
+
+      - end-to-end:
+          requires:
+            - build
+
+      # - deploy:
+      #     requires:
+      #       - end-to-end
+      #     filters:
+      #       branches:
+      #         only: main

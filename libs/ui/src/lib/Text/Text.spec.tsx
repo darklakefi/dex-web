@@ -1,10 +1,15 @@
 /// <reference types="@vitest/browser/context" />
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import "@testing-library/jest-dom";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 
 import Text from "./Text";
 
 describe("Text", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("should render heading", () => {
     render(<Text.Heading>Hello</Text.Heading>);
     const heading = screen.getByText("Hello");
