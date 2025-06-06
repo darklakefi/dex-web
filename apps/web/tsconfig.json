@@ -2,12 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "preserve",
-
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "noEmit": true,
+    "incremental": true
   },
   "references": [
     {
@@ -16,7 +17,6 @@
     {
       "path": "../../libs/ui"
     },
-
     {
       "path": "./tsconfig.lib.json"
     },

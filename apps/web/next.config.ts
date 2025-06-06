@@ -35,9 +35,6 @@ const nextConfig = {
   nx: {
     svgr: false,
   },
-  typescript: {
-    tsconfigPath: "./tsconfig.lib.json",
-  },
 } satisfies NextConfig;
 
 export default withNx(nextConfig);
