@@ -17,13 +17,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-green-100 px-3 py-1.5 text-green-700 hover:bg-green-200 focus:outline-blue-400",
+          "bg-green-100 px-3 py-1.5 text-green-700 hover:bg-green-200 focus:outline-white",
         "primary-dark":
-          "bg-green-700 px-3 py-1.5 text-green-100 hover:bg-green-600 focus:outline-blue-400",
+          "bg-green-700 px-3 py-1.5 text-green-100 hover:bg-green-600 focus:outline-white",
         secondary:
-          "bg-green-500 px-3 py-1.5 text-green-200 hover:text-green-100 focus:text-green-100 focus:outline-blue-400",
+          "bg-green-500 px-3 py-1.5 text-green-200 hover:text-green-100 focus:text-green-100 focus:outline-white",
         tertiary:
-          "px-1.5 text-green-300 hover:text-green-200 focus:text-green-200 focus:outline-blue-400",
+          "px-1.5 text-green-300 hover:text-green-200 focus:text-green-200 focus:outline-white",
       },
       disabled: {
         true: "cursor-not-allowed opacity-50",
@@ -75,6 +75,7 @@ export const Button: React.FC<ButtonProps> & {
   leadingIcon,
   trailingIcon,
   icon,
+  className,
   ...props
 }) => {
   const TextComponent =
@@ -90,15 +91,16 @@ export const Button: React.FC<ButtonProps> & {
 
   const isDisabled = isLoading || disabled;
 
-  const className = twMerge(
+  const mergedClassName = twMerge(
     buttonVariants({ variant, disabled: isDisabled }),
     TrailingIcon || LeadingIcon ? "flex items-center justify-center gap-2" : "",
+    className,
   );
 
   if (icon && !text && !children) {
     return (
       <button
-        className={twMerge(className, "w-fit p-2.5")}
+        className={twMerge(mergedClassName, "w-fit p-2.5")}
         disabled={isDisabled}
         {...props}
       >
@@ -108,7 +110,7 @@ export const Button: React.FC<ButtonProps> & {
   }
 
   return (
-    <button className={className} disabled={isDisabled} {...props}>
+    <button className={mergedClassName} disabled={isDisabled} {...props}>
       {LeadingIcon}
       {children
         ? children
