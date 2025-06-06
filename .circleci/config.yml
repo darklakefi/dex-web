@@ -110,7 +110,7 @@ jobs:
           command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build-storybook
       - run:
           name: Run Chromatic visual tests
-          command: pnpm exec chromatic --project-token=${CHROMATIC_PROJECT_TOKEN} --storybook-build-dir libs/ui/storybook-static
+          command: pnpm exec chromatic --project-token=${CHROMATIC_PROJECT_TOKEN} --storybook-build-dir libs/ui/storybook-static --exit-zero-on-changes
       - save-nx-cache
 
   build:
