@@ -1,26 +1,60 @@
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 /// <reference types="vitest" />
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
-import { getViteProjectConfig } from "../../vite.config.base";
 
 export default defineConfig(() => {
-  const baseConfig = getViteProjectConfig({
-    rootDir: __dirname,
-    projectName: "core",
-    buildType: "lib",
-  });
+  const baseConfig = {
+    root: __dirname,
+    cacheDir: "../../node_modules/.vite/libs/core",
+    test: {
+      name: "core",
+      environment: "happy-dom",
+      include: [
+        "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      ],
+      coverage: {
+        provider: "v8" as const,
+        reportsDirectory: "../../coverage/libs/core",
+      },
+      watch: false,
+      reporters: ["default"],
+      testTimeout: 30000,
+      hookTimeout: 30000,
+      teardownTimeout: 10000,
+      pool: "forks" as const,
+      poolOptions: {
+        forks: {
+          singleFork: true,
+        },
+      },
+      globals: true,
+    },
+    build: {
+      outDir: "./dist",
+      emptyOutDir: true,
+      reportCompressedSize: true,
+      commonjsOptions: {
+        transformMixedEsModules: true,
+      },
+      lib: {
+        entry: resolve(__dirname, "src/index.ts"),
+        name: "@dex-web/core",
+        fileName: "index",
+        formats: ["es" as const],
+      },
+      rollupOptions: {
+        external: [],
+      },
+    },
+  };
 
   return mergeConfig(baseConfig, {
     plugins: [
-      nxViteTsPaths(),
       dts({
-        root: "../../",
         entryRoot: "src",
         tsconfigPath: join(__dirname, "tsconfig.lib.json"),
-        include: ["src/**/*.ts"],
-        outDir: "dist/libs/core",
       }),
     ],
   });
