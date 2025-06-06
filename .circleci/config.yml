@@ -84,7 +84,7 @@ jobs:
           paths:
             - .nx/cache
 
-  playwright-job-name:
+  end-to-end:
     executor: pw-noble-development
     parallelism: 4
     steps:
@@ -108,6 +108,6 @@ workflows:
   ci:
     jobs:
       - main
-      - playwright-job-name:
+      - end-to-end:
           requires:
             - main
