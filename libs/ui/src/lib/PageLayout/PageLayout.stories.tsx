@@ -3,8 +3,9 @@ import { Footer } from "../Footer/Footer";
 import { Default as FooterDefault } from "../Footer/Footer.stories";
 import { Header } from "../Header/Header";
 import { Default as HeaderDefault } from "../Header/Header.stories";
+
 import Text from "../Text/Text";
-import { PageLayout } from "./PageLayout";
+import { PageLayout, backgroundImage } from "./PageLayout";
 const meta = {
   component: PageLayout,
   title: "PageLayout",
@@ -22,5 +23,6 @@ export const Default = {
     header: <Header {...headerArgs} />,
     children: <Text>Hello</Text>,
     footer: <Footer {...footerArgs} />,
+    backgroundImageUrl: backgroundImage,
   },
 } satisfies Story;
