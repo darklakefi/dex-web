@@ -1,6 +1,14 @@
+import {
+  Button,
+  Footer,
+  Header,
+  Icon,
+  PageLayout,
+  Text,
+  backgroundImage,
+} from "@dex-web/ui";
 import localFont from "next/font/local";
 import "./global.css";
-
 const bitsumishiRegular = localFont({
   src: "./bitsumishi-regular.woff2",
   weight: "400",
@@ -30,7 +38,83 @@ export default function RootLayout({
       lang="en"
       className={`${bitsumishiRegular.variable} ${classicConsoleNeue.variable} font-sans`}
     >
-      <body>{children}</body>
+      <body>
+        <PageLayout
+          backgroundImageUrl={backgroundImage.src}
+          header={
+            <Header
+              logoSm={
+                <Icon name="logo-sm" className="h-6 w-auto stroke-none" />
+              }
+              logoLg={
+                <Icon name="logo-lg" className="h-6 w-auto stroke-none" />
+              }
+              button={<Button variant="primary">CONNECT WALLET</Button>}
+            >
+              <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
+                Home
+              </Text.Link>
+              <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
+                About
+              </Text.Link>
+              <Text.Link className="inline-flex items-baseline justify-center gap-2 leading-none no-underline">
+                Contact <Icon name="external-link" className="size-4" />
+              </Text.Link>
+            </Header>
+          }
+          footer={
+            <Footer
+              logo={<Icon name="logo-lg" className="h-6 w-auto stroke-none" />}
+              socialMediaLinks={[]}
+            >
+              <div className="flex flex-col items-start gap-5">
+                <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
+                  MEV
+                </Text.Link>
+                <Text.Link className="inline-flex items-baseline justify-center text-green-300 leading-none no-underline">
+                  What is MEV?
+                </Text.Link>
+                <Text.Link className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline">
+                  MEV Checker{" "}
+                  <Icon
+                    name="external-link"
+                    className="size-4 fill-green-300"
+                  />
+                </Text.Link>
+              </div>
+              <div className="flex flex-col items-start gap-5">
+                <Text.Link className="inline-flex items-baseline justify-center no-underline">
+                  Resources
+                </Text.Link>
+                <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
+                  Docs
+                </Text.Link>
+                <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
+                  Support
+                </Text.Link>
+                <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
+                  Cookies
+                </Text.Link>
+              </div>
+              <div className="flex flex-col items-start gap-5">
+                <Text.Link className="inline-flex items-baseline justify-center no-underline">
+                  Protocol Stats
+                </Text.Link>
+                <Text.Link className="inline-flex flex-col items-baseline justify-center text-green-300 no-underline">
+                  <div>TVL</div>
+                  <div>$421.23M</div>
+                </Text.Link>
+                <Text.Link className="inline-flex flex-col items-baseline justify-center text-green-300 no-underline">
+                  <div>7D Vol</div>
+                  <div>$21.23M</div>
+                </Text.Link>
+              </div>
+            </Footer>
+          }
+        >
+          {children}
+        </PageLayout>
+      </body>
     </html>
   );
 }

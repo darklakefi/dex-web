@@ -1,25 +1,33 @@
 import type { Footer } from "../Footer/Footer";
 import type { Header } from "../Header/Header";
-import backgroundImageUrl from "./background.png";
+export { default as backgroundImage } from "./background.png";
+
 interface PageLayoutProps {
   header: React.ReactElement<typeof Header>;
   children: React.ReactNode;
   footer: React.ReactElement<typeof Footer>;
+  backgroundImageUrl: string;
 }
 
 /**
  * The PageLayout component is used to ensure a consistent layout for all pages.
+ * It is used to display the header, footer, and background image.
  */
-export function PageLayout({ header, children, footer }: PageLayoutProps) {
+export function PageLayout({
+  header,
+  children,
+  footer,
+  backgroundImageUrl,
+}: PageLayoutProps) {
   return (
-    <div className="flex flex-col bg-green-900 text-green-200">
+    <div className="flex min-h-screen flex-col bg-green-900 text-green-200">
       {header}
       <main
         style={{
           "--background-image-url": `url(${backgroundImageUrl})`,
         }}
         className={
-          "bg-[image:var(--background-image-url)] bg-center bg-cover px-5 py-10 lg:px-30 lg:py-20"
+          "flex-auto bg-[image:var(--background-image-url)] bg-center bg-cover px-5 py-10 lg:px-30 lg:py-20"
         }
       >
         {children}
