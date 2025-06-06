@@ -164,28 +164,28 @@ DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST
 
 ### 3. Database Schema & Migrations
 
-The project uses Drizzle ORM for schema management. The database schema is defined in `libs/server/src/db/schema.ts`.
+The project uses Drizzle ORM for schema management. The database schema is defined in `apps/server/src/db/schema.ts`.
 
 **Run database migrations:**
 ```sh
-npx drizzle-kit push --config libs/server/drizzle.config.ts
+npx drizzle-kit push --config apps/server/drizzle.config.ts
 ```
 
 **Generate migrations (when you change the schema):**
 ```sh
-npx drizzle-kit generate --config libs/server/drizzle.config.ts
+npx drizzle-kit generate --config apps/server/drizzle.config.ts
 ```
 
 ### 4. Database Management Commands
 
 **View database schema:**
 ```sh
-npx drizzle-kit introspect --config libs/server/drizzle.config.ts
+npx drizzle-kit introspect --config apps/server/drizzle.config.ts
 ```
 
 **Open Drizzle Studio (database browser):**
 ```sh
-npx drizzle-kit studio --config libs/server/drizzle.config.ts
+npx drizzle-kit studio --config apps/server/drizzle.config.ts
 ```
 
 This opens a web interface at [http://localhost:4983](http://localhost:4983) where you can browse and edit your database.
@@ -218,7 +218,7 @@ docker-compose down
 docker-compose down
 docker volume rm dex-web_postgres_data
 docker-compose up -d postgres
-npx drizzle-kit push --config libs/server/drizzle.config.ts
+npx drizzle-kit push --config apps/server/drizzle.config.ts
 ```
 
 **View database logs:**
@@ -243,7 +243,7 @@ The Docker setup is optimized for local development. For production:
 - Ensure no other service is using port 5432: `lsof -i :5432`
 
 **Schema/migration issues:**
-- Check your schema file: `libs/server/src/db/schema.ts`
+- Check your schema file: `apps/server/src/db/schema.ts`
 - Verify the `DATABASE_URL` in your `.env` file
 - Try resetting the database (see step 6 above)
 

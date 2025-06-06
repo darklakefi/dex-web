@@ -6,7 +6,7 @@ import dts from "vite-plugin-dts";
 export default defineConfig(() => {
   const baseConfig = {
     root: __dirname,
-    cacheDir: "../../node_modules/.vite/libs/server",
+    cacheDir: "../../node_modules/.vite/apps/server",
     test: {
       name: "server",
       environment: "happy-dom",
@@ -16,7 +16,7 @@ export default defineConfig(() => {
       ],
       coverage: {
         provider: "v8" as const,
-        reportsDirectory: "../../coverage/libs/server",
+        reportsDirectory: "../../coverage/apps/server",
       },
       watch: false,
       reporters: ["default"],

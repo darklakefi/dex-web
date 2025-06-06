@@ -18,7 +18,8 @@
     "pg": "^8.16.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "tailwind-merge": "^3.3.0"
+    "tailwind-merge": "^3.3.0",
+    "zod": "^3.25.55"
   },
   "devDependencies": {
     "@babel/core": "^7.27.4",

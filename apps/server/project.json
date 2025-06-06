@@ -1,8 +1,8 @@
 {
   "name": "server",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/server/src",
-  "projectType": "library",
+  "sourceRoot": "apps/server/src",
+  "projectType": "application",
   "tags": [],
   "// targets": "to see all targets run: nx show project server --web",
   "targets": {}
