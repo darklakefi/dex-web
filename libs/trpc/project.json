@@ -1,9 +1,9 @@
 {
-  "name": "server",
+  "name": "trpc",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/server/src",
+  "sourceRoot": "libs/trpc/src",
   "projectType": "application",
   "tags": [],
-  "// targets": "to see all targets run: nx show project server --web",
+  "// targets": "to see all targets run: nx show project trpc --web",
   "targets": {}
 }

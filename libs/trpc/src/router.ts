@@ -1,11 +1,29 @@
-import { createHTTPServer } from "@trpc/server/adapters/standalone";
+import { initTRPC } from "@trpc/server";
 import "dotenv/config";
+import { cache } from "react";
+import superjson from "superjson";
 import { z } from "zod";
 import { db } from "./db";
 import { usersTable } from "./db/schema";
-import { publicProcedure, router } from "./trpc";
 
-const appRouter: ReturnType<typeof router> = router({
+export type TRPCContext = {
+  foo: string;
+};
+
+export const createTRPCContext = cache(() => {
+  return {
+    foo: "bar",
+  } satisfies TRPCContext;
+});
+
+const trpc = initTRPC.context<TRPCContext>().create({
+  transformer: superjson,
+});
+export const router = trpc.router;
+
+export const publicProcedure = trpc.procedure;
+
+export const appRouter = router({
   userList: publicProcedure.query(async () => {
     const users = await db.select().from(usersTable);
     return users;
@@ -18,10 +36,4 @@ const appRouter: ReturnType<typeof router> = router({
     }),
 });
 
-const server = createHTTPServer({
-  router: appRouter,
-});
-
 export type AppRouter = typeof appRouter;
-
-server.listen(3000);

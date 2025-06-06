@@ -1,6 +1,6 @@
 import { Text } from "@dex-web/ui";
 
-export default function Index() {
+export default async function Index() {
   return (
     <div>
       <div className="wrapper">

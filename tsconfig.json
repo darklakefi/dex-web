@@ -15,7 +15,7 @@
       "path": "./apps/web-e2e"
     },
     {
-      "path": "./apps/server"
+      "path": "./libs/trpc"
     }
   ]
 }

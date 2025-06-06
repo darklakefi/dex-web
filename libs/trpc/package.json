@@ -1,5 +1,5 @@
 {
-  "name": "@dex-web/server",
+  "name": "@dex-web/trpc",
   "version": "0.0.1",
   "type": "module",
   "module": "./src/index.ts",
