@@ -50,8 +50,7 @@ commands:
 
 jobs:
   main:
-    docker:
-      - image: cimg/node:lts-browsers
+    executor: pw-noble-development
     steps:
       - checkout
       - restore-dependencies
