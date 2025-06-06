@@ -7,6 +7,9 @@ executors:
   pw-noble-development:
     docker:
       - image: mcr.microsoft.com/playwright:v1.52.0-noble
+  node-development:
+    docker:
+      - image: cimg/node:lts
 
 commands:
   setup-pnpm:
@@ -48,14 +51,9 @@ commands:
       - nx/set-shas:
           main-branch-name: 'main'
 
-jobs:
-  main:
-    executor: pw-noble-development
+  restore-nx-cache:
+    description: "Restore Nx cache"
     steps:
-      - checkout
-      - restore-dependencies
-      - save-pnpm-cache
-
       - restore_cache:
           name: Restore Nx Cache
           keys:
@@ -63,25 +61,67 @@ jobs:
             - nx-cache-{{ arch }}-{{ .Branch }}
             - nx-cache-{{ arch }}
 
-      - setup-nx
-
-      - run:
-          name: Run affected lint tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint
-
-      - run:
-          name: Run affected test tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test
-
-      - run:
-          name: Run affected build tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
-
+  save-nx-cache:
+    description: "Save Nx cache"
+    steps:
       - save_cache:
           name: Save Nx Cache
           key: nx-cache-{{ arch }}-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ epoch }}
           paths:
             - .nx/cache
+
+jobs:
+  lint:
+    executor: node-development
+    steps:
+      - checkout
+      - restore-dependencies
+      - save-pnpm-cache
+      - restore-nx-cache
+      - setup-nx
+      - run:
+          name: Run affected lint tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint
+      - save-nx-cache
+
+  test:
+    executor: pw-noble-development
+    steps:
+      - checkout
+      - restore-dependencies
+      - restore-nx-cache
+      - setup-nx
+      - run:
+          name: Run affected test tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test
+      - save-nx-cache
+
+  chromatic:
+    executor: node-development
+    steps:
+      - checkout
+      - restore-dependencies
+      - restore-nx-cache
+      - setup-nx
+      - run:
+          name: Build Storybook for Chromatic
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build-storybook
+      - run:
+          name: Run Chromatic visual tests
+          command: pnpm exec chromatic --project-token=${CHROMATIC_PROJECT_TOKEN}
+      - save-nx-cache
+
+  build:
+    executor: node-development
+    steps:
+      - checkout
+      - restore-dependencies
+      - restore-nx-cache
+      - setup-nx
+      - run:
+          name: Run affected build tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
+      - save-nx-cache
 
   end-to-end:
     executor: pw-noble-development
@@ -89,24 +129,50 @@ jobs:
     steps:
       - checkout
       - restore-dependencies
+      - restore-nx-cache
       - setup-nx
-
       - run:
           name: Build dependencies for e2e tests
           command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
-
       - run:
           name: Run Playwright tests with sharding
           command: |
             SHARD="$((${CIRCLE_NODE_INDEX}+1))"
             pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
 
+  # deploy:
+  #   executor: node-development
+  #   steps:
+  #     - checkout
+  #     - restore-dependencies
+  #     - setup-nx
+  #     - run:
+  #         name: Deploy application
+  #         command: |
+  #           echo "Deployment command goes here"
+
 workflows:
   version: 2
 
-  ci:
+  ci-cd:
     jobs:
-      - main
+      - lint
+      - test
+      - chromatic
+
+      - build:
+          requires:
+            - lint
+            - test
+            - chromatic
+
       - end-to-end:
           requires:
-            - main
+            - build
+
+      # - deploy:
+      #     requires:
+      #       - end-to-end
+      #     filters:
+      #       branches:
+      #         only: main
