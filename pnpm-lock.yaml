@@ -223,6 +223,9 @@ importers:
         specifier: 19.0.0
         version: 19.0.0(react@19.0.0)
     devDependencies:
+      '@dex-web/core':
+        specifier: workspace:*
+        version: link:../../libs/core
       '@dex-web/ui':
         specifier: workspace:*
         version: link:../../libs/ui
@@ -231,6 +234,8 @@ importers:
         version: link:../../libs/utils
 
   apps/web-e2e: {}
+
+  libs/core: {}
 
   libs/ui:
     devDependencies:

@@ -1,0 +1,21 @@
+{
+  "name": "core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/core/src",
+  "projectType": "library",
+  "targets": {
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "reportsDirectory": "../../coverage/libs/core"
+      },
+      "cache": true
+    },
+    "lint": {
+      "command": "biome check  --write --config-path=libs/core/biome.json --verbose libs/core/**/*",
+      "cache": true
+    }
+  },
+  "tags": []
+}

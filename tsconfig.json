@@ -12,6 +12,9 @@
       "path": "./libs/utils"
     },
     {
+      "path": "./libs/core"
+    },
+    {
       "path": "./apps/web-e2e"
     }
   ]
