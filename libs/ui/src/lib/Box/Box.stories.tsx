@@ -15,6 +15,7 @@ export const Default = {
     children: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     background: "base",
     padding: "md",
+    shadow: "sm",
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -31,5 +32,6 @@ export const Highlight = {
     children: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     background: "highlight",
     padding: "md",
+    shadow: "xl",
   },
 } satisfies Story;

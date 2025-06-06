@@ -15,10 +15,16 @@ const boxVariants = cva(
         base: "bg-green-700",
         highlight: "border border-green-400 bg-green-600",
       },
+      shadow: {
+        none: "shadow-none",
+        sm: "shadow-green-900 shadow-sm",
+        xl: "shadow-green-900 shadow-xl",
+      },
     },
     defaultVariants: {
       padding: "md",
       background: "base",
+      shadow: "none",
     },
   },
 );
@@ -34,12 +40,16 @@ export function Box({
   children,
   padding,
   background,
+  shadow,
   className,
   ...props
 }: BoxProps) {
   return (
     <div
-      className={twMerge(boxVariants({ padding, background }), className)}
+      className={twMerge(
+        boxVariants({ padding, background, shadow }),
+        className,
+      )}
       {...props}
     >
       {children}
