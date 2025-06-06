@@ -1,15 +1,8 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { router } from "./trpc";
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not set");
 }
 
 const db = drizzle(process.env.DATABASE_URL);
-
-const appRouter = router({
-  // ...
-});
-
-export type AppRouter = typeof appRouter;

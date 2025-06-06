@@ -9,6 +9,7 @@
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
+- [Database Setup](#database-setup)
 - [Development Workflow](#development-workflow)
 - [Conventional Commits](#conventional-commits)
 - [Signed Commits](#signed-commits)
@@ -118,6 +119,133 @@ For experienced users:
   npx nx dev web
   ```
 - App runs at [http://localhost:3000](http://localhost:3000)
+
+## Database Setup
+
+This project uses PostgreSQL with Drizzle ORM for database operations. Follow these steps to set up your local database environment.
+
+### Prerequisites
+
+Before setting up the database, ensure you have:
+
+- **Docker Desktop** installed and running
+- **Docker Compose** (included with Docker Desktop)
+
+### 1. Start PostgreSQL Server
+
+The project includes a `docker-compose.yml` file that sets up a PostgreSQL container optimized for local development.
+
+**Start the database:**
+```sh
+docker-compose up -d postgres
+```
+
+**Verify it's running:**
+```sh
+docker-compose ps
+```
+
+You should see the `dex-postgres` container running on port `5432`.
+
+### 2. Environment Configuration
+
+Create a `.env` file in the project root with your database connection string:
+
+```sh
+# .env
+POSTGRES_HOSTNAME="localhost"
+POSTGRES_DB="postgres"
+POSTGRES_USER="postgres"
+POSTGRES_PASSWORD="password"
+DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOSTNAME}:5432/${POSTGRES_DB}?schema=public"
+```
+
+> **Note:** The credentials match what's configured in `docker-compose.yml`. For production, these should be different and secure.
+
+### 3. Database Schema & Migrations
+
+The project uses Drizzle ORM for schema management. The database schema is defined in `libs/server/src/db/schema.ts`.
+
+**Run database migrations:**
+```sh
+npx drizzle-kit push --config libs/server/drizzle.config.ts
+```
+
+**Generate migrations (when you change the schema):**
+```sh
+npx drizzle-kit generate --config libs/server/drizzle.config.ts
+```
+
+### 4. Database Management Commands
+
+**View database schema:**
+```sh
+npx drizzle-kit introspect --config libs/server/drizzle.config.ts
+```
+
+**Open Drizzle Studio (database browser):**
+```sh
+npx drizzle-kit studio --config libs/server/drizzle.config.ts
+```
+
+This opens a web interface at [http://localhost:4983](http://localhost:4983) where you can browse and edit your database.
+
+### 5. Connecting to PostgreSQL Directly
+
+For debugging or advanced operations, you can connect directly to PostgreSQL:
+
+**Using Docker:**
+```sh
+docker exec -it dex-postgres psql -U postgres -d postgres
+```
+
+**Using a GUI client (like TablePlus, pgAdmin):**
+- Host: `localhost`
+- Port: `5432`
+- Database: `postgres`
+- User: `postgres`
+- Password: `password`
+
+### 6. Database Lifecycle Management
+
+**Stop the database:**
+```sh
+docker-compose down
+```
+
+**Reset the database (removes all data):**
+```sh
+docker-compose down
+docker volume rm dex-web_postgres_data
+docker-compose up -d postgres
+npx drizzle-kit push --config libs/server/drizzle.config.ts
+```
+
+**View database logs:**
+```sh
+docker-compose logs postgres
+```
+
+### 7. Production Considerations
+
+The Docker setup is optimized for local development. For production:
+
+- Use a managed PostgreSQL service (AWS RDS, Google Cloud SQL, etc.)
+- Update the `DATABASE_URL` environment variable
+- Ensure proper backup and monitoring strategies
+- Use migration files instead of `push` for schema changes
+
+### Troubleshooting
+
+**Database connection issues:**
+- Verify Docker is running: `docker info`
+- Check if the container is running: `docker-compose ps`
+- Ensure no other service is using port 5432: `lsof -i :5432`
+
+**Schema/migration issues:**
+- Check your schema file: `libs/server/src/db/schema.ts`
+- Verify the `DATABASE_URL` in your `.env` file
+- Try resetting the database (see step 6 above)
 
 ## Development Workflow
 

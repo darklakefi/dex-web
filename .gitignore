@@ -61,3 +61,7 @@ storybook-static
 
 # nix
 .direnv/
+
+# env
+.env
+!.env.example
