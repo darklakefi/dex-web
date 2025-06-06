@@ -24,7 +24,7 @@ export const config = mergeConfig(baseConfig, {
     react(),
     tailwindcss(),
     svgr({ include: "**/*.svg" }),
-    nxCopyAssetsPlugin(["*.md", "**/*.svg"]),
+    nxCopyAssetsPlugin(["*.md"]),
     nxViteTsPaths(),
     dts({
       root: "../../",

@@ -21,7 +21,6 @@
       "{workspaceRoot}/tsconfig.base.json"
     ]
   },
-  "nxCloudId": "68230a98f7a32c3a8df14adf",
   "plugins": [
     {
       "plugin": "@nx/js/typescript",
@@ -126,11 +125,6 @@
       "application": {
         "style": "tailwind",
         "linter": "none"
-      }
-    },
-    "@nx/react": {
-      "library": {
-        "unitTestRunner": "none"
       }
     }
   }

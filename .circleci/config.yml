@@ -6,13 +6,9 @@ orbs:
 jobs:
   main:
     docker:
-      - image: cimg/node:lts-browsers
+      - image: cimg/node:lts
     steps:
       - checkout
-
-      - run:
-          name: Start Nx Cloud CI Distribution
-          command: pnpm dlx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
 
       - restore_cache:
           name: Restore pnpm Package Cache
@@ -50,7 +46,7 @@ jobs:
 
       - run:
           name: Run affected tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint test build e2e-ci
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint test build e2e
 
       - save_cache:
           name: Save Nx Cache
