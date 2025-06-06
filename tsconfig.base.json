@@ -20,6 +20,6 @@
     "target": "es2022",
     "verbatimModuleSyntax": true
   },
-  "include": ["vite.config.base.ts"],
+  "include": ["vite.config.base.ts", "types/svg.d.ts", "types/css.d.ts"],
   "exclude": ["node_modules", "tmp"]
 }
