@@ -85,7 +85,10 @@ export default function Index() {
     <div>
       <div className="wrapper">
         <div className="container">
-          <div id="welcome" className="flex flex-col items-center justify-center">
+          <div
+            id="welcome"
+            className="flex flex-col items-center justify-center"
+          >
             <Text.Body1 className="animate-bounce">
               Under construction 🚧
             </Text.Body1>
