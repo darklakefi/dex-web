@@ -3,25 +3,15 @@ version: 2.1
 orbs:
   nx: nrwl/nx@1.7.0
 
-jobs:
-  main:
+executors:
+  pw-noble-development:
     docker:
-      - image: cimg/node:lts-browsers
+      - image: mcr.microsoft.com/playwright:v1.52.0-noble
+
+commands:
+  setup-pnpm:
+    description: "Install and configure pnpm package manager"
     steps:
-      - checkout
-
-      - restore_cache:
-          name: Restore pnpm Package Cache
-          keys:
-            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-
-      - restore_cache:
-          name: Restore Nx Cache
-          keys:
-            - nx-cache-{{ arch }}-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
-            - nx-cache-{{ arch }}-{{ .Branch }}
-            - nx-cache-{{ arch }}
-
       - run:
           name: Install pnpm package manager
           command: |
@@ -30,23 +20,63 @@ jobs:
             corepack prepare pnpm@latest-10 --activate
             pnpm config set store-dir .pnpm-store
 
+  restore-dependencies:
+    description: "Restore pnpm package cache and install dependencies"
+    steps:
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - setup-pnpm
       - run:
           name: Install Dependencies
           command: |
             pnpm install
 
+  save-pnpm-cache:
+    description: "Save pnpm package cache"
+    steps:
       - save_cache:
           name: Save pnpm Package Cache
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - .pnpm-store
 
+  setup-nx:
+    description: "Set up Nx SHAs for affected detection"
+    steps:
       - nx/set-shas:
           main-branch-name: 'main'
 
+jobs:
+  main:
+    docker:
+      - image: cimg/node:lts-browsers
+    steps:
+      - checkout
+      - restore-dependencies
+      - save-pnpm-cache
+
+      - restore_cache:
+          name: Restore Nx Cache
+          keys:
+            - nx-cache-{{ arch }}-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
+            - nx-cache-{{ arch }}-{{ .Branch }}
+            - nx-cache-{{ arch }}
+
+      - setup-nx
+
       - run:
-          name: Run affected tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint test build e2e
+          name: Run affected lint tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint
+
+      - run:
+          name: Run affected test tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test
+
+      - run:
+          name: Run affected build tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
 
       - save_cache:
           name: Save Nx Cache
@@ -54,9 +84,30 @@ jobs:
           paths:
             - .nx/cache
 
+  playwright-job-name:
+    executor: pw-noble-development
+    parallelism: 4
+    steps:
+      - checkout
+      - restore-dependencies
+      - setup-nx
+
+      - run:
+          name: Build dependencies for e2e tests
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
+
+      - run:
+          name: Run Playwright tests with sharding
+          command: |
+            SHARD="$((${CIRCLE_NODE_INDEX}+1))"
+            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+
 workflows:
   version: 2
 
   ci:
     jobs:
       - main
+      - playwright-job-name:
+          requires:
+            - main
