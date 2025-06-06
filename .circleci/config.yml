@@ -85,7 +85,7 @@ jobs:
       - save-nx-cache
 
   test:
-    executor: pw-noble-development
+    executor: node-development
     environment:
       CI: true
     steps:

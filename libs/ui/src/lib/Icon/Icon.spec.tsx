@@ -1,10 +1,15 @@
 /// <reference types="@vitest/browser/context" />
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import "@testing-library/jest-dom";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { Icon } from "./Icon";
 
 describe("Icon", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("should render successfully without props", () => {
     render(<Icon name="analytics" data-testid="icon-analytics" />);
     expect(screen.getByTestId("icon-analytics")).toBeTruthy();

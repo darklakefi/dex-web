@@ -14,6 +14,7 @@ const baseConfig = {
   test: {
     name: "ui",
     environment: "happy-dom",
+    setupFiles: ["@testing-library/jest-dom"],
     include: [
       "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
@@ -21,12 +22,6 @@ const baseConfig = {
     coverage: {
       provider: "v8" as const,
       reportsDirectory: "../../coverage/libs/ui",
-    },
-    browser: {
-      enabled: true,
-      provider: "playwright",
-      headless: true,
-      name: "chromium",
     },
     deps: {
       web: {

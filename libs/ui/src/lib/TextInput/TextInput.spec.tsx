@@ -1,4 +1,5 @@
 /// <reference types="@vitest/browser/context" />
+import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 
 import { describe, expect, it } from "vitest";
@@ -13,8 +14,8 @@ describe("TextInput", () => {
   it("should render successfully with padding and background explicitly set", () => {
     render(<TextInput label="First Name" />);
 
-    const inputElement = screen.getByRole("textbox");
-    const labelElement = inputElement.closest("label");
+    const inputElement = screen.getAllByRole("textbox")[0];
+    const labelElement = inputElement?.closest("label");
     expect(labelElement).toBeTruthy();
     expect(labelElement).toHaveClass("bg-green-600");
   });
