@@ -15,8 +15,10 @@
 - [Signed Commits](#signed-commits)
 - [Common Nx Commands](#common-nx-commands)
 - [Storybook](#storybook)
+- [CircleCI](#circleci)
 - [Recommended Extensions](#recommended-extensions)
 - [Troubleshooting](#troubleshooting)
+- [Knip](#knip)
 - [Further Reading](#further-reading)
 - [Contact & Support](#contact--support)
 
@@ -247,6 +249,53 @@ The Docker setup is optimized for local development. For production:
 - Verify the `DATABASE_URL` in your `.env` file
 - Try resetting the database (see step 6 above)
 
+## CircleCI
+
+See [CIRCLECI.md](./CIRCLECI.md) for full details on our CI/CD pipeline, local testing, and troubleshooting.
+
+## Knip: Unused Code & Dependency Checker
+
+[Knip](https://knip.dev/) is a tool for finding unused files, exports, and dependencies in your codebase. It helps keep the repository clean by identifying dead code and unnecessary dependencies, which can improve maintainability and reduce bundle size.
+
+### How We Use Knip
+
+- **Installed:** Knip is included as a dev dependency and can be run via the script in `package.json`.
+- **Default Configuration:** There is no custom Knip config file in this repo; Knip uses its default settings, which work well for most monorepos and Next.js projects.
+
+### Running Knip
+
+To check for unused files, exports, and dependencies, run:
+
+```sh
+pnpm knip
+```
+
+Or, using npm:
+
+```sh
+npm run knip
+```
+
+Knip will scan the workspace and report any unused code or dependencies. Review the output and remove or refactor as needed.
+
+### What Knip Checks
+- Unused files (not imported anywhere)
+- Unused exports (functions, components, etc. that are never used)
+- Unused dependencies (declared in `package.json` but not imported)
+- Unused devDependencies
+
+### Custom Configuration
+If you need to customize what Knip checks (e.g., ignore certain files or directories), you can add a `knip.json` or `knip.config.js` file at the root. See the [Knip documentation](https://knip.dev/docs/configuration) for details.
+
+### When to Run Knip
+- Before submitting a PR, to catch dead code
+- Periodically, to keep the codebase clean
+- When refactoring or removing features
+
+### More Info
+- [Knip documentation](https://knip.dev/docs)
+- [Knip GitHub](https://github.com/webpro/knip)
+
 ## Development Workflow
 
 - **Run tests:**
@@ -369,103 +418,3 @@ Storybook is used for developing and documenting UI components in isolation. It 
 ```sh
 npx nx storybook ui
 ```
-
-This will start the Storybook development server, typically available at [http://localhost:6006](http://localhost:6006).
-
-## CircleCI
-
-CircleCI handles our continuous integration and deployment. The configuration lives in `.circleci/config.yml`.
-
-### Pipeline Overview
-
-The CI/CD pipeline includes:
-
-- Running tests across affected projects
-- Building production bundles
-- Running E2E tests
-- Deploying to staging/production
-- Caching dependencies for faster builds
-
-You can view build status and logs at [CircleCI Dashboard](https://app.circleci.com/).
-
-### Pipeline Statuses
-
-| Status     | Meaning                   |
-| ---------- | ------------------------- |
-| ✅ Success | All checks passed         |
-| ❌ Failed  | One or more checks failed |
-| ⏳ Running | Pipeline in progress      |
-
-### Local Pipeline Testing
-
-To test the pipeline locally:
-
-1. **Install CircleCI CLI:**
-
-   - **macOS/Linux:**
-     ```sh
-     curl -fLSs https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/master/install.sh | bash
-     ```
-   - **Homebrew (macOS):**
-     ```sh
-     brew install circleci
-     ```
-
-2. **Verify Docker:**
-
-   ```sh
-   docker info
-   ```
-
-   > Note: Docker Desktop or daemon must be running
-
-3. **Execute Pipeline:**
-   ```sh
-   circleci local execute main
-   ```
-
-### Key Features
-
-- **Component Development**: Build and test components in isolation
-- **Documentation**: Auto-generated documentation for components
-- **Visual Testing**: Compare component states and catch visual regressions
-- **Interactive Testing**: Test component interactions and states
-
-### Best Practices
-
-- Write stories for all reusable components
-- Include component documentation and usage examples
-- Use controls to demonstrate different component states
-- Add relevant component props and their descriptions
-
-## Recommended Extensions
-
-- [Nx Console](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console)
-- [Biome](https://marketplace.visualstudio.com/items?itemName=biomejs.biome)
-- [Playwright Test for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright)
-- [Conventional Commits](https://marketplace.visualstudio.com/items?itemName=vivaxy.vscode-conventional-commits)
-- [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
-- [Vitest Explorer](https://marketplace.visualstudio.com/items?itemName=vitest.explorer)
-- [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
-
-## Troubleshooting
-
-> ⚠️ **Common Issues:**
-
-- **Dependency install issues on macOS:**
-  - Ensure Xcode Command Line Tools are installed:
-    `xcode-select --install`
-- **Playwright E2E requirements:**
-  - See [Playwright system requirements](https://playwright.dev/docs/intro#system-requirements).
-- **Biome or lint errors:**
-  - Run `npx biome check .` or `npx nx biome-lint web` for details.
-- **Git hooks not running:**
-  - Run `pnpm install` to re-setup Lefthook.
-
-## Further Reading
-
-- [Nx documentation](https://nx.dev/getting-started/intro)
-- [Next.js documentation](https://nextjs.org/docs)
-- [Vite documentation](https://vite.dev/guide/)
-- [Playwright documentation](https://playwright.dev/docs/intro)
-- [Biome documentation](https://biomejs.dev/docs/)
