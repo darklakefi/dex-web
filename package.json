@@ -30,6 +30,7 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@gitopslovers/nx-biome": "^1.5.0",
+    "@ngneat/falso": "^7.4.0",
     "@nx/devkit": "21.1.2",
     "@nx/js": "21.1.2",
     "@nx/next": "21.1.2",
