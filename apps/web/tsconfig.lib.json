@@ -25,6 +25,9 @@
   ],
   "references": [
     {
+      "path": "../../libs/orpc/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/utils/tsconfig.lib.json"
     },
     {
