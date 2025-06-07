@@ -82,5 +82,3 @@ Text.Body2 = (props) => {
 Text.Link = (props) => {
   return <Text variant={TextVariantEnum.Link} {...props} />;
 };
-
-export default Text;

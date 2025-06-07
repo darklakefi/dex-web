@@ -3,23 +3,21 @@
 exports[`Page > should render successfully 1`] = `
 <body>
   <div>
-    <div>
+    <div
+      class="wrapper"
+    >
       <div
-        class="wrapper"
+        class="container"
       >
         <div
-          class="container"
+          class="flex items-center justify-center"
+          id="welcome"
         >
-          <div
-            class="flex items-center justify-center"
-            id="welcome"
+          <p
+            class="font-normal font-sans text-3xl text-green-100 leading-8.5 tracking-wider uppercase animate-bounce"
           >
-            <p
-              class="font-normal font-sans text-3xl text-green-100 leading-8.5 tracking-wider uppercase animate-bounce"
-            >
-              Under construction 🚧
-            </p>
-          </div>
+            Under construction 🚧
+          </p>
         </div>
       </div>
     </div>

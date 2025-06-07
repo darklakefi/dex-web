@@ -2,7 +2,7 @@ import { type VariantProps, cva } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";
 
 import { Icon, type IconName } from "../Icon/Icon";
-import Text from "../Text/Text";
+import { Text } from "../Text/Text";
 
 export enum ButtonVariantEnum {
   Primary = "primary",
@@ -135,5 +135,3 @@ Button.Secondary = (props) => {
 Button.Tertiary = (props) => {
   return <Button variant={ButtonVariantEnum.Tertiary} {...props} />;
 };
-
-export default Button;

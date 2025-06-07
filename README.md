@@ -18,20 +18,24 @@ pnpm install
 npx playwright install
 
 # Start development
-npx nx dev web
+pnpm start
 ```
 
 ## Common Commands
 
 | Task       | Command               | Description                       |
 | ---------- | --------------------- | --------------------------------- |
-| Dev server | `npx nx dev web`      | Start the development server      |
-| Build      | `npx nx build web`    | Build the web application         |
-| Test Web   | `npx nx test web`     | Run web application tests         |
-| Test Utils | `npx nx test utils`   | Run utility library tests         |
-| Lint       | `npx nx lint web`     | Lint the web application          |
-| E2E        | `npx nx e2e web-e2e`  | Run end-to-end tests              |
-| Storybook  | `npx nx storybook ui` | Start Storybook for UI components |
+| Dev server | `pnpm start`          | Start the development server      |
+| Build      | `pnpm build`          | Build the web application         |
+| Test Web   | `pnpm test`           | Run web application tests         |
+| Lint       | `pnpm lint`           | Lint the web application          |
+| E2E        | `pnpm e2e`            | Run end-to-end tests              |
+| Storybook  | `pnpm build-storybook`| Build Storybook for UI components |
+| Dep Graph  | `pnpm dep-graph`      | Visualize project dependencies    |
+| Format     | `pnpm format`         | Format codebase                   |
+| Update Nx  | `pnpm update`         | Update Nx to latest version       |
+
+> You can still use `npx nx ...` for any Nx command, but these scripts provide convenient shortcuts.
 
 ## Project Structure
 

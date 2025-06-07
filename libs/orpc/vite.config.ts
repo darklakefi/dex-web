@@ -1,17 +1,14 @@
-import { join } from "node:path";
-/// <reference types='vitest' />
-import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
-import react from "@vitejs/plugin-react-swc";
+/// <reference types="vitest" />
+import { join, resolve } from "node:path";
+import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
-import svgr from "vite-plugin-svgr";
-import { defineConfig, mergeConfig } from "vitest/config";
 
 export default defineConfig(() => {
   const baseConfig = {
     root: __dirname,
-    cacheDir: "../../node_modules/.vite/apps/web",
+    cacheDir: "../../node_modules/.vite/libs/orpc",
     test: {
-      name: "web",
+      name: "orpc",
       environment: "happy-dom",
       include: [
         "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
@@ -19,7 +16,7 @@ export default defineConfig(() => {
       ],
       coverage: {
         provider: "v8" as const,
-        reportsDirectory: "../../coverage/apps/web",
+        reportsDirectory: "../../coverage/libs/orpc",
       },
       watch: false,
       reporters: ["default"],
@@ -36,18 +33,25 @@ export default defineConfig(() => {
     },
     build: {
       outDir: "./dist",
+      emptyOutDir: true,
       reportCompressedSize: true,
       commonjsOptions: {
         transformMixedEsModules: true,
+      },
+      lib: {
+        entry: resolve(__dirname, "src/index.ts"),
+        name: "@dex-web/orpc",
+        fileName: "index",
+        formats: ["es" as const],
+      },
+      rollupOptions: {
+        external: [],
       },
     },
   };
 
   return mergeConfig(baseConfig, {
     plugins: [
-      svgr({ include: "**/*.svg" }),
-      react(),
-      nxCopyAssetsPlugin(["*.md"]),
       dts({
         entryRoot: "src",
         tsconfigPath: join(__dirname, "tsconfig.lib.json"),
