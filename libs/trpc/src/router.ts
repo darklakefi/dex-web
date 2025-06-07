@@ -1,22 +1,12 @@
 import { initTRPC } from "@trpc/server";
 import "dotenv/config";
-import { cache } from "react";
 import superjson from "superjson";
 import { z } from "zod";
+import type { Context } from "./context";
 import { db } from "./db";
 import { usersTable } from "./db/schema";
 
-export type TRPCContext = {
-  foo: string;
-};
-
-export const createTRPCContext = cache(() => {
-  return {
-    foo: "bar",
-  } satisfies TRPCContext;
-});
-
-const trpc = initTRPC.context<TRPCContext>().create({
+const trpc = initTRPC.context<Context>().create({
   transformer: superjson,
 });
 export const router = trpc.router;

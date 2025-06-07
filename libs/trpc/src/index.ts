@@ -1,6 +1,6 @@
 export {
   appRouter,
-  createTRPCContext,
   type AppRouter,
-  type TRPCContext,
 } from "./router";
+
+export { createContext, type Context } from "./context";

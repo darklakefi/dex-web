@@ -1,13 +1,13 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-import { appRouter, createTRPCContext } from "@dex-web/trpc";
+import { appRouter, createContext } from "@dex-web/trpc";
 
 const handler = (req: Request) =>
   fetchRequestHandler({
     endpoint: "/api/trpc",
     req,
     router: appRouter,
-    createContext: createTRPCContext,
+    createContext,
   });
 
 export { handler as GET, handler as POST };
