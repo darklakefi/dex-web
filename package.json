@@ -74,6 +74,7 @@
     "chromatic": "^12.1.0",
     "class-variance-authority": "^0.7.1",
     "drizzle-kit": "^0.31.1",
+    "drizzle-zod": "^0.8.2",
     "happy-dom": "~17.6.3",
     "jiti": "2.4.2",
     "lefthook": "^1.11.13",

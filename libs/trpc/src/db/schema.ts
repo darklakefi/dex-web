@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   bigint,
   index,
@@ -8,6 +9,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -16,11 +18,11 @@ export const usersTable = pgTable("users", {
   email: varchar({ length: 255 }).notNull().unique(),
 });
 
-export const blockQueueStatusEnum = pgEnum("BlockQueueStatus", [
-  "QUEUED",
-  "PROCESSING",
-  "COMPLETED",
-  "FAILED",
+export const blockQueueStatusEnum = pgEnum("block_queue_status", [
+  "queued",
+  "processing",
+  "completed",
+  "failed",
 ]);
 
 export const config = pgTable("config", {
@@ -45,14 +47,18 @@ export const sandwichEvent = pgTable(
       mode: "bigint",
     }).notNull(),
     solAmountSwap: bigint("sol_amount_swap", { mode: "bigint" }).notNull(),
-    txHashVictimSwap: varchar("tx_hash_victim_swap").notNull(),
-    txHashAttackerBuy: varchar("tx_hash_attacker_buy").notNull(),
-    txHashAttackerSell: varchar("tx_hash_attacker_sell").notNull(),
-    tokenAddress: varchar("token_address").notNull(),
-    attackerAddress: varchar("attacker_address").notNull(),
-    victimAddress: varchar("victim_address").notNull(),
-    lpAddress: varchar("lp_address").notNull(),
-    dexName: varchar("dex_name").notNull(),
+    txHashVictimSwap: varchar("tx_hash_victim_swap", { length: 88 }).notNull(),
+    txHashAttackerBuy: varchar("tx_hash_attacker_buy", {
+      length: 88,
+    }).notNull(),
+    txHashAttackerSell: varchar("tx_hash_attacker_sell", {
+      length: 88,
+    }).notNull(),
+    tokenAddress: varchar("token_address", { length: 44 }).notNull(),
+    attackerAddress: varchar("attacker_address", { length: 44 }).notNull(),
+    victimAddress: varchar("victim_address", { length: 44 }).notNull(),
+    lpAddress: varchar("lp_address", { length: 44 }).notNull(),
+    dexName: varchar("dex_name", { length: 50 }).notNull(),
     occurredAt: timestamp("occurred_at").notNull(),
     addedAt: timestamp("added_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -72,6 +78,10 @@ export const sandwichEvent = pgTable(
     tokenAddressIdx: index("sandwich_events_token_address_idx").on(
       table.tokenAddress,
     ),
+    attackerAddressIdx: index("sandwich_events_attacker_address_idx").on(
+      table.attackerAddress,
+    ),
+    slotIdx: index("sandwich_events_slot_idx").on(table.slot),
     occurredAtIdx: index("sandwich_events_occurred_at_idx").on(
       table.occurredAt,
     ),
@@ -83,23 +93,51 @@ export const sandwichEvent = pgTable(
 );
 
 export const tokenMetadata = pgTable("token_metadata", {
-  tokenAddress: varchar("token_address").primaryKey(),
-  name: varchar("name").notNull(),
-  symbol: varchar("symbol").notNull(),
+  tokenAddress: varchar("token_address", { length: 44 }).primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  symbol: varchar("symbol", { length: 20 }).notNull(),
   decimals: integer("decimals").notNull(),
-  uri: varchar("uri"),
+  uri: varchar("uri", { length: 200 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const sandwichEventRelations = relations(sandwichEvent, ({ one }) => ({
+  tokenMetadata: one(tokenMetadata, {
+    fields: [sandwichEvent.tokenAddress],
+    references: [tokenMetadata.tokenAddress],
+  }),
+  blockQueue: one(blockQueue, {
+    fields: [sandwichEvent.slot],
+    references: [blockQueue.slot],
+  }),
+}));
+
+export const tokenMetadataRelations = relations(tokenMetadata, ({ many }) => ({
+  sandwichEvents: many(sandwichEvent),
+}));
+
+export const blockQueueRelations = relations(blockQueue, ({ many }) => ({
+  sandwichEvents: many(sandwichEvent),
+}));
+
 export type Config = typeof config.$inferSelect;
 export type NewConfig = typeof config.$inferInsert;
-
 export type BlockQueue = typeof blockQueue.$inferSelect;
 export type NewBlockQueue = typeof blockQueue.$inferInsert;
-
 export type SandwichEvent = typeof sandwichEvent.$inferSelect;
 export type NewSandwichEvent = typeof sandwichEvent.$inferInsert;
-
 export type TokenMetadata = typeof tokenMetadata.$inferSelect;
 export type NewTokenMetadata = typeof tokenMetadata.$inferInsert;
+
+export const insertConfigSchema = createInsertSchema(config);
+export const selectConfigSchema = createSelectSchema(config);
+
+export const insertBlockQueueSchema = createInsertSchema(blockQueue);
+export const selectBlockQueueSchema = createSelectSchema(blockQueue);
+
+export const insertSandwichEventSchema = createInsertSchema(sandwichEvent);
+export const selectSandwichEventSchema = createSelectSchema(sandwichEvent);
+
+export const insertTokenMetadataSchema = createInsertSchema(tokenMetadata);
+export const selectTokenMetadataSchema = createSelectSchema(tokenMetadata);
