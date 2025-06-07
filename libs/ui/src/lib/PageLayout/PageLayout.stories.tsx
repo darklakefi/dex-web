@@ -3,8 +3,7 @@ import { Footer } from "../Footer/Footer";
 import { Default as FooterDefault } from "../Footer/Footer.stories";
 import { Header } from "../Header/Header";
 import { Default as HeaderDefault } from "../Header/Header.stories";
-
-import Text from "../Text/Text";
+import { Text } from "../Text/Text";
 import { PageLayout, backgroundImage } from "./PageLayout";
 const meta = {
   component: PageLayout,
