@@ -10,6 +10,14 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const UserSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  age: z.number(),
+  email: z.string(),
+});
 
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),

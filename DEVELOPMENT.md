@@ -118,9 +118,11 @@ For experienced users:
   cd dex-web
   pnpm install
   npx playwright install
-  npx nx dev web
+  pnpm start
   ```
 - App runs at [http://localhost:3000](http://localhost:3000)
+
+> **Tip:** You can now use `pnpm` scripts for common tasks (see below), or continue using `npx nx ...` if you prefer.
 
 ## Database Setup
 
@@ -166,28 +168,28 @@ DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST
 
 ### 3. Database Schema & Migrations
 
-The project uses Drizzle ORM for schema management. The database schema is defined in `libs/trpc/src/db/schema.ts`.
+The project uses Drizzle ORM for schema management. The database schema is defined in `libs/orpc/src/db/schema.ts`.
 
 **Run database migrations:**
 ```sh
-npx drizzle-kit push --config libs/trpc/drizzle.config.ts
+npx drizzle-kit push --config libs/orpc/drizzle.config.ts
 ```
 
 **Generate migrations (when you change the schema):**
 ```sh
-npx drizzle-kit generate --config libs/trpc/drizzle.config.ts
+npx drizzle-kit generate --config libs/orpc/drizzle.config.ts
 ```
 
 ### 4. Database Management Commands
 
 **View database schema:**
 ```sh
-npx drizzle-kit introspect --config libs/trpc/drizzle.config.ts
+npx drizzle-kit introspect --config libs/orpc/drizzle.config.ts
 ```
 
 **Open Drizzle Studio (database browser):**
 ```sh
-npx drizzle-kit studio --config libs/trpc/drizzle.config.ts
+npx drizzle-kit studio --config libs/orpc/drizzle.config.ts
 ```
 
 This opens a web interface at [http://localhost:4983](http://localhost:4983) where you can browse and edit your database.
@@ -220,7 +222,7 @@ docker-compose down
 docker-compose down
 docker volume rm dex-web_postgres_data
 docker-compose up -d postgres
-npx drizzle-kit push --config libs/trpc/drizzle.config.ts
+npx drizzle-kit push --config libs/orpc/drizzle.config.ts
 ```
 
 **View database logs:**
@@ -245,7 +247,7 @@ The Docker setup is optimized for local development. For production:
 - Ensure no other service is using port 5432: `lsof -i :5432`
 
 **Schema/migration issues:**
-- Check your schema file: `libs/trpc/src/db/schema.ts`
+- Check your schema file: `libs/orpc/src/db/schema.ts`
 - Verify the `DATABASE_URL` in your `.env` file
 - Try resetting the database (see step 6 above)
 
@@ -298,26 +300,46 @@ If you need to customize what Knip checks (e.g., ignore certain files or directo
 
 ## Development Workflow
 
+- **Start dev server:**
+  ```sh
+  pnpm start
+  ```
+- **Build the app:**
+  ```sh
+  pnpm build
+  ```
 - **Run tests:**
   ```sh
-  npx nx test web
+  pnpm test
   ```
 - **Run linter:**
   ```sh
-  npx nx lint web
+  pnpm lint
   ```
 - **Run E2E tests:**
   ```sh
-  npx nx e2e web-e2e
+  pnpm e2e
+  ```
+- **Format code:**
+  ```sh
+  pnpm format
+  ```
+- **View dependency graph:**
+  ```sh
+  pnpm dep-graph
+  ```
+- **Update Nx:**
+  ```sh
+  pnpm update
   ```
 - **Create a new branch:**
   ```sh
   git checkout -b <feature-branch>
   ```
 - **Submit a PR:**
-  - Push your branch and open a pull request on GitHub.
+    - Push your branch and open a pull request on GitHub.
 - **Code review:**
-  - Ensure all checks pass before merging.
+    - Ensure all checks pass before merging.
 
 ## Conventional Commits
 
@@ -399,15 +421,24 @@ We require that all commits are signed to verify authorship and improve security
 - For VSCode, ensure your Git extension supports GPG signing or use the terminal.
 - See [GitHub's docs](https://docs.github.com/en/authentication/managing-commit-signature-verification) for more help.
 
-## Common Nx Commands
+## Common Nx Commands (now available as pnpm scripts)
 
-| Task       | Command              |
-| ---------- | -------------------- |
-| Dev server | `npx nx dev web`     |
-| Build      | `npx nx build web`   |
-| Test       | `npx nx test web`    |
-| Lint       | `npx nx lint web`    |
-| E2E        | `npx nx e2e web-e2e` |
+| Script                | Description                                 |
+|-----------------------|---------------------------------------------|
+| pnpm start            | Start the dev server (nx dev web)           |
+| pnpm build            | Build the web app (nx build web)            |
+| pnpm test             | Run tests (nx test web)                     |
+| pnpm lint             | Lint the codebase (nx workspace-lint && nx lint) |
+| pnpm e2e              | Run E2E tests (nx e2e web-e2e)              |
+| pnpm dep-graph        | Visualize project dependencies              |
+| pnpm format           | Format the codebase                         |
+| pnpm format:check     | Check code formatting                       |
+| pnpm update           | Update Nx to latest version                 |
+| pnpm help             | Show Nx help                                |
+| pnpm nx               | Run any Nx command                          |
+| pnpm workspace-generator | Run Nx workspace generators              |
+
+> You can still use `npx nx ...` for any Nx command, but these scripts provide convenient shortcuts.
 
 ## Storybook
 

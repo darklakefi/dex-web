@@ -1,9 +1,6 @@
 import { Text } from "@dex-web/ui";
-import { api } from "../trpc/client";
 
 export default async function Index() {
-  const users = await api.userList.query();
-  console.log(users);
   return (
     <div>
       <div className="wrapper">

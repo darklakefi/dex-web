@@ -1,9 +1,9 @@
 {
-  "name": "trpc",
+  "name": "orpc",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/trpc/src",
+  "sourceRoot": "libs/orpc/src",
   "projectType": "application",
   "tags": [],
-  "// targets": "to see all targets run: nx show project trpc --web",
+  "// targets": "to see all targets run: nx show project orpc --web",
   "targets": {}
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@dex-web/trpc",
+  "name": "@dex-web/orpc",
   "version": "0.0.1",
   "type": "module",
   "module": "./src/index.ts",
@@ -10,5 +10,8 @@
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     }
+  },
+  "devDependencies": {
+    "@dex-web/utils": "workspace:*"
   }
 }
