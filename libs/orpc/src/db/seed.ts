@@ -17,11 +17,11 @@ import {
   tokenMetadata,
 } from "./schema";
 
-function generateSolanaAddress(): string {
+export function generateSolanaAddress(): string {
   return Array.from({ length: 44 }, () => randAlphaNumeric()).join("");
 }
 
-function generateTxHash(): string {
+export function generateTxHash(): string {
   return Array.from({ length: 88 }, () => randAlphaNumeric()).join("");
 }
 
@@ -44,7 +44,7 @@ const configSeedData: NewConfig[] = [
   },
 ];
 
-function generateBlockQueueData(count: number): NewBlockQueue[] {
+export function generateBlockQueueData(count: number): NewBlockQueue[] {
   const statuses = ["queued", "processing", "completed", "failed"] as const;
 
   return Array.from({ length: count }, (_, i) => ({
@@ -53,7 +53,7 @@ function generateBlockQueueData(count: number): NewBlockQueue[] {
   }));
 }
 
-function generateTokenMetadata(count: number): NewTokenMetadata[] {
+export function generateTokenMetadata(count: number): NewTokenMetadata[] {
   const decimalsOptions = [6, 8, 9];
   return Array.from({ length: count }, () => {
     const randomIndex = Math.floor(Math.random() * decimalsOptions.length);
@@ -75,7 +75,7 @@ function generateTokenMetadata(count: number): NewTokenMetadata[] {
   });
 }
 
-function generateSandwichEvents(
+export function generateSandwichEvents(
   count: number,
   tokenAddresses: string[],
   slots: bigint[],

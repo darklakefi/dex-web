@@ -3,7 +3,7 @@ import "@testing-library/jest-dom";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import Text from "./Text";
+import { Text } from "./Text";
 
 describe("Text", () => {
   afterEach(() => {
