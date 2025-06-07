@@ -108,6 +108,16 @@ Before you begin, make sure you have the following installed **on your local mac
 
 - **Auto-installed with `pnpm install`. No manual setup required.**
 
+### 9. Seeding the Database
+
+After running your migrations, you can populate your database with sample data using the seed script:
+
+```sh
+pnpm db:seed
+```
+
+This will run the seeding logic defined in `libs/orpc/src/db/seed.ts` via Nx. Make sure your database schema is up to date (see migrations above) before running this command.
+
 ## Quick Start 🚀
 
 For experienced users:

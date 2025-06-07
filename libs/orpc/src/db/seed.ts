@@ -163,7 +163,11 @@ async function seed() {
   }
 }
 
-if (require.main === module) {
+if (
+  process.argv[1] &&
+  (import.meta.url === `file://${process.argv[1]}` ||
+    import.meta.url === process.argv[1])
+) {
   seed();
 }
 

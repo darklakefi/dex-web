@@ -1,5 +1,5 @@
+import { client } from "@dex-web/orpc";
 import { Text } from "@dex-web/ui";
-import { client } from "../orpc/orpc";
 
 export default async function Index() {
   const user = await client.user.list({});

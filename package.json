@@ -28,7 +28,8 @@
     "update": "nx migrate latest",
     "help": "nx help",
     "nx": "nx",
-    "workspace-generator": "nx workspace-generator"
+    "workspace-generator": "nx workspace-generator",
+    "db:seed": "nx run orpc:seed"
   },
   "private": true,
   "dependencies": {
