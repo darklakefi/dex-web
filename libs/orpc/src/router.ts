@@ -1,5 +1,5 @@
 import { parseJWT } from "@dex-web/utils";
-import { ORPCError, os } from "@orpc/server";
+import { os, ORPCError } from "@orpc/server";
 import "dotenv/config";
 import type { IncomingHttpHeaders } from "node:http";
 import { z } from "zod";
@@ -41,7 +41,7 @@ export const createUser = os
   });
 
 export const router = {
-  planet: {
+  user: {
     list: listUser,
     find: findUser,
     create: createUser,

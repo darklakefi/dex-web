@@ -1,6 +1,9 @@
 import { Text } from "@dex-web/ui";
+import { client } from "../orpc/orpc";
 
 export default async function Index() {
+  const user = await client.user.list({});
+  console.log(user);
   return (
     <div>
       <div className="wrapper">
