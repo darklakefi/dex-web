@@ -13,7 +13,7 @@ export const router = trpc.router;
 
 export const publicProcedure = trpc.procedure;
 
-export const appRouter = router({
+export const appRouter: ReturnType<typeof router> = router({
   userList: publicProcedure.query(async () => {
     const users = await db.select().from(usersTable);
     return users;
