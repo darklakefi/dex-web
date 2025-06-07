@@ -8,7 +8,7 @@ import {
   backgroundImage,
 } from "@dex-web/ui";
 import localFont from "next/font/local";
-import "../orpc/orpc.server";
+import "../orpc/server";
 import "./global.css";
 const bitsumishiRegular = localFont({
   src: "./bitsumishi-regular.woff2",
