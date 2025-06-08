@@ -3,15 +3,12 @@
 exports[`Page > should render successfully 1`] = `
 <body>
   <div>
-    <div
-      class="wrapper"
-    >
+    <div>
       <div
-        class="container"
+        class="wrapper"
       >
         <div
-          class="flex items-center justify-center"
-          id="welcome"
+          class="container"
         >
           <div
             class="flex flex-col items-center justify-center"
