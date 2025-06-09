@@ -6,7 +6,6 @@ import type { IncomingHttpHeaders } from "node:http";
 import { z } from "zod";
 
 export const listUser = os
-
   .input(
     z.object({
       limit: z.number().int().min(1).max(100).optional(),
