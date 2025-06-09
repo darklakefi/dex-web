@@ -1,7 +1,15 @@
 import { router } from "@dex-web/orpc";
 import { RPCHandler } from "@orpc/server/fetch";
+import { CORSPlugin } from "@orpc/server/plugins";
 
-const handler = new RPCHandler(router);
+const handler = new RPCHandler(router, {
+  plugins: [
+    new CORSPlugin({
+      origin: (origin) => origin,
+      allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "PATCH"],
+    }),
+  ],
+});
 
 async function handleRequest(request: Request) {
   const { response } = await handler.handle(request, {
