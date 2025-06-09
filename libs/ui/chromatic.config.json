@@ -6,5 +6,6 @@
   "externals": ["public/**"],
   "onlyChanged": true,
   "skip": "dependabot/**",
-  "buildCommand": "nx build-storybook ui"
+  "buildCommand": "nx build-storybook ui",
+  "outputDir": "dist"
 }
