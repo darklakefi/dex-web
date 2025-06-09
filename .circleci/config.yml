@@ -102,6 +102,7 @@ jobs:
     executor: node-development
     steps:
       - checkout
+      - restore-dependencies
       - run:
           command: cd libs/ui && npx chromatic --only-changed --exit-zero-on-changes
           environment:
