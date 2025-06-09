@@ -1,7 +1,4 @@
-import { router } from "@dex-web/orpc";
-import { RPCHandler } from "@orpc/server/fetch";
-
-const handler = new RPCHandler(router);
+import { handler } from "@dex-web/orpc";
 
 async function handleRequest(request: Request) {
   const { response } = await handler.handle(request, {
