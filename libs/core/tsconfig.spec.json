@@ -23,6 +23,7 @@
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx",
     "src/**/*.d.ts",
-    "../../vite.config.base.ts"
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ]
 }
