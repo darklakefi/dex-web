@@ -188,7 +188,8 @@ workflows:
 
       - chromatic:
           requires:
-            - build
+            - lint
+            - test
 
       - end-to-end:
           requires:
