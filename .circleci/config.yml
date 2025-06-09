@@ -98,18 +98,6 @@ jobs:
           command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test
       - save-nx-cache
 
-  chromatic:
-    executor: node-development
-    steps:
-      - checkout
-      - restore-dependencies
-      - run:
-          name: Build Storybook for Chromatic
-          command: pnpm exec nx build-storybook ui --stats-json=storybook-static
-      - run:
-          name: Run Chromatic
-          command: cd libs/ui && npx chromatic
-
   build:
     executor: node-development
     steps:
@@ -120,7 +108,42 @@ jobs:
       - run:
           name: Run affected build tasks
           command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
+      - run:
+          name: Check if UI was affected
+          command: |
+            if pnpm exec nx show projects --affected --base=$NX_BASE --head=$NX_HEAD | grep -q "^ui$"; then
+              echo "true" > /tmp/ui-affected
+            else
+              echo "false" > /tmp/ui-affected
+            fi
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - ui-affected
       - save-nx-cache
+
+  chromatic:
+    executor: node-development
+    steps:
+      - checkout
+      - restore-dependencies
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Check if UI was affected
+          command: |
+            if [ "$(cat /tmp/ui-affected)" = "true" ]; then
+              echo "UI was affected, running Chromatic"
+            else
+              echo "UI was not affected, skipping Chromatic"
+              circleci-agent step halt
+            fi
+      - run:
+          name: Build Storybook for Chromatic
+          command: pnpm exec nx build-storybook ui --stats-json=storybook-static
+      - run:
+          name: Run Chromatic
+          command: cd libs/ui && npx chromatic
 
   end-to-end:
     executor: pw-noble-development
@@ -157,13 +180,15 @@ workflows:
     jobs:
       - lint
       - test
-      - chromatic
 
       - build:
           requires:
             - lint
             - test
-            - chromatic
+
+      - chromatic:
+          requires:
+            - build
 
       - end-to-end:
           requires:
