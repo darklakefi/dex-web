@@ -54,9 +54,6 @@ const baseConfig = {
       fileName: "index",
       formats: ["es" as const],
     },
-    rollupOptions: {
-      external: [],
-    },
   },
 };
 

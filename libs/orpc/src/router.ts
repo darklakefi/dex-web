@@ -1,9 +1,9 @@
+import { UserSchema } from "@dex-web/db";
 import { parseJWT } from "@dex-web/utils";
 import { os, ORPCError } from "@orpc/server";
 import "dotenv/config";
 import type { IncomingHttpHeaders } from "node:http";
 import { z } from "zod";
-import { UserSchema } from "./db/schema";
 
 export const listUser = os
 

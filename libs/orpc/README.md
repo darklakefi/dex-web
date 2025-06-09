@@ -1,11 +1,11 @@
-# server
+# orpc
 
 This library was generated with [Nx](https://nx.dev).
 
 ## Building
 
-Run `nx build server` to build the library.
+Run `nx build orpc` to build the library.
 
 ## Running unit tests
 
-Run `nx test server` to execute the unit tests via [Vitest](https://vitest.dev/).
+Run `nx test orpc` to execute the unit tests via [Vitest](https://vitest.dev/).

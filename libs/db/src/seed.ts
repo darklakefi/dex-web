@@ -5,7 +5,7 @@ import {
   randRecentDate,
   randUrl,
 } from "@ngneat/falso";
-import { db } from ".";
+import { database } from ".";
 import {
   type NewBlockQueue,
   type NewConfig,
@@ -117,21 +117,21 @@ async function seed() {
 
   try {
     console.log("🧹 Clearing existing data...");
-    await db.delete(sandwichEvent);
-    await db.delete(tokenMetadata);
-    await db.delete(blockQueue);
-    await db.delete(config);
+    await database.delete(sandwichEvent);
+    await database.delete(tokenMetadata);
+    await database.delete(blockQueue);
+    await database.delete(config);
 
     console.log("⚙️ Seeding config...");
-    await db.insert(config).values(configSeedData);
+    await database.insert(config).values(configSeedData);
 
     console.log("📦 Seeding block queue...");
     const blockQueueData = generateBlockQueueData(100);
-    await db.insert(blockQueue).values(blockQueueData);
+    await database.insert(blockQueue).values(blockQueueData);
 
     console.log("🪙 Seeding token metadata...");
     const tokenMetadataData = generateTokenMetadata(50);
-    await db.insert(tokenMetadata).values(tokenMetadataData);
+    await database.insert(tokenMetadata).values(tokenMetadataData);
 
     console.log("🥪 Seeding sandwich events...");
     const tokenAddresses = tokenMetadataData.map((t) => t.tokenAddress);
@@ -145,7 +145,7 @@ async function seed() {
     const batchSize = 50;
     for (let i = 0; i < sandwichEventData.length; i += batchSize) {
       const batch = sandwichEventData.slice(i, i + batchSize);
-      await db.insert(sandwichEvent).values(batch);
+      await database.insert(sandwichEvent).values(batch);
       console.log(
         `   Inserted batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(sandwichEventData.length / batchSize)}`,
       );
