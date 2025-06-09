@@ -250,6 +250,9 @@ importers:
       '@dex-web/orpc':
         specifier: workspace:*
         version: link:../../libs/orpc
+      '@dex-web/core':
+        specifier: workspace:*
+        version: link:../../libs/core
       '@dex-web/ui':
         specifier: workspace:*
         version: link:../../libs/ui
@@ -264,6 +267,7 @@ importers:
       '@dex-web/utils':
         specifier: workspace:*
         version: link:../utils
+  libs/core: {}
 
   libs/ui:
     devDependencies:

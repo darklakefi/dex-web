@@ -4,7 +4,9 @@ import AnalyticsIcon from "./icons/analytics.svg";
 import CheckboxEmptyIcon from "./icons/checkbox-empty.svg";
 import CheckboxFilledIcon from "./icons/checkbox-filled.svg";
 import ChevronDownIcon from "./icons/chevron-down.svg";
+import CrownIcon from "./icons/crown.svg";
 import ExternalLinkIcon from "./icons/external-link.svg";
+import FireIcon from "./icons/fire.svg";
 import GithubIcon from "./icons/github.svg";
 import InfoIcon from "./icons/info.svg";
 import LoadingStripeIcon from "./icons/loading-stripe.svg";
@@ -23,7 +25,9 @@ export type IconName =
   | "checkbox-empty"
   | "checkbox-filled"
   | "chevron-down"
+  | "crown"
   | "external-link"
+  | "fire"
   | "github"
   | "info"
   | "logo-sm"
@@ -55,6 +59,8 @@ const iconComponents = {
   trending: TrendingIcon,
   "loading-stripe": LoadingStripeIcon,
   x: XIcon,
+  crown: CrownIcon,
+  fire: FireIcon,
 } as const satisfies Record<
   IconName,
   React.ComponentType<React.SVGProps<SVGSVGElement>>

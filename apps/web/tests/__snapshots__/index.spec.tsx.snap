@@ -3,21 +3,340 @@
 exports[`Page > should render successfully 1`] = `
 <body>
   <div>
-    <div
-      class="wrapper"
-    >
+    <div>
       <div
-        class="container"
+        class="wrapper"
       >
         <div
-          class="flex items-center justify-center"
-          id="welcome"
+          class="container"
         >
-          <p
-            class="font-normal font-sans text-3xl text-green-100 leading-8.5 tracking-wider uppercase animate-bounce"
+          <div
+            class="flex flex-col items-center justify-center"
+            id="welcome"
           >
-            Under construction 🚧
-          </p>
+            <p
+              class="font-normal font-sans text-3xl text-green-100 leading-8.5 tracking-wider uppercase animate-bounce"
+            >
+              Under construction 🚧
+            </p>
+            <div
+              class="w-sm"
+            >
+              <div
+                class="flex w-full flex-col items-center gap-10 bg-transparent"
+              >
+                <div
+                  class="mb-2 items-start justify-start text-green-200 p-5 shadow-green-900 shadow-sm flex w-full flex-col gap-5 bg-green-800"
+                >
+                  <div
+                    class="flex w-full items-center justify-between gap-2"
+                  >
+                    <div
+                      class="flex items-center gap-2"
+                    >
+                      <svg
+                        class="text-green-100 fill-current size-4"
+                        id="crown-solid"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <polygon
+                          points="23 7 23 9 22 9 22 10 21 10 21 14 20 14 20 17 19 17 19 19 18 19 18 21 6 21 6 19 5 19 5 17 4 17 4 14 3 14 3 10 2 10 2 9 1 9 1 7 2 7 2 6 4 6 4 7 5 7 5 9 4 9 4 10 5 10 5 11 6 11 6 12 8 12 8 11 9 11 9 9 10 9 10 7 11 7 11 6 10 6 10 4 11 4 11 3 13 3 13 4 14 4 14 6 13 6 13 7 14 7 14 9 15 9 15 11 16 11 16 12 18 12 18 11 19 11 19 10 20 10 20 9 19 9 19 7 20 7 20 6 22 6 22 7 23 7"
+                        />
+                      </svg>
+                      <p
+                        class="font-normal font-sans text-green-200 text-lg leading-6 tracking-wide uppercase"
+                      >
+                        Featured Pools
+                      </p>
+                    </div>
+                    <div
+                      class="flex items-center gap-2"
+                    >
+                      <p
+                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                      >
+                        24H APR
+                      </p>
+                      <svg
+                        class="size-6 fill-current text-green-300"
+                        id="chevron-down"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <polygon
+                          points="5 7 7 7 7 8 8 8 8 9 9 9 9 10 10 10 10 11 11 11 11 12 13 12 13 11 14 11 14 10 15 10 15 9 16 9 16 8 17 8 17 7 19 7 19 8 20 8 20 10 19 10 19 11 18 11 18 12 17 12 17 13 16 13 16 14 15 14 15 15 14 15 14 16 13 16 13 17 11 17 11 16 10 16 10 15 9 15 9 14 8 14 8 13 7 13 7 12 6 12 6 11 5 11 5 10 4 10 4 8 5 8 5 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div
+                    class="flex w-full flex-col gap-3"
+                  >
+                    <div
+                      class="flex w-full justify-between bg-green-700 p-3"
+                    >
+                      <div
+                        class="flex text-green-300"
+                      >
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          SOL
+                        </p>
+                        /
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          USDC
+                        </p>
+                      </div>
+                      <p
+                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                      >
+                        100
+                        %
+                      </p>
+                    </div>
+                    <div
+                      class="flex w-full justify-between bg-green-700 p-3"
+                    >
+                      <div
+                        class="flex text-green-300"
+                      >
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          SOL
+                        </p>
+                        /
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          USDC
+                        </p>
+                      </div>
+                      <p
+                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                      >
+                        120.12
+                        %
+                      </p>
+                    </div>
+                    <div
+                      class="flex w-full justify-between bg-green-700 p-3"
+                    >
+                      <div
+                        class="flex text-green-300"
+                      >
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          ETH
+                        </p>
+                        /
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          USDT
+                        </p>
+                      </div>
+                      <p
+                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                      >
+                        85.5
+                        %
+                      </p>
+                    </div>
+                    <div
+                      class="flex w-full justify-between bg-green-700 p-3"
+                    >
+                      <div
+                        class="flex text-green-300"
+                      >
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          BTC
+                        </p>
+                        /
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          USDC
+                        </p>
+                      </div>
+                      <p
+                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                      >
+                        150.75
+                        %
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="mb-2 items-start justify-start text-green-200 p-5 shadow-green-900 shadow-sm flex w-full flex-col gap-5 bg-green-800"
+                >
+                  <div
+                    class="flex w-full items-center justify-between gap-2"
+                  >
+                    <div
+                      class="flex items-center gap-2"
+                    >
+                      <svg
+                        class="text-green-100 fill-current size-4"
+                        id="fire-solid"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m19,13v-3h-1v-1h-1v-3h-1v-2h-1v-1h-1v-1h-1v-1h-2v1h1v2h-1v2h-1v1h-1v1h-1v1h-1v1h-1v3h1v2h-1v-1h-1v-2h-1v2h-1v3h1v2h1v1h1v1h1v1h1v1h8v-1h1v-1h1v-1h1v-2h1v-5h-1Zm-2,7h-1v1h-2v1h-4v-1h-1v-4h1v-1h1v-1h1v-1h1v-3h-1v-1h-1v-1h1v1h2v2h1v5h-1v2h1v-1h1v-1h1v3Z"
+                        />
+                      </svg>
+                      <p
+                        class="font-normal font-sans text-green-200 text-lg leading-6 tracking-wide uppercase"
+                      >
+                        Trending Pools
+                      </p>
+                    </div>
+                    <div
+                      class="flex items-center gap-2"
+                    >
+                      <p
+                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                      >
+                        24H APR
+                      </p>
+                      <svg
+                        class="size-6 fill-current text-green-300"
+                        id="chevron-down"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <polygon
+                          points="5 7 7 7 7 8 8 8 8 9 9 9 9 10 10 10 10 11 11 11 11 12 13 12 13 11 14 11 14 10 15 10 15 9 16 9 16 8 17 8 17 7 19 7 19 8 20 8 20 10 19 10 19 11 18 11 18 12 17 12 17 13 16 13 16 14 15 14 15 15 14 15 14 16 13 16 13 17 11 17 11 16 10 16 10 15 9 15 9 14 8 14 8 13 7 13 7 12 6 12 6 11 5 11 5 10 4 10 4 8 5 8 5 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div
+                    class="flex w-full flex-col gap-3"
+                  >
+                    <div
+                      class="flex w-full justify-between bg-green-700 p-3"
+                    >
+                      <div
+                        class="flex text-green-300"
+                      >
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          SOL
+                        </p>
+                        /
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          USDC
+                        </p>
+                      </div>
+                      <p
+                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                      >
+                        100
+                        %
+                      </p>
+                    </div>
+                    <div
+                      class="flex w-full justify-between bg-green-700 p-3"
+                    >
+                      <div
+                        class="flex text-green-300"
+                      >
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          SOL
+                        </p>
+                        /
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          USDC
+                        </p>
+                      </div>
+                      <p
+                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                      >
+                        120.12
+                        %
+                      </p>
+                    </div>
+                    <div
+                      class="flex w-full justify-between bg-green-700 p-3"
+                    >
+                      <div
+                        class="flex text-green-300"
+                      >
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          ETH
+                        </p>
+                        /
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          USDT
+                        </p>
+                      </div>
+                      <p
+                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                      >
+                        85.5
+                        %
+                      </p>
+                    </div>
+                    <div
+                      class="flex w-full justify-between bg-green-700 p-3"
+                    >
+                      <div
+                        class="flex text-green-300"
+                      >
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          BTC
+                        </p>
+                        /
+                        <p
+                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        >
+                          USDC
+                        </p>
+                      </div>
+                      <p
+                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                      >
+                        150.75
+                        %
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  class="outline-offset-1 focus:outline-2 focus:outline-solid px-1.5 text-green-300 hover:text-green-200 focus:text-green-200 focus:outline-white cursor-pointer w-fit"
+                >
+                  <div
+                    class="font-normal font-sans text-lg leading-6 tracking-wide underline uppercase text-inherit"
+                  >
+                    explore all pools
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
