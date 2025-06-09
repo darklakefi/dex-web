@@ -4,7 +4,10 @@ import { router } from "@dex-web/orpc";
 import { createRouterClient } from "@orpc/server";
 import { headers } from "next/headers";
 
+
 globalThis.$client = createRouterClient(router, {
+
+
   /**
    * Provide initial context if needed.
    *

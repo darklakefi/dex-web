@@ -6,6 +6,10 @@
   "tags": [],
   "// targets": "to see all targets run: nx show project db --web",
   "targets": {
+    "lint": {
+      "command": "biome check --write libs/db/**",
+      "cache": true
+    },
     "seed": {
       "executor": "nx:run-commands",
       "options": {
