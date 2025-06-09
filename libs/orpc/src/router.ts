@@ -34,6 +34,17 @@ export const createUser = os
 
     throw new ORPCError("UNAUTHORIZED");
   })
+  .use(({ next }) => {
+    try {
+      return next();
+    } catch (error) {
+      if (error instanceof ORPCError) {
+        throw error;
+      }
+      // Log error here
+      throw new ORPCError("INTERNAL_SERVER_ERROR");
+    }
+  })
   .input(UserSchema.omit({ id: true }))
   .handler(async ({ input, context }) => {
     return { id: 1, name: "name" };
