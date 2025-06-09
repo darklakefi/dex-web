@@ -22,7 +22,6 @@ export {
   selectTokenMetadataSchema,
   tokenMetadata,
 } from "./tokenMetadata";
-
 export type {
   BlockQueue,
   BlockQueueStatus,
@@ -34,3 +33,8 @@ export type {
   SandwichEvent,
   TokenMetadata,
 } from "./types";
+export {
+  insertUserSchema,
+  selectUserSchema,
+  user,
+} from "./user";

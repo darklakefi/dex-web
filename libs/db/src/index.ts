@@ -8,12 +8,15 @@ export {
   insertConfigSchema,
   insertSandwichEventSchema,
   insertTokenMetadataSchema,
+  insertUserSchema,
   sandwichEvents,
   selectBlockQueueSchema,
   selectConfigSchema,
   selectSandwichEventSchema,
   selectTokenMetadataSchema,
+  selectUserSchema,
   tokenMetadata,
+  user,
 } from "./schema";
 export type {
   BlockQueue,
