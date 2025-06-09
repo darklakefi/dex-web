@@ -2,8 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "../../dist/libs/core",
-    "tsBuildInfoFile": "../../dist/libs/core/tsconfig.lib.tsbuildinfo",
+    "outDir": "./dist",
     "types": ["node"]
   },
   "exclude": [
