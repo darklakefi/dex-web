@@ -104,6 +104,10 @@ jobs:
       - checkout
       - restore-dependencies
       - run:
+          name: Build Storybook for Chromatic
+          command: pnpm exec nx build-storybook ui --stats-json=storybook-static
+      - run:
+          name: Run Chromatic
           command: cd libs/ui && npx chromatic
           environment:
             CHROMATIC_PROJECT_TOKEN: ${CHROMATIC_PROJECT_TOKEN}
