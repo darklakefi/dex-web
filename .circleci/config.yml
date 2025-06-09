@@ -109,8 +109,6 @@ jobs:
       - run:
           name: Run Chromatic
           command: cd libs/ui && npx chromatic
-          environment:
-            CHROMATIC_PROJECT_TOKEN: ${CHROMATIC_PROJECT_TOKEN}
 
   build:
     executor: node-development
