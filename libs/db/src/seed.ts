@@ -13,7 +13,7 @@ import {
   type NewTokenMetadata,
   blockQueue,
   config,
-  sandwichEvent,
+  sandwichEvents,
   tokenMetadata,
 } from "./schema";
 
@@ -45,11 +45,11 @@ const configSeedData: NewConfig[] = [
 ];
 
 export function generateBlockQueueData(count: number): NewBlockQueue[] {
-  const statuses = ["queued", "processing", "completed", "failed"] as const;
+  const statuses = ["QUEUED", "PROCESSING", "COMPLETED", "FAILED"] as const;
 
   return Array.from({ length: count }, (_, i) => ({
     slot: BigInt(200000000 + i),
-    status: statuses[Math.floor(Math.random() * statuses.length)] ?? "queued",
+    status: statuses[Math.floor(Math.random() * statuses.length)] ?? "QUEUED",
   }));
 }
 
@@ -62,7 +62,7 @@ export function generateTokenMetadata(count: number): NewTokenMetadata[] {
         ? decimalsOptions[randomIndex]
         : 6;
     return {
-      tokenAddress: generateSolanaAddress(),
+      token_address: generateSolanaAddress(),
       name: `${randCompanyName()} Token`,
       symbol: Array.from({ length: Math.floor(Math.random() * 4) + 3 }, () =>
         randAlphaNumeric(),
@@ -87,27 +87,27 @@ export function generateSandwichEvents(
       slots.length > 0
         ? (slots[Math.floor(Math.random() * slots.length)] ?? BigInt(0))
         : BigInt(0);
-    const tokenAddress =
+    const token_address =
       tokenAddresses.length > 0
         ? (tokenAddresses[Math.floor(Math.random() * tokenAddresses.length)] ??
           "")
         : "";
-    const attackerAddress = generateSolanaAddress();
-    const victimAddress = generateSolanaAddress();
+    const attacker_address = generateSolanaAddress();
+    const victim_address = generateSolanaAddress();
 
     return {
       slot,
-      solAmountDrained: BigInt(randNumber({ min: 1000000, max: 100000000 })),
-      solAmountSwap: BigInt(randNumber({ min: 10000000, max: 1000000000 })),
-      txHashVictimSwap: generateTxHash(),
-      txHashAttackerBuy: generateTxHash(),
-      txHashAttackerSell: generateTxHash(),
-      tokenAddress,
-      attackerAddress,
-      victimAddress,
-      lpAddress: generateSolanaAddress(),
-      dexName: dexes[Math.floor(Math.random() * dexes.length)] ?? "Raydium",
-      occurredAt: randRecentDate({ days: 30 }),
+      sol_amount_drained: BigInt(randNumber({ min: 1000000, max: 100000000 })),
+      sol_amount_swap: BigInt(randNumber({ min: 10000000, max: 1000000000 })),
+      tx_hash_victim_swap: generateTxHash(),
+      tx_hash_attacker_buy: generateTxHash(),
+      tx_hash_attacker_sell: generateTxHash(),
+      token_address,
+      attacker_address,
+      victim_address,
+      lp_address: generateSolanaAddress(),
+      dex_name: dexes[Math.floor(Math.random() * dexes.length)] ?? "Raydium",
+      occurred_at: randRecentDate({ days: 30 }),
     };
   });
 }
@@ -117,7 +117,7 @@ async function seed() {
 
   try {
     console.log("🧹 Clearing existing data...");
-    await database.delete(sandwichEvent);
+    await database.delete(sandwichEvents);
     await database.delete(tokenMetadata);
     await database.delete(blockQueue);
     await database.delete(config);
@@ -134,7 +134,7 @@ async function seed() {
     await database.insert(tokenMetadata).values(tokenMetadataData);
 
     console.log("🥪 Seeding sandwich events...");
-    const tokenAddresses = tokenMetadataData.map((t) => t.tokenAddress);
+    const tokenAddresses = tokenMetadataData.map((t) => t.token_address);
     const slots = blockQueueData.map((b) => b.slot);
     const sandwichEventData = generateSandwichEvents(
       200,
@@ -145,7 +145,7 @@ async function seed() {
     const batchSize = 50;
     for (let i = 0; i < sandwichEventData.length; i += batchSize) {
       const batch = sandwichEventData.slice(i, i + batchSize);
-      await database.insert(sandwichEvent).values(batch);
+      await database.insert(sandwichEvents).values(batch);
       console.log(
         `   Inserted batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(sandwichEventData.length / batchSize)}`,
       );

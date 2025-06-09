@@ -1,20 +1,28 @@
-export { database } from "./database";
 export {
   blockQueue,
   blockQueueStatusEnum,
   blockQueueStatusSchema,
-  config,
   insertBlockQueueSchema,
-  insertConfigSchema,
-  insertSandwichEventSchema,
-  insertTokenMetadataSchema,
-  sandwichEvents,
   selectBlockQueueSchema,
+} from "./blockQueue";
+export {
+  config,
+  insertConfigSchema,
   selectConfigSchema,
+} from "./config";
+
+export {
+  insertSandwichEventSchema,
+  sandwichEvents,
   selectSandwichEventSchema,
+} from "./sandwichEvents";
+
+export {
+  insertTokenMetadataSchema,
   selectTokenMetadataSchema,
   tokenMetadata,
-} from "./schema";
+} from "./tokenMetadata";
+
 export type {
   BlockQueue,
   BlockQueueStatus,
@@ -25,4 +33,4 @@ export type {
   NewTokenMetadata,
   SandwichEvent,
   TokenMetadata,
-} from "./schema";
+} from "./types";
