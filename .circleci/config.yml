@@ -103,15 +103,12 @@ jobs:
     steps:
       - checkout
       - restore-dependencies
-      - restore-nx-cache
-      - setup-nx
       - run:
           name: Build Storybook for Chromatic
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build-storybook
+          command: pnpm exec nx build-storybook ui --stats-json=storybook-static
       - run:
-          name: Run Chromatic visual tests
-          command: pnpm exec chromatic --project-token=${CHROMATIC_PROJECT_TOKEN} --storybook-build-dir libs/ui/storybook-static --exit-zero-on-changes --only-changed
-      - save-nx-cache
+          name: Run Chromatic
+          command: cd libs/ui && npx chromatic
 
   build:
     executor: node-development
