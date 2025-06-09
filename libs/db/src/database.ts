@@ -5,4 +5,4 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not set");
 }
 
-export const db = drizzle(process.env.DATABASE_URL);
+export const database = drizzle(process.env.DATABASE_URL);

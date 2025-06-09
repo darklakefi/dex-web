@@ -19,6 +19,9 @@
     },
     {
       "path": "./libs/orpc"
+    },
+    {
+      "path": "./libs/db"
     }
   ]
 }

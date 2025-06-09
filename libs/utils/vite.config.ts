@@ -44,9 +44,6 @@ export default defineConfig(() => {
         fileName: "index",
         formats: ["es" as const],
       },
-      rollupOptions: {
-        external: [],
-      },
     },
   };
 
