@@ -40,7 +40,7 @@
       "outputs": ["{options.reportsDirectory}"]
     },
     "lint": {
-      "command": "biome check  --write --config-path=apps/web/biome.json --verbose apps/web/**/*",
+      "command": "biome check --write apps/web/**",
       "cache": true
     },
     "serve": {

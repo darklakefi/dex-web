@@ -28,5 +28,6 @@
   "files.eol": "\n",
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
-  "biome.lsp.bin": "node_modules/.bin/biome"
+  "biome.lsp.bin": "./node_modules/.bin/biome",
+  "biome.configurationPath": "./biome.json"
 }
