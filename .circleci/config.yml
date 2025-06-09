@@ -104,7 +104,7 @@ jobs:
       - checkout
       - restore-dependencies
       - run:
-          command: cd libs/ui && npx chromatic --only-changed --exit-zero-on-changes
+          command: cd libs/ui && npx chromatic --only-changed --exit-zero-on-changes --build-script-name "nx build-storybook ui"
           environment:
             CHROMATIC_PROJECT_TOKEN: ${CHROMATIC_PROJECT_TOKEN}
 
