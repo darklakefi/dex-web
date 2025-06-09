@@ -1,3 +1,3 @@
-export * from "./model/token";
+export type { Token } from "./model/token";
 
-export * from "./model/pool";
+export type { Pool } from "./model/pool";
