@@ -29,5 +29,12 @@
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
   "biome.lsp.bin": "./node_modules/.bin/biome",
-  "biome.configurationPath": "./biome.json"
+  "biome.configurationPath": "./biome.json",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": "explicit",
+    "source.action.useSortedAttributes.biome": "explicit",
+    "source.action.useSortedProperties.biome": "explicit",
+    "source.action.useSortedKeys.biome": "explicit",
+    "source.fixAll.biome": "explicit"
+  }
 }
