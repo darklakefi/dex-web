@@ -2,7 +2,9 @@
 
 import { router } from "@dex-web/orpc";
 import { createRouterClient } from "@orpc/server";
-import { headers } from "next/headers";
+import { headers as getHeaders } from "next/headers";
+
+const headers = await getHeaders();
 
 globalThis.$client = createRouterClient(router, {
   /**
@@ -13,6 +15,6 @@ globalThis.$client = createRouterClient(router, {
    * For per-request context, use middleware context or pass a function as the initial context.
    */
   context: async () => ({
-    headers: Object.fromEntries((await headers()).entries()),
+    headers: Object.fromEntries(headers.entries()),
   }),
 });

@@ -27,5 +27,6 @@
   "files.trimTrailingWhitespace": true,
   "files.eol": "\n",
   "editor.tabSize": 2,
-  "editor.detectIndentation": false
+  "editor.detectIndentation": false,
+  "biome.lsp.bin": "node_modules/.bin/biome"
 }
