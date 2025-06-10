@@ -81,7 +81,7 @@ jobs:
       - setup-nx
       - run:
           name: Run affected lint tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint  --parallel=${CIRCLE_NODE_TOTAL}
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD  --parallel=${CIRCLE_NODE_TOTAL} -t lint
       - save-nx-cache
 
   test:
@@ -95,7 +95,7 @@ jobs:
       - setup-nx
       - run:
           name: Run affected test tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test  --parallel=${CIRCLE_NODE_TOTAL}
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD --parallel=${CIRCLE_NODE_TOTAL} -t test
       - save-nx-cache
 
   build:
@@ -107,7 +107,7 @@ jobs:
       - setup-nx
       - run:
           name: Run affected build tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD --parallel=${CIRCLE_NODE_TOTAL} -t build
       - save-nx-cache
       - persist_to_workspace:
           root: .
@@ -142,7 +142,7 @@ jobs:
           name: Run Playwright tests with sharding
           command: |
             SHARD="$((${CIRCLE_NODE_INDEX}+1))"
-            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL} --parallel=${CIRCLE_NODE_TOTAL}
+            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD --parallel=${CIRCLE_NODE_TOTAL} -t e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
 
   # deploy:
   #   executor: node-development
