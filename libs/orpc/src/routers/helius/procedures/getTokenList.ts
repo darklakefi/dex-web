@@ -3,8 +3,8 @@ import { baseProcedure } from "../../../procedures/baseProcedure";
 import { searchAssetsHandler } from "../handlers/searchAssets.handler";
 
 const getTokenListInputSchema = z.object({
-  limit: z.number().int().min(1).max(100).optional(),
   cursor: z.string().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
 });
 
 export const getTokenList = baseProcedure
