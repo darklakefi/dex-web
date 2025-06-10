@@ -81,7 +81,7 @@ jobs:
       - setup-nx
       - run:
           name: Run affected lint tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint  --parallel=${CIRCLE_NODE_TOTAL}
       - save-nx-cache
 
   test:
@@ -95,7 +95,7 @@ jobs:
       - setup-nx
       - run:
           name: Run affected test tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test  --parallel=${CIRCLE_NODE_TOTAL}
       - save-nx-cache
 
   build:
@@ -109,6 +109,10 @@ jobs:
           name: Run affected build tasks
           command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
       - save-nx-cache
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
 
   chromatic:
     executor: node-development
@@ -127,17 +131,16 @@ jobs:
     parallelism: 4
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - restore-dependencies
       - restore-nx-cache
       - setup-nx
       - run:
-          name: Build dependencies for e2e tests
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
-      - run:
           name: Run Playwright tests with sharding
           command: |
             SHARD="$((${CIRCLE_NODE_INDEX}+1))"
-            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL} --parallel=${CIRCLE_NODE_TOTAL}
 
   # deploy:
   #   executor: node-development
