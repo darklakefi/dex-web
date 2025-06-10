@@ -39,6 +39,7 @@
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.44.2",
     "drizzle-zod": "^0.8.2",
+    "helius-sdk": "^1.5.1",
     "next": "~15.3.3",
     "pg": "^8.16.0",
     "react": "19.1.0",
