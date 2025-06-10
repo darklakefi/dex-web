@@ -51,6 +51,7 @@ export default defineConfig(() => {
           "pg",
           "pg-cloudflare",
           "cloudflare:sockets",
+          "helius-sdk"
         ],
       },
     },
