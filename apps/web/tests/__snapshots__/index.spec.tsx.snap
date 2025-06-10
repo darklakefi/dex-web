@@ -12,10 +12,9 @@ exports[`Page > should render successfully 1`] = `
         >
           <div
             class="flex flex-col items-center justify-center"
-            id="welcome"
           >
             <p
-              class="font-normal font-sans text-3xl text-green-100 leading-8.5 tracking-wider uppercase animate-bounce"
+              class="font-normal uppercase font-sans text-3xl text-green-100 leading-8.5 tracking-wider animate-bounce"
             >
               Under construction 🚧
             </p>
@@ -45,7 +44,7 @@ exports[`Page > should render successfully 1`] = `
                         />
                       </svg>
                       <p
-                        class="font-normal font-sans text-green-200 text-lg leading-6 tracking-wide uppercase"
+                        class="font-normal uppercase font-sans text-green-200 text-lg leading-6 tracking-wide"
                       >
                         Featured Pools
                       </p>
@@ -54,7 +53,7 @@ exports[`Page > should render successfully 1`] = `
                       class="flex items-center gap-2"
                     >
                       <p
-                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                       >
                         24H APR
                       </p>
@@ -80,19 +79,19 @@ exports[`Page > should render successfully 1`] = `
                         class="flex text-green-300"
                       >
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           SOL
                         </p>
                         /
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           USDC
                         </p>
                       </div>
                       <p
-                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                        class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-100"
                       >
                         100
                         %
@@ -105,19 +104,19 @@ exports[`Page > should render successfully 1`] = `
                         class="flex text-green-300"
                       >
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           SOL
                         </p>
                         /
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           USDC
                         </p>
                       </div>
                       <p
-                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                        class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-100"
                       >
                         120.12
                         %
@@ -130,19 +129,19 @@ exports[`Page > should render successfully 1`] = `
                         class="flex text-green-300"
                       >
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           ETH
                         </p>
                         /
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           USDT
                         </p>
                       </div>
                       <p
-                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                        class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-100"
                       >
                         85.5
                         %
@@ -155,19 +154,19 @@ exports[`Page > should render successfully 1`] = `
                         class="flex text-green-300"
                       >
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           BTC
                         </p>
                         /
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           USDC
                         </p>
                       </div>
                       <p
-                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                        class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-100"
                       >
                         150.75
                         %
@@ -195,7 +194,7 @@ exports[`Page > should render successfully 1`] = `
                         />
                       </svg>
                       <p
-                        class="font-normal font-sans text-green-200 text-lg leading-6 tracking-wide uppercase"
+                        class="font-normal uppercase font-sans text-green-200 text-lg leading-6 tracking-wide"
                       >
                         Trending Pools
                       </p>
@@ -204,7 +203,7 @@ exports[`Page > should render successfully 1`] = `
                       class="flex items-center gap-2"
                     >
                       <p
-                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                        class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                       >
                         24H APR
                       </p>
@@ -230,19 +229,19 @@ exports[`Page > should render successfully 1`] = `
                         class="flex text-green-300"
                       >
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           SOL
                         </p>
                         /
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           USDC
                         </p>
                       </div>
                       <p
-                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                        class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-100"
                       >
                         100
                         %
@@ -255,19 +254,19 @@ exports[`Page > should render successfully 1`] = `
                         class="flex text-green-300"
                       >
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           SOL
                         </p>
                         /
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           USDC
                         </p>
                       </div>
                       <p
-                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                        class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-100"
                       >
                         120.12
                         %
@@ -280,19 +279,19 @@ exports[`Page > should render successfully 1`] = `
                         class="flex text-green-300"
                       >
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           ETH
                         </p>
                         /
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           USDT
                         </p>
                       </div>
                       <p
-                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                        class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-100"
                       >
                         85.5
                         %
@@ -305,19 +304,19 @@ exports[`Page > should render successfully 1`] = `
                         class="flex text-green-300"
                       >
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           BTC
                         </p>
                         /
                         <p
-                          class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-300"
+                          class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-300"
                         >
                           USDC
                         </p>
                       </div>
                       <p
-                        class="font-normal font-sans text-lg leading-6 tracking-wide uppercase text-green-100"
+                        class="font-normal uppercase font-sans text-lg leading-6 tracking-wide text-green-100"
                       >
                         150.75
                         %
@@ -326,10 +325,10 @@ exports[`Page > should render successfully 1`] = `
                   </div>
                 </div>
                 <button
-                  class="outline-offset-1 focus:outline-2 focus:outline-solid px-1.5 text-green-300 hover:text-green-200 focus:text-green-200 focus:outline-white cursor-pointer w-fit"
+                  class="outline-offset-1 focus:outline-2 focus:outline-solid cursor-pointer px-1.5 text-green-300 hover:text-green-200 focus:text-green-200 focus:outline-white w-fit"
                 >
                   <div
-                    class="font-normal font-sans text-lg leading-6 tracking-wide underline uppercase text-inherit"
+                    class="font-normal uppercase font-sans text-lg leading-6 tracking-wide underline text-inherit"
                   >
                     explore all pools
                   </div>

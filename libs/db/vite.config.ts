@@ -20,10 +20,7 @@ export default defineConfig(() => {
       outDir: "./dist",
       reportCompressedSize: true,
       rollupOptions: {
-        external: [
-          ...builtinModules,
-          "pg",
-        ],
+        external: [...builtinModules, "pg"],
       },
     },
     cacheDir: "../../node_modules/.vite/libs/db",

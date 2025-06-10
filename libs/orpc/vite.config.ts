@@ -20,9 +20,7 @@ export default defineConfig(() => {
       outDir: "./dist",
       reportCompressedSize: true,
       rollupOptions: {
-        external: [
-          ...builtinModules,
-        ],
+        external: [...builtinModules],
       },
     },
     cacheDir: "../../node_modules/.vite/libs/orpc",

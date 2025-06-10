@@ -4,4 +4,4 @@ export const baseProcedure = os.errors({
   UNAUTHORIZED: {
     message: "You must be authenticated to perform this action",
   },
-})
+});
