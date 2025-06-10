@@ -3,9 +3,11 @@
     "paths": {
       "@/handlers/*": ["./src/handlers/*"],
       "@/helius": ["./src/helius"],
+      "@/mocks/*": ["./src/mocks/*"],
       "@/procedures/*": ["./src/procedures/*"],
       "@/routers/*": ["./src/routers/*"],
-      "@/schemas/*": ["./src/schemas/*"]
+      "@/schemas/*": ["./src/schemas/*"],
+      "@/utils/*": ["./src/utils/*"]
     }
   },
   "extends": "../../tsconfig.base.json",

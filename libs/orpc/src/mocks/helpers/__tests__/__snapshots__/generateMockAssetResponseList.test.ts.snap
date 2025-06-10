@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`getTokenBalanceHandler > should return a list of assets 1`] = `
+exports[`generateAssetResponseList > should generate a list of assets 1`] = `
 {
   "cursor": "123",
   "items": [

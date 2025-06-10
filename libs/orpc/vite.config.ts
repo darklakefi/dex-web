@@ -28,9 +28,11 @@ export default defineConfig(() => {
       alias: {
         "@/handlers": path.resolve(__dirname, "./src/handlers"),
         "@/helius": path.resolve(__dirname, "./src/helius"),
+        "@/mocks": path.resolve(__dirname, "./src/mocks"),
         "@/procedures": path.resolve(__dirname, "./src/procedures"),
         "@/routers": path.resolve(__dirname, "./src/routers"),
         "@/schemas": path.resolve(__dirname, "./src/schemas"),
+        "@/utils": path.resolve(__dirname, "./src/utils"),
       },
     },
     root: __dirname,
