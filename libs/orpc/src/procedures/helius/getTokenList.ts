@@ -1,6 +1,6 @@
-import { getTokenListHandler } from "@/handlers/helius/getTokenList.handler";
-import { baseProcedure } from "@/procedures/baseProcedure";
-import { getTokenListInputSchema } from "@/schemas/helius/getTokenList.schema";
+import { getTokenListHandler } from "../../handlers/helius/getTokenList.handler";
+import { getTokenListInputSchema } from "../../schemas/helius/getTokenList.schema";
+import { baseProcedure } from "../baseProcedure";
 
 export const getTokenList = baseProcedure
   .input(getTokenListInputSchema)

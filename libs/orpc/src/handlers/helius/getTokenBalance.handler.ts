@@ -1,10 +1,10 @@
-import { helius } from "@/helius";
+import { helius } from "../../helius";
 import type {
   GetTokenBalanceInput,
   GetTokenBalanceOutput,
-} from "@/schemas/helius/getTokenBalance.schema";
-import { getAssetsFromResponse } from "@/utils/getAssetsFromResponse";
-import { getTokenAccountsFromResponse } from "@/utils/getTokenAccountsFromResponse";
+} from "../../schemas/helius/getTokenBalance.schema";
+import { getAssetsFromResponse } from "../../utils/getAssetsFromResponse";
+import { getTokenAccountsFromResponse } from "../../utils/getTokenAccountsFromResponse";
 
 export async function getTokenBalanceHandler({
   ownerAddress,

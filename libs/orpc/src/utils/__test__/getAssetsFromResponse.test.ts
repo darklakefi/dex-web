@@ -1,4 +1,4 @@
-import { generateAssetResponseList } from "@/mocks/helpers/generateMockAssetResponseList";
+import { generateAssetResponseList } from "../../mocks/helpers/generateMockAssetResponseList";
 import { getAssetsFromResponse } from "../getAssetsFromResponse";
 
 const mockAssetsFromResponse = generateAssetResponseList();

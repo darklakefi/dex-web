@@ -1,8 +1,8 @@
-import { helius } from "@/helius";
+import { helius } from "../../helius";
 import type {
   GetTokenListInput,
   GetTokenListOutput,
-} from "@/schemas/helius/getTokenList.schema";
+} from "../../schemas/helius/getTokenList.schema";
 
 export async function getTokenListHandler({
   cursor,

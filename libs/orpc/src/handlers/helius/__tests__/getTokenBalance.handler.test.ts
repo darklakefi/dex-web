@@ -1,5 +1,5 @@
 import { randUuid, seed } from "@ngneat/falso";
-import { FIXED_SEED } from "@/mocks/helpers/constants";
+import { FIXED_SEED } from "../../../mocks/helpers/constants";
 import { getTokenBalanceHandler } from "../getTokenBalance.handler";
 
 describe("getTokenBalanceHandler", () => {
