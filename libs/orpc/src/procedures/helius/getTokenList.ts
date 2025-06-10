@@ -1,14 +1,9 @@
-import z from "zod";
 import { getTokenListHandler } from "../../handlers/helius/getTokenList.handler";
+import { getTokenListInputSchema } from "../../schemas/helius/getTokenList.schema";
 import { baseProcedure } from "../baseProcedure";
-
-const getTokenListInputSchema = z.object({
-  cursor: z.string().optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
 
 export const getTokenList = baseProcedure
   .input(getTokenListInputSchema)
   .handler(async ({ input }) => {
-    return await getTokenListHandler({ input });
+    return await getTokenListHandler(input);
   });
