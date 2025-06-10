@@ -127,17 +127,6 @@ jobs:
     steps:
       - checkout
       - restore-dependencies
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: Check if UI was affected
-          command: |
-            if [ "$(cat /tmp/ui-affected)" = "true" ]; then
-              echo "UI was affected, running Chromatic"
-            else
-              echo "UI was not affected, skipping Chromatic"
-              circleci-agent step halt
-            fi
       - run:
           name: Build Storybook for Chromatic
           command: pnpm exec nx build-storybook ui --stats-json=storybook-static
