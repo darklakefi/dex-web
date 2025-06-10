@@ -91,6 +91,9 @@
     "lint": {
       "cache": true
     },
+    "lint:ci": {
+      "cache": true
+    },
     "typecheck": {
       "cache": true
     },

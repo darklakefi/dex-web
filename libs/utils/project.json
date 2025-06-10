@@ -9,6 +9,10 @@
       "cache": true,
       "command": "biome check --write libs/ui/**"
     },
+    "lint:ci": {
+      "cache": true,
+      "command": "biome ci libs/utils/** --reporter=github"
+    },
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",

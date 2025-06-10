@@ -11,11 +11,25 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["apps/**", "libs/**"]
+    "includes": [
+      "apps/**",
+      "libs/**",
+      "!**/dist/**",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!**/storybook-static/**"
+    ]
   },
   "formatter": {
     "enabled": true,
-    "includes": ["apps/**", "libs/**"],
+    "includes": [
+      "apps/**",
+      "libs/**",
+      "!**/dist/**",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!**/storybook-static/**"
+    ],
     "indentStyle": "space",
     "useEditorconfig": true
   },
@@ -26,7 +40,14 @@
   },
   "linter": {
     "enabled": true,
-    "includes": ["apps/**", "libs/**"],
+    "includes": [
+      "apps/**",
+      "libs/**",
+      "!**/dist/**",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!**/storybook-static/**"
+    ],
     "rules": {
       "a11y": {
         "recommended": true
@@ -60,11 +81,5 @@
         "recommended": true
       }
     }
-  },
-  "vcs": {
-    "clientKind": "git",
-    "defaultBranch": "develop",
-    "enabled": true,
-    "useIgnoreFile": true
   }
 }

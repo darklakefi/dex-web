@@ -29,6 +29,10 @@
       "cache": true,
       "command": "biome check --write apps/web/**"
     },
+    "lint:ci": {
+      "cache": true,
+      "command": "biome ci apps/web/** --reporter=github"
+    },
     "serve": {
       "configurations": {
         "development": {

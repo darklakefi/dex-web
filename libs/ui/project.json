@@ -9,6 +9,10 @@
       "cache": true,
       "command": "biome check --write libs/ui/**"
     },
+    "lint:ci": {
+      "cache": true,
+      "command": "biome ci libs/ui/** --reporter=github"
+    },
     "storybook": {
       "options": {
         "port": 6006
