@@ -66,7 +66,7 @@ export const WalletModal: FC<WalletModalProps> = ({ container = "body" }) => {
   );
 
   const handleWalletClick = useCallback(
-    (event: MouseEvent, walletName: WalletName) => {
+    (_event: MouseEvent, walletName: WalletName) => {
       select(walletName);
       // handleClose(event);
     },
@@ -120,6 +120,7 @@ export const WalletModal: FC<WalletModalProps> = ({ container = "body" }) => {
         className={twMerge(
           "fixed top-0 right-0 flex h-screen w-110 items-center justify-center bg-transparent p-5 transition-opacity duration-150",
           fadeIn ? "opacity-100" : "opacity-0",
+          "focus:outline-none",
         )}
         ref={ref}
         tabIndex={-1}

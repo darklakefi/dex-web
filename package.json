@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@orpc/client": "^1.4.4",
     "@orpc/server": "^1.4.4",
     "@solana/wallet-adapter-backpack": "^0.1.14",

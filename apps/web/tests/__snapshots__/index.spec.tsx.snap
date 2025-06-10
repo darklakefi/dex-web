@@ -25,15 +25,27 @@ exports[`Page > should render successfully 1`] = `
                 >
                   Under construction 🚧
                 </p>
-                <button
-                  class="outline-offset-1 focus:outline-2 focus:outline-solid cursor-pointer bg-green-500 px-3 py-1.5 text-green-200 hover:text-green-100 focus:text-green-100 focus:outline-white flex gap-2"
+                <div
+                  class=""
+                  data-headlessui-state=""
                 >
-                  <p
-                    class="font-normal normal-case font-sans text-lg leading-6 tracking-wide text-inherit"
+                  <div
+                    aria-expanded="false"
+                    class="opacity-100"
+                    data-headlessui-state=""
+                    id="headlessui-popover-button-«r2»"
                   >
-                    1234567890
-                  </p>
-                </button>
+                    <button
+                      class="outline-offset-1 focus:outline-2 focus:outline-solid cursor-pointer bg-green-500 px-3 py-1.5 text-green-200 hover:text-green-100 focus:text-green-100 focus:outline-white flex gap-2"
+                    >
+                      <p
+                        class="font-normal normal-case font-sans text-lg leading-6 tracking-wide text-inherit"
+                      >
+                        1234567890
+                      </p>
+                    </button>
+                  </div>
+                </div>
                 <div
                   class="w-sm"
                 >

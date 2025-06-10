@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Box,
   Button,
   Icon,
   type IconName,
@@ -8,6 +9,7 @@ import {
   type VariantButtonProps,
 } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { FC, MouseEvent } from "react";
 import { useCallback, useMemo } from "react";
@@ -52,16 +54,39 @@ export const WalletConnectButton: FC<VariantButtonProps> = ({
   }, [wallet]);
 
   return connected ? (
-    <Button.Secondary
-      {...props}
-      className="flex gap-2"
-      onClick={handleDisconnect}
-    >
-      <Icon className="size-6 text-inherit" name={walletIcon as IconName} />
-      <Text.Body2 className="text-inherit" textCase="normal-case">
-        {buttonText}
-      </Text.Body2>
-    </Button.Secondary>
+    <Popover className="">
+      {({ open }) => (
+        <>
+          <PopoverButton
+            as="div"
+            className={open ? "opacity-70" : "opacity-100"}
+          >
+            <Button.Secondary {...props} className="flex gap-2">
+              <Icon
+                className="size-6 text-inherit"
+                name={walletIcon as IconName}
+              />
+              <Text.Body2 className="text-inherit" textCase="normal-case">
+                {buttonText}
+              </Text.Body2>
+            </Button.Secondary>
+          </PopoverButton>
+          <PopoverPanel anchor="bottom" className="z-30 mt-2">
+            {({ close }) => (
+              <Box className="bg-green-600" padding="sm" shadow="sm">
+                <Button.Primary
+                  onClick={() => {
+                    close();
+                    handleDisconnect();
+                  }}
+                  text="disconnect"
+                />
+              </Box>
+            )}
+          </PopoverPanel>
+        </>
+      )}
+    </Popover>
   ) : (
     <Button.Primary {...props} onClick={handleClick}>
       <Text.Body2 className="text-inherit">{buttonText}</Text.Body2>

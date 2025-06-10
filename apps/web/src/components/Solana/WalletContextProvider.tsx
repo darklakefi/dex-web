@@ -23,7 +23,6 @@ export const WalletContextProvider: FC<{ children: ReactNode }> = ({
 
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const wallets = useMemo(
     () => [
       /**
@@ -42,7 +41,7 @@ export const WalletContextProvider: FC<{ children: ReactNode }> = ({
       new SolflareWalletAdapter(),
       new BackpackWalletAdapter(),
     ],
-    [network],
+    [],
   );
 
   const onError = useCallback((error: WalletError, adapter?: Adapter) => {
