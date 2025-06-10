@@ -9,16 +9,23 @@ import dts from "vite-plugin-dts";
 import svgr from "vite-plugin-svgr";
 
 const baseConfig = {
-  root: __dirname,
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+    emptyOutDir: true,
+    lib: {
+      entry: resolve(__dirname, "src/index.ts"),
+      fileName: "index",
+      formats: ["es" as const],
+      name: "@dex-web/ui",
+    },
+    outDir: "./dist",
+    reportCompressedSize: true,
+  },
   cacheDir: "../../node_modules/.vite/libs/ui",
+  root: __dirname,
   test: {
-    name: "ui",
-    environment: "happy-dom",
-    setupFiles: ["@testing-library/jest-dom"],
-    include: [
-      "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-      "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-    ],
     coverage: {
       provider: "v8" as const,
       reportsDirectory: "../../coverage/libs/ui",
@@ -28,32 +35,25 @@ const baseConfig = {
         transformAssets: true,
       },
     },
-    watch: false,
-    reporters: ["default"],
-    testTimeout: 30000,
+    environment: "happy-dom",
+    globals: true,
     hookTimeout: 30000,
-    teardownTimeout: 10000,
+    include: [
+      "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+    ],
+    name: "ui",
     pool: "forks" as const,
     poolOptions: {
       forks: {
         singleFork: true,
       },
     },
-    globals: true,
-  },
-  build: {
-    outDir: "./dist",
-    emptyOutDir: true,
-    reportCompressedSize: true,
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
-    lib: {
-      entry: resolve(__dirname, "src/index.ts"),
-      name: "@dex-web/ui",
-      fileName: "index",
-      formats: ["es" as const],
-    },
+    reporters: ["default"],
+    setupFiles: ["@testing-library/jest-dom"],
+    teardownTimeout: 10000,
+    testTimeout: 30000,
+    watch: false,
   },
 };
 

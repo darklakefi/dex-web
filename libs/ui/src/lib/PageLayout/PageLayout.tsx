@@ -1,5 +1,6 @@
 import type { Footer } from "../Footer/Footer";
 import type { Header } from "../Header/Header";
+
 export { default as backgroundImage } from "./background.png";
 
 interface PageLayoutProps {
@@ -23,12 +24,12 @@ export function PageLayout({
     <div className="flex min-h-screen flex-col bg-green-900 text-green-200">
       {header}
       <main
-        style={{
-          "--background-image-url": `url(${backgroundImageUrl})`,
-        }}
         className={
           "flex-auto bg-[image:var(--background-image-url)] bg-center bg-cover px-5 py-10 lg:px-30 lg:py-20"
         }
+        style={{
+          "--background-image-url": `url(${backgroundImageUrl})`,
+        }}
       >
         {children}
       </main>

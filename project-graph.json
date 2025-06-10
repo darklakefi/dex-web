@@ -1,516 +1,185 @@
 {
   "graph": {
+    "dependencies": {
+      "config": [],
+      "ui": [
+        {
+          "source": "ui",
+          "target": "config",
+          "type": "static"
+        },
+        {
+          "source": "ui",
+          "target": "utils",
+          "type": "static"
+        }
+      ],
+      "utils": [
+        {
+          "source": "utils",
+          "target": "config",
+          "type": "static"
+        }
+      ],
+      "web": [
+        {
+          "source": "web",
+          "target": "ui",
+          "type": "static"
+        },
+        {
+          "source": "web",
+          "target": "utils",
+          "type": "static"
+        },
+        {
+          "source": "web",
+          "target": "config",
+          "type": "static"
+        }
+      ],
+      "web-e2e": [
+        {
+          "source": "web-e2e",
+          "target": "web",
+          "type": "implicit"
+        },
+        {
+          "source": "web-e2e",
+          "target": "config",
+          "type": "static"
+        }
+      ]
+    },
     "nodes": {
-      "web-e2e": {
-        "name": "web-e2e",
-        "type": "e2e",
+      "ui": {
         "data": {
-          "root": "apps/web-e2e",
-          "projectType": "application",
-          "targets": {
-            "typecheck": {
-              "dependsOn": ["^typecheck"],
-              "options": {
-                "cwd": "apps/web-e2e",
-                "command": "tsc --build --emitDeclarationOnly"
-              },
-              "cache": true,
-              "inputs": [
-                "{projectRoot}/package.json",
-                "{workspaceRoot}/tsconfig.base.json",
-                "{projectRoot}/tsconfig.json",
-                "{projectRoot}/**/*.ts",
-                "{projectRoot}/**/*.js",
-                "{projectRoot}/playwright.config.ts",
-                "{projectRoot}/src/**/*.spec.ts",
-                "{projectRoot}/src/**/*.spec.js",
-                "{projectRoot}/src/**/*.test.ts",
-                "{projectRoot}/src/**/*.test.js",
-                "{projectRoot}/src/**/*.d.ts",
-                "!{workspaceRoot}/node_modules",
-                "!{workspaceRoot}/tmp",
-                "^production",
-                {
-                  "externalDependencies": ["typescript"]
-                }
-              ],
-              "outputs": [
-                "{workspaceRoot}/dist/apps/web-e2e/**/*.d.ts",
-                "{workspaceRoot}/dist/apps/web-e2e/**/*.d.ts.map",
-                "{workspaceRoot}/dist/apps/web-e2e/tsconfig.lib.tsbuildinfo"
-              ],
-              "syncGenerators": ["@nx/js:typescript-sync"],
-              "metadata": {
-                "technologies": ["typescript"],
-                "description": "Runs type-checking for the project.",
-                "help": {
-                  "command": "pnpm exec tsc --build --help",
-                  "example": {
-                    "args": ["--force"]
-                  }
-                }
-              },
-              "executor": "nx:run-commands",
-              "configurations": {},
-              "parallelism": true
-            },
-            "e2e": {
-              "options": {
-                "cwd": "apps/web-e2e",
-                "command": "playwright test"
-              },
-              "metadata": {
-                "technologies": ["playwright"],
-                "description": "Runs Playwright Tests",
-                "help": {
-                  "command": "pnpm exec playwright test --help",
-                  "example": {
-                    "options": {
-                      "workers": 1
-                    }
-                  }
-                }
-              },
-              "dependsOn": [
-                {
-                  "projects": ["web"],
-                  "target": "start"
-                }
-              ],
-              "cache": true,
-              "inputs": [
-                "default",
-                "^production",
-                {
-                  "externalDependencies": ["@playwright/test"]
-                }
-              ],
-              "outputs": [
-                "{workspaceRoot}/dist/.playwright/apps/web-e2e/test-output",
-                "{workspaceRoot}/dist/.playwright/apps/web-e2e/playwright-report"
-              ],
-              "executor": "nx:run-commands",
-              "configurations": {},
-              "parallelism": true
-            },
-            "e2e-ci--src/root.spec.ts": {
-              "options": {
-                "cwd": "apps/web-e2e",
-                "env": {
-                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "../../dist/.playwright/apps/web-e2e/playwright-report/src-root-spec-ts",
-                  "PLAYWRIGHT_HTML_REPORT": "../../dist/.playwright/apps/web-e2e/playwright-report/src-root-spec-ts"
-                },
-                "command": "playwright test src/root.spec.ts --output=../../dist/.playwright/apps/web-e2e/test-output/src-root-spec-ts"
-              },
-              "metadata": {
-                "technologies": ["playwright"],
-                "description": "Runs Playwright Tests in src/root.spec.ts in CI",
-                "help": {
-                  "command": "pnpm exec playwright test --help",
-                  "example": {
-                    "options": {
-                      "workers": 1
-                    }
-                  }
-                }
-              },
-              "dependsOn": [
-                {
-                  "projects": ["web"],
-                  "target": "start"
-                }
-              ],
-              "cache": true,
-              "inputs": [
-                "default",
-                "^production",
-                {
-                  "externalDependencies": ["@playwright/test"]
-                }
-              ],
-              "outputs": [
-                "{workspaceRoot}/dist/.playwright/apps/web-e2e/test-output/src-root-spec-ts",
-                "{workspaceRoot}/dist/.playwright/apps/web-e2e/playwright-report/src-root-spec-ts"
-              ],
-              "executor": "nx:run-commands",
-              "configurations": {},
-              "parallelism": true
-            },
-            "e2e-ci": {
-              "executor": "nx:noop",
-              "cache": true,
-              "inputs": [
-                "default",
-                "^production",
-                {
-                  "externalDependencies": ["@playwright/test"]
-                }
-              ],
-              "outputs": [
-                "{workspaceRoot}/dist/.playwright/apps/web-e2e/test-output",
-                "{workspaceRoot}/dist/.playwright/apps/web-e2e/playwright-report"
-              ],
-              "dependsOn": [
-                {
-                  "target": "e2e-ci--src/root.spec.ts",
-                  "projects": "self",
-                  "params": "forward"
-                }
-              ],
-              "metadata": {
-                "technologies": ["playwright"],
-                "description": "Runs Playwright Tests in CI",
-                "nonAtomizedTarget": "e2e",
-                "help": {
-                  "command": "pnpm exec playwright test --help",
-                  "example": {
-                    "options": {
-                      "workers": 1
-                    }
-                  }
-                }
-              },
-              "configurations": {},
-              "options": {},
-              "parallelism": true
-            },
-            "lint": {
-              "cache": true,
-              "executor": "nx:run-commands",
-              "options": {
-                "command": "biome check  --write --config-path=apps/web-e2e/biome.json --verbose apps/web-e2e/**/*"
-              },
-              "configurations": {},
-              "parallelism": true
-            }
-          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "implicitDependencies": [],
           "metadata": {
-            "targetGroups": {
-              "E2E (CI)": ["e2e-ci--src/root.spec.ts", "e2e-ci"]
-            },
             "js": {
-              "packageName": "web-e2e",
+              "isInPackageManagerWorkspaces": true,
               "packageExports": {
                 ".": {
-                  "types": "./src/index.ts",
+                  "default": "./src/index.ts",
                   "import": "./src/index.ts",
-                  "default": "./src/index.ts"
+                  "types": "./src/index.ts"
                 }
               },
-              "isInPackageManagerWorkspaces": true
-            }
+              "packageName": "@dex-web/ui"
+            },
+            "targetGroups": {}
           },
-          "name": "web-e2e",
-          "tags": ["npm:private"],
-          "$schema": "../../node_modules/nx/schemas/project-schema.json",
-          "sourceRoot": "apps/web-e2e/src",
-          "implicitDependencies": ["web"]
-        }
-      },
-
-      "utils": {
-        "name": "utils",
-        "type": "lib",
-        "data": {
-          "root": "libs/utils",
+          "name": "ui",
           "projectType": "library",
+          "root": "libs/ui",
+          "sourceRoot": "libs/ui/src",
+          "tags": ["npm:public"],
           "targets": {
-            "typecheck": {
-              "dependsOn": ["^typecheck"],
-              "options": {
-                "cwd": "libs/utils",
-                "command": "tsc --build --emitDeclarationOnly"
-              },
+            "build-storybook": {
               "cache": true,
-              "inputs": [
-                "{projectRoot}/package.json",
-                "{workspaceRoot}/tsconfig.base.json",
-                "{projectRoot}/tsconfig.json",
-                "{projectRoot}/tsconfig.spec.json",
-                "{projectRoot}/vite.config.ts",
-                "{projectRoot}/vite.config.mts",
-                "{projectRoot}/vitest.config.ts",
-                "{projectRoot}/vitest.config.mts",
-                "{projectRoot}/src/**/*.test.ts",
-                "{projectRoot}/src/**/*.spec.ts",
-                "{projectRoot}/src/**/*.test.tsx",
-                "{projectRoot}/src/**/*.spec.tsx",
-                "{projectRoot}/src/**/*.test.js",
-                "{projectRoot}/src/**/*.spec.js",
-                "{projectRoot}/src/**/*.test.jsx",
-                "{projectRoot}/src/**/*.spec.jsx",
-                "{projectRoot}/src/**/*.d.ts",
-                "!{workspaceRoot}/node_modules",
-                "!{workspaceRoot}/tmp",
-                {
-                  "dependentTasksOutputFiles": "**/*.d.ts"
-                },
-                {
-                  "externalDependencies": ["typescript"]
-                }
-              ],
-              "outputs": [
-                "{projectRoot}/**/*.js",
-                "{projectRoot}/**/*.cjs",
-                "{projectRoot}/**/*.mjs",
-                "{projectRoot}/**/*.jsx",
-                "{projectRoot}/**/*.js.map",
-                "{projectRoot}/**/*.jsx.map",
-                "{projectRoot}/**/*.d.ts",
-                "{projectRoot}/**/*.d.cts",
-                "{projectRoot}/**/*.d.mts",
-                "{projectRoot}/**/*.d.ts.map",
-                "{projectRoot}/**/*.d.cts.map",
-                "{projectRoot}/**/*.d.mts.map",
-                "{projectRoot}/tsconfig.tsbuildinfo"
-              ],
-              "syncGenerators": ["@nx/js:typescript-sync"],
-              "metadata": {
-                "technologies": ["typescript"],
-                "description": "Runs type-checking for the project.",
-                "help": {
-                  "command": "pnpm exec tsc --build --help",
-                  "example": {
-                    "args": ["--force"]
-                  }
-                }
-              },
+              "configurations": {},
               "executor": "nx:run-commands",
-              "configurations": {},
-              "parallelism": true
-            },
-            "nx-release-publish": {
-              "executor": "@nx/js:release-publish",
-              "dependsOn": ["^nx-release-publish"],
-              "options": {},
-              "configurations": {},
-              "parallelism": true
-            },
-            "build": {
-              "executor": "@nx/vite:build",
-              "outputs": ["{options.outputPath}"],
-              "options": {
-                "outputPath": "dist/libs/utils"
-              },
-              "cache": true,
-              "configurations": {},
-              "parallelism": true,
               "inputs": [
                 "production",
                 "^production",
                 {
-                  "externalDependencies": ["vite"]
+                  "externalDependencies": [
+                    "storybook",
+                    "@storybook/test-runner"
+                  ]
                 }
-              ]
-            },
-            "test": {
-              "executor": "@nx/vite:test",
-              "outputs": ["{options.reportsDirectory}"],
+              ],
               "options": {
-                "reportsDirectory": "../../coverage/libs/utils"
+                "command": "storybook build",
+                "cwd": "libs/ui"
               },
+              "outputs": [
+                "{projectRoot}/storybook-static",
+                "{options.output-dir}",
+                "{options.outputDir}",
+                "{options.o}"
+              ],
+              "parallelism": true
+            },
+            "lint": {
               "cache": true,
               "configurations": {},
-              "parallelism": true,
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "biome check  --write --config-path=libs/ui/biome.json --verbose libs/ui/**/*"
+              },
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "configurations": {},
+              "dependsOn": ["^nx-release-publish"],
+              "executor": "@nx/js:release-publish",
+              "options": {},
+              "parallelism": true
+            },
+            "static-storybook": {
+              "configurations": {},
+              "continuous": true,
+              "dependsOn": ["build-storybook"],
+              "executor": "@nx/web:file-server",
+              "options": {
+                "buildTarget": "build-storybook",
+                "staticFilePath": "libs/ui/storybook-static"
+              },
+              "parallelism": true
+            },
+            "storybook": {
+              "configurations": {},
+              "continuous": true,
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "storybook dev",
+                "cwd": "libs/ui",
+                "port": 6006
+              },
+              "parallelism": true
+            },
+            "test": {
+              "cache": true,
+              "configurations": {},
+              "executor": "@nx/vite:test",
               "inputs": [
                 "default",
                 "^production",
                 {
                   "externalDependencies": ["vitest"]
                 }
-              ]
-            },
-            "lint": {
-              "cache": true,
-              "executor": "nx:run-commands",
-              "options": {
-                "command": "biome check  --write --config-path=libs/utils/biome.json --verbose libs/utils/**/*"
-              },
-              "configurations": {},
-              "parallelism": true
-            }
-          },
-          "name": "utils",
-          "tags": ["npm:public"],
-          "metadata": {
-            "targetGroups": {},
-            "js": {
-              "packageName": "@dex-web/utils",
-              "packageExports": {
-                ".": {
-                  "types": "./src/index.ts",
-                  "import": "./src/index.ts",
-                  "default": "./src/index.ts"
-                }
-              },
-              "isInPackageManagerWorkspaces": true
-            }
-          },
-          "$schema": "../../node_modules/nx/schemas/project-schema.json",
-          "sourceRoot": "libs/utils/src",
-          "implicitDependencies": []
-        }
-      },
-      "web": {
-        "name": "web",
-        "type": "app",
-        "data": {
-          "root": "apps/web",
-          "targets": {
-            "build": {
-              "dependsOn": ["^build"],
-              "cache": true,
-              "inputs": [
-                "default",
-                "^production",
-                {
-                  "externalDependencies": ["next"]
-                }
               ],
-              "outputs": [
-                "{projectRoot}/.next/!(cache)",
-                "{projectRoot}/.next/!(cache)/**/*"
-              ],
-              "executor": "nx:run-commands",
               "options": {
-                "cwd": "apps/web",
-                "tty": false,
-                "command": "next build"
+                "config": "libs/ui/vite.config.ts",
+                "reportsDirectory": "../../coverage/libs/ui"
               },
-              "configurations": {},
-              "parallelism": true
-            },
-            "dev": {
-              "continuous": true,
-              "options": {
-                "cwd": "apps/web",
-                "command": "next dev"
-              },
-              "executor": "nx:run-commands",
-              "configurations": {},
-              "parallelism": true
-            },
-            "start": {
-              "continuous": true,
-              "options": {
-                "cwd": "apps/web",
-                "command": "next start"
-              },
-              "dependsOn": ["build"],
-              "executor": "nx:run-commands",
-              "configurations": {},
-              "parallelism": true
-            },
-            "serve-static": {
-              "continuous": true,
-              "options": {
-                "cwd": "apps/web",
-                "command": "next start"
-              },
-              "dependsOn": ["build"],
-              "executor": "nx:run-commands",
-              "configurations": {},
-              "parallelism": true
-            },
-            "build-deps": {
-              "dependsOn": ["^build"],
-              "configurations": {},
-              "options": {},
-              "parallelism": true,
-              "executor": "nx:noop"
-            },
-            "watch-deps": {
-              "continuous": true,
-              "dependsOn": ["build-deps"],
-              "executor": "nx:run-commands",
-              "options": {
-                "command": "pnpm exec nx watch --projects web --includeDependentProjects -- pnpm exec nx build-deps web"
-              },
-              "configurations": {},
-              "parallelism": true
-            },
-            "test": {
-              "executor": "@nx/vite:test",
-              "options": {
-                "config": "apps/web/vite.config.ts",
-                "reportsDirectory": "../../coverage/apps/web"
-              },
-              "dependsOn": ["^build"],
-              "cache": true,
-              "inputs": [
-                "default",
-                "^production",
-                {
-                  "externalDependencies": ["vitest", "@vitest/ui", "happy-dom"]
-                }
-              ],
               "outputs": ["{options.reportsDirectory}"],
-              "configurations": {},
               "parallelism": true
             },
-            "lint": {
-              "cache": true,
+            "test-storybook": {
+              "configurations": {},
               "executor": "nx:run-commands",
+              "inputs": [
+                {
+                  "externalDependencies": [
+                    "storybook",
+                    "@storybook/test-runner"
+                  ]
+                }
+              ],
               "options": {
-                "command": "biome check  --write --config-path=apps/web/biome.json --verbose apps/web/**/*"
+                "command": "test-storybook",
+                "cwd": "libs/ui"
               },
-              "configurations": {},
               "parallelism": true
             },
-            "serve": {
-              "executor": "@nx/next:server",
-              "defaultConfiguration": "development",
-              "options": {
-                "buildTarget": "web:build",
-                "dev": true
-              },
-              "configurations": {
-                "development": {
-                  "buildTarget": "web:build:development",
-                  "dev": true,
-                  "turbo": true
-                }
-              },
-              "parallelism": true,
-              "continuous": true
-            }
-          },
-          "name": "web",
-          "tags": ["npm:private"],
-          "metadata": {
-            "targetGroups": {},
-            "js": {
-              "packageName": "@dex-web/web",
-              "packageExports": {
-                ".": {
-                  "types": "./src/index.ts",
-                  "import": "./src/index.ts",
-                  "default": "./src/index.ts"
-                }
-              },
-              "isInPackageManagerWorkspaces": true
-            }
-          },
-          "$schema": "../../node_modules/nx/schemas/project-schema.json",
-          "sourceRoot": "apps/web/src",
-          "projectType": "application",
-          "implicitDependencies": []
-        }
-      },
-      "ui": {
-        "name": "ui",
-        "type": "lib",
-        "data": {
-          "root": "libs/ui",
-          "projectType": "library",
-          "targets": {
             "typecheck": {
-              "dependsOn": ["^typecheck"],
-              "options": {
-                "cwd": "libs/ui",
-                "command": "tsc --build --emitDeclarationOnly"
-              },
               "cache": true,
+              "configurations": {},
+              "dependsOn": ["^typecheck"],
+              "executor": "nx:run-commands",
               "inputs": [
                 "{projectRoot}/package.json",
                 "{workspaceRoot}/tsconfig.base.json",
@@ -553,6 +222,20 @@
                   "externalDependencies": ["typescript"]
                 }
               ],
+              "metadata": {
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "pnpm exec tsc --build --help",
+                  "example": {
+                    "args": ["--force"]
+                  }
+                },
+                "technologies": ["typescript"]
+              },
+              "options": {
+                "command": "tsc --build --emitDeclarationOnly",
+                "cwd": "libs/ui"
+              },
               "outputs": [
                 "{projectRoot}/**/*.js",
                 "{projectRoot}/**/*.cjs",
@@ -571,193 +254,510 @@
                 "{workspaceRoot}/dist/libs/ui/**/*.d.ts.map",
                 "{workspaceRoot}/dist/libs/ui/tsconfig.lib.tsbuildinfo"
               ],
-              "syncGenerators": ["@nx/js:typescript-sync"],
-              "metadata": {
-                "technologies": ["typescript"],
-                "description": "Runs type-checking for the project.",
-                "help": {
-                  "command": "pnpm exec tsc --build --help",
-                  "example": {
-                    "args": ["--force"]
-                  }
+              "parallelism": true,
+              "syncGenerators": ["@nx/js:typescript-sync"]
+            }
+          }
+        },
+        "name": "ui",
+        "type": "lib"
+      },
+
+      "utils": {
+        "data": {
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "implicitDependencies": [],
+          "metadata": {
+            "js": {
+              "isInPackageManagerWorkspaces": true,
+              "packageExports": {
+                ".": {
+                  "default": "./src/index.ts",
+                  "import": "./src/index.ts",
+                  "types": "./src/index.ts"
                 }
               },
-              "executor": "nx:run-commands",
-              "configurations": {},
-              "parallelism": true
+              "packageName": "@dex-web/utils"
             },
-            "build-storybook": {
-              "options": {
-                "cwd": "libs/ui",
-                "command": "storybook build"
-              },
+            "targetGroups": {}
+          },
+          "name": "utils",
+          "projectType": "library",
+          "root": "libs/utils",
+          "sourceRoot": "libs/utils/src",
+          "tags": ["npm:public"],
+          "targets": {
+            "build": {
               "cache": true,
-              "outputs": [
-                "{projectRoot}/storybook-static",
-                "{options.output-dir}",
-                "{options.outputDir}",
-                "{options.o}"
-              ],
+              "configurations": {},
+              "executor": "@nx/vite:build",
               "inputs": [
                 "production",
                 "^production",
                 {
-                  "externalDependencies": [
-                    "storybook",
-                    "@storybook/test-runner"
-                  ]
+                  "externalDependencies": ["vite"]
                 }
               ],
-              "executor": "nx:run-commands",
-              "configurations": {},
-              "parallelism": true
-            },
-            "storybook": {
-              "continuous": true,
-              "executor": "nx:run-commands",
               "options": {
-                "cwd": "libs/ui",
-                "command": "storybook dev",
-                "port": 6006
+                "outputPath": "dist/libs/utils"
               },
-              "configurations": {},
-              "parallelism": true
-            },
-            "test-storybook": {
-              "options": {
-                "cwd": "libs/ui",
-                "command": "test-storybook"
-              },
-              "inputs": [
-                {
-                  "externalDependencies": [
-                    "storybook",
-                    "@storybook/test-runner"
-                  ]
-                }
-              ],
-              "executor": "nx:run-commands",
-              "configurations": {},
-              "parallelism": true
-            },
-            "static-storybook": {
-              "dependsOn": ["build-storybook"],
-              "continuous": true,
-              "executor": "@nx/web:file-server",
-              "options": {
-                "buildTarget": "build-storybook",
-                "staticFilePath": "libs/ui/storybook-static"
-              },
-              "configurations": {},
-              "parallelism": true
-            },
-            "nx-release-publish": {
-              "executor": "@nx/js:release-publish",
-              "dependsOn": ["^nx-release-publish"],
-              "options": {},
-              "configurations": {},
+              "outputs": ["{options.outputPath}"],
               "parallelism": true
             },
             "lint": {
               "cache": true,
+              "configurations": {},
               "executor": "nx:run-commands",
               "options": {
-                "command": "biome check  --write --config-path=libs/ui/biome.json --verbose libs/ui/**/*"
+                "command": "biome check  --write --config-path=libs/utils/biome.json --verbose libs/utils/**/*"
               },
+              "parallelism": true
+            },
+            "nx-release-publish": {
               "configurations": {},
+              "dependsOn": ["^nx-release-publish"],
+              "executor": "@nx/js:release-publish",
+              "options": {},
               "parallelism": true
             },
             "test": {
-              "executor": "@nx/vite:test",
-              "outputs": ["{options.reportsDirectory}"],
-              "options": {
-                "reportsDirectory": "../../coverage/libs/ui",
-                "config": "libs/ui/vite.config.ts"
-              },
               "cache": true,
               "configurations": {},
-              "parallelism": true,
+              "executor": "@nx/vite:test",
               "inputs": [
                 "default",
                 "^production",
                 {
                   "externalDependencies": ["vitest"]
                 }
-              ]
+              ],
+              "options": {
+                "reportsDirectory": "../../coverage/libs/utils"
+              },
+              "outputs": ["{options.reportsDirectory}"],
+              "parallelism": true
+            },
+            "typecheck": {
+              "cache": true,
+              "configurations": {},
+              "dependsOn": ["^typecheck"],
+              "executor": "nx:run-commands",
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/tsconfig.spec.json",
+                "{projectRoot}/vite.config.ts",
+                "{projectRoot}/vite.config.mts",
+                "{projectRoot}/vitest.config.ts",
+                "{projectRoot}/vitest.config.mts",
+                "{projectRoot}/src/**/*.test.ts",
+                "{projectRoot}/src/**/*.spec.ts",
+                "{projectRoot}/src/**/*.test.tsx",
+                "{projectRoot}/src/**/*.spec.tsx",
+                "{projectRoot}/src/**/*.test.js",
+                "{projectRoot}/src/**/*.spec.js",
+                "{projectRoot}/src/**/*.test.jsx",
+                "{projectRoot}/src/**/*.spec.jsx",
+                "{projectRoot}/src/**/*.d.ts",
+                "!{workspaceRoot}/node_modules",
+                "!{workspaceRoot}/tmp",
+                {
+                  "dependentTasksOutputFiles": "**/*.d.ts"
+                },
+                {
+                  "externalDependencies": ["typescript"]
+                }
+              ],
+              "metadata": {
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "pnpm exec tsc --build --help",
+                  "example": {
+                    "args": ["--force"]
+                  }
+                },
+                "technologies": ["typescript"]
+              },
+              "options": {
+                "command": "tsc --build --emitDeclarationOnly",
+                "cwd": "libs/utils"
+              },
+              "outputs": [
+                "{projectRoot}/**/*.js",
+                "{projectRoot}/**/*.cjs",
+                "{projectRoot}/**/*.mjs",
+                "{projectRoot}/**/*.jsx",
+                "{projectRoot}/**/*.js.map",
+                "{projectRoot}/**/*.jsx.map",
+                "{projectRoot}/**/*.d.ts",
+                "{projectRoot}/**/*.d.cts",
+                "{projectRoot}/**/*.d.mts",
+                "{projectRoot}/**/*.d.ts.map",
+                "{projectRoot}/**/*.d.cts.map",
+                "{projectRoot}/**/*.d.mts.map",
+                "{projectRoot}/tsconfig.tsbuildinfo"
+              ],
+              "parallelism": true,
+              "syncGenerators": ["@nx/js:typescript-sync"]
             }
-          },
-          "name": "ui",
-          "tags": ["npm:public"],
+          }
+        },
+        "name": "utils",
+        "type": "lib"
+      },
+      "web": {
+        "data": {
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "implicitDependencies": [],
           "metadata": {
-            "targetGroups": {},
             "js": {
-              "packageName": "@dex-web/ui",
+              "isInPackageManagerWorkspaces": true,
               "packageExports": {
                 ".": {
-                  "types": "./src/index.ts",
+                  "default": "./src/index.ts",
                   "import": "./src/index.ts",
-                  "default": "./src/index.ts"
+                  "types": "./src/index.ts"
                 }
               },
-              "isInPackageManagerWorkspaces": true
+              "packageName": "@dex-web/web"
+            },
+            "targetGroups": {}
+          },
+          "name": "web",
+          "projectType": "application",
+          "root": "apps/web",
+          "sourceRoot": "apps/web/src",
+          "tags": ["npm:private"],
+          "targets": {
+            "build": {
+              "cache": true,
+              "configurations": {},
+              "dependsOn": ["^build"],
+              "executor": "nx:run-commands",
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": ["next"]
+                }
+              ],
+              "options": {
+                "command": "next build",
+                "cwd": "apps/web",
+                "tty": false
+              },
+              "outputs": [
+                "{projectRoot}/.next/!(cache)",
+                "{projectRoot}/.next/!(cache)/**/*"
+              ],
+              "parallelism": true
+            },
+            "build-deps": {
+              "configurations": {},
+              "dependsOn": ["^build"],
+              "executor": "nx:noop",
+              "options": {},
+              "parallelism": true
+            },
+            "dev": {
+              "configurations": {},
+              "continuous": true,
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "next dev",
+                "cwd": "apps/web"
+              },
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "configurations": {},
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "biome check  --write --config-path=apps/web/biome.json --verbose apps/web/**/*"
+              },
+              "parallelism": true
+            },
+            "serve": {
+              "configurations": {
+                "development": {
+                  "buildTarget": "web:build:development",
+                  "dev": true,
+                  "turbo": true
+                }
+              },
+              "continuous": true,
+              "defaultConfiguration": "development",
+              "executor": "@nx/next:server",
+              "options": {
+                "buildTarget": "web:build",
+                "dev": true
+              },
+              "parallelism": true
+            },
+            "serve-static": {
+              "configurations": {},
+              "continuous": true,
+              "dependsOn": ["build"],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "next start",
+                "cwd": "apps/web"
+              },
+              "parallelism": true
+            },
+            "start": {
+              "configurations": {},
+              "continuous": true,
+              "dependsOn": ["build"],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "next start",
+                "cwd": "apps/web"
+              },
+              "parallelism": true
+            },
+            "test": {
+              "cache": true,
+              "configurations": {},
+              "dependsOn": ["^build"],
+              "executor": "@nx/vite:test",
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": ["vitest", "@vitest/ui", "happy-dom"]
+                }
+              ],
+              "options": {
+                "config": "apps/web/vite.config.ts",
+                "reportsDirectory": "../../coverage/apps/web"
+              },
+              "outputs": ["{options.reportsDirectory}"],
+              "parallelism": true
+            },
+            "watch-deps": {
+              "configurations": {},
+              "continuous": true,
+              "dependsOn": ["build-deps"],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "pnpm exec nx watch --projects web --includeDependentProjects -- pnpm exec nx build-deps web"
+              },
+              "parallelism": true
+            }
+          }
+        },
+        "name": "web",
+        "type": "app"
+      },
+      "web-e2e": {
+        "data": {
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "implicitDependencies": ["web"],
+          "metadata": {
+            "js": {
+              "isInPackageManagerWorkspaces": true,
+              "packageExports": {
+                ".": {
+                  "default": "./src/index.ts",
+                  "import": "./src/index.ts",
+                  "types": "./src/index.ts"
+                }
+              },
+              "packageName": "web-e2e"
+            },
+            "targetGroups": {
+              "E2E (CI)": ["e2e-ci--src/root.spec.ts", "e2e-ci"]
             }
           },
-          "$schema": "../../node_modules/nx/schemas/project-schema.json",
-          "sourceRoot": "libs/ui/src",
-          "implicitDependencies": []
-        }
+          "name": "web-e2e",
+          "projectType": "application",
+          "root": "apps/web-e2e",
+          "sourceRoot": "apps/web-e2e/src",
+          "tags": ["npm:private"],
+          "targets": {
+            "e2e": {
+              "cache": true,
+              "configurations": {},
+              "dependsOn": [
+                {
+                  "projects": ["web"],
+                  "target": "start"
+                }
+              ],
+              "executor": "nx:run-commands",
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": ["@playwright/test"]
+                }
+              ],
+              "metadata": {
+                "description": "Runs Playwright Tests",
+                "help": {
+                  "command": "pnpm exec playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                },
+                "technologies": ["playwright"]
+              },
+              "options": {
+                "command": "playwright test",
+                "cwd": "apps/web-e2e"
+              },
+              "outputs": [
+                "{workspaceRoot}/dist/.playwright/apps/web-e2e/test-output",
+                "{workspaceRoot}/dist/.playwright/apps/web-e2e/playwright-report"
+              ],
+              "parallelism": true
+            },
+            "e2e-ci": {
+              "cache": true,
+              "configurations": {},
+              "dependsOn": [
+                {
+                  "params": "forward",
+                  "projects": "self",
+                  "target": "e2e-ci--src/root.spec.ts"
+                }
+              ],
+              "executor": "nx:noop",
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": ["@playwright/test"]
+                }
+              ],
+              "metadata": {
+                "description": "Runs Playwright Tests in CI",
+                "help": {
+                  "command": "pnpm exec playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                },
+                "nonAtomizedTarget": "e2e",
+                "technologies": ["playwright"]
+              },
+              "options": {},
+              "outputs": [
+                "{workspaceRoot}/dist/.playwright/apps/web-e2e/test-output",
+                "{workspaceRoot}/dist/.playwright/apps/web-e2e/playwright-report"
+              ],
+              "parallelism": true
+            },
+            "e2e-ci--src/root.spec.ts": {
+              "cache": true,
+              "configurations": {},
+              "dependsOn": [
+                {
+                  "projects": ["web"],
+                  "target": "start"
+                }
+              ],
+              "executor": "nx:run-commands",
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": ["@playwright/test"]
+                }
+              ],
+              "metadata": {
+                "description": "Runs Playwright Tests in src/root.spec.ts in CI",
+                "help": {
+                  "command": "pnpm exec playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                },
+                "technologies": ["playwright"]
+              },
+              "options": {
+                "command": "playwright test src/root.spec.ts --output=../../dist/.playwright/apps/web-e2e/test-output/src-root-spec-ts",
+                "cwd": "apps/web-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "../../dist/.playwright/apps/web-e2e/playwright-report/src-root-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "../../dist/.playwright/apps/web-e2e/playwright-report/src-root-spec-ts"
+                }
+              },
+              "outputs": [
+                "{workspaceRoot}/dist/.playwright/apps/web-e2e/test-output/src-root-spec-ts",
+                "{workspaceRoot}/dist/.playwright/apps/web-e2e/playwright-report/src-root-spec-ts"
+              ],
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "configurations": {},
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "biome check  --write --config-path=apps/web-e2e/biome.json --verbose apps/web-e2e/**/*"
+              },
+              "parallelism": true
+            },
+            "typecheck": {
+              "cache": true,
+              "configurations": {},
+              "dependsOn": ["^typecheck"],
+              "executor": "nx:run-commands",
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/**/*.ts",
+                "{projectRoot}/**/*.js",
+                "{projectRoot}/playwright.config.ts",
+                "{projectRoot}/src/**/*.spec.ts",
+                "{projectRoot}/src/**/*.spec.js",
+                "{projectRoot}/src/**/*.test.ts",
+                "{projectRoot}/src/**/*.test.js",
+                "{projectRoot}/src/**/*.d.ts",
+                "!{workspaceRoot}/node_modules",
+                "!{workspaceRoot}/tmp",
+                "^production",
+                {
+                  "externalDependencies": ["typescript"]
+                }
+              ],
+              "metadata": {
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "pnpm exec tsc --build --help",
+                  "example": {
+                    "args": ["--force"]
+                  }
+                },
+                "technologies": ["typescript"]
+              },
+              "options": {
+                "command": "tsc --build --emitDeclarationOnly",
+                "cwd": "apps/web-e2e"
+              },
+              "outputs": [
+                "{workspaceRoot}/dist/apps/web-e2e/**/*.d.ts",
+                "{workspaceRoot}/dist/apps/web-e2e/**/*.d.ts.map",
+                "{workspaceRoot}/dist/apps/web-e2e/tsconfig.lib.tsbuildinfo"
+              ],
+              "parallelism": true,
+              "syncGenerators": ["@nx/js:typescript-sync"]
+            }
+          }
+        },
+        "name": "web-e2e",
+        "type": "e2e"
       }
-    },
-    "dependencies": {
-      "web-e2e": [
-        {
-          "source": "web-e2e",
-          "target": "web",
-          "type": "implicit"
-        },
-        {
-          "source": "web-e2e",
-          "target": "config",
-          "type": "static"
-        }
-      ],
-      "config": [],
-      "utils": [
-        {
-          "source": "utils",
-          "target": "config",
-          "type": "static"
-        }
-      ],
-      "web": [
-        {
-          "source": "web",
-          "target": "ui",
-          "type": "static"
-        },
-        {
-          "source": "web",
-          "target": "utils",
-          "type": "static"
-        },
-        {
-          "source": "web",
-          "target": "config",
-          "type": "static"
-        }
-      ],
-      "ui": [
-        {
-          "source": "ui",
-          "target": "config",
-          "type": "static"
-        },
-        {
-          "source": "ui",
-          "target": "utils",
-          "type": "static"
-        }
-      ]
     }
   }
 }

@@ -1,4 +1,4 @@
-const decodeAndVerifyJwtToken = async (token?: string) => {
+const decodeAndVerifyJwtToken = async (_token?: string) => {
   // TODO: Implement JWT decoding and verification
   return {
     id: "1",

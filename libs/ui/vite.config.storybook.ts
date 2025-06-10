@@ -3,6 +3,7 @@ import path from "node:path";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { defineConfig, mergeConfig } from "vite";
 import { config } from "./vite.config";
+
 const dirname = path.resolve(__dirname);
 export default mergeConfig(
   { ...config, test: undefined },
@@ -11,9 +12,9 @@ export default mergeConfig(
     test: {
       browser: {
         enabled: true,
-        provider: "playwright",
         headless: true,
         instances: [{ browser: "chromium" }],
+        provider: "playwright",
       },
     },
   }),

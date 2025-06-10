@@ -1,15 +1,16 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "incremental": true,
     "jsx": "preserve",
+    "noEmit": false,
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "noEmit": false,
-    "incremental": true
+    ]
   },
+  "extends": "../../tsconfig.base.json",
+  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
   "references": [
     {
       "path": "../../libs/core"
@@ -29,6 +30,5 @@
     {
       "path": "./tsconfig.spec.json"
     }
-  ],
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"]
+  ]
 }

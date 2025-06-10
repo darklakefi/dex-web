@@ -17,7 +17,7 @@ describe("Box", () => {
 
   it("should render successfully with padding and background explicitly set", () => {
     render(
-      <Box padding="lg" background="base">
+      <Box background="base" padding="lg">
         Box
       </Box>,
     );

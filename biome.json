@@ -11,10 +11,19 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["apps/**", "libs/**"]
+    "includes": [
+      "**",
+      "!**/dist/**",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!**/storybook-static/**",
+      "!**/tmp/**",
+      "!**/.*/**"
+    ]
   },
   "formatter": {
     "enabled": true,
+
     "indentStyle": "space",
     "useEditorconfig": true
   },
@@ -25,7 +34,17 @@
   },
   "linter": {
     "enabled": true,
+
     "rules": {
+      "a11y": {
+        "recommended": true
+      },
+      "complexity": {
+        "recommended": true
+      },
+      "correctness": {
+        "recommended": true
+      },
       "nursery": {
         "useSortedClasses": {
           "fix": "safe",
@@ -35,13 +54,23 @@
           }
         }
       },
-      "recommended": true
+      "performance": {
+        "recommended": true
+      },
+      "recommended": true,
+      "security": {
+        "recommended": true
+      },
+      "style": {
+        "recommended": true
+      },
+      "suspicious": {
+        "recommended": true
+      }
     }
   },
   "vcs": {
-    "clientKind": "git",
-    "defaultBranch": "develop",
-    "enabled": true,
-    "useIgnoreFile": true
+    "enabled": false,
+    "useIgnoreFile": false
   }
 }

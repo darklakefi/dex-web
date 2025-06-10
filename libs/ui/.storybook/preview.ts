@@ -12,25 +12,24 @@ const fontLoader = async () => ({
 });
 
 const preview: Preview = {
-  tags: ["autodocs"],
   parameters: {
+    a11y: {
+      test: "todo",
+    },
     docs: {
-      toc: true,
       theme: darklakeTheme,
+      toc: true,
+    },
+
+    initialGlobals: {
+      viewport: { isRotated: false, value: "ipad" },
     },
 
     viewport: {
       options: INITIAL_VIEWPORTS,
     },
-
-    initialGlobals: {
-      viewport: { value: "ipad", isRotated: false },
-    },
-
-    a11y: {
-      test: "todo",
-    },
   },
+  tags: ["autodocs"],
 };
 
 export const loaders = isChromatic() && document.fonts ? [fontLoader] : [];

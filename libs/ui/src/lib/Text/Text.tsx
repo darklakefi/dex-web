@@ -1,4 +1,4 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import type { ElementType } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -11,18 +11,18 @@ export enum TextVariantEnum {
 
 const textVariants = cva("font-normal", {
   variants: {
+    textCase: {
+      capitalize: "capitalize",
+      lowercase: "lowercase",
+      "normal-case": "normal-case",
+      uppercase: "uppercase",
+    },
     variant: {
-      heading:
-        "font-display text-3xl text-green-100 leading-7.5 tracking-normal",
       body1: "font-sans text-3xl text-green-100 leading-8.5 tracking-wider",
       body2: "font-sans text-green-200 text-lg leading-6 tracking-wide",
+      heading:
+        "font-display text-3xl text-green-100 leading-7.5 tracking-normal",
       link: "font-sans text-green-200 text-lg leading-6 tracking-wide underline",
-    },
-    textCase: {
-      uppercase: "uppercase",
-      lowercase: "lowercase",
-      capitalize: "capitalize",
-      "normal-case": "normal-case",
     },
   },
 });
@@ -56,7 +56,7 @@ export const Text: React.FC<TextProps> & {
 }) => {
   const Component = variantMap[variant || TextVariantEnum.Body1] as ElementType;
   const overrideClasses = twMerge(
-    textVariants({ variant, textCase }),
+    textVariants({ textCase, variant }),
     className,
   );
 

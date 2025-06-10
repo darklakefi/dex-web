@@ -1,4 +1,15 @@
 export { database } from "./database";
+export type {
+  BlockQueue,
+  BlockQueueStatus,
+  Config,
+  NewBlockQueue,
+  NewConfig,
+  NewSandwichEvent,
+  NewTokenMetadata,
+  SandwichEvent,
+  TokenMetadata,
+} from "./schema";
 export {
   blockQueue,
   blockQueueStatusEnum,
@@ -17,15 +28,4 @@ export {
   selectUserSchema,
   tokenMetadata,
   user,
-} from "./schema";
-export type {
-  BlockQueue,
-  BlockQueueStatus,
-  Config,
-  NewBlockQueue,
-  NewConfig,
-  NewSandwichEvent,
-  NewTokenMetadata,
-  SandwichEvent,
-  TokenMetadata,
 } from "./schema";

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Icon } from "./Icon";
+
 const meta = {
   component: Icon,
   title: "Icon",

@@ -1,18 +1,18 @@
 {
-  "name": "@dex-web/orpc",
-  "version": "0.0.1",
-  "type": "module",
-  "module": "./src/index.ts",
-  "types": "./src/index.ts",
+  "devDependencies": {
+    "@dex-web/db": "workspace:*",
+    "@dex-web/utils": "workspace:*"
+  },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
+      "default": "./src/index.ts",
       "import": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./src/index.ts"
     }
   },
-  "devDependencies": {
-    "@dex-web/utils": "workspace:*",
-    "@dex-web/db": "workspace:*"
-  }
+  "module": "./src/index.ts",
+  "name": "@dex-web/orpc",
+  "type": "module",
+  "types": "./src/index.ts",
+  "version": "0.0.1"
 }

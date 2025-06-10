@@ -11,12 +11,12 @@ describe("Icon", () => {
   });
 
   it("should render successfully without props", () => {
-    render(<Icon name="analytics" data-testid="icon-analytics" />);
+    render(<Icon data-testid="icon-analytics" name="analytics" />);
     expect(screen.getByTestId("icon-analytics")).toBeTruthy();
   });
 
   it("should render successfully with padding and background explicitly set", () => {
-    render(<Icon name="analytics" data-testid="icon-analytics" />);
+    render(<Icon data-testid="icon-analytics" name="analytics" />);
     const iconElement = screen.getByTestId("icon-analytics");
     expect(iconElement).toBeTruthy();
     expect(iconElement).toHaveClass("text-green-100");

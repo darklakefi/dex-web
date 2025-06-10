@@ -10,9 +10,9 @@ export const blockQueueStatusEnum = pgEnum("BlockQueueStatus", [
 ]);
 
 export const blockQueue = pgTable("block_queue", {
+  created_at: timestamp("created_at").defaultNow().notNull(),
   slot: bigint("slot", { mode: "bigint" }).primaryKey().unique(),
   status: blockQueueStatusEnum("status").notNull(),
-  created_at: timestamp("created_at").defaultNow().notNull(),
   updated_at: timestamp("updated_at")
     .defaultNow()
     .notNull()

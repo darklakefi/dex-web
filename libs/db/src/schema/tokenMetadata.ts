@@ -2,16 +2,16 @@ import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const tokenMetadata = pgTable("token_metadata", {
-  token_address: varchar("token_address").primaryKey(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  decimals: integer("decimals").notNull(),
   name: varchar("name").notNull(),
   symbol: varchar("symbol").notNull(),
-  decimals: integer("decimals").notNull(),
-  uri: varchar("uri"),
-  created_at: timestamp("created_at").defaultNow().notNull(),
+  token_address: varchar("token_address").primaryKey(),
   updated_at: timestamp("updated_at")
     .defaultNow()
     .notNull()
     .$onUpdate(() => new Date()),
+  uri: varchar("uri"),
 });
 
 export const insertTokenMetadataSchema = createInsertSchema(tokenMetadata);

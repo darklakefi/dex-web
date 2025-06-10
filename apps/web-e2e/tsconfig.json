@@ -1,10 +1,10 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node"],
     "outDir": "../../dist/apps/web-e2e",
-    "tsBuildInfoFile": "../../dist/apps/web-e2e/tsconfig.lib.tsbuildinfo"
+    "tsBuildInfoFile": "../../dist/apps/web-e2e/tsconfig.lib.tsbuildinfo",
+    "types": ["node"]
   },
+  "extends": "../../tsconfig.base.json",
   "include": [
     "**/*.ts",
     "**/*.js",

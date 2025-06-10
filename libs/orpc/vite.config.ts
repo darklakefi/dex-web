@@ -6,50 +6,48 @@ import dts from "vite-plugin-dts";
 
 export default defineConfig(() => {
   const baseConfig = {
-    root: __dirname,
+    build: {
+      commonjsOptions: {
+        transformMixedEsModules: true,
+      },
+      emptyOutDir: true,
+      lib: {
+        entry: resolve(__dirname, "src/index.ts"),
+        fileName: "index",
+        formats: ["es" as const],
+        name: "@dex-web/orpc",
+      },
+      outDir: "./dist",
+      reportCompressedSize: true,
+      rollupOptions: {
+        external: [...builtinModules],
+      },
+    },
     cacheDir: "../../node_modules/.vite/libs/orpc",
+    root: __dirname,
     test: {
-      name: "orpc",
-      environment: "happy-dom",
-      include: [
-        "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-        "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-      ],
       coverage: {
         provider: "v8" as const,
         reportsDirectory: "../../coverage/libs/orpc",
       },
-      watch: false,
-      reporters: ["default"],
-      testTimeout: 30000,
+      environment: "happy-dom",
+      globals: true,
       hookTimeout: 30000,
-      teardownTimeout: 10000,
+      include: [
+        "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      ],
+      name: "orpc",
       pool: "forks" as const,
       poolOptions: {
         forks: {
           singleFork: true,
         },
       },
-      globals: true,
-    },
-    build: {
-      outDir: "./dist",
-      emptyOutDir: true,
-      reportCompressedSize: true,
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
-      lib: {
-        entry: resolve(__dirname, "src/index.ts"),
-        name: "@dex-web/orpc",
-        fileName: "index",
-        formats: ["es" as const],
-      },
-      rollupOptions: {
-        external: [
-          ...builtinModules,
-        ],
-      },
+      reporters: ["default"],
+      teardownTimeout: 10000,
+      testTimeout: 30000,
+      watch: false,
     },
   };
 

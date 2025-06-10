@@ -15,8 +15,8 @@ import LogoSmIcon from "./icons/logo-sm.svg";
 import PlayIcon from "./icons/play.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
 import TelegramIcon from "./icons/telegram.svg";
-import TimesFilledIcon from "./icons/times-filled.svg";
 import TimesIcon from "./icons/times.svg";
+import TimesFilledIcon from "./icons/times-filled.svg";
 import TrendingIcon from "./icons/trending.svg";
 import XIcon from "./icons/x.svg";
 
@@ -46,21 +46,21 @@ const iconComponents = {
   "checkbox-empty": CheckboxEmptyIcon,
   "checkbox-filled": CheckboxFilledIcon,
   "chevron-down": ChevronDownIcon,
+  crown: CrownIcon,
   "external-link": ExternalLinkIcon,
+  fire: FireIcon,
   github: GithubIcon,
   info: InfoIcon,
-  "logo-sm": LogoSmIcon,
+  "loading-stripe": LoadingStripeIcon,
   "logo-lg": LogoLgIcon,
+  "logo-sm": LogoSmIcon,
   play: PlayIcon,
   seedlings: SeedlingsIcon,
   telegram: TelegramIcon,
   times: TimesIcon,
   "times-filled": TimesFilledIcon,
   trending: TrendingIcon,
-  "loading-stripe": LoadingStripeIcon,
   x: XIcon,
-  crown: CrownIcon,
-  fire: FireIcon,
 } as const satisfies Record<
   IconName,
   React.ComponentType<React.SVGProps<SVGSVGElement>>

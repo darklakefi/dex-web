@@ -18,16 +18,16 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2022",
-    "verbatimModuleSyntax": true,
     "typeRoots": ["types", "node_modules", "node_modules/@types"],
-    "types": ["svg", "css", "image"]
+    "types": ["svg", "css", "image"],
+    "verbatimModuleSyntax": true
   },
+  "exclude": ["node_modules", "tmp"],
 
   "include": [
     "vite.config.base.ts",
     "types/svg.d.ts",
     "types/css.d.ts",
     "types/image.d.ts"
-  ],
-  "exclude": ["node_modules", "tmp"]
+  ]
 }

@@ -5,8 +5,8 @@ import { appRouter } from "./routers/app/router";
 export const handler = new RPCHandler(appRouter, {
   plugins: [
     new CORSPlugin({
-      origin: (origin) => origin,
       allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "PATCH"],
+      origin: (origin) => origin,
     }),
   ],
 });

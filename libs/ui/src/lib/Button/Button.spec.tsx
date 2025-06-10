@@ -15,7 +15,7 @@ describe("Button", () => {
 
     it("should handle disabled state", () => {
       const { container } = render(
-        <Button variant="primary" disabled>
+        <Button disabled variant="primary">
           Disabled Button
         </Button>,
       );
@@ -27,7 +27,7 @@ describe("Button", () => {
     });
 
     it("should handle text prop", () => {
-      render(<Button variant="primary" text="Text Prop" />);
+      render(<Button text="Text Prop" variant="primary" />);
       expect(screen.getByText("Text Prop")).toBeInTheDocument();
     });
   });
@@ -35,7 +35,7 @@ describe("Button", () => {
   describe("Button Icons", () => {
     it("should render with leading icon", () => {
       const { container } = render(
-        <Button variant="primary" leadingIcon="checkbox-filled">
+        <Button leadingIcon="checkbox-filled" variant="primary">
           Button with Leading Icon
         </Button>,
       );
@@ -50,7 +50,7 @@ describe("Button", () => {
 
     it("should render with trailing icon", () => {
       const { container } = render(
-        <Button variant="primary" trailingIcon="times">
+        <Button trailingIcon="times" variant="primary">
           Button with Trailing Icon
         </Button>,
       );
@@ -65,7 +65,7 @@ describe("Button", () => {
 
     it("should render icon-only button", () => {
       const { container } = render(
-        <Button variant="primary" icon="external-link" />,
+        <Button icon="external-link" variant="primary" />,
       );
       expect(container.querySelector("button")).toHaveClass("p-2.5");
       expect(container.querySelector("svg")).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe("Button", () => {
 
     it("should show loading icon when isLoading is true", () => {
       const { container } = render(
-        <Button variant="primary" isLoading leadingIcon="checkbox-empty">
+        <Button isLoading leadingIcon="checkbox-empty" variant="primary">
           Loading Button
         </Button>,
       );

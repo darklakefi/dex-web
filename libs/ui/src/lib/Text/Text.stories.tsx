@@ -32,8 +32,8 @@ export const Body2: Story = {
 export const Body2Lowercase: Story = {
   args: {
     children: "Body2",
-    variant: "body2",
     textCase: "lowercase",
+    variant: "body2",
   },
 };
 

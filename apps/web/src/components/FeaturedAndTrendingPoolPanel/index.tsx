@@ -14,16 +14,16 @@ export function FeaturedAndTrendingPoolPanel({
   return (
     <div className="flex w-full flex-col items-center gap-10 bg-transparent">
       <ShortPoolPanel
+        icon="crown"
         pools={featuredPools}
         title="Featured Pools"
-        icon="crown"
       />
       <ShortPoolPanel
+        icon="fire"
         pools={trendingPools}
         title="Trending Pools"
-        icon="fire"
       />
-      <Button.Tertiary text="explore all pools" className="w-fit" />
+      <Button.Tertiary className="w-fit" text="explore all pools" />
     </div>
   );
 }
