@@ -10,7 +10,7 @@ import {
 } from "@solana/wallet-adapter-react";
 import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
 import { clusterApiUrl } from "@solana/web3.js";
-import React, { useCallback, useMemo, type FC, type ReactNode } from "react";
+import { type FC, type ReactNode, useCallback, useMemo } from "react";
 import { WalletModalProvider } from "./WalletModalProvider";
 
 export const WalletContextProvider: FC<{ children: ReactNode }> = ({
@@ -51,7 +51,7 @@ export const WalletContextProvider: FC<{ children: ReactNode }> = ({
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} onError={onError} autoConnect={true}>
+      <WalletProvider autoConnect={true} onError={onError} wallets={wallets}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

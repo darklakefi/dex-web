@@ -2,7 +2,6 @@ import { Button, Icon, type IconName, Text } from "@dex-web/ui";
 import { WalletReadyState } from "@solana/wallet-adapter-base";
 import type { Wallet } from "@solana/wallet-adapter-react";
 import type { FC, MouseEventHandler } from "react";
-import React from "react";
 
 export interface WalletListItemProps {
   handleClick: MouseEventHandler<HTMLButtonElement>;
@@ -17,14 +16,14 @@ export const WalletListItem: FC<WalletListItemProps> = ({
 }) => {
   return (
     <Button.Primary
+      className="flex w-full cursor-pointer items-center justify-between gap-3 bg-green-800 p-3 hover:bg-green-600"
       onClick={handleClick}
       type="button"
-      className="flex w-full cursor-pointer items-center justify-between gap-3 bg-green-800 p-3 hover:bg-green-600"
     >
       <div className="flex items-center gap-3">
         <Icon
-          name={wallet.adapter.name.toLowerCase() as IconName}
           className="size-8 text-green-200"
+          name={wallet.adapter.name.toLowerCase() as IconName}
         />
         <Text.Body2>{wallet.adapter.name}</Text.Body2>
       </div>
@@ -33,8 +32,8 @@ export const WalletListItem: FC<WalletListItemProps> = ({
       )}
       {connecting && (
         <Icon
-          name="loading-stripe"
           className="size-4 animate-spin text-green-100"
+          name="loading-stripe"
         />
       )}
     </Button.Primary>

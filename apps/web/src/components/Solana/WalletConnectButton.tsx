@@ -1,8 +1,5 @@
 "use client";
 
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "./useWalletModal";
-
 import {
   Button,
   Icon,
@@ -11,8 +8,10 @@ import {
   type VariantButtonProps,
 } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
+import { useWallet } from "@solana/wallet-adapter-react";
 import type { FC, MouseEvent } from "react";
 import { useCallback, useMemo } from "react";
+import { useWalletModal } from "./useWalletModal";
 
 export const WalletConnectButton: FC<VariantButtonProps> = ({
   onClick,
@@ -55,10 +54,10 @@ export const WalletConnectButton: FC<VariantButtonProps> = ({
   return connected ? (
     <Button.Secondary
       {...props}
-      onClick={handleDisconnect}
       className="flex gap-2"
+      onClick={handleDisconnect}
     >
-      <Icon name={walletIcon as IconName} className="size-6 text-inherit" />
+      <Icon className="size-6 text-inherit" name={walletIcon as IconName} />
       <Text.Body2 className="text-inherit" textCase="normal-case">
         {buttonText}
       </Text.Body2>

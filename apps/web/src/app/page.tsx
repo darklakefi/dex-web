@@ -86,10 +86,7 @@ export default function IndexPage() {
     <div>
       <div className="wrapper">
         <div className="container mx-auto">
-          <div
-            className="flex flex-col items-center justify-center gap-1"
-            id="welcome"
-          >
+          <div className="flex flex-col items-center justify-center gap-1">
             <Text.Body1 className="animate-bounce">
               Under construction 🚧
             </Text.Body1>

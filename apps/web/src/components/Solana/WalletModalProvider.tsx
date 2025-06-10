@@ -1,7 +1,7 @@
 "use client";
 
 import type { FC, ReactNode } from "react";
-import React, { useState } from "react";
+import { useState } from "react";
 import type { WalletModalProps } from "./ConnectWalletModal";
 import { WalletModal } from "./ConnectWalletModal";
 import { WalletModalContext } from "./useWalletModal";
@@ -18,8 +18,8 @@ export const WalletModalProvider: FC<WalletModalProviderProps> = ({
   return (
     <WalletModalContext.Provider
       value={{
-        visible,
         setVisible,
+        visible,
       }}
     >
       {children}

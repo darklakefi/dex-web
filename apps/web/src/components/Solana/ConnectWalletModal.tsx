@@ -6,18 +6,18 @@ import { WalletReadyState } from "@solana/wallet-adapter-base";
 import type { Wallet } from "@solana/wallet-adapter-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { FC, MouseEvent } from "react";
-import React, {
+import {
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  useEffect,
 } from "react";
 import { createPortal } from "react-dom";
 import { twMerge } from "tailwind-merge";
-import { WalletListItem } from "./WalletListItem";
 import { useWalletModal } from "./useWalletModal";
+import { WalletListItem } from "./WalletListItem";
 
 export interface WalletModalProps {
   className?: string;
@@ -125,11 +125,11 @@ export const WalletModal: FC<WalletModalProps> = ({ container = "body" }) => {
         tabIndex={-1}
       >
         <Box
-          shadow="xl"
           className={twMerge(
             "z-10 h-full w-full flex-col gap-4 shadow-green-600 transition-transform duration-150",
             fadeIn ? "translate-x-0" : "translate-x-full",
           )}
+          shadow="xl"
         >
           <div className="flex w-full justify-between border-green-600 border-b">
             <Text.Heading>connect wallet</Text.Heading>
@@ -138,23 +138,23 @@ export const WalletModal: FC<WalletModalProps> = ({ container = "body" }) => {
           <div className="flex w-full flex-col gap-4">
             {installedWallets.map((wallet) => (
               <WalletListItem
-                key={wallet.adapter.name}
-                handleClick={(event) =>
-                  handleWalletClick(event, wallet.adapter.name)
-                }
-                wallet={wallet}
                 connecting={
                   selectedWallet?.adapter.name === wallet.adapter.name &&
                   connecting
                 }
+                handleClick={(event) =>
+                  handleWalletClick(event, wallet.adapter.name)
+                }
+                key={wallet.adapter.name}
+                wallet={wallet}
               />
             ))}
             {notInstalledWallets.map((wallet) => (
               <WalletListItem
-                key={wallet.adapter.name}
                 handleClick={(event) =>
                   handleWalletClick(event, wallet.adapter.name)
                 }
+                key={wallet.adapter.name}
                 wallet={wallet}
               />
             ))}
