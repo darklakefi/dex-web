@@ -14,23 +14,23 @@ type Story = StoryObj<typeof meta>;
 
 export const Default = {
   args: {
-    name: "firstName",
     label: "First Name",
+    name: "firstName",
     value: "John",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByRole("textbox");
+    expect(input).toHaveValue("John");
   },
   render: (args) => {
     const [value, setValue] = useState(args.value);
     return (
       <TextInput
         {...args}
-        value={value}
         onChange={(e) => setValue(e.target.value)}
+        value={value}
       />
     );
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const input = canvas.getByRole("textbox");
-    expect(input).toHaveValue("John");
   },
 } satisfies Story;

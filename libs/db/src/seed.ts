@@ -7,12 +7,12 @@ import {
 } from "@ngneat/falso";
 import { database } from ".";
 import {
+  blockQueue,
+  config,
   type NewBlockQueue,
   type NewConfig,
   type NewSandwichEvent,
   type NewTokenMetadata,
-  blockQueue,
-  config,
   sandwichEvents,
   tokenMetadata,
 } from "./schema";
@@ -62,14 +62,14 @@ export function generateTokenMetadata(count: number): NewTokenMetadata[] {
         ? decimalsOptions[randomIndex]
         : 6;
     return {
-      token_address: generateSolanaAddress(),
+      decimals,
       name: `${randCompanyName()} Token`,
       symbol: Array.from({ length: Math.floor(Math.random() * 4) + 3 }, () =>
         randAlphaNumeric(),
       )
         .join("")
         .toUpperCase(),
-      decimals,
+      token_address: generateSolanaAddress(),
       uri: randUrl(),
     };
   });
@@ -96,18 +96,18 @@ export function generateSandwichEvents(
     const victim_address = generateSolanaAddress();
 
     return {
+      attacker_address,
+      dex_name: dexes[Math.floor(Math.random() * dexes.length)] ?? "Raydium",
+      lp_address: generateSolanaAddress(),
+      occurred_at: randRecentDate({ days: 30 }),
       slot,
-      sol_amount_drained: BigInt(randNumber({ min: 1000000, max: 100000000 })),
-      sol_amount_swap: BigInt(randNumber({ min: 10000000, max: 1000000000 })),
-      tx_hash_victim_swap: generateTxHash(),
+      sol_amount_drained: BigInt(randNumber({ max: 100000000, min: 1000000 })),
+      sol_amount_swap: BigInt(randNumber({ max: 1000000000, min: 10000000 })),
+      token_address,
       tx_hash_attacker_buy: generateTxHash(),
       tx_hash_attacker_sell: generateTxHash(),
-      token_address,
-      attacker_address,
+      tx_hash_victim_swap: generateTxHash(),
       victim_address,
-      lp_address: generateSolanaAddress(),
-      dex_name: dexes[Math.floor(Math.random() * dexes.length)] ?? "Raydium",
-      occurred_at: randRecentDate({ days: 30 }),
     };
   });
 }

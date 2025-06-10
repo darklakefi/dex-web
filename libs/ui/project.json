@@ -1,27 +1,27 @@
 {
-  "name": "ui",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "ui",
+  "projectType": "library",
+  "sourceRoot": "libs/ui/src",
+  "tags": [],
   "targets": {
     "lint": {
-      "command": "biome check --write libs/ui/**",
-      "cache": true
-    },
-    "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{options.reportsDirectory}"],
-      "options": {
-        "reportsDirectory": "../../coverage/libs/ui",
-        "config": "libs/ui/vite.config.ts"
-      },
-      "cache": true
+      "cache": true,
+      "command": "biome check --write libs/ui/**"
     },
     "storybook": {
       "options": {
         "port": 6006
       }
+    },
+    "test": {
+      "cache": true,
+      "executor": "@nx/vite:test",
+      "options": {
+        "config": "libs/ui/vite.config.ts",
+        "reportsDirectory": "../../coverage/libs/ui"
+      },
+      "outputs": ["{options.reportsDirectory}"]
     }
-  },
-  "sourceRoot": "libs/ui/src",
-  "projectType": "library",
-  "tags": []
+  }
 }

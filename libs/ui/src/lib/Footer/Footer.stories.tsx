@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Icon } from "../Icon/Icon";
 import { Text } from "../Text/Text";
 import { Footer } from "./Footer";
+
 const meta = {
   component: Footer,
   title: "Footer",
@@ -24,7 +25,7 @@ export const Default = {
           </Text.Link>
           <Text.Link className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline">
             MEV Checker{" "}
-            <Icon name="external-link" className="size-4 fill-green-300" />
+            <Icon className="size-4 fill-green-300" name="external-link" />
           </Text.Link>
         </div>
         <div className="flex flex-col items-start gap-5">
@@ -56,13 +57,13 @@ export const Default = {
         </div>
       </>
     ),
+    logo: <Icon className="h-6 w-auto stroke-none" name="logo-lg" />,
     socialMediaLinks: (
       <>
-        <Icon name="x" className="size-6 fill-green-300" />
-        <Icon name="telegram" className="size-6 stroke-green-300" />
-        <Icon name="github" className="size-6 fill-green-300" />
+        <Icon className="size-6 fill-green-300" name="x" />
+        <Icon className="size-6 stroke-green-300" name="telegram" />
+        <Icon className="size-6 fill-green-300" name="github" />
       </>
     ),
-    logo: <Icon name="logo-lg" className="h-6 w-auto stroke-none" />,
   },
 } satisfies Story;

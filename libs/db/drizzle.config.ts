@@ -15,10 +15,10 @@ if (!DATABASE_URL) {
 }
 
 export default defineConfig({
-  out: "./libs/orpc/drizzle",
-  schema: "./libs/orpc/src/db/schema.ts",
-  dialect: "postgresql",
   dbCredentials: {
     url: DATABASE_URL,
   },
+  dialect: "postgresql",
+  out: "./libs/orpc/drizzle",
+  schema: "./libs/orpc/src/db/schema.ts",
 });

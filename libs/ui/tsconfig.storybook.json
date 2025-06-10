@@ -1,5 +1,4 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": ["node", "vite/client"]
   },
@@ -13,6 +12,7 @@
     "src/**/*.spec.jsx",
     "src/**/*.test.js"
   ],
+  "extends": "./tsconfig.json",
   "include": [
     "src/**/*.stories.ts",
     "src/**/*.stories.js",

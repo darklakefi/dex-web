@@ -2,10 +2,10 @@ import { handler } from "@dex-web/orpc";
 
 async function handleRequest(request: Request) {
   const { response } = await handler.handle(request, {
-    prefix: "/rpc",
     context: {
       headers: Object.fromEntries(request.headers.entries()),
     },
+    prefix: "/rpc",
   });
 
   return response ?? new Response("Not found", { status: 404 });

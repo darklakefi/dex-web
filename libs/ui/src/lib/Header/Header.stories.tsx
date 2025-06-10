@@ -3,6 +3,7 @@ import { Button } from "../Button/Button";
 import { Icon } from "../Icon/Icon";
 import { Text } from "../Text/Text";
 import { Header } from "./Header";
+
 const meta = {
   component: Header,
   title: "Header",
@@ -14,6 +15,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default = {
   args: {
+    button: <Button variant="primary">CONNECT WALLET</Button>,
     children: (
       <>
         <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
@@ -23,12 +25,11 @@ export const Default = {
           About
         </Text.Link>
         <Text.Link className="inline-flex items-baseline justify-center gap-2 leading-none no-underline">
-          Contact <Icon name="external-link" className="size-4" />
+          Contact <Icon className="size-4" name="external-link" />
         </Text.Link>
       </>
     ),
-    button: <Button variant="primary">CONNECT WALLET</Button>,
-    logoSm: <Icon name="logo-sm" className="h-6 w-auto stroke-none" />,
-    logoLg: <Icon name="logo-lg" className="h-6 w-auto stroke-none" />,
+    logoLg: <Icon className="h-6 w-auto stroke-none" name="logo-lg" />,
+    logoSm: <Icon className="h-6 w-auto stroke-none" name="logo-sm" />,
   },
 } satisfies Story;

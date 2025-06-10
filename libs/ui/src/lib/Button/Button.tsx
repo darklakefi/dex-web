@@ -1,4 +1,4 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";
 
 import { Icon, type IconName } from "../Icon/Icon";
@@ -14,7 +14,14 @@ export enum ButtonVariantEnum {
 const buttonVariants = cva(
   "outline-offset-1 focus:outline-2 focus:outline-solid",
   {
+    defaultVariants: {
+      disabled: false,
+    },
     variants: {
+      disabled: {
+        false: "cursor-pointer",
+        true: "cursor-not-allowed opacity-50",
+      },
       variant: {
         primary:
           "bg-green-100 px-3 py-1.5 text-green-700 hover:bg-green-200 focus:outline-white",
@@ -25,13 +32,6 @@ const buttonVariants = cva(
         tertiary:
           "px-1.5 text-green-300 hover:text-green-200 focus:text-green-200 focus:outline-white",
       },
-      disabled: {
-        true: "cursor-not-allowed opacity-50",
-        false: "cursor-pointer",
-      },
-    },
-    defaultVariants: {
-      disabled: false,
     },
   },
 );
@@ -52,12 +52,12 @@ interface ButtonProps
 type VariantButtonProps = Omit<ButtonProps, "variant">;
 
 const ButtonIcon = ({ icon }: { icon: React.ReactNode | IconName }) => {
-  return <Icon name={icon as IconName} className="size-4 text-inherit" />;
+  return <Icon className="size-4 text-inherit" name={icon as IconName} />;
 };
 
 const LoadingIcon = () => {
   return (
-    <Icon name="loading-stripe" className="size-4 animate-spin text-inherit" />
+    <Icon className="size-4 animate-spin text-inherit" name="loading-stripe" />
   );
 };
 
@@ -92,7 +92,7 @@ export const Button: React.FC<ButtonProps> & {
   const isDisabled = isLoading || disabled;
 
   const mergedClassName = twMerge(
-    buttonVariants({ variant, disabled: isDisabled }),
+    buttonVariants({ disabled: isDisabled, variant }),
     TrailingIcon || LeadingIcon ? "flex items-center justify-center gap-2" : "",
     className,
   );

@@ -8,38 +8,38 @@ import { defineConfig, mergeConfig } from "vitest/config";
 
 export default defineConfig(() => {
   const baseConfig = {
-    root: __dirname,
+    build: {
+      commonjsOptions: {
+        transformMixedEsModules: true,
+      },
+      outDir: "./dist",
+      reportCompressedSize: true,
+    },
     cacheDir: "../../node_modules/.vite/apps/web",
+    root: __dirname,
     test: {
-      name: "web",
-      environment: "happy-dom",
-      include: [
-        "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-        "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-      ],
       coverage: {
         provider: "v8" as const,
         reportsDirectory: "../../coverage/apps/web",
       },
-      watch: false,
-      reporters: ["default"],
-      testTimeout: 30000,
+      environment: "happy-dom",
+      globals: true,
       hookTimeout: 30000,
-      teardownTimeout: 10000,
+      include: [
+        "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      ],
+      name: "web",
       pool: "forks" as const,
       poolOptions: {
         forks: {
           singleFork: true,
         },
       },
-      globals: true,
-    },
-    build: {
-      outDir: "./dist",
-      reportCompressedSize: true,
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
+      reporters: ["default"],
+      teardownTimeout: 10000,
+      testTimeout: 30000,
+      watch: false,
     },
   };
 

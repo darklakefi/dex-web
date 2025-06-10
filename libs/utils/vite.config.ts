@@ -5,45 +5,45 @@ import dts from "vite-plugin-dts";
 
 export default defineConfig(() => {
   const baseConfig = {
-    root: __dirname,
+    build: {
+      commonjsOptions: {
+        transformMixedEsModules: true,
+      },
+      emptyOutDir: true,
+      lib: {
+        entry: resolve(__dirname, "src/index.ts"),
+        fileName: "index",
+        formats: ["es" as const],
+        name: "@dex-web/utils",
+      },
+      outDir: "./dist",
+      reportCompressedSize: true,
+    },
     cacheDir: "../../node_modules/.vite/libs/utils",
+    root: __dirname,
     test: {
-      name: "utils",
-      environment: "happy-dom",
-      include: [
-        "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-        "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-      ],
       coverage: {
         provider: "v8" as const,
         reportsDirectory: "../../coverage/libs/utils",
       },
-      watch: false,
-      reporters: ["default"],
-      testTimeout: 30000,
+      environment: "happy-dom",
+      globals: true,
       hookTimeout: 30000,
-      teardownTimeout: 10000,
+      include: [
+        "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      ],
+      name: "utils",
       pool: "forks" as const,
       poolOptions: {
         forks: {
           singleFork: true,
         },
       },
-      globals: true,
-    },
-    build: {
-      outDir: "./dist",
-      emptyOutDir: true,
-      reportCompressedSize: true,
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
-      lib: {
-        entry: resolve(__dirname, "src/index.ts"),
-        name: "@dex-web/utils",
-        fileName: "index",
-        formats: ["es" as const],
-      },
+      reporters: ["default"],
+      teardownTimeout: 10000,
+      testTimeout: 30000,
+      watch: false,
     },
   };
 

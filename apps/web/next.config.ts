@@ -6,6 +6,12 @@ const nextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  images: {
+    unoptimized: false,
+  },
+  nx: {
+    svgr: false,
+  },
   turbopack: {
     rules: {
       "*.svg": {
@@ -14,8 +20,8 @@ const nextConfig = {
           {
             loader: "@svgr/webpack",
             options: {
-              typescript: true,
               icon: true,
+              typescript: true,
             },
           },
         ],
@@ -28,12 +34,6 @@ const nextConfig = {
       use: ["@svgr/webpack"],
     });
     return config;
-  },
-  images: {
-    unoptimized: false,
-  },
-  nx: {
-    svgr: false,
   },
 } satisfies NextConfig;
 

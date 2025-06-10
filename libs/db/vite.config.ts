@@ -6,51 +6,51 @@ import dts from "vite-plugin-dts";
 
 export default defineConfig(() => {
   const baseConfig = {
-    root: __dirname,
-    cacheDir: "../../node_modules/.vite/libs/db",
-    test: {
-      name: "db",
-      environment: "happy-dom",
-      include: [
-        "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-        "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-      ],
-      coverage: {
-        provider: "v8" as const,
-        reportsDirectory: "../../coverage/libs/db",
-      },
-      watch: false,
-      reporters: ["default"],
-      testTimeout: 30000,
-      hookTimeout: 30000,
-      teardownTimeout: 10000,
-      pool: "forks" as const,
-      poolOptions: {
-        forks: {
-          singleFork: true,
-        },
-      },
-      globals: true,
-    },
     build: {
-      outDir: "./dist",
-      emptyOutDir: true,
-      reportCompressedSize: true,
       commonjsOptions: {
         transformMixedEsModules: true,
       },
+      emptyOutDir: true,
       lib: {
         entry: resolve(__dirname, "src/index.ts"),
-        name: "@dex-web/db",
         fileName: "index",
         formats: ["es" as const],
+        name: "@dex-web/db",
       },
+      outDir: "./dist",
+      reportCompressedSize: true,
       rollupOptions: {
         external: [
           ...builtinModules,
           "pg",
         ],
       },
+    },
+    cacheDir: "../../node_modules/.vite/libs/db",
+    root: __dirname,
+    test: {
+      coverage: {
+        provider: "v8" as const,
+        reportsDirectory: "../../coverage/libs/db",
+      },
+      environment: "happy-dom",
+      globals: true,
+      hookTimeout: 30000,
+      include: [
+        "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      ],
+      name: "db",
+      pool: "forks" as const,
+      poolOptions: {
+        forks: {
+          singleFork: true,
+        },
+      },
+      reporters: ["default"],
+      teardownTimeout: 10000,
+      testTimeout: 30000,
+      watch: false,
     },
   };
 

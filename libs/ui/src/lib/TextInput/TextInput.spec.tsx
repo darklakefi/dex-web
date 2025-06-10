@@ -21,7 +21,7 @@ describe("TextInput", () => {
   });
 
   it("should allow custom props to be passed through", () => {
-    render(<TextInput label="First Name" data-testid="firstName" />);
+    render(<TextInput data-testid="firstName" label="First Name" />);
 
     const textInputElement = screen.getByTestId("firstName");
     expect(textInputElement).toBeTruthy();

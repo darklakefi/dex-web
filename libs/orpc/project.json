@@ -1,14 +1,14 @@
 {
-  "name": "orpc",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/orpc/src",
-  "projectType": "application",
-  "tags": [],
   "// targets": "to see all targets run: nx show project orpc --web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "orpc",
+  "projectType": "application",
+  "sourceRoot": "libs/orpc/src",
+  "tags": [],
   "targets": {
     "lint": {
-      "command": "biome check --write libs/orpc/**",
-      "cache": true
+      "cache": true,
+      "command": "biome check --write libs/orpc/**"
     },
     "seed": {
       "executor": "nx:run-commands",

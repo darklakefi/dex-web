@@ -1,21 +1,21 @@
 {
-  "name": "utils",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/utils/src",
+  "name": "utils",
   "projectType": "library",
+  "sourceRoot": "libs/utils/src",
+  "tags": [],
   "targets": {
+    "lint": {
+      "cache": true,
+      "command": "biome check --write libs/ui/**"
+    },
     "test": {
+      "cache": true,
       "executor": "@nx/vite:test",
-      "outputs": ["{options.reportsDirectory}"],
       "options": {
         "reportsDirectory": "../../coverage/libs/utils"
       },
-      "cache": true
-    },
-    "lint": {
-      "command": "biome check --write libs/ui/**",
-      "cache": true
+      "outputs": ["{options.reportsDirectory}"]
     }
-  },
-  "tags": []
+  }
 }
