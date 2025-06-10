@@ -49,7 +49,7 @@ interface ButtonProps
   icon?: IconName;
 }
 
-type VariantButtonProps = Omit<ButtonProps, "variant">;
+export type VariantButtonProps = Omit<ButtonProps, "variant">;
 
 const ButtonIcon = ({ icon }: { icon: React.ReactNode | IconName }) => {
   return <Icon className="size-4 text-inherit" name={icon as IconName} />;

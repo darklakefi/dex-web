@@ -2,6 +2,12 @@
   "dependencies": {
     "@orpc/client": "^1.4.4",
     "@orpc/server": "^1.4.4",
+    "@solana/wallet-adapter-backpack": "^0.1.14",
+    "@solana/wallet-adapter-base": "^0.9.26",
+    "@solana/wallet-adapter-phantom": "^0.9.27",
+    "@solana/wallet-adapter-react": "^0.15.38",
+    "@solana/wallet-adapter-solflare": "^0.6.31",
+    "@solana/web3.js": "^1.98.2",
     "@swc/helpers": "~0.5.17",
     "class-variance-authority": "^0.7.1",
     "dotenv": "^16.5.0",
