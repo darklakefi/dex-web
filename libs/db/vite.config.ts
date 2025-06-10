@@ -49,8 +49,6 @@ export default defineConfig(() => {
         external: [
           ...builtinModules,
           "pg",
-          "pg-cloudflare",
-          "cloudflare:sockets",
         ],
       },
     },
