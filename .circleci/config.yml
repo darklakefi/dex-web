@@ -49,7 +49,7 @@ commands:
     description: "Set up Nx SHAs for affected detection"
     steps:
       - nx/set-shas:
-          main-branch-name: 'main'
+          main-branch-name: "main"
 
   restore-nx-cache:
     description: "Restore Nx cache"
@@ -108,18 +108,6 @@ jobs:
       - run:
           name: Run affected build tasks
           command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
-      - run:
-          name: Check if UI was affected
-          command: |
-            if pnpm exec nx show projects --affected --base=$NX_BASE --head=$NX_HEAD | grep -q "^ui$"; then
-              echo "true" > /tmp/ui-affected
-            else
-              echo "false" > /tmp/ui-affected
-            fi
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - ui-affected
       - save-nx-cache
 
   chromatic:
