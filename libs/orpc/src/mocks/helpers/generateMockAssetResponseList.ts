@@ -14,6 +14,7 @@ export function generateAssetResponseList({
   count?: number;
 } = {}): DAS.GetAssetResponseList {
   seed(FIXED_SEED);
+  const owner = randUuid();
   return {
     cursor: "123",
     items: times(count, (_i) => ({
@@ -34,7 +35,7 @@ export function generateAssetResponseList({
         delegate: undefined,
         delegated: false,
         frozen: false,
-        owner: randUuid(),
+        owner,
         ownership_model: OwnershipModel.SINGLE,
       },
     })),
