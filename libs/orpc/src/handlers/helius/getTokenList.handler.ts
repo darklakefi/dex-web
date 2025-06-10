@@ -1,16 +1,16 @@
 import z from "zod";
-import { helius } from "../../../helius";
+import { helius } from "../../helius";
 
-export const searchAssetsInputSchema = z.object({
+export const getTokenListInputSchema = z.object({
   input: z.object({
     cursor: z.string().optional(),
     limit: z.number().int().min(1).max(100).optional(),
   }),
 });
 
-type SearchAssetsInput = z.infer<typeof searchAssetsInputSchema>;
+type GetTokenListInput = z.infer<typeof getTokenListInputSchema>;
 
-export async function searchAssetsHandler({ input }: SearchAssetsInput) {
+export async function getTokenListHandler({ input }: GetTokenListInput) {
   return await helius.rpc.searchAssets({
     cursor: input.cursor,
     limit: input.limit,

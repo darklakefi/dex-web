@@ -1,7 +1,7 @@
-import { handler } from "@dex-web/orpc";
+import { rpcHandler } from "@dex-web/orpc";
 
 async function handleRequest(request: Request) {
-  const { response } = await handler.handle(request, {
+  const { response } = await rpcHandler.handle(request, {
     context: {
       headers: Object.fromEntries(request.headers.entries()),
     },

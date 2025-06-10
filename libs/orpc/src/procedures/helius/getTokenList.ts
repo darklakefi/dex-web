@@ -1,6 +1,6 @@
 import z from "zod";
-import { baseProcedure } from "../../../procedures/baseProcedure";
-import { searchAssetsHandler } from "../handlers/searchAssets.handler";
+import { getTokenListHandler } from "../../handlers/helius/getTokenList.handler";
+import { baseProcedure } from "../baseProcedure";
 
 const getTokenListInputSchema = z.object({
   cursor: z.string().optional(),
@@ -10,5 +10,5 @@ const getTokenListInputSchema = z.object({
 export const getTokenList = baseProcedure
   .input(getTokenListInputSchema)
   .handler(async ({ input }) => {
-    return await searchAssetsHandler({ input });
+    return await getTokenListHandler({ input });
   });

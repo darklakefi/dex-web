@@ -1,10 +1,8 @@
-import { searchAssetsHandler } from "./searchAssets.handler";
+import { getTokenListHandler } from "../getTokenList.handler";
 
-import "../../../mocks/helius.mock";
-
-describe("searchAssestsHandler", () => {
+describe("getTokenListHandler", () => {
   it("should return a list of assets", async () => {
-    const result = await searchAssetsHandler({
+    const result = await getTokenListHandler({
       input: {
         cursor: "123",
         limit: 10,
