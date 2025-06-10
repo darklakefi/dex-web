@@ -17,7 +17,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-green-100 px-3 py-1.5 text-green-700 hover:bg-green-200 focus:outline-white",
+          "bg-green-100 px-3 py-1.5 text-green-700 hover:bg-green-200 focus:outline-white border-4 border-red-500",
         "primary-dark":
           "bg-green-700 px-3 py-1.5 text-green-100 hover:bg-green-600 focus:outline-white",
         secondary:
