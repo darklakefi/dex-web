@@ -49,7 +49,7 @@ commands:
     description: "Set up Nx SHAs for affected detection"
     steps:
       - nx/set-shas:
-          main-branch-name: 'main'
+          main-branch-name: "main"
 
   restore-nx-cache:
     description: "Restore Nx cache"
@@ -108,36 +108,19 @@ jobs:
       - run:
           name: Run affected build tasks
           command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
-      - run:
-          name: Check if UI was affected
-          command: |
-            if pnpm exec nx show projects --affected --base=$NX_BASE --head=$NX_HEAD | grep -q "^ui$"; then
-              echo "true" > /tmp/ui-affected
-            else
-              echo "false" > /tmp/ui-affected
-            fi
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - ui-affected
       - save-nx-cache
+      - persist_to_workspace:
+          root: .
+          paths:
+            - apps/*/.next
+            - libs/*/dist
+            - apps/*/dist
 
   chromatic:
     executor: node-development
     steps:
       - checkout
       - restore-dependencies
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: Check if UI was affected
-          command: |
-            if [ "$(cat /tmp/ui-affected)" = "true" ]; then
-              echo "UI was affected, running Chromatic"
-            else
-              echo "UI was not affected, skipping Chromatic"
-              circleci-agent step halt
-            fi
       - run:
           name: Build Storybook for Chromatic
           command: pnpm exec nx build-storybook ui --stats-json=storybook-static
@@ -150,12 +133,11 @@ jobs:
     parallelism: 4
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - restore-dependencies
       - restore-nx-cache
       - setup-nx
-      - run:
-          name: Build dependencies for e2e tests
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
       - run:
           name: Run Playwright tests with sharding
           command: |
