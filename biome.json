@@ -63,6 +63,8 @@
   },
   "vcs": {
     "clientKind": "git",
-    "enabled": true
+    "defaultBranch": "develop",
+    "enabled": true,
+    "useIgnoreFile": true
   }
 }
