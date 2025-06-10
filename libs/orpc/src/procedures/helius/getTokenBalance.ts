@@ -1,5 +1,5 @@
 import z from "zod";
-import { baseProcedure } from "../baseProcedure";
+import { baseProcedure } from "@/procedures/baseProcedure";
 
 const getTokenBalanceInputSchema = z.object({
   address: z.string(),

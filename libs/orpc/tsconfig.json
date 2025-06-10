@@ -1,5 +1,12 @@
 {
-  "compilerOptions": {},
+  "compilerOptions": {
+    "paths": {
+      "@/handlers/*": ["./src/handlers/*"],
+      "@/procedures/*": ["./src/procedures/*"],
+      "@/routers/*": ["./src/routers/*"],
+      "@/schemas/*": ["./src/schemas/*"]
+    }
+  },
   "extends": "../../tsconfig.base.json",
   "files": [],
   "include": [],
