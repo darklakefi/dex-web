@@ -1,5 +1,13 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "generators": {
+    "@nx/next": {
+      "application": {
+        "linter": "none",
+        "style": "tailwind"
+      }
+    }
+  },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
@@ -23,83 +31,64 @@
   },
   "plugins": [
     {
-      "plugin": "@nx/js/typescript",
       "options": {
+        "build": {
+          "buildDepsName": "build-deps",
+          "configName": "tsconfig.lib.json",
+          "targetName": "build",
+          "watchDepsName": "watch-deps"
+        },
         "typecheck": {
           "targetName": "typecheck"
-        },
-        "build": {
-          "targetName": "build",
-          "configName": "tsconfig.lib.json",
-          "buildDepsName": "build-deps",
-          "watchDepsName": "watch-deps"
         }
-      }
+      },
+      "plugin": "@nx/js/typescript"
     },
     {
-      "plugin": "@nx/next/plugin",
       "options": {
-        "startTargetName": "start",
+        "buildDepsTargetName": "build-deps",
         "buildTargetName": "build",
         "devTargetName": "dev",
         "serveStaticTargetName": "serve-static",
-        "buildDepsTargetName": "build-deps",
+        "startTargetName": "start",
         "watchDepsTargetName": "watch-deps"
-      }
+      },
+      "plugin": "@nx/next/plugin"
     },
     {
-      "plugin": "@nx/playwright/plugin",
       "options": {
         "targetName": "e2e"
-      }
+      },
+      "plugin": "@nx/playwright/plugin"
     },
     {
-      "plugin": "@nx/vite/plugin",
       "options": {
         "testTargetName": "test"
-      }
+      },
+      "plugin": "@nx/vite/plugin"
     },
     {
-      "plugin": "@nx/react/router-plugin",
       "options": {
+        "buildDepsTargetName": "build-deps",
         "buildTargetName": "build",
         "devTargetName": "dev",
         "startTargetName": "start",
-        "watchDepsTargetName": "watch-deps",
-        "buildDepsTargetName": "build-deps",
-        "typecheckTargetName": "typecheck"
-      }
+        "typecheckTargetName": "typecheck",
+        "watchDepsTargetName": "watch-deps"
+      },
+      "plugin": "@nx/react/router-plugin"
     },
     {
-      "plugin": "@nx/storybook/plugin",
       "options": {
-        "serveStorybookTargetName": "storybook",
         "buildStorybookTargetName": "build-storybook",
-        "testStorybookTargetName": "test-storybook",
-        "staticStorybookTargetName": "static-storybook"
-      }
+        "serveStorybookTargetName": "storybook",
+        "staticStorybookTargetName": "static-storybook",
+        "testStorybookTargetName": "test-storybook"
+      },
+      "plugin": "@nx/storybook/plugin"
     }
   ],
   "targetDefaults": {
-    "build": {
-      "cache": true
-    },
-    "test": {
-      "dependsOn": ["^build"],
-      "cache": true
-    },
-    "lint": {
-      "cache": true
-    },
-    "lint:ci": {
-      "cache": true
-    },
-    "typecheck": {
-      "cache": true
-    },
-    "e2e": {
-      "cache": true
-    },
     "@nx/vite:build": {
       "cache": true,
       "inputs": [
@@ -121,14 +110,25 @@
         }
       ],
       "outputs": ["{options.reportsDirectory}"]
-    }
-  },
-  "generators": {
-    "@nx/next": {
-      "application": {
-        "style": "tailwind",
-        "linter": "none"
-      }
+    },
+    "build": {
+      "cache": true
+    },
+    "e2e": {
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    },
+    "lint:ci": {
+      "cache": true
+    },
+    "test": {
+      "cache": true,
+      "dependsOn": ["^build"]
+    },
+    "typecheck": {
+      "cache": true
     }
   }
 }

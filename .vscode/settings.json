@@ -1,13 +1,8 @@
 {
-  "nxConsole.generateAiAgentRules": true,
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.preferences.importModuleSpecifier": "non-relative",
-  "javascript.preferences.importModuleSpecifier": "non-relative",
-  "typescript.validate.enable": true,
-  "javascript.validate.enable": false,
-  "editor.formatOnSave": true,
   "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
   "[typescript]": {
@@ -16,25 +11,30 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "[javascriptreact]": {
-    "editor.defaultFormatter": "biomejs.biome"
+  "biome.configurationPath": "./biome.json",
+  "biome.lsp.bin": "./node_modules/.bin/biome",
+  "editor.codeActionsOnSave": {
+    "source.action.useSortedAttributes.biome": "explicit",
+    "source.action.useSortedKeys.biome": "explicit",
+    "source.action.useSortedProperties.biome": "explicit",
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
   },
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.validate.enable": false,
+  "nxConsole.generateAiAgentRules": true,
+  "tailwindCSS.classFunctions": ["cva", "cx"],
   "tailwindCSS.experimental.classRegex": [
     ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
-  "tailwindCSS.classFunctions": ["cva", "cx"],
-  "files.insertFinalNewline": true,
-  "files.trimTrailingWhitespace": true,
-  "files.eol": "\n",
-  "editor.tabSize": 2,
-  "editor.detectIndentation": false,
-  "biome.lsp.bin": "./node_modules/.bin/biome",
-  "biome.configurationPath": "./biome.json",
-  "editor.codeActionsOnSave": {
-    "source.organizeImports.biome": "explicit",
-    "source.action.useSortedAttributes.biome": "explicit",
-    "source.action.useSortedProperties.biome": "explicit",
-    "source.action.useSortedKeys.biome": "explicit",
-    "source.fixAll.biome": "explicit"
-  }
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.validate.enable": true
 }

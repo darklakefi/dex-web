@@ -12,26 +12,18 @@
   "files": {
     "ignoreUnknown": false,
     "includes": [
-      "apps/**",
-      "libs/**",
+      "**",
       "!**/dist/**",
       "!**/node_modules/**",
       "!**/coverage/**",
       "!**/storybook-static/**",
-      "!**/.next/**"
+      "!**/tmp/**",
+      "!**/.*/**"
     ]
   },
   "formatter": {
     "enabled": true,
-    "includes": [
-      "apps/**",
-      "libs/**",
-      "!**/dist/**",
-      "!**/node_modules/**",
-      "!**/coverage/**",
-      "!**/storybook-static/**",
-      "!**/.next/**"
-    ],
+
     "indentStyle": "space",
     "useEditorconfig": true
   },
@@ -42,15 +34,7 @@
   },
   "linter": {
     "enabled": true,
-    "includes": [
-      "apps/**",
-      "libs/**",
-      "!**/dist/**",
-      "!**/node_modules/**",
-      "!**/coverage/**",
-      "!**/storybook-static/**",
-      "!**/.next/**"
-    ],
+
     "rules": {
       "a11y": {
         "recommended": true
@@ -84,5 +68,9 @@
         "recommended": true
       }
     }
+  },
+  "vcs": {
+    "enabled": false,
+    "useIgnoreFile": false
   }
 }
