@@ -13,7 +13,7 @@
     },
     "lint:ci": {
       "cache": true,
-      "command": "biome ci apps/web-e2e/** --reporter=github"
+      "command": "biome ci apps/web-e2e/**"
     }
   }
 }

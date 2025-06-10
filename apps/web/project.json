@@ -31,7 +31,7 @@
     },
     "lint:ci": {
       "cache": true,
-      "command": "biome ci apps/web/** --reporter=github"
+      "command": "biome ci apps/web/**"
     },
     "serve": {
       "configurations": {

@@ -11,7 +11,7 @@
     },
     "lint:ci": {
       "cache": true,
-      "command": "biome ci libs/core/** --reporter=github"
+      "command": "biome ci libs/core/**"
     },
     "test": {
       "cache": true,

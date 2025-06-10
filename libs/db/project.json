@@ -12,7 +12,7 @@
     },
     "lint:ci": {
       "cache": true,
-      "command": "biome ci libs/db/** --reporter=github"
+      "command": "biome ci libs/db/**"
     },
     "seed": {
       "executor": "nx:run-commands",
