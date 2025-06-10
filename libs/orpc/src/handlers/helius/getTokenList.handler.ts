@@ -1,9 +1,12 @@
+import { helius } from "@/helius";
 import type { GetTokenListInput } from "@/schemas/helius/getTokenList.schema";
-import { helius } from "../../helius";
 
-export async function getTokenListHandler({ input }: GetTokenListInput) {
+export async function getTokenListHandler({
+  cursor,
+  limit,
+}: GetTokenListInput) {
   return await helius.rpc.searchAssets({
-    cursor: input.cursor,
-    limit: input.limit,
+    cursor,
+    limit,
   });
 }

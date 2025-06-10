@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 import { builtinModules } from "node:module";
-import { join, resolve } from "node:path";
+import path, { join, resolve } from "node:path";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 
@@ -24,8 +24,20 @@ export default defineConfig(() => {
       },
     },
     cacheDir: "../../node_modules/.vite/libs/orpc",
+    resolve: {
+      alias: {
+        "@/handlers": path.resolve(__dirname, "./src/handlers"),
+        "@/helius": path.resolve(__dirname, "./src/helius"),
+        "@/procedures": path.resolve(__dirname, "./src/procedures"),
+        "@/routers": path.resolve(__dirname, "./src/routers"),
+        "@/schemas": path.resolve(__dirname, "./src/schemas"),
+      },
+    },
     root: __dirname,
     test: {
+      alias: {
+        "@/helius": resolve("./src/mocks/helius.mock.ts"),
+      },
       coverage: {
         provider: "v8" as const,
         reportsDirectory: "../../coverage/libs/orpc",

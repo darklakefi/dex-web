@@ -1,13 +1,9 @@
-import z from "zod";
+import { getTokenBalanceHandler } from "@/handlers/helius/getTokenBalance.handler";
 import { baseProcedure } from "@/procedures/baseProcedure";
-
-const getTokenBalanceInputSchema = z.object({
-  address: z.string(),
-  ownerAddress: z.string(),
-});
+import { getTokenBalanceInputSchema } from "@/schemas/helius/getTokenBalance.schema";
 
 export const getTokenBalance = baseProcedure
   .input(getTokenBalanceInputSchema)
   .handler(async ({ input }) => {
-    // return await searchAssetsHandler({ input });
+    return await getTokenBalanceHandler(input);
   });

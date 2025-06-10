@@ -2,6 +2,7 @@
   "compilerOptions": {
     "paths": {
       "@/handlers/*": ["./src/handlers/*"],
+      "@/helius": ["./src/helius"],
       "@/procedures/*": ["./src/procedures/*"],
       "@/routers/*": ["./src/routers/*"],
       "@/schemas/*": ["./src/schemas/*"]

@@ -10,17 +10,11 @@ import { vi } from "vitest";
 
 const FIXED_SEED = "1234567890123456";
 
-function generateAssetResponseList({
-  count = 1,
-  fixedSeed = "",
-}: {
-  count?: number;
-  fixedSeed?: string;
-}): DAS.GetAssetResponseList {
-  seed(fixedSeed);
+function generateAssetResponseList(): DAS.GetAssetResponseList {
+  seed(FIXED_SEED);
   return {
     cursor: "123",
-    items: times(count, (_i) => ({
+    items: times(10, (_i) => ({
       burnt: false,
       content: {
         $schema: "https://schema.dexscreener.com/asset.schema.json",
@@ -42,20 +36,16 @@ function generateAssetResponseList({
         ownership_model: OwnershipModel.SINGLE,
       },
     })),
-    limit: count,
-    total: count,
+    limit: 10,
+    total: 10,
   };
 }
 
-vi.mock("../../../helius", () => ({
+module.exports = {
   helius: {
     rpc: {
-      searchAssets: vi.fn(() =>
-        generateAssetResponseList({
-          count: 10,
-          fixedSeed: FIXED_SEED,
-        }),
-      ),
+      getAssetsByOwner: vi.fn(() => generateAssetResponseList()),
+      searchAssets: vi.fn(() => generateAssetResponseList()),
     },
   },
-}));
+};
