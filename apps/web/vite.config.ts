@@ -37,6 +37,7 @@ export default defineConfig(() => {
         },
       },
       reporters: ["default"],
+      setupFiles: ["./tests/setup.ts"],
       teardownTimeout: 10000,
       testTimeout: 30000,
       watch: false,
