@@ -112,7 +112,9 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - dist
+            - apps/*/.next
+            - libs/*/dist
+            - apps/*/dist
 
   chromatic:
     executor: node-development
