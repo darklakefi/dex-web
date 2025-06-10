@@ -22,6 +22,7 @@ exports[`Page > should render successfully 1`] = `
               >
                 <p
                   class="font-normal uppercase font-sans text-3xl text-green-100 leading-8.5 tracking-wider animate-bounce"
+                  data-testid="welcome"
                 >
                   Under construction 🚧
                 </p>

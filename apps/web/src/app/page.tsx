@@ -87,7 +87,7 @@ export default function IndexPage() {
       <div className="wrapper">
         <div className="container mx-auto">
           <div className="flex flex-col items-center justify-center gap-1">
-            <Text.Body1 className="animate-bounce">
+            <Text.Body1 className="animate-bounce" data-testid="welcome">
               Under construction 🚧
             </Text.Body1>
             <WalletConnectButton />
