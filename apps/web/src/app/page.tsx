@@ -80,7 +80,7 @@ const MOCK_POOLS = [
 	},
 ];
 
-export default async function Index() {
+export default function IndexPage() {
 	return (
 		<div>
 			<div className="wrapper">
