@@ -48,9 +48,6 @@ export default defineConfig(() => {
       rollupOptions: {
         external: [
           ...builtinModules,
-          "pg",
-          "pg-cloudflare",
-          "cloudflare:sockets",
         ],
       },
     },
