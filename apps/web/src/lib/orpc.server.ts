@@ -1,11 +1,11 @@
 "server only";
 
-import { router } from "@dex-web/orpc";
+import { appRouter } from "@dex-web/orpc";
 import { createRouterClient } from "@orpc/server";
 import { headers } from "next/headers";
 
 
-globalThis.$client = createRouterClient(router, {
+globalThis.$client = createRouterClient(appRouter, {
 
 
   /**
