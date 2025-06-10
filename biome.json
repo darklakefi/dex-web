@@ -28,6 +28,15 @@
     "enabled": true,
     "includes": ["apps/**", "libs/**"],
     "rules": {
+      "a11y": {
+        "recommended": true
+      },
+      "complexity": {
+        "recommended": true
+      },
+      "correctness": {
+        "recommended": true
+      },
       "nursery": {
         "useSortedClasses": {
           "fix": "safe",
@@ -37,7 +46,19 @@
           }
         }
       },
-      "recommended": true
+      "performance": {
+        "recommended": true
+      },
+      "recommended": true,
+      "security": {
+        "recommended": true
+      },
+      "style": {
+        "recommended": true
+      },
+      "suspicious": {
+        "recommended": true
+      }
     }
   },
   "vcs": {
