@@ -155,6 +155,14 @@ jobs:
       - run:
           name: Deploy Project Artifacts to Vercel
           command: npx vercel@latest deploy --token=$VERCEL_TOKEN
+      - run:
+          name: Update deployment status to SUCCESS
+          command: circleci run release update --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to FAILED
+          command: circleci run release update --status=FAILED
+          when: on_fail
       - save-vercel-cache
 
   deploy-production:
