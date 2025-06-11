@@ -1,0 +1,1 @@
+export const FIXED_SEED = "1234567890123456";

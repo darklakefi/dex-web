@@ -26,6 +26,9 @@ export default defineConfig(() => {
     cacheDir: "../../node_modules/.vite/libs/orpc",
     root: __dirname,
     test: {
+      alias: {
+        "../../helius": resolve("./src/mocks/helius.mock.ts"),
+      },
       coverage: {
         provider: "v8" as const,
         reportsDirectory: "../../coverage/libs/orpc",
