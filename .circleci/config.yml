@@ -75,45 +75,24 @@ commands:
             - .pnpm-store
 
 jobs:
-  quality-checks:
+  main:
     docker:
-      - image: cimg/node:lts
-    resource_class: medium
+      - image: mcr.microsoft.com/playwright:v1.53.0-noble
+    resource_class: large
     steps:
       - checkout
       - setup
       - setup-nx
       - restore-nx-cache
       - run:
-          name: Run affected lint tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint:ci --parallel=3
-      - run:
-          name: Run affected typecheck tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t typecheck --parallel=3
+          name: Run affected tasks
+          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint:ci,typecheck,test,e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
       - save-nx-cache
-
-  test:
-    docker:
-      - image: cimg/node:lts
-    resource_class: medium
-    environment:
-      CI: true
-    steps:
-      - checkout
-      - setup
-      - setup-nx
-      - restore-nx-cache
-      - run:
-          name: Run affected test tasks
-          command: |
-            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test --parallel=3
-      - run:
-          name: Build Storybook for Chromatic
-          command: pnpm exec nx build-storybook ui --stats-json=storybook-static
-      - run:
-          name: Run Chromatic
-          command: cd libs/ui && npx chromatic
-      - save-nx-cache
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+          destination: playwright-results
 
   chromatic:
     docker:
@@ -133,22 +112,6 @@ jobs:
           name: Run Chromatic
           command: cd libs/ui && npx chromatic
       - save-nx-cache
-
-  test-e2e:
-    docker:
-      - image: mcr.microsoft.com/playwright:v1.53.0-noble
-    resource_class: large
-    steps:
-      - checkout
-      - setup
-      - setup-nx
-      - restore-nx-cache
-      - run: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
-      - store_test_results:
-          path: test-results
-      - store_artifacts:
-          path: test-results
-          destination: playwright-results
 
   deploy-preview:
     docker:
@@ -219,25 +182,19 @@ jobs:
 workflows:
   ci-cd:
     jobs:
-      - quality-checks
-      - test
-      - chromatic
-      - test-e2e
+      - main
+      - chromatic:
+          requires:
+            - main
       - deploy-preview:
           requires:
             - chromatic
-            - quality-checks
-            - test
-            - test-e2e
           filters:
             branches:
               ignore: /main/
       - deploy-production:
           requires:
             - chromatic
-            - quality-checks
-            - test
-            - test-e2e
           filters:
             branches:
               only: /main/
