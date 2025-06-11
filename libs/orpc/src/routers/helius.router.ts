@@ -1,4 +1,4 @@
-import { getTokenList } from "@/procedures/helius/getTokenList";
+import { getTokenList } from "../procedures/helius/getTokenList";
 
 export const heliusRouter = {
   getTokenList,
