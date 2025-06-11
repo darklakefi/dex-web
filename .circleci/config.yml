@@ -96,7 +96,6 @@ jobs:
     docker:
       - image: cimg/node:lts
     resource_class: medium
-    parallelism: 2
     environment:
       CI: true
     steps:
