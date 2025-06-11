@@ -198,9 +198,6 @@ importers:
       jiti:
         specifier: 2.4.2
         version: 2.4.2
-      jsonc-parser:
-        specifier: ^3.3.1
-        version: 3.3.1
       knip:
         specifier: ^5.60.2
         version: 5.60.2(@types/node@24.0.1)(typescript@5.8.3)

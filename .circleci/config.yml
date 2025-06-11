@@ -75,7 +75,7 @@ commands:
             - .pnpm-store
 
 jobs:
-  main:
+  check:
     docker:
       - image: mcr.microsoft.com/playwright:v1.53.0-noble
     resource_class: large
@@ -86,7 +86,21 @@ jobs:
       - restore-nx-cache
       - run:
           name: Run affected tasks
-          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint:ci,typecheck,test,e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint:ci,typecheck
+      - save-nx-cache
+
+  test:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.53.0-noble
+    resource_class: large
+    steps:
+      - checkout
+      - setup
+      - setup-nx
+      - restore-nx-cache
+      - run:
+          name: Run affected tasks
+          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test,e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
       - save-nx-cache
       - store_test_results:
           path: test-results
@@ -182,19 +196,18 @@ jobs:
 workflows:
   ci-cd:
     jobs:
-      - main
-      - chromatic:
-          requires:
-            - main
+      - check
+      - test
+      - chromatic
       - deploy-preview:
           requires:
-            - chromatic
+            - test
           filters:
             branches:
               ignore: /main/
       - deploy-production:
           requires:
-            - chromatic
+            - test
           filters:
             branches:
               only: /main/

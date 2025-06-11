@@ -65,7 +65,6 @@
     "drizzle-kit": "^0.31.1",
     "happy-dom": "~18.0.1",
     "jiti": "2.4.2",
-    "jsonc-parser": "^3.3.1",
     "knip": "^5.60.2",
     "lefthook": "^1.11.13",
     "nx": "21.1.3",
