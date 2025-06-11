@@ -25,6 +25,7 @@ const baseConfig = {
   },
   cacheDir: "../../node_modules/.vite/libs/ui",
   root: __dirname,
+
   test: {
     coverage: {
       provider: "v8" as const,

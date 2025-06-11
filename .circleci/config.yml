@@ -3,47 +3,16 @@ version: 2.1
 orbs:
   nx: nrwl/nx@1.7.0
 
-executors:
-  pw-noble-development:
-    docker:
-      - image: mcr.microsoft.com/playwright:v1.52.0-noble
-  node-development:
-    docker:
-      - image: cimg/node:lts
-
 commands:
-  setup-pnpm:
-    description: "Install and configure pnpm package manager"
-    steps:
-      - run:
-          name: Install pnpm package manager
-          command: |
-            npm install --global corepack@latest
-            corepack enable
-            corepack prepare pnpm@latest-10 --activate
-            pnpm config set store-dir .pnpm-store
-
-  restore-dependencies:
-    description: "Restore pnpm package cache and install dependencies"
+  restore-nx-cache:
+    description: "Restore Nx cache with enhanced fallback"
     steps:
       - restore_cache:
-          name: Restore pnpm Package Cache
+          name: Restore Nx Cache
           keys:
-            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-      - setup-pnpm
-      - run:
-          name: Install Dependencies
-          command: |
-            pnpm install
-
-  save-pnpm-cache:
-    description: "Save pnpm package cache"
-    steps:
-      - save_cache:
-          name: Save pnpm Package Cache
-          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-          paths:
-            - .pnpm-store
+            - nx-cache-v2-{{ .Branch }}-{{ .Revision }}
+            - nx-cache-v2-{{ .Branch }}-
+            - nx-cache-v2-
 
   setup-nx:
     description: "Set up Nx SHAs for affected detection"
@@ -51,135 +20,195 @@ commands:
       - nx/set-shas:
           main-branch-name: "main"
 
-  restore-nx-cache:
-    description: "Restore Nx cache"
-    steps:
-      - restore_cache:
-          name: Restore Nx Cache
-          keys:
-            - nx-cache-{{ arch }}-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
-            - nx-cache-{{ arch }}-{{ .Branch }}
-            - nx-cache-{{ arch }}
-
   save-nx-cache:
-    description: "Save Nx cache"
+    description: "Save Nx cache with revision-specific key"
     steps:
       - save_cache:
           name: Save Nx Cache
-          key: nx-cache-{{ arch }}-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ epoch }}
+          key: nx-cache-v2-{{ .Branch }}-{{ .Revision }}
           paths:
             - .nx/cache
 
+  restore-vercel-cache:
+    description: "Restore Vercel build cache"
+    steps:
+      - restore_cache:
+          name: Restore Vercel Cache
+          keys:
+            - vercel-cache-v2-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
+            - vercel-cache-v2-{{ .Branch }}-
+            - vercel-cache-v2-
+
+  save-vercel-cache:
+    description: "Save Vercel build cache"
+    steps:
+      - save_cache:
+          name: Save Vercel Cache
+          key: vercel-cache-v2-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .vercel
+            - .next/cache
+            - apps/web/.next/cache
+
+  setup:
+    description: "Common setup steps for all jobs"
+    steps:
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install pnpm package manager
+          command: |
+            npm install --global corepack@latest
+            corepack enable
+            corepack prepare pnpm@latest-10 --activate
+            pnpm config set store-dir .pnpm-store
+      - run:
+          name: Install Dependencies
+          command: |
+            pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - .pnpm-store
+
 jobs:
-  lint:
-    executor: node-development
+  quality-checks:
+    docker:
+      - image: cimg/node:lts
+    resource_class: medium
     steps:
       - checkout
-      - restore-dependencies
-      - save-pnpm-cache
-      - restore-nx-cache
+      - setup
       - setup-nx
+      - restore-nx-cache
       - run:
           name: Run affected lint tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint:ci
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint:ci --parallel=3
+      - run:
+          name: Run affected typecheck tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t typecheck --parallel=3
       - save-nx-cache
 
-  test:
-    executor: node-development
+  test-suite:
+    docker:
+      - image: cimg/node:lts
+    resource_class: medium
+    parallelism: 2
     environment:
       CI: true
     steps:
       - checkout
-      - restore-dependencies
-      - restore-nx-cache
+      - setup
       - setup-nx
+      - restore-nx-cache
       - run:
           name: Run affected test tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test
-      - save-nx-cache
-
-  build:
-    executor: node-development
-    steps:
-      - checkout
-      - restore-dependencies
-      - restore-nx-cache
-      - setup-nx
-      - run:
-          name: Run affected build tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t build
-      - save-nx-cache
-      - persist_to_workspace:
-          root: .
-          paths:
-            - apps/*/.next
-            - libs/*/dist
-            - apps/*/dist
-
-  chromatic:
-    executor: node-development
-    steps:
-      - checkout
-      - restore-dependencies
+          command: |
+            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test --parallel=3
       - run:
           name: Build Storybook for Chromatic
           command: pnpm exec nx build-storybook ui --stats-json=storybook-static
       - run:
           name: Run Chromatic
           command: cd libs/ui && npx chromatic
+      - save-nx-cache
 
-  end-to-end:
-    executor: pw-noble-development
-    parallelism: 4
+  test-e2e:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.53.0-noble
+    resource_class: large
     steps:
       - checkout
-      - attach_workspace:
-          at: .
-      - restore-dependencies
-      - restore-nx-cache
+      - setup
       - setup-nx
-      - run:
-          name: Run Playwright tests with sharding
-          command: |
-            SHARD="$((${CIRCLE_NODE_INDEX}+1))"
-            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+      - restore-nx-cache
+      - run: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+          destination: playwright-results
 
-  # deploy:
-  #   executor: node-development
-  #   steps:
-  #     - checkout
-  #     - restore-dependencies
-  #     - setup-nx
-  #     - run:
-  #         name: Deploy application
-  #         command: |
-  #           echo "Deployment command goes here"
+  deploy-preview:
+    docker:
+      - image: cimg/node:lts
+    resource_class: medium
+    steps:
+      - checkout
+      - setup
+      - restore-vercel-cache
+      - run:
+          name: Plan preview deployment
+          command: circleci run release plan --target-version=preview-$CIRCLE_SHA1 --environment-name=preview --component-name=dex-web
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update --status=running
+      - run:
+          name: Pull Vercel Environment Information
+          command: npx vercel@latest pull --yes --environment=preview --token=$VERCEL_TOKEN
+      - run:
+          name: Build Project
+          command: npx vercel@latest build --token=$VERCEL_TOKEN
+      - run:
+          name: Deploy Project Artifacts to Vercel
+          command: npx vercel@latest deploy --token=$VERCEL_TOKEN
+      - save-vercel-cache
+
+  deploy-production:
+    docker:
+      - image: cimg/node:lts
+    resource_class: medium
+    steps:
+      - checkout
+      - setup
+      - restore-vercel-cache
+      - run:
+          name: Plan production deployment
+          command: circleci run release plan --target-version=production-$CIRCLE_SHA1 --environment-name=production --component-name=dex-web
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update --status=running
+      - run:
+          name: Pull Vercel Environment Information
+          command: npx vercel@latest pull --yes --environment=production --token=$VERCEL_TOKEN
+      - run:
+          name: Build Project
+          command: npx vercel@latest build --prod --token=$VERCEL_TOKEN
+      - run:
+          name: Deploy Project Artifacts to Vercel
+          command: npx vercel@latest deploy --prod --token=$VERCEL_TOKEN
+      - run:
+          name: Update deployment status to SUCCESS
+          command: circleci run release update --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to FAILED
+          command: circleci run release update --status=FAILED
+          when: on_fail
+      - save-vercel-cache
 
 workflows:
-  version: 2
-
   ci-cd:
     jobs:
-      - lint
-      - test
-
-      - build:
+      - quality-checks
+      - test-suite
+      - test-e2e
+      - deploy-preview:
           requires:
-            - lint
-            - test
-
-      - chromatic:
+            - quality-checks
+            - test-suite
+            - test-e2e
+          filters:
+            branches:
+              ignore: /main/
+      - deploy-production:
           requires:
-            - lint
-            - test
-
-      - end-to-end:
-          requires:
-            - build
-
-      # - deploy:
-      #     requires:
-      #       - end-to-end
-      #     filters:
-      #       branches:
-      #         only: main
+            - quality-checks
+            - test-suite
+            - test-e2e
+          filters:
+            branches:
+              only: /main/

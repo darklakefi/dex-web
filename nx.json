@@ -115,7 +115,8 @@
       "cache": true
     },
     "e2e": {
-      "cache": true
+      "cache": true,
+      "dependsOn": ["^build"]
     },
     "lint": {
       "cache": true
@@ -124,11 +125,11 @@
       "cache": true
     },
     "test": {
-      "cache": true,
-      "dependsOn": ["^build"]
+      "cache": true
     },
     "typecheck": {
-      "cache": true
+      "cache": true,
+      "dependsOn": ["^build", "build"]
     }
   }
 }

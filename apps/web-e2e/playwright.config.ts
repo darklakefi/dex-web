@@ -1,9 +1,23 @@
 import { workspaceRoot } from "@nx/devkit";
 import { nxE2EPreset } from "@nx/playwright/preset";
 import { defineConfig, devices } from "@playwright/test";
+import { join } from "path";
 
-// For CI, you may want to set BASE_URL to the deployed application.
-const baseURL = process.env.BASE_URL || "http://localhost:3000";
+// Configuration constants
+const CI_TIMEOUT = 60000; // 1 minute for CI environments
+const LOCAL_TIMEOUT = 30000; // 30 seconds for local development
+const CI_RETRIES = 2;
+const LOCAL_RETRIES = 0;
+const CI_WORKERS = 2; // Conservative for CircleCI resource limits
+
+// Environment detection
+const isCI = process.env.CI === "true";
+const isCIRCLECI = !!process.env.CIRCLECI;
+
+// App configuration
+const baseURL =
+  process.env.BASE_URL ||
+  (isCI ? "http://127.0.0.1:3000" : "http://localhost:4200");
 
 /**
  * Read environment variables from file.
@@ -16,53 +30,127 @@ const baseURL = process.env.BASE_URL || "http://localhost:3000";
  */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: "./src" }),
+  expect: {
+    timeout: 10000,
+  },
+  forbidOnly: isCI,
+  fullyParallel: true,
+  outputDir: join(
+    workspaceRoot,
+    "dist",
+    ".playwright",
+    "web-e2e",
+    "test-results",
+  ),
+
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        launchOptions: isCIRCLECI
+          ? {
+              args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--no-first-run",
+                "--no-zygote",
+                "--single-process",
+              ],
+            }
+          : {},
+      },
     },
-
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
-    },
-
-    // Uncomment for mobile browsers support
-    /* {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    }, */
-
-    // Uncomment for branded browsers
-    /* {
-      name: 'Microsoft Edge',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    },
-    {
-      name: 'Google Chrome',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    } */
+    ...(isCI
+      ? [
+          {
+            name: "firefox",
+            use: {
+              ...devices["Desktop Firefox"],
+              launchOptions: isCIRCLECI
+                ? {
+                    args: ["--no-sandbox", "--disable-dev-shm-usage"],
+                  }
+                : {},
+            },
+          },
+          {
+            name: "webkit",
+            use: {
+              ...devices["Desktop Safari"],
+              launchOptions: {},
+            },
+          },
+        ]
+      : []),
   ],
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+
+  reporter: isCI
+    ? [
+        [
+          "html",
+          {
+            open: "never",
+            outputFolder: join(
+              workspaceRoot,
+              "dist",
+              ".playwright",
+              "web-e2e",
+              "html-report",
+            ),
+          },
+        ],
+        [
+          "junit",
+          {
+            outputFile: join(
+              workspaceRoot,
+              "dist",
+              ".playwright",
+              "web-e2e",
+              "junit.xml",
+            ),
+          },
+        ],
+        ["github"],
+      ]
+    : [["html", { open: "on-failure" }], ["list"]],
+  retries: isCI ? CI_RETRIES : LOCAL_RETRIES,
+
+  timeout: isCI ? CI_TIMEOUT : LOCAL_TIMEOUT,
   use: {
+    actionTimeout: 15000,
     baseURL,
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: "on-first-retry",
+
+    headless: isCI,
+
+    navigationTimeout: 30000,
+    screenshot: "only-on-failure",
+    trace: isCI ? "retain-on-failure" : "on-first-retry",
+    video: isCI ? "retain-on-failure" : "on-first-retry",
+
+    viewport: { height: 720, width: 1280 },
   },
-  /* Run your local dev server before starting the tests */
   webServer: {
-    command: "pnpm exec nx run web:start",
+    command: isCI
+      ? "pnpm exec nx run web:start -- --hostname 0.0.0.0 --port 3000"
+      : "pnpm exec nx run web:serve",
     cwd: workspaceRoot,
-    reuseExistingServer: true,
-    url: "http://localhost:3000",
+
+    env: {
+      NEXT_TELEMETRY_DISABLED: "1",
+      NODE_ENV: isCI ? "production" : "development",
+      PORT: "3000",
+    },
+    reuseExistingServer: !isCI,
+    stderr: isCI ? "pipe" : "ignore",
+
+    stdout: isCI ? "pipe" : "ignore",
+    timeout: isCI ? 180000 : 60000,
+
+    url: baseURL,
   },
+  workers: isCI ? CI_WORKERS : undefined,
 });

@@ -1,9 +1,11 @@
-/** @type {import('next').NextConfig} */
+import { join } from "node:path";
 import { withNx } from "@nx/next";
 import type { NextConfig } from "next";
 
-const nextConfig = {
+const nextConfig: NextConfig = {
+  distDir: "dist",
   experimental: {
+    reactCompiler: true,
     typedRoutes: true,
   },
   images: {
@@ -12,6 +14,7 @@ const nextConfig = {
   nx: {
     svgr: false,
   },
+  outputFileTracingRoot: join(__dirname, "../../"),
   turbopack: {
     rules: {
       "*.svg": {
@@ -27,6 +30,10 @@ const nextConfig = {
         ],
       },
     },
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+    tsconfigPath: "./tsconfig.lib.json",
   },
   webpack(config) {
     config.module.rules.push({

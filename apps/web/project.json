@@ -6,24 +6,12 @@
   "tags": [],
   "targets": {
     "build": {
-      "cache": true,
-      "dependsOn": ["^build"],
-      "executor": "nx:run-commands",
-      "inputs": [
-        "default",
-        "^production",
-        {
-          "externalDependencies": ["next"]
-        }
-      ],
+      "defaultConfiguration": "production",
+      "executor": "@nx/next:build",
       "options": {
-        "command": "next build",
-        "cwd": "apps/web"
+        "outputPath": "./dist"
       },
-      "outputs": [
-        "{projectRoot}/.next/!(cache)",
-        "{projectRoot}/.next/!(cache)/**/*"
-      ]
+      "outputs": ["{options.outputPath}"]
     },
     "lint": {
       "cache": true,
@@ -45,7 +33,15 @@
       "executor": "@nx/next:server",
       "options": {
         "buildTarget": "web:build",
-        "dev": true
+        "dev": true,
+        "turbo": true
+      }
+    },
+    "start": {
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "web:build:production",
+        "dev": false
       }
     },
     "test": {
