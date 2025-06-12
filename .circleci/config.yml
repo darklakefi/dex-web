@@ -143,14 +143,14 @@ jobs:
           command: circleci run release update --status=running
       - run:
           name: Pull Vercel Environment Information
-          command: npx vercel@latest pull --yes --environment=preview --token=$VERCEL_TOKEN
+          command: circleci run release step "Pull Vercel Environment Information" -- npx vercel@latest pull --yes --environment=preview --token=$VERCEL_TOKEN
       - run:
           name: Build Project
-          command: npx vercel@latest build --token=$VERCEL_TOKEN
+          command: circleci run release step "Build Project" -- npx vercel@latest build --token=$VERCEL_TOKEN
       - run:
           name: Deploy Project Artifacts to Vercel
           command: |
-            VERCEL_URL=$(npx vercel@latest deploy --token=$VERCEL_TOKEN)
+            VERCEL_URL=$(circleci run release step "Deploy Project Artifacts to Vercel" -- npx vercel@latest deploy --token=$VERCEL_TOKEN)
 
             if [[ ! "$VERCEL_URL" =~ ^https?:// ]]; then
               echo "Invalid Vercel URL received: $VERCEL_URL"
@@ -166,6 +166,7 @@ jobs:
       - run:
           name: Create GitHub Deployment & Status
           command: |
+            circleci run release step "Create GitHub Deployment & Status" -- bash -c '
             set -e
 
             if [ -z "$GITHUB_TOKEN" ]; then
@@ -254,6 +255,7 @@ jobs:
             fi
 
             echo "🎉 GitHub integration completed successfully!"
+            '
 
   deploy-production:
     docker:
