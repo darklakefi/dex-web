@@ -150,22 +150,106 @@ jobs:
       - run:
           name: Deploy Project Artifacts to Vercel
           command: |
-            npx vercel@latest deploy --token=$VERCEL_TOKEN > deployment-url.txt
-            VERCEL_URL=$(cat deployment-url.txt)
+            VERCEL_URL=$(npx vercel@latest deploy --token=$VERCEL_TOKEN)
+
+            if [[ ! "$VERCEL_URL" =~ ^https?:// ]]; then
+              echo "Invalid Vercel URL received: $VERCEL_URL"
+              exit 1
+            fi
+
+            echo "Deployed to: $VERCEL_URL"
             echo "export VERCEL_URL=$VERCEL_URL" >> $BASH_ENV
       - run:
-          name: Update GitHub Status
+          name: Install required tools
+          command: sudo apt-get update && sudo apt-get install -y jq
+
+      - run:
+          name: Create GitHub Deployment & Status
           command: |
-            curl -X POST \
+            set -e  # Exit on any error
+
+            if [ -z "$GITHUB_TOKEN" ]; then
+              echo "⚠️  GITHUB_TOKEN not set, skipping GitHub integration"
+              exit 0
+            fi
+
+            if [ -z "$VERCEL_URL" ]; then
+              echo "❌ VERCEL_URL not set, cannot create deployment"
+              exit 1
+            fi
+
+            if [[ ! "$VERCEL_URL" =~ ^https?:// ]]; then
+              echo "❌ Invalid Vercel URL format: $VERCEL_URL"
+              exit 1
+            fi
+
+            echo "🚀 Creating GitHub deployment for commit: $CIRCLE_SHA1"
+            echo "📁 Repository: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+            echo "🔗 Preview URL: $VERCEL_URL"
+
+            DEPLOYMENT_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments \
+              -d '{
+                "ref": "'$CIRCLE_SHA1'",
+                "environment": "preview",
+                "auto_merge": false,
+                "required_contexts": []
+              }')
+
+            HTTP_STATUS=$(echo $DEPLOYMENT_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+            DEPLOYMENT_BODY=$(echo $DEPLOYMENT_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')
+
+            if [ "$HTTP_STATUS" -ne 201 ]; then
+              echo "❌ Failed to create deployment. HTTP Status: $HTTP_STATUS"
+              echo "Response: $DEPLOYMENT_BODY"
+              exit 1
+            fi
+
+            DEPLOYMENT_ID=$(echo $DEPLOYMENT_BODY | jq -r '.id')
+            echo "✅ Deployment created (ID: $DEPLOYMENT_ID)"
+
+            STATUS_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments/$DEPLOYMENT_ID/statuses \
+              -d '{
+                "state": "success",
+                "environment_url": "'$VERCEL_URL'",
+                "description": "Preview deployment ready"
+              }')
+
+            STATUS_HTTP_STATUS=$(echo $STATUS_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+
+            if [ "$STATUS_HTTP_STATUS" -ne 201 ]; then
+              echo "⚠️  Failed to update deployment status. HTTP Status: $STATUS_HTTP_STATUS"
+              echo "Response: $(echo $STATUS_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')"
+            else
+              echo "✅ Deployment status updated"
+            fi
+
+            CHECK_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
               -H "Authorization: token $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
               https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/statuses/$CIRCLE_SHA1 \
               -d '{
                 "state": "success",
                 "target_url": "'$VERCEL_URL'",
-                "description": "Preview deployment ready",
-                "context": "vercel/preview"
-              }'
+                "description": "Preview ready",
+                "context": "deploy/preview"
+              }')
+
+            CHECK_HTTP_STATUS=$(echo $CHECK_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+
+            if [ "$CHECK_HTTP_STATUS" -ne 201 ]; then
+              echo "⚠️  Failed to create status check. HTTP Status: $CHECK_HTTP_STATUS"
+              echo "Response: $(echo $CHECK_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')"
+            else
+              echo "✅ Status check created for deploy/preview context"
+            fi
+
+            echo "🎉 GitHub integration completed successfully!"
       - run:
           name: Update deployment status to SUCCESS
           command: circleci run release update --status=SUCCESS
@@ -199,6 +283,25 @@ jobs:
       - run:
           name: Deploy Project Artifacts to Vercel
           command: npx vercel@latest deploy --prod --token=$VERCEL_TOKEN
+      - run:
+          name: Create GitHub Production Deployment
+          command: |
+            if [ -n "$GITHUB_TOKEN" ]; then
+              curl -s -X POST \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments \
+                -d '{
+                  "ref": "'$CIRCLE_SHA1'",
+                  "environment": "production",
+                  "auto_merge": false,
+                  "required_contexts": []
+                }' | jq -r '.id' | xargs -I {} curl -s -X POST \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments/{}/statuses \
+                -d '{"state": "success", "description": "Production deployment successful"}'
+            fi
       - run:
           name: Update deployment status to SUCCESS
           command: circleci run release update --status=SUCCESS
