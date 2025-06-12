@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "composite": true,
+    "declarationDir": "./dist",
     "outDir": "./dist",
     "rootDir": "./src"
   },

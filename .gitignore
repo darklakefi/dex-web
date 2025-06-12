@@ -48,6 +48,10 @@ out
 
 test-output
 
+# Playwright reports
+playwright-report/
+test-results/
+
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 .cursor/rules/nx-rules.mdc
@@ -65,3 +69,7 @@ storybook-static
 # env
 .env
 !.env.example
+
+# Vercel
+
+.vercel

@@ -1,0 +1,9 @@
+{
+  "buildCommand": null,
+  "framework": "nextjs",
+  "git": {
+    "deploymentEnabled": false
+  },
+  "installCommand": null,
+  "outputDirectory": "dist"
+}

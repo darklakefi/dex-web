@@ -1,28 +1,24 @@
 {
   "compilerOptions": {
+    "declarationDir": "./dist",
     "incremental": true,
+    "jsx": "preserve",
     "noEmit": false,
-    "outDir": "./dist"
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "exclude": [
     "dist",
     "node_modules",
-    "vitest.config.ts",
     "**/*.spec.ts",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "../../dist/**/*"
   ],
   "extends": "./tsconfig.json",
-  "include": [
-    "**/*.js",
-    "**/*.jsx",
-    "**/*.ts",
-    "**/*.tsx",
-    "../../apps/web/.next/types/**/*.ts",
-    "../../dist/apps/web/.next/types/**/*.ts",
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    "../../vite.config.base.ts"
-  ],
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
   "references": [
     {
       "path": "../../libs/core/tsconfig.lib.json"

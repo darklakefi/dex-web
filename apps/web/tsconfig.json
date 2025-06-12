@@ -1,16 +1,9 @@
 {
   "compilerOptions": {
-    "incremental": true,
-    "jsx": "preserve",
-    "noEmit": false,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "jsx": "react-jsx"
   },
   "extends": "../../tsconfig.base.json",
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["vite.config.ts", "next.config.ts"],
   "references": [
     {
       "path": "../../libs/core"

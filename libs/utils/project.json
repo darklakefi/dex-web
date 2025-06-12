@@ -5,9 +5,18 @@
   "sourceRoot": "libs/utils/src",
   "tags": [],
   "targets": {
+    "build": {
+      "cache": true,
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p tsconfig.lib.json",
+        "cwd": "libs/utils"
+      },
+      "outputs": ["{workspaceRoot}/libs/utils/dist"]
+    },
     "lint": {
       "cache": true,
-      "command": "biome check --write libs/ui/**"
+      "command": "biome check --write libs/utils/**"
     },
     "lint:ci": {
       "cache": true,

@@ -6,6 +6,15 @@
   "sourceRoot": "libs/orpc/src",
   "tags": [],
   "targets": {
+    "build": {
+      "cache": true,
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p tsconfig.lib.json",
+        "cwd": "libs/orpc"
+      },
+      "outputs": ["{workspaceRoot}/libs/orpc/dist"]
+    },
     "lint": {
       "cache": true,
       "command": "biome check --write libs/orpc/**"
@@ -19,6 +28,15 @@
       "options": {
         "command": "tsx libs/orpc/src/db/seed.ts"
       }
+    },
+    "test": {
+      "cache": true,
+      "executor": "@nx/vite:test",
+      "options": {
+        "config": "libs/orpc/vite.config.ts",
+        "reportsDirectory": "../../coverage/libs/orpc"
+      },
+      "outputs": ["{options.reportsDirectory}"]
     }
   }
 }
