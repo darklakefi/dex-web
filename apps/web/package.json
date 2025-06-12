@@ -5,8 +5,7 @@
   "devDependencies": {
     "@dex-web/core": "workspace:*",
     "@dex-web/orpc": "workspace:*",
-    "@dex-web/ui": "workspace:*",
-    "@dex-web/utils": "workspace:*"
+    "@dex-web/ui": "workspace:*"
   },
   "exports": {
     ".": {
