@@ -149,7 +149,23 @@ jobs:
           command: npx vercel@latest build --token=$VERCEL_TOKEN
       - run:
           name: Deploy Project Artifacts to Vercel
-          command: npx vercel@latest deploy --token=$VERCEL_TOKEN
+          command: |
+            npx vercel@latest deploy --token=$VERCEL_TOKEN > deployment-url.txt
+            VERCEL_URL=$(cat deployment-url.txt)
+            echo "export VERCEL_URL=$VERCEL_URL" >> $BASH_ENV
+      - run:
+          name: Update GitHub Status
+          command: |
+            curl -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/statuses/$CIRCLE_SHA1 \
+              -d '{
+                "state": "success",
+                "target_url": "'$VERCEL_URL'",
+                "description": "Preview deployment ready",
+                "context": "vercel/preview"
+              }'
       - run:
           name: Update deployment status to SUCCESS
           command: circleci run release update --status=SUCCESS
