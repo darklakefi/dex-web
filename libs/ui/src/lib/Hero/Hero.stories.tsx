@@ -21,7 +21,7 @@ export const Default = {
         </Text.Body2>
       </div>
     ),
-    image: "/images/waddles/pose4.png",
+    image: "https://darklake.fi/images/image-waddles-4.png",
     imagePosition: "end",
   },
 } satisfies Story;
