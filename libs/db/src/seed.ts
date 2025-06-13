@@ -5,17 +5,17 @@ import {
   randRecentDate,
   randUrl,
 } from "@ngneat/falso";
-import { database } from ".";
-import {
-  blockQueue,
-  config,
-  type NewBlockQueue,
-  type NewConfig,
-  type NewSandwichEvent,
-  type NewTokenMetadata,
-  sandwichEvents,
-  tokenMetadata,
-} from "./schema";
+import { database } from "./database";
+import { blockQueue } from "./schema/blockQueue";
+import { config } from "./schema/config";
+import { sandwichEvents } from "./schema/sandwichEvents";
+import { tokenMetadata } from "./schema/tokenMetadata";
+import type {
+  NewBlockQueue,
+  NewConfig,
+  NewSandwichEvent,
+  NewTokenMetadata,
+} from "./schema/types";
 
 export function generateSolanaAddress(): string {
   return Array.from({ length: 44 }, () => randAlphaNumeric()).join("");
