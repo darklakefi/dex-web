@@ -2,6 +2,7 @@
   "dependencies": {
     "@orpc/client": "^1.5.1",
     "@orpc/server": "^1.5.1",
+    "@tanstack/react-form": "^1.12.3",
     "class-variance-authority": "^0.7.1",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.44.2",

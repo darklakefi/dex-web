@@ -5,26 +5,32 @@ import type {
 } from "../../schemas/helius/searchAssets.schema";
 
 export async function searchAssetsHandler({
-  limit,
+  limit = 100,
 }: SearchAssetsInput): Promise<SearchAssetsOutput> {
-  const response = await helius.rpc.searchAssets({
-    limit,
-    tokenType: "fungible",
-  });
+  try {
+    const result = await helius.rpc.searchAssets({
+      limit,
+    });
 
-  const tokenListOutput = response.items.map((item) => {
-    const imageUrl =
-      item.content?.files?.find((file) => file.mime?.includes("image"))
-        ?.cdn_uri ?? null;
+    const { items } = await result;
 
-    return {
-      description: item.content?.metadata?.description ?? "",
-      id: item.id,
-      image: imageUrl ? { url: imageUrl } : null,
-      name: item.content?.metadata?.name ?? "",
-      symbol: item.content?.metadata?.symbol ?? "",
-    };
-  });
+    const tokenListOutput = items.map((item) => {
+      const imageUrl =
+        item.content?.files?.find((file) => file.mime?.includes("image"))
+          ?.cdn_uri ?? null;
 
-  return tokenListOutput;
+      return {
+        description: item.content?.metadata?.description ?? "",
+        id: item.id,
+        image: imageUrl ? { url: imageUrl } : null,
+        name: item.content?.metadata?.name ?? "",
+        symbol: item.content?.metadata?.symbol ?? "",
+      };
+    });
+
+    return tokenListOutput;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 }
