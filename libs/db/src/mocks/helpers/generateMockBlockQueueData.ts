@@ -1,4 +1,4 @@
-import type { NewBlockQueue } from "../../schema/types";
+import type { NewBlockQueue } from "../../schemas/types";
 
 export function generateMockBlockQueueData(count: number): NewBlockQueue[] {
   const statuses = ["QUEUED", "PROCESSING", "COMPLETED", "FAILED"] as const;

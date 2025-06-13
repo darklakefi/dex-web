@@ -4,11 +4,11 @@ import { generateMockConfig } from "./mocks/helpers/generateMockConfig";
 import { generateMockSandwichEvents } from "./mocks/helpers/generateMockSandwichEvents";
 import { generateMockTokenMetadata } from "./mocks/helpers/generateMockTokenMetadata";
 import { generateMockTokens } from "./mocks/helpers/generateMockTokens";
-import { blockQueue } from "./schema/blockQueue";
-import { config } from "./schema/config";
-import { sandwichEvents } from "./schema/sandwichEvents";
-import { tokenMetadata } from "./schema/tokenMetadata";
-import { tokens } from "./schema/tokens";
+import { blockQueue } from "./schemas/blockQueue";
+import { config } from "./schemas/config";
+import { sandwichEvents } from "./schemas/sandwichEvents";
+import { tokenMetadata } from "./schemas/tokenMetadata";
+import { tokens } from "./schemas/tokens";
 
 async function seed() {
   console.log("🌱 Starting database seeding...");

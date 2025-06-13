@@ -1,4 +1,4 @@
-import type { NewConfig } from "../../schema/types";
+import type { NewConfig } from "../../schemas/types";
 
 export const configSeedData = [
   {

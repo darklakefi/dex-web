@@ -1,5 +1,5 @@
 import { randAlphaNumeric, randCompanyName, randImg } from "@ngneat/falso";
-import type { NewToken } from "../../schema/types";
+import type { NewToken } from "../../schemas/types";
 import { generateMockSolanaAddress } from "./generateMockSolanaAddress";
 
 export function generateMockTokens(count: number): NewToken[] {

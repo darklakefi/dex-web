@@ -1,5 +1,5 @@
 import { randNumber, randRecentDate } from "@ngneat/falso";
-import type { NewSandwichEvent } from "../../schema/types";
+import type { NewSandwichEvent } from "../../schemas/types";
 import { generateMockSolanaAddress } from "./generateMockSolanaAddress";
 import { generateMockTxHash } from "./generateMockTxHash";
 

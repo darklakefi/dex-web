@@ -19,6 +19,6 @@ export default defineConfig({
     url: DATABASE_URL,
   },
   dialect: "postgresql",
-  out: "./libs/orpc/drizzle",
-  schema: "./libs/orpc/src/db/schema.ts",
+  out: "./libs/db/drizzle",
+  schema: "./libs/db/src/schema.ts",
 });

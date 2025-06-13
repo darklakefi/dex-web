@@ -1,5 +1,5 @@
 import { randAlphaNumeric, randCompanyName, randUrl } from "@ngneat/falso";
-import type { NewTokenMetadata } from "../../schema/types";
+import type { NewTokenMetadata } from "../../schemas/types";
 import { generateMockSolanaAddress } from "./generateMockSolanaAddress";
 
 export function generateMockTokenMetadata(count: number): NewTokenMetadata[] {
