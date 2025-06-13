@@ -11,15 +11,9 @@ export enum TextVariantEnum {
 
 const textVariants = cva("font-normal", {
   variants: {
-    textCase: {
-      capitalize: "capitalize",
-      lowercase: "lowercase",
-      "normal-case": "normal-case",
-      uppercase: "uppercase",
-    },
     variant: {
       body1: "font-sans text-3xl text-green-100 leading-8.5 tracking-wider",
-      body2: "font-sans text-green-200 text-lg leading-6 tracking-wide",
+      body2: "font-sans text-green-200 text-lg leading-6 tracking-wider",
       heading:
         "font-display text-3xl text-green-100 leading-7.5 tracking-normal",
       link: "font-sans text-green-200 text-lg leading-6 tracking-wide underline",
@@ -40,7 +34,7 @@ type TextProps<
   TElement extends keyof JSX.IntrinsicElements,
   TProps extends React.ComponentProps<TElement>,
 > = {
-  as?: TElement;
+  as?: keyof JSX.IntrinsicElements;
 } & TProps &
   TextVariantProps;
 
@@ -48,14 +42,10 @@ export function Text<
   TElement extends keyof JSX.IntrinsicElements,
   TProps extends React.ComponentProps<TElement>,
 >(props: TextProps<TElement, TProps>) {
-  const { variant, as, textCase, className, children, ...rest } = props;
-  const Component = variantMap[
-    as || variant || TextVariantEnum.Body1
-  ] as ElementType;
-  const overrideClasses = twMerge(
-    textVariants({ textCase, variant }),
-    className,
-  );
+  const { variant, as, className, children, ...rest } = props;
+  const Component =
+    as || (variantMap[variant || TextVariantEnum.Body1] as ElementType);
+  const overrideClasses = twMerge(textVariants({ variant }), className);
 
   return (
     <Component className={overrideClasses} {...rest}>
