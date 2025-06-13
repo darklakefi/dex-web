@@ -1,5 +1,7 @@
 import { rpcHandler } from "@dex-web/orpc";
 
+export const dynamic = "force-dynamic";
+
 async function handleRequest(request: Request) {
   const { response } = await rpcHandler.handle(request, {
     context: {
