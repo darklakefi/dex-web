@@ -1,12 +1,12 @@
 import { helius } from "../../helius";
 import type {
-  GetTokenListInput,
-  GetTokenListOutput,
-} from "../../schemas/helius/getTokenList.schema";
+  SearchAssetsInput,
+  SearchAssetsOutput,
+} from "../../schemas/helius/searchAssets.schema";
 
-export async function getTokenListHandler({
+export async function searchAssetsHandler({
   limit,
-}: GetTokenListInput): Promise<GetTokenListOutput> {
+}: SearchAssetsInput): Promise<SearchAssetsOutput> {
   const response = await helius.rpc.searchAssets({
     limit,
     tokenType: "fungible",

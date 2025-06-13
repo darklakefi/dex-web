@@ -8,6 +8,7 @@
     "EditorConfig.EditorConfig",
     "nrwl.angular-console",
     "esbenp.prettier-vscode",
-    "mkhl.direnv"
+    "mkhl.direnv",
+    "yoavbls.pretty-ts-errors"
   ]
 }

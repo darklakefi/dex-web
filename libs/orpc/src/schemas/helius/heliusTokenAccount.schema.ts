@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const heliusTokenAccountSchema = z.object({
   address: z.string(),

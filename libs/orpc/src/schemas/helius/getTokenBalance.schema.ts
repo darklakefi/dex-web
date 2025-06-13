@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { heliusTokenSchema } from "./heliusToken.schema";
 import { heliusTokenAccountSchema } from "./heliusTokenAccount.schema";
 
