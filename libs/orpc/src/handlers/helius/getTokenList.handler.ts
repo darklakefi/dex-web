@@ -5,12 +5,11 @@ import type {
 } from "../../schemas/helius/getTokenList.schema";
 
 export async function getTokenListHandler({
-  cursor,
   limit,
 }: GetTokenListInput): Promise<GetTokenListOutput> {
   const response = await helius.rpc.searchAssets({
-    cursor,
     limit,
+    tokenType: "fungible",
   });
 
   const tokenListOutput = response.items.map((item) => {
