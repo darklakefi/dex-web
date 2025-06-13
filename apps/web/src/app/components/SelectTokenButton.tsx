@@ -1,21 +1,29 @@
-import { Button } from "@dex-web/ui";
+import { client } from "@dex-web/orpc";
+import { Button, Icon } from "@dex-web/ui";
 import Image from "next/image";
 
 interface SelectTokenButtonProps {
   symbol: string;
-  value: string;
-  imageUrl: string;
 }
-export function SelectTokenButton({
-  symbol,
-  value,
-  imageUrl,
-}: SelectTokenButtonProps) {
+
+export async function SelectTokenButton({ symbol }: SelectTokenButtonProps) {
+  const tokenDetails = await client.getTokenDetails({ symbol });
+
   return (
     <Button>
-      <Image alt={symbol} src={imageUrl} />
-      <span>{symbol}</span>
-      <span>{value}</span>
+      {tokenDetails.imageUrl ? (
+        <Image
+          alt={symbol}
+          height={24}
+          src={tokenDetails.imageUrl}
+          unoptimized
+          width={24}
+        />
+      ) : (
+        <Icon name="seedlings" />
+      )}
+      <span>{tokenDetails.symbol}</span>
+      <span>{tokenDetails.value}</span>
     </Button>
   );
 }

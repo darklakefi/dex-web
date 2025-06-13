@@ -1,16 +1,17 @@
 import { Box, Text } from "@dex-web/ui";
+import { SelectTokenButton } from "./SelectTokenButton";
 import { SwapFormFieldset } from "./SwapFormFieldset";
 
 interface SwapFormProps {
-  buyToken: string;
-  sellToken: string;
+  buyTokenSymbol: string;
+  sellTokenSymbol: string;
   buyTokenBalance: number;
   sellTokenBalance: number;
 }
 
-export function SwapForm({
-  buyToken,
-  sellToken,
+export async function SwapForm({
+  buyTokenSymbol,
+  sellTokenSymbol,
   buyTokenBalance,
   sellTokenBalance,
 }: SwapFormProps) {
@@ -22,7 +23,7 @@ export function SwapForm({
             <Text.Body2 as="label" className="text-green-300 uppercase">
               Selling
             </Text.Body2>
-            <Text.Body2>{sellToken}</Text.Body2>
+            <SelectTokenButton symbol={sellTokenSymbol} />
           </div>
           <SwapFormFieldset balance={sellTokenBalance} label="Amount" />
         </Box>
@@ -31,7 +32,7 @@ export function SwapForm({
             <Text.Body2 as="label" className="text-green-300 uppercase">
               Buying
             </Text.Body2>
-            <Text.Body2>{buyToken}</Text.Body2>
+            <SelectTokenButton symbol={buyTokenSymbol} />
           </div>
           <SwapFormFieldset balance={buyTokenBalance} label="Amount" />
         </Box>
