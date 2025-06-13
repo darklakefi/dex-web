@@ -17,7 +17,7 @@ export type NewSandwichEvent = InferInsertModel<typeof sandwichEvents>;
 export type TokenMetadata = InferSelectModel<typeof tokenMetadata>;
 export type NewTokenMetadata = InferInsertModel<typeof tokenMetadata>;
 
-export type BlockQueueStatus = "QUEUED" | "PROCESSING" | "COMPLETED" | "FAILED";
-
 export type Token = InferSelectModel<typeof tokens>;
 export type NewToken = InferInsertModel<typeof tokens>;
+
+export type BlockQueueStatus = "QUEUED" | "PROCESSING" | "COMPLETED" | "FAILED";

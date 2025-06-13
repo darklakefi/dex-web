@@ -1,6 +1,6 @@
-import z from "zod";
+import { z } from "zod";
 
-export const tokenSchema = z.object({
+export const heliusTokenSchema = z.object({
   description: z.string(),
   id: z.string(),
   image: z
@@ -12,4 +12,4 @@ export const tokenSchema = z.object({
   symbol: z.string(),
 });
 
-export type Token = z.infer<typeof tokenSchema>;
+export type HeliusToken = z.infer<typeof heliusTokenSchema>;

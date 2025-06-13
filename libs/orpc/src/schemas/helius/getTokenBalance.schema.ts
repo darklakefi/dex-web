@@ -1,15 +1,15 @@
 import { z } from "zod";
-import { tokenSchema } from "./token.schema";
-import { tokenAccountSchema } from "./tokenAccount.schema";
+import { heliusTokenSchema } from "./heliusToken.schema";
+import { heliusTokenAccountSchema } from "./heliusTokenAccount.schema";
 
 export const getTokenBalanceInputSchema = z.object({
   ownerAddress: z.string(),
 });
 
 export const getTokenBalanceOutputSchema = z.object({
-  assets: z.array(tokenSchema),
+  assets: z.array(heliusTokenSchema),
   ownerAddress: z.string(),
-  tokenAccounts: z.array(tokenAccountSchema),
+  tokenAccounts: z.array(heliusTokenAccountSchema),
   total: z.number(),
 });
 
