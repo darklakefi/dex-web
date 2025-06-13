@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ElementType } from "react";
+import type { ElementType, JSX } from "react";
 import { twMerge } from "tailwind-merge";
 
 export enum TextVariantEnum {
@@ -32,53 +32,50 @@ const variantMap: { [key: string]: ElementType } = {
   [TextVariantEnum.Body1]: "p",
   [TextVariantEnum.Body2]: "p",
   [TextVariantEnum.Link]: "div",
-};
+} satisfies Record<TextVariantEnum, ElementType>;
 
-type TextPropsVariantProps = VariantProps<typeof textVariants>;
-interface TextProps extends TextPropsVariantProps, React.ComponentProps<"div"> {
-  children: React.ReactNode;
-  textCase?: "uppercase" | "lowercase" | "capitalize" | "normal-case";
-}
+type TextVariantProps = VariantProps<typeof textVariants>;
 
-type VariantTextProps = Omit<TextProps, "variant">;
+type TextProps<
+  TElement extends keyof JSX.IntrinsicElements,
+  TProps extends React.ComponentProps<TElement>,
+> = {
+  as?: TElement;
+} & TProps &
+  TextVariantProps;
 
-export const Text: React.FC<TextProps> & {
-  Heading: React.FC<VariantTextProps>;
-  Body1: React.FC<VariantTextProps>;
-  Body2: React.FC<VariantTextProps>;
-  Link: React.FC<VariantTextProps>;
-} = ({
-  children,
-  variant,
-  textCase = "uppercase",
-  className = "",
-  ...props
-}) => {
-  const Component = variantMap[variant || TextVariantEnum.Body1] as ElementType;
+export function Text<
+  TElement extends keyof JSX.IntrinsicElements,
+  TProps extends React.ComponentProps<TElement>,
+>(props: TextProps<TElement, TProps>) {
+  const { variant, as, textCase, className, children, ...rest } = props;
+  const Component = variantMap[
+    as || variant || TextVariantEnum.Body1
+  ] as ElementType;
   const overrideClasses = twMerge(
     textVariants({ textCase, variant }),
     className,
   );
 
   return (
-    <Component className={overrideClasses} {...props}>
+    <Component className={overrideClasses} {...rest}>
       {children}
     </Component>
   );
-};
+}
 
-Text.Heading = (props) => {
+Text.Heading = (props: TextProps<"h1", React.ComponentProps<"h1">>) => {
   return <Text variant={TextVariantEnum.Heading} {...props} />;
 };
 
-Text.Body1 = (props) => {
+Text.Body1 = (props: TextProps<"p", React.ComponentProps<"p">>) => {
   return <Text variant={TextVariantEnum.Body1} {...props} />;
 };
 
-Text.Body2 = (props) => {
+Text.Body2 = (props: TextProps<"p", React.ComponentProps<"p">>) => {
   return <Text variant={TextVariantEnum.Body2} {...props} />;
 };
 
-Text.Link = (props) => {
+Text.Link = (props: TextProps<"div", React.ComponentProps<"div">>) => {
   return <Text variant={TextVariantEnum.Link} {...props} />;
 };
