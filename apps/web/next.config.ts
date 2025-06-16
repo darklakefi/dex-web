@@ -1,6 +1,9 @@
 import { join } from "node:path";
 import { withNx } from "@nx/next";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
   distDir: "dist/apps/web",
@@ -61,4 +64,4 @@ const nextConfig = {
   },
 } satisfies NextConfig;
 
-export default withNx(nextConfig);
+export default withNx(withNextIntl(nextConfig));
