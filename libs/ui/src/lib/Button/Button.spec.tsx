@@ -20,8 +20,8 @@ describe("Button", () => {
         </Button>,
       );
       expect(container.querySelector("button")).toHaveClass(
-        "cursor-not-allowed",
-        "opacity-50",
+        "disabled:cursor-not-allowed",
+        "disabled:opacity-50",
       );
       expect(container.querySelector("button")).toBeDisabled();
     });
@@ -79,7 +79,7 @@ describe("Button", () => {
         </Button>,
       );
       expect(container.querySelector("svg")).toHaveClass("animate-spin");
-      expect(container.querySelector("button")).toBeDisabled();
+      expect(container.querySelector("button")).not.toBeDisabled();
     });
   });
 

@@ -4,15 +4,14 @@ import AnalyticsIcon from "./icons/analytics.svg";
 import CheckboxEmptyIcon from "./icons/checkbox-empty.svg";
 import CheckboxFilledIcon from "./icons/checkbox-filled.svg";
 import ChevronDownIcon from "./icons/chevron-down.svg";
-import CrownIcon from "./icons/crown.svg";
 import ExternalLinkIcon from "./icons/external-link.svg";
-import FireIcon from "./icons/fire.svg";
 import GithubIcon from "./icons/github.svg";
 import InfoIcon from "./icons/info.svg";
 import LoadingStripeIcon from "./icons/loading-stripe.svg";
 import LogoLgIcon from "./icons/logo-lg.svg";
 import LogoSmIcon from "./icons/logo-sm.svg";
 import PlayIcon from "./icons/play.svg";
+import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
 import TelegramIcon from "./icons/telegram.svg";
 import TimesIcon from "./icons/times.svg";
@@ -25,9 +24,7 @@ export type IconName =
   | "checkbox-empty"
   | "checkbox-filled"
   | "chevron-down"
-  | "crown"
   | "external-link"
-  | "fire"
   | "github"
   | "info"
   | "logo-sm"
@@ -39,6 +36,7 @@ export type IconName =
   | "times-filled"
   | "trending"
   | "loading-stripe"
+  | "search"
   | "x";
 
 const iconComponents = {
@@ -46,15 +44,14 @@ const iconComponents = {
   "checkbox-empty": CheckboxEmptyIcon,
   "checkbox-filled": CheckboxFilledIcon,
   "chevron-down": ChevronDownIcon,
-  crown: CrownIcon,
   "external-link": ExternalLinkIcon,
-  fire: FireIcon,
   github: GithubIcon,
   info: InfoIcon,
   "loading-stripe": LoadingStripeIcon,
   "logo-lg": LogoLgIcon,
   "logo-sm": LogoSmIcon,
   play: PlayIcon,
+  search: SearchIcon,
   seedlings: SeedlingsIcon,
   telegram: TelegramIcon,
   times: TimesIcon,

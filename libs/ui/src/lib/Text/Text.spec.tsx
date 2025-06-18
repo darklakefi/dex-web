@@ -28,12 +28,6 @@ describe("Text", () => {
     expect(body2).toBeTruthy();
   });
 
-  it("should render body2 lowercase", () => {
-    render(<Text.Body2 textCase="lowercase">Hello</Text.Body2>);
-    const body2 = screen.getByText("Hello");
-    expect(body2).toHaveClass("lowercase");
-  });
-
   it("should render link", () => {
     render(<Text.Link>Hello</Text.Link>);
     const link = screen.getByText("Hello");

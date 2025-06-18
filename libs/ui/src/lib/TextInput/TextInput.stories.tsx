@@ -34,3 +34,12 @@ export const Default = {
     );
   },
 } satisfies Story;
+
+export const WithLeadingIcon = {
+  args: {
+    label: "First Name",
+    leadingIcon: "search",
+    name: "firstName",
+    value: "John",
+  },
+} satisfies Story;
