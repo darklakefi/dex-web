@@ -6,13 +6,10 @@
   "tags": [],
   "targets": {
     "build": {
-      "cache": true,
-      "executor": "nx:run-commands",
+      "executor": "@nx/vite:build",
       "options": {
-        "command": "tsc -p tsconfig.lib.json",
-        "cwd": "libs/utils"
-      },
-      "outputs": ["{workspaceRoot}/libs/utils/dist"]
+        "outputPath": "dist/libs/utils"
+      }
     },
     "lint": {
       "cache": true,

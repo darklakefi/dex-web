@@ -1,6 +1,5 @@
-/// <reference types="vitest" />
-import { builtinModules } from "node:module";
 import { join, resolve } from "node:path";
+/// <reference types="vitest" />
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 
@@ -20,15 +19,13 @@ export default defineConfig(() => {
       outDir: "./dist",
       reportCompressedSize: true,
       rollupOptions: {
-        external: [...builtinModules],
+        external: (id: string) =>
+          id.includes("node_modules") || id.startsWith("@dex-web/"),
       },
     },
     cacheDir: "../../node_modules/.vite/libs/orpc",
     root: __dirname,
     test: {
-      alias: {
-        "../../helius": resolve(__dirname, "src/mocks/helius.mock.ts"),
-      },
       coverage: {
         provider: "v8" as const,
         reportsDirectory: "../../coverage/libs/orpc",
@@ -40,7 +37,7 @@ export default defineConfig(() => {
         "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
         "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       ],
-      name: "orpc",
+      name: "core",
       pool: "forks" as const,
       poolOptions: {
         forks: {

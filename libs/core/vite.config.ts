@@ -18,6 +18,10 @@ export default defineConfig(() => {
       },
       outDir: "./dist",
       reportCompressedSize: true,
+      rollupOptions: {
+        external: (id: string) =>
+          id.includes("node_modules") || id.startsWith("@dex-web/"),
+      },
     },
     cacheDir: "../../node_modules/.vite/libs/core",
     root: __dirname,

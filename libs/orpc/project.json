@@ -1,20 +1,15 @@
 {
-  "// targets": "to see all targets run: nx show project orpc --web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "implicitDependencies": ["db"],
   "name": "orpc",
   "projectType": "library",
   "sourceRoot": "libs/orpc/src",
   "tags": [],
   "targets": {
     "build": {
-      "cache": true,
-      "executor": "nx:run-commands",
+      "executor": "@nx/vite:build",
       "options": {
-        "command": "tsc -p tsconfig.lib.json",
-        "cwd": "libs/orpc"
-      },
-      "outputs": ["{workspaceRoot}/libs/orpc/dist"]
+        "outputPath": "dist/libs/orpc"
+      }
     },
     "lint": {
       "cache": true,
