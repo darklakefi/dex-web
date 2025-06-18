@@ -1,6 +1,7 @@
 {
   "// targets": "to see all targets run: nx show project orpc --web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": ["db"],
   "name": "orpc",
   "projectType": "library",
   "sourceRoot": "libs/orpc/src",

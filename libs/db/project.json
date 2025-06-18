@@ -2,7 +2,7 @@
   "// targets": "to see all targets run: nx show project db --web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "name": "db",
-  "projectType": "application",
+  "projectType": "library",
   "sourceRoot": "libs/db/src",
   "tags": [],
   "targets": {
