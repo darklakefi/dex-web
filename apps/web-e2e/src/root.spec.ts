@@ -4,7 +4,7 @@ test("has title", async ({ page }) => {
   await page.goto("/");
 
   // Expect the first paragraph to contain a substring.
-  expect(await page.locator("p").first().innerText()).toContain(
-    "Under construction 🚧",
-  );
+  expect(await page.locator("label").first().innerText()).toContain("SELLING");
+
+  await expect(page).toHaveScreenshot();
 });

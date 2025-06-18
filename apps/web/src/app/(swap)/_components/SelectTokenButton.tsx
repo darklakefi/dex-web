@@ -1,18 +1,26 @@
+"use client";
 import { client } from "@dex-web/orpc";
 import { Button, Icon } from "@dex-web/ui";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-import { selectedTokensCache } from "../_utils/searchParams";
+import { useQueryStates } from "nuqs";
+import { selectedTokensParsers } from "../_utils/searchParams";
 
 interface SelectTokenButtonProps {
   type: "buy" | "sell";
 }
 
-export async function SelectTokenButton({ type }: SelectTokenButtonProps) {
-  const { buyTokenAddress, sellTokenAddress } = selectedTokensCache.all();
+export function SelectTokenButton({ type }: SelectTokenButtonProps) {
+  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+    selectedTokensParsers,
+  );
 
   const tokenAddress = type === "buy" ? buyTokenAddress : sellTokenAddress;
-  const tokenDetails = await client.getTokenDetails({ address: tokenAddress });
+  const { data: tokenDetails } = useSuspenseQuery({
+    queryFn: () => client.getTokenDetails({ address: tokenAddress }),
+    queryKey: ["token", tokenAddress],
+  });
 
   return (
     <Button

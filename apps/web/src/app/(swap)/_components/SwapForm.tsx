@@ -2,7 +2,7 @@ import { Box, Text } from "@dex-web/ui";
 import { SelectTokenButton } from "./SelectTokenButton";
 import { SwapFormFieldset } from "./SwapFormFieldset";
 
-export async function SwapForm() {
+export function SwapForm() {
   // TODO: Get balances from API
   const buyTokenBalance = 100;
   const sellTokenBalance = 100;

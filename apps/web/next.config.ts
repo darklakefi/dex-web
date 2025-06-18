@@ -15,6 +15,7 @@ const nextConfig = {
     svgr: false,
   },
   outputFileTracingRoot: join(__dirname, "../../"),
+  serverExternalPackages: ["pg"],
   turbopack: {
     rules: {
       "*.svg": {
@@ -47,6 +48,8 @@ const nextConfig = {
         https: false,
         net: false,
         os: false,
+        pg: false,
+        "pg-native": false,
         tls: false,
       };
     }
