@@ -139,19 +139,3 @@ export function Button<TElement extends React.ElementType>(
 
   return React.createElement(ButtonComponent, elementProps, ...buttonChildren);
 }
-
-Button.Primary = (props: ButtonProps<"button">) => {
-  return <Button variant={ButtonVariantEnum.Primary} {...props} />;
-};
-
-Button.PrimaryDark = (props: ButtonProps<"button">) => {
-  return <Button variant={ButtonVariantEnum.PrimaryDark} {...props} />;
-};
-
-Button.Secondary = (props: ButtonProps<"button">) => {
-  return <Button variant={ButtonVariantEnum.Secondary} {...props} />;
-};
-
-Button.Tertiary = (props: ButtonProps<"button">) => {
-  return <Button variant={ButtonVariantEnum.Tertiary} {...props} />;
-};
