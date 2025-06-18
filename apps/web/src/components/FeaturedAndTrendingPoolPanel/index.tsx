@@ -23,7 +23,7 @@ export function FeaturedAndTrendingPoolPanel({
         pools={trendingPools}
         title="Trending Pools"
       />
-      <Button.Tertiary className="w-fit" text="explore all pools" />
+      <Button className="w-fit" text="explore all pools" variant="tertiary" />
     </div>
   );
 }

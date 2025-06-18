@@ -13,6 +13,7 @@ import LoadingStripeIcon from "./icons/loading-stripe.svg";
 import LogoLgIcon from "./icons/logo-lg.svg";
 import LogoSmIcon from "./icons/logo-sm.svg";
 import PlayIcon from "./icons/play.svg";
+import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
 import TelegramIcon from "./icons/telegram.svg";
 import TimesIcon from "./icons/times.svg";
@@ -25,10 +26,10 @@ export type IconName =
   | "checkbox-empty"
   | "checkbox-filled"
   | "chevron-down"
-  | "crown"
   | "external-link"
-  | "fire"
   | "github"
+  | "crown"
+  | "fire"
   | "info"
   | "logo-sm"
   | "logo-lg"
@@ -39,6 +40,7 @@ export type IconName =
   | "times-filled"
   | "trending"
   | "loading-stripe"
+  | "search"
   | "x";
 
 const iconComponents = {
@@ -55,6 +57,7 @@ const iconComponents = {
   "logo-lg": LogoLgIcon,
   "logo-sm": LogoSmIcon,
   play: PlayIcon,
+  search: SearchIcon,
   seedlings: SeedlingsIcon,
   telegram: TelegramIcon,
   times: TimesIcon,
