@@ -1,0 +1,400 @@
+{
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  },
+  "dialect": "postgresql",
+  "enums": {
+    "public.BlockQueueStatus": {
+      "name": "BlockQueueStatus",
+      "schema": "public",
+      "values": ["QUEUED", "PROCESSING", "COMPLETED", "FAILED"]
+    }
+  },
+  "id": "2e2714c6-3f08-457b-87be-750ca9c096f0",
+  "policies": {},
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "roles": {},
+  "schemas": {},
+  "sequences": {},
+  "tables": {
+    "public.block_queue": {
+      "checkConstraints": {},
+      "columns": {
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "slot": {
+          "name": "slot",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "bigint"
+        },
+        "status": {
+          "name": "status",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "BlockQueueStatus",
+          "typeSchema": "public"
+        },
+        "updated_at": {
+          "default": "now()",
+          "name": "updated_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {},
+      "indexes": {},
+      "isRLSEnabled": false,
+      "name": "block_queue",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {
+        "block_queue_slot_unique": {
+          "columns": ["slot"],
+          "name": "block_queue_slot_unique",
+          "nullsNotDistinct": false
+        }
+      }
+    },
+    "public.config": {
+      "checkConstraints": {},
+      "columns": {
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "key": {
+          "name": "key",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "varchar"
+        },
+        "updated_at": {
+          "default": "now()",
+          "name": "updated_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "value": {
+          "name": "value",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {},
+      "indexes": {},
+      "isRLSEnabled": false,
+      "name": "config",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {
+        "config_key_unique": {
+          "columns": ["key"],
+          "name": "config_key_unique",
+          "nullsNotDistinct": false
+        }
+      }
+    },
+    "public.sandwich_events": {
+      "checkConstraints": {},
+      "columns": {
+        "added_at": {
+          "default": "now()",
+          "name": "added_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "attacker_address": {
+          "name": "attacker_address",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "dex_name": {
+          "name": "dex_name",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "lp_address": {
+          "name": "lp_address",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "slot": {
+          "name": "slot",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "bigint"
+        },
+        "sol_amount_drained": {
+          "name": "sol_amount_drained",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "bigint"
+        },
+        "sol_amount_swap": {
+          "name": "sol_amount_swap",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "bigint"
+        },
+        "token_address": {
+          "name": "token_address",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "tx_hash_attacker_buy": {
+          "name": "tx_hash_attacker_buy",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "tx_hash_attacker_sell": {
+          "name": "tx_hash_attacker_sell",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "tx_hash_victim_swap": {
+          "name": "tx_hash_victim_swap",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "updated_at": {
+          "default": "now()",
+          "name": "updated_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "victim_address": {
+          "name": "victim_address",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        }
+      },
+      "compositePrimaryKeys": {
+        "sandwich_events_tx_hash_victim_swap_token_address_attacker_address_victim_address_pk": {
+          "columns": [
+            "tx_hash_victim_swap",
+            "token_address",
+            "attacker_address",
+            "victim_address"
+          ],
+          "name": "sandwich_events_tx_hash_victim_swap_token_address_attacker_address_victim_address_pk"
+        }
+      },
+      "foreignKeys": {},
+      "indexes": {
+        "occurred_at_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "occurred_at",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": false,
+          "method": "btree",
+          "name": "occurred_at_idx",
+          "with": {}
+        },
+        "token_address_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "token_address",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": false,
+          "method": "btree",
+          "name": "token_address_idx",
+          "with": {}
+        },
+        "victim_address_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "victim_address",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": false,
+          "method": "btree",
+          "name": "victim_address_idx",
+          "with": {}
+        },
+        "victim_address_occurred_at_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "victim_address",
+              "isExpression": false,
+              "nulls": "last"
+            },
+            {
+              "asc": true,
+              "expression": "occurred_at",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": false,
+          "method": "btree",
+          "name": "victim_address_occurred_at_idx",
+          "with": {}
+        }
+      },
+      "isRLSEnabled": false,
+      "name": "sandwich_events",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
+    },
+    "public.token_metadata": {
+      "checkConstraints": {},
+      "columns": {
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "decimals": {
+          "name": "decimals",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "name": {
+          "name": "name",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "symbol": {
+          "name": "symbol",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "token_address": {
+          "name": "token_address",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "varchar"
+        },
+        "updated_at": {
+          "default": "now()",
+          "name": "updated_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "uri": {
+          "name": "uri",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "varchar"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {},
+      "indexes": {},
+      "isRLSEnabled": false,
+      "name": "token_metadata",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
+    },
+    "public.tokens": {
+      "checkConstraints": {},
+      "columns": {
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "image_url": {
+          "name": "image_url",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "name": {
+          "name": "name",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "symbol": {
+          "name": "symbol",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "varchar"
+        },
+        "token_address": {
+          "name": "token_address",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "varchar"
+        },
+        "updated_at": {
+          "default": "now()",
+          "name": "updated_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {},
+      "indexes": {},
+      "isRLSEnabled": false,
+      "name": "tokens",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
+    }
+  },
+  "version": "7",
+  "views": {}
+}

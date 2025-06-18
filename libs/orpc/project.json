@@ -23,12 +23,6 @@
       "cache": true,
       "command": "biome ci libs/orpc/**"
     },
-    "seed": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "tsx libs/orpc/src/db/seed.ts"
-      }
-    },
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",

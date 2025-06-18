@@ -1,5 +1,4 @@
 import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const tokenMetadata = pgTable("token_metadata", {
   created_at: timestamp("created_at").defaultNow().notNull(),
@@ -13,6 +12,3 @@ export const tokenMetadata = pgTable("token_metadata", {
     .$onUpdate(() => new Date()),
   uri: varchar("uri"),
 });
-
-export const insertTokenMetadataSchema = createInsertSchema(tokenMetadata);
-export const selectTokenMetadataSchema = createSelectSchema(tokenMetadata);

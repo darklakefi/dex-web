@@ -52,12 +52,14 @@
   --color-red-900: oklch(0.2143 0.0706 25.45);
   --color-red-950: oklch(0.1517 0.0422 23.6);
 
-  --font-sans: var(--font-classic-console-neue), ui-sans-serif, system-ui,
-    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    "Noto Color Emoji";
-  --font-display: var(--font-bitsumishi-regular), ui-sans-serif, system-ui,
-    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    "Noto Color Emoji";
+  --drop-shadow-xl: 12px 12px 0px 0px var(--color-green-600);
+
+  --font-sans:
+    var(--font-classic-console-neue), ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-display:
+    var(--font-bitsumishi-regular), ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
@@ -71,4 +73,15 @@
 
   --shadow-sm: 4px 4px 0px 0px;
   --shadow-xl: 12px 12px 0px 0px;
+}
+
+@layer base {
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"] {
+    -webkit-appearance: none;
+    margin: 0;
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+  }
 }

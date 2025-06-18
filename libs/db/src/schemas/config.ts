@@ -1,5 +1,4 @@
 import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const config = pgTable("config", {
   created_at: timestamp("created_at").defaultNow().notNull(),
@@ -10,6 +9,3 @@ export const config = pgTable("config", {
     .$onUpdate(() => new Date()),
   value: varchar("value").notNull(),
 });
-
-export const insertConfigSchema = createInsertSchema(config);
-export const selectConfigSchema = createSelectSchema(config);

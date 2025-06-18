@@ -3,7 +3,7 @@ import type { blockQueue } from "./blockQueue";
 import type { config } from "./config";
 import type { sandwichEvents } from "./sandwichEvents";
 import type { tokenMetadata } from "./tokenMetadata";
-import type { user } from "./user";
+import type { tokens } from "./tokens";
 
 export type Config = InferSelectModel<typeof config>;
 export type NewConfig = InferInsertModel<typeof config>;
@@ -17,7 +17,7 @@ export type NewSandwichEvent = InferInsertModel<typeof sandwichEvents>;
 export type TokenMetadata = InferSelectModel<typeof tokenMetadata>;
 export type NewTokenMetadata = InferInsertModel<typeof tokenMetadata>;
 
-export type BlockQueueStatus = "QUEUED" | "PROCESSING" | "COMPLETED" | "FAILED";
+export type Token = InferSelectModel<typeof tokens>;
+export type NewToken = InferInsertModel<typeof tokens>;
 
-export type User = InferSelectModel<typeof user>;
-export type NewUser = InferInsertModel<typeof user>;
+export type BlockQueueStatus = "QUEUED" | "PROCESSING" | "COMPLETED" | "FAILED";

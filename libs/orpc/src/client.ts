@@ -1,6 +1,10 @@
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
 import type { RouterClient } from "@orpc/server";
+import {
+  createTanstackQueryUtils,
+  type RouterUtils,
+} from "@orpc/tanstack-query";
 import type { appRouter } from "./routers/app.router";
 
 declare global {
@@ -22,3 +26,6 @@ const link = new RPCLink({
  */
 export const client: RouterClient<typeof appRouter> =
   globalThis.$client ?? createORPCClient(link);
+
+export const tanstackClient: RouterUtils<typeof client> =
+  createTanstackQueryUtils(globalThis.$client ?? client);
