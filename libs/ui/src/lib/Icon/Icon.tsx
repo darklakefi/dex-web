@@ -4,7 +4,9 @@ import AnalyticsIcon from "./icons/analytics.svg";
 import CheckboxEmptyIcon from "./icons/checkbox-empty.svg";
 import CheckboxFilledIcon from "./icons/checkbox-filled.svg";
 import ChevronDownIcon from "./icons/chevron-down.svg";
+import CrownIcon from "./icons/crown.svg";
 import ExternalLinkIcon from "./icons/external-link.svg";
+import FireIcon from "./icons/fire.svg";
 import GithubIcon from "./icons/github.svg";
 import InfoIcon from "./icons/info.svg";
 import LoadingStripeIcon from "./icons/loading-stripe.svg";
@@ -26,6 +28,8 @@ export type IconName =
   | "chevron-down"
   | "external-link"
   | "github"
+  | "crown"
+  | "fire"
   | "info"
   | "logo-sm"
   | "logo-lg"
@@ -44,7 +48,9 @@ const iconComponents = {
   "checkbox-empty": CheckboxEmptyIcon,
   "checkbox-filled": CheckboxFilledIcon,
   "chevron-down": ChevronDownIcon,
+  crown: CrownIcon,
   "external-link": ExternalLinkIcon,
+  fire: FireIcon,
   github: GithubIcon,
   info: InfoIcon,
   "loading-stripe": LoadingStripeIcon,
