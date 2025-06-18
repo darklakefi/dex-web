@@ -116,6 +116,9 @@
           "externalDependencies": ["vitest"]
         }
       ],
+      "options": {
+        "coverage": true
+      },
       "outputs": ["{options.reportsDirectory}"]
     },
     "build": {

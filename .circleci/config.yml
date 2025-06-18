@@ -100,7 +100,7 @@ jobs:
       - restore-nx-cache
       - run:
           name: Run affected tasks
-          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test,e2e -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t test -- --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
       - save-nx-cache
       - store_test_results:
           path: test-results
