@@ -1,5 +1,5 @@
 import { join, resolve } from "node:path";
-/// <reference types="vitest" />
+import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 
@@ -56,8 +56,9 @@ export default defineConfig(() => {
 
   return mergeConfig(baseConfig, {
     plugins: [
+      nxCopyAssetsPlugin(["*.md", "package.json"]),
       dts({
-        entryRoot: "src",
+        copyDtsFiles: true,
         tsconfigPath: join(__dirname, "tsconfig.lib.json"),
       }),
     ],

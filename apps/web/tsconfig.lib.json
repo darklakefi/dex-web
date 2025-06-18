@@ -23,20 +23,18 @@
     "**/*.jsx",
     "**/*.ts",
     "**/*.tsx",
-    "../../dist/dist/types/**/*.ts"
+    "../../dist/dist/types/**/*.ts",
+    "../../apps/web/dist/dist/types/**/*.ts"
   ],
   "references": [
     {
-      "path": "../../libs/core/tsconfig.lib.json"
+      "path": "../../libs/ui/tsconfig.lib.json"
     },
     {
       "path": "../../libs/orpc/tsconfig.lib.json"
     },
     {
-      "path": "../../libs/utils/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/ui/tsconfig.lib.json"
+      "path": "../../libs/core/tsconfig.lib.json"
     }
   ]
 }

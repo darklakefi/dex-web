@@ -63,6 +63,10 @@
     },
     {
       "options": {
+        "buildTargetName": "build",
+        "previewTargetName": "preview",
+        "serveStaticTargetName": "serve-static",
+        "serveTargetName": "serve",
         "testTargetName": "test"
       },
       "plugin": "@nx/vite/plugin"
@@ -88,6 +92,9 @@
       "plugin": "@nx/storybook/plugin"
     }
   ],
+  "sync": {
+    "applyChanges": true
+  },
   "targetDefaults": {
     "@nx/vite:build": {
       "cache": true,
@@ -112,7 +119,8 @@
       "outputs": ["{options.reportsDirectory}"]
     },
     "build": {
-      "cache": true
+      "cache": true,
+      "dependsOn": ["^build"]
     },
     "e2e": {
       "cache": true,
@@ -129,7 +137,7 @@
     },
     "typecheck": {
       "cache": true,
-      "dependsOn": ["^build", "build"]
+      "dependsOn": ["^build"]
     }
   }
 }

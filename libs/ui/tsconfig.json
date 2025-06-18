@@ -3,10 +3,8 @@
     "jsx": "react-jsx"
   },
   "extends": "../../tsconfig.base.json",
+  "files": [],
   "references": [
-    {
-      "path": "../utils"
-    },
     {
       "path": "./tsconfig.lib.json"
     },

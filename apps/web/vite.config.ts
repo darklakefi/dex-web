@@ -53,7 +53,7 @@ export default defineConfig(() => {
       react(),
       nxCopyAssetsPlugin(["*.md"]),
       dts({
-        entryRoot: "src",
+        copyDtsFiles: true,
         tsconfigPath: join(__dirname, "tsconfig.lib.json"),
       }),
     ],

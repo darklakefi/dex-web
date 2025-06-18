@@ -54,7 +54,7 @@ export default defineConfig(() => {
   return mergeConfig(baseConfig, {
     plugins: [
       dts({
-        entryRoot: "src",
+        copyDtsFiles: true,
         tsconfigPath: join(__dirname, "tsconfig.lib.json"),
       }),
     ],

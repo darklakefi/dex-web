@@ -3,19 +3,16 @@
     "jsx": "react-jsx"
   },
   "extends": "../../tsconfig.base.json",
-  "include": ["vite.config.ts", "next.config.ts"],
+  "files": [],
   "references": [
     {
-      "path": "../../libs/core"
+      "path": "../../libs/ui"
     },
     {
       "path": "../../libs/orpc"
     },
     {
-      "path": "../../libs/utils"
-    },
-    {
-      "path": "../../libs/ui"
+      "path": "../../libs/core"
     },
     {
       "path": "./tsconfig.lib.json"

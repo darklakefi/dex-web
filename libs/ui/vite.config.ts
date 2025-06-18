@@ -68,9 +68,8 @@ export const config = mergeConfig(baseConfig, {
     react(),
     tailwindcss(),
     svgr({ include: "**/*.svg" }),
-    nxCopyAssetsPlugin(["*.md"]),
+    nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
-      entryRoot: "src",
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),
   ],

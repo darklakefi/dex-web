@@ -1,9 +1,6 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "declarationDir": "./dist",
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "outDir": "./out-tsc/lib",
     "types": ["node"]
   },
   "exclude": [
@@ -18,5 +15,10 @@
     "src/**/*.test.jsx"
   ],
   "extends": "./tsconfig.json",
-  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
+  "references": [
+    {
+      "path": "../db/tsconfig.lib.json"
+    }
+  ]
 }
