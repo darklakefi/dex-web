@@ -2,7 +2,7 @@ import { client } from "@dex-web/orpc";
 import { Button, Icon } from "@dex-web/ui";
 import Image from "next/image";
 import Link from "next/link";
-import { selectedTokensCache } from "./searchParams";
+import { selectedTokensCache } from "../_utils/searchParams";
 
 interface SelectTokenButtonProps {
   type: "buy" | "sell";

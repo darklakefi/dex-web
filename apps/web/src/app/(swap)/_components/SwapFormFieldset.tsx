@@ -14,7 +14,7 @@ export function SwapFormFieldset({ label, balance }: SwapFormFieldsetProps) {
         </Text.Body2>
         <Text.Body2>{balance}</Text.Body2>
       </div>
-      <NumericInput label={label} />
+      <NumericInput placeholder={label} />
     </fieldset>
   );
 }

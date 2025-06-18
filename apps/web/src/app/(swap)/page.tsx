@@ -1,6 +1,6 @@
 import type { SearchParams } from "nuqs/server";
-import { SwapForm } from "./SwapForm";
-import { selectedTokensCache } from "./searchParams";
+import { SwapForm } from "./_components/SwapForm";
+import { selectedTokensCache } from "./_utils/searchParams";
 
 interface SwapPageProps {
   searchParams: SearchParams;

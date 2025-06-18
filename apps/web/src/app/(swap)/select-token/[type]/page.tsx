@@ -1,6 +1,6 @@
 import type { SearchParams } from "nuqs/server";
-import { SelectTokenModal } from "../../SelectTokenModal";
-import { selectedTokensCache } from "../../searchParams";
+import { SelectTokenModal } from "../../_components/SelectTokenModal";
+import { selectedTokensCache } from "../../_utils/searchParams";
 
 export default async function Page({
   searchParams,

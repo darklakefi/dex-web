@@ -9,18 +9,18 @@ import {
 } from "@dex-web/ui";
 import localFont from "next/font/local";
 import "../lib/orpc.server";
-import Providers from "./Providers";
+import Providers from "./_components/Providers";
 import "./global.css";
 
 const bitsumishiRegular = localFont({
-  src: "./bitsumishi-regular.woff2",
+  src: "./_fonts/bitsumishi-regular.woff2",
   style: "normal",
   variable: "--font-bitsumishi-regular",
   weight: "400",
 });
 
 const classicConsoleNeue = localFont({
-  src: "./classic-console-neue.woff2",
+  src: "./_fonts/classic-console-neue.woff2",
   style: "normal",
   variable: "--font-classic-console-neue",
   weight: "400",

@@ -11,7 +11,7 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
-import { selectedTokensParsers } from "./searchParams";
+import { selectedTokensParsers } from "../_utils/searchParams";
 import { TokenList } from "./TokenList";
 
 const selectTokenModalFormSchema = getTokensInputSchema.pick({

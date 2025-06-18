@@ -1,6 +1,6 @@
 import type { SearchParams } from "nuqs/server";
-import { SelectTokenModal } from "../../../(swap)/SelectTokenModal";
-import { selectedTokensCache } from "../../../(swap)/searchParams";
+import { SelectTokenModal } from "../../../(swap)/_components/SelectTokenModal";
+import { selectedTokensCache } from "../../../(swap)/_utils/searchParams";
 
 export const dynamic = "force-dynamic";
 
