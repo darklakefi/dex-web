@@ -24,8 +24,8 @@ describe("ShortPoolPanel", () => {
   it("renders title, icon, and pool data", () => {
     render(<ShortPoolPanel icon="crown" pools={pools} title="Featured" />);
     expect(screen.getByText("Featured")).toBeInTheDocument();
-    expect(screen.getByText("SOL")).toBeInTheDocument();
-    expect(screen.getByText("USDC")).toBeInTheDocument();
-    expect(screen.getByText("5%"));
+    expect(screen.getAllByText("SOL")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("USDC")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("5%")[0]).toBeInTheDocument();
   });
 });

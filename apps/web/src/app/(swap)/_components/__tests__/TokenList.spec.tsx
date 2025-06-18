@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { TokenList } from "../TokenList";
 
@@ -15,16 +16,31 @@ const tokens = [
 
 describe("TokenList", () => {
   it("renders token symbol, name, and truncated address", () => {
-    render(<TokenList onSelect={() => {}} tokens={tokens} />);
-    expect(screen.getByText("SOL")).toBeInTheDocument();
-    expect(screen.getByText("Solana")).toBeInTheDocument();
+    const onSelect = vi.fn();
+    const onUrlUpdate = vi.fn();
+    render(<TokenList onSelect={onSelect} tokens={tokens} />, {
+      wrapper: withNuqsTestingAdapter({
+        onUrlUpdate,
+        searchParams: "?buyTokenAddress=abc&sellTokenAddress=def",
+      }),
+    });
+    expect(screen.getAllByText("SOL")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Solana")[0]).toBeInTheDocument();
     expect(screen.getByText(/So11.*1112/)).toBeInTheDocument();
   });
 
   it("calls onSelect when a token is clicked", () => {
     const onSelect = vi.fn();
-    render(<TokenList onSelect={onSelect} tokens={tokens} />);
-    const button = screen.getAllByRole("button")[0];
+    const onUrlUpdate = vi.fn();
+    render(<TokenList onSelect={onSelect} tokens={tokens} />, {
+      wrapper: withNuqsTestingAdapter({
+        onUrlUpdate,
+        searchParams: "?buyTokenAddress=abc&sellTokenAddress=def",
+      }),
+    });
+    const button = screen
+      .getAllByRole("button")
+      .filter((button) => button.textContent?.includes("SOL"))[0];
     expect(button).toBeInTheDocument();
     button && fireEvent.click(button);
     expect(onSelect).toHaveBeenCalledWith(tokens[0]?.address);

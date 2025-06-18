@@ -2,7 +2,7 @@
   "compilerOptions": {
     "incremental": true,
     "jsx": "preserve",
-    "noEmit": true,
+    "noEmit": false,
     "plugins": [
       {
         "name": "next"
@@ -18,14 +18,7 @@
     "../../dist/**/*"
   ],
   "extends": "./tsconfig.json",
-  "include": [
-    "**/*.js",
-    "**/*.jsx",
-    "**/*.ts",
-    "**/*.tsx",
-    "../../apps/web/dist/dist/types/**/*.ts",
-    "dist/types/**/*.ts"
-  ],
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
   "references": [
     {
       "path": "../../libs/utils/tsconfig.lib.json"

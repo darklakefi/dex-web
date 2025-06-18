@@ -10,7 +10,6 @@
   },
   "exports": {
     ".": {
-      "default": "./dist/index.js",
       "import": "./dist/index.js",
       "types": "./src/index.d.ts"
     }
