@@ -102,7 +102,7 @@ export const IconOnly: Story = {
 
 export const PrimaryLoading: Story = {
   args: {
-    isLoading: true,
+    loading: true,
     text: "Primary",
     variant: "primary",
   },

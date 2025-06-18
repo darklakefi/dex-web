@@ -72,9 +72,9 @@ describe("Button", () => {
       expect(container.querySelector("button")?.textContent).toBe("");
     });
 
-    it("should show loading icon when isLoading is true", () => {
+    it("should show loading icon when loading is true", () => {
       const { container } = render(
-        <Button isLoading leadingIcon="checkbox-empty" variant="primary">
+        <Button leadingIcon="checkbox-empty" loading variant="primary">
           Loading Button
         </Button>,
       );

@@ -28,7 +28,7 @@ const buttonVariants = cva(
       variant: "primary",
     },
     variants: {
-      isLoading: {
+      loading: {
         true: "cursor-progress opacity-50",
       },
       size: {
@@ -59,7 +59,6 @@ type ButtonProps<
   as?: React.ElementType;
   text?: string;
   disabled?: boolean;
-  isLoading?: boolean;
   trailingIcon?: IconName;
   leadingIcon?: IconName;
   icon?: IconName;
@@ -83,7 +82,7 @@ export function Button<TElement extends React.ElementType>(
     size,
     variant,
     text,
-    isLoading,
+    loading,
     children,
     leadingIcon,
     trailingIcon,
@@ -101,7 +100,7 @@ export function Button<TElement extends React.ElementType>(
     throw new Error(`Invalid component type: ${as}`);
   }
 
-  const LeadingIcon = isLoading ? (
+  const LeadingIcon = loading ? (
     <LoadingIcon />
   ) : leadingIcon ? (
     <ButtonIcon icon={leadingIcon} />
@@ -110,7 +109,7 @@ export function Button<TElement extends React.ElementType>(
   const TrailingIcon = trailingIcon ? <ButtonIcon icon={trailingIcon} /> : null;
 
   const mergedClassName = twMerge(
-    buttonVariants({ isLoading, size, variant }),
+    buttonVariants({ loading, size, variant }),
     TrailingIcon || LeadingIcon ? "flex items-center justify-center gap-2" : "",
     className,
   );
@@ -134,7 +133,7 @@ export function Button<TElement extends React.ElementType>(
       icon && !text && !children
         ? twMerge(mergedClassName, "w-fit p-2.5")
         : mergedClassName,
-    isLoading,
+    loading,
     ...restProps,
   };
 
