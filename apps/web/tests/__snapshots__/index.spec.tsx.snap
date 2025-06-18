@@ -33,6 +33,17 @@ exports[`Page > should render successfully 1`] = `
                     <div
                       class="flex items-center gap-2"
                     >
+                      <svg
+                        class="text-green-100 fill-current size-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M22 7V6H20V7H19V9H20V10H19V11H18V12H16V11H15V9H14V7H13V6H14V4H13V3H11V4H10V6H11V7H10V9H9V11H8V12H6V11H5V10H4V9H5V7H4V6H2V7H1V9H2V10H3V14H4V17H5V19H6V21H18V19H19V17H20V14H21V10H22V9H23V7H22ZM18 14V17H17V19H7V17H6V14H5V13H6V14H8V13H9V12H10V11H11V9H13V11H14V12H15V13H16V14H18V13H19V14H18Z"
+                          fill="#1A9A56"
+                        />
+                      </svg>
                       <p
                         class="font-normal font-sans text-green-200 text-lg leading-6 tracking-wider"
                       >
@@ -173,6 +184,16 @@ exports[`Page > should render successfully 1`] = `
                     <div
                       class="flex items-center gap-2"
                     >
+                      <svg
+                        class="text-green-100 fill-current size-4"
+                        id="fire-solid"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m19,13v-3h-1v-1h-1v-3h-1v-2h-1v-1h-1v-1h-1v-1h-2v1h1v2h-1v2h-1v1h-1v1h-1v1h-1v1h-1v3h1v2h-1v-1h-1v-2h-1v2h-1v3h1v2h1v1h1v1h1v1h1v1h8v-1h1v-1h1v-1h1v-2h1v-5h-1Zm-2,7h-1v1h-2v1h-4v-1h-1v-4h1v-1h1v-1h1v-1h1v-3h-1v-1h-1v-1h1v1h2v2h1v5h-1v2h1v-1h1v-1h1v3Z"
+                        />
+                      </svg>
                       <p
                         class="font-normal font-sans text-green-200 text-lg leading-6 tracking-wider"
                       >
