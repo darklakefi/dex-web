@@ -1,7 +1,7 @@
+import { join } from "node:path";
 import { workspaceRoot } from "@nx/devkit";
 import { nxE2EPreset } from "@nx/playwright/preset";
 import { defineConfig, devices } from "@playwright/test";
-import { join } from "path";
 
 // Configuration constants
 const CI_TIMEOUT = 60000; // 1 minute for CI environments
