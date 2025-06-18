@@ -4,8 +4,10 @@
     "tsBuildInfoFile": "./dist/tsconfig.lib.tsbuildinfo",
     "types": ["node"]
   },
-  "exclude": ["dist", "node_modules", "../../dist/**/*"],
+  "exclude": ["dist", "../../node_modules", "../../dist/**/*"],
+
   "extends": "../../tsconfig.base.json",
+  "files": [],
   "include": [
     "**/*.ts",
     "**/*.js",

@@ -14,6 +14,9 @@ importers:
       '@orpc/server':
         specifier: ^1.5.2
         version: 1.5.2(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@orpc/tanstack-query':
+        specifier: ^1.5.2
+        version: 1.5.2(@orpc/client@1.5.2)(@tanstack/query-core@5.80.7)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -22,19 +25,22 @@ importers:
         version: 16.5.0
       drizzle-orm:
         specifier: ^0.44.2
-        version: 0.44.2(@types/pg@8.15.4)(pg@8.16.0)
+        version: 0.44.2(@types/pg@8.15.4)(pg@8.16.1)
       drizzle-zod:
         specifier: ^0.8.2
-        version: 0.8.2(drizzle-orm@0.44.2(@types/pg@8.15.4)(pg@8.16.0))(zod@3.25.67)
+        version: 0.8.2(drizzle-orm@0.44.2(@types/pg@8.15.4)(pg@8.16.1))(zod@3.25.67)
       helius-sdk:
         specifier: ^1.5.1
         version: 1.5.1(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(utf-8-validate@5.0.10)
       next:
         specifier: ~15.3.3
         version: 15.3.3(@babel/core@7.27.4)(@playwright/test@1.53.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.89.2)
+      nuqs:
+        specifier: ^2.4.3
+        version: 2.4.3(next@15.3.3(@babel/core@7.27.4)(@playwright/test@1.53.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.89.2))(react@19.1.0)
       pg:
-        specifier: ^8.16.0
-        version: 8.16.0
+        specifier: ^8.16.1
+        version: 8.16.1
       react:
         specifier: 19.1.0
         version: 19.1.0
@@ -2256,6 +2262,12 @@ packages:
   '@orpc/standard-server@1.5.2':
     resolution: {integrity: sha512-j7xFPzr4ijmNTrN5ViIW2VAi5BRPcREXKKz2jU8C+b/47FqS1iqe6/MmS6PSPSBDuZA5s/D21VRMsrQz0Q4vzg==}
 
+  '@orpc/tanstack-query@1.5.2':
+    resolution: {integrity: sha512-6yPTEz4+V8+djLhE6NO30gKlt3Ex0n3haH54Km0O6k0Y5L4sPYPyhqap47o5Zm7X3C3WYUwV0EQ9MWZfwCP8qw==}
+    peerDependencies:
+      '@orpc/client': 1.5.2
+      '@tanstack/query-core': '>=5.80.2'
+
   '@oxc-resolver/binding-darwin-arm64@11.2.0':
     resolution: {integrity: sha512-ruKLkS+Dm/YIJaUhzEB7zPI+jh3EXxu0QnNV8I7t9jf0lpD2VnltuyRbhrbJEkksklZj//xCMyFFsILGjiU2Mg==}
     cpu: [arm64]
@@ -3189,6 +3201,9 @@ packages:
     resolution: {integrity: sha512-QWnD5HDY2IADv+vYR82lOhqOlS1jSCUUAmfem52cXAhRTKxpDh3ARX8TTXJTCCO7Rv7cD2Nlekabv02bwP3a2A==}
     peerDependencies:
       vite: ^5.2.0 || ^6
+
+  '@tanstack/query-core@5.80.7':
+    resolution: {integrity: sha512-s09l5zeUKC8q7DCCCIkVSns8zZrK4ZDT6ryEjxNBFi68G4z2EBobBS7rdOY3r6W1WbUDpc1fe5oY+YO/+2UVUg==}
 
   '@testing-library/dom@10.4.0':
     resolution: {integrity: sha512-pemlzrSESWbdAloYml3bAJMEfNh1Z7EduzqPKprCH5S341frlpYnUEW0H72dLxa6IsYr+mPno20GiSm+h9dEdQ==}
@@ -6374,6 +6389,9 @@ packages:
     resolution: {integrity: sha512-oG62iEk+CYt5Xj2YqI5Xi9xWUeZhDI8jjQmC5oThVH5JGCTgIjr7ciJDzC7MBzYd//WvR1OTmP5Q38Q8ShQtVA==}
     engines: {node: '>= 18'}
 
+  mitt@3.0.1:
+    resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
+
   mkdirp@1.0.4:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
     engines: {node: '>=10'}
@@ -6510,6 +6528,24 @@ packages:
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
+
+  nuqs@2.4.3:
+    resolution: {integrity: sha512-BgtlYpvRwLYiJuWzxt34q2bXu/AIS66sLU1QePIMr2LWkb+XH0vKXdbLSgn9t6p7QKzwI7f38rX3Wl9llTXQ8Q==}
+    peerDependencies:
+      '@remix-run/react': '>=2'
+      next: '>=14.2.0'
+      react: '>=18.2.0 || ^19.0.0-0'
+      react-router: ^6 || ^7
+      react-router-dom: ^6 || ^7
+    peerDependenciesMeta:
+      '@remix-run/react':
+        optional: true
+      next:
+        optional: true
+      react-router:
+        optional: true
+      react-router-dom:
+        optional: true
 
   nx@21.2.0:
     resolution: {integrity: sha512-64UK6Bt9a2BbeRhKPpfdyHDCtzz5onfjiBtngyqjtkB8FLVXW4OAggG18NIUl354SUcv2xqjlZyTRz7H/mmXdQ==}
@@ -6704,31 +6740,31 @@ packages:
     resolution: {integrity: sha512-vE7JKRyES09KiunauX7nd2Q9/L7lhok4smP9RZTDeD4MVs72Dp2qNFVz39Nz5a0FVEW0BJR6C0DYrq6unoziZA==}
     engines: {node: '>= 14.16'}
 
-  pg-cloudflare@1.2.5:
-    resolution: {integrity: sha512-OOX22Vt0vOSRrdoUPKJ8Wi2OpE/o/h9T8X1s4qSkCedbNah9ei2W2765be8iMVxQUsvgT7zIAT2eIa9fs5+vtg==}
+  pg-cloudflare@1.2.6:
+    resolution: {integrity: sha512-uxmJAnmIgmYgnSFzgOf2cqGQBzwnRYcrEgXuFjJNEkpedEIPBSEzxY7ph4uA9k1mI+l/GR0HjPNS6FKNZe8SBQ==}
 
-  pg-connection-string@2.9.0:
-    resolution: {integrity: sha512-P2DEBKuvh5RClafLngkAuGe9OUlFV7ebu8w1kmaaOgPcpJd1RIFh7otETfI6hAR8YupOLFTY7nuvvIn7PLciUQ==}
+  pg-connection-string@2.9.1:
+    resolution: {integrity: sha512-nkc6NpDcvPVpZXxrreI/FOtX3XemeLl8E0qFr6F2Lrm/I8WOnaWNhIPK2Z7OHpw7gh5XJThi6j6ppgNoaT1w4w==}
 
   pg-int8@1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
 
-  pg-pool@3.10.0:
-    resolution: {integrity: sha512-DzZ26On4sQ0KmqnO34muPcmKbhrjmyiO4lCCR0VwEd7MjmiKf5NTg/6+apUEu0NF7ESa37CGzFxH513CoUmWnA==}
+  pg-pool@3.10.1:
+    resolution: {integrity: sha512-Tu8jMlcX+9d8+QVzKIvM/uJtp07PKr82IUOYEphaWcoBhIYkoHpLXN3qO59nAI11ripznDsEzEv8nUxBVWajGg==}
     peerDependencies:
       pg: '>=8.0'
 
-  pg-protocol@1.10.0:
-    resolution: {integrity: sha512-IpdytjudNuLv8nhlHs/UrVBhU0e78J0oIS/0AVdTbWxSOkFUVdsHC/NrorO6nXsQNDTT1kzDSOMJubBQviX18Q==}
+  pg-protocol@1.10.1:
+    resolution: {integrity: sha512-9YS3ZonDj0Lxny//aF0ITPdfrEPgKWCJvONsSXAaIUhgpzlzl5JgaZNlbTFxvYNfm2terGEnHeOSUlF6qRGBzw==}
 
   pg-types@2.2.0:
     resolution: {integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==}
     engines: {node: '>=4'}
 
-  pg@8.16.0:
-    resolution: {integrity: sha512-7SKfdvP8CTNXjMUzfcVTaI+TDzBEeaUnVwiVGZQD1Hh33Kpev7liQba9uLd4CfN8r9mCVsD0JIpq03+Unpz+kg==}
-    engines: {node: '>= 8.0.0'}
+  pg@8.16.1:
+    resolution: {integrity: sha512-5n6e7MgF5ABRsssOsX9xC95p+NUuhgDQDBSsrKSZJjYVqZHGyrmJuknym2IbVhGtzV9siBdzH9SEIQAuWF+sdg==}
+    engines: {node: '>= 16.0.0'}
     peerDependencies:
       pg-native: '>=3.0.1'
     peerDependenciesMeta:
@@ -11011,6 +11047,12 @@ snapshots:
     dependencies:
       '@orpc/shared': 1.5.2
 
+  '@orpc/tanstack-query@1.5.2(@orpc/client@1.5.2)(@tanstack/query-core@5.80.7)':
+    dependencies:
+      '@orpc/client': 1.5.2
+      '@orpc/shared': 1.5.2
+      '@tanstack/query-core': 5.80.7
+
   '@oxc-resolver/binding-darwin-arm64@11.2.0':
     optional: true
 
@@ -11926,6 +11968,8 @@ snapshots:
       tailwindcss: 4.1.10
       vite: 6.3.5(@types/node@24.0.3)(jiti@2.4.2)(less@4.1.3)(lightningcss@1.30.1)(sass-embedded@1.89.2)(sass@1.89.2)(stylus@0.64.0)(terser@5.43.0)(tsx@4.20.3)(yaml@2.8.0)
 
+  '@tanstack/query-core@5.80.7': {}
+
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.27.1
@@ -12109,7 +12153,7 @@ snapshots:
   '@types/pg@8.15.4':
     dependencies:
       '@types/node': 24.0.3
-      pg-protocol: 1.10.0
+      pg-protocol: 1.10.1
       pg-types: 2.2.0
 
   '@types/qs@6.14.0': {}
@@ -13526,14 +13570,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.2(@types/pg@8.15.4)(pg@8.16.0):
+  drizzle-orm@0.44.2(@types/pg@8.15.4)(pg@8.16.1):
     optionalDependencies:
       '@types/pg': 8.15.4
-      pg: 8.16.0
+      pg: 8.16.1
 
-  drizzle-zod@0.8.2(drizzle-orm@0.44.2(@types/pg@8.15.4)(pg@8.16.0))(zod@3.25.67):
+  drizzle-zod@0.8.2(drizzle-orm@0.44.2(@types/pg@8.15.4)(pg@8.16.1))(zod@3.25.67):
     dependencies:
-      drizzle-orm: 0.44.2(@types/pg@8.15.4)(pg@8.16.0)
+      drizzle-orm: 0.44.2(@types/pg@8.15.4)(pg@8.16.1)
       zod: 3.25.67
 
   dunder-proto@1.0.1:
@@ -15545,6 +15589,8 @@ snapshots:
     dependencies:
       minipass: 7.1.2
 
+  mitt@3.0.1: {}
+
   mkdirp@1.0.4: {}
 
   mkdirp@3.0.1: {}
@@ -15667,6 +15713,13 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
+
+  nuqs@2.4.3(next@15.3.3(@babel/core@7.27.4)(@playwright/test@1.53.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.89.2))(react@19.1.0):
+    dependencies:
+      mitt: 3.0.1
+      react: 19.1.0
+    optionalDependencies:
+      next: 15.3.3(@babel/core@7.27.4)(@playwright/test@1.53.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.89.2)
 
   nx@21.2.0(@swc-node/register@1.10.10(@swc/core@1.12.1(@swc/helpers@0.5.17))(@swc/types@0.1.23)(typescript@5.8.3))(@swc/core@1.12.1(@swc/helpers@0.5.17)):
     dependencies:
@@ -15949,18 +16002,18 @@ snapshots:
 
   pathval@2.0.0: {}
 
-  pg-cloudflare@1.2.5:
+  pg-cloudflare@1.2.6:
     optional: true
 
-  pg-connection-string@2.9.0: {}
+  pg-connection-string@2.9.1: {}
 
   pg-int8@1.0.1: {}
 
-  pg-pool@3.10.0(pg@8.16.0):
+  pg-pool@3.10.1(pg@8.16.1):
     dependencies:
-      pg: 8.16.0
+      pg: 8.16.1
 
-  pg-protocol@1.10.0: {}
+  pg-protocol@1.10.1: {}
 
   pg-types@2.2.0:
     dependencies:
@@ -15970,15 +16023,15 @@ snapshots:
       postgres-date: 1.0.7
       postgres-interval: 1.2.0
 
-  pg@8.16.0:
+  pg@8.16.1:
     dependencies:
-      pg-connection-string: 2.9.0
-      pg-pool: 3.10.0(pg@8.16.0)
-      pg-protocol: 1.10.0
+      pg-connection-string: 2.9.1
+      pg-pool: 3.10.1(pg@8.16.1)
+      pg-protocol: 1.10.1
       pg-types: 2.2.0
       pgpass: 1.0.5
     optionalDependencies:
-      pg-cloudflare: 1.2.5
+      pg-cloudflare: 1.2.6
 
   pgpass@1.0.5:
     dependencies:

@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "declarationDir": "./dist",
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "outDir": "./out-tsc/lib"
   },
   "exclude": [
     "dist",
+    "../../node_modules",
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
     "src/**/*.spec.tsx",
@@ -18,9 +16,5 @@
   ],
   "extends": "./tsconfig.json",
   "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
-  "references": [
-    {
-      "path": "../utils/tsconfig.lib.json"
-    }
-  ]
+  "references": []
 }

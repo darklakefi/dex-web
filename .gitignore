@@ -4,8 +4,6 @@
 dist
 tmp
 
-
-
 # dependencies
 node_modules
 
@@ -57,11 +55,11 @@ vitest.config.*.timestamp*
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
-
 storybook-static
 
 # Typescript
 *.tsbuildinfo
+out-tsc/
 
 # nix
 .direnv/

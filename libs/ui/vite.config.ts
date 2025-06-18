@@ -22,6 +22,10 @@ const baseConfig = {
     },
     outDir: "./dist",
     reportCompressedSize: true,
+    rollupOptions: {
+      external: (id: string) =>
+        id.includes("../../node_modules") || id.startsWith("@dex-web/"),
+    },
   },
   cacheDir: "../../node_modules/.vite/libs/ui",
   root: __dirname,
@@ -64,9 +68,9 @@ export const config = mergeConfig(baseConfig, {
     react(),
     tailwindcss(),
     svgr({ include: "**/*.svg" }),
-    nxCopyAssetsPlugin(["*.md"]),
+    nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
-      entryRoot: "src",
+      outDir: "./out-tsc/lib",
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),
   ],

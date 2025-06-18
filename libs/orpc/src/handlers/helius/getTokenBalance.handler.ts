@@ -1,3 +1,5 @@
+"use server";
+
 import { helius } from "../../helius";
 import type {
   GetTokenBalanceInput,

@@ -1,4 +1,5 @@
 import { join, resolve } from "node:path";
+import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 /// <reference types="vitest" />
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
@@ -18,6 +19,10 @@ export default defineConfig(() => {
       },
       outDir: "./dist",
       reportCompressedSize: true,
+      rollupOptions: {
+        external: (id: string) =>
+          id.includes("../../node_modules") || id.startsWith("@dex-web/"),
+      },
     },
     cacheDir: "../../node_modules/.vite/libs/utils",
     root: __dirname,
@@ -49,8 +54,10 @@ export default defineConfig(() => {
 
   return mergeConfig(baseConfig, {
     plugins: [
+      nxCopyAssetsPlugin(["*.md", "package.json"]),
       dts({
-        entryRoot: "src",
+        copyDtsFiles: true,
+        outDir: "./out-tsc/lib",
         tsconfigPath: join(__dirname, "tsconfig.lib.json"),
       }),
     ],

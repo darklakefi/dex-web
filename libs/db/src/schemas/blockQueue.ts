@@ -1,6 +1,4 @@
 import { bigint, pgEnum, pgTable, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
 
 export const blockQueueStatusEnum = pgEnum("BlockQueueStatus", [
   "QUEUED",
@@ -18,13 +16,3 @@ export const blockQueue = pgTable("block_queue", {
     .notNull()
     .$onUpdate(() => new Date()),
 });
-
-export const insertBlockQueueSchema = createInsertSchema(blockQueue);
-export const selectBlockQueueSchema = createSelectSchema(blockQueue);
-
-export const blockQueueStatusSchema = z.enum([
-  "QUEUED",
-  "PROCESSING",
-  "COMPLETED",
-  "FAILED",
-]);

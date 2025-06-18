@@ -5,6 +5,12 @@
   "sourceRoot": "libs/ui/src",
   "tags": [],
   "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "options": {
+        "outputPath": "libs/ui/dist"
+      }
+    },
     "lint": {
       "cache": true,
       "command": "biome check --write libs/ui/**"

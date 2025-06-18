@@ -6,7 +6,6 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const sandwichEvents = pgTable(
   "sandwich_events",
@@ -49,6 +48,3 @@ export const sandwichEvents = pgTable(
     ),
   }),
 );
-
-export const insertSandwichEventSchema = createInsertSchema(sandwichEvents);
-export const selectSandwichEventSchema = createSelectSchema(sandwichEvents);
