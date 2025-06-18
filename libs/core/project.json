@@ -8,7 +8,7 @@
     "build": {
       "executor": "@nx/vite:build",
       "options": {
-        "outputPath": "dist/libs/core"
+        "outputPath": "libs/core/dist"
       }
     },
     "lint": {
