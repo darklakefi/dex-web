@@ -20,7 +20,7 @@ export default defineConfig(() => {
       reportCompressedSize: true,
       rollupOptions: {
         external: (id: string) =>
-          id.includes("node_modules") || id.startsWith("@dex-web/"),
+          id.includes("../../node_modules") || id.startsWith("@dex-web/"),
       },
     },
     cacheDir: "../../node_modules/.vite/libs/orpc",
@@ -59,6 +59,7 @@ export default defineConfig(() => {
       nxCopyAssetsPlugin(["*.md", "package.json"]),
       dts({
         copyDtsFiles: true,
+        outDir: "./out-tsc/lib",
         tsconfigPath: join(__dirname, "tsconfig.lib.json"),
       }),
     ],

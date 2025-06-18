@@ -24,7 +24,7 @@ const baseConfig = {
     reportCompressedSize: true,
     rollupOptions: {
       external: (id: string) =>
-        id.includes("node_modules") || id.startsWith("@dex-web/"),
+        id.includes("../../node_modules") || id.startsWith("@dex-web/"),
     },
   },
   cacheDir: "../../node_modules/.vite/libs/ui",
@@ -70,6 +70,7 @@ export const config = mergeConfig(baseConfig, {
     svgr({ include: "**/*.svg" }),
     nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
+      outDir: "./out-tsc/lib",
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),
   ],

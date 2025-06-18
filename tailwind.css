@@ -54,12 +54,12 @@
 
   --drop-shadow-xl: 12px 12px 0px 0px var(--color-green-600);
 
-  --font-sans:
-    var(--font-classic-console-neue), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-display:
-    var(--font-bitsumishi-regular), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: var(--font-classic-console-neue), ui-sans-serif, system-ui,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+  --font-display: var(--font-bitsumishi-regular), ui-sans-serif, system-ui,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
 
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;

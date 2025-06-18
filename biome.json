@@ -70,7 +70,8 @@
     }
   },
   "vcs": {
-    "enabled": false,
-    "useIgnoreFile": false
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
   }
 }

@@ -56,6 +56,7 @@ export default defineConfig(() => {
       nxCopyAssetsPlugin(["*.md", "package.json"]),
       dts({
         copyDtsFiles: true,
+        outDir: "./out-tsc/lib",
         tsconfigPath: join(__dirname, "tsconfig.lib.json"),
       }),
     ],
