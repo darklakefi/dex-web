@@ -4,14 +4,14 @@ import { describe, expect, it, vi } from "vitest";
 import { SelectTokenButton } from "../SelectTokenButton";
 
 vi.mock("@tanstack/react-query", () => ({
-  useSuspenseQuery: () => ({ data: { symbol: "SOL", imageUrl: "" } }),
+  useSuspenseQuery: () => ({ data: { imageUrl: "", symbol: "SOL" } }),
 }));
 vi.mock("../_utils/searchParams", () => ({
   selectedTokensCache: {
     all: () => ({ buyTokenAddress: "abc", sellTokenAddress: "def" }),
   },
 }));
-vi.mock("next/link", () => ({ default: (props: any) => <a {...props} /> }));
+vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 
 describe("SelectTokenButton", () => {
   it("renders token symbol and chevron icon", () => {

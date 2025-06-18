@@ -11,14 +11,7 @@
         "outputPath": "libs/ui/dist"
       }
     },
-    "lint": {
-      "cache": true,
-      "command": "pnpm exec biome check --changed libs/ui/**"
-    },
-    "lint:ci": {
-      "cache": true,
-      "command": "pnpm exec biome ci --changed libs/ui/**"
-    },
+
     "storybook": {
       "options": {
         "port": 6006

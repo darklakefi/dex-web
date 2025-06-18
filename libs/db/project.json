@@ -17,14 +17,7 @@
         "command": "drizzle-kit generate --config=libs/db/drizzle.config.ts"
       }
     },
-    "lint": {
-      "cache": true,
-      "command": "pnpm exec biome check --changed libs/db/**"
-    },
-    "lint:ci": {
-      "cache": true,
-      "command": "pnpm exec biome ci --changed libs/db/**"
-    },
+
     "migrate": {
       "executor": "nx:run-commands",
       "options": {

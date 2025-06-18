@@ -6,7 +6,7 @@ import { SelectTokenModal } from "../SelectTokenModal";
 vi.mock("@tanstack/react-query", () => ({
   useSuspenseQuery: () => ({
     data: {
-      tokens: [{ symbol: "SOL", address: "abc", name: "Solana", imageUrl: "" }],
+      tokens: [{ address: "abc", imageUrl: "", name: "Solana", symbol: "SOL" }],
     },
   }),
 }));

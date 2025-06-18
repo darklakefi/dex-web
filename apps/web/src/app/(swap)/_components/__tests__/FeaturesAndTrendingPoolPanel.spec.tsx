@@ -4,23 +4,23 @@ import { describe, expect, it } from "vitest";
 import { FeaturesAndTrendingPoolPanel } from "../FeaturesAndTrendingPoolPanel";
 
 const pool = {
-  id: "1",
   address: "1",
+  apr: 5,
+  id: "1",
   tokenX: {
-    id: "1",
     address: "1",
-    symbol: "SOL",
-    name: "SOL",
     decimals: 9,
+    id: "1",
+    name: "SOL",
+    symbol: "SOL",
   },
   tokenY: {
-    id: "2",
     address: "2",
-    symbol: "USDC",
-    name: "USDC",
     decimals: 6,
+    id: "2",
+    name: "USDC",
+    symbol: "USDC",
   },
-  apr: 5,
 } satisfies Pool;
 
 describe("FeaturesAndTrendingPoolPanel", () => {

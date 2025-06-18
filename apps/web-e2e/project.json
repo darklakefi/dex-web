@@ -10,10 +10,6 @@
     "lint": {
       "cache": true,
       "command": "pnpm exec biome check --changed apps/web-e2e/**"
-    },
-    "lint:ci": {
-      "cache": true,
-      "command": "pnpm exec biome ci --changed apps/web-e2e/**"
     }
   }
 }

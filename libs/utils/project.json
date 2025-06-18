@@ -11,14 +11,6 @@
         "outputPath": "libs/utils/dist"
       }
     },
-    "lint": {
-      "cache": true,
-      "command": "pnpm exec biome check --changed libs/utils/**"
-    },
-    "lint:ci": {
-      "cache": true,
-      "command": "pnpm exec biome ci --changed libs/utils/**"
-    },
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",

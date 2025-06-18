@@ -5,17 +5,17 @@ import { TokenList } from "../TokenList";
 
 const tokens = [
   {
-    symbol: "SOL",
     address: "So11111111111111111111111111111111111111112",
-    name: "Solana",
     imageUrl: "",
+    name: "Solana",
+    symbol: "SOL",
     value: "SOL",
   },
 ];
 
 describe("TokenList", () => {
   it("renders token symbol, name, and truncated address", () => {
-    render(<TokenList tokens={tokens} onSelect={() => {}} />);
+    render(<TokenList onSelect={() => {}} tokens={tokens} />);
     expect(screen.getByText("SOL")).toBeInTheDocument();
     expect(screen.getByText("Solana")).toBeInTheDocument();
     expect(screen.getByText(/So11.*1112/)).toBeInTheDocument();
@@ -23,7 +23,7 @@ describe("TokenList", () => {
 
   it("calls onSelect when a token is clicked", () => {
     const onSelect = vi.fn();
-    render(<TokenList tokens={tokens} onSelect={onSelect} />);
+    render(<TokenList onSelect={onSelect} tokens={tokens} />);
     const button = screen.getAllByRole("button")[0];
     expect(button).toBeInTheDocument();
     button && fireEvent.click(button);

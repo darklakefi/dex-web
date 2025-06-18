@@ -127,7 +127,11 @@
       "dependsOn": ["^build"]
     },
     "lint": {
-      "cache": true
+      "cache": true,
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx biome lint --config {projectRoot}/biome.json"
+      }
     },
     "lint:ci": {
       "cache": true

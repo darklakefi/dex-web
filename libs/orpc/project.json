@@ -11,14 +11,7 @@
         "outputPath": "libs/orpc/dist"
       }
     },
-    "lint": {
-      "cache": true,
-      "command": "pnpm exec biome check --changed libs/orpc/**"
-    },
-    "lint:ci": {
-      "cache": true,
-      "command": "pnpm exec biome ci --changed libs/orpc/**"
-    },
+
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",
