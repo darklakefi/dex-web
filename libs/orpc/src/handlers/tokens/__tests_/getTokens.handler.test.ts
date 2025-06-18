@@ -1,9 +1,10 @@
-import { getTokenListHandler } from "../getTokenList.handler";
+import { getTokensHandler } from "../getTokens.handler";
 
-describe("getTokenListHandler", () => {
+describe("getTokensHandler", () => {
   it("should return a list of assets", async () => {
-    const result = await getTokenListHandler({
+    const result = await getTokensHandler({
       limit: 10,
+      offset: 0,
     });
 
     expect(result).toBeDefined();
