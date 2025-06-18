@@ -9,7 +9,6 @@
   "main": "./src/index.ts",
   "module": "./src/index.ts",
   "name": "@dex-web/utils",
-  "type": "module",
   "types": "./src/index.ts",
   "version": "0.0.1"
 }

@@ -11,8 +11,10 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "biome.configurationPath": "./biome.json",
-  "biome.lsp.bin": "./node_modules/.bin/biome",
+  "biome.lsp": {
+    "configurationPath": "./biome.json",
+    "bin": "./node_modules/.bin/biome"
+  },
   "editor.codeActionsOnSave": {
     "source.action.useSortedAttributes.biome": "explicit",
     "source.action.useSortedKeys.biome": "explicit",

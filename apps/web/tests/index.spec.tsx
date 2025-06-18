@@ -4,7 +4,7 @@ import Page from "../src/app/(swap)/page";
 
 describe("Page", () => {
   it("should render successfully", () => {
-    const { baseElement } = render(<Page />);
+    const { baseElement } = render(<Page searchParams={{}} />);
     expect(baseElement).toBeTruthy();
     expect(baseElement).toMatchSnapshot();
   });

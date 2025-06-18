@@ -13,11 +13,11 @@
     },
     "lint": {
       "cache": true,
-      "command": "biome check --write libs/ui/**"
+      "command": "pnpm exec biome check --changed libs/ui/**"
     },
     "lint:ci": {
       "cache": true,
-      "command": "biome ci libs/ui/**"
+      "command": "pnpm exec biome ci --changed libs/ui/**"
     },
     "storybook": {
       "options": {

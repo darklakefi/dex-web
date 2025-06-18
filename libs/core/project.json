@@ -13,11 +13,11 @@
     },
     "lint": {
       "cache": true,
-      "command": "biome check --write libs/core/**"
+      "command": "pnpm exec biome check --changed libs/core/**"
     },
     "lint:ci": {
       "cache": true,
-      "command": "biome ci libs/core/**"
+      "command": "pnpm exec biome ci --changed libs/core/**"
     },
     "test": {
       "cache": true,

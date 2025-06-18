@@ -36,7 +36,20 @@ const nextConfig = {
     tsconfigPath: "./tsconfig.lib.json",
   },
 
-  webpack(config) {
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        child_process: false,
+        dns: false,
+        fs: false,
+        http: false,
+        https: false,
+        net: false,
+        os: false,
+        tls: false,
+      };
+    }
     config.module.rules.push({
       test: /\.svg$/i,
       use: ["@svgr/webpack"],

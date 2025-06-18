@@ -15,11 +15,11 @@
     },
     "lint": {
       "cache": true,
-      "command": "biome check --write apps/web/**"
+      "command": "pnpm exec biome check --changed apps/web/**"
     },
     "lint:ci": {
       "cache": true,
-      "command": "biome ci apps/web/**"
+      "command": "pnpm exec biome ci --changed apps/web/**"
     },
     "serve": {
       "configurations": {

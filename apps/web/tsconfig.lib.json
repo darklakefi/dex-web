@@ -11,7 +11,8 @@
   },
   "exclude": [
     "dist",
-    "../../node_modules",
+    "node_modules",
+    "node_modules",
     "**/*.spec.ts",
     "**/*.test.ts",
     "../../dist/**/*"
@@ -22,8 +23,7 @@
     "**/*.jsx",
     "**/*.ts",
     "**/*.tsx",
-    "../../dist/dist/types/**/*.ts",
-    "dist/types/**/*.ts"
+    "../../apps/web/dist/dist/types/**/*.ts"
   ],
   "references": [
     {

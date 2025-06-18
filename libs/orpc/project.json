@@ -13,11 +13,11 @@
     },
     "lint": {
       "cache": true,
-      "command": "biome check --write libs/orpc/**"
+      "command": "pnpm exec biome check --changed libs/orpc/**"
     },
     "lint:ci": {
       "cache": true,
-      "command": "biome ci libs/orpc/**"
+      "command": "pnpm exec biome ci --changed libs/orpc/**"
     },
     "test": {
       "cache": true,
