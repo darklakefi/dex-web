@@ -17,12 +17,6 @@
         "command": "drizzle-kit generate --config=libs/db/drizzle.config.ts"
       }
     },
-    "generate": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "drizzle-kit generate --config=libs/db/drizzle.config.ts"
-      }
-    },
     "lint": {
       "cache": true,
       "command": "biome check --write libs/db/**"
