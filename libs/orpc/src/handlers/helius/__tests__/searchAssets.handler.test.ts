@@ -1,8 +1,8 @@
-import { getTokenListHandler } from "../getTokenList.handler";
+import { searchAssetsHandler } from "../searchAssets.handler";
 
-describe("getTokenListHandler", () => {
+describe("searchAssetsHandler", () => {
   it("should return a list of assets", async () => {
-    const result = await getTokenListHandler({
+    const result = await searchAssetsHandler({
       limit: 10,
     });
 
