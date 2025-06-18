@@ -9,7 +9,9 @@ import {
 } from "@dex-web/ui";
 import localFont from "next/font/local";
 import "../lib/orpc.server";
+import Providers from "./Providers";
 import "./global.css";
+
 const bitsumishiRegular = localFont({
   src: "./bitsumishi-regular.woff2",
   style: "normal",
@@ -31,90 +33,97 @@ export const metadata = {
 
 export default function RootLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   return (
     <html
-      className={`${bitsumishiRegular.variable} ${classicConsoleNeue.variable} font-sans`}
+      className={`${bitsumishiRegular.variable} ${classicConsoleNeue.variable} font-sans antialiased`}
       lang="en"
     >
       <body>
-        <PageLayout
-          backgroundImageUrl={backgroundImage.src}
-          footer={
-            <Footer
-              logo={<Icon className="h-6 w-auto stroke-none" name="logo-lg" />}
-              socialMediaLinks={[]}
-            >
-              <div className="flex flex-col items-start gap-5">
+        <Providers>
+          <PageLayout
+            backgroundImageUrl={backgroundImage.src}
+            footer={
+              <Footer
+                logo={
+                  <Icon className="h-6 w-auto stroke-none" name="logo-lg" />
+                }
+                socialMediaLinks={[]}
+              >
+                <div className="flex flex-col items-start gap-5">
+                  <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
+                    MEV
+                  </Text.Link>
+                  <Text.Link className="inline-flex items-baseline justify-center text-green-300 leading-none no-underline">
+                    What is MEV?
+                  </Text.Link>
+                  <Text.Link className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline">
+                    MEV Checker{" "}
+                    <Icon
+                      className="size-4 fill-green-300"
+                      name="external-link"
+                    />
+                  </Text.Link>
+                </div>
+                <div className="flex flex-col items-start gap-5">
+                  <Text.Link className="inline-flex items-baseline justify-center no-underline">
+                    Resources
+                  </Text.Link>
+                  <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
+                    Docs
+                  </Text.Link>
+                  <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
+                    Support
+                  </Text.Link>
+                  <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
+                    Cookies
+                  </Text.Link>
+                </div>
+                <div className="flex flex-col items-start gap-5">
+                  <Text.Link className="inline-flex items-baseline justify-center no-underline">
+                    Protocol Stats
+                  </Text.Link>
+                  <Text.Link className="inline-flex flex-col items-baseline justify-center text-green-300 no-underline">
+                    <div>TVL</div>
+                    <div>$421.23M</div>
+                  </Text.Link>
+                  <Text.Link className="inline-flex flex-col items-baseline justify-center text-green-300 no-underline">
+                    <div>7D Vol</div>
+                    <div>$21.23M</div>
+                  </Text.Link>
+                </div>
+              </Footer>
+            }
+            header={
+              <Header
+                button={<Button variant="primary">CONNECT WALLET</Button>}
+                logoLg={
+                  <Icon className="h-6 w-auto stroke-none" name="logo-lg" />
+                }
+                logoSm={
+                  <Icon className="h-6 w-auto stroke-none" name="logo-sm" />
+                }
+              >
                 <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
-                  MEV
+                  Home
                 </Text.Link>
-                <Text.Link className="inline-flex items-baseline justify-center text-green-300 leading-none no-underline">
-                  What is MEV?
+                <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
+                  About
                 </Text.Link>
-                <Text.Link className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline">
-                  MEV Checker{" "}
-                  <Icon
-                    className="size-4 fill-green-300"
-                    name="external-link"
-                  />
+                <Text.Link className="inline-flex items-baseline justify-center gap-2 leading-none no-underline">
+                  Contact <Icon className="size-4" name="external-link" />
                 </Text.Link>
-              </div>
-              <div className="flex flex-col items-start gap-5">
-                <Text.Link className="inline-flex items-baseline justify-center no-underline">
-                  Resources
-                </Text.Link>
-                <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
-                  Docs
-                </Text.Link>
-                <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
-                  Support
-                </Text.Link>
-                <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
-                  Cookies
-                </Text.Link>
-              </div>
-              <div className="flex flex-col items-start gap-5">
-                <Text.Link className="inline-flex items-baseline justify-center no-underline">
-                  Protocol Stats
-                </Text.Link>
-                <Text.Link className="inline-flex flex-col items-baseline justify-center text-green-300 no-underline">
-                  <div>TVL</div>
-                  <div>$421.23M</div>
-                </Text.Link>
-                <Text.Link className="inline-flex flex-col items-baseline justify-center text-green-300 no-underline">
-                  <div>7D Vol</div>
-                  <div>$21.23M</div>
-                </Text.Link>
-              </div>
-            </Footer>
-          }
-          header={
-            <Header
-              button={<Button variant="primary">CONNECT WALLET</Button>}
-              logoLg={
-                <Icon className="h-6 w-auto stroke-none" name="logo-lg" />
-              }
-              logoSm={
-                <Icon className="h-6 w-auto stroke-none" name="logo-sm" />
-              }
-            >
-              <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
-                Home
-              </Text.Link>
-              <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
-                About
-              </Text.Link>
-              <Text.Link className="inline-flex items-baseline justify-center gap-2 leading-none no-underline">
-                Contact <Icon className="size-4" name="external-link" />
-              </Text.Link>
-            </Header>
-          }
-        >
-          {children}
-        </PageLayout>
+              </Header>
+            }
+          >
+            {children}
+          </PageLayout>
+          {modal}
+        </Providers>
       </body>
     </html>
   );

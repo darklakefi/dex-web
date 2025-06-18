@@ -244,6 +244,9 @@ importers:
       '@dex-web/ui':
         specifier: workspace:*
         version: link:../../libs/ui
+      '@dex-web/utils':
+        specifier: workspace:*
+        version: link:../../libs/utils
 
   apps/web-e2e: {}
 

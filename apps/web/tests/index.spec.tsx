@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import Page from "../src/app/page";
+import Page from "../src/app/(swap)/page";
 
 describe("Page", () => {
   it("should render successfully", () => {

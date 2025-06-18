@@ -1,5 +1,3 @@
-"server only";
-
 import { appRouter } from "@dex-web/orpc";
 import { createRouterClient } from "@orpc/server";
 import { headers } from "next/headers";

@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { withNx } from "@nx/next";
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   distDir: "dist",
   experimental: {
     reactCompiler: true,
@@ -35,6 +35,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
     tsconfigPath: "./tsconfig.lib.json",
   },
+
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/i,
