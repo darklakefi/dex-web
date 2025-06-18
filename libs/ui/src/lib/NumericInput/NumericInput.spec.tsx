@@ -22,7 +22,7 @@ describe("NumericInput", () => {
   it("should allow custom props to be passed through", () => {
     render(<NumericInput data-testid="firstName" placeholder="First Name" />);
 
-    const textInputElement = screen.getByTestId("firstName");
+    const textInputElement = screen.getAllByTestId("firstName")[0];
     expect(textInputElement).toBeTruthy();
   });
 });
