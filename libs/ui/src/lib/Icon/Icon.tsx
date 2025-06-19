@@ -2,8 +2,6 @@ import { twMerge } from "tailwind-merge";
 
 import AnalyticsIcon from "./icons/analytics.svg";
 import BackpackWalletIcon from "./icons/backpack-icon.svg";
-import CheckboxEmptyIcon from "./icons/checkbox-empty.svg";
-import CheckboxFilledIcon from "./icons/checkbox-filled.svg";
 import ChevronDownIcon from "./icons/chevron-down.svg";
 import CogIcon from "./icons/cog.svg";
 import CrownIcon from "./icons/crown.svg";
@@ -31,8 +29,6 @@ export type IconName =
   | "analytics"
   | "refresh"
   | "cog"
-  | "checkbox-empty"
-  | "checkbox-filled"
   | "chevron-down"
   | "external-link"
   | "exclamation"
@@ -58,8 +54,6 @@ export type IconName =
 const iconComponents = {
   analytics: AnalyticsIcon,
   backpack: BackpackWalletIcon,
-  "checkbox-empty": CheckboxEmptyIcon,
-  "checkbox-filled": CheckboxFilledIcon,
   "chevron-down": ChevronDownIcon,
   cog: CogIcon,
   crown: CrownIcon,

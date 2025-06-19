@@ -17,20 +17,6 @@ export const Analytics = {
   },
 } satisfies Story;
 
-export const CheckboxEmpty = {
-  args: {
-    name: "checkbox-empty",
-    title: "Checkbox Empty",
-  },
-} satisfies Story;
-
-export const CheckboxFilled = {
-  args: {
-    name: "checkbox-filled",
-    title: "Checkbox Filled",
-  },
-} satisfies Story;
-
 export const ChevronDown = {
   args: {
     name: "chevron-down",
