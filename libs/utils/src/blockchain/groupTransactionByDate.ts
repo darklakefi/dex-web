@@ -3,7 +3,7 @@ type GroupedTransaction<T> = {
   keys: string[];
 };
 
-export const groupTransactionByTimestamp = <T extends { executedAt: Date }>(
+export const groupTransactionByDate = <T extends { executedAt: Date }>(
   sortedItems: T[],
 ): GroupedTransaction<T> => {
   if (sortedItems.length === 0) {

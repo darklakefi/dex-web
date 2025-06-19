@@ -1,6 +1,6 @@
 import type { SwapTransaction } from "@dex-web/core";
 import { Box, Icon, Text } from "@dex-web/ui";
-import { groupTransactionByTimestamp } from "@dex-web/utils";
+import { groupTransactionByDate } from "@dex-web/utils";
 
 interface SwapTransactionHistoryProps {
   transactions: SwapTransaction[];
@@ -9,16 +9,16 @@ interface SwapTransactionHistoryProps {
 export function SwapTransactionHistory({
   transactions,
 }: SwapTransactionHistoryProps) {
-  const groupedTransactions = groupTransactionByTimestamp(transactions);
+  const groupedTransactions = groupTransactionByDate(transactions);
   return (
     <Box className="flex flex-col gap-6" padding="lg">
       <Text.Heading>mev-protected trades</Text.Heading>
       <div className="flex w-full flex-col gap-8">
-        {groupedTransactions.keys.map((key) => (
+        {groupedTransactions.keys.map((key: string) => (
           <div className="flex flex-col gap-3" key={key}>
             <Text.Body2 className="text-green-400">{key}</Text.Body2>
-            {groupedTransactions.data[key] &&
-              groupedTransactions.data[key].map((transaction) => (
+            {groupedTransactions.data[key]?.map(
+              (transaction: SwapTransaction) => (
                 <div
                   className="flex flex-col border-green-400 border-b pb-3"
                   key={transaction.id}
@@ -59,7 +59,8 @@ export function SwapTransactionHistory({
                     </Text.Body2>
                   </div>
                 </div>
-              ))}
+              ),
+            )}
           </div>
         ))}
       </div>
