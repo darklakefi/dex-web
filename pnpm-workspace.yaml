@@ -2,14 +2,3 @@ packages:
   - apps/*
   - libs/*
 
-onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - '@swc/core'
-  - '@tailwindcss/oxide'
-  - bigint-buffer
-  - bufferutil
-  - esbuild
-  - lefthook
-  - nx
-  - sharp
-  - utf-8-validate

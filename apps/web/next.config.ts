@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { withNx } from "@nx/next";
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   distDir: "dist",
   experimental: {
     reactCompiler: true,
@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
     svgr: false,
   },
   outputFileTracingRoot: join(__dirname, "../../"),
+  serverExternalPackages: ["pg"],
   turbopack: {
     rules: {
       "*.svg": {
@@ -35,7 +36,23 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
     tsconfigPath: "./tsconfig.lib.json",
   },
-  webpack(config) {
+
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        child_process: false,
+        dns: false,
+        fs: false,
+        http: false,
+        https: false,
+        net: false,
+        os: false,
+        pg: false,
+        "pg-native": false,
+        tls: false,
+      };
+    }
     config.module.rules.push({
       test: /\.svg$/i,
       use: ["@svgr/webpack"],

@@ -11,14 +11,7 @@
         "outputPath": "libs/orpc/dist"
       }
     },
-    "lint": {
-      "cache": true,
-      "command": "biome check --write libs/orpc/**"
-    },
-    "lint:ci": {
-      "cache": true,
-      "command": "biome ci libs/orpc/**"
-    },
+
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",

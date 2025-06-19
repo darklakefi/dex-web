@@ -6,6 +6,9 @@
   "files": [],
   "references": [
     {
+      "path": "../../libs/utils"
+    },
+    {
       "path": "../../libs/ui"
     },
     {

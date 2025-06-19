@@ -15,9 +15,7 @@ const isCI = process.env.CI === "true";
 const isCIRCLECI = !!process.env.CIRCLECI;
 
 // App configuration
-const baseURL =
-  process.env.BASE_URL ||
-  (isCI ? "http://127.0.0.1:3000" : "http://localhost:4200");
+const baseURL = process.env.BASE_URL;
 
 /**
  * Read environment variables from file.
@@ -32,6 +30,7 @@ export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: "./src" }),
   expect: {
     timeout: 10000,
+    toHaveScreenshot: { maxDiffPixels: 100 },
   },
   forbidOnly: isCI,
   fullyParallel: true,
@@ -134,9 +133,7 @@ export default defineConfig({
     viewport: { height: 720, width: 1280 },
   },
   webServer: {
-    command: isCI
-      ? "pnpm exec nx run web:start -- --hostname 0.0.0.0 --port 3000"
-      : "pnpm exec nx run web:serve",
+    command: "pnpm exec nx run web:start",
     cwd: workspaceRoot,
 
     env: {

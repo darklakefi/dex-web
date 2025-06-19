@@ -11,14 +11,6 @@
         "outputPath": "libs/utils/dist"
       }
     },
-    "lint": {
-      "cache": true,
-      "command": "biome check --write libs/utils/**"
-    },
-    "lint:ci": {
-      "cache": true,
-      "command": "biome ci libs/utils/**"
-    },
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",

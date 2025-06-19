@@ -5,11 +5,11 @@
   "devDependencies": {
     "@dex-web/core": "workspace:*",
     "@dex-web/orpc": "workspace:*",
-    "@dex-web/ui": "workspace:*"
+    "@dex-web/ui": "workspace:*",
+    "@dex-web/utils": "workspace:*"
   },
   "exports": {
     ".": {
-      "default": "./dist/index.js",
       "import": "./dist/index.js",
       "types": "./src/index.d.ts"
     }

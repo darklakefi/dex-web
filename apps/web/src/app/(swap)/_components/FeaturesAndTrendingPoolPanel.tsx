@@ -2,15 +2,15 @@ import type { Pool } from "@dex-web/core";
 import { Button } from "@dex-web/ui";
 import { ShortPoolPanel } from "./ShortPoolPanel";
 
-interface FeaturedAndTrendingPoolPanelProps {
+interface FeaturesAndTrendingPoolPanelProps {
   featuredPools: Pool[];
   trendingPools: Pool[];
 }
 
-export function FeaturedAndTrendingPoolPanel({
+export function FeaturesAndTrendingPoolPanel({
   featuredPools,
   trendingPools,
-}: FeaturedAndTrendingPoolPanelProps) {
+}: FeaturesAndTrendingPoolPanelProps) {
   return (
     <div className="flex w-full flex-col items-center gap-10 bg-transparent">
       <ShortPoolPanel

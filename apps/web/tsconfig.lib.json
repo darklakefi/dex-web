@@ -2,7 +2,7 @@
   "compilerOptions": {
     "incremental": true,
     "jsx": "preserve",
-    "noEmit": true,
+    "noEmit": false,
     "plugins": [
       {
         "name": "next"
@@ -11,7 +11,8 @@
   },
   "exclude": [
     "dist",
-    "../../node_modules",
+    "node_modules",
+    "node_modules",
     "**/*.spec.ts",
     "**/*.test.ts",
     "../../dist/**/*"
@@ -22,10 +23,12 @@
     "**/*.jsx",
     "**/*.ts",
     "**/*.tsx",
-    "../../apps/web/dist/types/**/*.ts",
     "../../apps/web/dist/dist/types/**/*.ts"
   ],
   "references": [
+    {
+      "path": "../../libs/utils/tsconfig.lib.json"
+    },
     {
       "path": "../../libs/ui/tsconfig.lib.json"
     },

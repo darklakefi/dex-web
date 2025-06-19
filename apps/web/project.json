@@ -13,14 +13,7 @@
       },
       "outputs": ["{options.outputPath}"]
     },
-    "lint": {
-      "cache": true,
-      "command": "biome check --write apps/web/**"
-    },
-    "lint:ci": {
-      "cache": true,
-      "command": "biome ci apps/web/**"
-    },
+
     "serve": {
       "configurations": {
         "development": {

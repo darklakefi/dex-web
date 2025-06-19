@@ -8,7 +8,6 @@
 export const truncate = (text: string, leftLength = 4, rightLength = 4) => {
   if (!text) return text;
 
-  // If the string is shorter than or equal to the combined length, return it as is
   if (text.length <= leftLength + rightLength + 3) return text;
 
   const start = text.slice(0, leftLength);

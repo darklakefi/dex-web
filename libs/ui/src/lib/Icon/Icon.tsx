@@ -85,5 +85,5 @@ export function Icon({ name, title, className, ...props }: IconProps) {
 
   const classNames = twMerge("size-6 text-green-100 fill-current", className);
 
-  return <IconComponent className={classNames} {...props} />;
+  return <IconComponent className={classNames} role="img" {...props} />;
 }

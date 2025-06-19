@@ -9,11 +9,7 @@
   "targets": {
     "lint": {
       "cache": true,
-      "command": "biome check --write apps/web-e2e/**"
-    },
-    "lint:ci": {
-      "cache": true,
-      "command": "biome ci apps/web-e2e/**"
+      "command": "pnpm exec biome check --changed apps/web-e2e/**"
     }
   }
 }

@@ -3,7 +3,7 @@
     "types": ["node", "vite/client"]
   },
   "exclude": [
-    "../../node_modules",
+    "node_modules",
     "dist",
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
