@@ -93,7 +93,7 @@ export function Button<TElement extends React.ElementType>(
   } = props;
 
   const TextComponent =
-    (as ?? variant === ButtonVariantEnum.Tertiary) ? Text.Link : Text.Body2;
+    variant === ButtonVariantEnum.Tertiary ? Text.Link : Text.Body2;
   const ButtonComponent = as;
 
   if (!ButtonComponent) {
