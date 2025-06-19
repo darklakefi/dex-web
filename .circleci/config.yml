@@ -14,6 +14,7 @@ commands:
             - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
             - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}
             - nx-cache-{{ .Branch }}-
+            - nx-cache-
 
   setup-nx:
     description: "Set up Nx SHAs for affected detection"
@@ -26,9 +27,10 @@ commands:
     steps:
       - save_cache:
           name: Save Nx Cache
-          key: nx-cache-v3-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
+          key: nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
           paths:
             - .nx/cache
+            - node_modules/.cache/nx
 
   restore-vercel-cache:
     description: "Restore Vercel build cache"
@@ -62,17 +64,16 @@ commands:
           name: Restore pnpm Package Cache
           keys:
             - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+            - pnpm-packages-{{ .Branch }}-
+            - pnpm-packages-
 
       - run:
           name: Install pnpm package manager
           command: |
             if ! command -v pnpm &> /dev/null; then
-              echo "Installing pnpm..."
               npm install --global corepack@latest
               corepack enable
               corepack prepare pnpm@latest-10 --activate
-            else
-              echo "pnpm is already installed"
             fi
             pnpm config set store-dir ~/.pnpm-store
 
@@ -87,13 +88,16 @@ commands:
 
       - run:
           name: Install Dependencies
-          command: pnpm install
+          command: pnpm install --frozen-lockfile
 
       - save_cache:
           name: Save pnpm Package Cache
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - ~/.pnpm-store
+            - node_modules
+            - apps/*/node_modules
+            - libs/*/node_modules
 
 jobs:
   check:
@@ -114,6 +118,7 @@ jobs:
     docker:
       - image: mcr.microsoft.com/playwright:v1.53.0-noble
     resource_class: large
+    parallelism: 4
     steps:
       - checkout
       - setup
@@ -132,7 +137,7 @@ jobs:
   chromatic:
     docker:
       - image: cimg/node:lts
-    resource_class: small
+    resource_class: medium
     environment:
       CI: true
     steps:
@@ -166,13 +171,10 @@ jobs:
           name: Deploy Project Artifacts to Vercel
           command: |
             VERCEL_URL=$(npx vercel@latest deploy --token=$VERCEL_TOKEN)
-
             if [[ ! "$VERCEL_URL" =~ ^https?:// ]]; then
               echo "Invalid Vercel URL received: $VERCEL_URL"
               exit 1
             fi
-
-            echo "Deployed to: $VERCEL_URL"
             echo "export VERCEL_URL=$VERCEL_URL" >> $BASH_ENV
       - run:
           name: Create GitHub Deployment & Status
@@ -220,7 +222,6 @@ workflows:
       - check
       - test
       - chromatic
-
       - deploy-preview:
           requires:
             - check
@@ -228,7 +229,6 @@ workflows:
           filters:
             branches:
               ignore: /main/
-
       - deploy-production:
           requires:
             - check
