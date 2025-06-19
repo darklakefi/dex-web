@@ -70,12 +70,10 @@ commands:
       - run:
           name: Install pnpm package manager
           command: |
-            if ! command -v pnpm &> /dev/null; then
-              npm install --global corepack@latest
-              corepack enable
-              corepack prepare pnpm@latest-10 --activate
-            fi
-            pnpm config set store-dir ~/.pnpm-store
+            npm install --global corepack@latest
+            corepack enable
+            corepack prepare pnpm@latest-10 --activate
+            pnpm config set store-dir .pnpm-store
 
       - save_cache:
           name: Save Global NPM Cache
@@ -157,7 +155,7 @@ jobs:
 
   deploy-preview:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:lts
     resource_class: small
     steps:
       - checkout
@@ -184,7 +182,7 @@ jobs:
 
   deploy-production:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:lts
     resource_class: medium
     steps:
       - checkout
