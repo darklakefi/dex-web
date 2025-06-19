@@ -47,41 +47,56 @@ commands:
           key: vercel-cache-v2-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - .vercel
-            - .next/cache
             - apps/web/.next/cache
 
-  setup:
-    description: "Common setup steps for all jobs"
+  setup-pnpm:
+    description: "Install pnpm package manager"
     steps:
+      - run:
+          name: Install pnpm package manager
+          command: |
+            corepack enable
+            corepack prepare pnpm@latest-10 --activate
+            pnpm config set store-dir ~/.pnpm-store
+
+.job_defaults: &job_defaults
+  docker:
+    - image: mcr.microsoft.com/playwright:v1.53.0-noble
+  resource_class: large
+
+jobs:
+  install_dependencies:
+    <<: *job_defaults
+    steps:
+      - checkout
       - restore_cache:
           name: Restore pnpm Package Cache
           keys:
             - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-      - run:
-          name: Install pnpm package manager
-          command: |
-            npm install --global corepack@latest
-            corepack enable
-            corepack prepare pnpm@latest-10 --activate
-            pnpm config set store-dir ~/.pnpm-store
+      - setup-pnpm
       - run:
           name: Install Dependencies
-          command: |
-            pnpm install
+          command: pnpm install --frozen-lockfile
       - save_cache:
           name: Save pnpm Package Cache
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - ~/.pnpm-store
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
 
-jobs:
   check:
-    docker:
-      - image: mcr.microsoft.com/playwright:v1.53.0-noble
-    resource_class: large
+    <<: *job_defaults
     steps:
-      - checkout
-      - setup
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - setup-pnpm
       - setup-nx
       - restore-nx-cache
       - run:
@@ -90,12 +105,15 @@ jobs:
       - save-nx-cache
 
   test:
-    docker:
-      - image: mcr.microsoft.com/playwright:v1.53.0-noble
-    resource_class: large
+    <<: *job_defaults
     steps:
-      - checkout
-      - setup
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - setup-pnpm
       - setup-nx
       - restore-nx-cache
       - run:
@@ -115,8 +133,13 @@ jobs:
     environment:
       CI: true
     steps:
-      - checkout
-      - setup
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - setup-pnpm
       - setup-nx
       - restore-nx-cache
       - run:
@@ -132,19 +155,24 @@ jobs:
       - image: cimg/node:lts
     resource_class: medium
     steps:
-      - checkout
-      - setup
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - setup-pnpm
       - restore-vercel-cache
       - run:
           name: Pull Vercel Environment Information
-          command: npx vercel@latest pull --yes --environment=preview --token=$VERCEL_TOKEN
+          command: npx vercel@34 pull --yes --environment=preview --token=$VERCEL_TOKEN
       - run:
           name: Build Project
-          command: npx vercel@latest build --token=$VERCEL_TOKEN
+          command: npx vercel@34 build --token=$VERCEL_TOKEN
       - run:
           name: Deploy Project Artifacts to Vercel
           command: |
-            VERCEL_URL=$(npx vercel@latest deploy --token=$VERCEL_TOKEN)
+            VERCEL_URL=$(npx vercel@34 deploy --token=$VERCEL_TOKEN)
 
             if [[ ! "$VERCEL_URL" =~ ^https?:// ]]; then
               echo "Invalid Vercel URL received: $VERCEL_URL"
@@ -156,106 +184,24 @@ jobs:
       - run:
           name: Install required tools
           command: sudo apt-get update && sudo apt-get install -y jq
-
       - run:
           name: Create GitHub Deployment & Status
           command: |
-            set -e
-
-            if [ -z "$GITHUB_TOKEN" ]; then
-              echo "⚠️  GITHUB_TOKEN not set, skipping GitHub integration"
-              exit 0
-            fi
-
-            if [ -z "$VERCEL_URL" ]; then
-              echo "❌ VERCEL_URL not set, cannot create deployment"
-              exit 1
-            fi
-
-            if [[ ! "$VERCEL_URL" =~ ^https?:// ]]; then
-              echo "❌ Invalid Vercel URL format: $VERCEL_URL"
-              exit 1
-            fi
-
-            REPO_OWNER="darklakefi"
-            REPO_NAME="dex-web"
-            COMMIT_SHA="$CIRCLE_SHA1"
-
-            echo "🚀 Creating GitHub deployment for commit: $COMMIT_SHA"
-            echo "📁 Repository: $REPO_OWNER/$REPO_NAME"
-            echo "🔗 Preview URL: $VERCEL_URL"
-
-            DEPLOYMENT_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/deployments \
-              -d '{
-                "ref": "'$COMMIT_SHA'",
-                "environment": "preview",
-                "auto_merge": false,
-                "required_contexts": []
-              }')
-
-            HTTP_STATUS=$(echo $DEPLOYMENT_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-            DEPLOYMENT_BODY=$(echo $DEPLOYMENT_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')
-
-            if [ "$HTTP_STATUS" -ne 201 ]; then
-              echo "❌ Failed to create deployment. HTTP Status: $HTTP_STATUS"
-              echo "Response: $DEPLOYMENT_BODY"
-              exit 1
-            fi
-
-            DEPLOYMENT_ID=$(echo $DEPLOYMENT_BODY | jq -r '.id')
-            echo "✅ Deployment created (ID: $DEPLOYMENT_ID)"
-
-            STATUS_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/deployments/$DEPLOYMENT_ID/statuses \
-              -d '{
-                "state": "success",
-                "environment_url": "'$VERCEL_URL'",
-                "description": "Preview deployment ready"
-              }')
-
-            STATUS_HTTP=$(echo $STATUS_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-
-            if [ "$STATUS_HTTP" -ne 201 ]; then
-              echo "⚠️  Failed to update deployment status. HTTP Status: $STATUS_HTTP"
-              echo "Response: $(echo $STATUS_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')"
-            else
-              echo "✅ Deployment status updated"
-            fi
-
-            CHECK_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/statuses/$COMMIT_SHA \
-              -d '{
-                "state": "success",
-                "target_url": "'$VERCEL_URL'",
-                "description": "Preview ready",
-                "context": "deploy/preview"
-              }')
-
-            CHECK_HTTP=$(echo $CHECK_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-
-            if [ "$CHECK_HTTP" -ne 201 ]; then
-              echo "⚠️  Failed to create status check. HTTP Status: $CHECK_HTTP"
-              echo "Response: $(echo $CHECK_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')"
-            else
-              echo "✅ Status check created for deploy/preview context"
-            fi
-
-            echo "🎉 GitHub integration completed successfully!"
+            chmod +x scripts/create-github-deployment.sh
+            ./scripts/create-github-deployment.sh
 
   deploy-production:
     docker:
       - image: cimg/node:lts
     resource_class: medium
     steps:
-      - checkout
-      - setup
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - setup-pnpm
       - restore-vercel-cache
       - run:
           name: Plan production deployment
@@ -265,32 +211,18 @@ jobs:
           command: circleci run release update --status=running
       - run:
           name: Pull Vercel Environment Information
-          command: npx vercel@latest pull --yes --environment=production --token=$VERCEL_TOKEN
+          command: npx vercel@34 pull --yes --environment=production --token=$VERCEL_TOKEN
       - run:
           name: Build Project
-          command: npx vercel@latest build --prod --token=$VERCEL_TOKEN
+          command: npx vercel@34 build --prod --token=$VERCEL_TOKEN
       - run:
           name: Deploy Project Artifacts to Vercel
-          command: npx vercel@latest deploy --prod --token=$VERCEL_TOKEN
+          command: npx vercel@34 deploy --prod --token=$VERCEL_TOKEN
       - run:
           name: Create GitHub Production Deployment
           command: |
-            if [ -n "$GITHUB_TOKEN" ]; then
-              curl -s -X POST \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments \
-                -d '{
-                  "ref": "'$CIRCLE_SHA1'",
-                  "environment": "production",
-                  "auto_merge": false,
-                  "required_contexts": []
-                }' | jq -r '.id' | xargs -I {} curl -s -X POST \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments/{}/statuses \
-                -d '{"state": "success", "description": "Production deployment successful"}'
-            fi
+            chmod +x scripts/create-github-production-deployment.sh
+            ./scripts/create-github-production-deployment.sh
       - run:
           name: Update deployment status to SUCCESS
           command: circleci run release update --status=SUCCESS
@@ -304,18 +236,29 @@ jobs:
 workflows:
   ci-cd:
     jobs:
-      - check
-      - test
-      - chromatic
+      - install_dependencies
+      - check:
+          requires:
+            - install_dependencies
+      - test:
+          requires:
+            - install_dependencies
+      - chromatic:
+          requires:
+            - install_dependencies
       - deploy-preview:
           requires:
             - test
+            - check
+            - chromatic
           filters:
             branches:
               ignore: /main/
       - deploy-production:
           requires:
             - test
+            - check
+            - chromatic
           filters:
             branches:
               only: /main/
