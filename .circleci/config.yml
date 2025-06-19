@@ -10,9 +10,13 @@ commands:
       - restore_cache:
           name: Restore Nx Cache
           keys:
-            - nx-cache-v2-{{ .Branch }}-{{ .Revision }}
-            - nx-cache-v2-{{ .Branch }}-
-            - nx-cache-v2-
+            - nx-cache-v3-{{ .Branch }}-{{ .Revision }}
+            - nx-cache-v3-{{ .Branch }}-
+            - nx-cache-v3-
+      - run:
+          name: Fix Nx cache permissions
+          command: |
+            sudo chown -R $(id -u):$(id -g) .nx/cache
 
   setup-nx:
     description: "Set up Nx SHAs for affected detection"
