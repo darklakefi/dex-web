@@ -1,6 +1,6 @@
+import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import { builtinModules } from "node:module";
 import { join, resolve } from "node:path";
-import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import { defineConfig, mergeConfig } from "vite";
 
 import dts from "vite-plugin-dts";
@@ -38,13 +38,14 @@ export default defineConfig(() => {
         "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       ],
       name: "db",
+      outputFile: "./test-results/test-output.json",
       pool: "forks" as const,
       poolOptions: {
         forks: {
           singleFork: true,
         },
       },
-      reporters: ["default"],
+      reporters: ["default", "junit"],
       teardownTimeout: 10000,
       testTimeout: 30000,
       watch: false,

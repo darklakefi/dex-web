@@ -1,5 +1,5 @@
-import { join, resolve } from "node:path";
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
+import { join, resolve } from "node:path";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 
@@ -47,7 +47,8 @@ export default defineConfig(() => {
           singleFork: true,
         },
       },
-      reporters: ["default"],
+      reporters: ["default", "junit"],
+      outputFile: "./test-results/test-output.json",
       teardownTimeout: 10000,
       testTimeout: 30000,
       watch: false,
