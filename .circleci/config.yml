@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   nx: nrwl/nx@1.7.0
+  node: circleci/node@7.1.0
 
 commands:
   restore-nx-cache:
@@ -55,47 +56,9 @@ commands:
   setup:
     description: "Common setup steps for all jobs"
     steps:
-      - restore_cache:
-          name: Restore Global NPM Cache
-          keys:
-            - global-npm-cache-{{ checksum ".circleci/config.yml" }}
-
-      - restore_cache:
-          name: Restore pnpm Package Cache
-          keys:
-            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-            - pnpm-packages-{{ .Branch }}-
-            - pnpm-packages-
-
-      - run:
-          name: Install pnpm package manager
-          command: |
-            npm install --global corepack@latest
-            corepack enable
-            corepack prepare pnpm@latest-10 --activate
-            pnpm config set store-dir .pnpm-store
-
-      - save_cache:
-          name: Save Global NPM Cache
-          key: global-npm-cache-{{ checksum ".circleci/config.yml" }}
-          paths:
-            - /usr/local/lib/node_modules
-            - /usr/local/share/.config/yarn
-            - /usr/local/share/corepack
-            - ~/.npm
-
-      - run:
-          name: Install Dependencies
-          command: pnpm install --frozen-lockfile
-
-      - save_cache:
-          name: Save pnpm Package Cache
-          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-          paths:
-            - ~/.pnpm-store
-            - node_modules
-            - apps/*/node_modules
-            - libs/*/node_modules
+      - node/install-packages:
+          pkg-manager: pnpm
+          cache-path: ~/.pnpm-store
 
 jobs:
   check:
