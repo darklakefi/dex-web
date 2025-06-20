@@ -5,5 +5,14 @@ test("has title", async ({ page }) => {
 
   expect(await page.locator("label").first().innerText()).toContain("SELLING");
 
-  await expect(page.locator("body")).toMatchAriaSnapshot();
+  await expect(page.locator("body")).toMatchAriaSnapshot(`
+    - banner:
+      - img
+      - navigation:
+        - text: Home About Contact
+        - img
+      - button "CONNECT WALLET"
+    - main:
+      - text: Selling
+    `);
 });
