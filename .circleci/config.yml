@@ -103,7 +103,7 @@ jobs:
 
   e2e:
     docker:
-      - image: mcr.microsoft.com/playwright:v1.53.01noble
+      - image: mcr.microsoft.com/playwright:v1.53.1-noble
     resource_class: large
     parallelism: 2
     steps:
