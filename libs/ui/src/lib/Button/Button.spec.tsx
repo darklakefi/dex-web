@@ -35,7 +35,7 @@ describe("Button", () => {
   describe("Button Icons", () => {
     it("should render with leading icon", () => {
       const { container } = render(
-        <Button leadingIcon="checkbox-filled" variant="primary">
+        <Button leadingIcon="times" variant="primary">
           Button with Leading Icon
         </Button>,
       );
@@ -44,7 +44,7 @@ describe("Button", () => {
         "items-center",
         "gap-2",
       );
-      expect(screen.getByRole("img")).toBeInTheDocument();
+      expect(container.querySelector("svg")).toBeInTheDocument();
       expect(screen.getByText("Button with Leading Icon")).toBeInTheDocument();
     });
 
