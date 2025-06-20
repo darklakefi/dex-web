@@ -12,7 +12,6 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "biome.lsp": {
-    "configurationPath": "./biome.json",
     "bin": "./node_modules/.bin/biome"
   },
   "editor.codeActionsOnSave": {
