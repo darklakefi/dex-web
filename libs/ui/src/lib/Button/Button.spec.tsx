@@ -44,7 +44,7 @@ describe("Button", () => {
         "items-center",
         "gap-2",
       );
-      expect(container.querySelector("svg")).toBeInTheDocument();
+      expect(screen.getByRole("img")).toBeInTheDocument();
       expect(screen.getByText("Button with Leading Icon")).toBeInTheDocument();
     });
 
@@ -78,7 +78,7 @@ describe("Button", () => {
           Loading Button
         </Button>,
       );
-      expect(container.querySelector("svg")).toHaveClass("animate-spin");
+      expect(container.querySelector("svg")).toHaveClass("animate-spin-pause");
       expect(container.querySelector("button")).not.toBeDisabled();
     });
   });
