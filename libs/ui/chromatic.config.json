@@ -1,10 +1,11 @@
 {
   "$schema": "https://www.chromatic.com/config-file.schema.json",
   "autoAcceptChanges": "main",
-  "exitOnceUploaded": true,
+  "buildCommand": "nx build-storybook ui",
+  "exitZeroOnChanges": true,
   "externals": ["public/**"],
   "onlyChanged": true,
-  "projectId": "Project:...",
-  "skip": "dependabot/**",
-  "storybookBuildDir": "storybook-static"
+  "outputDir": "storybook-static",
+  "projectId": "Project:6835a6e6e7f3ca7f18217892",
+  "skip": "dependabot/**"
 }

@@ -6,17 +6,17 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "biomejs.biome"
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
   "biome.lsp": {
-    "configurationPath": "./biome.json",
     "bin": "./node_modules/.bin/biome"
   },
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit",
   },
   "editor.detectIndentation": false,
   "editor.formatOnSave": true,

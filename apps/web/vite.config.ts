@@ -40,13 +40,14 @@ export default defineConfig(() => {
         "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       ],
       name: "web",
+      outputFile: "./test-results/test-output.json",
       pool: "forks" as const,
       poolOptions: {
         forks: {
           singleFork: true,
         },
       },
-      reporters: ["default"],
+      reporters: ["default", "junit"],
       setupFiles: [resolve(__dirname, "vitest.setup.ts")],
       teardownTimeout: 10000,
       testTimeout: 30000,

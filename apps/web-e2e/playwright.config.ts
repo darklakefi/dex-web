@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import { workspaceRoot } from "@nx/devkit";
 import { nxE2EPreset } from "@nx/playwright/preset";
 import { defineConfig, devices } from "@playwright/test";
@@ -15,7 +14,7 @@ const isCI = process.env.CI === "true";
 const isCIRCLECI = !!process.env.CIRCLECI;
 
 // App configuration
-const baseURL = process.env.BASE_URL;
+const baseURL = isCI ? "http://localhost:4200" : process.env.BASE_URL;
 
 /**
  * Read environment variables from file.
@@ -34,13 +33,7 @@ export default defineConfig({
   },
   forbidOnly: isCI,
   fullyParallel: true,
-  outputDir: join(
-    workspaceRoot,
-    "dist",
-    ".playwright",
-    "web-e2e",
-    "test-results",
-  ),
+  outputDir: "dist/test-results",
 
   projects: [
     {
@@ -92,25 +85,13 @@ export default defineConfig({
           "html",
           {
             open: "never",
-            outputFolder: join(
-              workspaceRoot,
-              "dist",
-              ".playwright",
-              "web-e2e",
-              "html-report",
-            ),
+            outputFolder: "dist/html-report",
           },
         ],
         [
           "junit",
           {
-            outputFile: join(
-              workspaceRoot,
-              "dist",
-              ".playwright",
-              "web-e2e",
-              "junit.xml",
-            ),
+            outputFile: "dist/junit.xml",
           },
         ],
         ["github"],

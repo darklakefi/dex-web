@@ -41,13 +41,14 @@ export default defineConfig(() => {
         "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       ],
       name: "orpc",
+      outputFile: "./test-results/test-output.json",
       pool: "forks" as const,
       poolOptions: {
         forks: {
           singleFork: true,
         },
       },
-      reporters: ["default"],
+      reporters: ["default", "junit"],
       teardownTimeout: 10000,
       testTimeout: 30000,
       watch: false,

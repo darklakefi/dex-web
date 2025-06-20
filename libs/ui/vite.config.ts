@@ -48,13 +48,14 @@ const baseConfig = {
       "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
     ],
     name: "ui",
+    outputFile: "./test-results/test-output.json",
     pool: "forks" as const,
     poolOptions: {
       forks: {
         singleFork: true,
       },
     },
-    reporters: ["default"],
+    reporters: ["default", "junit"],
     setupFiles: ["@testing-library/jest-dom"],
     teardownTimeout: 10000,
     testTimeout: 30000,
