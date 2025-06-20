@@ -99,7 +99,7 @@ jobs:
 
   e2e:
     docker:
-      - image: mcr.microsoft.com/playwright:v1.45.1-jammy
+      - image: mcr.microsoft.com/playwright:v1.53.0-noble
     resource_class: large
     parallelism: 2
     steps:
@@ -121,7 +121,6 @@ jobs:
   chromatic:
     docker:
       - image: cimg/node:lts
-    working_directory: libs/ui
     resource_class: medium
     environment:
       CI: true
@@ -131,11 +130,8 @@ jobs:
       - setup-nx
       - restore-nx-cache
       - run:
-          name: Build Storybook for Chromatic
-          command: pnpm exec nx build-storybook ui --stats-json=storybook-static
-      - run:
           name: Run Chromatic
-          command: npx chromatic
+          command: cd libs/ui && npx chromatic
       - save-nx-cache
 
   deploy-preview:

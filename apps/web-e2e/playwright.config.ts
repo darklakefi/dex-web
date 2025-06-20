@@ -42,60 +42,60 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
         launchOptions: isCIRCLECI
           ? {
-            args: [
-              "--no-sandbox",
-              "--disable-setuid-sandbox",
-              "--disable-dev-shm-usage",
-              "--disable-gpu",
-              "--no-first-run",
-              "--no-zygote",
-              "--single-process",
-            ],
-          }
+              args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--no-first-run",
+                "--no-zygote",
+                "--single-process",
+              ],
+            }
           : {},
       },
     },
     ...(isCI
       ? [
-        {
-          name: "firefox",
-          use: {
-            ...devices["Desktop Firefox"],
-            launchOptions: isCIRCLECI
-              ? {
-                args: ["--no-sandbox", "--disable-dev-shm-usage"],
-              }
-              : {},
+          {
+            name: "firefox",
+            use: {
+              ...devices["Desktop Firefox"],
+              launchOptions: isCIRCLECI
+                ? {
+                    args: ["--no-sandbox", "--disable-dev-shm-usage"],
+                  }
+                : {},
+            },
           },
-        },
-        {
-          name: "webkit",
-          use: {
-            ...devices["Desktop Safari"],
-            launchOptions: {},
+          {
+            name: "webkit",
+            use: {
+              ...devices["Desktop Safari"],
+              launchOptions: {},
+            },
           },
-        },
-      ]
+        ]
       : []),
   ],
 
   reporter: isCI
     ? [
-      [
-        "html",
-        {
-          open: "never",
-          outputFolder: "dist/html-report",
-        },
-      ],
-      [
-        "junit",
-        {
-          outputFile: "dist/junit.xml",
-        },
-      ],
-      ["github"],
-    ]
+        [
+          "html",
+          {
+            open: "never",
+            outputFolder: "dist/html-report",
+          },
+        ],
+        [
+          "junit",
+          {
+            outputFile: "dist/junit.xml",
+          },
+        ],
+        ["github"],
+      ]
     : [["html", { open: "on-failure" }], ["list"]],
   retries: isCI ? CI_RETRIES : LOCAL_RETRIES,
 
