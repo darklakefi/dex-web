@@ -5,5 +5,5 @@ test("has title", async ({ page }) => {
 
   expect(await page.locator("label").first().innerText()).toContain("SELLING");
 
-  await expect(page).toHaveScreenshot();
+  await expect(page.locator("body")).toMatchAriaSnapshot();
 });
