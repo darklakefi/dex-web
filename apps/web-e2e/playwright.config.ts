@@ -14,7 +14,7 @@ const isCI = process.env.CI === "true";
 const isCIRCLECI = !!process.env.CIRCLECI;
 
 // App configuration
-const baseURL = process.env.BASE_URL;
+const baseURL = isCI ? "http://localhost:4200" : process.env.BASE_URL;
 
 /**
  * Read environment variables from file.
