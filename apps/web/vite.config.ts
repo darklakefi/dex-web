@@ -1,8 +1,8 @@
 /// <reference types='vitest' />
 
+import { resolve } from "node:path";
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import react from "@vitejs/plugin-react-swc";
-import { resolve } from "node:path";
 import svgr from "vite-plugin-svgr";
 import { defineConfig, mergeConfig } from "vitest/config";
 

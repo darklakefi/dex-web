@@ -1,5 +1,5 @@
-import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import { join, resolve } from "node:path";
+import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 
@@ -41,6 +41,7 @@ export default defineConfig(() => {
         "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       ],
       name: "orpc",
+      outputFile: "./test-results/test-output.json",
       pool: "forks" as const,
       poolOptions: {
         forks: {
@@ -48,7 +49,6 @@ export default defineConfig(() => {
         },
       },
       reporters: ["default", "junit"],
-      outputFile: "./test-results/test-output.json",
       teardownTimeout: 10000,
       testTimeout: 30000,
       watch: false,

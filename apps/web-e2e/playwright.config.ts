@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import { workspaceRoot } from "@nx/devkit";
 import { nxE2EPreset } from "@nx/playwright/preset";
 import { defineConfig, devices } from "@playwright/test";
@@ -34,13 +33,7 @@ export default defineConfig({
   },
   forbidOnly: isCI,
   fullyParallel: true,
-  outputDir: join(
-    workspaceRoot,
-    "dist",
-    ".playwright",
-    "web-e2e",
-    "test-results",
-  ),
+  outputDir: "dist/test-results",
 
   projects: [
     {
@@ -49,72 +42,60 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
         launchOptions: isCIRCLECI
           ? {
-              args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--no-first-run",
-                "--no-zygote",
-                "--single-process",
-              ],
-            }
+            args: [
+              "--no-sandbox",
+              "--disable-setuid-sandbox",
+              "--disable-dev-shm-usage",
+              "--disable-gpu",
+              "--no-first-run",
+              "--no-zygote",
+              "--single-process",
+            ],
+          }
           : {},
       },
     },
     ...(isCI
       ? [
-          {
-            name: "firefox",
-            use: {
-              ...devices["Desktop Firefox"],
-              launchOptions: isCIRCLECI
-                ? {
-                    args: ["--no-sandbox", "--disable-dev-shm-usage"],
-                  }
-                : {},
-            },
+        {
+          name: "firefox",
+          use: {
+            ...devices["Desktop Firefox"],
+            launchOptions: isCIRCLECI
+              ? {
+                args: ["--no-sandbox", "--disable-dev-shm-usage"],
+              }
+              : {},
           },
-          {
-            name: "webkit",
-            use: {
-              ...devices["Desktop Safari"],
-              launchOptions: {},
-            },
+        },
+        {
+          name: "webkit",
+          use: {
+            ...devices["Desktop Safari"],
+            launchOptions: {},
           },
-        ]
+        },
+      ]
       : []),
   ],
 
   reporter: isCI
     ? [
-        [
-          "html",
-          {
-            open: "never",
-            outputFolder: join(
-              workspaceRoot,
-              "dist",
-              ".playwright",
-              "web-e2e",
-              "html-report",
-            ),
-          },
-        ],
-        [
-          "junit",
-          {
-            outputFile: join(
-              workspaceRoot,
-              "dist",
-              ".playwright",
-              "web-e2e",
-              "junit.xml",
-            ),
-          },
-        ],
-        ["github"],
-      ]
+      [
+        "html",
+        {
+          open: "never",
+          outputFolder: "dist/html-report",
+        },
+      ],
+      [
+        "junit",
+        {
+          outputFile: "dist/junit.xml",
+        },
+      ],
+      ["github"],
+    ]
     : [["html", { open: "on-failure" }], ["list"]],
   retries: isCI ? CI_RETRIES : LOCAL_RETRIES,
 

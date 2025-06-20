@@ -1,6 +1,6 @@
-import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import { builtinModules } from "node:module";
 import { join, resolve } from "node:path";
+import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import { defineConfig, mergeConfig } from "vite";
 
 import dts from "vite-plugin-dts";

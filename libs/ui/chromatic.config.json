@@ -5,6 +5,7 @@
   "externals": ["public/**"],
   "onlyChanged": true,
   "projectId": "Project:6835a6e6e7f3ca7f18217892",
+  "repositorySlug": "darklakefi/dex-web",
   "skip": "dependabot/**",
   "storybookBuildDir": "storybook-static"
 }

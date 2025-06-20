@@ -97,9 +97,31 @@ jobs:
           path: test-results
           destination: junit
 
+  e2e:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.45.1-jammy
+    resource_class: large
+    parallelism: 2
+    steps:
+      - checkout
+      - setup
+      - setup-nx
+      - restore-nx-cache
+      - run:
+          name: Run affected e2e tests
+          command: |
+            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD --target=e2e --parallel --max-parallel=2
+      - save-nx-cache
+      - store_test_results:
+          path: apps/web-e2e/dist/junit.xml
+      - store_artifacts:
+          path: apps/web-e2e/dist/html-report
+          destination: playwright-report
+
   chromatic:
     docker:
       - image: cimg/node:lts
+    working_directory: libs/ui
     resource_class: medium
     environment:
       CI: true
@@ -113,7 +135,7 @@ jobs:
           command: pnpm exec nx build-storybook ui --stats-json=storybook-static
       - run:
           name: Run Chromatic
-          command: cd libs/ui && npx chromatic
+          command: npx chromatic
       - save-nx-cache
 
   deploy-preview:
@@ -288,7 +310,14 @@ workflows:
     jobs:
       - check
       - test
-      - chromatic
+      - e2e:
+          requires:
+            - check
+            - test
+      - chromatic:
+          requires:
+            - check
+            - test
       - deploy-preview:
           requires:
             - check
@@ -300,6 +329,7 @@ workflows:
           requires:
             - check
             - test
+            - e2e
             - chromatic
           filters:
             branches:
