@@ -15,7 +15,7 @@ export default async function Page({
       <Hero
         className="gap-4"
         image="/images/waddles/pose4.png"
-        imagePosition="start"
+        imagePosition="end"
       >
         <div className="flex flex-col gap-3 uppercase">
           <Text.Heading>swap</Text.Heading>
