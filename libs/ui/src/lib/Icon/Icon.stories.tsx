@@ -100,3 +100,17 @@ export const X = {
     title: "X",
   },
 } satisfies Story;
+
+export const Refresh = {
+  args: {
+    name: "refresh",
+    title: "Refresh",
+  },
+} satisfies Story;
+
+export const Cog = {
+  args: {
+    name: "cog",
+    title: "Cog",
+  },
+} satisfies Story;

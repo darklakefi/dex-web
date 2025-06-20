@@ -4,6 +4,7 @@ import AnalyticsIcon from "./icons/analytics.svg";
 import CheckboxEmptyIcon from "./icons/checkbox-empty.svg";
 import CheckboxFilledIcon from "./icons/checkbox-filled.svg";
 import ChevronDownIcon from "./icons/chevron-down.svg";
+import CogIcon from "./icons/cog.svg";
 import CrownIcon from "./icons/crown.svg";
 import ExternalLinkIcon from "./icons/external-link.svg";
 import FireIcon from "./icons/fire.svg";
@@ -13,6 +14,7 @@ import LoadingStripeIcon from "./icons/loading-stripe.svg";
 import LogoLgIcon from "./icons/logo-lg.svg";
 import LogoSmIcon from "./icons/logo-sm.svg";
 import PlayIcon from "./icons/play.svg";
+import RefreshIcon from "./icons/refresh.svg";
 import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
 import TelegramIcon from "./icons/telegram.svg";
@@ -23,6 +25,8 @@ import XIcon from "./icons/x.svg";
 
 export type IconName =
   | "analytics"
+  | "refresh"
+  | "cog"
   | "checkbox-empty"
   | "checkbox-filled"
   | "chevron-down"
@@ -48,6 +52,7 @@ const iconComponents = {
   "checkbox-empty": CheckboxEmptyIcon,
   "checkbox-filled": CheckboxFilledIcon,
   "chevron-down": ChevronDownIcon,
+  cog: CogIcon,
   crown: CrownIcon,
   "external-link": ExternalLinkIcon,
   fire: FireIcon,
@@ -57,6 +62,7 @@ const iconComponents = {
   "logo-lg": LogoLgIcon,
   "logo-sm": LogoSmIcon,
   play: PlayIcon,
+  refresh: RefreshIcon,
   search: SearchIcon,
   seedlings: SeedlingsIcon,
   telegram: TelegramIcon,
