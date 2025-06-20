@@ -62,6 +62,7 @@ type ButtonProps<
   trailingIcon?: IconName;
   leadingIcon?: IconName;
   icon?: IconName;
+  loading?: boolean;
 } & TProps &
   VariantProps<typeof buttonVariants>;
 
@@ -71,7 +72,10 @@ const ButtonIcon = ({ icon }: { icon: React.ReactNode | IconName }) => {
 
 const LoadingIcon = () => {
   return (
-    <Icon className="size-4 animate-spin text-inherit" name="loading-stripe" />
+    <Icon
+      className="size-4 animate-spin-pause text-inherit"
+      name="loading-stripe"
+    />
   );
 };
 
