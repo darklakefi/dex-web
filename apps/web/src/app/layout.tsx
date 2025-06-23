@@ -26,32 +26,35 @@ export const metadata = {
   title: "Welcome to web",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   modal,
+  params,
 }: {
   children: React.ReactNode;
   modal: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   return (
-			<html
-				className={`${bitsumishiRegular.variable} ${classicConsoleNeue.variable} font-sans antialiased`}
-				lang="en"
-			>
-				<body>
-					<NextIntlClientProvider>
-						<Providers>
-							<PageLayout
-								backgroundImageUrl={backgroundImage.src}
-								footer={<AppFooter />}
-								header={<AppHeader />}
-							>
-								{children}
-							</PageLayout>
-							{modal}
-						</Providers>
-					</NextIntlClientProvider>
-				</body>
-			</html>
-		);
+    <html
+      className={`${bitsumishiRegular.variable} ${classicConsoleNeue.variable} font-sans antialiased`}
+      lang={locale}
+    >
+      <body>
+        <NextIntlClientProvider>
+          <Providers>
+            <PageLayout
+              backgroundImageUrl={backgroundImage.src}
+              footer={<AppFooter />}
+              header={<AppHeader />}
+            >
+              {children}
+            </PageLayout>
+            {modal}
+          </Providers>
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
 }
