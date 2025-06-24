@@ -1,5 +1,6 @@
 import { Box, Text } from "@dex-web/ui";
 import { SelectTokenButton } from "./SelectTokenButton";
+import { SwapDetails } from "./SwapDetails";
 import { SwapFormFieldset } from "./SwapFormFieldset";
 
 export function SwapForm() {
@@ -34,6 +35,7 @@ export function SwapForm() {
           </div>
           <SwapFormFieldset balance={buyTokenBalance} label="Amount" />
         </Box>
+        <SwapDetails />
       </Box>
     </section>
   );
