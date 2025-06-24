@@ -1,8 +1,9 @@
+import { FIXED_SEED } from "../constants";
 import { generateMockSwap } from "../generateMockSwap";
 
 describe("generateMockSwap", () => {
   it("should generate a swap", () => {
-    const response = generateMockSwap();
+    const response = generateMockSwap(FIXED_SEED);
 
     expect(response).toMatchSnapshot();
     expect(response.buyAmount).toBeDefined();
