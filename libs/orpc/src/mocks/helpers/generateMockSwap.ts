@@ -1,8 +1,8 @@
 import {
+  randBetweenDate,
   randBoolean,
   randCurrencySymbol,
   randNumber,
-  randRecentDate,
   randUuid,
   seed,
 } from "@ngneat/falso";
@@ -34,7 +34,10 @@ export function generateMockSwap(swapId: string = randUuid()) {
     swapStatus: "pending",
     swapType: "swap",
     transactionSignature: randUuid(),
-    updatedAt: randRecentDate().toISOString(),
+    updatedAt: randBetweenDate({
+      from: new Date("2025-01-01"),
+      to: new Date("2025-06-24"),
+    }).toISOString(),
     userAddress: randUuid(),
   } satisfies Swap;
 }

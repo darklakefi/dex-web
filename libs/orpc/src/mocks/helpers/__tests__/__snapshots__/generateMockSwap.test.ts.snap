@@ -25,7 +25,7 @@ exports[`generateMockSwap > should generate a swap 1`] = `
   "swapStatus": "pending",
   "swapType": "swap",
   "transactionSignature": "26ced47a-41ef-47d0-a7a1-fcfd02d516d3",
-  "updatedAt": "2025-06-24T04:00:18.426Z",
+  "updatedAt": "2025-04-28T19:01:22.181Z",
   "userAddress": "b8944cb6-932d-4540-8464-766eb6964d4e",
 }
 `;
