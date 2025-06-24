@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";
 
 const boxVariants = cva(
-  "mb-2 flex flex-1 flex-col items-stretch justify-start gap-3 text-green-200",
+  "flex flex-1 flex-col items-stretch justify-start gap-3 text-green-200",
   {
     defaultVariants: {
       background: "base",
