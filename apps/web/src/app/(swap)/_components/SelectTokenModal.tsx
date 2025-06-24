@@ -4,9 +4,9 @@ import { getTokensInputSchema, tanstackClient } from "@dex-web/orpc";
 import { Box, Button, Modal, TextInput } from "@dex-web/ui";
 import { useDebouncedValue } from "@dex-web/utils";
 import {
-	createFormHook,
-	createFormHookContexts,
-	useStore,
+  createFormHook,
+  createFormHookContexts,
+  useStore,
 } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -16,102 +16,102 @@ import { selectedTokensParsers } from "../_utils/searchParams";
 import { TokenList } from "./TokenList";
 
 const selectTokenModalFormSchema = getTokensInputSchema.pick({
-	query: true,
+  query: true,
 });
 
 const { fieldContext, formContext } = createFormHookContexts();
 const { useAppForm } = createFormHook({
-	fieldComponents: {
-		TextInput,
-	},
+  fieldComponents: {
+    TextInput,
+  },
 
-	fieldContext,
-	formComponents: {},
-	formContext,
+  fieldContext,
+  formComponents: {},
+  formContext,
 });
 
 const formConfig = {
-	defaultValues: {
-		query: "",
-	},
-	onSubmit: ({ value }: { value: { query: string } }) => {
-		console.log(value);
-	},
-	validators: {
-		onChange: ({ value }: { value: { query: string } }) =>
-			selectTokenModalFormSchema.parse(value),
-	},
+  defaultValues: {
+    query: "",
+  },
+  onSubmit: ({ value }: { value: { query: string } }) => {
+    console.log(value);
+  },
+  validators: {
+    onChange: ({ value }: { value: { query: string } }) =>
+      selectTokenModalFormSchema.parse(value),
+  },
 };
 
 interface SelectTokenModalProps {
-	type: "buy" | "sell";
+  type: "buy" | "sell";
 }
 
 export function SelectTokenModal({ type }: SelectTokenModalProps) {
-	const router = useRouter();
+  const router = useRouter();
 
-	const [{ buyTokenAddress, sellTokenAddress }, setSelectedTokens] =
-		useQueryStates(selectedTokensParsers);
+  const [{ buyTokenAddress, sellTokenAddress }, setSelectedTokens] =
+    useQueryStates(selectedTokensParsers);
 
-	const handleSelect = (tokenAddress: string) => {
-		if (type === "buy") {
-			setSelectedTokens({
-				buyTokenAddress: tokenAddress,
-				sellTokenAddress: sellTokenAddress,
-			});
-		} else {
-			setSelectedTokens({
-				buyTokenAddress: buyTokenAddress,
-				sellTokenAddress: tokenAddress,
-			});
-		}
-		router.push("/");
-	};
+  const handleSelect = (tokenAddress: string) => {
+    if (type === "buy") {
+      setSelectedTokens({
+        buyTokenAddress: tokenAddress,
+        sellTokenAddress: sellTokenAddress,
+      });
+    } else {
+      setSelectedTokens({
+        buyTokenAddress: buyTokenAddress,
+        sellTokenAddress: tokenAddress,
+      });
+    }
+    router.push("/");
+  };
 
-	const form = useAppForm(formConfig);
+  const form = useAppForm(formConfig);
 
-	const rawQuery = useStore(form.store, (state) => state.values.query);
-	const isInitialLoad = rawQuery === "";
+  const rawQuery = useStore(form.store, (state) => state.values.query);
+  const isInitialLoad = rawQuery === "";
 
-	const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 300);
+  const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 300);
 
-	const { data } = useSuspenseQuery(
-		tanstackClient.getTokens.queryOptions({
-			input: {
-				limit: 8,
-				offset: 0,
-				query: debouncedQuery,
-			},
-		}),
-	);
+  const { data } = useSuspenseQuery(
+    tanstackClient.getTokens.queryOptions({
+      input: {
+        limit: 8,
+        offset: 0,
+        query: debouncedQuery,
+      },
+    }),
+  );
 
-	return (
-		<Modal onClose={() => router.push("/")}>
-			<Box className="flex max-h-full w-full max-w-sm drop-shadow-xl">
-				<form.Field name="query">
-					{(field) => (
-						<TextInput
-							autoFocus
-							className="shrink-0"
-							label={
-								<>
-									Search Token or <Button variant="secondary">Paste</Button>{" "}
-									Address
-								</>
-							}
-							leadingIcon="search"
-							onChange={(e) => field.handleChange(e.target.value)}
-							placeholder="Search for a token"
-							value={field.state.value}
-						/>
-					)}
-				</form.Field>
-				<Suspense
-					fallback={<div className="h-32 animate-pulse rounded bg-green-600" />}
-				>
-					<TokenList onSelect={handleSelect} tokens={data.tokens} />
-				</Suspense>
-			</Box>
-		</Modal>
-	);
+  return (
+    <Modal onClose={() => router.push("/")}>
+      <Box className="flex max-h-full w-full max-w-sm drop-shadow-xl">
+        <form.Field name="query">
+          {(field) => (
+            <TextInput
+              autoFocus
+              className="shrink-0"
+              label={
+                <>
+                  Search Token or <Button variant="secondary">Paste</Button>{" "}
+                  Address
+                </>
+              }
+              leadingIcon="search"
+              onChange={(e) => field.handleChange(e.target.value)}
+              placeholder="Search for a token"
+              value={field.state.value}
+            />
+          )}
+        </form.Field>
+        <Suspense
+          fallback={<div className="h-32 animate-pulse rounded bg-green-600" />}
+        >
+          <TokenList onSelect={handleSelect} tokens={data.tokens} />
+        </Suspense>
+      </Box>
+    </Modal>
+  );
 }

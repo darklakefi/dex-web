@@ -22,7 +22,7 @@ export default async function Page({
       input: {
         limit: 8,
         offset: 0,
-        query: "", // Initial empty query
+        query: "",
       },
     }),
   );

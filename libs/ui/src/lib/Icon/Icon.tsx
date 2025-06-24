@@ -19,68 +19,68 @@ import RefreshIcon from "./icons/refresh.svg";
 import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
 import TelegramIcon from "./icons/telegram.svg";
-import TimesFilledIcon from "./icons/times-filled.svg";
 import TimesIcon from "./icons/times.svg";
+import TimesFilledIcon from "./icons/times-filled.svg";
 import TrendingIcon from "./icons/trending.svg";
 import XIcon from "./icons/x.svg";
 
 export type IconName =
-	| "analytics"
-	| "refresh"
-	| "cog"
-	| "checkbox-empty"
-	| "checkbox-filled"
-	| "chevron-down"
-	| "external-link"
-	| "exclamation"
-	| "github"
-	| "crown"
-	| "fire"
-	| "info"
-	| "logo-sm"
-	| "logo-lg"
-	| "play"
-	| "seedlings"
-	| "telegram"
-	| "times"
-	| "times-filled"
-	| "trending"
-	| "loading-stripe"
-	| "search"
-	| "x";
+  | "analytics"
+  | "refresh"
+  | "cog"
+  | "checkbox-empty"
+  | "checkbox-filled"
+  | "chevron-down"
+  | "external-link"
+  | "exclamation"
+  | "github"
+  | "crown"
+  | "fire"
+  | "info"
+  | "logo-sm"
+  | "logo-lg"
+  | "play"
+  | "seedlings"
+  | "telegram"
+  | "times"
+  | "times-filled"
+  | "trending"
+  | "loading-stripe"
+  | "search"
+  | "x";
 
 const iconComponents = {
-	analytics: AnalyticsIcon,
-	"checkbox-empty": CheckboxEmptyIcon,
-	"checkbox-filled": CheckboxFilledIcon,
-	"chevron-down": ChevronDownIcon,
-	cog: CogIcon,
-	crown: CrownIcon,
-	exclamation: ExclamationIcon,
-	"external-link": ExternalLinkIcon,
-	fire: FireIcon,
-	github: GithubIcon,
-	info: InfoIcon,
-	"loading-stripe": LoadingStripeIcon,
-	"logo-lg": LogoLgIcon,
-	"logo-sm": LogoSmIcon,
-	play: PlayIcon,
-	refresh: RefreshIcon,
-	search: SearchIcon,
-	seedlings: SeedlingsIcon,
-	telegram: TelegramIcon,
-	times: TimesIcon,
-	"times-filled": TimesFilledIcon,
-	trending: TrendingIcon,
-	x: XIcon,
+  analytics: AnalyticsIcon,
+  "checkbox-empty": CheckboxEmptyIcon,
+  "checkbox-filled": CheckboxFilledIcon,
+  "chevron-down": ChevronDownIcon,
+  cog: CogIcon,
+  crown: CrownIcon,
+  exclamation: ExclamationIcon,
+  "external-link": ExternalLinkIcon,
+  fire: FireIcon,
+  github: GithubIcon,
+  info: InfoIcon,
+  "loading-stripe": LoadingStripeIcon,
+  "logo-lg": LogoLgIcon,
+  "logo-sm": LogoSmIcon,
+  play: PlayIcon,
+  refresh: RefreshIcon,
+  search: SearchIcon,
+  seedlings: SeedlingsIcon,
+  telegram: TelegramIcon,
+  times: TimesIcon,
+  "times-filled": TimesFilledIcon,
+  trending: TrendingIcon,
+  x: XIcon,
 } as const satisfies Record<
-	IconName,
-	React.ComponentType<React.SVGProps<SVGSVGElement>>
+  IconName,
+  React.ComponentType<React.SVGProps<SVGSVGElement>>
 >;
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
-	name: IconName;
-	title?: string;
+  name: IconName;
+  title?: string;
 }
 
 /**
@@ -89,24 +89,24 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
  * This is a server component that supports tree shaking.
  */
 export function Icon({ name, title, className, ...props }: IconProps) {
-	const IconComponent = iconComponents[name];
-	if (!IconComponent) return null;
+  const IconComponent = iconComponents[name];
+  if (!IconComponent) return null;
 
-	if (!IconComponent) {
-		console.error(`❌ Icon "${name}" is undefined/null`);
-		return <span style={{ color: "red" }}>[Missing: {name}]</span>;
-	}
+  if (!IconComponent) {
+    console.error(`❌ Icon "${name}" is undefined/null`);
+    return <span style={{ color: "red" }}>[Missing: {name}]</span>;
+  }
 
-	if (typeof IconComponent !== "function") {
-		console.error(
-			`❌ Icon "${name}" is not a function:`,
-			typeof IconComponent,
-			IconComponent,
-		);
-		return <span style={{ color: "red" }}>[Invalid: {name}]</span>;
-	}
+  if (typeof IconComponent !== "function") {
+    console.error(
+      `❌ Icon "${name}" is not a function:`,
+      typeof IconComponent,
+      IconComponent,
+    );
+    return <span style={{ color: "red" }}>[Invalid: {name}]</span>;
+  }
 
-	const classNames = twMerge("size-6 text-green-100 fill-current", className);
+  const classNames = twMerge("size-6 text-green-100 fill-current", className);
 
-	return <IconComponent className={classNames} role="img" {...props} />;
+  return <IconComponent className={classNames} role="img" {...props} />;
 }
