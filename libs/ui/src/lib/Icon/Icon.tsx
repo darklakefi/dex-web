@@ -6,6 +6,7 @@ import CheckboxFilledIcon from "./icons/checkbox-filled.svg";
 import ChevronDownIcon from "./icons/chevron-down.svg";
 import CogIcon from "./icons/cog.svg";
 import CrownIcon from "./icons/crown.svg";
+import ExclamationIcon from "./icons/exclamation.svg";
 import ExternalLinkIcon from "./icons/external-link.svg";
 import FireIcon from "./icons/fire.svg";
 import GithubIcon from "./icons/github.svg";
@@ -18,8 +19,8 @@ import RefreshIcon from "./icons/refresh.svg";
 import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
 import TelegramIcon from "./icons/telegram.svg";
-import TimesIcon from "./icons/times.svg";
 import TimesFilledIcon from "./icons/times-filled.svg";
+import TimesIcon from "./icons/times.svg";
 import TrendingIcon from "./icons/trending.svg";
 import XIcon from "./icons/x.svg";
 
@@ -31,6 +32,7 @@ export type IconName =
   | "checkbox-filled"
   | "chevron-down"
   | "external-link"
+  | "exclamation"
   | "github"
   | "crown"
   | "fire"
@@ -54,6 +56,7 @@ const iconComponents = {
   "chevron-down": ChevronDownIcon,
   cog: CogIcon,
   crown: CrownIcon,
+  exclamation: ExclamationIcon,
   "external-link": ExternalLinkIcon,
   fire: FireIcon,
   github: GithubIcon,

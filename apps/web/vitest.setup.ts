@@ -14,6 +14,33 @@ import { afterEach } from "vitest";
     value: "1000",
   }));
 
+  implement(unlazy.getSwapDetails).handler(async () => ({
+    buyAmount: 100,
+    buyBalance: 100,
+    buyToken: {
+      address: "fake-address",
+      symbol: "FAKE",
+      value: "1000",
+    },
+    estimatedFeesUsd: 100,
+    exchangeRate: 0.00669,
+    mevProtectionEnabled: true,
+    priceImpactPercentage: 12,
+    sellAmount: 100,
+    sellBalance: 100,
+    sellToken: {
+      address: "fake-address",
+      symbol: "FAKE",
+      value: "1000",
+    },
+    slippageTolerancePercentage: 12,
+    swapProgressStep: 1,
+    swapStatus: "pending",
+    swapType: "swap",
+    updatedAt: new Date().toISOString(),
+    userAddress: "fake-user-address",
+  }));
+
   implement(unlazy.getTokens).handler(async () => ({
     hasMore: false,
     tokens: [
