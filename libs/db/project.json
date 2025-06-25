@@ -27,7 +27,7 @@
         "format": ["cjs"],
         "main": "libs/db/src/index.ts",
         "outputFileName": "main.js",
-        "outputPath": "libs/db/dist",
+        "outputPath": "dist/libs/db",
         "tsConfig": "libs/db/tsconfig.lib.json"
       },
       "outputs": ["{options.outputPath}"]

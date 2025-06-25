@@ -6,8 +6,6 @@
     "./schemas": "./src/schemas/index.ts",
     "./schemas/*": "./src/schemas/*.ts"
   },
-  "main": "./src/index.ts",
-  "module": "./src/index.ts",
   "name": "@dex-web/db",
   "type": "module",
   "types": "./src/index.ts",

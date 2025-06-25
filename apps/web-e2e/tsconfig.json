@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./dist",
+    "outDir": "../../dist/apps/web-e2e",
     "tsBuildInfoFile": "./dist/tsconfig.lib.tsbuildinfo",
     "types": ["node"]
   },

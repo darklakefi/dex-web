@@ -1,9 +1,9 @@
-import { join } from "node:path";
 import { withNx } from "@nx/next";
 import type { NextConfig } from "next";
+import { join } from "node:path";
 
 const nextConfig = {
-  distDir: "dist",
+  distDir: "../../dist/apps/web",
   experimental: {
     reactCompiler: true,
     typedRoutes: true,

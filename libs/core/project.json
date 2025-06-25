@@ -29,7 +29,7 @@
         "format": ["cjs"],
         "main": "libs/core/src/index.ts",
         "outputFileName": "main.js",
-        "outputPath": "libs/core/dist",
+        "outputPath": "dist/libs/core",
         "tsConfig": "libs/core/tsconfig.lib.json"
       },
       "outputs": ["{options.outputPath}"]

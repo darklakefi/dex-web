@@ -27,7 +27,7 @@
         "format": ["cjs"],
         "main": "libs/orpc/src/index.ts",
         "outputFileName": "main.js",
-        "outputPath": "libs/orpc/dist",
+        "outputPath": "dist/libs/orpc",
         "tsConfig": "libs/orpc/tsconfig.lib.json"
       },
       "outputs": ["{options.outputPath}"]

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/spec",
+    "outDir": "../../dist/libs/db/spec",
     "types": [
       "vitest/globals",
       "vitest/importMeta",

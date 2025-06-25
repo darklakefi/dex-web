@@ -14,7 +14,7 @@ export default defineConfig(() => {
       commonjsOptions: {
         transformMixedEsModules: true,
       },
-      outDir: "./dist",
+      outDir: "../../dist/apps/web",
       reportCompressedSize: true,
       rollupOptions: {
         external: (id: string) =>
