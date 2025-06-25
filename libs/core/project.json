@@ -16,6 +16,7 @@
       },
       "defaultConfiguration": "production",
       "executor": "@nx/esbuild:esbuild",
+
       "options": {
         "assets": [
           {
@@ -24,6 +25,7 @@
             "output": "."
           }
         ],
+
         "format": ["cjs"],
         "main": "libs/core/src/index.ts",
         "outputFileName": "main.js",

@@ -71,7 +71,7 @@ export const config = mergeConfig(baseConfig, {
     svgr({ include: "**/*.svg" }),
     nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
-      outDir: "./out-tsc/lib",
+      outDir: "./dist/lib",
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),
   ],

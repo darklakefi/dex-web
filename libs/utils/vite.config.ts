@@ -43,7 +43,7 @@ const baseConfig = {
 export const config = mergeConfig(baseConfig, {
   plugins: [
     dts({
-      outDir: "./out-tsc/lib",
+      outDir: "./dist/lib",
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),
   ],

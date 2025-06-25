@@ -37,7 +37,7 @@ export default defineConfig(() => {
     plugins: [
       dts({
         copyDtsFiles: true,
-        outDir: "./out-tsc/lib",
+        outDir: "./dist/lib",
         tsconfigPath: join(__dirname, "tsconfig.lib.json"),
       }),
     ],

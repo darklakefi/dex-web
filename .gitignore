@@ -59,7 +59,6 @@ storybook-static
 
 # Typescript
 *.tsbuildinfo
-out-tsc/
 
 # nix
 .direnv/
