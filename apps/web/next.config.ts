@@ -1,6 +1,6 @@
+import { join } from "node:path";
 import { withNx } from "@nx/next";
 import type { NextConfig } from "next";
-import { join } from "node:path";
 
 const nextConfig = {
   distDir: "../../dist/apps/web",

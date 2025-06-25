@@ -2,6 +2,7 @@ import type { Pool } from "@dex-web/core";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { FeaturesAndTrendingPoolPanel } from "../FeaturesAndTrendingPoolPanel";
+import { mockOrpc } from "./__mocks__/mockOrpc";
 
 const pool = {
   address: "1",
@@ -23,6 +24,8 @@ const pool = {
   },
 } satisfies Pool;
 
+mockOrpc();
+
 describe("FeaturesAndTrendingPoolPanel", () => {
   it("renders featured and trending pool panels and explore button", () => {
     render(
@@ -31,8 +34,8 @@ describe("FeaturesAndTrendingPoolPanel", () => {
         trendingPools={[pool]}
       />,
     );
-    expect(screen.getByText("Featured Pools")).toBeInTheDocument();
-    expect(screen.getByText("Trending Pools")).toBeInTheDocument();
-    expect(screen.getByText("explore all pools")).toBeInTheDocument();
+    expect(screen.getByText("Featured Pools")).toBeDefined();
+    expect(screen.getByText("Trending Pools")).toBeDefined();
+    expect(screen.getByText("explore all pools")).toBeDefined();
   });
 });

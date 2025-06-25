@@ -1,48 +1,10 @@
-import type { Swap } from "@dex-web/orpc/schemas";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
 import { SwapFormFieldsets } from "../SwapFormFieldsets";
-
-vi.mock("@dex-web/orpc", () => ({
-  client: {
-    getSwapDetails: vi.fn().mockResolvedValue({
-      buyAmount: 100,
-      buyBalance: 100,
-      buyToken: {
-        address: DEFAULT_BUY_TOKEN,
-        symbol: "SOL",
-        value: "1000",
-      },
-      estimatedFeesUsd: 100,
-      exchangeRate: 0.00669,
-      mevProtectionEnabled: true,
-      priceImpactPercentage: 12,
-      sellAmount: 100,
-      sellBalance: 100,
-      sellToken: {
-        address: DEFAULT_SELL_TOKEN,
-        symbol: "USDC",
-        value: "1000",
-      },
-      slippageTolerancePercentage: 12,
-      swapProgressStep: 1,
-      swapStatus: "pending",
-      swapType: "swap",
-      updatedAt: new Date().toISOString(),
-      userAddress: "0x123",
-    } satisfies Swap),
-    getTokenDetails: vi.fn().mockResolvedValue({
-      address: DEFAULT_BUY_TOKEN,
-      imageUrl: "https://example.com/image.png",
-      name: "Solana",
-      symbol: "SOL",
-      value: "1000",
-    }),
-  },
-}));
 
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 
@@ -67,6 +29,21 @@ describe("SwapFormFieldsets", () => {
     expect(await screen.findByText("Buying")).toBeDefined();
     expect(await screen.findByText("Selling")).toBeDefined();
     expect(await screen.findAllByLabelText(/Amount/)).toHaveLength(2);
-    expect(await screen.findAllByText("100")).toHaveLength(2);
+    expect(await screen.findAllByText("0")).toHaveLength(2);
+  });
+
+  it("updates the buy and sell amounts when the user types", async () => {
+    const user = userEvent.setup();
+    render(<SwapFormFieldsets />, { wrapper });
+    await user.type(
+      screen.getByRole("spinbutton", { name: "buyAmount" }),
+      "123",
+    );
+    await user.type(
+      screen.getByRole("spinbutton", { name: "sellAmount" }),
+      "321",
+    );
+    expect(await screen.getByDisplayValue("123")).toBeDefined();
+    expect(await screen.getByDisplayValue("321")).toBeDefined();
   });
 });

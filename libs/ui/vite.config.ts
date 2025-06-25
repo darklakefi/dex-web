@@ -56,7 +56,10 @@ const baseConfig = {
       },
     },
     reporters: ["default", "junit"],
-    setupFiles: ["@testing-library/jest-dom"],
+    setupFiles: [
+      "@testing-library/jest-dom",
+      resolve(__dirname, "vitest.setup.ts"),
+    ],
     teardownTimeout: 10000,
     testTimeout: 30000,
     watch: false,

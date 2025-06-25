@@ -41,7 +41,11 @@ export function SwapFormFieldsets() {
           </Text.Body2>
           <SelectTokenButton type="sell" />
         </div>
-        <SwapFormFieldset balance={sellTokenBalance} label="Amount" />
+        <SwapFormFieldset
+          balance={sellTokenBalance}
+          label="Amount"
+          name="sellAmount"
+        />
       </Box>
       <Box background="highlight" className="flex-row">
         <div>
@@ -53,7 +57,11 @@ export function SwapFormFieldsets() {
           </Text.Body2>
           <SelectTokenButton type="buy" />
         </div>
-        <SwapFormFieldset balance={buyTokenBalance} label="Amount" />
+        <SwapFormFieldset
+          balance={buyTokenBalance}
+          label="Amount"
+          name="buyAmount"
+        />
       </Box>
     </div>
   );
