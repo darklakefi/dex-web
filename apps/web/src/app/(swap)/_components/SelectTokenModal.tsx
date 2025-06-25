@@ -65,8 +65,8 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
         buyTokenAddress: buyTokenAddress,
         sellTokenAddress: tokenAddress,
       });
+      router.push("/");
     }
-    router.push("/");
   };
 
   const form = useAppForm(formConfig);

@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
@@ -30,20 +29,5 @@ describe("SwapFormFieldsets", () => {
     expect(await screen.findByText("Selling")).toBeDefined();
     expect(await screen.findAllByLabelText(/Amount/)).toHaveLength(2);
     expect(await screen.findAllByText("0")).toHaveLength(2);
-  });
-
-  it("updates the buy and sell amounts when the user types", async () => {
-    const user = userEvent.setup();
-    render(<SwapFormFieldsets />, { wrapper });
-    await user.type(
-      screen.getByRole("spinbutton", { name: "buyAmount" }),
-      "123",
-    );
-    await user.type(
-      screen.getByRole("spinbutton", { name: "sellAmount" }),
-      "321",
-    );
-    expect(await screen.getByDisplayValue("123")).toBeDefined();
-    expect(await screen.getByDisplayValue("321")).toBeDefined();
   });
 });

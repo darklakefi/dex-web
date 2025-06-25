@@ -23,11 +23,7 @@
     "**/*.jsx",
     "**/*.ts",
     "**/*.tsx",
-    "../../apps/web/dist/dist/types/**/*.ts",
-    "../../dist/apps/web/types/**/*.ts",
-    "../../dist/types/**/*.ts",
-    "dist/types/**/*.ts",
-    "../../apps/dist/apps/web/types/**/*.ts"
+    "../../dist/apps/web/types/**/*.ts"
   ],
   "references": [
     {
