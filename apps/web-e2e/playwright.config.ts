@@ -60,7 +60,7 @@ export default defineConfig({
   },
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "npx nx serve web-e2e",
+    command: "npx nx serve web --port=3000",
     cwd: workspaceRoot,
     reuseExistingServer: true,
     url: "http://localhost:3000",
