@@ -1,4 +1,7 @@
 {
+  "devDependencies": {
+    "@dex-web/orpc": "workspace:*"
+  },
   "exports": {
     ".": {
       "import": "./src/index.ts",

@@ -1,3 +1,4 @@
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import { join, resolve } from "node:path";
 /// <reference types="vitest" />
 import { defineConfig, mergeConfig } from "vite";
@@ -54,6 +55,7 @@ export default defineConfig(() => {
 
   return mergeConfig(baseConfig, {
     plugins: [
+      nxViteTsPaths(),
       dts({
         copyDtsFiles: true,
         outDir: "./out-tsc/lib",

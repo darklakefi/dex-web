@@ -1,4 +1,4 @@
-import type { Token } from "@dex-web/orpc";
+import type { Token } from "@dex-web/orpc/schemas/tokens";
 import { Text } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
 import Image from "next/image";

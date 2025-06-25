@@ -2,6 +2,7 @@
 import { join, resolve } from "node:path";
 
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 
@@ -63,6 +64,7 @@ const baseConfig = {
 export const config = mergeConfig(baseConfig, {
   assetsInclude: ["**/*.svg"],
   plugins: [
+    nxViteTsPaths(),
     nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
       outDir: "./out-tsc/lib",

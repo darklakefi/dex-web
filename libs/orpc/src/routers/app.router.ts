@@ -9,3 +9,5 @@ export const appRouter = {
   getTokens,
   helius: heliusRouter,
 };
+
+export type AppRouter = typeof appRouter;

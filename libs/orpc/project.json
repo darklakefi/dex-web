@@ -8,6 +8,18 @@
     "build": {
       "executor": "@nx/vite:build",
       "options": {
+        "additionalEntryPoints": [
+          "libs/orpc/src/routers/index.ts",
+          "libs/orpc/src/procedures/index.ts",
+          "libs/orpc/src/handlers/index.ts",
+          "libs/orpc/src/schemas/index.ts",
+          "libs/orpc/src/schemas/helius/index.ts",
+          "libs/orpc/src/schemas/swaps/index.ts",
+          "libs/orpc/src/schemas/tokens/index.ts",
+          "libs/orpc/src/utils/index.ts"
+        ],
+        "generateExportsField": true,
+        "main": "libs/orpc/src/index.ts",
         "outputPath": "libs/orpc/dist"
       }
     },

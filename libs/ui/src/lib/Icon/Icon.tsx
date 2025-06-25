@@ -19,8 +19,8 @@ import RefreshIcon from "./icons/refresh.svg";
 import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
 import TelegramIcon from "./icons/telegram.svg";
-import TimesIcon from "./icons/times.svg";
 import TimesFilledIcon from "./icons/times-filled.svg";
+import TimesIcon from "./icons/times.svg";
 import TrendingIcon from "./icons/trending.svg";
 import XIcon from "./icons/x.svg";
 
@@ -92,21 +92,7 @@ export function Icon({ name, title, className, ...props }: IconProps) {
   const IconComponent = iconComponents[name];
   if (!IconComponent) return null;
 
-  if (!IconComponent) {
-    console.error(`❌ Icon "${name}" is undefined/null`);
-    return <span style={{ color: "red" }}>[Missing: {name}]</span>;
-  }
-
-  if (typeof IconComponent !== "function") {
-    console.error(
-      `❌ Icon "${name}" is not a function:`,
-      typeof IconComponent,
-      IconComponent,
-    );
-    return <span style={{ color: "red" }}>[Invalid: {name}]</span>;
-  }
-
-  const classNames = twMerge("size-6 text-green-100 fill-current", className);
+  const classNames = twMerge("size-6 fill-current", className);
 
   return <IconComponent className={classNames} role="img" {...props} />;
 }
