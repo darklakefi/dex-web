@@ -1,6 +1,7 @@
 import { twMerge } from "tailwind-merge";
 
 import AnalyticsIcon from "./icons/analytics.svg";
+import BackpackWalletIcon from "./icons/backpack-icon.svg";
 import CheckboxEmptyIcon from "./icons/checkbox-empty.svg";
 import CheckboxFilledIcon from "./icons/checkbox-filled.svg";
 import ChevronDownIcon from "./icons/chevron-down.svg";
@@ -14,10 +15,12 @@ import InfoIcon from "./icons/info.svg";
 import LoadingStripeIcon from "./icons/loading-stripe.svg";
 import LogoLgIcon from "./icons/logo-lg.svg";
 import LogoSmIcon from "./icons/logo-sm.svg";
+import PhantomWalletIcon from "./icons/phantom-icon.svg";
 import PlayIcon from "./icons/play.svg";
 import RefreshIcon from "./icons/refresh.svg";
 import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
+import SolflareWalletIcon from "./icons/solflare-icon.svg";
 import TelegramIcon from "./icons/telegram.svg";
 import TimesIcon from "./icons/times.svg";
 import TimesFilledIcon from "./icons/times-filled.svg";
@@ -47,10 +50,14 @@ export type IconName =
   | "trending"
   | "loading-stripe"
   | "search"
-  | "x";
+  | "x"
+  | "phantom"
+  | "solflare"
+  | "backpack";
 
 const iconComponents = {
   analytics: AnalyticsIcon,
+  backpack: BackpackWalletIcon,
   "checkbox-empty": CheckboxEmptyIcon,
   "checkbox-filled": CheckboxFilledIcon,
   "chevron-down": ChevronDownIcon,
@@ -64,10 +71,12 @@ const iconComponents = {
   "loading-stripe": LoadingStripeIcon,
   "logo-lg": LogoLgIcon,
   "logo-sm": LogoSmIcon,
+  phantom: PhantomWalletIcon,
   play: PlayIcon,
   refresh: RefreshIcon,
   search: SearchIcon,
   seedlings: SeedlingsIcon,
+  solflare: SolflareWalletIcon,
   telegram: TelegramIcon,
   times: TimesIcon,
   "times-filled": TimesFilledIcon,
