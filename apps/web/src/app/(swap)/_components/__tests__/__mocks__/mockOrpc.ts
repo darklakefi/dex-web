@@ -1,6 +1,8 @@
 import type {
   GetTokenBalanceOutput,
   GetTokenDetailsOutput,
+  GetTokensOutput,
+  SearchAssetsOutput,
   Swap,
 } from "@dex-web/orpc/schemas";
 import { vi } from "vitest";
@@ -44,7 +46,7 @@ export function mockOrpc() {
         name: "Solana",
         symbol: "SOL",
         value: "1000",
-      }),
+      } satisfies GetTokenDetailsOutput),
     },
     tanstackClient: {
       getSwapDetails: {
@@ -88,6 +90,23 @@ export function mockOrpc() {
           } satisfies GetTokenDetailsOutput,
         }),
       },
+      getTokens: {
+        queryOptions: vi.fn().mockReturnValue({
+          data: {
+            hasMore: false,
+            tokens: [
+              {
+                address: DEFAULT_BUY_TOKEN,
+                imageUrl: "https://example.com/image.png",
+                name: "Solana",
+                symbol: "SOL",
+                value: "1000",
+              },
+            ],
+            total: 0,
+          } satisfies GetTokensOutput,
+        }),
+      },
       helius: {
         getTokenBalance: {
           queryOptions: vi.fn().mockReturnValue({
@@ -97,6 +116,19 @@ export function mockOrpc() {
               tokenAccounts: [],
               total: 0,
             } satisfies GetTokenBalanceOutput,
+          }),
+        },
+        searchAssets: {
+          queryOptions: vi.fn().mockReturnValue({
+            data: [
+              {
+                description: "Solana",
+                id: "1",
+                image: { url: "https://example.com/image.png" },
+                name: "Solana",
+                symbol: "SOL",
+              },
+            ] satisfies SearchAssetsOutput,
           }),
         },
       },

@@ -23,6 +23,10 @@ export type {
   GetTokenDetailsOutput,
 } from "./tokens/getTokenDetails.schema";
 export { getTokenDetailsInputSchema } from "./tokens/getTokenDetails.schema";
+export type {
+  GetTokensInput,
+  GetTokensOutput,
+} from "./tokens/getTokens.schema";
 export { getTokensInputSchema } from "./tokens/getTokens.schema";
 export type { Token } from "./tokens/token.schema";
 export { tokenSchema } from "./tokens/token.schema";

@@ -28,7 +28,7 @@ export function SelectTokenButton({ type }: SelectTokenButtonProps) {
       as={Link}
       className="w-full justify-between bg-green-700 p-1"
       href={`/select-token/${type}/?buyTokenAddress=${buyTokenAddress}&sellTokenAddress=${sellTokenAddress}`}
-      prefetch
+      prefetch={true}
       variant="secondary"
     >
       {tokenDetails.imageUrl ? (
