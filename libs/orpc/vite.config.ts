@@ -1,6 +1,5 @@
-import { join, resolve } from "node:path";
-import { defineConfig, mergeConfig } from "vite";
-import dts from "vite-plugin-dts";
+import { resolve } from "node:path";
+import { defineConfig } from "vite";
 
 export default defineConfig(() => {
   const baseConfig = {
@@ -36,13 +35,5 @@ export default defineConfig(() => {
     },
   };
 
-  return mergeConfig(baseConfig, {
-    plugins: [
-      dts({
-        copyDtsFiles: true,
-        outDir: "../../dist/libs/orpc",
-        tsconfigPath: join(__dirname, "tsconfig.lib.json"),
-      }),
-    ],
-  });
+  return baseConfig;
 });

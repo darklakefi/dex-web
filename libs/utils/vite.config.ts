@@ -1,7 +1,4 @@
-/// <reference types='vitest' />
-import { join } from "node:path";
-import { defineConfig, mergeConfig } from "vite";
-import dts from "vite-plugin-dts";
+import { defineConfig } from "vite";
 
 const baseConfig = {
   cacheDir: "../../node_modules/.vite/libs/utils",
@@ -40,13 +37,6 @@ const baseConfig = {
   },
 };
 
-export const config = mergeConfig(baseConfig, {
-  plugins: [
-    dts({
-      outDir: "../../dist/libs/utils",
-      tsconfigPath: join(__dirname, "tsconfig.lib.json"),
-    }),
-  ],
-});
+export const config = baseConfig;
 
 export default defineConfig(config);

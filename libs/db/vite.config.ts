@@ -1,7 +1,4 @@
-import { join } from "node:path";
-import { defineConfig, mergeConfig } from "vite";
-
-import dts from "vite-plugin-dts";
+import { defineConfig } from "vite";
 export default defineConfig(() => {
   const baseConfig = {
     cacheDir: "../../node_modules/.vite/libs/db",
@@ -33,13 +30,5 @@ export default defineConfig(() => {
     },
   };
 
-  return mergeConfig(baseConfig, {
-    plugins: [
-      dts({
-        copyDtsFiles: true,
-        outDir: "../../dist/libs/db",
-        tsconfigPath: join(__dirname, "tsconfig.lib.json"),
-      }),
-    ],
-  });
+  return baseConfig;
 });
