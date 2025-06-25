@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/lib",
+    "outDir": "../../dist/libs/utils",
     "types": ["node"]
   },
   "exclude": [

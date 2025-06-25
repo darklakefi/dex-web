@@ -40,7 +40,7 @@ export default defineConfig(() => {
     plugins: [
       dts({
         copyDtsFiles: true,
-        outDir: "./dist/lib",
+        outDir: "../../dist/libs/orpc",
         tsconfigPath: join(__dirname, "tsconfig.lib.json"),
       }),
     ],
