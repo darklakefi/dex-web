@@ -5,5 +5,5 @@
     "deploymentEnabled": false
   },
   "installCommand": null,
-  "outputDirectory": "../../dist/apps/web"
+  "outputDirectory": "dist/apps/web"
 }
