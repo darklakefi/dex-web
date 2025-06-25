@@ -6,12 +6,34 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/vite:build",
-      "options": {
-        "outputPath": "libs/core/dist"
-      }
-    },
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
+      },
+      "defaultConfiguration": "production",
+      "executor": "@nx/esbuild:esbuild",
 
+      "options": {
+        "assets": [
+          {
+            "glob": "libs/core/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ],
+
+        "format": ["cjs"],
+        "main": "libs/core/src/index.ts",
+        "outputFileName": "main.js",
+        "outputPath": "dist/libs/core",
+        "tsConfig": "libs/core/tsconfig.lib.json"
+      },
+      "outputs": ["{options.outputPath}"]
+    },
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",

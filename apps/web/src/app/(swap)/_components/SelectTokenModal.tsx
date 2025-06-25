@@ -1,6 +1,7 @@
 "use client";
 
-import { getTokensInputSchema, tanstackClient } from "@dex-web/orpc";
+import { tanstackClient } from "@dex-web/orpc";
+import { getTokensInputSchema } from "@dex-web/orpc/schemas";
 import { Box, Button, Modal, TextInput } from "@dex-web/ui";
 import { useDebouncedValue } from "@dex-web/utils";
 import {
@@ -64,8 +65,8 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
         buyTokenAddress: buyTokenAddress,
         sellTokenAddress: tokenAddress,
       });
+      router.push("/");
     }
-    router.push("/");
   };
 
   const form = useAppForm(formConfig);

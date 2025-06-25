@@ -117,9 +117,9 @@ jobs:
             pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD --target=e2e --parallel --max-parallel=2
       - save-nx-cache
       - store_test_results:
-          path: apps/web-e2e/dist/junit.xml
+          path: dist/apps/web-e2e/junit.xml
       - store_artifacts:
-          path: apps/web-e2e/dist/html-report
+          path: dist/apps/web-e2e/html-report
           destination: playwright-report
 
   chromatic:

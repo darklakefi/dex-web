@@ -5,8 +5,6 @@
       "types": "./src/index.ts"
     }
   },
-  "main": "./src/index.ts",
-  "module": "./src/index.ts",
   "name": "@dex-web/ui",
   "type": "module",
   "types": "./src/index.ts",

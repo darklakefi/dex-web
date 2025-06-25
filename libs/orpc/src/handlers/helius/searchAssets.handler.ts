@@ -1,6 +1,6 @@
 "use server";
 
-import { helius } from "../../helius";
+import { getHelius } from "../../getHelius";
 import type {
   SearchAssetsInput,
   SearchAssetsOutput,
@@ -10,6 +10,8 @@ export async function searchAssetsHandler({
   limit = 100,
 }: SearchAssetsInput): Promise<SearchAssetsOutput> {
   try {
+    const helius = getHelius();
+
     const result = await helius.rpc.searchAssets({
       limit,
     });

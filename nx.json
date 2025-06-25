@@ -96,6 +96,11 @@
     "applyChanges": true
   },
   "targetDefaults": {
+    "@nx/esbuild:esbuild": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
     "@nx/vite:build": {
       "cache": true,
       "inputs": [

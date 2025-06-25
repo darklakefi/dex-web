@@ -1,14 +1,45 @@
-import { Hero, Text } from "@dex-web/ui";
+import { tanstackClient } from "@dex-web/orpc";
+import { Box, Hero, Text } from "@dex-web/ui";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
-import { SwapForm } from "./_components/SwapForm";
+import { SwapDetails } from "./_components/SwapDetails";
+import { SwapFormFieldsets } from "./_components/SwapFormFieldsets";
+import { SwapPageRefreshButton } from "./_components/SwapPageRefreshButton";
+import { MOCK_OWNER_ADDRESS, MOCK_SWAP_ID } from "./_utils/constants";
 import { selectedTokensCache } from "./_utils/searchParams";
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<SearchParams>;
+  searchParams: SearchParams;
 }) {
-  await selectedTokensCache.parse(await searchParams);
+  await selectedTokensCache.parse(searchParams);
+
+  const queryClient = new QueryClient();
+
+  await Promise.all([
+    queryClient.prefetchQuery(
+      tanstackClient.getSwapDetails.queryOptions({
+        input: { swapId: MOCK_SWAP_ID },
+      }),
+    ),
+
+    queryClient.prefetchQuery(
+      tanstackClient.getTokenDetails.queryOptions({
+        input: { address: MOCK_OWNER_ADDRESS },
+      }),
+    ),
+
+    queryClient.prefetchQuery(
+      tanstackClient.helius.getTokenBalance.queryOptions({
+        input: { ownerAddress: MOCK_OWNER_ADDRESS },
+      }),
+    ),
+  ]);
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -27,7 +58,16 @@ export default async function Page({
           </div>
         </div>
       </Hero>
-      <SwapForm />
+      <section className="flex w-full max-w-xl items-start gap-1">
+        <div className="size-9" />
+        <Box padding="lg">
+          <SwapFormFieldsets />
+          <HydrationBoundary state={dehydrate(queryClient)}>
+            <SwapDetails />
+          </HydrationBoundary>
+        </Box>
+        <SwapPageRefreshButton />
+      </section>
     </div>
   );
 }

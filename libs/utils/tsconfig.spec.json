@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./out-tsc/spec",
+    "outDir": "../../dist/libs/utils/spec",
     "types": [
       "vitest/globals",
       "vitest/importMeta",

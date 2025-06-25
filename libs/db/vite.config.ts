@@ -1,28 +1,6 @@
-import { builtinModules } from "node:module";
-import { join, resolve } from "node:path";
-import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
-import { defineConfig, mergeConfig } from "vite";
-
-import dts from "vite-plugin-dts";
+import { defineConfig } from "vite";
 export default defineConfig(() => {
   const baseConfig = {
-    build: {
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
-      emptyOutDir: true,
-      lib: {
-        entry: resolve(__dirname, "src/index.ts"),
-        fileName: "index",
-        formats: ["es" as const],
-        name: "@dex-web/db",
-      },
-      outDir: "./dist",
-      reportCompressedSize: true,
-      rollupOptions: {
-        external: [...builtinModules, "pg"],
-      },
-    },
     cacheDir: "../../node_modules/.vite/libs/db",
     root: __dirname,
     test: {
@@ -52,14 +30,5 @@ export default defineConfig(() => {
     },
   };
 
-  return mergeConfig(baseConfig, {
-    plugins: [
-      nxCopyAssetsPlugin(["*.md", "package.json"]),
-      dts({
-        copyDtsFiles: true,
-        outDir: "./out-tsc/lib",
-        tsconfigPath: join(__dirname, "tsconfig.lib.json"),
-      }),
-    ],
-  });
+  return baseConfig;
 });

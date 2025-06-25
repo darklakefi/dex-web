@@ -31,8 +31,8 @@ describe("FeaturesAndTrendingPoolPanel", () => {
         trendingPools={[pool]}
       />,
     );
-    expect(screen.getByText("Featured Pools")).toBeInTheDocument();
-    expect(screen.getByText("Trending Pools")).toBeInTheDocument();
-    expect(screen.getByText("explore all pools")).toBeInTheDocument();
+    expect(screen.getByText("Featured Pools")).toBeDefined();
+    expect(screen.getByText("Trending Pools")).toBeDefined();
+    expect(screen.getByText("explore all pools")).toBeDefined();
   });
 });

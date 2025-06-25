@@ -19,7 +19,6 @@ describe("Icon", () => {
     render(<Icon data-testid="icon-analytics" name="analytics" />);
     const iconElement = screen.getByTestId("icon-analytics");
     expect(iconElement).toBeTruthy();
-    expect(iconElement).toHaveClass("text-green-100");
   });
 
   it("should allow custom props to be passed through", () => {

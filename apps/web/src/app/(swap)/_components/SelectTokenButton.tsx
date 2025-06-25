@@ -1,5 +1,5 @@
 "use client";
-import { client } from "@dex-web/orpc";
+import { tanstackClient } from "@dex-web/orpc";
 import { Button, Icon } from "@dex-web/ui";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -17,17 +17,18 @@ export function SelectTokenButton({ type }: SelectTokenButtonProps) {
   );
 
   const tokenAddress = type === "buy" ? buyTokenAddress : sellTokenAddress;
-  const { data: tokenDetails } = useSuspenseQuery({
-    queryFn: () => client.getTokenDetails({ address: tokenAddress }),
-    queryKey: ["token", tokenAddress],
-  });
+  const { data: tokenDetails } = useSuspenseQuery(
+    tanstackClient.getTokenDetails.queryOptions({
+      input: { address: tokenAddress },
+    }),
+  );
 
   return (
     <Button
       as={Link}
       className="w-full justify-between bg-green-700 p-1"
       href={`/select-token/${type}/?buyTokenAddress=${buyTokenAddress}&sellTokenAddress=${sellTokenAddress}`}
-      prefetch
+      prefetch={true}
       variant="secondary"
     >
       {tokenDetails.imageUrl ? (

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./out-tsc/lib"
+    "outDir": "../../dist/libs/ui"
   },
   "exclude": [
     "dist",

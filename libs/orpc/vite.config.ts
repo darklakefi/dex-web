@@ -1,33 +1,13 @@
-import { join, resolve } from "node:path";
-import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
-import { defineConfig, mergeConfig } from "vite";
-import dts from "vite-plugin-dts";
+import { resolve } from "node:path";
+import { defineConfig } from "vite";
 
 export default defineConfig(() => {
   const baseConfig = {
-    build: {
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
-      emptyOutDir: true,
-      lib: {
-        entry: resolve(__dirname, "src/index.ts"),
-        fileName: "index",
-        formats: ["es" as const],
-        name: "@dex-web/orpc",
-      },
-      outDir: "./dist",
-      reportCompressedSize: true,
-      rollupOptions: {
-        external: (id: string) =>
-          id.includes("../../node_modules") || id.startsWith("@dex-web/"),
-      },
-    },
     cacheDir: "../../node_modules/.vite/libs/orpc",
     root: __dirname,
     test: {
       alias: {
-        "../../helius": resolve(__dirname, "src/mocks/helius.mock.ts"),
+        "../../getHelius": resolve(__dirname, "src/mocks/helius.mock.ts"),
       },
       coverage: {
         provider: "v8" as const,
@@ -55,14 +35,5 @@ export default defineConfig(() => {
     },
   };
 
-  return mergeConfig(baseConfig, {
-    plugins: [
-      nxCopyAssetsPlugin(["*.md", "package.json"]),
-      dts({
-        copyDtsFiles: true,
-        outDir: "./out-tsc/lib",
-        tsconfigPath: join(__dirname, "tsconfig.lib.json"),
-      }),
-    ],
-  });
+  return baseConfig;
 });

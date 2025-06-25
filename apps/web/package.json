@@ -10,8 +10,8 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./src/index.d.ts"
+      "import": "./src/index.js",
+      "types": "./scr/index.d.ts"
     }
   },
   "name": "@dex-web/web",

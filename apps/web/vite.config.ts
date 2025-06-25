@@ -1,33 +1,17 @@
 /// <reference types='vitest' />
 
-import { resolve } from "node:path";
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import react from "@vitejs/plugin-react-swc";
 import svgr from "vite-plugin-svgr";
+
 import { defineConfig, mergeConfig } from "vitest/config";
 
 export default defineConfig(() => {
   const baseConfig = {
-    build: {
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
-      outDir: "./dist",
-      reportCompressedSize: true,
-      rollupOptions: {
-        external: (id: string) =>
-          id.includes("node_modules") || id.startsWith("@dex-web/"),
-      },
-    },
     cacheDir: "../../node_modules/.vite/apps/web",
     root: __dirname,
     test: {
-      alias: {
-        [resolve(__dirname, "../../libs/orpc/src/helius.ts")]: resolve(
-          __dirname,
-          "../../libs/orpc/src/mocks/helius.mock.ts",
-        ),
-      },
       coverage: {
         provider: "v8" as const,
         reportsDirectory: "../../coverage/apps/web",
@@ -48,7 +32,7 @@ export default defineConfig(() => {
         },
       },
       reporters: ["default", "junit"],
-      setupFiles: [resolve(__dirname, "vitest.setup.ts")],
+      setupFiles: ["./vitest.setup.ts"],
       teardownTimeout: 10000,
       testTimeout: 30000,
       watch: false,
@@ -57,6 +41,7 @@ export default defineConfig(() => {
 
   return mergeConfig(baseConfig, {
     plugins: [
+      nxViteTsPaths(),
       svgr({ include: "**/*.svg" }),
       react(),
       nxCopyAssetsPlugin(["*.md"]),

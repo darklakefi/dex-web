@@ -8,7 +8,7 @@
     "build": {
       "executor": "@nx/vite:build",
       "options": {
-        "outputPath": "libs/ui/dist"
+        "outputPath": "dist/libs/ui"
       }
     },
 

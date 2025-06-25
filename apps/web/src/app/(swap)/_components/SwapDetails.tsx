@@ -1,10 +1,11 @@
 "use client";
 
-import { client } from "@dex-web/orpc";
+import { tanstackClient } from "@dex-web/orpc";
 import { Box, Icon } from "@dex-web/ui";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { cva, type VariantProps } from "class-variance-authority";
+import { MOCK_SWAP_ID } from "../_utils/constants";
 
 function getImpact(priceImpactPercentage: number) {
   switch (true) {
@@ -62,10 +63,11 @@ function SwapDetailsItem({ impact, label, value }: SwapDetailsItemProps) {
   );
 }
 export function SwapDetails() {
-  const { data: swapDetails } = useSuspenseQuery({
-    queryFn: () => client.getSwapDetails({ swapId: "1" }),
-    queryKey: ["swapDetails"],
-  });
+  const { data: swapDetails } = useSuspenseQuery(
+    tanstackClient.getSwapDetails.queryOptions({
+      input: { swapId: MOCK_SWAP_ID },
+    }),
+  );
 
   const priceValue = `1 ${swapDetails.buyToken.symbol} ≈ ${swapDetails.exchangeRate} ${swapDetails.sellToken.symbol}`;
   const priceImpactValue = `${swapDetails.priceImpactPercentage}%`;
@@ -77,16 +79,18 @@ export function SwapDetails() {
   const impact = getImpact(swapDetails.priceImpactPercentage);
 
   return (
-    <Box background="highlight" className="flex flex-col gap-2">
-      <SwapDetailsItem label="Price" value={priceValue} />
-      <SwapDetailsItem
-        impact={impact}
-        label="Price Impact"
-        value={priceImpactValue}
-      />
-      <SwapDetailsItem label="Max Slippage" value={maxSlippageValue} />
-      <SwapDetailsItem label="MEV Protection" value={mevProtectionValue} />
-      <SwapDetailsItem label="Est. Fees" value={estimatedFeesValue} />
+    <Box background="highlight">
+      <dl className="flex flex-col gap-2">
+        <SwapDetailsItem label="Price" value={priceValue} />
+        <SwapDetailsItem
+          impact={impact}
+          label="Price Impact"
+          value={priceImpactValue}
+        />
+        <SwapDetailsItem label="Max Slippage" value={maxSlippageValue} />
+        <SwapDetailsItem label="MEV Protection" value={mevProtectionValue} />
+        <SwapDetailsItem label="Est. Fees" value={estimatedFeesValue} />
+      </dl>
     </Box>
   );
 }

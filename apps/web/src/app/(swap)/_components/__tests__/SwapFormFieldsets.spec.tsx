@@ -7,7 +7,9 @@ import { render, screen } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
-import { SwapDetails } from "../SwapDetails";
+import { SwapFormFieldsets } from "../SwapFormFieldsets";
+
+vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();
@@ -24,13 +26,12 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   </NuqsTestingAdapter>
 );
 
-describe("SwapDetails", () => {
-  it("renders", async () => {
-    render(<SwapDetails />, { wrapper });
-    expect(await screen.findByText("Price")).toBeDefined();
-    expect(await screen.findByText("Price Impact")).toBeDefined();
-    expect(await screen.findByText("Max Slippage")).toBeDefined();
-    expect(await screen.findByText("MEV Protection")).toBeDefined();
-    expect(await screen.findByText("Est. Fees")).toBeDefined();
+describe("SwapFormFieldsets", () => {
+  it("renders both buy and sell sections", async () => {
+    render(<SwapFormFieldsets />, { wrapper });
+    expect(await screen.findByText("Buying")).toBeDefined();
+    expect(await screen.findByText("Selling")).toBeDefined();
+    expect(await screen.findAllByLabelText(/Amount/)).toHaveLength(2);
+    expect(await screen.findAllByText("0")).toHaveLength(2);
   });
 });

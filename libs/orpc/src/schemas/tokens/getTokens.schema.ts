@@ -1,4 +1,4 @@
-import { tokens } from "@dex-web/db";
+import { tokens } from "@dex-web/db/schemas";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { tokenSchema } from "./token.schema";

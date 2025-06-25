@@ -5,3 +5,5 @@ export const heliusRouter = {
   getTokenBalance,
   searchAssets,
 };
+
+export type HeliusRouter = typeof heliusRouter;

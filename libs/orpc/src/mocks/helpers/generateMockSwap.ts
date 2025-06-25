@@ -6,10 +6,11 @@ import {
   randUuid,
   seed,
 } from "@ngneat/falso";
-import type { Swap } from "../../schemas/swaps/swap.schema";
+import type { Swap } from "../../schemas";
 
-export function generateMockSwap(swapId: string = randUuid()) {
-  seed(swapId);
+export function generateMockSwap(randomSeed: string) {
+  seed(randomSeed);
+
   return {
     buyAmount: randNumber({ max: 1000000, min: 1 }),
     buyBalance: randNumber({ max: 1000000, min: 1 }),

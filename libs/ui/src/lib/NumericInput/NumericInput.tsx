@@ -26,7 +26,7 @@ export function NumericInput({
   const size = props.value?.toString().length ?? placeholder?.length ?? 1;
   return (
     <input
-      aria-label={placeholder}
+      aria-label={name}
       className={numericInputVariants()}
       inputMode="numeric"
       min={0}

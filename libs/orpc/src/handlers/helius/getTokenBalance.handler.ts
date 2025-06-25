@@ -1,6 +1,6 @@
 "use server";
 
-import { helius } from "../../helius";
+import { getHelius } from "../../getHelius";
 import type {
   GetTokenBalanceInput,
   GetTokenBalanceOutput,
@@ -11,6 +11,8 @@ import { getTokenAccountsFromResponse } from "../../utils/getTokenAccountsFromRe
 export async function getTokenBalanceHandler({
   ownerAddress,
 }: GetTokenBalanceInput): Promise<GetTokenBalanceOutput> {
+  const helius = getHelius();
+
   const getAssetsByOwnerResponse = await helius.rpc.getAssetsByOwner({
     ownerAddress,
     page: 1,

@@ -3,7 +3,7 @@ import { withNx } from "@nx/next";
 import type { NextConfig } from "next";
 
 const nextConfig = {
-  distDir: "dist",
+  distDir: "dist/apps/web",
   experimental: {
     reactCompiler: true,
     typedRoutes: true,

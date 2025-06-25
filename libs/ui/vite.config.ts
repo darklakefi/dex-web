@@ -56,7 +56,10 @@ const baseConfig = {
       },
     },
     reporters: ["default", "junit"],
-    setupFiles: ["@testing-library/jest-dom"],
+    setupFiles: [
+      "@testing-library/jest-dom",
+      resolve(__dirname, "vitest.setup.ts"),
+    ],
     teardownTimeout: 10000,
     testTimeout: 30000,
     watch: false,
@@ -71,7 +74,7 @@ export const config = mergeConfig(baseConfig, {
     svgr({ include: "**/*.svg" }),
     nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
-      outDir: "./out-tsc/lib",
+      outDir: "../../dist/libs/ui",
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),
   ],

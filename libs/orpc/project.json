@@ -6,12 +6,32 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/vite:build",
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
+      },
+      "defaultConfiguration": "production",
+      "executor": "@nx/esbuild:esbuild",
       "options": {
-        "outputPath": "libs/orpc/dist"
-      }
+        "assets": [
+          {
+            "glob": "libs/orpc/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ],
+        "format": ["cjs"],
+        "main": "libs/orpc/src/index.ts",
+        "outputFileName": "main.js",
+        "outputPath": "dist/libs/orpc",
+        "tsConfig": "libs/orpc/tsconfig.lib.json"
+      },
+      "outputs": ["{options.outputPath}"]
     },
-
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",

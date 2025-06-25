@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./out-tsc/lib",
+    "outDir": "../../dist/libs/utils",
     "types": ["node"]
   },
   "exclude": [
