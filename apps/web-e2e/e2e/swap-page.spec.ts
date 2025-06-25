@@ -16,10 +16,12 @@ test.describe("Swap Page", () => {
     const initialContent = await swapDetailsLocator.textContent();
     await expect(page.getByRole("button", { name: "refresh" })).toBeVisible();
     await page.getByRole("button", { name: "refresh" }).click();
-    await page.waitForTimeout(100);
-    await expect(swapDetailsLocator).toBeVisible();
-    const updatedContent = await swapDetailsLocator.textContent();
-    expect(updatedContent).not.toEqual(initialContent);
+
+    await expect(async () => {
+      const updatedContent = await swapDetailsLocator.textContent();
+      expect(updatedContent).not.toEqual(initialContent);
+    }).toPass();
+
     await expect(page.getByRole("button", { name: "refresh" })).toBeVisible();
   });
 });
