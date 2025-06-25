@@ -9,12 +9,8 @@ import type { SearchParams } from "nuqs/server";
 import { SwapDetails } from "./_components/SwapDetails";
 import { SwapFormFieldsets } from "./_components/SwapFormFieldsets";
 import { SwapPageRefreshButton } from "./_components/SwapPageRefreshButton";
-import { MOCK_OWNER_ADDRESS } from "./_utils/constants";
+import { MOCK_OWNER_ADDRESS, MOCK_SWAP_ID } from "./_utils/constants";
 import { selectedTokensCache } from "./_utils/searchParams";
-import { refreshSwapDetails } from "./actions";
-
-const MOCK_SOLANA_ADDRESS = "11111111111111111111111111111111";
-const MOCK_SWAP_ID = "1";
 
 export default async function Page({
   searchParams,
@@ -34,7 +30,7 @@ export default async function Page({
 
     queryClient.prefetchQuery(
       tanstackClient.getTokenDetails.queryOptions({
-        input: { address: MOCK_SOLANA_ADDRESS },
+        input: { address: MOCK_OWNER_ADDRESS },
       }),
     ),
 
@@ -70,7 +66,7 @@ export default async function Page({
             <SwapDetails />
           </HydrationBoundary>
         </Box>
-        <SwapPageRefreshButton handleRefresh={refreshSwapDetails} />
+        <SwapPageRefreshButton />
       </section>
     </div>
   );

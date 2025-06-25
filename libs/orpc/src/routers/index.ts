@@ -1,2 +1,2 @@
-export { appRouter, type AppRouter } from "./app.router";
-export { heliusRouter, type HeliusRouter } from "./helius.router";
+export { type AppRouter, appRouter } from "./app.router";
+export { type HeliusRouter, heliusRouter } from "./helius.router";

@@ -8,5 +8,5 @@ export function getSwapDetailsHandler(
   input: GetSwapDetailsInput,
 ): GetSwapDetailsOutput {
   const { swapId } = input;
-  return generateMockSwap(swapId);
+  return generateMockSwap(swapId + new Date().toISOString());
 }

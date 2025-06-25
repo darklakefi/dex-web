@@ -1,32 +1,11 @@
 {
-  "name": "core",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "core",
   "projectType": "library",
   "sourceRoot": "libs/core/src",
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/esbuild:esbuild",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "defaultConfiguration": "production",
-      "options": {
-        "main": "libs/core/src/index.ts",
-        "outputPath": "libs/core/dist",
-        "outputFileName": "main.js",
-        "tsConfig": "libs/core/tsconfig.lib.json",
-        "format": [
-          "cjs"
-        ],
-        "assets": [
-          {
-            "glob": "libs/core/README.md",
-            "input": ".",
-            "output": "."
-          }
-        ]
-      },
       "configurations": {
         "development": {
           "minify": false
@@ -34,7 +13,24 @@
         "production": {
           "minify": true
         }
-      }
+      },
+      "defaultConfiguration": "production",
+      "executor": "@nx/esbuild:esbuild",
+      "options": {
+        "assets": [
+          {
+            "glob": "libs/core/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ],
+        "format": ["cjs"],
+        "main": "libs/core/src/index.ts",
+        "outputFileName": "main.js",
+        "outputPath": "libs/core/dist",
+        "tsConfig": "libs/core/tsconfig.lib.json"
+      },
+      "outputs": ["{options.outputPath}"]
     },
     "test": {
       "cache": true,
@@ -42,9 +38,7 @@
       "options": {
         "reportsDirectory": "../../coverage/libs/core"
       },
-      "outputs": [
-        "{options.reportsDirectory}"
-      ]
+      "outputs": ["{options.reportsDirectory}"]
     }
   }
 }

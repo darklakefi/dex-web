@@ -1,5 +1,5 @@
 {
- "exports": {
+  "exports": {
     ".": "./src/index.ts",
     "./mocks": "./src/mocks/index.ts",
     "./mocks/*": "./src/mocks/*.ts",
