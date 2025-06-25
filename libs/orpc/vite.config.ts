@@ -8,7 +8,7 @@ export default defineConfig(() => {
     root: __dirname,
     test: {
       alias: {
-        "../../helius": resolve(__dirname, "src/mocks/helius.mock.ts"),
+        "../../getHelius": resolve(__dirname, "src/mocks/helius.mock.ts"),
       },
       coverage: {
         provider: "v8" as const,

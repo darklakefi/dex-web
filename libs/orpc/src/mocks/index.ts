@@ -1,1 +1,1 @@
-export { resetMockOrpcHandlers, setupMockOrpcHandlers } from "./helpers/setupMockOrpcHandlers";
+export { setupMockOrpcHandlers } from "./helpers/setupMockOrpcHandlers";
