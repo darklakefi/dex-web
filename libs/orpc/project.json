@@ -6,24 +6,32 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/vite:build",
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
+      },
+      "defaultConfiguration": "production",
+      "executor": "@nx/esbuild:esbuild",
       "options": {
-        "additionalEntryPoints": [
-          "libs/orpc/src/routers/index.ts",
-          "libs/orpc/src/procedures/index.ts",
-          "libs/orpc/src/handlers/index.ts",
-          "libs/orpc/src/schemas/index.ts",
-          "libs/orpc/src/schemas/helius/index.ts",
-          "libs/orpc/src/schemas/swaps/index.ts",
-          "libs/orpc/src/schemas/tokens/index.ts",
-          "libs/orpc/src/utils/index.ts"
+        "assets": [
+          {
+            "glob": "libs/orpc/README.md",
+            "input": ".",
+            "output": "."
+          }
         ],
-        "generateExportsField": true,
+        "format": ["cjs"],
         "main": "libs/orpc/src/index.ts",
-        "outputPath": "libs/orpc/dist"
-      }
+        "outputFileName": "main.js",
+        "outputPath": "libs/orpc/dist",
+        "tsConfig": "libs/orpc/tsconfig.lib.json"
+      },
+      "outputs": ["{options.outputPath}"]
     },
-
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",

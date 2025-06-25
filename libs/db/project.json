@@ -6,10 +6,31 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/vite:build",
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
+      },
+      "defaultConfiguration": "production",
+      "executor": "@nx/esbuild:esbuild",
       "options": {
-        "outputPath": "libs/db/dist"
-      }
+        "assets": [
+          {
+            "glob": "libs/db/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ],
+        "format": ["cjs"],
+        "main": "libs/db/src/index.ts",
+        "outputFileName": "main.js",
+        "outputPath": "libs/db/dist",
+        "tsConfig": "libs/db/tsconfig.lib.json"
+      },
+      "outputs": ["{options.outputPath}"]
     },
     "generate": {
       "executor": "nx:run-commands",
@@ -17,7 +38,6 @@
         "command": "drizzle-kit generate --config=libs/db/drizzle.config.ts"
       }
     },
-
     "migrate": {
       "executor": "nx:run-commands",
       "options": {

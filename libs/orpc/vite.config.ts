@@ -1,29 +1,9 @@
-import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import { join, resolve } from "node:path";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 
 export default defineConfig(() => {
   const baseConfig = {
-    build: {
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
-      emptyOutDir: true,
-      lib: {
-        entry: resolve(__dirname, "src/index.ts"),
-        fileName: "index",
-        formats: ["es" as const],
-        name: "@dex-web/orpc",
-      },
-      outDir: "./dist",
-      reportCompressedSize: true,
-      rollupOptions: {
-        external: (id: string) =>
-          id.includes("../../node_modules") || id.startsWith("@dex-web/"),
-      },
-    },
     cacheDir: "../../node_modules/.vite/libs/orpc",
     root: __dirname,
     test: {
@@ -58,8 +38,6 @@ export default defineConfig(() => {
 
   return mergeConfig(baseConfig, {
     plugins: [
-      nxViteTsPaths(),
-      nxCopyAssetsPlugin(["*.md", "package.json"]),
       dts({
         copyDtsFiles: true,
         outDir: "./out-tsc/lib",

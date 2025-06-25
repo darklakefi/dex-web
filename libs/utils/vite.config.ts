@@ -1,30 +1,9 @@
 /// <reference types='vitest' />
-import { join, resolve } from "node:path";
-
-import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
+import { join } from "node:path";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 
 const baseConfig = {
-  build: {
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
-    emptyOutDir: true,
-    lib: {
-      entry: resolve(__dirname, "src/index.ts"),
-      fileName: "index",
-      formats: ["es" as const],
-      name: "@dex-web/utils",
-    },
-    outDir: "./dist",
-    reportCompressedSize: true,
-    rollupOptions: {
-      external: (id: string) =>
-        id.includes("../../node_modules") || id.startsWith("@dex-web/"),
-    },
-  },
   cacheDir: "../../node_modules/.vite/libs/utils",
   root: __dirname,
 
@@ -62,10 +41,7 @@ const baseConfig = {
 };
 
 export const config = mergeConfig(baseConfig, {
-  assetsInclude: ["**/*.svg"],
   plugins: [
-    nxViteTsPaths(),
-    nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
       outDir: "./out-tsc/lib",
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),

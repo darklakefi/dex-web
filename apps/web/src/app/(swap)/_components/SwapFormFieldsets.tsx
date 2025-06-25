@@ -10,51 +10,51 @@ import { SelectTokenButton } from "./SelectTokenButton";
 import { SwapFormFieldset } from "./SwapFormFieldset";
 
 export function SwapFormFieldsets() {
-	const { data: balances } = useSuspenseQuery(
-		tanstackClient.helius.getTokenBalance.queryOptions({
-			input: { ownerAddress: MOCK_OWNER_ADDRESS },
-		}),
-	);
+  const { data: balances } = useSuspenseQuery(
+    tanstackClient.helius.getTokenBalance.queryOptions({
+      input: { ownerAddress: MOCK_OWNER_ADDRESS },
+    }),
+  );
 
-	const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
-		selectedTokensParsers,
-	);
+  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+    selectedTokensParsers,
+  );
 
-	const buyTokenBalance =
-		balances?.tokenAccounts.find((account) => account.mint === buyTokenAddress)
-			?.amount ?? 0;
+  const buyTokenBalance =
+    balances?.tokenAccounts.find((account) => account.mint === buyTokenAddress)
+      ?.amount ?? 0;
 
-	const sellTokenBalance =
-		balances?.tokenAccounts.find((account) => account.mint === sellTokenAddress)
-			?.amount ?? 0;
+  const sellTokenBalance =
+    balances?.tokenAccounts.find((account) => account.mint === sellTokenAddress)
+      ?.amount ?? 0;
 
-	// TODO: Convert balance using token decimals
-	return (
-		<div>
-			<Box background="highlight" className="flex-row">
-				<div>
-					<Text.Body2
-						as="label"
-						className="mb-6 block text-green-300 uppercase"
-					>
-						Selling
-					</Text.Body2>
-					<SelectTokenButton type="sell" />
-				</div>
-				<SwapFormFieldset balance={sellTokenBalance} label="Amount" />
-			</Box>
-			<Box background="highlight" className="flex-row">
-				<div>
-					<Text.Body2
-						as="label"
-						className="mb-6 block text-green-300 uppercase"
-					>
-						Buying
-					</Text.Body2>
-					<SelectTokenButton type="buy" />
-				</div>
-				<SwapFormFieldset balance={buyTokenBalance} label="Amount" />
-			</Box>
-		</div>
-	);
+  // TODO: Convert balance using token decimals
+  return (
+    <div>
+      <Box background="highlight" className="flex-row">
+        <div>
+          <Text.Body2
+            as="label"
+            className="mb-6 block text-green-300 uppercase"
+          >
+            Selling
+          </Text.Body2>
+          <SelectTokenButton type="sell" />
+        </div>
+        <SwapFormFieldset balance={sellTokenBalance} label="Amount" />
+      </Box>
+      <Box background="highlight" className="flex-row">
+        <div>
+          <Text.Body2
+            as="label"
+            className="mb-6 block text-green-300 uppercase"
+          >
+            Buying
+          </Text.Body2>
+          <SelectTokenButton type="buy" />
+        </div>
+        <SwapFormFieldset balance={buyTokenBalance} label="Amount" />
+      </Box>
+    </div>
+  );
 }

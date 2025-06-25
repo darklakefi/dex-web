@@ -1,7 +1,7 @@
 "use client";
 
 import { tanstackClient } from "@dex-web/orpc";
-import { getTokensInputSchema } from "@dex-web/orpc/schemas/tokens";
+import { getTokensInputSchema } from "@dex-web/orpc/schemas";
 import { Box, Button, Modal, TextInput } from "@dex-web/ui";
 import { useDebouncedValue } from "@dex-web/utils";
 import {

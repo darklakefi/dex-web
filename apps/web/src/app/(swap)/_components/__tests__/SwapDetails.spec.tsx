@@ -1,4 +1,4 @@
-import type { Swap } from "@dex-web/orpc/schemas/swaps";
+import type { Swap } from "@dex-web/orpc/schemas";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";

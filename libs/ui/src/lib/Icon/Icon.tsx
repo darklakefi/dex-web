@@ -19,8 +19,8 @@ import RefreshIcon from "./icons/refresh.svg";
 import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
 import TelegramIcon from "./icons/telegram.svg";
-import TimesFilledIcon from "./icons/times-filled.svg";
 import TimesIcon from "./icons/times.svg";
+import TimesFilledIcon from "./icons/times-filled.svg";
 import TrendingIcon from "./icons/trending.svg";
 import XIcon from "./icons/x.svg";
 

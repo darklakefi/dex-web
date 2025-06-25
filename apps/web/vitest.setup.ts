@@ -1,4 +1,4 @@
-import { appRouter } from "@dex-web/orpc";
+import { appRouter } from "@dex-web/orpc/routers/app.router";
 import { implement, unlazyRouter } from "@orpc/server";
 import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
