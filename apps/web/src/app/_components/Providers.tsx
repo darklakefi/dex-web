@@ -1,5 +1,11 @@
 "use client";
 
+import { WalletContextProvider } from "@dex-web/ui";
+import {
+  type Adapter,
+  WalletAdapterNetwork,
+  type WalletError,
+} from "@solana/wallet-adapter-base";
 import {
   isServer,
   QueryClient,
@@ -28,12 +34,25 @@ function getQueryClient() {
   }
 }
 
+const NETWORK =
+  process.env.NETWORK === "mainnet"
+    ? WalletAdapterNetwork.Mainnet
+    : WalletAdapterNetwork.Devnet;
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
+  const onError = (error: WalletError, adapter?: Adapter) => {
+    console.log(error, adapter);
+  };
+
   return (
     <NuqsAdapter>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <WalletContextProvider network={NETWORK} onError={onError}>
+          {children}
+        </WalletContextProvider>
+      </QueryClientProvider>
     </NuqsAdapter>
   );
 }
