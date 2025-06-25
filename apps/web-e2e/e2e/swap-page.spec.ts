@@ -1,5 +1,5 @@
-import { setupMockOrpcHandlers } from "@dex-web/orpc/mocks";
 import { expect, test } from "@playwright/test";
+import { setupMockOrpcHandlers } from "../helpers/setupMockOrpcHandlers";
 
 test.describe("Swap Page", () => {
   test("should refresh swap details when refresh button is clicked", async ({

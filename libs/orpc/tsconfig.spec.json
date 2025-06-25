@@ -26,5 +26,5 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.ts"
-  ]
+, "../../apps/web-e2e/helpers/setupMockOrpcHandlers.ts"  ]
 }

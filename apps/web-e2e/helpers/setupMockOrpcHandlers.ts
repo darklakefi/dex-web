@@ -1,6 +1,6 @@
 "use server";
 
-import { generateMockSwap } from "./generateMockSwap";
+import { generateMockSwap } from "@dex-web/orpc/mocks/helpers/generateMockSwap";
 
 export async function setupMockOrpcHandlers(
   page: import("@playwright/test").Page,
