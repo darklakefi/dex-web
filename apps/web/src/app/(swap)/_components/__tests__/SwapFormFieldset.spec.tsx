@@ -2,9 +2,7 @@ import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { SwapFormFieldset } from "../SwapFormFieldset";
-import { mockOrpc } from "./__mocks__/mockOrpc";
 
-mockOrpc();
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 
 describe("SwapFormFieldset", () => {

@@ -4,9 +4,7 @@ import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
 import { SwapFormFieldsets } from "../SwapFormFieldsets";
-import { mockOrpc } from "./__mocks__/mockOrpc";
 
-mockOrpc();
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 
 const queryClient = new QueryClient();

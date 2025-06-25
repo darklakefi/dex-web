@@ -50,7 +50,7 @@ export default defineConfig(() => {
         },
       },
       reporters: ["default", "junit"],
-      setupFiles: [resolve(__dirname, "vitest.setup.ts")],
+      setupFiles: ["./vitest.setup.ts"],
       teardownTimeout: 10000,
       testTimeout: 30000,
       watch: false,

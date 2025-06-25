@@ -134,4 +134,10 @@ export function mockOrpc() {
       },
     },
   }));
+
+  vi.mock("../../../../../libs/orpc/src/routers/app.router.ts", () => ({
+    appRouter: {
+      getSwapDetails: vi.fn().mockResolvedValue({}),
+    },
+  }));
 }

@@ -4,9 +4,6 @@ import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
 import { SwapDetails } from "../SwapDetails";
-import { mockOrpc } from "./__mocks__/mockOrpc";
-
-mockOrpc();
 
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();
