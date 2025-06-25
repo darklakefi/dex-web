@@ -6,9 +6,9 @@ import { selectedTokensCache } from "./_utils/searchParams";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
-  await selectedTokensCache.parse(searchParams);
+  await selectedTokensCache.parse(await searchParams);
 
   return (
     <div className="flex flex-col items-center justify-center">

@@ -11,6 +11,7 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
+import { Suspense } from "react";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { TokenList } from "./TokenList";
 
@@ -28,6 +29,19 @@ const { useAppForm } = createFormHook({
   formComponents: {},
   formContext,
 });
+
+const formConfig = {
+  defaultValues: {
+    query: "",
+  },
+  onSubmit: ({ value }: { value: { query: string } }) => {
+    console.log(value);
+  },
+  validators: {
+    onChange: ({ value }: { value: { query: string } }) =>
+      selectTokenModalFormSchema.parse(value),
+  },
+};
 
 interface SelectTokenModalProps {
   type: "buy" | "sell";
@@ -54,20 +68,12 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
     router.push("/");
   };
 
-  const form = useAppForm({
-    defaultValues: {
-      query: "",
-    },
-    onSubmit: ({ value }) => {
-      alert(JSON.stringify(value, null, 2));
-    },
-    validators: {
-      onChange: ({ value }) => selectTokenModalFormSchema.parse(value),
-    },
-  });
+  const form = useAppForm(formConfig);
 
   const rawQuery = useStore(form.store, (state) => state.values.query);
-  const debouncedQuery = useDebouncedValue(rawQuery, 300);
+  const isInitialLoad = rawQuery === "";
+
+  const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 300);
 
   const { data } = useSuspenseQuery(
     tanstackClient.getTokens.queryOptions({
@@ -100,7 +106,11 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
             />
           )}
         </form.Field>
-        <TokenList onSelect={handleSelect} tokens={data.tokens} />
+        <Suspense
+          fallback={<div className="h-32 animate-pulse rounded bg-green-600" />}
+        >
+          <TokenList onSelect={handleSelect} tokens={data.tokens} />
+        </Suspense>
       </Box>
     </Modal>
   );
