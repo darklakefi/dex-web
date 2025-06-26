@@ -1,26 +1,39 @@
-import { Button, Header, Icon, Text } from "@dex-web/ui";
-import { useTranslations } from "next-intl";
+import { Header, Icon, Text } from "@dex-web/ui";
+import Link from "next/link";
+import { ConnectWalletButton } from "../(wallet)/_components/ConnectWalletButton";
 
-export const AppHeader = () => {
-  const t = useTranslations("pages");
+export function AppHeader() {
   return (
     <Header
-      button={<Button variant="primary">CONNECT WALLET</Button>}
-      logoLg={<Icon className="h-6 w-auto stroke-none" name="logo-lg" />}
-      logoSm={<Icon className="h-6 w-auto stroke-none" name="logo-sm" />}
+      button={<ConnectWalletButton />}
+      logoLg={
+        <Link href="/" passHref>
+          <Icon
+            className="h-6 w-auto cursor-pointer stroke-none"
+            name="logo-lg"
+          />
+        </Link>
+      }
+      logoSm={
+        <Link href="/" passHref>
+          <Icon
+            className="h-6 w-auto cursor-pointer stroke-none"
+            name="logo-sm"
+          />
+        </Link>
+      }
     >
-      <Text.Link
-        className="inline-flex items-baseline justify-center leading-none no-underline"
-        data-testid="home-link"
-      >
-        {t("home")}
+      <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
+        Home
       </Text.Link>
       <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
-        {t("about")}
+        <Link href="/about" passHref>
+          About
+        </Link>
       </Text.Link>
       <Text.Link className="inline-flex items-baseline justify-center gap-2 leading-none no-underline">
-        {t("contact")} <Icon className="size-4" name="external-link" />
+        Contact <Icon className="size-4" name="external-link" />
       </Text.Link>
     </Header>
   );
-};
+}
