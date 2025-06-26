@@ -6,8 +6,9 @@ import {
 } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
-import { SelectTokenModal } from "../../../(swap)/_components/SelectTokenModal";
-import { selectedTokensCache } from "../../../(swap)/_utils/searchParams";
+
+import { SelectTokenModal } from "../../../[lang]/(swap)/_components/SelectTokenModal";
+import { selectedTokensCache } from "../../../[lang]/(swap)/_utils/searchParams";
 
 export default async function Page({
   searchParams,

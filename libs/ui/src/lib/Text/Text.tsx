@@ -9,7 +9,7 @@ export enum TextVariantEnum {
   Link = "link",
 }
 
-const textVariants = cva("font-normal", {
+const textVariants = cva("font-normal uppercase", {
   variants: {
     variant: {
       body1: "font-sans text-3xl text-green-100 leading-8.5 tracking-wider",
