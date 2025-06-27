@@ -7,7 +7,7 @@ import { render, screen } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
-import { SwapFormFieldsets } from "../SwapFormFieldsets";
+import { SwapForm } from "../SwapForm";
 
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 
@@ -26,12 +26,12 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   </NuqsTestingAdapter>
 );
 
-describe("SwapFormFieldsets", () => {
+describe("SwapForm", () => {
   it("renders both buy and sell sections", async () => {
-    render(<SwapFormFieldsets />, { wrapper });
+    render(<SwapForm />, { wrapper });
     expect(await screen.findByText("Buying")).toBeDefined();
     expect(await screen.findByText("Selling")).toBeDefined();
-    expect(await screen.findAllByLabelText(/Amount/)).toHaveLength(2);
-    expect(await screen.findAllByText("0")).toHaveLength(2);
+    expect(await screen.findAllByText("Half")).toHaveLength(2);
+    expect(await screen.findAllByText("1000 SOL"));
   });
 });

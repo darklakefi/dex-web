@@ -2,6 +2,7 @@ import type {
   GetTokenDetailsOutput,
   GetTokensOutput,
   Swap,
+  TokenAccount,
 } from "@dex-web/orpc/schemas";
 import { vi } from "vitest";
 import {
@@ -112,16 +113,21 @@ export function mockOrpc() {
         })),
       },
       helius: {
-        getTokenBalance: {
+        getTokenAccounts: {
           queryOptions: vi.fn().mockImplementation(() => ({
             queryFn: () =>
               Promise.resolve({
-                assets: [],
-                ownerAddress: "0x123",
-                tokenAccounts: [],
-                total: 0,
+                tokenAccounts: [
+                  {
+                    address: "0x123",
+                    amount: 1000,
+                    balance: 1000,
+                    mint: "0x123",
+                    symbol: "SOL",
+                  } satisfies TokenAccount,
+                ],
               }),
-            queryKey: ["helius", "getTokenBalance", { ownerAddress: "0x123" }],
+            queryKey: ["helius", "getTokenAccounts", { ownerAddress: "0x123" }],
           })),
         },
         searchAssets: {

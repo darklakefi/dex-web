@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import type { ComponentPropsWithRef } from "react";
 
 const numericInputVariants = cva(
   "inline-flex w-full bg-green-600 text-end font-sans text-3xl text-green-100 uppercase fieldset:placeholder-transparent caret-green-300 focus:outline-none",
@@ -10,8 +11,9 @@ const numericInputVariants = cva(
 
 type NumericInputVariants = VariantProps<typeof numericInputVariants>;
 
-interface NumericInputProps
+export interface NumericInputProps
   extends React.InputHTMLAttributes<HTMLInputElement>,
+    ComponentPropsWithRef<"input">,
     NumericInputVariants {}
 
 /**

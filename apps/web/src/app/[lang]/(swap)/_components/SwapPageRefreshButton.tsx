@@ -22,7 +22,7 @@ export function SwapPageRefreshButton() {
         }),
       }),
       queryClient.invalidateQueries({
-        queryKey: tanstackClient.helius.getTokenBalance.key({
+        queryKey: tanstackClient.helius.getTokenAccounts.key({
           input: { ownerAddress: MOCK_OWNER_ADDRESS },
         }),
       }),

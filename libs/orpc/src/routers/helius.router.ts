@@ -1,8 +1,8 @@
-import { getTokenBalance } from "../procedures/helius/getTokenBalance.procedure";
+import { getTokenAccounts } from "../procedures/helius/getTokenAccounts.procedure";
 import { searchAssets } from "../procedures/helius/searchAssets.procedure";
 
 export const heliusRouter = {
-  getTokenBalance,
+  getTokenAccounts,
   searchAssets,
 };
 

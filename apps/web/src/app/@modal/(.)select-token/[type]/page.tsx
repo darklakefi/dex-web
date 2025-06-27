@@ -7,7 +7,7 @@ import {
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 
-import { SelectTokenModal } from "../../../[lang]/(swap)/_components/SelectTokenModal";
+import { SelectTokenModal } from "../../../[lang]/(swap)/_components/`SelectTokenModal";
 import { selectedTokensCache } from "../../../[lang]/(swap)/_utils/searchParams";
 
 export default async function Page({
