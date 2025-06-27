@@ -35,7 +35,7 @@ describe("Button", () => {
   describe("Button Icons", () => {
     it("should render with leading icon", () => {
       const { container } = render(
-        <Button leadingIcon="checkbox-filled" variant="primary">
+        <Button leadingIcon="times" variant="primary">
           Button with Leading Icon
         </Button>,
       );
@@ -78,7 +78,7 @@ describe("Button", () => {
           Loading Button
         </Button>,
       );
-      expect(container.querySelector("svg")).toHaveClass("animate-spin");
+      expect(container.querySelector("svg")).toHaveClass("animate-spin-pause");
       expect(container.querySelector("button")).not.toBeDisabled();
     });
   });
