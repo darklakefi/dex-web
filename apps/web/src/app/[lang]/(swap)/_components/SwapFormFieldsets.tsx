@@ -7,6 +7,7 @@ import { useQueryStates } from "nuqs";
 import { MOCK_OWNER_ADDRESS } from "../_utils/constants";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { SelectTokenButton } from "./SelectTokenButton";
+import { SwapButton } from "./SwapButton";
 import { SwapFormFieldset } from "./SwapFormFieldset";
 
 export function SwapFormFieldsets() {
@@ -47,6 +48,9 @@ export function SwapFormFieldsets() {
           name="sellAmount"
         />
       </Box>
+      <div className="flex items-center justify-center">
+        <SwapButton />
+      </div>
       <Box background="highlight" className="flex-row">
         <div>
           <Text.Body2
