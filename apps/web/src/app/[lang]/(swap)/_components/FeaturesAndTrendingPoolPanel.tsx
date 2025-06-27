@@ -8,8 +8,8 @@ interface FeaturesAndTrendingPoolPanelProps {
 }
 
 export function FeaturesAndTrendingPoolPanel({
-  featuredPools,
-  trendingPools,
+  featuredPools = [],
+  trendingPools = [],
 }: FeaturesAndTrendingPoolPanelProps) {
   return (
     <div className="flex w-full flex-col items-center gap-10 bg-transparent">
