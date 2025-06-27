@@ -1,8 +1,8 @@
 export type {
-  GetTokenBalanceInput,
-  GetTokenBalanceOutput,
-} from "./helius/getTokenBalance.schema";
-export { getTokenBalanceInputSchema } from "./helius/getTokenBalance.schema";
+  GetTokenAccountsInput,
+  GetTokenAccountsOutput,
+} from "./helius/getTokenAccounts.schema";
+export { getTokenAccountsInputSchema } from "./helius/getTokenAccounts.schema";
 export { heliusTokenSchema } from "./helius/heliusToken.schema";
 export type { HeliusTokenAccount } from "./helius/heliusTokenAccount.schema";
 export { heliusTokenAccountSchema } from "./helius/heliusTokenAccount.schema";
@@ -30,3 +30,4 @@ export type {
 export { getTokensInputSchema } from "./tokens/getTokens.schema";
 export type { Token } from "./tokens/token.schema";
 export { tokenSchema } from "./tokens/token.schema";
+export type { TokenAccount } from "./tokens/tokenAccount.schema";

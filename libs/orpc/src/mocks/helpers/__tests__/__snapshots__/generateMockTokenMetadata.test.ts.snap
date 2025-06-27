@@ -1,0 +1,21 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateMockTokenMetadata > should generate a list of token accounts 1`] = `
+{
+  "burnt": false,
+  "id": "3c4dfb0c-f84d-41ea-ac6d-be433685d544",
+  "interface": "V1_NFT",
+  "mutable": true,
+  "ownership": {
+    "delegate": undefined,
+    "delegated": false,
+    "frozen": true,
+    "owner": "e7281d9e-834d-4e58-a56c-106dad7426e4",
+    "ownership_model": "single",
+  },
+  "token_info": {
+    "decimals": 5,
+    "symbol": "₡",
+  },
+}
+`;

@@ -80,28 +80,18 @@ export async function setupMockOrpcHandlers(
         contentType: "application/json",
         status: 200,
       });
-    } else if (body.method === "helius.getTokenBalance") {
+    } else if (body.method === "helius.getTokenAccounts") {
       await route.fulfill({
         body: JSON.stringify({
           result: {
-            assets: [
-              {
-                description: "Fake asset description",
-                id: "asset-1",
-                image: { url: "https://example.com/asset1.png" },
-                name: "Fake Asset 1",
-                symbol: "FAKE1",
-              },
-            ],
-            ownerAddress: "fake-owner-address",
             tokenAccounts: [
               {
                 address: "account-1",
                 amount: 1000,
                 mint: "mint-1",
+                symbol: "FAKE1",
               },
             ],
-            total: 1,
           },
         }),
         contentType: "application/json",
