@@ -21,6 +21,7 @@ const boxVariants = cva(
         sm: "p-2",
       },
       shadow: {
+        md: "shadow-green-900 shadow-md",
         none: "shadow-none",
         sm: "shadow-green-900 shadow-sm",
         xl: "shadow-green-900 shadow-xl",

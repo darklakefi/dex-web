@@ -1,8 +1,10 @@
 import { Header, Icon, Text } from "@dex-web/ui";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ConnectWalletButton } from "../(wallet)/_components/ConnectWalletButton";
 
 export function AppHeader() {
+  const t = useTranslations("pages");
   return (
     <Header
       button={<ConnectWalletButton />}
@@ -24,11 +26,13 @@ export function AppHeader() {
       }
     >
       <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
-        Home
+        <Link href="/" passHref>
+          Swap
+        </Link>
       </Text.Link>
       <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
         <Link href="/about" passHref>
-          About
+          {t("about")}
         </Link>
       </Text.Link>
       <Text.Link className="inline-flex items-baseline justify-center gap-2 leading-none no-underline">
