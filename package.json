@@ -1,8 +1,15 @@
 {
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@orpc/client": "^1.5.2",
     "@orpc/server": "^1.5.2",
     "@orpc/tanstack-query": "^1.5.2",
+    "@solana/wallet-adapter-backpack": "^0.1.14",
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-phantom": "^0.9.28",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-solflare": "^0.6.32",
+    "@solana/web3.js": "^1.98.2",
     "@tanstack/react-form": "^1.12.3",
     "@tanstack/react-query": "^5.80.7",
     "class-variance-authority": "^0.7.1",
