@@ -8,6 +8,7 @@ import { useQueryStates } from "nuqs";
 import { useRef } from "react";
 import { MOCK_OWNER_ADDRESS } from "../_utils/constants";
 import { selectedTokensParsers } from "../_utils/searchParams";
+import { useFormatPrice } from "../_utils/useFormatPrice";
 
 interface SwapFormFieldsetProps extends NumericInputProps {
   name: "buyAmount" | "sellAmount";
@@ -45,10 +46,11 @@ export function SwapFormFieldset({
     }),
   );
 
-  const formattedPriceInUsd = format.number(usdExchangeRate.price * value, {
-    currency: QUOTE_CURRENCY,
-    style: "currency",
-  });
+  const formattedPrice = useFormatPrice(
+    value,
+    usdExchangeRate.price,
+    QUOTE_CURRENCY,
+  );
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -102,7 +104,7 @@ export function SwapFormFieldset({
           {...rest}
         />
         <Text.Body2 className="text-green-300 uppercase">
-          {formattedPriceInUsd}
+          {formattedPrice}
         </Text.Body2>
       </div>
     </fieldset>

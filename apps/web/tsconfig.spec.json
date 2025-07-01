@@ -24,6 +24,8 @@
     "src/**/*.spec.js",
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "src/app/[lang]/(swap)/_utils/useFormatPrice.tsx",
+    "src/app/[lang]/(swap)/_utils/__tests__/useFormatPrice.spec.tsx"
   ]
 }
