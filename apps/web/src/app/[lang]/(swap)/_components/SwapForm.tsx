@@ -90,7 +90,7 @@ export function SwapForm() {
               name={field.name}
               onBlur={field.handleBlur}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                field.handleChange(e.target.valueAsNumber)
+                field.handleChange(Number(e.target.value))
               }
               value={field.state.value}
             />

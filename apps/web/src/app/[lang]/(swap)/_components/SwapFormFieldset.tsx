@@ -3,7 +3,6 @@
 import { tanstackClient } from "@dex-web/orpc";
 import { NumericInput, type NumericInputProps, Text } from "@dex-web/ui";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useFormatter } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useRef } from "react";
 import { MOCK_OWNER_ADDRESS } from "../_utils/constants";
@@ -13,6 +12,7 @@ import { useFormatPrice } from "../_utils/useFormatPrice";
 interface SwapFormFieldsetProps extends NumericInputProps {
   name: "buyAmount" | "sellAmount";
 }
+const QUOTE_CURRENCY = "USD" as const;
 
 export function SwapFormFieldset({
   name,
@@ -23,9 +23,6 @@ export function SwapFormFieldset({
   const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
     selectedTokensParsers,
   );
-
-  const QUOTE_CURRENCY = "USD" as const;
-  const format = useFormatter();
 
   const { data } = useSuspenseQuery(
     tanstackClient.helius.getTokenAccounts.queryOptions({
