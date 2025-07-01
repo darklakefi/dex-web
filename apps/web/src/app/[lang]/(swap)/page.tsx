@@ -10,6 +10,7 @@ import { FeaturesAndTrendingPoolPanel } from "./_components/FeaturesAndTrendingP
 import { SwapDetails } from "./_components/SwapDetails";
 import { SwapForm } from "./_components/SwapForm";
 import { SwapPageRefreshButton } from "./_components/SwapPageRefreshButton";
+import { SwapPageSettingButton } from "./_components/SwapPageSettingButton";
 import { MOCK_OWNER_ADDRESS, MOCK_SWAP_ID } from "./_utils/constants";
 import { selectedTokensCache } from "./_utils/searchParams";
 
@@ -76,7 +77,10 @@ export default async function Page({
               <SwapDetails />
             </HydrationBoundary>
           </Box>
+          <div className="flex flex-col gap-1">
+          <SwapPageSettingButton />
           <SwapPageRefreshButton />
+        </div>
         </section>
       </div>
       <div className="max-w-xs">

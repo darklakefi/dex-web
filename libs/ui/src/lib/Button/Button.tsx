@@ -62,12 +62,24 @@ type ButtonProps<
   trailingIcon?: IconName;
   leadingIcon?: IconName;
   icon?: IconName;
+  iconClassName?: string;
   loading?: boolean;
 } & TProps &
   VariantProps<typeof buttonVariants>;
 
-const ButtonIcon = ({ icon }: { icon: React.ReactNode | IconName }) => {
-  return <Icon className="size-4 text-inherit" name={icon as IconName} />;
+const ButtonIcon = ({
+  icon,
+  className,
+}: {
+  icon: React.ReactNode | IconName;
+  className?: string;
+}) => {
+  return (
+    <Icon
+      className={twMerge("size-4 text-inherit", className)}
+      name={icon as IconName}
+    />
+  );
 };
 
 const LoadingIcon = () => {
@@ -92,6 +104,7 @@ export function Button<TElement extends React.ElementType>(
     trailingIcon,
     as = "button",
     icon,
+    iconClassName,
     className,
     ...restProps
   } = props;
@@ -120,7 +133,7 @@ export function Button<TElement extends React.ElementType>(
 
   const buttonChildren =
     icon && !text && !children
-      ? [<ButtonIcon icon={icon} key="icon-only" />]
+      ? [<ButtonIcon className={iconClassName} icon={icon} key="icon-only" />]
       : [
           LeadingIcon,
           children ??
