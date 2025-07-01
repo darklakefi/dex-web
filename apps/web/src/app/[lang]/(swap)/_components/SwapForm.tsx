@@ -10,8 +10,8 @@ import { SwapFormFieldset } from "./SwapFormFieldset";
 export const { fieldContext, formContext } = createFormHookContexts();
 
 const swapFormSchema = z.object({
-  buyAmount: z.number(),
-  sellAmount: z.number(),
+  buyAmount: z.number().nonnegative(),
+  sellAmount: z.number().nonnegative(),
 });
 
 type SwapFormSchema = z.infer<typeof swapFormSchema>;

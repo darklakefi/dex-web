@@ -2,6 +2,13 @@
 
 import { BigDecimal } from "effect";
 import { useFormatter } from "next-intl";
+import { z } from "zod";
+
+const useFormatPriceSchema = z.object({
+  exchangeRate: z.number().nonnegative(),
+  quoteCurrency: z.string(),
+  value: z.number().nonnegative(),
+});
 
 export function useFormatPrice(
   value: string | number | readonly string[] | undefined,
@@ -10,16 +17,34 @@ export function useFormatPrice(
 ) {
   const format = useFormatter();
 
-  const valueAsBigDecimal = BigDecimal.unsafeFromString(String(value ?? "0"));
+  const { success, data: parsedData } = useFormatPriceSchema.safeParse({
+    exchangeRate,
+    quoteCurrency,
+    value,
+  });
+
+  if (!success) {
+    return "0.00";
+  }
+
+  const {
+    value: parsedValue,
+    exchangeRate: parsedExchangeRate,
+    quoteCurrency: parsedQuoteCurrency,
+  } = parsedData;
+
+  const valueAsBigDecimal = BigDecimal.unsafeFromString(
+    String(parsedValue ?? "0"),
+  );
   const exchangeRateAsBigDecimal = BigDecimal.unsafeFromString(
-    String(exchangeRate),
+    String(parsedExchangeRate),
   );
   const amountInUsd = BigDecimal.format(
     BigDecimal.multiply(valueAsBigDecimal, exchangeRateAsBigDecimal),
   );
 
   const formattedPrice = format.number(Number(amountInUsd), {
-    currency: quoteCurrency,
+    currency: parsedQuoteCurrency,
     style: "currency",
   });
 
