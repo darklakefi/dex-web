@@ -1,6 +1,5 @@
 "use client";
 
-import { BackpackWalletAdapter } from "@solana/wallet-adapter-backpack";
 import type {
   Adapter,
   WalletAdapterNetwork,
@@ -30,7 +29,6 @@ const WALLET_ADAPTERS = [
    */
   new PhantomWalletAdapter(),
   new SolflareWalletAdapter(),
-  new BackpackWalletAdapter(),
 ];
 
 export interface WalletContextProviderProps {

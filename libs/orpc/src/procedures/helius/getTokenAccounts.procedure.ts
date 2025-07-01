@@ -6,5 +6,4 @@ export const getTokenAccounts = baseProcedure
   .input(getTokenAccountsInputSchema)
   .handler(async ({ input }) => {
     return await getTokenAccountsHandler(input);
-  })
-  .callable();
+  });
