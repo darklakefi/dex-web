@@ -14,6 +14,12 @@ const nextConfig = {
   images: {
     unoptimized: false,
   },
+  logging: {
+    fetches: {
+      fullUrl: true,
+      hmrRefreshes: true,
+    },
+  },
   nx: {
     svgr: false,
   },
@@ -60,7 +66,6 @@ const nextConfig = {
       test: /\.svg$/i,
       use: ["@svgr/webpack"],
     });
-    config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
   },
 } satisfies NextConfig;

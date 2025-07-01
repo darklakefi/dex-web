@@ -30,13 +30,13 @@ This repository is managed as an [Nx](https://nx.dev/) monorepo, enabling:
 - **Task Orchestration** (build, test, lint, e2e)
 - **Code Generation** via Nx plugins
 - **Affected Commands** for efficient CI/local workflows
-- **Consistent Tooling**: Next.js 15.3.2, Vite, Playwright 1.52.0, Biome, pnpm 10.11.1
+- **Consistent Tooling**: Next.js 15.3.2, Vite, Playwright 1.52.0, Biome, pnpm 10.12.4
 
 ## Prerequisites
 
 Before you begin, make sure you have the following installed **on your local machine**:
 
-### 1. Node.js (≥ 22.0.0)
+### 1. Node.js (≥ 24.0.0)
 
 - **Recommended:** Use a version manager like [nvm](https://github.com/nvm-sh/nvm) or [asdf](https://asdf-vm.com/).
 - **Check version:**
@@ -45,15 +45,15 @@ Before you begin, make sure you have the following installed **on your local mac
   ```
 - **Install (macOS/Linux):**
   ```sh
-  nvm install 22
-  nvm use 22
+  nvm install 24
+  nvm use 24
   ```
 - **Install (Homebrew, macOS):**
   ```sh
-  brew install node@22
+  brew install node@24
   ```
 
-### 2. pnpm (10.11.1)
+### 2. pnpm (10.12.4)
 
 - **Check version:**
   ```sh
@@ -61,7 +61,7 @@ Before you begin, make sure you have the following installed **on your local mac
   ```
 - **Install:**
   ```sh
-  npm install -g pnpm@10.11.1
+  npm install -g pnpm@10.12.4
   ```
 
 ### 3. Git
