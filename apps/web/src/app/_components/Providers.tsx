@@ -1,6 +1,5 @@
 "use client";
 
-import { WalletContextProvider } from "@dex-web/ui";
 import {
   type Adapter,
   WalletAdapterNetwork,
@@ -12,6 +11,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { WalletContextProvider } from "./WalletContextProvider";
 
 function makeQueryClient() {
   return new QueryClient({

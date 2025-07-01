@@ -15,11 +15,13 @@ export async function getTokenAccountsHandler({
   const helius = getHelius();
 
   const [getTokenAccountsResponse, tokenMetadata] = await Promise.all([
-    helius.rpc.getTokenAccounts({
-      mint: mint,
-      owner: ownerAddress,
-      page: 1,
-    }),
+    helius.rpc
+      .getTokenAccounts({
+        mint: mint,
+        owner: ownerAddress,
+        page: 1,
+      })
+      .catch(() => null),
     helius.rpc
       .getAsset({
         id: mint ?? "",
@@ -28,11 +30,11 @@ export async function getTokenAccountsHandler({
   ]);
 
   const hasTokenAccounts =
-    (getTokenAccountsResponse.token_accounts?.length ?? 0) > 0;
+    (getTokenAccountsResponse?.token_accounts?.length ?? 0) > 0;
 
   const tokenAccounts = (
     hasTokenAccounts
-      ? getTokenAccountsResponse.token_accounts
+      ? getTokenAccountsResponse?.token_accounts
       : [
           {
             address: ownerAddress,

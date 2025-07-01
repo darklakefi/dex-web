@@ -21,7 +21,7 @@ export function SwapFormFieldset({
     selectedTokensParsers,
   );
 
-  const { data } = useSuspenseQuery(
+  const { data, isError, error, isSuccess } = useSuspenseQuery(
     tanstackClient.helius.getTokenAccounts.queryOptions({
       input: {
         mint: name === "buyAmount" ? buyTokenAddress : sellTokenAddress,
@@ -50,6 +50,12 @@ export function SwapFormFieldset({
       inputRef.current.dispatchEvent(event);
     }
   };
+
+  if (!isSuccess) {
+    console.error(error);
+
+    return <div>Error</div>;
+  }
 
   return (
     <fieldset className="flex min-w-0 flex-1 flex-col items-end gap-3">

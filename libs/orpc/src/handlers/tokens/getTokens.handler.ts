@@ -1,5 +1,6 @@
 "use server";
 
+import { tokensData } from "../../mocks/tokens.mock";
 import type {
   GetTokensInput,
   GetTokensOutput,
@@ -11,9 +12,7 @@ export const getTokensHandler = async (
 ): Promise<GetTokensOutput> => {
   const { limit, query } = input;
 
-  const response = await fetch("https://token.jup.ag/strict");
-
-  const rawData = await response.json();
+  const rawData = tokensData;
 
   const { data, error } = jupiterTokensResponseSchema.safeParse(rawData);
 
