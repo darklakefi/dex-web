@@ -3,6 +3,7 @@
 import { tanstackClient } from "@dex-web/orpc";
 import { NumericInput, type NumericInputProps, Text } from "@dex-web/ui";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useFormatter } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useRef } from "react";
 import { MOCK_OWNER_ADDRESS } from "../_utils/constants";
@@ -15,13 +16,17 @@ interface SwapFormFieldsetProps extends NumericInputProps {
 export function SwapFormFieldset({
   name,
   onChange,
+  value,
   ...rest
 }: SwapFormFieldsetProps) {
   const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
-  const { data, isError, error, isSuccess } = useSuspenseQuery(
+  const QUOTE_CURRENCY = "USD" as const;
+  const format = useFormatter();
+
+  const { data } = useSuspenseQuery(
     tanstackClient.helius.getTokenAccounts.queryOptions({
       input: {
         mint: name === "buyAmount" ? buyTokenAddress : sellTokenAddress,
@@ -29,6 +34,21 @@ export function SwapFormFieldset({
       },
     }),
   );
+
+  const { data: usdExchangeRate } = useSuspenseQuery(
+    tanstackClient.getTokenPrice.queryOptions({
+      input: {
+        amount: 1,
+        mint: name === "buyAmount" ? buyTokenAddress : sellTokenAddress,
+        quoteCurrency: QUOTE_CURRENCY,
+      },
+    }),
+  );
+
+  const formattedPriceInUsd = format.number(usdExchangeRate.price * value, {
+    currency: QUOTE_CURRENCY,
+    style: "currency",
+  });
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -51,12 +71,6 @@ export function SwapFormFieldset({
     }
   };
 
-  if (!isSuccess) {
-    console.error(error);
-
-    return <div>Error</div>;
-  }
-
   return (
     <fieldset className="flex min-w-0 flex-1 flex-col items-end gap-3">
       <div className="mb-3 flex gap-3">
@@ -78,13 +92,19 @@ export function SwapFormFieldset({
           </button>
         </Text.Body2>
       </div>
-      <NumericInput
-        name={name}
-        onChange={onChange}
-        placeholder="Amount"
-        ref={inputRef}
-        {...rest}
-      />
+      <div className="flex flex-col items-end">
+        <NumericInput
+          name={name}
+          onChange={onChange}
+          placeholder="0.00"
+          ref={inputRef}
+          value={value}
+          {...rest}
+        />
+        <Text.Body2 className="text-green-300 uppercase">
+          {formattedPriceInUsd}
+        </Text.Body2>
+      </div>
     </fieldset>
   );
 }

@@ -14,6 +14,8 @@ const swapFormSchema = z.object({
   sellAmount: z.number(),
 });
 
+type SwapFormSchema = z.infer<typeof swapFormSchema>;
+
 const { useAppForm } = createFormHook({
   fieldComponents: {
     SwapFormFieldset,
@@ -28,7 +30,7 @@ const formConfig = {
   defaultValues: {
     buyAmount: 0,
     sellAmount: 0,
-  },
+  } satisfies SwapFormSchema,
   onSubmit: ({
     value,
   }: {
@@ -37,11 +39,7 @@ const formConfig = {
     console.log(value);
   },
   validators: {
-    onChange: ({
-      value,
-    }: {
-      value: { buyAmount: number; sellAmount: number };
-    }) => swapFormSchema.parse(value),
+    onChange: swapFormSchema,
   },
 };
 
@@ -68,6 +66,7 @@ export function SwapForm() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 field.handleChange(Number(e.target.value))
               }
+              value={field.state.value}
             />
           )}
         </form.Field>
@@ -93,6 +92,7 @@ export function SwapForm() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 field.handleChange(e.target.valueAsNumber)
               }
+              value={field.state.value}
             />
           )}
         </form.Field>
