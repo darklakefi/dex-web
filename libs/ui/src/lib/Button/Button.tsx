@@ -62,7 +62,6 @@ type ButtonProps<
   trailingIcon?: IconName;
   leadingIcon?: IconName;
   icon?: IconName;
-  iconClassName?: string;
   loading?: boolean;
 } & TProps &
   VariantProps<typeof buttonVariants>;
@@ -104,7 +103,6 @@ export function Button<TElement extends React.ElementType>(
     trailingIcon,
     as = "button",
     icon,
-    iconClassName,
     className,
     ...restProps
   } = props;
@@ -133,7 +131,7 @@ export function Button<TElement extends React.ElementType>(
 
   const buttonChildren =
     icon && !text && !children
-      ? [<ButtonIcon className={iconClassName} icon={icon} key="icon-only" />]
+      ? [<ButtonIcon icon={icon} key="icon-only" />]
       : [
           LeadingIcon,
           children ??
