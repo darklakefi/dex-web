@@ -1,7 +1,9 @@
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import { defineConfig } from "vite";
 
 const baseConfig = {
   cacheDir: "../../node_modules/.vite/libs/utils",
+  plugins: [nxViteTsPaths()],
   root: __dirname,
 
   test: {
