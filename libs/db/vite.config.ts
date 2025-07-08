@@ -1,7 +1,9 @@
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import { defineConfig } from "vite";
 export default defineConfig(() => {
   const baseConfig = {
     cacheDir: "../../node_modules/.vite/libs/db",
+    plugins: [nxViteTsPaths()],
     root: __dirname,
     test: {
       coverage: {

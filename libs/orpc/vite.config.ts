@@ -1,9 +1,11 @@
 import { resolve } from "node:path";
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import { defineConfig } from "vite";
 
 export default defineConfig(() => {
   const baseConfig = {
     cacheDir: "../../node_modules/.vite/libs/orpc",
+    plugins: [nxViteTsPaths()],
     root: __dirname,
     test: {
       alias: {

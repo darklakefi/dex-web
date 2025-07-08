@@ -1,11 +1,12 @@
-import { Button, Header, Icon, Text } from "@dex-web/ui";
+import { Header, Icon, Text } from "@dex-web/ui";
 import { useTranslations } from "next-intl";
+import { AppHeaderButton } from "./AppHeaderButton";
 
 export const AppHeader = () => {
   const t = useTranslations("pages");
   return (
     <Header
-      button={<Button variant="primary">CONNECT WALLET</Button>}
+      button={<AppHeaderButton />}
       logoLg={<Icon className="h-6 w-auto stroke-none" name="logo-lg" />}
       logoSm={<Icon className="h-6 w-auto stroke-none" name="logo-sm" />}
     >

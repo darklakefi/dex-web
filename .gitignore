@@ -65,18 +65,21 @@ storybook-static
 
 # env
 .env
+.env.*
 !.env.example
 
 # Vercel
 
 .vercel
 
-# Devenv
-.devenv*
-devenv.local.nix
+# Nix & devenv
+result
 
-# direnv
-.direnv
+.devenv*
+.direnv*
+/.cache
+/.pre-commit-config.yaml
+man
 
 # pre-commit
 .pre-commit-config.yaml
