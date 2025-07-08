@@ -10,17 +10,12 @@ export function AppHeaderButton() {
   const { wallets } = useWallet();
   const firstConnectedWalletAdapter = getFirstConnectedWalletAdapter(wallets);
 
-  if (!firstConnectedWalletAdapter) {
-    return <ConnectWalletButton wallets={wallets} />;
-  }
-  const firstConnectedWalletAddress = getFirstConnectedWalletAddress(
-    firstConnectedWalletAdapter,
-  );
+  const firstConnectedWalletAddress = firstConnectedWalletAdapter
+    ? getFirstConnectedWalletAddress(firstConnectedWalletAdapter)
+    : null;
 
-  if (!firstConnectedWalletAddress) {
-    throw new Error(
-      `No wallet address found for ${firstConnectedWalletAdapter.name}`,
-    );
+  if (!firstConnectedWalletAddress || !firstConnectedWalletAdapter) {
+    return <ConnectWalletButton wallets={wallets} />;
   }
 
   return (
