@@ -48,25 +48,25 @@ export default async function Page({
         <section className="flex w-full items-start gap-1">
           <div className="size-9" />
           <Box className="mb-0 bg-green-800 pb-0">
-              <Hero
-                className="gap-4"
-                image="/images/waddles/pose4.png"
-                imageClassName="scale-x-[-1] "
-                imagePosition="end"
-              >
-                <div className="flex flex-col gap-3 uppercase">
-                  <Text.Heading>swap</Text.Heading>
-                  <div className="flex flex-col">
-                    <Text.Body2>ANTI-SANDWICH DEFENSE:</Text.Body2>
-                    <Text.Body2 className="text-green-300">
-                      Value preservation system active.
-                    </Text.Body2>
-                  </div>
+            <Hero
+              className="gap-4"
+              image="/images/waddles/pose4.png"
+              imageClassName="scale-x-[-1] "
+              imagePosition="end"
+            >
+              <div className="flex flex-col gap-3 uppercase">
+                <Text.Heading>swap</Text.Heading>
+                <div className="flex flex-col">
+                  <Text.Body2>ANTI-SANDWICH DEFENSE:</Text.Body2>
+                  <Text.Body2 className="text-green-300">
+                    Value preservation system active.
+                  </Text.Body2>
                 </div>
-              </Hero>
+              </div>
+            </Hero>
           </Box>
 
-            <div className="size-9" />
+          <div className="size-9" />
         </section>
         <section className="flex w-full max-w-xl items-start gap-1">
           <div className="size-9" />
