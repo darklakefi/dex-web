@@ -18,13 +18,7 @@
     "../../dist/**/*"
   ],
   "extends": "./tsconfig.json",
-  "include": [
-    "**/*.js",
-    "**/*.jsx",
-    "**/*.ts",
-    "**/*.tsx",
-    "dist/apps/web/types/**/*.ts"
-  ],
+  "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
   "references": [
     {
       "path": "../../libs/utils/tsconfig.lib.json"
