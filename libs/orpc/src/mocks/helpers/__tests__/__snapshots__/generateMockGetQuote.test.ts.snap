@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generateMockGetQuote > should generate a quote 1`] = `
+{
+  "amountOut": 921062,
+  "deadline": 655453,
+  "estimatedFee": 560177,
+  "estimatedFeesUsd": 325667,
+  "isXtoY": false,
+  "poolAddress": "ccd7af3a-e849-4d09-9540-b27b437b5e60",
+  "priceImpactPercentage": 81,
+  "rateXtoY": 1324,
+  "slippage": 34,
+  "tokenX": {
+    "address": "e78cf7a8-fe06-4d1d-9474-870c7f047dcc",
+    "symbol": "₡",
+    "value": "316153",
+  },
+  "tokenY": {
+    "address": "3e84bbe0-16cf-4629-810d-129a769ed8eb",
+    "symbol": "p.",
+    "value": "656865",
+  },
+  "userAddress": "1021e76f-dc65-4462-90bf-6098424d0676",
+}
+`;

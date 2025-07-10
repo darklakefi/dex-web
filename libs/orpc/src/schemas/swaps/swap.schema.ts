@@ -1,3 +1,4 @@
+import { SolanaAddressSchema } from "@dex-web/core";
 import { z } from "zod/v4";
 import { tokenSchema } from "../tokens/token.schema";
 
@@ -27,9 +28,7 @@ export const swapSchema = z.object({
     .regex(/^[1-9A-HJ-NP-Za-km-z]{87,88}$/, "Invalid transaction signature")
     .optional(),
   updatedAt: z.iso.datetime(),
-  userAddress: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, {
-    message: "Invalid Solana address",
-  }),
+  userAddress: SolanaAddressSchema,
 });
 
 export type Swap = z.infer<typeof swapSchema>;
