@@ -5,15 +5,10 @@ import {
   randUuid,
   seed,
 } from "@ngneat/falso";
-import type {
-  GetQuoteInput,
-  GetQuoteOutput,
-} from "../../schemas/swaps/getQuote.schema";
+import type { GetQuoteOutput } from "../../schemas/swaps/getQuote.schema";
 
-export function generateMockGetQuote(input: GetQuoteInput) {
-  seed(
-    `${input.amountIn.toString()}${input.isXtoY.toString()}${input.slippage.toString()}${input.tokenX}${input.tokenY}${input.poolAddress}`,
-  );
+export function generateMockGetQuote(randomSeed: string) {
+  seed(randomSeed);
 
   return {
     amountOut: randNumber({ max: 1000000, min: 1 }),

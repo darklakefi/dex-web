@@ -2,25 +2,25 @@
 
 exports[`generateMockGetQuote > should generate a quote 1`] = `
 {
-  "amountOut": 921062,
-  "deadline": 655453,
-  "estimatedFee": 560177,
-  "estimatedFeesUsd": 325667,
+  "amountOut": 236912,
+  "deadline": 301162,
+  "estimatedFee": 985399,
+  "estimatedFeesUsd": 48409,
   "isXtoY": false,
-  "poolAddress": "ccd7af3a-e849-4d09-9540-b27b437b5e60",
-  "priceImpactPercentage": 81,
-  "rateXtoY": 1324,
-  "slippage": 34,
+  "poolAddress": "4d21ea2c-6dbe-4336-85d5-44e7281d9e83",
+  "priceImpactPercentage": 31,
+  "rateXtoY": 558300,
+  "slippage": 35,
   "tokenX": {
-    "address": "e78cf7a8-fe06-4d1d-9474-870c7f047dcc",
+    "address": "e56c106d-ad74-46e4-8117-f4a3c0badcaa",
     "symbol": "₡",
-    "value": "316153",
+    "value": "57029",
   },
   "tokenY": {
-    "address": "3e84bbe0-16cf-4629-810d-129a769ed8eb",
-    "symbol": "p.",
-    "value": "656865",
+    "address": "21891745-26ce-447a-81ef-27d027a1fcfd",
+    "symbol": "B/.",
+    "value": "835757",
   },
-  "userAddress": "1021e76f-dc65-4462-90bf-6098424d0676",
+  "userAddress": "16d3adb8-944c-4693-adb5-408464766eb6",
 }
 `;

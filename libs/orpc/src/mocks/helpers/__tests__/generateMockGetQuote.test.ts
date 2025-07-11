@@ -1,15 +1,9 @@
+import { FIXED_SEED } from "../constants";
 import { generateMockGetQuote } from "../generateMockGetQuote";
 
 describe("generateMockGetQuote", () => {
   it("should generate a quote", () => {
-    const response = generateMockGetQuote({
-      amountIn: 100,
-      isXtoY: true,
-      poolAddress: "poolAddress",
-      slippage: 1,
-      tokenX: "tokenX",
-      tokenY: "tokenY",
-    });
+    const response = generateMockGetQuote(FIXED_SEED);
 
     expect(response).toMatchSnapshot();
     expect(response.tokenX).toBeDefined();
