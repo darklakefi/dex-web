@@ -6,7 +6,7 @@ describe("getTokenPriceHandler", () => {
     const input = {
       amount: 1,
       mint: "So11111111111111111111111111111111111111112",
-      quoteCurrency: "usd" as const,
+      quoteCurrency: "USD" as const,
     };
 
     const result = await getTokenPriceHandler(input);
@@ -14,7 +14,7 @@ describe("getTokenPriceHandler", () => {
     expect(result).toEqual({
       mint: "So11111111111111111111111111111111111111112",
       price: 150.25,
-      quoteCurrency: "usd",
+      quoteCurrency: "USD",
     });
   });
 });
