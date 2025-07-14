@@ -2,9 +2,10 @@
 
 import { tanstackClient } from "@dex-web/orpc";
 import { getTokensInputSchema } from "@dex-web/orpc/schemas";
-import { Box, Button, Modal, TextInput } from "@dex-web/ui";
-import { useDebouncedValue } from "@dex-web/utils";
+import { Box, Button, Modal, NoResultFound, TextInput } from "@dex-web/ui";
+import { pasteFromClipboard, useDebouncedValue } from "@dex-web/utils";
 import {
+  type AnyFieldApi,
   createFormHook,
   createFormHookContexts,
   useStore,
@@ -86,6 +87,12 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
     }),
   );
 
+  const handlePaste = (field: AnyFieldApi) => {
+    pasteFromClipboard((pasted) => {
+      field.handleChange(pasted.trim());
+    });
+  };
+
   return (
     <Modal onClose={() => router.push("/")}>
       <Box className="flex max-h-full w-full max-w-sm drop-shadow-xl">
@@ -96,7 +103,13 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
               className="shrink-0"
               label={
                 <>
-                  Search Token or <Button variant="secondary">Paste</Button>{" "}
+                  Search Token or{" "}
+                  <Button
+                    onClick={() => handlePaste(field)}
+                    variant="secondary"
+                  >
+                    Paste
+                  </Button>{" "}
                   Address
                 </>
               }
@@ -110,7 +123,11 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
         <Suspense
           fallback={<div className="h-32 animate-pulse rounded bg-green-600" />}
         >
-          <TokenList onSelect={handleSelect} tokens={data.tokens} />
+          {data.tokens.length > 0 ? (
+            <TokenList onSelect={handleSelect} tokens={data.tokens} />
+          ) : (
+            <NoResultFound className="py-20" search={debouncedQuery} />
+          )}
         </Suspense>
       </Box>
     </Modal>

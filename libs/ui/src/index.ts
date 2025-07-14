@@ -5,6 +5,7 @@ export { Header } from "./lib/Header/Header";
 export { Hero } from "./lib/Hero/Hero";
 export { Icon, type IconName } from "./lib/Icon/Icon";
 export { Modal } from "./lib/Modal/Modal";
+export { NoResultFound } from "./lib/NoResultFound/NoResultFound";
 export {
   NumericInput,
   type NumericInputProps,
