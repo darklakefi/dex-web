@@ -20,11 +20,11 @@ export function useFormatPrice(
   const { success, data: parsedData } = useFormatPriceSchema.safeParse({
     exchangeRate,
     quoteCurrency,
-    value,
+    value: Number(value),
   });
 
   if (!success) {
-    return "0.00";
+    return "$0.00";
   }
 
   const {
@@ -33,9 +33,7 @@ export function useFormatPrice(
     quoteCurrency: parsedQuoteCurrency,
   } = parsedData;
 
-  const valueAsBigDecimal = BigDecimal.unsafeFromString(
-    String(parsedValue ?? "0"),
-  );
+  const valueAsBigDecimal = BigDecimal.unsafeFromNumber(parsedValue);
   const exchangeRateAsBigDecimal = BigDecimal.unsafeFromString(
     String(parsedExchangeRate),
   );
