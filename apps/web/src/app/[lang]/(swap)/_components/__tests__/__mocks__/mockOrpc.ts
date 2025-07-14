@@ -4,6 +4,7 @@ import type {
   Swap,
   TokenAccount,
 } from "@dex-web/orpc/schemas";
+import type { GetTokenPriceOutput } from "@dex-web/orpc/schemas/tokens/getTokenPrice.schema";
 import { vi } from "vitest";
 import {
   DEFAULT_BUY_TOKEN,
@@ -91,6 +92,17 @@ export function mockOrpc() {
               value: "1000",
             } satisfies GetTokenDetailsOutput),
           queryKey: ["getTokenDetails"],
+        })),
+      },
+      getTokenPrice: {
+        queryOptions: vi.fn().mockImplementation(() => ({
+          queryFn: () =>
+            Promise.resolve({
+              mint: DEFAULT_BUY_TOKEN,
+              price: 100,
+              quoteCurrency: "USD",
+            } satisfies GetTokenPriceOutput),
+          queryKey: ["getTokenPrice"],
         })),
       },
       getTokens: {

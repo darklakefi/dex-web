@@ -10,9 +10,11 @@ import { SwapFormFieldset } from "./SwapFormFieldset";
 export const { fieldContext, formContext } = createFormHookContexts();
 
 const swapFormSchema = z.object({
-  buyAmount: z.number(),
-  sellAmount: z.number(),
+  buyAmount: z.number().nonnegative(),
+  sellAmount: z.number().nonnegative(),
 });
+
+type SwapFormSchema = z.infer<typeof swapFormSchema>;
 
 const { useAppForm } = createFormHook({
   fieldComponents: {
@@ -28,7 +30,7 @@ const formConfig = {
   defaultValues: {
     buyAmount: 0,
     sellAmount: 0,
-  },
+  } satisfies SwapFormSchema,
   onSubmit: ({
     value,
   }: {
@@ -37,11 +39,7 @@ const formConfig = {
     console.log(value);
   },
   validators: {
-    onChange: ({
-      value,
-    }: {
-      value: { buyAmount: number; sellAmount: number };
-    }) => swapFormSchema.parse(value),
+    onChange: swapFormSchema,
   },
 };
 
@@ -68,6 +66,7 @@ export function SwapForm() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 field.handleChange(Number(e.target.value))
               }
+              value={field.state.value}
             />
           )}
         </form.Field>
@@ -91,8 +90,9 @@ export function SwapForm() {
               name={field.name}
               onBlur={field.handleBlur}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                field.handleChange(e.target.valueAsNumber)
+                field.handleChange(Number(e.target.value))
               }
+              value={field.state.value}
             />
           )}
         </form.Field>
