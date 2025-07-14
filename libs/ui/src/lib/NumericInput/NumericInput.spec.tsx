@@ -14,7 +14,7 @@ describe("NumericInput", () => {
   it("should render successfully with padding and background explicitly set", () => {
     render(<NumericInput placeholder="First Name" />);
 
-    const inputElement = screen.getAllByRole("textbox")[0];
+    const inputElement = screen.getAllByRole("spinbutton")[0];
     expect(inputElement).toBeTruthy();
     expect(inputElement).toHaveClass("bg-green-600");
   });
