@@ -43,6 +43,6 @@ describe("TokenList", () => {
       .filter((button) => button.textContent?.includes("SOL"))[0];
     expect(button).toBeInTheDocument();
     button && fireEvent.click(button);
-    expect(onSelect).toHaveBeenCalledWith(tokens[0]?.address);
+    expect(onSelect).toHaveBeenCalledWith(tokens[0]);
   });
 });
