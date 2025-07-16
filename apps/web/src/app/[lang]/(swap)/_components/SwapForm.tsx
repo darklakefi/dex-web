@@ -47,7 +47,7 @@ export function SwapForm() {
   const form = useAppForm(formConfig);
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <Box background="highlight" className="flex-row">
         <div>
           <Text.Body2

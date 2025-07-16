@@ -20,7 +20,7 @@ export function SwapButton() {
 
   return (
     <button
-      className="inline-flex items-center justify-center border border-green-600 bg-green-800 text-green-300 hover:border-green-500 hover:text-green-200 focus:border-green-400 focus:text-green-200"
+      className="inline-flex cursor-pointer items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300 hover:border-green-500 hover:text-green-200 focus:border-green-400 focus:text-green-200"
       onClick={handleClick}
       type="button"
     >
