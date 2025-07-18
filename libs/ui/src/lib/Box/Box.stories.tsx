@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "@storybook/test";
 import { Box } from "./Box";
+
 const meta = {
   component: Box,
   title: "Box",
@@ -12,9 +13,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Default = {
   args: {
-    children: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     background: "base",
+    children: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     padding: "md",
+    shadow: "sm",
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -28,8 +30,9 @@ export const Default = {
 
 export const Highlight = {
   args: {
-    children: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     background: "highlight",
+    children: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     padding: "md",
+    shadow: "xl",
   },
 } satisfies Story;

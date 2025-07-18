@@ -1,13 +1,58 @@
 {
-  "name": "web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "targets": {
-    "lint": {
-      "command": "biome check  --write --config-path=apps/web/biome.json --verbose apps/web/**/*",
-      "cache": true
-    }
-  },
-  "sourceRoot": "apps/web/src",
+  "name": "web",
   "projectType": "application",
-  "tags": []
+  "sourceRoot": "apps/web/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "defaultConfiguration": "production",
+      "executor": "@nx/next:build",
+      "options": {
+        "outputPath": "apps/web/dist"
+      },
+      "outputs": ["{options.outputPath}"]
+    },
+
+    "serve": {
+      "configurations": {
+        "development": {
+          "buildTarget": "web:build:development",
+          "dev": true,
+          "turbo": true
+        }
+      },
+      "defaultConfiguration": "development",
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "web:build",
+        "dev": true,
+        "turbo": true
+      }
+    },
+    "start": {
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "web:build:production",
+        "dev": false
+      }
+    },
+    "test": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "executor": "@nx/vite:test",
+      "inputs": [
+        "default",
+        "^production",
+        {
+          "externalDependencies": ["vitest", "@vitest/ui", "happy-dom"]
+        }
+      ],
+      "options": {
+        "config": "apps/web/vite.config.ts",
+        "reportsDirectory": "../../coverage/apps/web"
+      },
+      "outputs": ["{options.reportsDirectory}"]
+    }
+  }
 }

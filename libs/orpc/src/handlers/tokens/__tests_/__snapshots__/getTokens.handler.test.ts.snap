@@ -1,0 +1,80 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`getTokensHandler > should return a list of assets 1`] = `
+{
+  "hasMore": true,
+  "tokens": [
+    {
+      "address": "12mcpYL84oMi8Hiinyjuv2Zq3F47tLLxjw1THLcAdKT2",
+      "imageUrl": "https://bafybeidbzidjhf5wo2l2dljjgbcozxwafwdgsfjzzmt2zwcketodzzqdfa.ipfs.cf-ipfs.com/",
+      "name": "giggleched",
+      "symbol": "ched",
+      "value": "12mcpYL84oMi8Hiinyjuv2Zq3F47tLLxjw1THLcAdKT2",
+    },
+    {
+      "address": "1F1sRpidpKBQjmCnHAu8vJpmktLVK3ZjKyxVwEy8XpC",
+      "imageUrl": "https://cf-ipfs.com/ipfs/QmVNexv8GWNZ39We31Wk9fHZN2Aeu3HLmRn6KgAXC7qJAc",
+      "name": "SolGen",
+      "symbol": "GEN",
+      "value": "1F1sRpidpKBQjmCnHAu8vJpmktLVK3ZjKyxVwEy8XpC",
+    },
+    {
+      "address": "21BTCo9hWHjGYYUQQLqjLgDBxjcn8vDt4Zic7TB3UbNE",
+      "imageUrl": "https://cdn.onyx.21.co/images/tokens/21BTC.png",
+      "name": "21.co Wrapped Bitcoin",
+      "symbol": "21BTC",
+      "value": "21BTCo9hWHjGYYUQQLqjLgDBxjcn8vDt4Zic7TB3UbNE",
+    },
+    {
+      "address": "21kbezaCxz9dG2NtXp7pW1hAmtKe6ykiJkeT1EiGXDyY",
+      "imageUrl": "https://i.imgur.com/KPPBoDB.png",
+      "name": "Exiled Dust Protocol",
+      "symbol": "EDUST",
+      "value": "21kbezaCxz9dG2NtXp7pW1hAmtKe6ykiJkeT1EiGXDyY",
+    },
+    {
+      "address": "22513u2QwiY6xaJn7nVFWGKy3aBdw6WfZsRPW2RRtCKj",
+      "imageUrl": "https://cf-ipfs.com/ipfs/Qmdh9Jz5SEPKeRSmTu7Ey3BnFEqAPtGZ9nM6qKceJhk1Jv",
+      "name": "Hunter Boden",
+      "symbol": "HuntBoden",
+      "value": "22513u2QwiY6xaJn7nVFWGKy3aBdw6WfZsRPW2RRtCKj",
+    },
+    {
+      "address": "24a1k6wSDQUSwoRXJyvkr25kF5do8f6Ddff6A2fTc1pM",
+      "imageUrl": "https://arweave.net/7Qzb-BKL734z8w77fPNJ8lu3f6TtA87nbiw2A-qmCK0",
+      "name": "BEAR",
+      "symbol": "$BEAR",
+      "value": "24a1k6wSDQUSwoRXJyvkr25kF5do8f6Ddff6A2fTc1pM",
+    },
+    {
+      "address": "25hAyBQfoDhfWx9ay6rarbgvWGwDdNqcHsXS3jQ3mTDJ",
+      "imageUrl": "https://img.fotofolio.xyz/?url=https%3A%2F%2Fi.ibb.co%2FJnz56gp%2FManeki-PFP.png",
+      "name": "MANEKI",
+      "symbol": "MANEKI",
+      "value": "25hAyBQfoDhfWx9ay6rarbgvWGwDdNqcHsXS3jQ3mTDJ",
+    },
+    {
+      "address": "25p2BoNp6qrJH5As6ek6H7Ei495oSkyZd3tGb97sqFmH",
+      "imageUrl": "https://img.fotofolio.xyz/?url=https%3A%2F%2Fcf-ipfs.com%2Fipfs%2FQmW1VaQ31oKGUeRnXiohvrZXzu1ETBWK3rM4haVYnfShXo",
+      "name": "SolBastard",
+      "symbol": "soba",
+      "value": "25p2BoNp6qrJH5As6ek6H7Ei495oSkyZd3tGb97sqFmH",
+    },
+    {
+      "address": "25yPcyqSpSv8T2JWyoKKRiU622Sr7LoMk9S3FmuBFt8S",
+      "imageUrl": "https://img-cdn.magiceden.dev/rs:fill:400:400:0:0/plain/https://creator-hub-prod.s3.us-east-2.amazonaws.com/gmers_pfp_1662860639809.png",
+      "name": "GMers",
+      "symbol": "GMERS",
+      "value": "25yPcyqSpSv8T2JWyoKKRiU622Sr7LoMk9S3FmuBFt8S",
+    },
+    {
+      "address": "26KMQVgDUoB6rEfnJ51yAABWWJND8uMtpnQgsHQ64Udr",
+      "imageUrl": "https://bafkreidnhl3agzjkay3ljojmvwid72amoumqftgaw7lks2keg27ph3efsu.ipfs.nftstorage.link",
+      "name": "SAD HAMSTER",
+      "symbol": "HAMMY",
+      "value": "26KMQVgDUoB6rEfnJ51yAABWWJND8uMtpnQgsHQ64Udr",
+    },
+  ],
+  "total": 1497,
+}
+`;

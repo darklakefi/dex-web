@@ -1,0 +1,46 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "core",
+  "projectType": "library",
+  "sourceRoot": "libs/core/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
+      },
+      "defaultConfiguration": "production",
+      "executor": "@nx/esbuild:esbuild",
+
+      "options": {
+        "assets": [
+          {
+            "glob": "libs/core/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ],
+
+        "format": ["cjs"],
+        "main": "libs/core/src/index.ts",
+        "outputFileName": "main.js",
+        "outputPath": "dist/libs/core",
+        "tsConfig": "libs/core/tsconfig.lib.json"
+      },
+      "outputs": ["{options.outputPath}"]
+    },
+    "test": {
+      "cache": true,
+      "executor": "@nx/vite:test",
+      "options": {
+        "reportsDirectory": "../../coverage/libs/core"
+      },
+      "outputs": ["{options.reportsDirectory}"]
+    }
+  }
+}

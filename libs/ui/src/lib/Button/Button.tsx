@@ -1,8 +1,10 @@
-import { type VariantProps, cva } from "class-variance-authority";
-import { twMerge } from "tailwind-merge";
+"use client";
 
+import { cva, type VariantProps } from "class-variance-authority";
+import React from "react";
+import { twMerge } from "tailwind-merge";
 import { Icon, type IconName } from "../Icon/Icon";
-import Text from "../Text/Text";
+import { Text } from "../Text/Text";
 
 export enum ButtonVariantEnum {
   Primary = "primary",
@@ -12,75 +14,97 @@ export enum ButtonVariantEnum {
 }
 
 const buttonVariants = cva(
-  "outline-offset-1 focus:outline-2 focus:outline-solid",
+  [
+    "inline-flex items-center justify-center gap-2",
+    "font-medium uppercase leading-none",
+    "outline-offset-1 focus:outline-2 focus:outline-solid",
+    "transition-colors duration-200",
+    "disabled:cursor-not-allowed disabled:opacity-50",
+    "[&>*]:flex [&>*]:items-center [&>*]:leading-none",
+  ],
   {
+    defaultVariants: {
+      size: "md",
+      variant: "primary",
+    },
     variants: {
+      loading: {
+        true: "cursor-progress opacity-50",
+      },
+      size: {
+        icon: "w-fit p-2.5",
+        lg: "px-4 py-2 text-lg",
+        md: "px-3 py-1.5",
+        sm: "px-2 py-1 text-sm",
+      },
       variant: {
         primary:
-          "bg-green-100 px-3 py-1.5 text-green-700 hover:bg-green-200 focus:outline-blue-400",
+          "bg-green-100 text-green-700 hover:bg-green-200 focus:outline-white",
         "primary-dark":
-          "bg-green-700 px-3 py-1.5 text-green-100 hover:bg-green-600 focus:outline-blue-400",
+          "bg-green-700 text-green-100 hover:bg-green-600 focus:outline-white",
         secondary:
-          "bg-green-500 px-3 py-1.5 text-green-200 hover:text-green-100 focus:text-green-100 focus:outline-blue-400",
+          "bg-green-500 text-green-200 hover:text-green-100 focus:text-green-100 focus:outline-white",
         tertiary:
-          "px-1.5 text-green-300 hover:text-green-200 focus:text-green-200 focus:outline-blue-400",
+          "text-green-300 hover:text-green-200 focus:text-green-200 focus:outline-white",
       },
-      disabled: {
-        true: "cursor-not-allowed opacity-50",
-        false: "cursor-pointer",
-      },
-    },
-    defaultVariants: {
-      disabled: false,
     },
   },
 );
 
-type ButtonPropsVariantProps = VariantProps<typeof buttonVariants>;
-
-interface ButtonProps
-  extends ButtonPropsVariantProps,
-    React.ComponentProps<"button"> {
+type ButtonProps<
+  TElement extends React.ElementType,
+  TProps extends
+    React.ComponentProps<TElement> = React.ComponentProps<TElement>,
+> = {
+  as?: React.ElementType;
   text?: string;
   disabled?: boolean;
-  isLoading?: boolean;
-  trailingIcon?: React.ReactNode | IconName;
-  leadingIcon?: React.ReactNode | IconName;
-  icon?: React.ReactNode | IconName;
-}
-
-type VariantButtonProps = Omit<ButtonProps, "variant">;
+  trailingIcon?: IconName;
+  leadingIcon?: IconName;
+  icon?: IconName;
+  loading?: boolean;
+} & TProps &
+  VariantProps<typeof buttonVariants>;
 
 const ButtonIcon = ({ icon }: { icon: React.ReactNode | IconName }) => {
-  return <Icon name={icon as IconName} className="size-4 text-inherit" />;
+  return <Icon className="size-4 text-inherit" name={icon as IconName} />;
 };
 
 const LoadingIcon = () => {
   return (
-    <Icon name="loading-stripe" className="size-4 animate-spin text-inherit" />
+    <Icon
+      className="size-4 animate-spin-pause text-inherit"
+      name="loading-stripe"
+    />
   );
 };
 
-export const Button: React.FC<ButtonProps> & {
-  Primary: React.FC<VariantButtonProps>;
-  PrimaryDark: React.FC<VariantButtonProps>;
-  Secondary: React.FC<VariantButtonProps>;
-  Tertiary: React.FC<VariantButtonProps>;
-} = ({
-  variant,
-  text,
-  disabled,
-  isLoading,
-  children,
-  leadingIcon,
-  trailingIcon,
-  icon,
-  ...props
-}) => {
+export function Button<TElement extends React.ElementType>(
+  props: ButtonProps<TElement>,
+) {
+  const {
+    size,
+    variant,
+    text,
+    loading,
+    children,
+    leadingIcon,
+    trailingIcon,
+    as = "button",
+    icon,
+    className,
+    ...restProps
+  } = props;
+
   const TextComponent =
     variant === ButtonVariantEnum.Tertiary ? Text.Link : Text.Body2;
+  const ButtonComponent = as;
 
-  const LeadingIcon = isLoading ? (
+  if (!ButtonComponent) {
+    throw new Error(`Invalid component type: ${as}`);
+  }
+
+  const LeadingIcon = loading ? (
     <LoadingIcon />
   ) : leadingIcon ? (
     <ButtonIcon icon={leadingIcon} />
@@ -88,52 +112,34 @@ export const Button: React.FC<ButtonProps> & {
 
   const TrailingIcon = trailingIcon ? <ButtonIcon icon={trailingIcon} /> : null;
 
-  const isDisabled = isLoading || disabled;
-
-  const className = twMerge(
-    buttonVariants({ variant, disabled: isDisabled }),
+  const mergedClassName = twMerge(
+    buttonVariants({ loading, size, variant }),
     TrailingIcon || LeadingIcon ? "flex items-center justify-center gap-2" : "",
+    className,
   );
 
-  if (icon && !text && !children) {
-    return (
-      <button
-        className={twMerge(className, "w-fit p-2.5")}
-        disabled={isDisabled}
-        {...props}
-      >
-        <ButtonIcon icon={icon} />
-      </button>
-    );
-  }
+  const buttonChildren =
+    icon && !text && !children
+      ? [<ButtonIcon icon={icon} key="icon-only" />]
+      : [
+          LeadingIcon,
+          children ??
+            (text && (
+              <TextComponent className="text-inherit" key="text">
+                {text}
+              </TextComponent>
+            )),
+          TrailingIcon,
+        ].filter(Boolean);
 
-  return (
-    <button className={className} disabled={isDisabled} {...props}>
-      {LeadingIcon}
-      {children
-        ? children
-        : text && (
-            <TextComponent className="text-inherit">{text}</TextComponent>
-          )}
-      {TrailingIcon}
-    </button>
-  );
-};
+  const elementProps = {
+    className:
+      icon && !text && !children
+        ? twMerge(mergedClassName, "w-fit p-2.5")
+        : mergedClassName,
+    loading,
+    ...restProps,
+  };
 
-Button.Primary = (props) => {
-  return <Button variant={ButtonVariantEnum.Primary} {...props} />;
-};
-
-Button.PrimaryDark = (props) => {
-  return <Button variant={ButtonVariantEnum.PrimaryDark} {...props} />;
-};
-
-Button.Secondary = (props) => {
-  return <Button variant={ButtonVariantEnum.Secondary} {...props} />;
-};
-
-Button.Tertiary = (props) => {
-  return <Button variant={ButtonVariantEnum.Tertiary} {...props} />;
-};
-
-export default Button;
+  return React.createElement(ButtonComponent, elementProps, ...buttonChildren);
+}

@@ -15,20 +15,7 @@ const baseURL = process.env.BASE_URL || "http://localhost:3000";
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  ...nxE2EPreset(__filename, { testDir: "./src" }),
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    baseURL,
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: "on-first-retry",
-  },
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: "pnpm exec nx run web:start",
-    url: "http://localhost:3000",
-    reuseExistingServer: true,
-    cwd: workspaceRoot,
-  },
+  ...nxE2EPreset(__filename, { testDir: "./e2e" }),
   projects: [
     {
       name: "chromium",
@@ -65,4 +52,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     } */
   ],
+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  use: {
+    baseURL,
+    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    trace: "on-first-retry",
+  },
+  /* Run your local dev server before starting the tests */
+  webServer: {
+    command: "npx nx serve web --port=3000",
+    cwd: workspaceRoot,
+    reuseExistingServer: true,
+    url: "http://localhost:3000",
+  },
 });

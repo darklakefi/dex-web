@@ -1,42 +1,336 @@
 version: 2.1
 
 orbs:
-  nx: nrwl/nx@1.6.2
+  nx: nrwl/nx@1.7.0
+  node: circleci/node@7.1.0
+
+commands:
+  restore-nx-cache:
+    description: "Restore Nx cache with enhanced fallback"
+    steps:
+      - restore_cache:
+          name: Restore Nx Cache
+          keys:
+            - nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
+            - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
+            - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}
+            - nx-cache-{{ .Branch }}-
+            - nx-cache-
+
+  setup-nx:
+    description: "Set up Nx SHAs for affected detection"
+    steps:
+      - nx/set-shas:
+          main-branch-name: "develop"
+
+  save-nx-cache:
+    description: "Save Nx cache with revision-specific key"
+    steps:
+      - save_cache:
+          name: Save Nx Cache
+          key: nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
+          paths:
+            - .nx/cache
+            - node_modules/.cache/nx
+
+  restore-vercel-cache:
+    description: "Restore Vercel build cache"
+    steps:
+      - restore_cache:
+          name: Restore Vercel Cache
+          keys:
+            - vercel-cache-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}
+            - vercel-cache-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
+            - vercel-cache-{{ .Branch }}-
+
+  save-vercel-cache:
+    description: "Save Vercel build cache"
+    steps:
+      - save_cache:
+          name: Save Vercel Cache
+          key: vercel-cache-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}
+          paths:
+            - .vercel
+            - .next/cache
+
+  setup:
+    description: "Common setup steps for all jobs"
+    steps:
+      - node/install:
+          install-pnpm: true
+          pnpm-version: 10.12.4
+
+      - node/install-packages:
+          pkg-manager: pnpm
+          cache-path: ~/.pnpm-store
 
 jobs:
-  main:
+  check:
     docker:
-      - image: cimg/node:lts-browsers
+      - image: cimg/node:lts
+    resource_class: medium
     steps:
       - checkout
-      
+      - setup
+      - setup-nx
+      - restore-nx-cache
       - run:
-          name: Install PNPM
-          command: npm install --prefix=$HOME/.local -g pnpm@8
-      
-      
+          name: Run affected tasks
+          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint:ci,typecheck
+      - save-nx-cache
 
+  test:
+    docker:
+      - image: cimg/node:lts
+    resource_class: large
+    parallelism: 4
+    steps:
+      - checkout
+      - setup
+      - setup-nx
+      - restore-nx-cache
+      - run:
+          name: Run affected tests in parallel
+          command: |
+            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD \
+              --target=test --parallel --maxParallel=${CIRCLE_NODE_TOTAL}
+      - save-nx-cache
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+          destination: junit
 
-      # This enables task distribution via Nx Cloud
-      # Run this command as early as possible, before dependencies are installed
-      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      # Uncomment this line to enable task distribution
-      # - run: pnpm dlx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
+  e2e:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.53.1-noble
+    resource_class: large
+    parallelism: 2
+    steps:
+      - checkout
+      - setup
+      - setup-nx
+      - restore-nx-cache
+      - run:
+          name: Run affected e2e tests
+          command: |
+            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD --target=e2e --parallel --max-parallel=2
+      - save-nx-cache
+      - store_test_results:
+          path: dist/apps/web-e2e/junit.xml
+      - store_artifacts:
+          path: dist/apps/web-e2e/html-report
+          destination: playwright-report
 
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps
-      - nx/set-shas:
-          main-branch-name: 'main'
+  chromatic:
+    docker:
+      - image: cimg/node:lts
+    resource_class: medium
+    environment:
+      CI: true
+    steps:
+      - checkout
+      - setup
+      - setup-nx
+      - restore-nx-cache
+      - run:
+          name: Run Chromatic
+          command: cd libs/ui && npx chromatic
+      - save-nx-cache
 
-      # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
-      # - run: pnpm exec nx-cloud record -- echo Hello World
-      # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
-      # When you enable task distribution, run the e2e-ci task instead of e2e
-      - run: pnpm exec nx affected -t lint test build e2e
+  deploy-preview:
+    docker:
+      - image: cimg/node:lts
+    resource_class: small
+    steps:
+      - checkout
+      - setup
+      - restore-vercel-cache
+      - run:
+          name: Pull Vercel Environment Information
+          command: npx vercel@latest pull --yes --environment=preview --token=$VERCEL_TOKEN
+      - run:
+          name: Build Project
+          command: npx vercel@latest build --token=$VERCEL_TOKEN
+      - run:
+          name: Deploy Project Artifacts to Vercel
+          command: |
+            VERCEL_URL=$(npx vercel@latest deploy --token=$VERCEL_TOKEN)
+            if [[ ! "$VERCEL_URL" =~ ^https?:// ]]; then
+              echo "Invalid Vercel URL received: $VERCEL_URL"
+              exit 1
+            fi
+            echo "export VERCEL_URL=$VERCEL_URL" >> $BASH_ENV
+      - run:
+          name: Create GitHub Deployment & Status
+          command: |
+            set -e
+
+            if [ -z "$GITHUB_TOKEN" ]; then
+              echo "⚠️  GITHUB_TOKEN not set, skipping GitHub integration"
+              exit 0
+            fi
+
+            if [ -z "$VERCEL_URL" ]; then
+              echo "❌ VERCEL_URL not set, cannot create deployment"
+              exit 1
+            fi
+
+            if [[ ! "$VERCEL_URL" =~ ^https?:// ]]; then
+              echo "❌ Invalid Vercel URL format: $VERCEL_URL"
+              exit 1
+            fi
+
+            REPO_OWNER="darklakefi"
+            REPO_NAME="dex-web"
+            COMMIT_SHA="$CIRCLE_SHA1"
+
+            echo "🚀 Creating GitHub deployment for commit: $COMMIT_SHA"
+            echo "📁 Repository: $REPO_OWNER/$REPO_NAME"
+            echo "🔗 Preview URL: $VERCEL_URL"
+
+            DEPLOYMENT_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/deployments \
+              -d '{
+                "ref": "'$COMMIT_SHA'",
+                "environment": "preview",
+                "auto_merge": false,
+                "required_contexts": []
+              }')
+
+            HTTP_STATUS=$(echo $DEPLOYMENT_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+            DEPLOYMENT_BODY=$(echo $DEPLOYMENT_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')
+
+            if [ "$HTTP_STATUS" -ne 201 ]; then
+              echo "❌ Failed to create deployment. HTTP Status: $HTTP_STATUS"
+              echo "Response: $DEPLOYMENT_BODY"
+              exit 1
+            fi
+
+            DEPLOYMENT_ID=$(echo $DEPLOYMENT_BODY | jq -r '.id')
+            echo "✅ Deployment created (ID: $DEPLOYMENT_ID)"
+
+            STATUS_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/deployments/$DEPLOYMENT_ID/statuses \
+              -d '{
+                "state": "success",
+                "environment_url": "'$VERCEL_URL'",
+                "description": "Preview deployment ready"
+              }')
+
+            STATUS_HTTP=$(echo $STATUS_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+
+            if [ "$STATUS_HTTP" -ne 201 ]; then
+              echo "⚠️  Failed to update deployment status. HTTP Status: $STATUS_HTTP"
+              echo "Response: $(echo $STATUS_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')"
+            else
+              echo "✅ Deployment status updated"
+            fi
+
+            CHECK_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/statuses/$COMMIT_SHA \
+              -d '{
+                "state": "success",
+                "target_url": "'$VERCEL_URL'",
+                "description": "Preview ready",
+                "context": "deploy/preview"
+              }')
+
+            CHECK_HTTP=$(echo $CHECK_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+
+            if [ "$CHECK_HTTP" -ne 201 ]; then
+              echo "⚠️  Failed to create status check. HTTP Status: $CHECK_HTTP"
+              echo "Response: $(echo $CHECK_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')"
+            else
+              echo "✅ Status check created for deploy/preview context"
+            fi
+
+            echo "🎉 GitHub integration completed successfully!"
+
+  deploy-production:
+    docker:
+      - image: cimg/node:lts
+    resource_class: medium
+    steps:
+      - checkout
+      - setup
+      - restore-vercel-cache
+      - run:
+          name: Plan production deployment
+          command: circleci run release plan --target-version=production-$CIRCLE_SHA1 --environment-name=production --component-name=dex-web
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update --status=running
+      - run:
+          name: Pull Vercel Environment Information
+          command: npx vercel@latest pull --yes --environment=production --token=$VERCEL_TOKEN
+      - run:
+          name: Build Project
+          command: npx vercel@latest build --prod --token=$VERCEL_TOKEN
+      - run:
+          name: Deploy Project Artifacts to Vercel
+          command: npx vercel@latest deploy --prod --token=$VERCEL_TOKEN
+      - run:
+          name: Create GitHub Production Deployment
+          command: |
+            if [ -n "$GITHUB_TOKEN" ]; then
+              curl -s -X POST \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments \
+                -d '{
+                  "ref": "'$CIRCLE_SHA1'",
+                  "environment": "production",
+                  "auto_merge": false,
+                  "required_contexts": []
+                }' | jq -r '.id' | xargs -I {} curl -s -X POST \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments/{}/statuses \
+                -d '{"state": "success", "description": "Production deployment successful"}'
+            fi
+      - run:
+          name: Update deployment status to SUCCESS
+          command: circleci run release update --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to FAILED
+          command: circleci run release update --status=FAILED
+          when: on_fail
+      - save-vercel-cache
 
 workflows:
-  version: 2
-
-  ci:
+  ci-cd:
     jobs:
-      - main
+      - check
+      - test
+      - e2e:
+          requires:
+            - check
+            - test
+      - chromatic:
+          requires:
+            - check
+            - test
+      - deploy-preview:
+          requires:
+            - check
+            - test
+          filters:
+            branches:
+              ignore: /main/
+      - deploy-production:
+          requires:
+            - check
+            - test
+            - e2e
+            - chromatic
+          filters:
+            branches:
+              only: /main/

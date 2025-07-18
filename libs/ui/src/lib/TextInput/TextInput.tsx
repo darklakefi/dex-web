@@ -1,11 +1,12 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";
+import { Icon, type IconName } from "../Icon/Icon";
 
 const textInputVariants = cva(
-  "peer flex py-2 pr-2 pl-6 placeholder-transparent caret-green-300 focus:outline-none focus:ring-2 focus:ring-blue-200",
+  "peer flex w-full py-2 pr-2 pl-8 placeholder-transparent caret-green-300 focus:outline-none focus:ring-2 focus:ring-blue-200",
   {
-    variants: {},
     defaultVariants: {},
+    variants: {},
   },
 );
 
@@ -14,7 +15,8 @@ type TextInputVariants = VariantProps<typeof textInputVariants>;
 interface TextInputProps
   extends React.InputHTMLAttributes<HTMLInputElement>,
     TextInputVariants {
-  label: string;
+  label: React.ReactNode;
+  leadingIcon?: IconName;
 }
 
 /**
@@ -26,23 +28,44 @@ export function TextInput({
   value,
   name,
   label,
+  placeholder,
+  leadingIcon,
+  className,
   ...props
 }: TextInputProps) {
+  const prefix = leadingIcon ? (
+    <span className="flex h-6 items-center justify-center">
+      <Icon className="size-4" name={leadingIcon} />
+    </span>
+  ) : (
+    "> "
+  );
   return (
-    <label className="relative inline-flex items-center border border-green-300 bg-green-600 font-sans text-green-300 text-lg/4xl">
-      <span className="absolute top-0 left-0 py-2 pl-2">{"> "}</span>
+    <label
+      className={twMerge(
+        "relative inline-flex items-center gap-2 border border-green-300 bg-green-600 font-sans text-green-300 text-lg/4xl",
+        className,
+      )}
+    >
+      <span className="absolute top-0 left-0 p-2">{prefix}</span>
       <input
-        onChange={onChange}
-        value={value}
-        name={name}
-        placeholder={label}
         className={twMerge(
           textInputVariants(),
           !value ? "caret-transparent" : "",
         )}
+        name={name}
+        onChange={onChange}
+        placeholder={
+          placeholder
+            ? placeholder
+            : typeof label === "string"
+              ? label
+              : undefined
+        }
+        value={value}
         {...props}
       />
-      <span className="invisible absolute top-2 left-6 text-green-300 peer-placeholder-shown:visible peer-focus:text-green-400 peer-active:text-green-400">
+      <span className="invisible absolute top-0 left-8 inline-flex h-full items-center justify-start gap-2 text-green-300 uppercase peer-placeholder-shown:visible peer-focus:text-green-400 peer-active:text-green-400">
         {label}
       </span>
     </label>

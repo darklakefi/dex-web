@@ -1,47 +1,73 @@
+import { join } from "node:path";
 import { withNx } from "@nx/next";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
-const nextConfig: NextConfig = {
+const withNextIntl = createNextIntlPlugin();
+
+const nextConfig = {
+  distDir: "dist/apps/web",
   experimental: {
+    reactCompiler: true,
     typedRoutes: true,
+  },
+  images: {
+    unoptimized: false,
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
+      hmrRefreshes: true,
+    },
   },
   nx: {
     svgr: false,
   },
-
-  images: {
-    unoptimized: false,
-  },
-  webpack: (config) => {
-    const fileLoaderRule = config.module.rules.find((rule) =>
-      rule.test?.test?.(".svg"),
-    );
-
-    config.module.rules.push(
-      {
-        ...fileLoaderRule,
-        test: /\.svg$/i,
-        resourceQuery: /url/, // *.svg?url
-      },
-      {
-        test: /\.svg$/i,
-        issuer: fileLoaderRule.issuer,
-        resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] }, // exclude if *.svg?url
-        use: [
+  outputFileTracingRoot: join(__dirname, "../../"),
+  serverExternalPackages: ["pg"],
+  turbopack: {
+    rules: {
+      "*.svg": {
+        as: "*.js",
+        loaders: [
           {
             loader: "@svgr/webpack",
             options: {
+              icon: true,
               typescript: true,
-              dimensions: false,
             },
           },
         ],
       },
-    );
-    fileLoaderRule.exclude = /\.svg$/i;
+    },
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+    tsconfigPath: "./tsconfig.lib.json",
+  },
 
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        child_process: false,
+        dns: false,
+        fs: false,
+        http: false,
+        https: false,
+        net: false,
+        os: false,
+        pg: false,
+        "pg-native": false,
+        tls: false,
+      };
+    }
+    config.module.rules.push({
+      test: /\.svg$/i,
+      use: ["@svgr/webpack"],
+    });
     return config;
   },
-};
+} satisfies NextConfig;
 
-export default withNx(nextConfig);
+export default withNx(withNextIntl(nextConfig));

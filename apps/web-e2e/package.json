@@ -1,5 +1,14 @@
 {
+  "devDependencies": {
+    "@dex-web/orpc": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
   "name": "web-e2e",
-  "version": "0.0.1",
-  "private": true
+  "private": true,
+  "version": "0.0.1"
 }

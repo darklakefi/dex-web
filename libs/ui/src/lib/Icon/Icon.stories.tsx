@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Icon } from "./Icon";
+
 const meta = {
   component: Icon,
   title: "Icon",
@@ -13,20 +14,6 @@ export const Analytics = {
   args: {
     name: "analytics",
     title: "Analytics",
-  },
-} satisfies Story;
-
-export const CheckboxEmpty = {
-  args: {
-    name: "checkbox-empty",
-    title: "Checkbox Empty",
-  },
-} satisfies Story;
-
-export const CheckboxFilled = {
-  args: {
-    name: "checkbox-filled",
-    title: "Checkbox Filled",
   },
 } satisfies Story;
 
@@ -97,5 +84,19 @@ export const X = {
   args: {
     name: "x",
     title: "X",
+  },
+} satisfies Story;
+
+export const Refresh = {
+  args: {
+    name: "refresh",
+    title: "Refresh",
+  },
+} satisfies Story;
+
+export const Cog = {
+  args: {
+    name: "cog",
+    title: "Cog",
   },
 } satisfies Story;

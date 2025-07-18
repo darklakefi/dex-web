@@ -1,10 +1,20 @@
 {
-  "name": "@dex-fe-web/web",
-  "version": "0.0.1",
-  "private": true,
   "dependencies": {
-    "next": "~15.3.2",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
-  }
+    "babel-plugin-react-compiler": "19.1.0-rc.2"
+  },
+  "devDependencies": {
+    "@dex-web/core": "workspace:*",
+    "@dex-web/orpc": "workspace:*",
+    "@dex-web/ui": "workspace:*",
+    "@dex-web/utils": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./scr/index.d.ts"
+    }
+  },
+  "name": "@dex-web/web",
+  "private": true,
+  "version": "0.0.1"
 }

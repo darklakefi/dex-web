@@ -1,0 +1,19 @@
+@font-face {
+  font-display: optional;
+  font-family: "Bitsumishi";
+  font-style: normal;
+  font-weight: normal;
+  src: url("/fonts/bitsumishi-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: optional;
+  font-family: "Classic Console Neue";
+  font-style: normal;
+  font-weight: normal;
+  src: url("/fonts/classic-console-neue.woff2") format("woff2");
+}
+:root {
+  --font-sans: "Classic Console Neue", sans-serif;
+  --font-display: "Bitsumishi", sans-serif;
+}

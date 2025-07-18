@@ -1,13 +1,10 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "module": "preserve",
-    "noEmit": true,
-    "lib": ["es2022", "dom", "dom.iterable"]
+    "types": ["node", "vite/client"]
   },
   "exclude": [
+    "node_modules",
+    "dist",
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
     "src/**/*.spec.js",
@@ -17,6 +14,7 @@
     "src/**/*.spec.jsx",
     "src/**/*.test.js"
   ],
+  "extends": "./tsconfig.json",
   "include": [
     "src/**/*.stories.ts",
     "src/**/*.stories.js",
@@ -25,10 +23,5 @@
     "src/**/*.stories.mdx",
     ".storybook/*.js",
     ".storybook/*.ts"
-  ],
-  "files": [
-    "../../node_modules/@nx/react/typings/styled-jsx.d.ts",
-    "../../node_modules/@nx/react/typings/cssmodule.d.ts",
-    "../../node_modules/@nx/react/typings/image.d.ts"
   ]
 }

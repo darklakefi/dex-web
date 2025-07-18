@@ -1,1 +1,5 @@
 @import "../../../../tailwind.css";
+
+:root {
+  --background-image-url: url("/background.png");
+}

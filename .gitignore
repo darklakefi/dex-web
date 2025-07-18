@@ -3,7 +3,6 @@
 # compiled output
 dist
 tmp
-out-tsc
 
 # dependencies
 node_modules
@@ -47,10 +46,40 @@ out
 
 test-output
 
+# Playwright reports
+playwright-report/
+test-results/
+
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
-
 storybook-static
+
+# Typescript
+*.tsbuildinfo
+
+# nix
+.direnv/
+
+# env
+.env
+.env.*
+!.env.example
+
+# Vercel
+
+.vercel
+
+# Nix & devenv
+result
+
+.devenv*
+.direnv*
+/.cache
+/.pre-commit-config.yaml
+man
+
+# pre-commit
+.pre-commit-config.yaml

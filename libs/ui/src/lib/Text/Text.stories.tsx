@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import Text from "./Text";
+import { Text } from "./Text";
 
 const meta: Meta<typeof Text> = {
   component: Text,
@@ -33,7 +33,6 @@ export const Body2Lowercase: Story = {
   args: {
     children: "Body2",
     variant: "body2",
-    textCase: "lowercase",
   },
 };
 

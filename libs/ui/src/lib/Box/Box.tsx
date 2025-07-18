@@ -1,24 +1,30 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";
 
 const boxVariants = cva(
-  "mb-2 flex items-start justify-start gap-3 text-green-200",
+  "flex flex-1 flex-col items-stretch justify-start gap-3 text-green-200",
   {
+    defaultVariants: {
+      background: "base",
+      padding: "md",
+      shadow: "none",
+    },
     variants: {
-      padding: {
-        none: "p-0",
-        sm: "p-2",
-        md: "p-5",
-        lg: "p-6",
-      },
       background: {
         base: "bg-green-700",
         highlight: "border border-green-400 bg-green-600",
       },
-    },
-    defaultVariants: {
-      padding: "md",
-      background: "base",
+      padding: {
+        lg: "p-6",
+        md: "p-5",
+        none: "p-0",
+        sm: "p-2",
+      },
+      shadow: {
+        none: "shadow-none",
+        sm: "shadow-green-900 shadow-sm",
+        xl: "shadow-green-900 shadow-xl",
+      },
     },
   },
 );
@@ -34,12 +40,16 @@ export function Box({
   children,
   padding,
   background,
+  shadow,
   className,
   ...props
 }: BoxProps) {
   return (
     <div
-      className={twMerge(boxVariants({ padding, background }), className)}
+      className={twMerge(
+        boxVariants({ background, padding, shadow }),
+        className,
+      )}
       {...props}
     >
       {children}

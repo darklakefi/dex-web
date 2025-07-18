@@ -52,8 +52,14 @@
   --color-red-900: oklch(0.2143 0.0706 25.45);
   --color-red-950: oklch(0.1517 0.0422 23.6);
 
-  --font-sans: var(--font-classic-console-neue), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-display: var(--font-bitsumishi-regular), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --drop-shadow-xl: 12px 12px 0px 0px var(--color-green-600);
+
+  --font-sans: var(--font-classic-console-neue), ui-sans-serif, system-ui,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+  --font-display: var(--font-bitsumishi-regular), ui-sans-serif, system-ui,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
 
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
@@ -64,4 +70,80 @@
   --tracking-normal: 0px;
   --tracking-wide: 0.01em;
   --tracking-wider: 0.02em;
+
+  --shadow-sm: 4px 4px 0px 0px;
+  --shadow-md: 8px 8px 0px 0px;
+  --shadow-xl: 12px 12px 0px 0px;
+}
+
+@layer base {
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"] {
+    -webkit-appearance: none;
+    margin: 0;
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+  }
+}
+
+@keyframes spin-pause {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(0deg);
+  } /* Pause at 0° */
+  11.11% {
+    transform: rotate(45deg);
+  }
+  21.11% {
+    transform: rotate(45deg);
+  } /* Pause at 45° */
+  22.22% {
+    transform: rotate(90deg);
+  }
+  32.22% {
+    transform: rotate(90deg);
+  } /* Pause at 90° */
+  33.33% {
+    transform: rotate(135deg);
+  }
+  43.33% {
+    transform: rotate(135deg);
+  } /* Pause at 135° */
+  44.44% {
+    transform: rotate(180deg);
+  }
+  54.44% {
+    transform: rotate(180deg);
+  } /* Pause at 180° */
+  55.55% {
+    transform: rotate(225deg);
+  }
+  65.55% {
+    transform: rotate(225deg);
+  } /* Pause at 225° */
+  66.66% {
+    transform: rotate(270deg);
+  }
+  76.66% {
+    transform: rotate(270deg);
+  } /* Pause at 270° */
+  77.77% {
+    transform: rotate(315deg);
+  }
+  87.77% {
+    transform: rotate(315deg);
+  } /* Pause at 315° */
+  88.88% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-pause {
+  animation: spin-pause 9s linear infinite;
 }

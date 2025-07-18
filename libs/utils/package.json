@@ -1,6 +1,11 @@
 {
-  "name": "@dex-fe-web/utils",
-  "version": "0.0.1",
-  "type": "module",
-  "main": "./src/index.ts"
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "name": "@dex-web/utils",
+  "types": "./src/index.ts",
+  "version": "0.0.1"
 }

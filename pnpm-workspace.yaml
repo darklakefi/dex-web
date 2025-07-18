@@ -1,12 +1,15 @@
 packages:
   - apps/*
   - libs/*
+
 onlyBuiltDependencies:
-  - "@biomejs/biome"
-  - "@parcel/watcher"
-  - "@swc/core"
-  - "@tailwindcss/oxide"
+  - '@parcel/watcher'
+  - '@swc/core'
+  - '@tailwindcss/oxide'
+  - bigint-buffer
+  - bufferutil
   - esbuild
   - lefthook
   - nx
   - sharp
+  - utf-8-validate

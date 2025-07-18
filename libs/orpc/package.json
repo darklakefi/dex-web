@@ -1,0 +1,24 @@
+{
+  "devDependencies": {
+    "@dex-web/db": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./handlers": "./src/handlers/index.ts",
+    "./handlers/*": "./src/handlers/*.ts",
+    "./mocks": "./src/mocks/index.ts",
+    "./mocks/*": "./src/mocks/*.ts",
+    "./procedures": "./src/procedures/index.ts",
+    "./procedures/*": "./src/procedures/*.ts",
+    "./routers": "./src/routers/index.ts",
+    "./routers/*": "./src/routers/*.ts",
+    "./schemas": "./src/schemas/index.ts",
+    "./schemas/*": "./src/schemas/*.ts",
+    "./utils": "./src/utils/index.ts",
+    "./utils/*": "./src/utils/*.ts"
+  },
+  "name": "@dex-web/orpc",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "version": "0.0.1"
+}

@@ -9,13 +9,16 @@
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
+- [Database Setup](#database-setup)
 - [Development Workflow](#development-workflow)
 - [Conventional Commits](#conventional-commits)
 - [Signed Commits](#signed-commits)
 - [Common Nx Commands](#common-nx-commands)
 - [Storybook](#storybook)
+- [CircleCI](#circleci)
 - [Recommended Extensions](#recommended-extensions)
 - [Troubleshooting](#troubleshooting)
+- [Knip](#knip)
 - [Further Reading](#further-reading)
 - [Contact & Support](#contact--support)
 
@@ -27,13 +30,13 @@ This repository is managed as an [Nx](https://nx.dev/) monorepo, enabling:
 - **Task Orchestration** (build, test, lint, e2e)
 - **Code Generation** via Nx plugins
 - **Affected Commands** for efficient CI/local workflows
-- **Consistent Tooling**: Next.js 15.3.2, Vite, Playwright 1.52.0, Biome, pnpm 10.11.0
+- **Consistent Tooling**: Next.js 15.3.2, Vite, Playwright 1.52.0, Biome, pnpm 10.12.4
 
 ## Prerequisites
 
 Before you begin, make sure you have the following installed **on your local machine**:
 
-### 1. Node.js (≥ 22.0.0)
+### 1. Node.js (≥ 24.0.0)
 
 - **Recommended:** Use a version manager like [nvm](https://github.com/nvm-sh/nvm) or [asdf](https://asdf-vm.com/).
 - **Check version:**
@@ -42,15 +45,15 @@ Before you begin, make sure you have the following installed **on your local mac
   ```
 - **Install (macOS/Linux):**
   ```sh
-  nvm install 22
-  nvm use 22
+  nvm install 24
+  nvm use 24
   ```
 - **Install (Homebrew, macOS):**
   ```sh
-  brew install node@22
+  brew install node@24
   ```
 
-### 2. pnpm (10.11.0)
+### 2. pnpm (10.12.4)
 
 - **Check version:**
   ```sh
@@ -58,7 +61,7 @@ Before you begin, make sure you have the following installed **on your local mac
   ```
 - **Install:**
   ```sh
-  npm install -g pnpm@10.11.0
+  npm install -g pnpm@10.12.4
   ```
 
 ### 3. Git
@@ -105,42 +108,248 @@ Before you begin, make sure you have the following installed **on your local mac
 
 - **Auto-installed with `pnpm install`. No manual setup required.**
 
+### 9. Seeding the Database
+
+After running your migrations, you can populate your database with sample data using the seed script:
+
+```sh
+pnpm db:seed
+```
+
+This will run the seeding logic defined in `libs/orpc/src/db/seed.ts` via Nx. Make sure your database schema is up to date (see migrations above) before running this command.
+
 ## Quick Start 🚀
 
 For experienced users:
 
 - Clone and install dependencies:
   ```sh
-  git clone https://github.com/darklakefi/dex-fe-web.git
-  cd dex-fe-web
+  git clone https://github.com/darklakefi/dex-web.git
+  cd dex-web
   pnpm install
   npx playwright install
-  npx nx dev web
+  pnpm start
   ```
 - App runs at [http://localhost:3000](http://localhost:3000)
 
+> **Tip:** You can now use `pnpm` scripts for common tasks (see below), or continue using `npx nx ...` if you prefer.
+
+## Database Setup
+
+This project uses PostgreSQL with Drizzle ORM for database operations. Follow these steps to set up your local database environment.
+
+### Prerequisites
+
+Before setting up the database, ensure you have:
+
+- **Docker Desktop** installed and running
+- **Docker Compose** (included with Docker Desktop)
+
+### 1. Start PostgreSQL Server
+
+The project includes a `docker-compose.yml` file that sets up a PostgreSQL container optimized for local development.
+
+**Start the database:**
+```sh
+docker-compose up -d postgres
+```
+
+**Verify it's running:**
+```sh
+docker-compose ps
+```
+
+You should see the `dex-postgres` container running on port `5432`.
+
+### 2. Environment Configuration
+
+Create a `.env` file in the project root with your database connection string:
+
+```sh
+# .env
+POSTGRES_HOSTNAME="localhost"
+POSTGRES_DB="postgres"
+POSTGRES_USER="postgres"
+POSTGRES_PASSWORD="password"
+DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOSTNAME}:5432/${POSTGRES_DB}?schema=public"
+```
+
+> **Note:** The credentials match what's configured in `docker-compose.yml`. For production, these should be different and secure.
+
+### 3. Database Schema & Migrations
+
+The project uses Drizzle ORM for schema management. The database schema is defined in `libs/orpc/src/db/schema.ts`.
+
+**Run database migrations:**
+```sh
+npx drizzle-kit push --config libs/orpc/drizzle.config.ts
+```
+
+**Generate migrations (when you change the schema):**
+```sh
+npx drizzle-kit generate --config libs/orpc/drizzle.config.ts
+```
+
+### 4. Database Management Commands
+
+**View database schema:**
+```sh
+npx drizzle-kit introspect --config libs/orpc/drizzle.config.ts
+```
+
+**Open Drizzle Studio (database browser):**
+```sh
+npx drizzle-kit studio --config libs/orpc/drizzle.config.ts
+```
+
+This opens a web interface at [http://localhost:4983](http://localhost:4983) where you can browse and edit your database.
+
+### 5. Connecting to PostgreSQL Directly
+
+For debugging or advanced operations, you can connect directly to PostgreSQL:
+
+**Using Docker:**
+```sh
+docker exec -it dex-postgres psql -U postgres -d postgres
+```
+
+**Using a GUI client (like TablePlus, pgAdmin):**
+- Host: `localhost`
+- Port: `5432`
+- Database: `postgres`
+- User: `postgres`
+- Password: `password`
+
+### 6. Database Lifecycle Management
+
+**Stop the database:**
+```sh
+docker-compose down
+```
+
+**Reset the database (removes all data):**
+```sh
+docker-compose down
+docker volume rm dex-web_postgres_data
+docker-compose up -d postgres
+npx drizzle-kit push --config libs/orpc/drizzle.config.ts
+```
+
+**View database logs:**
+```sh
+docker-compose logs postgres
+```
+
+### 7. Production Considerations
+
+The Docker setup is optimized for local development. For production:
+
+- Use a managed PostgreSQL service (AWS RDS, Google Cloud SQL, etc.)
+- Update the `DATABASE_URL` environment variable
+- Ensure proper backup and monitoring strategies
+- Use migration files instead of `push` for schema changes
+
+### Troubleshooting
+
+**Database connection issues:**
+- Verify Docker is running: `docker info`
+- Check if the container is running: `docker-compose ps`
+- Ensure no other service is using port 5432: `lsof -i :5432`
+
+**Schema/migration issues:**
+- Check your schema file: `libs/orpc/src/db/schema.ts`
+- Verify the `DATABASE_URL` in your `.env` file
+- Try resetting the database (see step 6 above)
+
+## CircleCI
+
+See [CIRCLECI.md](./CIRCLECI.md) for full details on our CI/CD pipeline, local testing, and troubleshooting.
+
+## Knip: Unused Code & Dependency Checker
+
+[Knip](https://knip.dev/) is a tool for finding unused files, exports, and dependencies in your codebase. It helps keep the repository clean by identifying dead code and unnecessary dependencies, which can improve maintainability and reduce bundle size.
+
+### How We Use Knip
+
+- **Installed:** Knip is included as a dev dependency and can be run via the script in `package.json`.
+- **Default Configuration:** There is no custom Knip config file in this repo; Knip uses its default settings, which work well for most monorepos and Next.js projects.
+
+### Running Knip
+
+To check for unused files, exports, and dependencies, run:
+
+```sh
+pnpm knip
+```
+
+Or, using npm:
+
+```sh
+npm run knip
+```
+
+Knip will scan the workspace and report any unused code or dependencies. Review the output and remove or refactor as needed.
+
+### What Knip Checks
+- Unused files (not imported anywhere)
+- Unused exports (functions, components, etc. that are never used)
+- Unused dependencies (declared in `package.json` but not imported)
+- Unused devDependencies
+
+### Custom Configuration
+If you need to customize what Knip checks (e.g., ignore certain files or directories), you can add a `knip.json` or `knip.config.js` file at the root. See the [Knip documentation](https://knip.dev/docs/configuration) for details.
+
+### When to Run Knip
+- Before submitting a PR, to catch dead code
+- Periodically, to keep the codebase clean
+- When refactoring or removing features
+
+### More Info
+- [Knip documentation](https://knip.dev/docs)
+- [Knip GitHub](https://github.com/webpro/knip)
+
 ## Development Workflow
 
+- **Start dev server:**
+  ```sh
+  pnpm start
+  ```
+- **Build the app:**
+  ```sh
+  pnpm build
+  ```
 - **Run tests:**
   ```sh
-  npx nx test web
+  pnpm test
   ```
 - **Run linter:**
   ```sh
-  npx nx lint web
+  pnpm lint
   ```
 - **Run E2E tests:**
   ```sh
-  npx nx e2e web-e2e
+  pnpm e2e
+  ```
+- **Format code:**
+  ```sh
+  pnpm format
+  ```
+- **View dependency graph:**
+  ```sh
+  pnpm dep-graph
+  ```
+- **Update Nx:**
+  ```sh
+  pnpm update
   ```
 - **Create a new branch:**
   ```sh
   git checkout -b <feature-branch>
   ```
 - **Submit a PR:**
-  - Push your branch and open a pull request on GitHub.
+    - Push your branch and open a pull request on GitHub.
 - **Code review:**
-  - Ensure all checks pass before merging.
+    - Ensure all checks pass before merging.
 
 ## Conventional Commits
 
@@ -222,15 +431,24 @@ We require that all commits are signed to verify authorship and improve security
 - For VSCode, ensure your Git extension supports GPG signing or use the terminal.
 - See [GitHub's docs](https://docs.github.com/en/authentication/managing-commit-signature-verification) for more help.
 
-## Common Nx Commands
+## Common Nx Commands (now available as pnpm scripts)
 
-| Task       | Command              |
-| ---------- | -------------------- |
-| Dev server | `npx nx dev web`     |
-| Build      | `npx nx build web`   |
-| Test       | `npx nx test web`    |
-| Lint       | `npx nx lint web`    |
-| E2E        | `npx nx e2e web-e2e` |
+| Script                | Description                                 |
+|-----------------------|---------------------------------------------|
+| pnpm start            | Start the dev server (nx dev web)           |
+| pnpm build            | Build the web app (nx build web)            |
+| pnpm test             | Run tests (nx test web)                     |
+| pnpm lint             | Lint the codebase (nx workspace-lint && nx lint) |
+| pnpm e2e              | Run E2E tests (nx e2e web-e2e)              |
+| pnpm dep-graph        | Visualize project dependencies              |
+| pnpm format           | Format the codebase                         |
+| pnpm format:check     | Check code formatting                       |
+| pnpm update           | Update Nx to latest version                 |
+| pnpm help             | Show Nx help                                |
+| pnpm nx               | Run any Nx command                          |
+| pnpm workspace-generator | Run Nx workspace generators              |
+
+> You can still use `npx nx ...` for any Nx command, but these scripts provide convenient shortcuts.
 
 ## Storybook
 
@@ -241,51 +459,3 @@ Storybook is used for developing and documenting UI components in isolation. It 
 ```sh
 npx nx storybook ui
 ```
-
-This will start the Storybook development server, typically available at [http://localhost:6006](http://localhost:6006).
-
-### Key Features
-
-- **Component Development**: Build and test components in isolation
-- **Documentation**: Auto-generated documentation for components
-- **Visual Testing**: Compare component states and catch visual regressions
-- **Interactive Testing**: Test component interactions and states
-
-### Best Practices
-
-- Write stories for all reusable components
-- Include component documentation and usage examples
-- Use controls to demonstrate different component states
-- Add relevant component props and their descriptions
-
-## Recommended Extensions
-
-- [Nx Console](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console)
-- [Biome](https://marketplace.visualstudio.com/items?itemName=biomejs.biome)
-- [Playwright Test for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright)
-- [Conventional Commits](https://marketplace.visualstudio.com/items?itemName=vivaxy.vscode-conventional-commits)
-- [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
-- [Vitest Explorer](https://marketplace.visualstudio.com/items?itemName=vitest.explorer)
-- [EditorConfig](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig)
-
-## Troubleshooting
-
-> ⚠️ **Common Issues:**
-
-- **Dependency install issues on macOS:**
-  - Ensure Xcode Command Line Tools are installed:
-    `xcode-select --install`
-- **Playwright E2E requirements:**
-  - See [Playwright system requirements](https://playwright.dev/docs/intro#system-requirements).
-- **Biome or lint errors:**
-  - Run `npx biome check .` or `npx nx biome-lint web` for details.
-- **Git hooks not running:**
-  - Run `pnpm install` to re-setup Lefthook.
-
-## Further Reading
-
-- [Nx documentation](https://nx.dev/getting-started/intro)
-- [Next.js documentation](https://nextjs.org/docs)
-- [Vite documentation](https://vite.dev/guide/)
-- [Playwright documentation](https://playwright.dev/docs/intro)
-- [Biome documentation](https://biomejs.dev/docs/)

@@ -2,7 +2,6 @@
 
 A collection of utility functions for common operations in the DexFE Web application.
 
-
 ## Development
 
 - Build: `nx build utils`
@@ -12,6 +11,7 @@ A collection of utility functions for common operations in the DexFE Web applica
 ## Contributing
 
 When adding new utilities:
+
 1. Create a new file in the appropriate category directory under `src/`
 2. Write comprehensive tests for your utility
 3. Follow the existing code style and naming conventions

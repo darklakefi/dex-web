@@ -1,0 +1,10 @@
+{
+  "common": {
+    "welcome": "welcome"
+  },
+  "pages": {
+    "about": "about",
+    "contact": "contact",
+    "home": "home"
+  }
+}

@@ -7,9 +7,9 @@ describe("Header", () => {
   it("should render", () => {
     const { baseElement } = render(
       <Header
-        logoSm={<div>Logo</div>}
-        logoLg={<div>Logo</div>}
         button={<div>Button</div>}
+        logoLg={<div>Logo</div>}
+        logoSm={<div>Logo</div>}
       >
         <div>Box</div>
       </Header>,

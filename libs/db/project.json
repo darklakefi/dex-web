@@ -1,0 +1,69 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "db",
+  "projectType": "library",
+  "sourceRoot": "libs/db/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "configurations": {
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
+      },
+      "defaultConfiguration": "production",
+      "executor": "@nx/esbuild:esbuild",
+      "options": {
+        "assets": [
+          {
+            "glob": "libs/db/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ],
+        "format": ["cjs"],
+        "main": "libs/db/src/index.ts",
+        "outputFileName": "main.js",
+        "outputPath": "dist/libs/db",
+        "tsConfig": "libs/db/tsconfig.lib.json"
+      },
+      "outputs": ["{options.outputPath}"]
+    },
+    "generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit generate --config=libs/db/drizzle.config.ts"
+      }
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit migrate --config=libs/db/drizzle.config.ts"
+      }
+    },
+    "seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx libs/db/src/seed.ts"
+      }
+    },
+    "studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit studio --config=libs/db/drizzle.config.ts"
+      }
+    },
+    "test": {
+      "cache": true,
+      "executor": "@nx/vite:test",
+      "options": {
+        "config": "libs/db/vite.config.ts",
+        "reportsDirectory": "../../coverage/libs/db"
+      },
+      "outputs": ["{options.reportsDirectory}"]
+    }
+  }
+}

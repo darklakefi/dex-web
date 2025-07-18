@@ -1,18 +1,10 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "lib": [
-      "es2022"
-    ],
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "jsx": "react-jsx",
+    "types": ["vite/client"]
   },
+  "extends": "../../tsconfig.base.json",
   "files": [],
-  "include": [],
   "references": [
     {
       "path": "./tsconfig.lib.json"
