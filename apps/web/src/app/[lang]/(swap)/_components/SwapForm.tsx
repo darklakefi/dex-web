@@ -7,6 +7,7 @@ import { z } from "zod";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { getFirstConnectedWalletAdapter } from "../../../_utils/getFirstConnectedWalletAdapter";
 import { getFirstConnectedWalletAddress } from "../../../_utils/getFirstConnectedWalletAddress";
+import { toast } from "../../../_utils/toast";
 import { SelectTokenButton } from "./SelectTokenButton";
 import { SwapButton } from "./SwapButton";
 import { SwapFormFieldset } from "./SwapFormFieldset";
@@ -111,7 +112,16 @@ export function SwapForm() {
         {!firstConnectedWalletAddress || !firstConnectedWalletAdapter ? (
           <ConnectWalletButton className="w-full py-3" wallets={wallets} />
         ) : (
-          <Button className="w-full cursor-pointer py-3" onClick={() => {}}>
+          <Button
+            className="w-full cursor-pointer py-3"
+            onClick={() => {
+              toast({
+                description: "Swap tokens successfully",
+                title: "Swap",
+                variant: "success",
+              });
+            }}
+          >
             Swap
           </Button>
         )}

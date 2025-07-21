@@ -1,5 +1,6 @@
 import { backgroundImage, PageLayout } from "@dex-web/ui";
 import localFont from "next/font/local";
+import { Toaster } from "sonner";
 import "../lib/orpc.server";
 import Providers from "./_components/Providers";
 import "./global.css";
@@ -44,6 +45,7 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider>
           <Providers>
+            <Toaster position="top-right" />
             <PageLayout
               backgroundImageUrl={backgroundImage.src}
               footer={<AppFooter />}
