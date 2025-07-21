@@ -1,8 +1,12 @@
 "use client";
 
-import { Box, Text } from "@dex-web/ui";
+import { Box, Button, Text } from "@dex-web/ui";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { z } from "zod";
+import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
+import { getFirstConnectedWalletAdapter } from "../../../_utils/getFirstConnectedWalletAdapter";
+import { getFirstConnectedWalletAddress } from "../../../_utils/getFirstConnectedWalletAddress";
 import { SelectTokenButton } from "./SelectTokenButton";
 import { SwapButton } from "./SwapButton";
 import { SwapFormFieldset } from "./SwapFormFieldset";
@@ -45,6 +49,12 @@ const formConfig = {
 
 export function SwapForm() {
   const form = useAppForm(formConfig);
+  const { wallets } = useWallet();
+  const firstConnectedWalletAdapter = getFirstConnectedWalletAdapter(wallets);
+
+  const firstConnectedWalletAddress = firstConnectedWalletAdapter
+    ? getFirstConnectedWalletAddress(firstConnectedWalletAdapter)
+    : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -97,6 +107,15 @@ export function SwapForm() {
           )}
         </form.Field>
       </Box>
+      <div className="w-full">
+        {!firstConnectedWalletAddress || !firstConnectedWalletAdapter ? (
+          <ConnectWalletButton className="w-full py-3" wallets={wallets} />
+        ) : (
+          <Button className="w-full cursor-pointer py-3" onClick={() => {}}>
+            Swap
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
