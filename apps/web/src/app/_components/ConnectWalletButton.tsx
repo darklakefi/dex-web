@@ -2,12 +2,17 @@
 
 import { Button } from "@dex-web/ui";
 import type { Wallet } from "@solana/wallet-adapter-react";
+import { twMerge } from "tailwind-merge";
 import { getFirstAvailableWallet } from "../_utils/getFirstAvailableWallet";
 
 interface ConnectWalletButtonProps {
   wallets: Wallet[];
+  className?: string;
 }
-export function ConnectWalletButton({ wallets }: ConnectWalletButtonProps) {
+export function ConnectWalletButton({
+  wallets,
+  className,
+}: ConnectWalletButtonProps) {
   const firstAvailableWallet = getFirstAvailableWallet(wallets);
   function handleClick() {
     if (firstAvailableWallet) {
@@ -17,7 +22,11 @@ export function ConnectWalletButton({ wallets }: ConnectWalletButtonProps) {
   }
 
   return (
-    <Button onClick={handleClick} variant="primary">
+    <Button
+      className={twMerge(className, "cursor-pointer")}
+      onClick={handleClick}
+      variant="primary"
+    >
       Connect Wallet
     </Button>
   );

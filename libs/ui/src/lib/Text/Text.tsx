@@ -6,6 +6,7 @@ export enum TextVariantEnum {
   Heading = "heading",
   Body1 = "body1",
   Body2 = "body2",
+  Body3 = "body3",
   Link = "link",
 }
 
@@ -51,6 +52,16 @@ const textVariants = cva("font-normal uppercase", {
       className: "text-green-200",
       variant: TextVariantEnum.Body2,
     },
+    {
+      active: true,
+      className: "text-green-100",
+      variant: TextVariantEnum.Body3,
+    },
+    {
+      active: false,
+      className: "text-green-200",
+      variant: TextVariantEnum.Body3,
+    },
   ],
   variants: {
     active: {
@@ -60,6 +71,7 @@ const textVariants = cva("font-normal uppercase", {
     variant: {
       body1: "font-sans text-3xl leading-8.5 tracking-wider",
       body2: "font-sans text-lg leading-6 tracking-wider",
+      body3: "font-sans text-sm leading-4.5 tracking-normal",
       heading: "font-display text-3xl leading-7.5 tracking-normal",
       link: "font-sans text-lg leading-6 tracking-wide underline",
     },
@@ -70,6 +82,7 @@ const variantMap: { [key: string]: ElementType } = {
   [TextVariantEnum.Heading]: "h1",
   [TextVariantEnum.Body1]: "p",
   [TextVariantEnum.Body2]: "p",
+  [TextVariantEnum.Body3]: "p",
   [TextVariantEnum.Link]: "div",
 } satisfies Record<TextVariantEnum, ElementType>;
 
@@ -112,6 +125,10 @@ Text.Body1 = (props: TextProps<"p", React.ComponentProps<"p">>) => {
 
 Text.Body2 = (props: TextProps<"p", React.ComponentProps<"p">>) => {
   return <Text variant={TextVariantEnum.Body2} {...props} />;
+};
+
+Text.Body3 = (props: TextProps<"p", React.ComponentProps<"p">>) => {
+  return <Text variant={TextVariantEnum.Body3} {...props} />;
 };
 
 Text.Link = (props: TextProps<"div", React.ComponentProps<"div">>) => {
