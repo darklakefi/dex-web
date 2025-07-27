@@ -317,6 +317,9 @@ importers:
 
   libs/orpc:
     devDependencies:
+      '@dex-web/core':
+        specifier: workspace:*
+        version: link:../core
       '@dex-web/db':
         specifier: workspace:*
         version: link:../db
