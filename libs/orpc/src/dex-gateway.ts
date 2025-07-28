@@ -1,4 +1,3 @@
-/**  biome-ignore lint/style/useNodejsImportProtocol: will be removed **/
 /**  biome-ignore lint/suspicious/noExplicitAny: will be removed **/
 
 import * as grpc from "@grpc/grpc-js";
