@@ -1,29 +1,35 @@
-import { SolanaAddressSchema } from "@dex-web/core";
 import { z } from "zod/v4";
-import { tokenSchema } from "../tokens/token.schema";
 
 export const getQuoteInputSchema = z.object({
   amountIn: z.number().positive(),
   isXtoY: z.boolean(),
-  poolAddress: SolanaAddressSchema,
-  slippage: z.number().positive(),
-  tokenX: SolanaAddressSchema,
-  tokenY: SolanaAddressSchema,
+  slippage: z.number().positive().optional(),
+  tokenXMint: z.string(),
+  tokenYMint: z.string(),
 });
 
 export const getQuoteOutputSchema = z.object({
+  amountIn: z.number().positive(),
+  amountInRaw: z.number().positive(),
   amountOut: z.number().positive(),
-  deadline: z.number().positive(),
+  amountOutRaw: z.number().positive(),
   estimatedFee: z.number().positive(),
   estimatedFeesUsd: z.number().positive(),
   isXtoY: z.boolean(),
-  poolAddress: SolanaAddressSchema,
   priceImpactPercentage: z.number().positive(),
   rateXtoY: z.number().positive(),
+  routePlan: z.array(
+    z.object({
+      amountIn: z.number().positive(),
+      amountOut: z.number().positive(),
+      feeAmount: z.number().positive(),
+      tokenXMint: z.string(),
+      tokenYMint: z.string(),
+    }),
+  ),
   slippage: z.number().positive(),
-  tokenX: tokenSchema,
-  tokenY: tokenSchema,
-  userAddress: SolanaAddressSchema,
+  tokenXMint: z.string(),
+  tokenYMint: z.string(),
 });
 
 export type GetQuoteInput = z.infer<typeof getQuoteInputSchema>;

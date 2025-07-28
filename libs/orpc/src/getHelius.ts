@@ -6,5 +6,8 @@ export function getHelius(): Helius {
     throw new Error("HELIUS_API_KEY is not set");
   }
 
-  return new Helius(apiKey);
+  return new Helius(
+    apiKey,
+    process.env.NETWORK === "2" ? "devnet" : "mainnet-beta",
+  );
 }

@@ -1,26 +1,19 @@
 export const tokensData = [
   {
-    address: "12mcpYL84oMi8Hiinyjuv2Zq3F47tLLxjw1THLcAdKT2",
+    address: "DPFczWRUhvXK3F3kZ3qFiQCcoFjo7VHEjL6RK5wKEiVx",
     chainId: 101,
     decimals: 6,
-    extensions: {
-      coingeckoId: "giggleched",
-    },
-    logoURI:
-      "https://bafybeidbzidjhf5wo2l2dljjgbcozxwafwdgsfjzzmt2zwcketodzzqdfa.ipfs.cf-ipfs.com/",
-    name: "giggleched",
-    symbol: "ched",
-    tags: ["community"],
+    logoURI: "",
+    name: "TokenXXX",
+    symbol: "TokenXXX",
   },
   {
-    address: "1F1sRpidpKBQjmCnHAu8vJpmktLVK3ZjKyxVwEy8XpC",
+    address: "EipJWba86jgVAvZQNBzkLoCzzpf73y3qecDQoNxBN9MM",
     chainId: 101,
-    decimals: 6,
-    logoURI:
-      "https://cf-ipfs.com/ipfs/QmVNexv8GWNZ39We31Wk9fHZN2Aeu3HLmRn6KgAXC7qJAc",
-    name: "SolGen",
-    symbol: "GEN",
-    tags: ["community"],
+    decimals: 9,
+    logoURI: "",
+    name: "TokenYYY",
+    symbol: "TokenYYY",
   },
   {
     address: "21BTCo9hWHjGYYUQQLqjLgDBxjcn8vDt4Zic7TB3UbNE",

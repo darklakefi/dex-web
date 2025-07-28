@@ -1,15 +1,18 @@
 "use client";
 
-import { client } from "@dex-web/orpc";
+import { client, tanstackClient } from "@dex-web/orpc";
 import { Box, Button, Text } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useSearchParams } from "next/navigation";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import BigNumber from "bignumber.js";
+import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { z } from "zod";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
-import { toast } from "../../../_utils/toast";
+import { dismissToast, toast } from "../../../_utils/toast";
+import { selectedTokensParsers } from "../_utils/searchParams";
 import { SelectTokenButton } from "./SelectTokenButton";
 import { SwapButton } from "./SwapButton";
 import { SwapFormFieldset } from "./SwapFormFieldset";
@@ -59,12 +62,23 @@ const MESSAGE_STEP = {
 export function SwapForm() {
   const form = useAppForm(formConfig);
   const { wallets, signTransaction, publicKey } = useWallet();
-  const searchParams = useSearchParams();
+  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+    selectedTokensParsers,
+  );
   const [swapStep, setSwapStep] = useState(0);
+  const [disableSwap, setDisableSwap] = useState(true);
 
-  // Get token information from search params
-  const sellTokenMint = searchParams.get("sellToken") || "";
-  const buyTokenMint = searchParams.get("buyToken") || "";
+  const { data: poolDetails } = useSuspenseQuery(
+    tanstackClient.getPoolDetails.queryOptions({
+      input: {
+        tokenXMint: sellTokenAddress,
+        tokenYMint: buyTokenAddress,
+      },
+    }),
+  );
+
+  const isXtoY = poolDetails?.tokenXMint === sellTokenAddress;
+  console.log(sellTokenAddress);
 
   const requestSigning = async (
     unsignedTransaction: string,
@@ -125,6 +139,7 @@ export function SwapForm() {
       }
     } catch (error) {
       console.error("Signing error:", error);
+      dismissToast();
       toast({
         description:
           error instanceof Error ? error.message : "Unknown error occurred",
@@ -159,13 +174,13 @@ export function SwapForm() {
       const buyAmount = formState.buyAmount;
       const response = await client.dexGateway.getSwap({
         amount_in: sellAmount,
-        is_swap_x_to_y: true,
-        min_out: buyAmount,
+        is_swap_x_to_y: isXtoY,
+        min_out: buyAmount, // TODO: buyAmount as min_out (might need adjustment based on slippage)
         network: parseInt(process.env.NETWORK || "2", 10),
-        token_mint_x: sellTokenMint, // Using buyAmount as min_out (might need adjustment based on slippage)
-        token_mint_y: buyTokenMint,
-        tracking_id: "123",
-        user_address: publicKey.toBase58(), // should place this in the orpc and better structure for tracking
+        token_mint_x: sellTokenAddress,
+        token_mint_y: buyTokenAddress,
+        tracking_id: "123", // should place this in the orpc and better structure for tracking
+        user_address: publicKey.toBase58(),
       });
 
       if (response.success && response.unsignedTransaction) {
@@ -189,6 +204,56 @@ export function SwapForm() {
     }
   };
 
+  const getQuote = async ({
+    amountIn,
+    type,
+    isXtoY,
+  }: {
+    amountIn: number;
+    type: "buy" | "sell";
+    isXtoY: boolean;
+  }) => {
+    if (!poolDetails) return;
+    setDisableSwap(true);
+    const quote = await client.getSwapQuote({
+      amountIn,
+      isXtoY,
+      tokenXMint: poolDetails.tokenXMint,
+      tokenYMint: poolDetails.tokenYMint,
+    });
+    if (type === "sell") {
+      form.setFieldValue("buyAmount", quote.amountOut);
+    } else {
+      form.setFieldValue("sellAmount", quote.amountOut);
+    }
+    setDisableSwap(false);
+  };
+
+  const handleAmountChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "buy" | "sell",
+  ) => {
+    if (BigNumber(e.target.value).gt(0)) {
+      getQuote({
+        amountIn: Number(e.target.value),
+        isXtoY,
+        type,
+      });
+    } else {
+      setDisableSwap(true);
+    }
+  };
+
+  const onClickSwapToken = () => {
+    if (!poolDetails || BigNumber(form.state.values.sellAmount).lte(0)) return;
+
+    getQuote({
+      amountIn: form.state.values.sellAmount,
+      isXtoY: !isXtoY,
+      type: "sell",
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <Box background="highlight" className="flex-row">
@@ -206,16 +271,17 @@ export function SwapForm() {
             <SwapFormFieldset
               name={field.name}
               onBlur={field.handleBlur}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                field.handleChange(Number(e.target.value))
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleAmountChange(e, "sell");
+                field.handleChange(Number(e.target.value));
+              }}
               value={field.state.value}
             />
           )}
         </form.Field>
       </Box>
       <div className="flex items-center justify-center">
-        <SwapButton />
+        <SwapButton onClickSwapToken={onClickSwapToken} />
       </div>
       <Box background="highlight" className="flex-row">
         <div>
@@ -232,9 +298,10 @@ export function SwapForm() {
             <SwapFormFieldset
               name={field.name}
               onBlur={field.handleBlur}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                field.handleChange(Number(e.target.value))
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleAmountChange(e, "buy");
+                field.handleChange(Number(e.target.value));
+              }}
               value={field.state.value}
             />
           )}
@@ -243,16 +310,20 @@ export function SwapForm() {
       <div className="w-full">
         {!publicKey ? (
           <ConnectWalletButton className="w-full py-3" wallets={wallets} />
-        ) : (
+        ) : poolDetails ? (
           <Button
             className="w-full cursor-pointer py-3"
-            disabled={swapStep !== 0}
+            disabled={swapStep !== 0 || disableSwap}
             loading={swapStep !== 0}
             onClick={handleSwap}
           >
             {swapStep === 0
               ? "Swap"
               : MESSAGE_STEP[swapStep as keyof typeof MESSAGE_STEP]}
+          </Button>
+        ) : (
+          <Button className="w-full cursor-pointer py-3" disabled={true}>
+            Create Pool
           </Button>
         )}
       </div>

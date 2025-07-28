@@ -1,23 +1,41 @@
 "use server";
 
+import BigNumber from "bignumber.js";
 import { getDexGatewayClient } from "../../dex-gateway";
 import type { SwapRequest, SwapResponse } from "../../dex-gateway.type";
+import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
 
 export async function getSwapHandler(input: SwapRequest) {
   try {
-    // Get the client
     const grpcClient = getDexGatewayClient();
+    const { is_swap_x_to_y } = input;
 
-    // for testing
-    input.token_mint_x = "DPFczWRUhvXK3F3kZ3qFiQCcoFjo7VHEjL6RK5wKEiVx";
-    input.token_mint_y = "DPFczWRUhvXK3F3kZ3qFiQCcoFjo7VHEjL6RK5wKEiVx";
-    input.amount_in = 1000;
-    input.min_out = 10;
-    input.is_swap_x_to_y = true;
+    const tokenX = await getTokenDetailsHandler({
+      address: input.token_mint_x,
+    });
+    const tokenY = await getTokenDetailsHandler({
+      address: input.token_mint_y,
+    });
 
-    input.tracking_id = "id" + Math.random().toString(16).slice(2);
+    let amountInDecimals = tokenX.decimals;
+    let minOutDecimals = tokenY.decimals;
+    console.log(tokenX, tokenY, "tokenX, tokenY");
+    if (!is_swap_x_to_y) {
+      [amountInDecimals, minOutDecimals] = [minOutDecimals, amountInDecimals];
+    }
 
+    input.amount_in = BigNumber(input.amount_in)
+      .multipliedBy(BigNumber(10 ** amountInDecimals))
+      .toNumber();
+    input.min_out = BigNumber(input.min_out)
+      .multipliedBy(BigNumber(10 ** minOutDecimals))
+      .toNumber();
+
+    input.tracking_id = `id${Math.random().toString(16).slice(2)}`;
+
+    console.log(input, "input");
     const swapResponse: SwapResponse = await grpcClient.swap(input);
+    console.log(swapResponse, "swapResponse");
 
     return {
       success: true,

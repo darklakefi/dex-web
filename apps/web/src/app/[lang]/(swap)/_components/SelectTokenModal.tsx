@@ -55,18 +55,25 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
   const [{ buyTokenAddress, sellTokenAddress }, setSelectedTokens] =
     useQueryStates(selectedTokensParsers);
 
+  const handleClose = () => {
+    router.push(
+      `/?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${buyTokenAddress}`,
+    );
+  };
+
   const handleSelect = (tokenAddress: string) => {
     if (type === "buy") {
       setSelectedTokens({
         buyTokenAddress: tokenAddress,
         sellTokenAddress: sellTokenAddress,
       });
+      handleClose();
     } else {
       setSelectedTokens({
         buyTokenAddress: buyTokenAddress,
         sellTokenAddress: tokenAddress,
       });
-      router.push("/");
+      handleClose();
     }
   };
 
@@ -94,7 +101,7 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
   };
 
   return (
-    <Modal onClose={() => router.push("/")}>
+    <Modal onClose={handleClose}>
       <Box className="flex max-h-full w-full max-w-sm drop-shadow-xl">
         <form.Field name="query">
           {(field) => (

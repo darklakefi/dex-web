@@ -11,6 +11,7 @@ export enum TradeStatus {
   SETTLED = 3,
   SLASHED = 4,
   CANCELLED = 5,
+  FAILED = 6,
 }
 
 export interface WalletEmulatorConfig {
@@ -61,6 +62,7 @@ export interface SignedTransactionRequest {
 export interface SignedTransactionResponse {
   trade_id: string;
   success: boolean;
+  error_logs: string;
 }
 
 export interface CheckTradeStatusRequest {

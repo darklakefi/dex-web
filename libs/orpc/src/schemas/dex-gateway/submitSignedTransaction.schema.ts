@@ -13,6 +13,7 @@ export type SubmitSignedTransactionInput = z.infer<
 
 // Define the output schema for the ping response
 export const submitSignedTransactionOutputSchema = z.object({
+  error_logs: z.string(),
   success: z.boolean(),
   trade_id: z.string(),
 });

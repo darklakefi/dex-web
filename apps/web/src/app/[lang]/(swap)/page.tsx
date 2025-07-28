@@ -29,11 +29,11 @@ export default async function Page({
       }),
     ),
 
-    queryClient.prefetchQuery(
-      tanstackClient.getTokenDetails.queryOptions({
-        input: { address: MOCK_OWNER_ADDRESS },
-      }),
-    ),
+    // queryClient.prefetchQuery(
+    //   tanstackClient.getTokenDetails.queryOptions({
+    //     input: { address: MOCK_OWNER_ADDRESS },
+    //   }),
+    // ),
 
     queryClient.prefetchQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({

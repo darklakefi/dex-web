@@ -1,3 +1,6 @@
+/**  biome-ignore lint/style/useNodejsImportProtocol: will be removed **/
+/**  biome-ignore lint/suspicious/noExplicitAny: will be removed **/
+
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import * as crypto from "crypto";
@@ -16,7 +19,7 @@ import type {
 
 const config = {
   gatewayHost:
-    process.env.GATEWAY_HOST ||
+    process.env.GATEWAY_SWAP_URL ||
     "dex-gateway-staging-srv01.dex.darklake.fi" ||
     "localhost",
   gatewayPort: parseInt(process.env.GATEWAY_PORT || "50051"),
@@ -43,6 +46,7 @@ enum TradeStatus {
     SETTLED   = 3;
     SLASHED   = 4;
     CANCELLED = 5;
+    FAILED    = 6;
 }
 
 // --------------------------------- MESSAGES
@@ -74,7 +78,7 @@ message SendSignedTransactionRequest {
 message SendSignedTransactionResponse {
     bool success    = 1;
     string trade_id = 2;
-    // TODO: DAR-488 discuss necessary return values
+    repeated string error_logs = 3;
 }
 
 message CheckTradeStatusRequest {

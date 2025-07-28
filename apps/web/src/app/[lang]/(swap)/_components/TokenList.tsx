@@ -14,9 +14,9 @@ export function TokenList({ tokens, onSelect }: TokenListProps) {
       {tokens.map((token) => {
         const id = `${token.symbol}-${token.address}`;
         return (
-          <li key={id}>
+          <li className="cursor-pointer hover:opacity-70" key={id}>
             <button
-              className="flex items-start justify-start gap-3"
+              className="flex cursor-pointer items-start justify-start gap-3"
               onClick={() => onSelect(token.address)}
               type="button"
             >
@@ -32,7 +32,7 @@ export function TokenList({ tokens, onSelect }: TokenListProps) {
                   />
                 </div>
               ) : null}
-              <div className="flex flex-col items-start">
+              <div className="flex cursor-pointer flex-col items-start">
                 <div className="flex gap-3">
                   <Text.Body2 as="span">{token.symbol}</Text.Body2>
                   <div>

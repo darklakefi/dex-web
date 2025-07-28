@@ -16,6 +16,7 @@ export function generateMockSwap(randomSeed: string) {
     buyBalance: randNumber({ max: 1000000, min: 1 }),
     buyToken: {
       address: randUuid(),
+      decimals: randNumber({ max: 1000000, min: 1 }),
       symbol: randCurrencySymbol(),
       value: randNumber({ max: 1000000, min: 1 }).toString(),
     },
@@ -27,6 +28,7 @@ export function generateMockSwap(randomSeed: string) {
     sellBalance: randNumber({ max: 1000000, min: 1 }),
     sellToken: {
       address: randUuid(),
+      decimals: randNumber({ max: 1000000, min: 1 }),
       symbol: randCurrencySymbol(),
       value: randNumber({ max: 1000000, min: 1 }).toString(),
     },
