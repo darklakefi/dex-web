@@ -6,7 +6,6 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
-import { FeaturesAndTrendingPoolPanel } from "./_components/FeaturesAndTrendingPoolPanel";
 import { SwapDetails } from "./_components/SwapDetails";
 import { SwapForm } from "./_components/SwapForm";
 import { SwapPageRefreshButton } from "./_components/SwapPageRefreshButton";
@@ -56,9 +55,11 @@ export default async function Page({
             >
               <div className="flex flex-col gap-3 uppercase">
                 <Text.Heading>swap</Text.Heading>
-                <div className="flex flex-col">
-                  <Text.Body2>ANTI-SANDWICH DEFENSE:</Text.Body2>
-                  <Text.Body2 className="text-green-300">
+                <div className="flex flex-col text-md">
+                  <Text.Body2 className="text-md md:text-lg">
+                    ANTI-SANDWICH DEFENSE:
+                  </Text.Body2>
+                  <Text.Body2 className="text-green-300 text-md md:text-lg">
                     Value preservation system active.
                   </Text.Body2>
                 </div>
@@ -79,9 +80,9 @@ export default async function Page({
           <SwapPageRefreshButton />
         </section>
       </div>
-      <div className="max-w-xs">
+      {/* <div className="max-w-xs">
         <FeaturesAndTrendingPoolPanel featuredPools={[]} trendingPools={[]} />
-      </div>
+      </div> */}
     </div>
   );
 }

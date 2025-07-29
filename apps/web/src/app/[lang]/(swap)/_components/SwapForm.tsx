@@ -190,7 +190,7 @@ export function SwapForm() {
           response.trackingId,
         );
       } else {
-        throw new Error("Failed to create swap transaction");
+        // throw new Error("Failed to create swap transaction");
       }
     } catch (error) {
       console.error("Swap error:", error);
@@ -313,8 +313,8 @@ export function SwapForm() {
         ) : poolDetails ? (
           <Button
             className="w-full cursor-pointer py-3"
-            disabled={swapStep !== 0 || disableSwap}
-            loading={swapStep !== 0}
+            // disabled={swapStep !== 0 || disableSwap}
+            // loading={swapStep !== 0}
             onClick={handleSwap}
           >
             {swapStep === 0

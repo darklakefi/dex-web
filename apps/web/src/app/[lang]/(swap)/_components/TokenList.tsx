@@ -5,7 +5,10 @@ import Image from "next/image";
 
 interface TokenListProps {
   tokens: Token[];
-  onSelect: (tokenSymbol: string) => void;
+  onSelect: (
+    tokenSymbol: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => void;
 }
 
 export function TokenList({ tokens, onSelect }: TokenListProps) {
@@ -17,7 +20,7 @@ export function TokenList({ tokens, onSelect }: TokenListProps) {
           <li className="cursor-pointer hover:opacity-70" key={id}>
             <button
               className="flex cursor-pointer items-start justify-start gap-3"
-              onClick={() => onSelect(token.address)}
+              onClick={(e) => onSelect(token.address, e)}
               type="button"
             >
               {token.imageUrl ? (

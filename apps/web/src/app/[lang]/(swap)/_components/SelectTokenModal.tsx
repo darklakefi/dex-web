@@ -61,19 +61,27 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
     );
   };
 
-  const handleSelect = (tokenAddress: string) => {
+  const handleSelect = (
+    tokenAddress: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    e.preventDefault();
     if (type === "buy") {
       setSelectedTokens({
         buyTokenAddress: tokenAddress,
         sellTokenAddress: sellTokenAddress,
       });
-      handleClose();
+      router.push(
+        `/?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${tokenAddress}`,
+      );
     } else {
       setSelectedTokens({
         buyTokenAddress: buyTokenAddress,
         sellTokenAddress: tokenAddress,
       });
-      handleClose();
+      router.push(
+        `/?sellTokenAddress=${tokenAddress}&buyTokenAddress=${buyTokenAddress}`,
+      );
     }
   };
 
