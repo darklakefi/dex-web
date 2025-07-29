@@ -10,7 +10,7 @@ import { selectedTokensParsers } from "../_utils/searchParams";
 import { useFormatPrice } from "../_utils/useFormatPrice";
 
 interface SwapFormFieldsetProps extends NumericInputProps {
-  name: "buyAmount" | "sellAmount";
+  name: "buy.amount" | "sell.amount";
 }
 const QUOTE_CURRENCY = "USD" as const;
 
@@ -27,7 +27,7 @@ export function SwapFormFieldset({
   const { data } = useSuspenseQuery(
     tanstackClient.helius.getTokenAccounts.queryOptions({
       input: {
-        mint: name === "buyAmount" ? buyTokenAddress : sellTokenAddress,
+        mint: name === "buy.amount" ? buyTokenAddress : sellTokenAddress,
         ownerAddress: MOCK_OWNER_ADDRESS,
       },
     }),
@@ -37,7 +37,7 @@ export function SwapFormFieldset({
     tanstackClient.getTokenPrice.queryOptions({
       input: {
         amount: 1,
-        mint: name === "buyAmount" ? buyTokenAddress : sellTokenAddress,
+        mint: name === "buy.amount" ? buyTokenAddress : sellTokenAddress,
         quoteCurrency: QUOTE_CURRENCY,
       },
     }),
