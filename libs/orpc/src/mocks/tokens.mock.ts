@@ -1,6 +1,6 @@
 export const tokensData = [
   {
-    address: "DPFczWRUhvXK3F3kZ3qFiQCcoFjo7VHEjL6RK5wKEiVx",
+    address: "7gxzDSLbXqapoJ1e4WubzWUfFDeZZPENMAfCQeKfYyjT",
     chainId: 101,
     decimals: 6,
     logoURI: "",
@@ -8,7 +8,7 @@ export const tokensData = [
     symbol: "TokenXXX",
   },
   {
-    address: "EipJWba86jgVAvZQNBzkLoCzzpf73y3qecDQoNxBN9MM",
+    address: "9gXQd53kyGXB1juo7eKpfSTrvCW26u9LfUsPC9HH4nGQ",
     chainId: 101,
     decimals: 9,
     logoURI: "",

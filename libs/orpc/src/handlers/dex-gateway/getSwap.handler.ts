@@ -19,7 +19,7 @@ export async function getSwapHandler(input: SwapRequest) {
 
     let amountInDecimals = tokenX.decimals;
     let minOutDecimals = tokenY.decimals;
-    console.log(tokenX, tokenY, "tokenX, tokenY");
+
     if (!is_swap_x_to_y) {
       [amountInDecimals, minOutDecimals] = [minOutDecimals, amountInDecimals];
     }
@@ -27,9 +27,10 @@ export async function getSwapHandler(input: SwapRequest) {
     input.amount_in = BigNumber(input.amount_in)
       .multipliedBy(BigNumber(10 ** amountInDecimals))
       .toNumber();
-    input.min_out = BigNumber(input.min_out)
-      .multipliedBy(BigNumber(10 ** minOutDecimals))
-      .toNumber();
+    // input.min_out = BigNumber(input.min_out)
+    //   .multipliedBy(BigNumber(10 ** minOutDecimals))
+    //   .toNumber();
+    input.min_out = 0;
 
     input.tracking_id = `id${Math.random().toString(16).slice(2)}`;
 

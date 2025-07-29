@@ -6,8 +6,8 @@ import type {
 const MOCK_POOLS = [
   {
     rateXtoY: 0.01,
-    tokenXMint: "DPFczWRUhvXK3F3kZ3qFiQCcoFjo7VHEjL6RK5wKEiVx",
-    tokenYMint: "EipJWba86jgVAvZQNBzkLoCzzpf73y3qecDQoNxBN9MM",
+    tokenXMint: "7gxzDSLbXqapoJ1e4WubzWUfFDeZZPENMAfCQeKfYyjT",
+    tokenYMint: "9gXQd53kyGXB1juo7eKpfSTrvCW26u9LfUsPC9HH4nGQ",
   },
 ];
 
