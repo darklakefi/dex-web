@@ -1,22 +1,34 @@
 "use client";
 
+import { tanstackClient } from "@dex-web/orpc";
 import { Box, Button, Text } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryStates } from "nuqs";
 import { z } from "zod";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { getFirstConnectedWalletAdapter } from "../../../_utils/getFirstConnectedWalletAdapter";
 import { getFirstConnectedWalletAddress } from "../../../_utils/getFirstConnectedWalletAddress";
 import { toast } from "../../../_utils/toast";
+import { selectedTokensParsers } from "../_utils/searchParams";
 import { SelectTokenButton } from "./SelectTokenButton";
 import { SwapButton } from "./SwapButton";
 import { SwapFormFieldset } from "./SwapFormFieldset";
 
+const MOCK_TRANSACTION_STATUS = "success";
+
 export const { fieldContext, formContext } = createFormHookContexts();
 
 const swapFormSchema = z.object({
-  buyAmount: z.number().nonnegative(),
-  sellAmount: z.number().nonnegative(),
+  buy: z.object({
+    amount: z.number().nonnegative(),
+    token: z.string(),
+  }),
+  sell: z.object({
+    amount: z.number().nonnegative(),
+    token: z.string(),
+  }),
 });
 
 type SwapFormSchema = z.infer<typeof swapFormSchema>;
@@ -31,24 +43,65 @@ const { useAppForm } = createFormHook({
   formContext,
 });
 
-const formConfig = {
-  defaultValues: {
-    buyAmount: 0,
-    sellAmount: 0,
-  } satisfies SwapFormSchema,
-  onSubmit: ({
-    value,
-  }: {
-    value: { buyAmount: number; sellAmount: number };
-  }) => {
-    console.log(value);
-  },
-  validators: {
-    onChange: swapFormSchema,
-  },
-};
-
 export function SwapForm() {
+  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+    selectedTokensParsers,
+  );
+  const { data: buyTokenDetails } = useSuspenseQuery(
+    tanstackClient.getTokenDetails.queryOptions({
+      input: { address: buyTokenAddress },
+    }),
+  );
+  const { data: sellTokenDetails } = useSuspenseQuery(
+    tanstackClient.getTokenDetails.queryOptions({
+      input: { address: sellTokenAddress },
+    }),
+  );
+
+  const formConfig = {
+    defaultValues: {
+      buy: {
+        amount: 0,
+        token: buyTokenDetails?.symbol as string,
+      },
+      sell: {
+        amount: 0,
+        token: sellTokenDetails?.symbol as string,
+      },
+    } satisfies SwapFormSchema,
+
+    onSubmit: ({
+      value,
+    }: {
+      value: {
+        buy: {
+          amount: number;
+          token: string;
+        };
+        sell: {
+          amount: number;
+          token: string;
+        };
+      };
+    }) => {
+      if (MOCK_TRANSACTION_STATUS === "success") {
+        toast({
+          description: `Swapped ${value.sell.amount} ${value.sell.token} for ${value.buy.amount} ${value.buy.token}`,
+          title: "Success",
+          variant: "success",
+        });
+      } else {
+        toast({
+          description: `Swap failed to complete`,
+          title: "Failure",
+          variant: "error",
+        });
+      }
+    },
+    validators: {
+      onChange: swapFormSchema,
+    },
+  };
   const form = useAppForm(formConfig);
   const { wallets } = useWallet();
   const firstConnectedWalletAdapter = getFirstConnectedWalletAdapter(wallets);
@@ -69,10 +122,10 @@ export function SwapForm() {
           </Text.Body2>
           <SelectTokenButton type="sell" />
         </div>
-        <form.Field name="sellAmount">
+        <form.Field name="sell.amount">
           {(field) => (
             <SwapFormFieldset
-              name={field.name}
+              name="sell.amount"
               onBlur={field.handleBlur}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 field.handleChange(Number(e.target.value))
@@ -95,10 +148,10 @@ export function SwapForm() {
           </Text.Body2>
           <SelectTokenButton type="buy" />
         </div>
-        <form.Field name="buyAmount">
+        <form.Field name="buy.amount">
           {(field) => (
             <SwapFormFieldset
-              name={field.name}
+              name="buy.amount"
               onBlur={field.handleBlur}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 field.handleChange(Number(e.target.value))
@@ -114,13 +167,8 @@ export function SwapForm() {
         ) : (
           <Button
             className="w-full cursor-pointer py-3"
-            onClick={() => {
-              toast({
-                description: "Swap tokens successfully",
-                title: "Swap",
-                variant: "success",
-              });
-            }}
+            onClick={form.handleSubmit}
+            type="submit"
           >
             Swap
           </Button>
