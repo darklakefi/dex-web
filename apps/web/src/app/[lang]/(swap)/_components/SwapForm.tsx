@@ -87,13 +87,13 @@ export function SwapForm() {
       if (MOCK_TRANSACTION_STATUS === "success") {
         toast({
           description: `Swapped ${value.sell.amount} ${value.sell.token} for ${value.buy.amount} ${value.buy.token}`,
-          title: "Swap",
+          title: "Success",
           variant: "success",
         });
       } else {
         toast({
-          description: `Swap failed`,
-          title: "Swap",
+          description: `Swap failed to complete`,
+          title: "Failure",
           variant: "error",
         });
       }
