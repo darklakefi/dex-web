@@ -218,12 +218,6 @@ export async function getSwapRateHandler(
 
   const connection = helius.connection;
 
-  // Create Helius RPC connection using the API key
-  const apiKey = process.env.HELIUS_API_KEY;
-  if (!apiKey) {
-    throw new Error("HELIUS_API_KEY is not set");
-  }
-
   // Fetch and parse both Pool and AmmConfig accounts
   const pool = await getPoolAccount(connection, poolPubkey);
   const ammConfig = await getAmmConfigAccount(connection, ammConfigPubkey);
