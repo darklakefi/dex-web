@@ -139,7 +139,7 @@ function calculateSwap(
 }
 
 // Load the IDL
-const idlPath = path.join(__dirname, "./darklake-idl.json");
+const idlPath = path.join(__dirname, "../../../darklake-idl.json");
 const idl = JSON.parse(fs.readFileSync(idlPath, "utf8")) as Idl;
 
 // Use Anchor's coder directly for decoding
