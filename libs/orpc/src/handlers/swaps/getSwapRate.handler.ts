@@ -252,10 +252,6 @@ export async function getSwapRateHandler(
     tradeFeeRate,
   );
 
-  const poolData = {
-    rateXtoY: swapResult.rate || 1.0, // Fallback to 1.0 if calculation results in 0 or NaN
-  };
-
   const tokenX = await getTokenDetailsHandler({
     address: tokenXMint.toString(),
   });
