@@ -247,8 +247,8 @@ export async function getSwapRateHandler(
   const tradeFeeRate = Number(ammConfig.trade_fee_rate) || 0;
   const swapResult = calculateSwap(
     amountIn,
-    availableReserveX,
-    availableReserveY,
+    isXtoY ? availableReserveX : availableReserveY,
+    isXtoY ? availableReserveY : availableReserveX,
     tradeFeeRate,
   );
 
