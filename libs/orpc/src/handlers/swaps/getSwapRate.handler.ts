@@ -260,12 +260,12 @@ export async function getSwapRateHandler(
   });
 
   const amountInBigDecimal = BigNumber(amountIn).multipliedBy(
-    BigNumber(10 ** tokenX.decimals),
+    BigNumber(10 ** (isXtoY ? tokenX.decimals : tokenY.decimals)),
   );
   const amountOutBigDecimal = BigNumber(swapResult.destinationAmount);
 
   const amountOut = amountOutBigDecimal
-    .dividedBy(BigNumber(10 ** tokenY.decimals))
+    .dividedBy(BigNumber(10 ** (isXtoY ? tokenY.decimals : tokenX.decimals)))
     .toNumber();
 
   return {
