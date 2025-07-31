@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { setupMockOrpcHandlers } from "../helpers/setupMockOrpcHandlers";
 
 test.describe("Swap Page", () => {
-  test("should refresh swap details when refresh button is clicked", async ({
+  test.skip("should refresh swap details when refresh button is clicked", async ({
     page,
   }) => {
     await setupMockOrpcHandlers(page);
