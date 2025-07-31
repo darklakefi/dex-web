@@ -19,6 +19,7 @@ export function mockOrpc() {
         buyBalance: 100,
         buyToken: {
           address: DEFAULT_BUY_TOKEN,
+          decimals: 9,
           symbol: "SOL",
           value: "1000",
         },
@@ -30,6 +31,7 @@ export function mockOrpc() {
         sellBalance: 100,
         sellToken: {
           address: DEFAULT_SELL_TOKEN,
+          decimals: 9,
           symbol: "USDC",
           value: "1000",
         },
@@ -42,6 +44,7 @@ export function mockOrpc() {
       } satisfies Swap),
       getTokenDetails: vi.fn().mockResolvedValue({
         address: DEFAULT_BUY_TOKEN,
+        decimals: 9,
         imageUrl: "https://example.com/image.png",
         name: "Solana",
         symbol: "SOL",
@@ -57,6 +60,7 @@ export function mockOrpc() {
               buyBalance: 100,
               buyToken: {
                 address: DEFAULT_BUY_TOKEN,
+                decimals: 9,
                 symbol: "SOL",
                 value: "1000",
               },
@@ -68,6 +72,7 @@ export function mockOrpc() {
               sellBalance: 100,
               sellToken: {
                 address: DEFAULT_SELL_TOKEN,
+                decimals: 9,
                 symbol: "USDC",
                 value: "1000",
               },
@@ -86,6 +91,7 @@ export function mockOrpc() {
           queryFn: () =>
             Promise.resolve({
               address: DEFAULT_BUY_TOKEN,
+              decimals: 9,
               imageUrl: "https://example.com/image.png",
               name: "Solana",
               symbol: "SOL",
@@ -113,6 +119,7 @@ export function mockOrpc() {
               tokens: [
                 {
                   address: DEFAULT_BUY_TOKEN,
+                  decimals: 9,
                   imageUrl: "https://example.com/image.png",
                   name: "Solana",
                   symbol: "SOL",
@@ -134,6 +141,7 @@ export function mockOrpc() {
                     address: "0x123",
                     amount: 1000,
                     balance: 1000,
+                    decimals: 9,
                     mint: "0x123",
                     symbol: "SOL",
                   } satisfies TokenAccount,

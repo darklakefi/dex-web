@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@dex-web/core": "workspace:*",
     "@dex-web/db": "workspace:*"
   },
   "exports": {

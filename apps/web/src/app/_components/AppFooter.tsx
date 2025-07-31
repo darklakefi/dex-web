@@ -1,6 +1,14 @@
+"use client";
 import { Footer, Icon, Text } from "@dex-web/ui";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export const AppFooter = () => {
+  const { disconnect } = useWallet();
+
+  const handleClick = () => {
+    disconnect();
+  };
+
   return (
     <Footer
       logo={<Icon className="h-6 w-auto stroke-none" name="logo-lg" />}
@@ -42,7 +50,13 @@ export const AppFooter = () => {
         </Text.Link>
         <Text.Link className="inline-flex flex-col items-baseline justify-center text-green-300 no-underline">
           <div>7D Vol</div>
-          <div>$21.23M</div>
+          <button
+            className="cursor-pointer"
+            onClick={handleClick}
+            type="button"
+          >
+            $21.23M
+          </button>
         </Text.Link>
       </div>
     </Footer>
