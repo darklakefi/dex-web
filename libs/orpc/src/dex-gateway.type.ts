@@ -5,13 +5,13 @@ export enum Network {
 }
 
 export enum TradeStatus {
-  UNSIGNED = 0,
-  SIGNED = 1,
-  CONFIRMED = 2,
-  SETTLED = 3,
-  SLASHED = 4,
-  CANCELLED = 5,
-  FAILED = 6,
+  UNSIGNED = "UNSIGNED",
+  SIGNED = "SIGNED",
+  CONFIRMED = "CONFIRMED",
+  SETTLED = "SETTLED",
+  SLASHED = "SLASHED",
+  CANCELLED = "CANCELLED",
+  FAILED = "FAILED",
 }
 
 export interface WalletEmulatorConfig {

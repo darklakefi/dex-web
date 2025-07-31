@@ -1,6 +1,6 @@
 "use client";
 
-import { client, tanstackClient } from "@dex-web/orpc";
+import { client, TradeStatus, tanstackClient } from "@dex-web/orpc";
 import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -72,6 +72,13 @@ export function SwapForm() {
   );
   const [swapStep, setSwapStep] = useState(0);
   const [disableSwap, setDisableSwap] = useState(true);
+  const [trackDetails, setTrackDetails] = useState<{
+    tradeId: string;
+    trackingId: string;
+  }>({
+    trackingId: "",
+    tradeId: "",
+  });
 
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.getPoolDetails.queryOptions({
@@ -116,6 +123,12 @@ export function SwapForm() {
         .serialize()
         .toString("base64");
       // Prepare signed transaction request
+
+      setTrackDetails({
+        trackingId,
+        tradeId,
+      });
+      console.log("Setting track details", trackDetails);
       const signedTxRequest = {
         signed_transaction: signedTransactionBase64,
         tracking_id: trackingId,
@@ -134,12 +147,7 @@ export function SwapForm() {
         await client.dexGateway.submitSignedTransaction(signedTxRequest);
 
       if (signedTxResponse.success) {
-        setSwapStep(0);
-        toast({
-          description: "Trade completed!",
-          title: "Trade completed",
-          variant: "success",
-        });
+        checkSwapStatus(trackingId, tradeId);
       } else {
         throw new Error("Failed to submit signed transaction");
       }
@@ -147,13 +155,69 @@ export function SwapForm() {
       console.error("Signing error:", error);
       dismissToast();
       toast({
-        description:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        description: `${error instanceof Error ? error.message : "Unknown error occurred"}, trackingId: ${trackingId}`,
         title: "Signing Error",
         variant: "error",
       });
       setSwapStep(0);
     }
+  };
+
+  const checkSwapStatus = async (
+    trackingId: string,
+    tradeId: string,
+    maxAttempts = 10,
+  ) => {
+    for (let i = 0; i < maxAttempts; i++) {
+      if (!trackingId || !tradeId) return;
+      const response = await client.dexGateway.checkTradeStatus({
+        tracking_id: trackingId,
+        trade_id: tradeId,
+      });
+
+      dismissToast();
+
+      if (
+        response.status === TradeStatus.SETTLED ||
+        response.status === TradeStatus.SLASHED
+      ) {
+        setSwapStep(0);
+        toast({
+          description: `Trade completed!, trackingId: ${trackingId}`,
+          title: "Trade completed",
+          variant: "success",
+        });
+        return;
+      }
+
+      if (
+        response.status === TradeStatus.CANCELLED ||
+        response.status === TradeStatus.FAILED
+      ) {
+        setSwapStep(0);
+        toast({
+          description: `Trade ${response.status}!, trackingId: ${trackingId}`,
+          title: `Trade ${response.status}`,
+          variant: "error",
+        });
+        return;
+      }
+
+      toast({
+        description: `TrackingId: ${trackingId}`,
+        title: "Checking trade status",
+        variant: "loading",
+      });
+
+      if (i < maxAttempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+    toast({
+      description: `TrackingId: ${trackingId}`,
+      title: "Failed to check trade status",
+      variant: "error",
+    });
   };
 
   const handleSwap = async () => {
