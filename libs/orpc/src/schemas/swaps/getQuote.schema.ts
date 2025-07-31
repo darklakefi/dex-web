@@ -1,4 +1,5 @@
 import { z } from "zod/v4";
+import { tokenSchema } from "../tokens";
 
 export const getQuoteInputSchema = z.object({
   amountIn: z.number().positive(),
@@ -28,7 +29,9 @@ export const getQuoteOutputSchema = z.object({
     }),
   ),
   slippage: z.number().positive(),
+  tokenX: tokenSchema,
   tokenXMint: z.string(),
+  tokenY: tokenSchema,
   tokenYMint: z.string(),
 });
 

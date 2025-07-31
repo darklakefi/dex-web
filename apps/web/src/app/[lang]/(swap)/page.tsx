@@ -1,14 +1,8 @@
 import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
-import { SwapDetails } from "./_components/SwapDetails";
 import { SwapForm } from "./_components/SwapForm";
-import { SwapPageRefreshButton } from "./_components/SwapPageRefreshButton";
 import { MOCK_OWNER_ADDRESS, MOCK_SWAP_ID } from "./_utils/constants";
 import { selectedTokensCache } from "./_utils/searchParams";
 
@@ -27,12 +21,6 @@ export default async function Page({
         input: { swapId: MOCK_SWAP_ID },
       }),
     ),
-
-    // queryClient.prefetchQuery(
-    //   tanstackClient.getTokenDetails.queryOptions({
-    //     input: { address: MOCK_OWNER_ADDRESS },
-    //   }),
-    // ),
 
     queryClient.prefetchQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
@@ -69,16 +57,7 @@ export default async function Page({
 
           <div className="size-9" />
         </section>
-        <section className="flex w-full max-w-xl items-start gap-1">
-          <div className="size-9" />
-          <Box padding="lg">
-            <SwapForm />
-            <HydrationBoundary state={dehydrate(queryClient)}>
-              <SwapDetails />
-            </HydrationBoundary>
-          </Box>
-          <SwapPageRefreshButton />
-        </section>
+        <SwapForm />
       </div>
       {/* <div className="max-w-xs">
         <FeaturesAndTrendingPoolPanel featuredPools={[]} trendingPools={[]} />

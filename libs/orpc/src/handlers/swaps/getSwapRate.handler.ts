@@ -9,8 +9,7 @@ import {
 } from "@solana/spl-token";
 import { type Connection, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
-import * as fs from "fs";
-import * as path from "path";
+import IDL from "../../../darklake.json";
 import { getHelius } from "../../getHelius";
 import type {
   GetSwapRateInput,
@@ -139,11 +138,11 @@ function calculateSwap(
 }
 
 // Load the IDL
-const idlPath = path.join(__dirname, "../../../darklake-idl.json");
-const idl = JSON.parse(fs.readFileSync(idlPath, "utf8")) as Idl;
+// const idlPath = path.join(__dirname, "../../../darklake.json");
+// const idl = JSON.parse(fs.readFileSync(idlPath, "utf8")) as Idl;
 
 // Use Anchor's coder directly for decoding
-const coder = new BorshCoder(idl);
+const coder = new BorshCoder(IDL as Idl);
 
 // Helper function to fetch and parse Pool account
 async function getPoolAccount(
@@ -159,7 +158,7 @@ async function getPoolAccount(
   // Decode the Pool account using Anchor's built-in decoder
   try {
     const pool = coder.accounts.decode("Pool", accountInfo.data);
-    console.log("Pool data:", pool);
+    // console.log("Pool data:", pool);
     return pool;
   } catch (error) {
     console.error("Failed to decode Pool account:", error);
@@ -275,5 +274,7 @@ export async function getSwapRateHandler(
     amountOutRaw: amountOutBigDecimal.toNumber(),
     estimatedFee: swapResult.tradeFee,
     rateXtoY: swapResult.rate,
+    tokenX,
+    tokenY,
   };
 }

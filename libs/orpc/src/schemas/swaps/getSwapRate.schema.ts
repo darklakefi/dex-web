@@ -1,4 +1,5 @@
 import { z } from "zod/v4";
+import { tokenSchema } from "../tokens/token.schema";
 
 export const getSwapRateInputSchema = z.object({
   amountIn: z.number().positive(),
@@ -14,6 +15,8 @@ export const getSwapRateOutputSchema = z.object({
   amountOutRaw: z.number().positive(),
   estimatedFee: z.number().positive(),
   rateXtoY: z.number().positive(),
+  tokenX: tokenSchema,
+  tokenY: tokenSchema,
 });
 
 export type GetSwapRateInput = z.infer<typeof getSwapRateInputSchema>;

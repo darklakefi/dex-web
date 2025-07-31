@@ -14,6 +14,7 @@ export function SelectWalletModal() {
   ) => {
     e.preventDefault();
     select(wallet.adapter.name);
+    handleClose();
   };
 
   const handleClose = () => {
@@ -28,7 +29,9 @@ export function SelectWalletModal() {
             <Button
               className="cursor-pointer"
               key={wallet.adapter.name}
-              onClick={(e) => handleSelect(wallet, e)}
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                handleSelect(wallet, e)
+              }
               type="button"
               variant="secondary"
             >

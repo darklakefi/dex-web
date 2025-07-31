@@ -104,6 +104,9 @@ importers:
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
+      use-debounce:
+        specifier: ^10.0.5
+        version: 10.0.5(react@19.1.0)
       zod:
         specifier: ^3.25.67
         version: 3.25.67
@@ -10513,6 +10516,12 @@ packages:
   usb@2.15.0:
     resolution: {integrity: sha512-BA9r7PFxyYp99wps1N70lIqdPb2Utcl2KkWohDtWUmhDBeM5hDH1Zl/L/CZvWxd5W3RUCNm1g+b+DEKZ6cHzqg==}
     engines: {node: '>=12.22.0 <13.0 || >=14.17.0'}
+
+  use-debounce@10.0.5:
+    resolution: {integrity: sha512-Q76E3lnIV+4YT9AHcrHEHYmAd9LKwUAbPXDm7FlqVGDHiSOhX3RDjT8dm0AxbJup6WgOb1YEcKyCr11kBJR5KQ==}
+    engines: {node: '>= 16.0.0'}
+    peerDependencies:
+      react: '*'
 
   use-intl@4.3.3:
     resolution: {integrity: sha512-nyaEdN+NhnQW38uMPeB2z74T3+Uxslo9FtBToq3xbv1hxwXpjGfvZHu7BElJaaOaBDv5KQTRuHBbpliP8HZSTA==}
@@ -23806,6 +23815,10 @@ snapshots:
       '@types/w3c-web-usb': 1.0.10
       node-addon-api: 8.4.0
       node-gyp-build: 4.8.4
+
+  use-debounce@10.0.5(react@19.1.0):
+    dependencies:
+      react: 19.1.0
 
   use-intl@4.3.3(react@19.1.0):
     dependencies:

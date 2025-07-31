@@ -5,11 +5,10 @@ import type {
   GetQuoteInput,
   GetQuoteOutput,
 } from "../../schemas/swaps/getQuote.schema";
-import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
+import { getSwapRateHandler } from "./getSwapRate.handler";
 
 const MOCK_POOLS = [
   {
-    rateXtoY: 10,
     tokenXMint: "7gxzDSLbXqapoJ1e4WubzWUfFDeZZPENMAfCQeKfYyjT",
     tokenYMint: "9gXQd53kyGXB1juo7eKpfSTrvCW26u9LfUsPC9HH4nGQ",
   },
@@ -30,45 +29,39 @@ export async function getSwapQuoteHandler(
     throw new Error("Pool not found");
   }
 
-  const tokenX = await getTokenDetailsHandler({
-    address: tokenXMint as string,
+  const swapRate = await getSwapRateHandler({
+    amountIn,
+    isXtoY,
+    tokenXMint,
+    tokenYMint,
   });
-  const tokenY = await getTokenDetailsHandler({
-    address: tokenYMint as string,
-  });
-
-  const amountInBigDecimal = BigNumber(amountIn).multipliedBy(
-    BigNumber(10 ** tokenX.decimals),
-  );
-  const amountOutBigDecimal = isXtoY
-    ? amountInBigDecimal.multipliedBy(BigNumber(pool.rateXtoY))
-    : amountInBigDecimal.dividedBy(BigNumber(pool.rateXtoY));
-
-  const amountOut = amountOutBigDecimal
-    .dividedBy(BigNumber(10 ** tokenY.decimals))
-    .toNumber();
-
+  const mockSolPrice = 200;
   return {
     amountIn,
-    amountInRaw: amountInBigDecimal.toNumber(),
-    amountOut,
-    amountOutRaw: amountOutBigDecimal.toNumber(),
-    estimatedFee: 0,
-    estimatedFeesUsd: 0,
+    amountInRaw: swapRate.amountInRaw,
+    amountOut: swapRate.amountOut,
+    amountOutRaw: swapRate.amountOutRaw,
+    estimatedFee: swapRate.estimatedFee,
+    estimatedFeesUsd: BigNumber(swapRate.estimatedFee)
+      .div(10 ** 9)
+      .multipliedBy(mockSolPrice)
+      .toNumber(),
     isXtoY,
     priceImpactPercentage: 1,
-    rateXtoY: pool.rateXtoY,
+    rateXtoY: swapRate.rateXtoY,
     routePlan: [
       {
         amountIn,
-        amountOut,
+        amountOut: swapRate.amountOut,
         feeAmount: 0,
         tokenXMint,
         tokenYMint,
       },
     ],
     slippage: slippage ?? 0,
+    tokenX: swapRate.tokenX,
     tokenXMint,
+    tokenY: swapRate.tokenY,
     tokenYMint,
   };
 }

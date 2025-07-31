@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "../../dist/libs/orpc",
+    "resolveJsonModule": true,
     "types": ["node"]
   },
   "exclude": [
@@ -16,7 +17,14 @@
     "src/**/*.test.jsx"
   ],
   "extends": "./tsconfig.json",
-  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
+  "include": [
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.json",
+    "*.json"
+  ],
   "references": [
     {
       "path": "../db/tsconfig.lib.json"

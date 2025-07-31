@@ -1,11 +1,8 @@
 "use client";
 
-import { tanstackClient } from "@dex-web/orpc";
+import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Icon } from "@dex-web/ui";
-
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { cva, type VariantProps } from "class-variance-authority";
-import { MOCK_SWAP_ID } from "../_utils/constants";
 
 function getImpact(priceImpactPercentage: number) {
   switch (true) {
@@ -62,21 +59,33 @@ function SwapDetailsItem({ impact, label, value }: SwapDetailsItemProps) {
     </div>
   );
 }
-export function SwapDetails() {
-  const { data: swapDetails } = useSuspenseQuery(
-    tanstackClient.getSwapDetails.queryOptions({
-      input: { swapId: MOCK_SWAP_ID },
-    }),
-  );
 
-  const priceValue = `1 ${swapDetails.buyToken.symbol} ≈ ${swapDetails.exchangeRate} ${swapDetails.sellToken.symbol}`;
-  const priceImpactValue = `${swapDetails.priceImpactPercentage}%`;
-  const maxSlippageValue = `${swapDetails.slippageTolerancePercentage}%`;
-  const mevProtectionValue = swapDetails.mevProtectionEnabled
-    ? "Active"
-    : "Inactive";
-  const estimatedFeesValue = `$${swapDetails.estimatedFeesUsd}`;
-  const impact = getImpact(swapDetails.priceImpactPercentage);
+export interface SwapDetailsProps {
+  quote: GetQuoteOutput;
+  tokenSellMint: string;
+  tokenBuyMint: string;
+}
+
+export function SwapDetails({
+  quote,
+  tokenSellMint,
+  tokenBuyMint,
+}: SwapDetailsProps) {
+  const tokenSell =
+    quote.tokenX.address === tokenSellMint ? quote.tokenX : quote.tokenY;
+  const tokenBuy =
+    quote.tokenX.address === tokenBuyMint ? quote.tokenX : quote.tokenY;
+  const rate =
+    quote.tokenX.address === tokenSellMint
+      ? quote.rateXtoY
+      : 1 / quote.rateXtoY;
+
+  const priceValue = `1 ${tokenBuy.symbol} ≈ ${rate} ${tokenSell.symbol}`;
+  const priceImpactValue = `${quote.priceImpactPercentage}%`;
+  // const maxSlippageValue = `${quote.slippage}%`;
+  // const mevProtectionValue = true ? "Active" : "Inactive";
+  const estimatedFeesValue = `$${quote.estimatedFeesUsd}`;
+  const impact = getImpact(quote.priceImpactPercentage);
 
   return (
     <Box background="highlight">
@@ -87,8 +96,8 @@ export function SwapDetails() {
           label="Price Impact"
           value={priceImpactValue}
         />
-        <SwapDetailsItem label="Max Slippage" value={maxSlippageValue} />
-        <SwapDetailsItem label="MEV Protection" value={mevProtectionValue} />
+        {/* <SwapDetailsItem label="Max Slippage" value={maxSlippageValue} /> */}
+        <SwapDetailsItem label="MEV Protection" value="Active" />
         <SwapDetailsItem label="Est. Fees" value={estimatedFeesValue} />
       </dl>
     </Box>
