@@ -10,7 +10,7 @@ describe("SwapButton", () => {
   it("swaps tokens", async () => {
     const user = userEvent.setup();
 
-    render(<SwapButton />, {
+    render(<SwapButton onClickSwapToken={() => {}} />, {
       wrapper: withNuqsTestingAdapter({
         onUrlUpdate,
         searchParams: "?buyTokenAddress=abc&sellTokenAddress=def",
