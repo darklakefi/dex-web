@@ -17,7 +17,10 @@ import type {
 } from "./dex-gateway.type";
 
 const config = {
-  gatewayHost: process.env.GATEWAY_HOST || "148.251.84.109" || "localhost",
+  gatewayHost:
+    process.env.GATEWAY_HOST ||
+    "dex-gateway-staging.dex.darklake.fi" ||
+    "localhost",
   gatewayPort: parseInt(process.env.GATEWAY_PORT || "50051"),
 };
 
