@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Modal } from "@dex-web/ui";
+import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import { useWallet, type Wallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -23,11 +23,19 @@ export function SelectWalletModal() {
 
   return (
     <Modal onClose={handleClose}>
-      <Box className="flex max-h-full w-full max-w-sm drop-shadow-xl">
+      <Box className="fixed right-0 flex h-full max-h-full w-full max-w-sm drop-shadow-xl">
+        <div className="mb-3 flex justify-between border-green-600 border-b pb-3">
+          <Text className="font-bold text-2xl" variant="heading">
+            Connect Wallet
+          </Text>{" "}
+          <button type="button">
+            <Icon className="size-6" name="times" />
+          </button>
+        </div>
         <div className="flex flex-col gap-4">
           {wallets.map((wallet) => (
             <Button
-              className="cursor-pointer"
+              className="inline-flex cursor-pointer justify-start gap-4"
               key={wallet.adapter.name}
               onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
                 handleSelect(wallet, e)
