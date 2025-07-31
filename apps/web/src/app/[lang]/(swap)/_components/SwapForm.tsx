@@ -128,7 +128,6 @@ export function SwapForm() {
         trackingId,
         tradeId,
       });
-      console.log("Setting track details", trackDetails);
       const signedTxRequest = {
         signed_transaction: signedTransactionBase64,
         tracking_id: trackingId,
