@@ -34,7 +34,8 @@ export default async function Page({
       <div className="flex max-w-xl flex-col items-center justify-center">
         <section className="flex w-full items-start gap-1">
           <div className="size-9" />
-          <Box className="mb-0 bg-green-800 pb-0">
+          <Text.Heading className="mb-4 block md:hidden">Swap</Text.Heading>
+          <Box className="mb-0 hidden bg-green-800 pb-0 md:block">
             <Hero
               className="gap-4"
               image="/images/waddles/pose4.png"
@@ -45,10 +46,10 @@ export default async function Page({
                 <Text.Heading>swap</Text.Heading>
                 <div className="flex flex-col text-md">
                   <Text.Body2 className="text-md md:text-lg">
-                    ANTI-SANDWICH DEFENSE:
+                    MEV attacks intercepted:
                   </Text.Body2>
                   <Text.Body2 className="text-green-300 text-md md:text-lg">
-                    Value preservation system active.
+                    better prices.
                   </Text.Body2>
                 </div>
               </div>

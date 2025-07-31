@@ -182,8 +182,8 @@ export function SwapForm() {
       ) {
         setSwapStep(0);
         toast({
-          description: `Trade completed!, trackingId: ${trackingId}`,
-          title: "Trade completed",
+          description: `SWAPPED ${form.state.values.sellAmount} ${sellTokenAddress} FOR ${form.state.values.buyAmount} ${buyTokenAddress}. protected from MEV attacks.`,
+          title: "Swap complete",
           variant: "success",
         });
         return;
