@@ -23,7 +23,7 @@ const classicConsoleNeue = localFont({
 });
 
 export const metadata = {
-  description: "A decentralized exchange with MEV protection for Solana",
+  description: "A decentralized exchange (dex) with MEV protection for Solana",
   title: "Darklake",
 };
 
