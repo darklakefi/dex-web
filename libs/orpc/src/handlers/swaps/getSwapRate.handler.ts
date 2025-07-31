@@ -9,7 +9,7 @@ import {
 } from "@solana/spl-token";
 import { type Connection, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
-import IDL from "../../../darklake.json";
+import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
   GetSwapRateInput,
