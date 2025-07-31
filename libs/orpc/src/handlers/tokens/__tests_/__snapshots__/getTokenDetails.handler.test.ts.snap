@@ -3,6 +3,7 @@
 exports[`getTokensHandler > should return a token details 1`] = `
 {
   "address": "So11111111111111111111111111111111111111112",
+  "decimals": 9,
   "imageUrl": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
   "name": "Wrapped SOL",
   "symbol": "SOL",
