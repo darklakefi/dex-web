@@ -1,9 +1,9 @@
 {
-  "buildCommand": null,
+  "buildCommand": "cd ../.. && npx nx build web",
   "framework": "nextjs",
   "git": {
     "deploymentEnabled": false
   },
-  "installCommand": null,
-  "outputDirectory": "dist/apps/web"
+  "installCommand": "cd ../.. && pnpm install",
+  "outputDirectory": "dist/dist"
 }

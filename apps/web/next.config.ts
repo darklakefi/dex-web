@@ -6,7 +6,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
-  distDir: "dist/apps/web",
+  distDir: "dist",
   experimental: {
     reactCompiler: true,
     typedRoutes: true,
@@ -43,7 +43,8 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
-    tsconfigPath: "./tsconfig.lib.json",
+    // Use the main tsconfig for Next.js builds
+    tsconfigPath: "./tsconfig.json",
   },
 
   webpack(config, { isServer }) {
