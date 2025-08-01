@@ -19,35 +19,19 @@ export const tokensData = [
 
 export const tokensDataMainnet = [
   {
-    address: "BjkpJ2nwVAcqiJS7QvyFT7NmPiiKSER2jk3UZ357aeFk",
+    address: "DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX",
     chainId: 101,
     decimals: 6,
     logoURI: "",
-    name: "TokenXXX",
-    symbol: "TokenXXX",
+    name: "DuX",
+    symbol: "DuX",
   },
   {
-    address: "FhvvMyddHzDQjopqL2cTmevcf225syJzXucKS1aQbyrd",
+    address: "HXsKnhXPtGr2mq4uTpxbxyy7ZydYWJwx4zMuYPEDukY",
     chainId: 101,
     decimals: 9,
     logoURI: "",
-    name: "TokenYYY",
-    symbol: "TokenYYY",
-  },
-  {
-    address: "4Hdpxzz6VXyTfNpcQxiGg97gYsSDjkqDsYNxNj42kmb6",
-    chainId: 101,
-    decimals: 6,
-    logoURI: "",
-    name: "TokenXXX",
-    symbol: "TokenXXX",
-  },
-  {
-    address: "JBjvyqUJX1dapQbzXqXj5vmnrT5AmdhjVdQHE9yxu1cU",
-    chainId: 101,
-    decimals: 9,
-    logoURI: "",
-    name: "TokenYYY",
-    symbol: "TokenYYY",
+    name: "DukY",
+    symbol: "DukY",
   },
 ];

@@ -12,12 +12,8 @@ const MOCK_POOLS = [
 
 const MAINNET_POOLS = [
   {
-    tokenXMint: "BjkpJ2nwVAcqiJS7QvyFT7NmPiiKSER2jk3UZ357aeFk",
-    tokenYMint: "FhvvMyddHzDQjopqL2cTmevcf225syJzXucKS1aQbyrd",
-  },
-  {
-    tokenXMint: "4Hdpxzz6VXyTfNpcQxiGg97gYsSDjkqDsYNxNj42kmb6",
-    tokenYMint: "JBjvyqUJX1dapQbzXqXj5vmnrT5AmdhjVdQHE9yxu1cU",
+    tokenXMint: "DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX",
+    tokenYMint: "HXsKnhXPtGr2mq4uTpxbxyy7ZydYWJwx4zMuYPEDukY",
   },
 ];
 
