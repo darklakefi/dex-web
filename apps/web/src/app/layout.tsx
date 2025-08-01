@@ -23,8 +23,9 @@ const classicConsoleNeue = localFont({
 });
 
 export const metadata = {
-  description: "A decentralized exchange (dex) with MEV protection for Solana",
-  title: "Darklake",
+  description:
+    "Darklake is the best solana dex for trade execution that is fair, and value for LPs. Learn more about how we use zk to protect your alpha and create fair markets",
+  title: "Best Solana Dex for Trade Execution | Darklake",
 };
 
 export default async function RootLayout({
