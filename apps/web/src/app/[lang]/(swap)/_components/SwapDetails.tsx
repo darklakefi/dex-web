@@ -77,11 +77,13 @@ export function SwapDetails({
   const tokenBuy =
     quote.tokenX.address === tokenBuyMint ? quote.tokenX : quote.tokenY;
 
-  const priceValue = `1 ${quote.tokenX.symbol} ≈ ${quote.rateXtoY} ${quote.tokenY.symbol}`;
+  const priceValue = `1 ${quote.tokenX.symbol} ≈ ${quote.isXtoY ? quote.rateXtoY : 1 / quote.rateXtoY} ${quote.tokenY.symbol}`;
   const priceImpactValue = `${quote.priceImpactPercentage}%`;
   // const maxSlippageValue = `${quote.slippage}%`;
   // const mevProtectionValue = true ? "Active" : "Inactive";
-  const estimatedFeesValue = `${BigNumber(quote.estimatedFee).toString()} ${tokenSell.symbol}`;
+  const estimatedFeesValue = `${BigNumber(quote.estimatedFee)
+    .div(10 ** Number(tokenSell.decimals))
+    .toString()} ${tokenSell.symbol}`;
   const impact = getImpact(quote.priceImpactPercentage);
 
   return (
