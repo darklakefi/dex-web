@@ -20,6 +20,7 @@ import { SwapButton } from "./SwapButton";
 import { SwapDetails } from "./SwapDetails";
 import { SwapFormFieldset } from "./SwapFormFieldset";
 import { SwapPageRefreshButton } from "./SwapPageRefreshButton";
+import { SwapPageSettingButton } from "./SwapPageSettingButton";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -413,15 +414,18 @@ export function SwapForm() {
           />
         )}
       </Box>
-      <SwapPageRefreshButton
-        onClick={() => {
-          debouncedGetQuote({
-            amountIn: form.state.values.sellAmount,
-            isXtoY,
-            type: "sell",
-          });
-        }}
-      />
+      <div className="flex flex-col gap-1">
+        <SwapPageSettingButton />
+        <SwapPageRefreshButton
+          onClick={() => {
+            debouncedGetQuote({
+              amountIn: form.state.values.sellAmount,
+              isXtoY,
+              type: "sell",
+            });
+          }}
+        />
+      </div>
     </section>
   );
 }
