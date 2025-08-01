@@ -5,5 +5,5 @@
     "deploymentEnabled": false
   },
   "installCommand": "cd ../.. && pnpm install",
-  "outputDirectory": "dist/dist"
+  "outputDirectory": "dist"
 }
