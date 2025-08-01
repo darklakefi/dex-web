@@ -3,14 +3,14 @@ import type {
   GetPoolDetailsOutput,
 } from "../../schemas/pools/getPoolDetails.schema";
 
-const MOCK_POOLS = [
+export const MOCK_POOLS = [
   {
     tokenXMint: "DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX",
     tokenYMint: "HXsKnhXPtGr2mq4uTpxbxyy7ZydYWJwx4zMuYPEDukY",
   },
 ];
 
-const MAINNET_POOLS = [
+export const MAINNET_POOLS = [
   {
     tokenXMint: "DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX",
     tokenYMint: "HXsKnhXPtGr2mq4uTpxbxyy7ZydYWJwx4zMuYPEDukY",

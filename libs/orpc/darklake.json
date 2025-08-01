@@ -13,7 +13,7 @@
       "name": "Pool"
     }
   ],
-  "address": "3LS7r7w6bx6UrTkgHiHGsKZYDLqbE7XWWt24wmYk2sAq",
+  "address": "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
   "docs": [
     "# Darklake DEX - Two-Step Confidential Trading Protocol",
     "",
@@ -2631,19 +2631,19 @@
             "type": "u64"
           },
           {
-            "docs": ["padding"],
-            "name": "padding",
-            "type": {
-              "array": ["u64", 16]
-            }
-          },
-          {
             "name": "bump",
             "type": "u8"
           },
           {
             "name": "halted",
             "type": "bool"
+          },
+          {
+            "docs": ["padding"],
+            "name": "padding",
+            "type": {
+              "array": ["u64", 16]
+            }
           }
         ],
         "kind": "struct"
@@ -2860,18 +2860,18 @@
             }
           },
           {
-            "name": "padding",
-            "type": {
-              "array": ["u64", 3]
-            }
-          },
-          {
             "name": "is_x_to_y",
             "type": "bool"
           },
           {
             "name": "bump",
             "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": ["u64", 4]
+            }
           }
         ],
         "kind": "struct"
@@ -2934,14 +2934,14 @@
             "type": "u64"
           },
           {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
             "name": "padding",
             "type": {
               "array": ["u64", 4]
             }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ],
         "kind": "struct"

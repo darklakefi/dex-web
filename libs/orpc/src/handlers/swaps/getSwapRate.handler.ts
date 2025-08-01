@@ -20,7 +20,7 @@ import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
 // TODO: put this somewhere configurable based on env
 const EXCHANGE_PROGRAM_ID = new PublicKey(
   process.env.EXCHANGE_PROGRAM_ID ||
-    "3LS7r7w6bx6UrTkgHiHGsKZYDLqbE7XWWt24wmYk2sAq",
+    "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
 );
 
 // 100% = 1000000, 0.0001% = 1
@@ -191,91 +191,102 @@ async function getAmmConfigAccount(
 export async function getSwapRateHandler(
   input: GetSwapRateInput,
 ): Promise<GetSwapRateOutput> {
-  const { amountIn, isXtoY, tokenXMint, tokenYMint } = input;
+  try {
+    const { amountIn, isXtoY, tokenXMint, tokenYMint } = input;
 
-  const tokenXMintPubkey = new PublicKey(tokenXMint);
-  const tokenYMintPubkey = new PublicKey(tokenYMint);
+    const tokenXMintPubkey = new PublicKey(tokenXMint);
+    const tokenYMintPubkey = new PublicKey(tokenYMint);
 
-  const helius = getHelius();
+    const helius = getHelius();
 
-  const amm_config_index = Buffer.alloc(4);
-  amm_config_index.writeUInt8(0, 0);
+    const amm_config_index = Buffer.alloc(4);
+    amm_config_index.writeUInt8(0, 0);
 
-  const [ammConfigPubkey] = PublicKey.findProgramAddressSync(
-    [Buffer.from("amm_config"), amm_config_index],
-    EXCHANGE_PROGRAM_ID,
-  );
+    const [ammConfigPubkey] = PublicKey.findProgramAddressSync(
+      [Buffer.from("amm_config"), amm_config_index],
+      EXCHANGE_PROGRAM_ID,
+    );
 
-  const [poolPubkey] = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("pool"),
-      ammConfigPubkey.toBuffer(),
-      new PublicKey(tokenXMint).toBuffer(),
-      new PublicKey(tokenYMint).toBuffer(),
-    ],
-    EXCHANGE_PROGRAM_ID,
-  );
+    const [poolPubkey] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("pool"),
+        ammConfigPubkey.toBuffer(),
+        new PublicKey(tokenXMint).toBuffer(),
+        new PublicKey(tokenYMint).toBuffer(),
+      ],
+      EXCHANGE_PROGRAM_ID,
+    );
 
-  const connection = helius.connection;
+    const connection = helius.connection;
 
-  // Fetch and parse both Pool and AmmConfig accounts
-  const pool = await getPoolAccount(connection, poolPubkey);
-  const ammConfig = await getAmmConfigAccount(connection, ammConfigPubkey);
+    // Fetch and parse both Pool and AmmConfig accounts
+    const pool = await getPoolAccount(connection, poolPubkey);
+    const ammConfig = await getAmmConfigAccount(connection, ammConfigPubkey);
 
-  // Get token balances from reserve accounts
-  let reserveXBalance = 0;
-  let reserveYBalance = 0;
+    // Get token balances from reserve accounts
+    let reserveXBalance = 0;
+    let reserveYBalance = 0;
 
-  // Get token balances
-  reserveXBalance = await getTokenBalance(
-    connection,
-    pool.reserve_x,
-    "Reserve X",
-  );
-  reserveYBalance = await getTokenBalance(
-    connection,
-    pool.reserve_y,
-    "Reserve Y",
-  );
+    // Get token balances
+    reserveXBalance = await getTokenBalance(
+      connection,
+      pool.reserve_x,
+      "Reserve X",
+    );
+    reserveYBalance = await getTokenBalance(
+      connection,
+      pool.reserve_y,
+      "Reserve Y",
+    );
 
-  const availableReserveX =
-    reserveXBalance - pool.locked_x - pool.user_locked_x - pool.protocol_fee_x;
-  const availableReserveY =
-    reserveYBalance - pool.locked_y - pool.user_locked_y - pool.protocol_fee_y;
+    const availableReserveX =
+      reserveXBalance -
+      pool.locked_x -
+      pool.user_locked_x -
+      pool.protocol_fee_x;
+    const availableReserveY =
+      reserveYBalance -
+      pool.locked_y -
+      pool.user_locked_y -
+      pool.protocol_fee_y;
 
-  // Calculate swap using AMM formula
-  const tradeFeeRate = Number(ammConfig.trade_fee_rate) || 0;
-  const swapResult = calculateSwap(
-    amountIn,
-    isXtoY ? availableReserveX : availableReserveY,
-    isXtoY ? availableReserveY : availableReserveX,
-    tradeFeeRate,
-  );
+    // Calculate swap using AMM formula
+    const tradeFeeRate = Number(ammConfig.trade_fee_rate) || 0;
+    const swapResult = calculateSwap(
+      amountIn,
+      isXtoY ? availableReserveX : availableReserveY,
+      isXtoY ? availableReserveY : availableReserveX,
+      tradeFeeRate,
+    );
 
-  const tokenX = await getTokenDetailsHandler({
-    address: tokenXMint.toString(),
-  });
-  const tokenY = await getTokenDetailsHandler({
-    address: tokenYMint.toString(),
-  });
+    const tokenX = await getTokenDetailsHandler({
+      address: tokenXMint.toString(),
+    });
+    const tokenY = await getTokenDetailsHandler({
+      address: tokenYMint.toString(),
+    });
 
-  const amountInBigDecimal = BigNumber(amountIn).multipliedBy(
-    BigNumber(10 ** (isXtoY ? tokenX.decimals : tokenY.decimals)),
-  );
-  const amountOutBigDecimal = BigNumber(swapResult.destinationAmount);
+    const amountInBigDecimal = BigNumber(amountIn).multipliedBy(
+      BigNumber(10 ** (isXtoY ? tokenX.decimals : tokenY.decimals)),
+    );
+    const amountOutBigDecimal = BigNumber(swapResult.destinationAmount);
 
-  const amountOut = amountOutBigDecimal
-    .dividedBy(BigNumber(10 ** (isXtoY ? tokenY.decimals : tokenX.decimals)))
-    .toNumber();
+    const amountOut = amountOutBigDecimal
+      .dividedBy(BigNumber(10 ** (isXtoY ? tokenY.decimals : tokenX.decimals)))
+      .toNumber();
 
-  return {
-    amountIn,
-    amountInRaw: amountInBigDecimal.toNumber(),
-    amountOut,
-    amountOutRaw: amountOutBigDecimal.toNumber(),
-    estimatedFee: swapResult.tradeFee,
-    rateXtoY: swapResult.rate,
-    tokenX,
-    tokenY,
-  };
+    return {
+      amountIn,
+      amountInRaw: amountInBigDecimal.toNumber(),
+      amountOut,
+      amountOutRaw: amountOutBigDecimal.toNumber(),
+      estimatedFee: swapResult.tradeFee,
+      rateXtoY: swapResult.rate,
+      tokenX,
+      tokenY,
+    };
+  } catch (error) {
+    console.error("Failed to get swap rate:", error);
+    throw new Error("Failed to get swap rate");
+  }
 }
