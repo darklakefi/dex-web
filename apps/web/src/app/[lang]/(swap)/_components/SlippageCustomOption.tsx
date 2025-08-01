@@ -1,33 +1,40 @@
 import { Text } from "@dex-web/ui";
+import { useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
+import type { Slippage } from "./SwapPageSettingButton";
 
 export interface SlippageCustomOptionProps {
-  selected: boolean;
-  onClick: (slippage: string) => void;
-  onChange: (slippage: string) => void;
-  slippage: string;
+  onClick: (slippage: Slippage) => void;
+  onChange: (slippage: Slippage) => void;
+  slippage: Slippage;
 }
 
 export function SlippageCustomOption({
-  selected,
   onClick,
   onChange,
   slippage,
 }: SlippageCustomOptionProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const [localValue, setLocalValue] = useState<string | null>(null);
+
   return (
     <button
       aria-label="custom-slippage"
       className={twMerge(
         "flex cursor-pointer items-center gap-2",
-        selected ? "text-green-200" : "text-green-300",
+        slippage.type === "custom" ? "text-green-200" : "text-green-300",
       )}
       onClick={() => {
-        onClick(slippage);
+        onClick({
+          type: "custom",
+          value: localValue ?? "",
+        });
       }}
       type="button"
     >
       <Text.Body2 className="text-inherit">
-        {selected ? "[x]" : "[ ]"}
+        {slippage.type === "custom" ? "[x]" : "[ ]"}
       </Text.Body2>
       <div className="flex items-center gap-1 border border-green-400 bg-green-600 pr-1">
         <input
@@ -35,12 +42,15 @@ export function SlippageCustomOption({
           className="w-10 text-end font-sans text-inherit text-md uppercase focus:outline-none"
           inputMode="decimal"
           onChange={(e) => {
-            const value = e.target.value.replace(/[^0-9.]/g, "");
-            const sanitized = value.split(".").slice(0, 2).join(".");
-            onChange(sanitized);
+            onChange({
+              type: "custom",
+              value: String(Number(e.target.value)),
+            });
+            setLocalValue(String(Number(e.target.value)));
           }}
+          ref={inputRef}
           type="text"
-          value={slippage === "0" ? "" : slippage}
+          value={localValue ?? ""}
         />
         %
       </div>

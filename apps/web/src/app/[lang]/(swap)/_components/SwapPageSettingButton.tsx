@@ -6,13 +6,20 @@ import { useState } from "react";
 import { SlippageCustomOption } from "./SlippageCustomOption";
 import { SlippageDefaultOption } from "./SlippageDefaultOption";
 
+export type Slippage = {
+  type: string;
+  value: string;
+};
+
 export function SwapPageSettingButton({
   onChange,
 }: {
   onChange: (slippage: string) => void;
 }) {
-  const [selectedOption, setSelectedOption] = useState<string>("0.5");
-  const [customSlippage, setCustomSlippage] = useState<string>("");
+  const [slippage, setSlippage] = useState<Slippage>({
+    type: "0.5",
+    value: "0.5",
+  });
 
   const handleChange = (slippage: string) => {
     onChange(slippage);
@@ -52,59 +59,76 @@ export function SwapPageSettingButton({
                 <div className="flex items-center gap-4">
                   <SlippageDefaultOption
                     onClick={() => {
-                      if (selectedOption === "0.5") {
+                      if (slippage.type === "0.5") {
                         handleChange("0");
-                        setSelectedOption("0");
+                        setSlippage({
+                          type: "0",
+                          value: "0",
+                        });
                         return;
                       }
-                      setSelectedOption("0.5");
+                      setSlippage({
+                        type: "0.5",
+                        value: "0.5",
+                      });
                       handleChange("0.5");
                     }}
-                    selected={selectedOption === "0.5"}
+                    selected={slippage.type === "0.5"}
                     slippage={0.5}
                   />
                   <SlippageDefaultOption
                     onClick={() => {
-                      if (selectedOption === "1") {
+                      if (slippage.type === "1") {
                         handleChange("0");
-                        setSelectedOption("0");
+                        setSlippage({
+                          type: "0",
+                          value: "0",
+                        });
                         return;
                       }
-                      setSelectedOption("1");
+                      setSlippage({
+                        type: "1",
+                        value: "1",
+                      });
                       handleChange("1");
                     }}
-                    selected={selectedOption === "1"}
+                    selected={slippage.type === "1"}
                     slippage={1}
                   />
                   <SlippageDefaultOption
                     onClick={() => {
-                      if (selectedOption === "2") {
+                      if (slippage.type === "2") {
                         handleChange("0");
-                        setSelectedOption("0");
+                        setSlippage({
+                          type: "0",
+                          value: "0",
+                        });
                         return;
                       }
-                      setSelectedOption("2");
+                      setSlippage({
+                        type: "2",
+                        value: "2",
+                      });
                       handleChange("2");
                     }}
-                    selected={selectedOption === "2"}
+                    selected={slippage.type === "2"}
                     slippage={2}
                   />
                   <SlippageCustomOption
-                    onChange={(slippage: string) => {
-                      if (selectedOption === "custom") {
-                        handleChange("0");
-                        setSelectedOption("0");
-                        return;
-                      }
-                      setCustomSlippage(slippage);
-                      handleChange(slippage);
+                    onChange={(slippage: Slippage) => {
+                      setSlippage({
+                        type: "custom",
+                        value: slippage.value,
+                      });
+                      handleChange(slippage.value);
                     }}
-                    onClick={(slippage: string) => {
-                      setSelectedOption("custom");
-                      setCustomSlippage(slippage);
+                    onClick={(slippage: Slippage) => {
+                      setSlippage({
+                        type: "custom",
+                        value: slippage.value,
+                      });
                     }}
-                    selected={selectedOption === "custom"}
-                    slippage={customSlippage}
+                    slippage={slippage}
                   />
                 </div>
               </Box>
