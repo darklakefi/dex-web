@@ -51,7 +51,7 @@ export function SlippageCustomOption({
             }
           }}
           ref={inputRef}
-          type="number"
+          type="text"
           value={localValue ?? ""}
         />
         %
