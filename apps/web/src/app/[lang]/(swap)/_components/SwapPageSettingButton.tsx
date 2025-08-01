@@ -10,7 +10,9 @@ export type Slippage = {
   type: string;
   value: string;
 };
-
+export function slippageIsWithinRange(slippage: string) {
+  return Number(slippage) >= 0 && Number(slippage) <= 99;
+}
 export function SwapPageSettingButton({
   onChange,
 }: {
@@ -22,7 +24,9 @@ export function SwapPageSettingButton({
   });
 
   const handleChange = (slippage: string) => {
-    onChange(slippage);
+    if (slippageIsWithinRange(slippage)) {
+      onChange(slippage);
+    }
   };
 
   return (

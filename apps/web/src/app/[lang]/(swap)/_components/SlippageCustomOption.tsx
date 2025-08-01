@@ -1,7 +1,7 @@
 import { Text } from "@dex-web/ui";
 import { useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import type { Slippage } from "./SwapPageSettingButton";
+import { type Slippage, slippageIsWithinRange } from "./SwapPageSettingButton";
 
 export interface SlippageCustomOptionProps {
   onClick: (slippage: Slippage) => void;
@@ -41,17 +41,17 @@ export function SlippageCustomOption({
           aria-label="slippage"
           className="w-10 text-end font-sans text-inherit text-md uppercase focus:outline-none"
           inputMode="decimal"
-          maxLength={2}
-          minLength={0}
           onChange={(e) => {
             onChange({
               type: "custom",
               value: String(Number(e.target.value)),
             });
-            setLocalValue(String(Number(e.target.value)));
+            if (slippageIsWithinRange(String(Number(e.target.value)))) {
+              setLocalValue(String(Number(e.target.value)));
+            }
           }}
           ref={inputRef}
-          type="text"
+          type="number"
           value={localValue ?? ""}
         />
         %
