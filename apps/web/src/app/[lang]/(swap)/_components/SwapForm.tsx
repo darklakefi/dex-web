@@ -253,8 +253,8 @@ export function SwapForm() {
               .toNumber()
           : buyAmount,
         network: parseInt(process.env.NETWORK || "2", 10),
-        token_mint_x: sellTokenAddress,
-        token_mint_y: buyTokenAddress,
+        token_mint_x: isXtoY ? sellTokenAddress : buyTokenAddress,
+        token_mint_y: isXtoY ? buyTokenAddress : sellTokenAddress,
         tracking_id: "123", // should place this in the orpc and better structure for tracking
         user_address: publicKey.toBase58(),
       });
