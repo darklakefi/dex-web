@@ -9,7 +9,7 @@
       "defaultConfiguration": "production",
       "executor": "@nx/next:build",
       "options": {
-        "outputPath": "apps/web/dist"
+        "outputPath": "dist"
       },
       "outputs": ["{options.outputPath}"]
     },
