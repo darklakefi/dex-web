@@ -18,7 +18,7 @@ export function SwapPageSettingButton({
 
   useEffect(() => {
     onChange(slippage);
-  }, [slippage, onChange]);
+  }, [slippage]);
 
   return (
     <Popover>
