@@ -5,21 +5,17 @@ import type {
   GetQuoteInput,
   GetQuoteOutput,
 } from "../../schemas/swaps/getQuote.schema";
+import { MAINNET_POOLS, MOCK_POOLS } from "../pools/getPoolDetails.handler";
 import { getSwapRateHandler } from "./getSwapRate.handler";
-
-const MOCK_POOLS = [
-  {
-    tokenXMint: "7gxzDSLbXqapoJ1e4WubzWUfFDeZZPENMAfCQeKfYyjT",
-    tokenYMint: "9gXQd53kyGXB1juo7eKpfSTrvCW26u9LfUsPC9HH4nGQ",
-  },
-];
 
 export async function getSwapQuoteHandler(
   input: GetQuoteInput,
 ): Promise<GetQuoteOutput> {
   const { amountIn, isXtoY, slippage, tokenXMint, tokenYMint } = input;
 
-  const pool = MOCK_POOLS.find(
+  const rawData = process.env.NETWORK === "2" ? MOCK_POOLS : MAINNET_POOLS;
+
+  const pool = rawData.find(
     (pool) =>
       (pool.tokenXMint === tokenXMint && pool.tokenYMint === tokenYMint) ||
       (pool.tokenXMint === tokenYMint && pool.tokenYMint === tokenXMint),
@@ -28,13 +24,14 @@ export async function getSwapQuoteHandler(
   if (!pool) {
     throw new Error("Pool not found");
   }
-
+  console.log("pool", pool);
   const swapRate = await getSwapRateHandler({
     amountIn,
     isXtoY,
     tokenXMint,
     tokenYMint,
   });
+  console.log("swapRate", swapRate);
   const mockSolPrice = 200;
   return {
     amountIn,
