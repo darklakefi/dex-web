@@ -4,10 +4,27 @@ import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import { useWallet, type Wallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useQueryStates } from "nuqs";
+import { useEffect, useState } from "react";
+import { getFirstAvailableWallet } from "../../../_utils/getFirstAvailableWallet";
+import { selectedTokensParsers } from "../_utils/searchParams";
 
 export function SelectWalletModal() {
-  const { wallets, select } = useWallet();
+  const { wallets, wallet, select } = useWallet();
   const router = useRouter();
+  const [shouldClose, setShouldClose] = useState(false);
+  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+    selectedTokensParsers,
+  );
+
+  const firstAvailableWallet = getFirstAvailableWallet(wallets);
+
+  useEffect(() => {
+    if (firstAvailableWallet && shouldClose) {
+      handleClose();
+    }
+  }, [firstAvailableWallet, shouldClose]);
+
   const handleSelect = (
     wallet: Wallet,
     e: React.MouseEvent<HTMLButtonElement>,
@@ -15,12 +32,14 @@ export function SelectWalletModal() {
     e.preventDefault();
     select(wallet.adapter.name);
     setTimeout(() => {
-      handleClose();
-    }, 500);
+      setShouldClose(true);
+    }, 2000);
   };
 
   const handleClose = () => {
-    router.push("/");
+    router.push(
+      `/?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${buyTokenAddress}&wallet=${wallet?.adapter.name}`,
+    );
   };
 
   return (
