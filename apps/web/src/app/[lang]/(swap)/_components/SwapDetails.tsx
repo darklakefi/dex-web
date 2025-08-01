@@ -81,7 +81,9 @@ export function SwapDetails({
   const priceImpactValue = `${quote.priceImpactPercentage}%`;
   // const maxSlippageValue = `${quote.slippage}%`;
   // const mevProtectionValue = true ? "Active" : "Inactive";
-  const estimatedFeesValue = `${BigNumber(quote.estimatedFee).toString()} ${tokenSell.symbol}`;
+  const estimatedFeesValue = `${BigNumber(quote.estimatedFee)
+    .div(10 ** Number(tokenSell.decimals))
+    .toString()} ${tokenSell.symbol}`;
   const impact = getImpact(quote.priceImpactPercentage);
 
   return (
