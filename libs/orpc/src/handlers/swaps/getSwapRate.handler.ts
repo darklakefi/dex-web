@@ -19,7 +19,8 @@ import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
 
 // TODO: put this somewhere configurable based on env
 const EXCHANGE_PROGRAM_ID = new PublicKey(
-  "3LS7r7w6bx6UrTkgHiHGsKZYDLqbE7XWWt24wmYk2sAq",
+  process.env.EXCHANGE_PROGRAM_ID ||
+    "3LS7r7w6bx6UrTkgHiHGsKZYDLqbE7XWWt24wmYk2sAq",
 );
 
 // 100% = 1000000, 0.0001% = 1
