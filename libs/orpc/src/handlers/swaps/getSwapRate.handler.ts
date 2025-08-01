@@ -194,9 +194,6 @@ export async function getSwapRateHandler(
   try {
     const { amountIn, isXtoY, tokenXMint, tokenYMint } = input;
 
-    const tokenXMintPubkey = new PublicKey(tokenXMint);
-    const tokenYMintPubkey = new PublicKey(tokenYMint);
-
     const helius = getHelius();
 
     const amm_config_index = Buffer.alloc(4);
@@ -250,15 +247,6 @@ export async function getSwapRateHandler(
       pool.user_locked_y -
       pool.protocol_fee_y;
 
-    // Calculate swap using AMM formula
-    const tradeFeeRate = Number(ammConfig.trade_fee_rate) || 0;
-    const swapResult = calculateSwap(
-      amountIn,
-      isXtoY ? availableReserveX : availableReserveY,
-      isXtoY ? availableReserveY : availableReserveX,
-      tradeFeeRate,
-    );
-
     const tokenX = await getTokenDetailsHandler({
       address: tokenXMint.toString(),
     });
@@ -266,22 +254,58 @@ export async function getSwapRateHandler(
       address: tokenYMint.toString(),
     });
 
-    const amountInBigDecimal = BigNumber(amountIn).multipliedBy(
-      BigNumber(10 ** (isXtoY ? tokenX.decimals : tokenY.decimals)),
+    const scaledInput =
+      amountIn * 10 ** (isXtoY ? tokenX.decimals : tokenY.decimals);
+    const roundedInput = Math.floor(scaledInput);
+
+    // Calculate swap using AMM formula
+    const tradeFeeRate = Number(ammConfig.trade_fee_rate) || 0;
+    const swapResult = calculateSwap(
+      roundedInput,
+      isXtoY ? availableReserveX : availableReserveY,
+      isXtoY ? availableReserveY : availableReserveX,
+      tradeFeeRate,
     );
+
     const amountOutBigDecimal = BigNumber(swapResult.destinationAmount);
 
     const amountOut = amountOutBigDecimal
       .dividedBy(BigNumber(10 ** (isXtoY ? tokenY.decimals : tokenX.decimals)))
       .toNumber();
 
+    const decDiff = Math.abs(tokenX.decimals - tokenY.decimals);
+
+    // Adjust rate for decimal differences
+    let adjustedRate = swapResult.rate;
+    if (isXtoY) {
+      // When swapping X to Y, adjust based on decimal difference
+      if (tokenX.decimals < tokenY.decimals) {
+        // X has more decimals, so we need to downscale the rate
+        adjustedRate = swapResult.rate / 10 ** decDiff;
+      } else if (tokenX.decimals > tokenY.decimals) {
+        // X has fewer decimals, so we need to upscale the rate
+        adjustedRate = swapResult.rate * 10 ** decDiff;
+      }
+    } else {
+      // When swapping Y to X, adjust based on decimal difference
+      if (tokenY.decimals < tokenX.decimals) {
+        // Y has more decimals, so we need to downscale the rate
+        adjustedRate = swapResult.rate / 10 ** decDiff;
+      } else if (tokenY.decimals > tokenX.decimals) {
+        // Y has fewer decimals, so we need to upscale the rate
+        adjustedRate = swapResult.rate * 10 ** decDiff;
+      }
+    }
+
     return {
       amountIn,
-      amountInRaw: amountInBigDecimal.toNumber(),
+      amountInRaw: roundedInput,
       amountOut,
       amountOutRaw: amountOutBigDecimal.toNumber(),
       estimatedFee: swapResult.tradeFee,
-      rateXtoY: swapResult.rate,
+      // the division by 1 shouldn't be necessary, but is expected by dependant front-end
+      // amount by which you have to DIVIDE the input to get the output
+      rateXtoY: 1 / adjustedRate,
       tokenX,
       tokenY,
     };
