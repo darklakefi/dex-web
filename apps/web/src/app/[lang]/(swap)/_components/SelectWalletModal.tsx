@@ -14,7 +14,9 @@ export function SelectWalletModal() {
   ) => {
     e.preventDefault();
     select(wallet.adapter.name);
-    handleClose();
+    setTimeout(() => {
+      handleClose();
+    }, 500);
   };
 
   const handleClose = () => {
