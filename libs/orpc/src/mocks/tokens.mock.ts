@@ -4,15 +4,15 @@ export const tokensData = [
     chainId: 101,
     decimals: 6,
     logoURI: "",
-    name: "Felix",
-    symbol: "FELIX",
+    name: "$F$",
+    symbol: "$F$",
   },
   {
     address: "9gXQd53kyGXB1juo7eKpfSTrvCW26u9LfUsPC9HH4nGQ",
     chainId: 101,
     decimals: 9,
     logoURI: "",
-    name: "John",
+    name: "JOHN",
     symbol: "JOHN",
   },
 ];
