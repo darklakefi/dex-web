@@ -2,6 +2,7 @@
 
 import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Icon } from "@dex-web/ui";
+import BigNumber from "bignumber.js";
 import { cva, type VariantProps } from "class-variance-authority";
 
 function getImpact(priceImpactPercentage: number) {
@@ -75,16 +76,12 @@ export function SwapDetails({
     quote.tokenX.address === tokenSellMint ? quote.tokenX : quote.tokenY;
   const tokenBuy =
     quote.tokenX.address === tokenBuyMint ? quote.tokenX : quote.tokenY;
-  const rate =
-    quote.tokenX.address === tokenSellMint
-      ? quote.rateXtoY
-      : 1 / quote.rateXtoY;
 
-  const priceValue = `1 ${tokenBuy.symbol} ≈ ${rate} ${tokenSell.symbol}`;
+  const priceValue = `1 ${quote.tokenX.symbol} ≈ ${quote.rateXtoY} ${quote.tokenY.symbol}`;
   const priceImpactValue = `${quote.priceImpactPercentage}%`;
   // const maxSlippageValue = `${quote.slippage}%`;
   // const mevProtectionValue = true ? "Active" : "Inactive";
-  const estimatedFeesValue = `$${quote.estimatedFeesUsd}`;
+  const estimatedFeesValue = `${BigNumber(quote.estimatedFee).toString()} ${tokenSell.symbol}`;
   const impact = getImpact(quote.priceImpactPercentage);
 
   return (
