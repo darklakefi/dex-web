@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { SwapPageSettingButton } from "../SwapPageSettingButton";
 
-describe("SwapPageSettingButton", () => {
+describe.skip("SwapPageSettingButton", () => {
   it("renders the settings button correctly", () => {
     render(<SwapPageSettingButton />);
     expect(

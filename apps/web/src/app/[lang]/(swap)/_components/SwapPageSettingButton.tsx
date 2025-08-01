@@ -18,7 +18,7 @@ export function SwapPageSettingButton() {
           <PopoverButton as="div" className={"cursor-pointer"}>
             <button
               aria-label="settings"
-              className="inline-flex items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
+              className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
               type="button"
             >
               <Icon className="size-5" name="cog" />
