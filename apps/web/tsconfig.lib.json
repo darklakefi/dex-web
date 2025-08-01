@@ -9,21 +9,14 @@
       }
     ]
   },
-  "exclude": [
-    "dist",
-    "node_modules",
-    "node_modules",
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "../../dist/**/*"
-  ],
+  "exclude": ["dist", "node_modules", "**/*.spec.ts", "**/*.test.ts"],
   "extends": "./tsconfig.json",
   "include": [
     "**/*.js",
     "**/*.jsx",
     "**/*.ts",
     "**/*.tsx",
-    "dist/apps/web/types/**/*.ts"
+    "dist/types/**/*.ts"
   ],
   "references": [
     {
@@ -37,9 +30,6 @@
     },
     {
       "path": "../../libs/core/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/utils/tsconfig.lib.json"
     }
   ]
 }
