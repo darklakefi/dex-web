@@ -28,7 +28,7 @@ export function SelectWalletModal() {
           <Text className="font-bold text-2xl" variant="heading">
             Connect Wallet
           </Text>{" "}
-          <button type="button">
+          <button onClick={handleClose} type="button">
             <Icon className="size-6" name="times" />
           </button>
         </div>
