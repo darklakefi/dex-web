@@ -12,6 +12,7 @@ import { useFormatPrice } from "../_utils/useFormatPrice";
 
 interface SwapFormFieldsetProps extends NumericInputProps {
   name: "buyAmount" | "sellAmount";
+  disabled?: boolean;
 }
 const QUOTE_CURRENCY = "USD" as const;
 
@@ -19,6 +20,7 @@ export function SwapFormFieldset({
   name,
   onChange,
   value,
+  disabled,
   ...rest
 }: SwapFormFieldsetProps) {
   const { publicKey } = useWallet();
@@ -118,6 +120,7 @@ export function SwapFormFieldset({
       </div>
       <div className="flex flex-col items-end">
         <NumericInput
+          disabled={disabled}
           name={name}
           onChange={onChange}
           placeholder="0.00"
