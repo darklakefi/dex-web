@@ -13,7 +13,7 @@
       "name": "Pool"
     }
   ],
-  "address": "3LS7r7w6bx6UrTkgHiHGsKZYDLqbE7XWWt24wmYk2sAq",
+  "address": "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
   "docs": [
     "# Darklake DEX - Two-Step Confidential Trading Protocol",
     "",
@@ -965,7 +965,7 @@
     {
       "accounts": [
         {
-          "address": "43RPeUeQ1c4eAqvAYiS43wVfr81PjfWSteTxyHx49kMr",
+          "address": "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB",
           "docs": ["Address to be set as protocol owner."],
           "name": "admin",
           "signer": true,
@@ -1360,7 +1360,7 @@
           "writable": true
         },
         {
-          "address": "HNQdnRgtnsgcx7E836nZ1JwrQstWBEJMnRVy8doY366A",
+          "address": "HNVk87PuSDucX14Eh6CJ5dNm2mG6iNpuT3PHLdbGZeLo",
           "name": "create_pool_fee_vault",
           "writable": true
         },
@@ -2472,7 +2472,7 @@
     {
       "accounts": [
         {
-          "address": "43RPeUeQ1c4eAqvAYiS43wVfr81PjfWSteTxyHx49kMr",
+          "address": "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB",
           "docs": ["The config admin"],
           "name": "admin",
           "signer": true
@@ -2631,19 +2631,19 @@
             "type": "u64"
           },
           {
-            "docs": ["padding"],
-            "name": "padding",
-            "type": {
-              "array": ["u64", 16]
-            }
-          },
-          {
             "name": "bump",
             "type": "u8"
           },
           {
             "name": "halted",
             "type": "bool"
+          },
+          {
+            "docs": ["padding"],
+            "name": "padding",
+            "type": {
+              "array": ["u64", 16]
+            }
           }
         ],
         "kind": "struct"
@@ -2860,18 +2860,18 @@
             }
           },
           {
-            "name": "padding",
-            "type": {
-              "array": ["u64", 3]
-            }
-          },
-          {
             "name": "is_x_to_y",
             "type": "bool"
           },
           {
             "name": "bump",
             "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": ["u64", 4]
+            }
           }
         ],
         "kind": "struct"
@@ -2934,14 +2934,14 @@
             "type": "u64"
           },
           {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
             "name": "padding",
             "type": {
               "array": ["u64", 4]
             }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ],
         "kind": "struct"
