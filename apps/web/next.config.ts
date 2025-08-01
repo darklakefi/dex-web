@@ -6,7 +6,6 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
-  distDir: "dist",
   experimental: {
     reactCompiler: true,
     typedRoutes: true,
