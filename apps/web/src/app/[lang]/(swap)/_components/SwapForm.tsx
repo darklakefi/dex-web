@@ -385,7 +385,7 @@ export function SwapForm() {
             <form.Field name="buyAmount">
               {(field) => (
                 <SwapFormFieldset
-                  disabled={isUseSlippage}
+                  disabled={true}
                   name={field.name}
                   onBlur={field.handleBlur}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
