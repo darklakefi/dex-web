@@ -39,8 +39,9 @@ export async function getTokenAccountsHandler({
           {
             address: ownerAddress,
             amount: 0,
+            decimals: tokenMetadata?.token_info?.decimals ?? 0,
             mint: mint ?? "",
-            symbol: tokenMetadata?.token_info?.symbol ?? "",
+            symbol: tokenMetadata?.content?.metadata?.symbol ?? "",
           },
         ]
   )?.map(
@@ -49,8 +50,9 @@ export async function getTokenAccountsHandler({
         address: tokenAccount.address ?? "",
         amount: tokenAccount.amount ?? 0,
         balance: tokenAccount.amount ?? 0,
+        decimals: tokenMetadata?.token_info?.decimals ?? 0,
         mint: tokenAccount.mint ?? "",
-        symbol: tokenMetadata?.token_info?.symbol ?? "",
+        symbol: tokenMetadata?.content?.metadata?.symbol ?? "",
       }) satisfies TokenAccount,
   );
 

@@ -12,7 +12,7 @@ export const getTokensHandler = async (
 ): Promise<GetTokensOutput> => {
   const { limit, query } = input;
 
-  const rawData = tokensData;
+  const rawData = process.env.NETWORK === "2" ? tokensData : tokensData;
 
   const { data, error } = jupiterTokensResponseSchema.safeParse(rawData);
 
@@ -32,6 +32,7 @@ export const getTokensHandler = async (
       .slice(0, limit)
       .map((token) => ({
         address: token.address,
+        decimals: token.decimals,
         imageUrl: token.logoURI,
         name: token.name,
         symbol: token.symbol,

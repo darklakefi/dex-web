@@ -2,22 +2,28 @@
 
 import { Button } from "@dex-web/ui";
 import type { Wallet } from "@solana/wallet-adapter-react";
-import { getFirstAvailableWallet } from "../_utils/getFirstAvailableWallet";
+import { useRouter } from "next/navigation";
+import { twMerge } from "tailwind-merge";
 
 interface ConnectWalletButtonProps {
   wallets: Wallet[];
+  className?: string;
 }
-export function ConnectWalletButton({ wallets }: ConnectWalletButtonProps) {
-  const firstAvailableWallet = getFirstAvailableWallet(wallets);
+export function ConnectWalletButton({
+  wallets,
+  className,
+}: ConnectWalletButtonProps) {
+  const router = useRouter();
   function handleClick() {
-    if (firstAvailableWallet) {
-      firstAvailableWallet.adapter.connect();
-    }
-    throw new Error("No wallet available");
+    router.push("/select-wallet");
   }
 
   return (
-    <Button onClick={handleClick} variant="primary">
+    <Button
+      className={twMerge(className, "cursor-pointer")}
+      onClick={handleClick}
+      variant="primary"
+    >
       Connect Wallet
     </Button>
   );

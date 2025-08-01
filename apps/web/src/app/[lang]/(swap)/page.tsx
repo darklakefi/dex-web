@@ -1,15 +1,8 @@
 import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
-import { FeaturesAndTrendingPoolPanel } from "./_components/FeaturesAndTrendingPoolPanel";
-import { SwapDetails } from "./_components/SwapDetails";
 import { SwapForm } from "./_components/SwapForm";
-import { SwapPageRefreshButton } from "./_components/SwapPageRefreshButton";
 import { MOCK_OWNER_ADDRESS, MOCK_SWAP_ID } from "./_utils/constants";
 import { selectedTokensCache } from "./_utils/searchParams";
 
@@ -30,12 +23,6 @@ export default async function Page({
     ),
 
     queryClient.prefetchQuery(
-      tanstackClient.getTokenDetails.queryOptions({
-        input: { address: MOCK_OWNER_ADDRESS },
-      }),
-    ),
-
-    queryClient.prefetchQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: { ownerAddress: MOCK_OWNER_ADDRESS },
       }),
@@ -47,7 +34,8 @@ export default async function Page({
       <div className="flex max-w-xl flex-col items-center justify-center">
         <section className="flex w-full items-start gap-1">
           <div className="size-9" />
-          <Box className="mb-0 bg-green-800 pb-0">
+          <Text.Heading className="mb-4 block md:hidden">Swap</Text.Heading>
+          <Box className="mb-0 hidden bg-green-800 pb-0 md:block">
             <Hero
               className="gap-4"
               image="/images/waddles/pose4.png"
@@ -56,10 +44,12 @@ export default async function Page({
             >
               <div className="flex flex-col gap-3 uppercase">
                 <Text.Heading>swap</Text.Heading>
-                <div className="flex flex-col">
-                  <Text.Body2>ANTI-SANDWICH DEFENSE:</Text.Body2>
-                  <Text.Body2 className="text-green-300">
-                    Value preservation system active.
+                <div className="flex flex-col text-md">
+                  <Text.Body2 className="text-md md:text-lg">
+                    MEV attacks intercepted:
+                  </Text.Body2>
+                  <Text.Body2 className="text-green-300 text-md md:text-lg">
+                    better prices.
                   </Text.Body2>
                 </div>
               </div>
@@ -68,20 +58,11 @@ export default async function Page({
 
           <div className="size-9" />
         </section>
-        <section className="flex w-full max-w-xl items-start gap-1">
-          <div className="size-9" />
-          <Box padding="lg">
-            <SwapForm />
-            <HydrationBoundary state={dehydrate(queryClient)}>
-              <SwapDetails />
-            </HydrationBoundary>
-          </Box>
-          <SwapPageRefreshButton />
-        </section>
+        <SwapForm />
       </div>
-      <div className="max-w-xs">
+      {/* <div className="max-w-xs">
         <FeaturesAndTrendingPoolPanel featuredPools={[]} trendingPools={[]} />
-      </div>
+      </div> */}
     </div>
   );
 }

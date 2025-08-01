@@ -14,7 +14,7 @@ export function ConnectedWalletButton({
   walletAdapter,
 }: ConnectedWalletButtonProps) {
   return (
-    <Button as="div" variant="secondary">
+    <Button as="div" className="normal-case" variant="secondary">
       <Image
         alt={walletAdapter.name}
         height={18}

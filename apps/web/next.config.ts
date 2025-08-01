@@ -24,7 +24,7 @@ const nextConfig = {
     svgr: false,
   },
   outputFileTracingRoot: join(__dirname, "../../"),
-  serverExternalPackages: ["pg"],
+  serverExternalPackages: ["pg", "@grpc/grpc-js", "@grpc/proto-loader"],
   turbopack: {
     rules: {
       "*.svg": {
@@ -54,6 +54,7 @@ const nextConfig = {
         dns: false,
         fs: false,
         http: false,
+        http2: false,
         https: false,
         net: false,
         os: false,

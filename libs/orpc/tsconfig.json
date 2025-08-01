@@ -10,6 +10,15 @@
       "path": "../db"
     },
     {
+      "path": "../core"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../core/tsconfig.lib.json"
+    },
+    {
       "path": "./tsconfig.lib.json"
     },
     {

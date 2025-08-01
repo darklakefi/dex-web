@@ -24,11 +24,13 @@ const buttonVariants = cva(
   ],
   {
     defaultVariants: {
+      loading: false,
       size: "md",
       variant: "primary",
     },
     variants: {
       loading: {
+        false: null,
         true: "cursor-progress opacity-50",
       },
       size: {
@@ -59,11 +61,11 @@ type ButtonProps<
   as?: React.ElementType;
   text?: string;
   disabled?: boolean;
+  loading?: boolean;
   trailingIcon?: IconName;
   leadingIcon?: IconName;
   icon?: IconName;
-  loading?: boolean;
-} & TProps &
+} & Omit<TProps, "loading"> &
   VariantProps<typeof buttonVariants>;
 
 const ButtonIcon = ({ icon }: { icon: React.ReactNode | IconName }) => {
