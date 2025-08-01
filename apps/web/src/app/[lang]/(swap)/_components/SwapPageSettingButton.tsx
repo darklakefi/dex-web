@@ -11,13 +11,14 @@ export function SwapPageSettingButton({
 }: {
   onChange: (slippage: string) => void;
 }) {
-  const [selectedOption, setSelectedOption] = useState<string>("0");
-  const [slippage, setSlippage] = useState<string>("0");
+  // default slippage is 0.5%
+  const [selectedOption, setSelectedOption] = useState<string>("0.5");
+  const [slippage, setSlippage] = useState<string>("0.5");
   const [customSlippage, setCustomSlippage] = useState<string>("");
 
   useEffect(() => {
     onChange(slippage);
-  }, [slippage]);
+  }, [slippage, onChange]);
 
   return (
     <Popover>

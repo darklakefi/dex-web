@@ -73,7 +73,7 @@ export function SwapForm() {
   );
   const [swapStep, setSwapStep] = useState(0);
   const [disableSwap, setDisableSwap] = useState(true);
-  const [trackDetails, setTrackDetails] = useState<{
+  const [_trackDetails, setTrackDetails] = useState<{
     tradeId: string;
     trackingId: string;
   }>({
@@ -81,7 +81,7 @@ export function SwapForm() {
     tradeId: "",
   });
   const [isUseSlippage, setIsUseSlippage] = useState(false);
-  const [slippage, setSlippage] = useState("0");
+  const [slippage, setSlippage] = useState("0.5");
 
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.getPoolDetails.queryOptions({
@@ -284,10 +284,12 @@ export function SwapForm() {
     amountIn,
     type,
     isXtoY,
+    slippage,
   }: {
     amountIn: number;
     type: "buy" | "sell";
     isXtoY: boolean;
+    slippage: number;
   }) => {
     if (!poolDetails) return;
     setSwapStep(10);
@@ -295,6 +297,7 @@ export function SwapForm() {
     const quote = await client.getSwapQuote({
       amountIn,
       isXtoY,
+      slippage,
       tokenXMint: poolDetails.tokenXMint,
       tokenYMint: poolDetails.tokenYMint,
     });
@@ -318,6 +321,7 @@ export function SwapForm() {
       debouncedGetQuote({
         amountIn: Number(e.target.value),
         isXtoY,
+        slippage: parseFloat(slippage),
         type,
       });
     } else {
@@ -331,6 +335,7 @@ export function SwapForm() {
     debouncedGetQuote({
       amountIn: form.state.values.sellAmount,
       isXtoY: !isXtoY,
+      slippage: parseFloat(slippage),
       type: "sell",
     });
   };
@@ -426,6 +431,12 @@ export function SwapForm() {
           onChange={(slippage) => {
             setIsUseSlippage(slippage !== "0");
             setSlippage(slippage);
+            debouncedGetQuote({
+              amountIn: form.state.values.sellAmount,
+              isXtoY,
+              slippage: parseFloat(slippage),
+              type: "sell",
+            });
           }}
         />
         <SwapPageRefreshButton
@@ -433,6 +444,7 @@ export function SwapForm() {
             debouncedGetQuote({
               amountIn: form.state.values.sellAmount,
               isXtoY,
+              slippage: parseFloat(slippage),
               type: "sell",
             });
           }}

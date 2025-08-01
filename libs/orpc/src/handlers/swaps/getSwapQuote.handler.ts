@@ -49,7 +49,7 @@ export async function getSwapQuoteHandler(
         tokenYMint,
       },
     ],
-    slippage: slippage ?? 0,
+    slippage,
     tokenX: swapRate.tokenX,
     tokenXMint,
     tokenY: swapRate.tokenY,

@@ -78,24 +78,29 @@ export function SwapDetails({
     quote.tokenX.address === tokenBuyMint ? quote.tokenX : quote.tokenY;
 
   const priceValue = `1 ${quote.tokenX.symbol} ≈ ${quote.isXtoY ? quote.rateXtoY : 1 / quote.rateXtoY} ${quote.tokenY.symbol}`;
-  const priceImpactValue = `${quote.priceImpactPercentage}%`;
+  // const priceImpactValue = `${quote.priceImpactPercentage}%`;
+  const minOutputValue = BigNumber(quote.amountOutRaw)
+    .times(1 - quote.slippage / 100)
+    .div(10 ** Number(tokenBuy.decimals))
+    .toFixed(Number(tokenBuy.decimals));
+
   // const maxSlippageValue = `${quote.slippage}%`;
   // const mevProtectionValue = true ? "Active" : "Inactive";
   const estimatedFeesValue = `${BigNumber(quote.estimatedFee)
     .div(10 ** Number(tokenSell.decimals))
     .toString()} ${tokenSell.symbol}`;
-  const impact = getImpact(quote.priceImpactPercentage);
+  // const impact = getImpact(quote.priceImpactPercentage);
 
   return (
     <Box background="highlight">
       <dl className="flex flex-col gap-2">
         <SwapDetailsItem label="Price" value={priceValue} />
-        <SwapDetailsItem
+        {/* <SwapDetailsItem
           impact={impact}
           label="Price Impact"
           value={priceImpactValue}
-        />
-        {/* <SwapDetailsItem label="Max Slippage" value={maxSlippageValue} /> */}
+        /> */}
+        <SwapDetailsItem label="Min. Output" value={minOutputValue} />
         <SwapDetailsItem label="MEV Protection" value="Active" />
         <SwapDetailsItem label="Est. Fees" value={estimatedFeesValue} />
       </dl>

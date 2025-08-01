@@ -4,7 +4,7 @@ import { tokenSchema } from "../tokens";
 export const getQuoteInputSchema = z.object({
   amountIn: z.number().positive(),
   isXtoY: z.boolean(),
-  slippage: z.number().positive().optional(),
+  slippage: z.number().positive(),
   tokenXMint: z.string(),
   tokenYMint: z.string(),
 });
