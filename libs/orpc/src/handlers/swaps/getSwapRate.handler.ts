@@ -303,9 +303,7 @@ export async function getSwapRateHandler(
       amountOut,
       amountOutRaw: amountOutBigDecimal.toNumber(),
       estimatedFee: swapResult.tradeFee,
-      // the division by 1 shouldn't be necessary, but is expected by dependant front-end
-      // amount by which you have to DIVIDE the input to get the output
-      rateXtoY: 1 / adjustedRate,
+      rate: adjustedRate,
       tokenX,
       tokenY,
     };

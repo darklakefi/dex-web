@@ -39,7 +39,7 @@ export async function getSwapQuoteHandler(
     estimatedFeesUsd: swapRate.estimatedFee,
     isXtoY,
     priceImpactPercentage: 1,
-    rateXtoY: swapRate.rateXtoY,
+    rate: swapRate.rate,
     routePlan: [
       {
         amountIn,
@@ -49,7 +49,7 @@ export async function getSwapQuoteHandler(
         tokenYMint,
       },
     ],
-    slippage: slippage ?? 0,
+    slippage,
     tokenX: swapRate.tokenX,
     tokenXMint,
     tokenY: swapRate.tokenY,

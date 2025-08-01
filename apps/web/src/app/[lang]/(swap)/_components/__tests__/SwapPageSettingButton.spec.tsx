@@ -6,7 +6,8 @@ import { SwapPageSettingButton } from "../SwapPageSettingButton";
 
 describe.skip("SwapPageSettingButton", () => {
   it("renders the settings button correctly", () => {
-    render(<SwapPageSettingButton />);
+    render(<SwapPageSettingButton onChange={() => {}} />);
+
     expect(
       screen.getByRole("button", { name: "settings" }),
     ).toBeInTheDocument();
@@ -15,7 +16,7 @@ describe.skip("SwapPageSettingButton", () => {
 
   it("opens the settings panel when button is clicked", async () => {
     const user = userEvent.setup();
-    render(<SwapPageSettingButton />);
+    render(<SwapPageSettingButton onChange={() => {}} />);
 
     const settingsButton = screen.getByRole("button", { name: "settings" });
     await user.click(settingsButton);
@@ -26,7 +27,7 @@ describe.skip("SwapPageSettingButton", () => {
 
   it("selects default slippage options correctly", async () => {
     const user = userEvent.setup();
-    render(<SwapPageSettingButton />);
+    render(<SwapPageSettingButton onChange={() => {}} />);
 
     // Open the settings panel
     await user.click(screen.getByRole("button", { name: "settings" }));
@@ -48,7 +49,7 @@ describe.skip("SwapPageSettingButton", () => {
 
   it("handles custom slippage input correctly", async () => {
     const user = userEvent.setup();
-    render(<SwapPageSettingButton />);
+    render(<SwapPageSettingButton onChange={() => {}} />);
 
     // Open the settings panel
     await user.click(screen.getByRole("button", { name: "settings" }));
@@ -67,7 +68,7 @@ describe.skip("SwapPageSettingButton", () => {
 
   it("closes the panel when close button is clicked", async () => {
     const user = userEvent.setup();
-    render(<SwapPageSettingButton />);
+    render(<SwapPageSettingButton onChange={() => {}} />);
 
     // Open the settings panel
     await user.click(screen.getByRole("button", { name: "settings" }));
