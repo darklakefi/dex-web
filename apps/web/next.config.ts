@@ -7,7 +7,7 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
   experimental: {
-    reactCompiler: true,
+    reactCompiler: false,
     typedRoutes: true,
   },
   images: {
