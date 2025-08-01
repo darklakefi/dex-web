@@ -39,7 +39,7 @@ export async function getSwapQuoteHandler(
     estimatedFeesUsd: swapRate.estimatedFee,
     isXtoY,
     priceImpactPercentage: 1,
-    rateXtoY: swapRate.rateXtoY,
+    rate: swapRate.rate,
     routePlan: [
       {
         amountIn,

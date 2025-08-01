@@ -77,7 +77,7 @@ export function SwapDetails({
   const tokenBuy =
     quote.tokenX.address === tokenBuyMint ? quote.tokenX : quote.tokenY;
 
-  const priceValue = `1 ${quote.tokenX.symbol} ≈ ${quote.isXtoY ? quote.rateXtoY : 1 / quote.rateXtoY} ${quote.tokenY.symbol}`;
+  const priceValue = `1 ${quote.isXtoY ? quote.tokenX.symbol : quote.tokenY.symbol} ≈ ${quote.rate} ${quote.isXtoY ? quote.tokenY.symbol : quote.tokenX.symbol}`;
   // const priceImpactValue = `${quote.priceImpactPercentage}%`;
   const minOutputValue = BigNumber(quote.amountOutRaw)
     .times(1 - quote.slippage / 100)
