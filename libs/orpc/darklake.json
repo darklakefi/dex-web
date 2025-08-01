@@ -965,7 +965,7 @@
     {
       "accounts": [
         {
-          "address": "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB",
+          "address": "43RPeUeQ1c4eAqvAYiS43wVfr81PjfWSteTxyHx49kMr",
           "docs": ["Address to be set as protocol owner."],
           "name": "admin",
           "signer": true,
@@ -1360,7 +1360,7 @@
           "writable": true
         },
         {
-          "address": "HNVk87PuSDucX14Eh6CJ5dNm2mG6iNpuT3PHLdbGZeLo",
+          "address": "HNQdnRgtnsgcx7E836nZ1JwrQstWBEJMnRVy8doY366A",
           "name": "create_pool_fee_vault",
           "writable": true
         },
@@ -2472,7 +2472,7 @@
     {
       "accounts": [
         {
-          "address": "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB",
+          "address": "43RPeUeQ1c4eAqvAYiS43wVfr81PjfWSteTxyHx49kMr",
           "docs": ["The config admin"],
           "name": "admin",
           "signer": true
