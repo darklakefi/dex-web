@@ -1,6 +1,6 @@
 "use server";
 
-import { tokensData } from "../../mocks/tokens.mock";
+import { tokensData, tokensDataMainnet } from "../../mocks/tokens.mock";
 import type {
   GetTokensInput,
   GetTokensOutput,
@@ -12,7 +12,7 @@ export const getTokensHandler = async (
 ): Promise<GetTokensOutput> => {
   const { limit, query } = input;
 
-  const rawData = process.env.NETWORK === "2" ? tokensData : tokensData;
+  const rawData = process.env.NETWORK === "2" ? tokensData : tokensDataMainnet;
 
   const { data, error } = jupiterTokensResponseSchema.safeParse(rawData);
 
