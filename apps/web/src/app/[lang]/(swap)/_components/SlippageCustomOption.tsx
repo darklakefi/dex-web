@@ -18,7 +18,7 @@ export function SlippageCustomOption({
     <button
       aria-label="custom-slippage"
       className={twMerge(
-        "flex cursor-pointer items-center gap-1",
+        "flex cursor-pointer items-center gap-2",
         selected ? "text-green-200" : "text-green-300",
       )}
       onClick={() => {
@@ -32,7 +32,7 @@ export function SlippageCustomOption({
       <div className="flex items-center gap-1 border border-green-400 bg-green-600 pr-1">
         <input
           aria-label="slippage"
-          className="w-10 text-end font-sans text-inherit text-lg uppercase focus:outline-none"
+          className="w-10 text-end font-sans text-inherit text-md uppercase focus:outline-none"
           inputMode="decimal"
           onChange={(e) => {
             const value = e.target.value.replace(/[^0-9.]/g, "");

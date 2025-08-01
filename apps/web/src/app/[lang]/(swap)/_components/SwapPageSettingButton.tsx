@@ -2,7 +2,7 @@
 
 import { Box, Icon, Text } from "@dex-web/ui";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SlippageCustomOption } from "./SlippageCustomOption";
 import { SlippageDefaultOption } from "./SlippageDefaultOption";
 
@@ -11,14 +11,12 @@ export function SwapPageSettingButton({
 }: {
   onChange: (slippage: string) => void;
 }) {
-  // default slippage is 0.5%
   const [selectedOption, setSelectedOption] = useState<string>("0.5");
-  const [slippage, setSlippage] = useState<string>("0.5");
   const [customSlippage, setCustomSlippage] = useState<string>("");
 
-  useEffect(() => {
+  const handleChange = (slippage: string) => {
     onChange(slippage);
-  }, [slippage]);
+  };
 
   return (
     <Popover>
@@ -55,12 +53,12 @@ export function SwapPageSettingButton({
                   <SlippageDefaultOption
                     onClick={() => {
                       if (selectedOption === "0.5") {
-                        setSlippage("0");
+                        handleChange("0");
                         setSelectedOption("0");
                         return;
                       }
                       setSelectedOption("0.5");
-                      setSlippage("0.5");
+                      handleChange("0.5");
                     }}
                     selected={selectedOption === "0.5"}
                     slippage={0.5}
@@ -68,12 +66,12 @@ export function SwapPageSettingButton({
                   <SlippageDefaultOption
                     onClick={() => {
                       if (selectedOption === "1") {
-                        setSlippage("0");
+                        handleChange("0");
                         setSelectedOption("0");
                         return;
                       }
                       setSelectedOption("1");
-                      setSlippage("1");
+                      handleChange("1");
                     }}
                     selected={selectedOption === "1"}
                     slippage={1}
@@ -81,12 +79,12 @@ export function SwapPageSettingButton({
                   <SlippageDefaultOption
                     onClick={() => {
                       if (selectedOption === "2") {
-                        setSlippage("0");
+                        handleChange("0");
                         setSelectedOption("0");
                         return;
                       }
                       setSelectedOption("2");
-                      setSlippage("2");
+                      handleChange("2");
                     }}
                     selected={selectedOption === "2"}
                     slippage={2}
@@ -94,12 +92,12 @@ export function SwapPageSettingButton({
                   <SlippageCustomOption
                     onChange={(slippage: string) => {
                       if (selectedOption === "custom") {
-                        setSlippage("0");
+                        handleChange("0");
                         setSelectedOption("0");
                         return;
                       }
                       setCustomSlippage(slippage);
-                      setSlippage(slippage);
+                      handleChange(slippage);
                     }}
                     onClick={(slippage: string) => {
                       setSelectedOption("custom");
