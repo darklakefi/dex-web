@@ -80,6 +80,8 @@ export function SwapForm() {
     trackingId: "",
     tradeId: "",
   });
+  const [isUseSlippage, setIsUseSlippage] = useState(false);
+  const [slippage, setSlippage] = useState("0");
 
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.getPoolDetails.queryOptions({
@@ -245,7 +247,11 @@ export function SwapForm() {
       const response = await client.dexGateway.getSwap({
         amount_in: sellAmount,
         is_swap_x_to_y: isXtoY,
-        min_out: buyAmount, // TODO: buyAmount as min_out (might need adjustment based on slippage)
+        min_out: isUseSlippage
+          ? BigNumber(buyAmount)
+              .multipliedBy(1 - Number(slippage) / 100)
+              .toNumber()
+          : buyAmount,
         network: parseInt(process.env.NETWORK || "2", 10),
         token_mint_x: sellTokenAddress,
         token_mint_y: buyTokenAddress,
@@ -374,6 +380,7 @@ export function SwapForm() {
             <form.Field name="buyAmount">
               {(field) => (
                 <SwapFormFieldset
+                  disabled={isUseSlippage}
                   name={field.name}
                   onBlur={field.handleBlur}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -415,7 +422,12 @@ export function SwapForm() {
         )}
       </Box>
       <div className="flex flex-col gap-1">
-        <SwapPageSettingButton />
+        <SwapPageSettingButton
+          onChange={(slippage) => {
+            setIsUseSlippage(slippage !== "0");
+            setSlippage(slippage);
+          }}
+        />
         <SwapPageRefreshButton
           onClick={() => {
             debouncedGetQuote({
