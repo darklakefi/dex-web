@@ -66,19 +66,12 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
     e: React.MouseEvent<HTMLButtonElement>,
   ) => {
     e.preventDefault();
+    console.log({ tokenAddress, type });
     if (type === "buy") {
-      setSelectedTokens({
-        buyTokenAddress: tokenAddress,
-        sellTokenAddress: sellTokenAddress,
-      });
       router.push(
         `/?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${tokenAddress}`,
       );
     } else {
-      setSelectedTokens({
-        buyTokenAddress: buyTokenAddress,
-        sellTokenAddress: tokenAddress,
-      });
       router.push(
         `/?sellTokenAddress=${tokenAddress}&buyTokenAddress=${buyTokenAddress}`,
       );

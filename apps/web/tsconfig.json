@@ -1,9 +1,24 @@
 {
   "compilerOptions": {
-    "jsx": "react-jsx"
+    "incremental": true,
+    "jsx": "preserve",
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "extends": "../../tsconfig.base.json",
   "files": [],
+  "include": [
+    "../../apps/web/dist/dist/types/**/*.ts",
+    "../../types/css.d.ts",
+    "../../types/image.d.ts",
+    "../../types/svg.d.ts",
+    "../../vite.config.base.ts",
+    "dist/types/**/*.ts"
+  ],
   "references": [
     {
       "path": "../../libs/utils"
