@@ -41,6 +41,8 @@ export function SlippageCustomOption({
           aria-label="slippage"
           className="w-10 text-end font-sans text-inherit text-md uppercase focus:outline-none"
           inputMode="decimal"
+          maxLength={2}
+          minLength={0}
           onChange={(e) => {
             onChange({
               type: "custom",
