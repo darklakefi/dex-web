@@ -1,6 +1,5 @@
 "use server";
 
-import BigNumber from "bignumber.js";
 import type {
   GetQuoteInput,
   GetQuoteOutput,
@@ -31,18 +30,13 @@ export async function getSwapQuoteHandler(
     tokenXMint,
     tokenYMint,
   });
-  console.log("swapRate", swapRate);
-  const mockSolPrice = 200;
   return {
     amountIn,
     amountInRaw: swapRate.amountInRaw,
     amountOut: swapRate.amountOut,
     amountOutRaw: swapRate.amountOutRaw,
     estimatedFee: swapRate.estimatedFee,
-    estimatedFeesUsd: BigNumber(swapRate.estimatedFee)
-      .div(10 ** 9)
-      .multipliedBy(mockSolPrice)
-      .toNumber(),
+    estimatedFeesUsd: swapRate.estimatedFee,
     isXtoY,
     priceImpactPercentage: 1,
     rateXtoY: swapRate.rateXtoY,

@@ -60,7 +60,7 @@ export function SwapFormFieldset({
     if (inputRef.current) {
       inputRef.current.value = convertToDecimal(amount, decimals)
         .div(2)
-        .toFixed(2)
+        .toFixed(20)
         .toString();
       const event = new Event("change", { bubbles: true });
       inputRef.current.dispatchEvent(event);
@@ -75,7 +75,7 @@ export function SwapFormFieldset({
   const setValueToMaxAmount = () => {
     if (inputRef.current) {
       inputRef.current.value = convertToDecimal(amount, decimals)
-        .toFixed(2)
+        .toFixed(20)
         .toString();
       const event = new Event("change", { bubbles: true });
       inputRef.current.dispatchEvent(event);
