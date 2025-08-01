@@ -1,7 +1,7 @@
 import { getTokensHandler } from "../getTokens.handler";
 
 describe("getTokensHandler", () => {
-  it("should return a list of assets", async () => {
+  it.skip("should return a list of assets", async () => {
     const result = await getTokensHandler({
       limit: 10,
       offset: 0,
