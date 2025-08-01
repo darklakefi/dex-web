@@ -20,6 +20,7 @@ import { SwapButton } from "./SwapButton";
 import { SwapDetails } from "./SwapDetails";
 import { SwapFormFieldset } from "./SwapFormFieldset";
 import { SwapPageRefreshButton } from "./SwapPageRefreshButton";
+import { SwapPageSettingButton } from "./SwapPageSettingButton";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -72,13 +73,15 @@ export function SwapForm() {
   );
   const [swapStep, setSwapStep] = useState(0);
   const [disableSwap, setDisableSwap] = useState(true);
-  const [trackDetails, setTrackDetails] = useState<{
+  const [_trackDetails, setTrackDetails] = useState<{
     tradeId: string;
     trackingId: string;
   }>({
     trackingId: "",
     tradeId: "",
   });
+  const [isUseSlippage, setIsUseSlippage] = useState(false);
+  const [slippage, setSlippage] = useState("0.5");
 
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.getPoolDetails.queryOptions({
@@ -244,7 +247,11 @@ export function SwapForm() {
       const response = await client.dexGateway.getSwap({
         amount_in: sellAmount,
         is_swap_x_to_y: isXtoY,
-        min_out: buyAmount, // TODO: buyAmount as min_out (might need adjustment based on slippage)
+        min_out: isUseSlippage
+          ? BigNumber(buyAmount)
+              .multipliedBy(1 - Number(slippage) / 100)
+              .toNumber()
+          : buyAmount,
         network: parseInt(process.env.NETWORK || "2", 10),
         token_mint_x: sellTokenAddress,
         token_mint_y: buyTokenAddress,
@@ -277,10 +284,12 @@ export function SwapForm() {
     amountIn,
     type,
     isXtoY,
+    slippage,
   }: {
     amountIn: number;
     type: "buy" | "sell";
     isXtoY: boolean;
+    slippage: number;
   }) => {
     if (!poolDetails) return;
     setSwapStep(10);
@@ -288,6 +297,7 @@ export function SwapForm() {
     const quote = await client.getSwapQuote({
       amountIn,
       isXtoY,
+      slippage,
       tokenXMint: poolDetails.tokenXMint,
       tokenYMint: poolDetails.tokenYMint,
     });
@@ -311,6 +321,7 @@ export function SwapForm() {
       debouncedGetQuote({
         amountIn: Number(e.target.value),
         isXtoY,
+        slippage: parseFloat(slippage),
         type,
       });
     } else {
@@ -324,6 +335,7 @@ export function SwapForm() {
     debouncedGetQuote({
       amountIn: form.state.values.sellAmount,
       isXtoY: !isXtoY,
+      slippage: parseFloat(slippage),
       type: "sell",
     });
   };
@@ -373,6 +385,7 @@ export function SwapForm() {
             <form.Field name="buyAmount">
               {(field) => (
                 <SwapFormFieldset
+                  disabled={isUseSlippage}
                   name={field.name}
                   onBlur={field.handleBlur}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -413,15 +426,30 @@ export function SwapForm() {
           />
         )}
       </Box>
-      <SwapPageRefreshButton
-        onClick={() => {
-          debouncedGetQuote({
-            amountIn: form.state.values.sellAmount,
-            isXtoY,
-            type: "sell",
-          });
-        }}
-      />
+      <div className="flex flex-col gap-1">
+        <SwapPageSettingButton
+          onChange={(slippage) => {
+            setIsUseSlippage(slippage !== "0");
+            setSlippage(slippage);
+            debouncedGetQuote({
+              amountIn: form.state.values.sellAmount,
+              isXtoY,
+              slippage: parseFloat(slippage),
+              type: "sell",
+            });
+          }}
+        />
+        <SwapPageRefreshButton
+          onClick={() => {
+            debouncedGetQuote({
+              amountIn: form.state.values.sellAmount,
+              isXtoY,
+              slippage: parseFloat(slippage),
+              type: "sell",
+            });
+          }}
+        />
+      </div>
     </section>
   );
 }
