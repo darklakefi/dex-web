@@ -15,6 +15,7 @@ import { z } from "zod";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { selectedTokensParsers } from "../_utils/searchParams";
+import { sortSolanaAddresses } from "../_utils/sortSolanaAddresses";
 import { SelectTokenButton } from "./SelectTokenButton";
 import { SwapButton } from "./SwapButton";
 import { SwapDetails } from "./SwapDetails";
@@ -244,6 +245,18 @@ export function SwapForm() {
       const formState = form.state.values;
       const sellAmount = formState.sellAmount;
       const buyAmount = formState.buyAmount;
+
+      if (!buyTokenAddress || !sellTokenAddress) {
+        throw new Error("Missing token addresses");
+      }
+
+      const sortedTokens = sortSolanaAddresses(
+        buyTokenAddress,
+        sellTokenAddress,
+      );
+
+      const { tokenXAddress, tokenYAddress } = sortedTokens;
+
       const response = await client.dexGateway.getSwap({
         amount_in: sellAmount,
         is_swap_x_to_y: isXtoY,
@@ -253,8 +266,8 @@ export function SwapForm() {
               .toNumber()
           : buyAmount,
         network: parseInt(process.env.NETWORK || "2", 10),
-        token_mint_x: isXtoY ? sellTokenAddress : buyTokenAddress,
-        token_mint_y: isXtoY ? buyTokenAddress : sellTokenAddress,
+        token_mint_x: tokenXAddress,
+        token_mint_y: tokenYAddress,
         tracking_id: "123", // should place this in the orpc and better structure for tracking
         user_address: publicKey.toBase58(),
       });
