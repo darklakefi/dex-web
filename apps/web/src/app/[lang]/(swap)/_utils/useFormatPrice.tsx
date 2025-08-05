@@ -17,6 +17,10 @@ export function useFormatPrice(
 ) {
   const format = useFormatter();
 
+  if (!exchangeRate) {
+    return "";
+  }
+
   const { success, data: parsedData } = useFormatPriceSchema.safeParse({
     exchangeRate,
     quoteCurrency,

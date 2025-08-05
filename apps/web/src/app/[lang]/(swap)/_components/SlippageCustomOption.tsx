@@ -28,7 +28,8 @@ export function SlippageCustomOption({
       onClick={() => {
         onClick({
           type: "custom",
-          value: localValue ?? "",
+          value:
+            (localValue ?? slippage.type === "custom") ? slippage.value : "",
         });
       }}
       type="button"
@@ -39,7 +40,7 @@ export function SlippageCustomOption({
       <div className="flex items-center gap-1 border border-green-400 bg-green-600 pr-1">
         <input
           aria-label="slippage"
-          className="w-10 text-end font-sans text-inherit text-md uppercase focus:outline-none"
+          className="w-10 text-end font-sans text-green-200 text-md uppercase focus:outline-none"
           inputMode="decimal"
           onChange={(e) => {
             onChange({
@@ -52,7 +53,9 @@ export function SlippageCustomOption({
           }}
           ref={inputRef}
           type="text"
-          value={localValue ?? ""}
+          value={
+            localValue ?? (slippage.type === "custom" ? slippage.value : "")
+          }
         />
         %
       </div>

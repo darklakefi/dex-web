@@ -9,14 +9,23 @@ interface ToastProps {
 }
 
 export function toast(toast: Omit<ToastProps, "id">) {
-  return sonnerToast.custom((id) => (
-    <Toast
-      description={toast.description}
-      id={id}
-      title={toast.title}
-      variant={toast.variant || "success"}
-    />
-  ));
+  let duration: number | undefined;
+  if (toast.variant === "error") {
+    duration = Infinity;
+  }
+  return sonnerToast.custom(
+    (id) => (
+      <Toast
+        description={toast.description}
+        id={id}
+        title={toast.title}
+        variant={toast.variant || "success"}
+      />
+    ),
+    {
+      duration,
+    },
+  );
 }
 
 function Toast(props: ToastProps) {

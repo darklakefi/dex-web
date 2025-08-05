@@ -7,5 +7,7 @@ export { useDebouncedValue } from "./hooks/useDebouncedValue";
 export {
   convertToDecimal,
   convertToWholeNumber,
+  formatValueWithThousandSeparator,
+  isValidNumberFormat,
   numberFormatHelper,
 } from "./number";
