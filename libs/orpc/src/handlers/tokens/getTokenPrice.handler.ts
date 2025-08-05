@@ -1,6 +1,5 @@
 "use server";
 
-import { mockPrices } from "../../mocks/tokenPrices.mock";
 import type {
   GetTokenPriceInput,
   GetTokenPriceOutput,
@@ -11,7 +10,7 @@ export const getTokenPriceHandler = async (
 ): Promise<GetTokenPriceOutput> => {
   const { mint, amount, quoteCurrency } = input;
 
-  const basePrice = mockPrices[mint] ?? Math.random() * 1000 + 0.01;
+  const basePrice = 0;
 
   const totalPrice = basePrice * amount;
 

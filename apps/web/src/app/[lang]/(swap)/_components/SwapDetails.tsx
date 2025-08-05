@@ -65,12 +65,14 @@ export interface SwapDetailsProps {
   quote: GetQuoteOutput;
   tokenSellMint: string;
   tokenBuyMint: string;
+  slippage: string;
 }
 
 export function SwapDetails({
   quote,
   tokenSellMint,
   tokenBuyMint,
+  slippage,
 }: SwapDetailsProps) {
   const tokenSell =
     quote.tokenX.address === tokenSellMint ? quote.tokenX : quote.tokenY;
@@ -100,6 +102,7 @@ export function SwapDetails({
           label="Price Impact"
           value={priceImpactValue}
         /> */}
+        <SwapDetailsItem label="Max Slippage" value={`${slippage}%`} />
         <SwapDetailsItem label="Min. Output" value={minOutputValue} />
         <SwapDetailsItem label="MEV Protection" value="Active" />
         <SwapDetailsItem label="Est. Fees" value={estimatedFeesValue} />
