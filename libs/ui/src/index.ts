@@ -14,3 +14,4 @@ export { backgroundImage, PageLayout } from "./lib/PageLayout/PageLayout";
 export { Text } from "./lib/Text/Text";
 export { TextInput } from "./lib/TextInput/TextInput";
 export { Toast } from "./lib/Toast/Toast";
+export { Tooltip } from "./lib/Tooltip/Tooltip";

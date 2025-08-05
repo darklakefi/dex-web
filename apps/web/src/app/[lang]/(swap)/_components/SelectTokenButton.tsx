@@ -26,7 +26,7 @@ export function SelectTokenButton({ type }: SelectTokenButtonProps) {
   return (
     <Button
       as={Link}
-      className="w-full justify-between bg-green-700 p-1"
+      className="mt-1 w-full items-center justify-between bg-green-700 p-2"
       href={`/select-token/${type}/?buyTokenAddress=${buyTokenAddress}&sellTokenAddress=${sellTokenAddress}`}
       prefetch={true}
       variant="secondary"
@@ -34,7 +34,7 @@ export function SelectTokenButton({ type }: SelectTokenButtonProps) {
       {tokenDetails.imageUrl ? (
         <Image
           alt={tokenDetails.symbol}
-          className="size-6 overflow-hidden rounded-full"
+          className="size-8 overflow-hidden rounded-full"
           height={24}
           priority
           src={tokenDetails.imageUrl}
@@ -44,7 +44,7 @@ export function SelectTokenButton({ type }: SelectTokenButtonProps) {
       ) : (
         <Icon name="seedlings" />
       )}
-      <span className="flex items-center justify-center leading-none">
+      <span className="flex items-center justify-center text-lg leading-6!">
         {tokenDetails.symbol}
       </span>
       <Icon className="size-4 fill-green-300" name="chevron-down" />
