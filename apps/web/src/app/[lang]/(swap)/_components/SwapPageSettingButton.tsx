@@ -11,7 +11,7 @@ export type Slippage = {
   value: string;
 };
 export function slippageIsWithinRange(slippage: string) {
-  return Number(slippage) >= 0 && Number(slippage) <= 99;
+  return Number(slippage) > 0 && Number(slippage) <= 99;
 }
 export function SwapPageSettingButton({
   onChange,
@@ -63,14 +63,6 @@ export function SwapPageSettingButton({
                 <div className="flex items-center gap-4">
                   <SlippageDefaultOption
                     onClick={() => {
-                      if (slippage.type === "0.5") {
-                        handleChange("0");
-                        setSlippage({
-                          type: "0",
-                          value: "0",
-                        });
-                        return;
-                      }
                       setSlippage({
                         type: "0.5",
                         value: "0.5",
@@ -82,14 +74,6 @@ export function SwapPageSettingButton({
                   />
                   <SlippageDefaultOption
                     onClick={() => {
-                      if (slippage.type === "1") {
-                        handleChange("0");
-                        setSlippage({
-                          type: "0",
-                          value: "0",
-                        });
-                        return;
-                      }
                       setSlippage({
                         type: "1",
                         value: "1",
@@ -101,14 +85,6 @@ export function SwapPageSettingButton({
                   />
                   <SlippageDefaultOption
                     onClick={() => {
-                      if (slippage.type === "2") {
-                        handleChange("0");
-                        setSlippage({
-                          type: "0",
-                          value: "0",
-                        });
-                        return;
-                      }
                       setSlippage({
                         type: "2",
                         value: "2",

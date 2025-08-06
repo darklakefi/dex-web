@@ -63,3 +63,52 @@ export function numberFormatHelper({
 
   return formattedNumber;
 }
+
+export function formatValueWithThousandSeparator(value: string) {
+  const cleanValue = value.replace(/,/g, "");
+  const regex = /^[0-9]*\.?[0-9]*$/;
+  if (!regex.test(cleanValue)) {
+    return value;
+  }
+
+  // Split the number into integer and decimal parts
+  const parts = cleanValue.split(".");
+  let integerPart = parts[0]?.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (integerPart?.length && integerPart?.length >= 2) {
+    integerPart = integerPart?.replace(/^0+/, "");
+  }
+
+  // If there's a decimal part, keep it as is without adding commas
+  if (parts.length > 1) {
+    return `${integerPart}.${parts[1]}`;
+  }
+
+  return integerPart;
+}
+
+/**
+ * Validates if a string represents a valid number with comma separators
+ * Accepts numbers with comma as thousand separator and properly formatted decimal part
+ * Rejects numbers ending with decimal point without digits
+ *
+ * Examples:
+ * - "4,000.00" -> valid
+ * - "4." -> valid
+ * - "1,234,567.89" -> valid
+ * - "0.123" -> valid
+ *
+ * @param value The string to validate
+ * @returns boolean indicating if the string is a valid number format
+ */
+export function isValidNumberFormat(value: string): boolean {
+  if (!value) return false;
+
+  // Allow empty string or just a decimal point
+  if (value === "" || value === ".") return true;
+
+  // Regular expression to validate number format with commas as thousand separators
+  // and optional decimal part
+  const regex = /^-?(?:\d{1,3}(?:,\d{3})*|\d+)(?:\.\d*)?$/;
+
+  return regex.test(value);
+}

@@ -2,8 +2,12 @@
 
 import { tanstackClient } from "@dex-web/orpc";
 import { NumericInput, type NumericInputProps, Text } from "@dex-web/ui";
-import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
-import { useWallet } from "@solana/wallet-adapter-react";
+import {
+  convertToDecimal,
+  formatValueWithThousandSeparator,
+  isValidNumberFormat,
+  numberFormatHelper,
+} from "@dex-web/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useQueryStates } from "nuqs";
 import { useRef } from "react";
@@ -13,6 +17,12 @@ import { useFormatPrice } from "../_utils/useFormatPrice";
 interface SwapFormFieldsetProps extends NumericInputProps {
   name: "buyAmount" | "sellAmount";
   disabled?: boolean;
+  tokenAccount?: {
+    address: string;
+    amount: number;
+    decimals: number;
+    symbol: string;
+  };
 }
 const QUOTE_CURRENCY = "USD" as const;
 
@@ -21,20 +31,11 @@ export function SwapFormFieldset({
   onChange,
   value,
   disabled,
+  tokenAccount,
   ...rest
 }: SwapFormFieldsetProps) {
-  const { publicKey } = useWallet();
   const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
     selectedTokensParsers,
-  );
-
-  const { data } = useSuspenseQuery(
-    tanstackClient.helius.getTokenAccounts.queryOptions({
-      input: {
-        mint: name === "buyAmount" ? buyTokenAddress : sellTokenAddress,
-        ownerAddress: publicKey?.toBase58() ?? "",
-      },
-    }),
   );
 
   const { data: usdExchangeRate } = useSuspenseQuery(
@@ -55,9 +56,9 @@ export function SwapFormFieldset({
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const amount = data.tokenAccounts[0]?.amount ?? 0;
-  const tokenSymbol = data.tokenAccounts[0]?.symbol;
-  const decimals = data.tokenAccounts[0]?.decimals ?? 0;
+  const amount = tokenAccount?.amount ?? 0;
+  const tokenSymbol = tokenAccount?.symbol;
+  const decimals = tokenAccount?.decimals ?? 0;
   const setValueToHalfAmount = () => {
     if (inputRef.current) {
       inputRef.current.value = convertToDecimal(amount, decimals)
@@ -89,26 +90,48 @@ export function SwapFormFieldset({
     }
   };
 
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let value = event.target.value;
+
+    // if the last character is a comma, replace it with a dot
+    if (value.endsWith(",")) {
+      value = value.slice(0, -1) + ".";
+    }
+
+    const cleanValue = value.replace(/,/g, "");
+    if (value && !isValidNumberFormat(cleanValue)) {
+      return;
+    }
+
+    onChange?.({
+      target: {
+        value,
+      },
+    } as React.ChangeEvent<HTMLInputElement>);
+  };
+
   return (
     <fieldset className="flex min-w-0 flex-1 flex-col items-end gap-3">
       <div className="mb-3 flex gap-3">
-        <Text.Body2 className="text-green-300 uppercase">
-          {amount
-            ? `${numberFormatHelper({
-                decimalScale: 2,
-                thousandSeparator: true,
-                trimTrailingZeros: true,
-                value: convertToDecimal(amount, decimals),
-              })}`
-            : "0.00"}{" "}
-          {tokenSymbol}{" "}
+        <Text.Body2 className="flex gap-3 text-green-300 uppercase">
+          <span>
+            {amount
+              ? `${numberFormatHelper({
+                  decimalScale: 2,
+                  thousandSeparator: true,
+                  trimTrailingZeros: true,
+                  value: convertToDecimal(amount, decimals),
+                })}`
+              : "0.00"}{" "}
+            {tokenSymbol}
+          </span>
           <button
             className="cursor-pointer uppercase underline"
             onClick={setValueToHalfAmount}
             type="button"
           >
             Half
-          </button>{" "}
+          </button>
           <button
             className="cursor-pointer uppercase underline"
             onClick={setValueToMaxAmount}
@@ -120,12 +143,14 @@ export function SwapFormFieldset({
       </div>
       <div className="flex flex-col items-end">
         <NumericInput
+          autoComplete="off"
           disabled={disabled}
           name={name}
-          onChange={onChange}
+          onChange={handleChange}
           placeholder="0.00"
           ref={inputRef}
-          value={value}
+          type="text"
+          value={formatValueWithThousandSeparator(String(value) ?? "0")}
           {...rest}
         />
         <Text.Body2 className="text-green-300 uppercase">

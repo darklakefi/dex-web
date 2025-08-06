@@ -28,7 +28,7 @@ export const getQuoteOutputSchema = z.object({
       tokenYMint: z.string(),
     }),
   ),
-  slippage: z.number().positive(),
+  slippage: z.number().positive().max(99),
   tokenX: tokenSchema,
   tokenXMint: z.string(),
   tokenY: tokenSchema,

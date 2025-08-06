@@ -26,8 +26,8 @@ import { SwapPageSettingButton } from "./SwapPageSettingButton";
 export const { fieldContext, formContext } = createFormHookContexts();
 
 const swapFormSchema = z.object({
-  buyAmount: z.number().nonnegative(),
-  sellAmount: z.number().nonnegative(),
+  buyAmount: z.string(),
+  sellAmount: z.string(),
 });
 
 type SwapFormSchema = z.infer<typeof swapFormSchema>;
@@ -44,13 +44,13 @@ const { useAppForm } = createFormHook({
 
 const formConfig = {
   defaultValues: {
-    buyAmount: 0,
-    sellAmount: 0,
+    buyAmount: "0",
+    sellAmount: "0",
   } satisfies SwapFormSchema,
   onSubmit: async ({
     value,
   }: {
-    value: { buyAmount: number; sellAmount: number };
+    value: { buyAmount: string; sellAmount: string };
   }) => {
     console.log(value);
   },
@@ -92,6 +92,26 @@ export function SwapForm() {
       },
     }),
   );
+
+  const { data: buyTokenAccount, refetch: refetchBuyTokenAccount } =
+    useSuspenseQuery(
+      tanstackClient.helius.getTokenAccounts.queryOptions({
+        input: {
+          mint: buyTokenAddress,
+          ownerAddress: publicKey?.toBase58() ?? "",
+        },
+      }),
+    );
+
+  const { data: sellTokenAccount, refetch: refetchSellTokenAccount } =
+    useSuspenseQuery(
+      tanstackClient.helius.getTokenAccounts.queryOptions({
+        input: {
+          mint: sellTokenAddress,
+          ownerAddress: publicKey?.toBase58() ?? "",
+        },
+      }),
+    );
 
   const [quote, setQuote] = useState<GetQuoteOutput | null>(null);
 
@@ -190,6 +210,8 @@ export function SwapForm() {
           title: "Swap complete",
           variant: "success",
         });
+        refetchBuyTokenAccount();
+        refetchSellTokenAccount();
         return;
       }
 
@@ -243,8 +265,8 @@ export function SwapForm() {
 
     try {
       const formState = form.state.values;
-      const sellAmount = formState.sellAmount;
-      const buyAmount = formState.buyAmount;
+      const sellAmount = Number(formState.sellAmount.replace(/,/g, ""));
+      const buyAmount = Number(formState.buyAmount.replace(/,/g, ""));
 
       if (!buyTokenAddress || !sellTokenAddress) {
         throw new Error("Missing token addresses");
@@ -258,13 +280,13 @@ export function SwapForm() {
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
       const response = await client.dexGateway.getSwap({
-        amount_in: sellAmount,
+        amount_in: Number(sellAmount),
         is_swap_x_to_y: isXtoY,
         min_out: isUseSlippage
           ? BigNumber(buyAmount)
               .multipliedBy(1 - Number(slippage) / 100)
               .toNumber()
-          : buyAmount,
+          : Number(buyAmount),
         network: parseInt(process.env.NETWORK || "2", 10),
         token_mint_x: tokenXAddress,
         token_mint_y: tokenYAddress,
@@ -299,16 +321,18 @@ export function SwapForm() {
     isXtoY,
     slippage,
   }: {
-    amountIn: number;
+    amountIn: string;
     type: "buy" | "sell";
     isXtoY: boolean;
     slippage: number;
   }) => {
-    if (!poolDetails) return;
+    const amountInNumber = Number(amountIn.replace(/,/g, ""));
+    if (!poolDetails || BigNumber(amountInNumber).lte(0)) return;
+
     setSwapStep(10);
     setDisableSwap(true);
     const quote = await client.getSwapQuote({
-      amountIn,
+      amountIn: amountInNumber,
       isXtoY,
       slippage,
       tokenXMint: poolDetails.tokenXMint,
@@ -316,9 +340,9 @@ export function SwapForm() {
     });
     setQuote(quote);
     if (type === "sell") {
-      form.setFieldValue("buyAmount", quote.amountOut);
+      form.setFieldValue("buyAmount", String(quote.amountOut));
     } else {
-      form.setFieldValue("sellAmount", quote.amountOut);
+      form.setFieldValue("sellAmount", String(quote.amountOut));
     }
     setDisableSwap(false);
     setSwapStep(0);
@@ -330,9 +354,10 @@ export function SwapForm() {
     e: React.ChangeEvent<HTMLInputElement>,
     type: "buy" | "sell",
   ) => {
-    if (BigNumber(e.target.value).gt(0)) {
+    const value = e.target.value.replace(/,/g, "");
+    if (BigNumber(value).gt(0)) {
       debouncedGetQuote({
-        amountIn: Number(e.target.value),
+        amountIn: value,
         isXtoY,
         slippage: parseFloat(slippage),
         type,
@@ -343,7 +368,8 @@ export function SwapForm() {
   };
 
   const onClickSwapToken = () => {
-    if (!poolDetails || BigNumber(form.state.values.sellAmount).lte(0)) return;
+    const sellAmount = Number(form.state.values.sellAmount.replace(/,/g, ""));
+    if (!poolDetails || BigNumber(sellAmount).lte(0)) return;
 
     debouncedGetQuote({
       amountIn: form.state.values.sellAmount,
@@ -375,8 +401,9 @@ export function SwapForm() {
                   onBlur={field.handleBlur}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleAmountChange(e, "sell");
-                    field.handleChange(Number(e.target.value));
+                    field.handleChange(e.target.value);
                   }}
+                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
                   value={field.state.value}
                 />
               )}
@@ -403,8 +430,9 @@ export function SwapForm() {
                   onBlur={field.handleBlur}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleAmountChange(e, "buy");
-                    field.handleChange(Number(e.target.value));
+                    field.handleChange(e.target.value);
                   }}
+                  tokenAccount={buyTokenAccount?.tokenAccounts[0]}
                   value={field.state.value}
                 />
               )}
@@ -434,6 +462,7 @@ export function SwapForm() {
         {quote && (
           <SwapDetails
             quote={quote}
+            slippage={slippage}
             tokenBuyMint={buyTokenAddress}
             tokenSellMint={sellTokenAddress}
           />

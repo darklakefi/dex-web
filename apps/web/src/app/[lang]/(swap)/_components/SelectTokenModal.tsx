@@ -52,8 +52,9 @@ interface SelectTokenModalProps {
 export function SelectTokenModal({ type }: SelectTokenModalProps) {
   const router = useRouter();
 
-  const [{ buyTokenAddress, sellTokenAddress }, setSelectedTokens] =
-    useQueryStates(selectedTokensParsers);
+  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+    selectedTokensParsers,
+  );
 
   const handleClose = () => {
     router.push(
@@ -62,18 +63,25 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
   };
 
   const handleSelect = (
-    tokenAddress: string,
+    selectedTokenAddress: string,
     e: React.MouseEvent<HTMLButtonElement>,
   ) => {
     e.preventDefault();
-    console.log({ tokenAddress, type });
     if (type === "buy") {
+      const sellAddress =
+        selectedTokenAddress === sellTokenAddress
+          ? buyTokenAddress
+          : sellTokenAddress;
       router.push(
-        `/?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${tokenAddress}`,
+        `/?sellTokenAddress=${sellAddress}&buyTokenAddress=${selectedTokenAddress}`,
       );
     } else {
+      const buyAddress =
+        selectedTokenAddress === buyTokenAddress
+          ? sellTokenAddress
+          : buyTokenAddress;
       router.push(
-        `/?sellTokenAddress=${tokenAddress}&buyTokenAddress=${buyTokenAddress}`,
+        `/?sellTokenAddress=${selectedTokenAddress}&buyTokenAddress=${buyAddress}`,
       );
     }
   };
