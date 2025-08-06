@@ -111,6 +111,12 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
 
   return (
     <Modal onClose={handleClose}>
+      <Button
+        className="absolute top-5 right-5 cursor-pointer p-2.5 md:top-7 md:right-6 xl:right-10"
+        icon="times"
+        onClick={handleClose}
+        variant="secondary"
+      ></Button>
       <Box className="flex max-h-full w-full max-w-sm drop-shadow-xl">
         <form.Field name="query">
           {(field) => (
