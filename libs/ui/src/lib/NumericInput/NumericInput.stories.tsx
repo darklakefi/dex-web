@@ -131,7 +131,9 @@ export const Interactive = {
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="rounded bg-gray-800 p-4">
             <div className="text-gray-400">Current Value:</div>
-            <div className="font-mono text-lg text-white">{displayValue}</div>
+            <div className="font-mono text-lg text-white">
+              {formatValueWithThousandSeparator(displayValue)}
+            </div>
           </div>
           <div className="rounded bg-gray-800 p-4">
             <div className="text-gray-400">Input Size:</div>
