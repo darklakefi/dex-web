@@ -68,7 +68,7 @@ const MESSAGE_STEP = {
 
 export function SwapForm() {
   const form = useAppForm(formConfig);
-  const { wallets, signTransaction, publicKey } = useWallet();
+  const { signTransaction, publicKey } = useWallet();
   const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
     selectedTokensParsers,
   );
@@ -440,10 +440,10 @@ export function SwapForm() {
           </Box>
           <div className="w-full">
             {!publicKey ? (
-              <ConnectWalletButton className="w-full py-3" wallets={wallets} />
+              <ConnectWalletButton className="w-full py-3" />
             ) : poolDetails ? (
               <Button
-                className="w-full cursor-pointer py-3"
+                className="w-full cursor-pointer py-3 leading-6"
                 disabled={swapStep !== 0 || disableSwap}
                 loading={swapStep !== 0}
                 onClick={handleSwap}
