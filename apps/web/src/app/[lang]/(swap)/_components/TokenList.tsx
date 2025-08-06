@@ -27,6 +27,7 @@ export function TokenList({ tokens, onSelect }: TokenListProps) {
                 <div className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-green-500 text-xs leading-8">
                   <Image
                     alt={token.symbol}
+                    className="h-full w-full object-cover"
                     height={32}
                     priority
                     src={token.imageUrl}
