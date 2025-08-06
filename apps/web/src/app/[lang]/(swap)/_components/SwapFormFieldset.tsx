@@ -113,23 +113,25 @@ export function SwapFormFieldset({
   return (
     <fieldset className="flex min-w-0 flex-1 flex-col items-end gap-3">
       <div className="mb-3 flex gap-3">
-        <Text.Body2 className="text-green-300 uppercase">
-          {amount
-            ? `${numberFormatHelper({
-                decimalScale: 2,
-                thousandSeparator: true,
-                trimTrailingZeros: true,
-                value: convertToDecimal(amount, decimals),
-              })}`
-            : "0.00"}{" "}
-          {tokenSymbol}{" "}
+        <Text.Body2 className="flex gap-3 text-green-300 uppercase">
+          <span>
+            {amount
+              ? `${numberFormatHelper({
+                  decimalScale: 2,
+                  thousandSeparator: true,
+                  trimTrailingZeros: true,
+                  value: convertToDecimal(amount, decimals),
+                })}`
+              : "0.00"}{" "}
+            {tokenSymbol}
+          </span>
           <button
             className="cursor-pointer uppercase underline"
             onClick={setValueToHalfAmount}
             type="button"
           >
             Half
-          </button>{" "}
+          </button>
           <button
             className="cursor-pointer uppercase underline"
             onClick={setValueToMaxAmount}
