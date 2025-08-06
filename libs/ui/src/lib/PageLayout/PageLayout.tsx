@@ -25,7 +25,7 @@ export function PageLayout({
       {header}
       <main
         className={
-          "flex-auto bg-[image:var(--background-image-url)] bg-center bg-cover px-5 py-10 lg:px-30 lg:py-20"
+          "flex-auto bg-[image:var(--background-image-url)] bg-cover bg-top px-5 py-10 lg:px-30 lg:py-20"
         }
         style={{
           "--background-image-url": `url(${backgroundImageUrl})`,
