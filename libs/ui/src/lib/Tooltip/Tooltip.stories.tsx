@@ -31,7 +31,7 @@ export const LongContent: Story = {
     <div>
       <Button data-tooltip-id="long-tooltip">Hover for more info</Button>
       <Tooltip id="long-tooltip">
-        <Text.Body2>
+        <Text.Body2 className="max-w-xs">
           This tooltip contains a longer explanation that might wrap to multiple
           lines.
         </Text.Body2>

@@ -49,10 +49,53 @@ export const Interactive = {
     const [displayValue, setDisplayValue] = useState("0");
     const inputId = useId();
 
+    function isValidNumberFormat(value: string): boolean {
+      if (!value) return false;
+
+      if (value === "" || value === ".") return true;
+
+      const regex = /^-?(?:\d{1,3}(?:,\d{3})*|\d+)(?:\.\d*)?$/;
+
+      return regex.test(value);
+    }
+
+    function formatValueWithThousandSeparator(value: string) {
+      const cleanValue = value.replace(/,/g, "");
+      const regex = /^[0-9]*\.?[0-9]*$/;
+      if (!regex.test(cleanValue)) {
+        return value;
+      }
+
+      // Split the number into integer and decimal parts
+      const parts = cleanValue.split(".");
+      let integerPart = parts[0]?.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      if (integerPart?.length && integerPart?.length >= 2) {
+        integerPart = integerPart?.replace(/^0+/, "");
+      }
+
+      // If there's a decimal part, keep it as is without adding commas
+      if (parts.length > 1) {
+        return `${integerPart}.${parts[1]}`;
+      }
+
+      return integerPart;
+    }
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-      setValue(newValue);
-      setDisplayValue(newValue || "0");
+      let value = e.target.value;
+
+      // if the last character is a comma, replace it with a dot
+      if (value.endsWith(",")) {
+        value = value.slice(0, -1) + ".";
+      }
+
+      const cleanValue = value.replace(/,/g, "");
+      if (value && !isValidNumberFormat(cleanValue)) {
+        return;
+      }
+
+      setValue(value);
+      setDisplayValue(value || "0");
     };
 
     return (
@@ -75,11 +118,13 @@ export const Interactive = {
           </label>
           <NumericInput
             {...args}
+            autoComplete="off"
             id={inputId}
             min="0"
             onChange={handleChange}
-            step="0.01"
-            value={value}
+            placeholder="0.00"
+            type="text"
+            value={formatValueWithThousandSeparator(String(value) ?? "0")}
           />
         </div>
 
