@@ -25,7 +25,7 @@ export const AppFooter = () => {
         <Text
           as="a"
           className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
-          href="http://mev-checker.darklake.fi/"
+          href="https://mev-checker.darklake.fi/"
           variant="link"
         >
           MEV Checker{" "}
