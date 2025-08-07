@@ -384,11 +384,11 @@ export function SwapForm() {
       <div className="size-9" />
       <Box padding="lg">
         <div className="flex flex-col gap-4">
-          <Box background="highlight" className="flex-row">
+          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
             <div>
               <Text.Body2
                 as="label"
-                className="mb-6 block text-green-300 uppercase"
+                className="mb-3 block text-green-300 uppercase"
               >
                 Selling
               </Text.Body2>
@@ -412,11 +412,11 @@ export function SwapForm() {
           <div className="flex items-center justify-center">
             <SwapButton onClickSwapToken={onClickSwapToken} />
           </div>
-          <Box background="highlight" className="flex-row">
+          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
             <div>
               <Text.Body2
                 as="label"
-                className="mb-6 block text-green-300 uppercase"
+                className="mb-3 block text-green-300 uppercase"
               >
                 Buying
               </Text.Body2>

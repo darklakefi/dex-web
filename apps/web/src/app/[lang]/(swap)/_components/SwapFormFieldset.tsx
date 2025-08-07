@@ -144,6 +144,7 @@ export function SwapFormFieldset({
       <div className="flex flex-col items-end">
         <NumericInput
           autoComplete="off"
+          className={!formattedPrice ? "leading-10" : ""}
           disabled={disabled}
           name={name}
           onChange={handleChange}

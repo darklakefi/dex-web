@@ -1,8 +1,9 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentPropsWithRef } from "react";
+import { twMerge } from "tailwind-merge";
 
 const numericInputVariants = cva(
-  "inline-flex w-full bg-green-600 text-end font-sans text-3xl text-green-100 uppercase fieldset:placeholder-transparent caret-green-300 focus:outline-none",
+  "inline-flex w-full bg-green-600 text-end font-sans text-3xl text-green-100 uppercase leading-8.5 fieldset:placeholder-transparent caret-green-300 focus:outline-none",
   {
     defaultVariants: {},
     variants: {},
@@ -23,13 +24,14 @@ export function NumericInput({
   children,
   name,
   placeholder,
+  className,
   ...props
 }: NumericInputProps) {
   const size = props.value?.toString().length ?? placeholder?.length ?? 1;
   return (
     <input
       aria-label={name}
-      className={numericInputVariants()}
+      className={twMerge(numericInputVariants(), className)}
       inputMode="numeric"
       min={0}
       name={name}
