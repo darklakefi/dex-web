@@ -1,13 +1,12 @@
-"use client";
+//"use client";
 import { Footer, Icon, Text } from "@dex-web/ui";
-import { useWallet } from "@solana/wallet-adapter-react";
+//import { useWallet } from "@solana/wallet-adapter-react";
 
 export const AppFooter = () => {
-  const { disconnect } = useWallet();
-
-  const handleClick = () => {
-    disconnect();
-  };
+  //const { disconnect } = useWallet();
+  //const handleClick = () => {
+  //  disconnect();
+  //};
 
   return (
     <Footer
@@ -15,31 +14,56 @@ export const AppFooter = () => {
       socialMediaLinks={[]}
     >
       <div className="flex flex-col items-start gap-5">
+        {/*
         <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
           MEV
         </Text.Link>
         <Text.Link className="inline-flex items-baseline justify-center text-green-300 leading-none no-underline">
           What is MEV?
         </Text.Link>
-        <Text.Link className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline">
+        */}
+        <Text
+          as="a"
+          className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
+          href="https://mev-checker.darklake.fi/"
+          variant="link"
+        >
           MEV Checker{" "}
           <Icon className="size-4 fill-green-300" name="external-link" />
-        </Text.Link>
+        </Text>
       </div>
       <div className="flex flex-col items-start gap-5">
         <Text.Link className="inline-flex items-baseline justify-center no-underline">
           Resources
         </Text.Link>
-        <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
-          Docs
-        </Text.Link>
-        <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
-          Support
-        </Text.Link>
-        <Text.Link className="inline-flex items-baseline justify-center text-green-300 no-underline">
-          Cookies
-        </Text.Link>
+        <Text
+          as="a"
+          className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
+          href="https://docs.darklake.fi"
+          variant="link"
+        >
+          Docs <Icon className="size-4 fill-green-300" name="external-link" />
+        </Text>
+        <Text
+          as="a"
+          className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
+          href="https://darklake.typeform.com/contact"
+          variant="link"
+        >
+          Support{" "}
+          <Icon className="size-4 fill-green-300" name="external-link" />
+        </Text>
+        <Text
+          as="a"
+          className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
+          href="https://docs.darklake.fi/cookies-policy"
+          variant="link"
+        >
+          Cookies Policy{" "}
+          <Icon className="size-4 fill-green-300" name="external-link" />
+        </Text>
       </div>
+      {/*
       <div className="flex flex-col items-start gap-5">
         <Text.Link className="inline-flex items-baseline justify-center no-underline">
           Protocol Stats
@@ -59,6 +83,7 @@ export const AppFooter = () => {
           </button>
         </Text.Link>
       </div>
+      */}
     </Footer>
   );
 };

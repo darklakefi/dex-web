@@ -44,17 +44,17 @@ export const AppHeader = () => {
         {tx("pools")}
       </Text> */}
       <Text
-        active={pathname === "/about"}
-        className="inline-flex items-baseline justify-center leading-none no-underline"
-        href="/about"
+        as="a"
+        className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"
+        href="https://docs.darklake.fi"
         variant="link"
       >
-        {tx("about")}
+        {tx("about")} <Icon className="size-4" name="external-link" />
       </Text>
       <Text
-        active={pathname === "/contact"}
+        as="a"
         className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"
-        href="/contact"
+        href="https://darklake.typeform.com/contact"
         variant="link"
       >
         {tx("contact")} <Icon className="size-4" name="external-link" />
