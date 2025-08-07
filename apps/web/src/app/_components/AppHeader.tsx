@@ -45,7 +45,7 @@ export const AppHeader = () => {
       </Text> */}
       <Text
         as="a"
-        className="inline-flex items-baseline justify-center leading-none no-underline"
+        className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"
         href="https://docs.darklake.fi"
         variant="link"
       >

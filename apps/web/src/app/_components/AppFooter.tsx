@@ -38,7 +38,7 @@ export const AppFooter = () => {
         </Text.Link>
         <Text
           as="a"
-          className="inline-flex items-baseline justify-center text-green-300 no-underline"
+          className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
           href="https://docs.darklake.fi"
           variant="link"
         >
@@ -46,7 +46,7 @@ export const AppFooter = () => {
         </Text>
         <Text
           as="a"
-          className="inline-flex items-baseline justify-center text-green-300 no-underline"
+          className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
           href="https://darklake.typeform.com/contact"
           variant="link"
         >
@@ -55,7 +55,7 @@ export const AppFooter = () => {
         </Text>
         <Text
           as="a"
-          className="inline-flex items-baseline justify-center text-green-300 no-underline"
+          className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
           href="https://docs.darklake.fi/cookies-policy"
           variant="link"
         >
