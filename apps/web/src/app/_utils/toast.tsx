@@ -9,7 +9,7 @@ interface ToastProps {
 }
 
 export function toast(toast: Omit<ToastProps, "id">) {
-  let duration: number | undefined;
+  let duration = 5000;
   if (toast.variant === "error") {
     duration = Infinity;
   }
