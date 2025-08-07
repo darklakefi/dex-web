@@ -31,11 +31,10 @@ export default async function Page({
 
   return (
     <div className="flex justify-center gap-12">
-      <div className="flex max-w-xl flex-col items-center justify-center">
-        <section className="flex w-full items-start gap-1">
+      <div className="flex w-full max-w-xl flex-col items-center justify-center">
+        <section className="hidden w-full items-start gap-1 md:flex">
           <div className="size-9" />
-          <Text.Heading className="mb-4 block md:hidden">Swap</Text.Heading>
-          <Box className="mb-0 hidden bg-green-800 pb-0 md:block">
+          <Box className="mb-0 bg-green-800 pb-0">
             <Hero
               className="gap-4"
               image="/images/waddles/pose4.png"
@@ -55,7 +54,6 @@ export default async function Page({
               </div>
             </Hero>
           </Box>
-
           <div className="size-9" />
         </section>
         <SwapForm />
