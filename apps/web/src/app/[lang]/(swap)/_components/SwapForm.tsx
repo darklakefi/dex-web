@@ -380,118 +380,147 @@ export function SwapForm() {
   };
 
   return (
-    <section className="flex w-full max-w-xl items-start gap-1">
-      <div className="size-9" />
-      <Box padding="lg">
-        <div className="flex flex-col gap-4">
-          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
-            <div>
-              <Text.Body2
-                as="label"
-                className="mb-3 block text-green-300 uppercase"
-              >
-                Selling
-              </Text.Body2>
-              <SelectTokenButton type="sell" />
-            </div>
-            <form.Field name="sellAmount">
-              {(field) => (
-                <SwapFormFieldset
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "sell");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </Box>
-          <div className="flex items-center justify-center">
-            <SwapButton onClickSwapToken={onClickSwapToken} />
-          </div>
-          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
-            <div>
-              <Text.Body2
-                as="label"
-                className="mb-3 block text-green-300 uppercase"
-              >
-                Buying
-              </Text.Body2>
-              <SelectTokenButton type="buy" />
-            </div>
-            <form.Field name="buyAmount">
-              {(field) => (
-                <SwapFormFieldset
-                  disabled={true}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "buy");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={buyTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </Box>
-          <div className="w-full">
-            {!publicKey ? (
-              <ConnectWalletButton className="w-full py-3" />
-            ) : poolDetails ? (
-              <Button
-                className="w-full cursor-pointer py-3 leading-6"
-                disabled={swapStep !== 0 || disableSwap}
-                loading={swapStep !== 0}
-                onClick={handleSwap}
-              >
-                {swapStep === 0
-                  ? "Swap"
-                  : MESSAGE_STEP[swapStep as keyof typeof MESSAGE_STEP]}
-              </Button>
-            ) : (
-              <Button className="w-full cursor-pointer py-3" disabled={true}>
-                Create Pool
-              </Button>
-            )}
-          </div>
-        </div>
-        {quote && (
-          <SwapDetails
-            quote={quote}
-            slippage={slippage}
-            tokenBuyMint={buyTokenAddress}
-            tokenSellMint={sellTokenAddress}
+    <div className="w-full">
+      <div className="mb-4 flex items-center justify-between md:hidden">
+        <Text.Heading className="text-green-200">Swap</Text.Heading>
+        <div className="flex gap-3">
+          <SwapPageSettingButton
+            onChange={(slippage) => {
+              setIsUseSlippage(slippage !== "0");
+              setSlippage(slippage);
+              debouncedGetQuote({
+                amountIn: form.state.values.sellAmount,
+                isXtoY,
+                slippage: parseFloat(slippage),
+                type: "sell",
+              });
+            }}
           />
-        )}
-      </Box>
-      <div className="flex flex-col gap-1">
-        <SwapPageSettingButton
-          onChange={(slippage) => {
-            setIsUseSlippage(slippage !== "0");
-            setSlippage(slippage);
-            debouncedGetQuote({
-              amountIn: form.state.values.sellAmount,
-              isXtoY,
-              slippage: parseFloat(slippage),
-              type: "sell",
-            });
-          }}
-        />
-        <SwapPageRefreshButton
-          onClick={() => {
-            debouncedGetQuote({
-              amountIn: form.state.values.sellAmount,
-              isXtoY,
-              slippage: parseFloat(slippage),
-              type: "sell",
-            });
-          }}
-        />
+          <SwapPageRefreshButton
+            onClick={() => {
+              debouncedGetQuote({
+                amountIn: form.state.values.sellAmount,
+                isXtoY,
+                slippage: parseFloat(slippage),
+                type: "sell",
+              });
+            }}
+          />
+        </div>
       </div>
-    </section>
+      <section className="flex gap-1">
+        <div className="hidden size-9 md:block" />
+        <Box className="bg-transparent md:bg-green-700 md:p-6" padding="none">
+          <div className="flex flex-col gap-4">
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  Selling
+                </Text.Body2>
+                <SelectTokenButton type="sell" />
+              </div>
+              <form.Field name="sellAmount">
+                {(field) => (
+                  <SwapFormFieldset
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "sell");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                )}
+              </form.Field>
+            </Box>
+            <div className="flex items-center justify-center">
+              <SwapButton onClickSwapToken={onClickSwapToken} />
+            </div>
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  Buying
+                </Text.Body2>
+                <SelectTokenButton type="buy" />
+              </div>
+              <form.Field name="buyAmount">
+                {(field) => (
+                  <SwapFormFieldset
+                    disabled={true}
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "buy");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                )}
+              </form.Field>
+            </Box>
+            <div className="w-full">
+              {!publicKey ? (
+                <ConnectWalletButton className="w-full py-3" />
+              ) : poolDetails ? (
+                <Button
+                  className="w-full cursor-pointer py-3 leading-6"
+                  disabled={swapStep !== 0 || disableSwap}
+                  loading={swapStep !== 0}
+                  onClick={handleSwap}
+                >
+                  {swapStep === 0
+                    ? "Swap"
+                    : MESSAGE_STEP[swapStep as keyof typeof MESSAGE_STEP]}
+                </Button>
+              ) : (
+                <Button className="w-full cursor-pointer py-3" disabled={true}>
+                  Create Pool
+                </Button>
+              )}
+            </div>
+          </div>
+          {quote && (
+            <SwapDetails
+              quote={quote}
+              slippage={slippage}
+              tokenBuyMint={buyTokenAddress}
+              tokenSellMint={sellTokenAddress}
+            />
+          )}
+        </Box>
+        <div className="hidden flex-col gap-1 md:flex">
+          <SwapPageSettingButton
+            onChange={(slippage) => {
+              setIsUseSlippage(slippage !== "0");
+              setSlippage(slippage);
+              debouncedGetQuote({
+                amountIn: form.state.values.sellAmount,
+                isXtoY,
+                slippage: parseFloat(slippage),
+                type: "sell",
+              });
+            }}
+          />
+          <SwapPageRefreshButton
+            onClick={() => {
+              debouncedGetQuote({
+                amountIn: form.state.values.sellAmount,
+                isXtoY,
+                slippage: parseFloat(slippage),
+                type: "sell",
+              });
+            }}
+          />
+        </div>
+      </section>
+    </div>
   );
 }
