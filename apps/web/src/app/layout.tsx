@@ -46,7 +46,7 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider>
           <Providers>
-            <Toaster position="top-right" />
+            <Toaster expand={true} position="top-right" visibleToasts={5} />
             <PageLayout
               backgroundImageUrl={backgroundImage.src}
               footer={<AppFooter />}

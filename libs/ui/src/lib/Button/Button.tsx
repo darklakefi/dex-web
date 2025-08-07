@@ -16,7 +16,7 @@ export enum ButtonVariantEnum {
 const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2",
-    "font-medium uppercase leading-none",
+    "font-normal uppercase leading-none tracking-wider",
     "outline-offset-1 focus:outline-2 focus:outline-solid",
     "transition-colors duration-200",
     "disabled:cursor-not-allowed disabled:opacity-50",

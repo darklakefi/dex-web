@@ -56,13 +56,13 @@ export function SelectWalletModal() {
         <div className="flex flex-col gap-4">
           {wallets.map((wallet) => (
             <Button
-              className="inline-flex cursor-pointer justify-start gap-4"
+              className="inline-flex cursor-pointer justify-start gap-4 bg-green-800 py-3"
               key={wallet.adapter.name}
               onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
                 handleSelect(wallet, e)
               }
               type="button"
-              variant="secondary"
+              variant="primary-dark"
             >
               <Image
                 alt={wallet.adapter.name}

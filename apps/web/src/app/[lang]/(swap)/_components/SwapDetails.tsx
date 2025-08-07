@@ -2,9 +2,9 @@
 
 import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Icon, Text, Tooltip } from "@dex-web/ui";
-import { numberFormatHelper } from "@dex-web/utils";
 import BigNumber from "bignumber.js";
 import { cva, type VariantProps } from "class-variance-authority";
+import { SwapRate } from "./SwapRate";
 
 function getImpact(priceImpactPercentage: number) {
   switch (true) {
@@ -47,7 +47,7 @@ const swapDetailsItemVariants = cva(
 interface SwapDetailsItemProps
   extends VariantProps<typeof swapDetailsItemVariants> {
   label: string;
-  value: string;
+  value: string | React.ReactNode;
   tooltip?: React.ReactNode | string;
   tooltipId?: string;
 }
@@ -94,25 +94,12 @@ export function SwapDetails({
   const tokenBuy =
     quote.tokenX.address === tokenBuyMint ? quote.tokenX : quote.tokenY;
 
-  // const rateXtoY = quote.isXtoY ? quote.rate : BigNumber(1).div(quote.rate || 1).toString();
-  // const rateYtoX = quote.isXtoY ? BigNumber(1).div(quote.rate || 1).toString() : quote.rate;
-
-  const priceValue = `1 ${quote.isXtoY ? quote.tokenX.symbol : quote.tokenY.symbol} ≈ ${numberFormatHelper(
-    {
-      decimalScale: 5,
-      thousandSeparator: true,
-      trimTrailingZeros: true,
-      value: quote.rate,
-    },
-  )} ${quote.isXtoY ? quote.tokenY.symbol : quote.tokenX.symbol}`;
   // const priceImpactValue = `${quote.priceImpactPercentage}%`;
   const minOutputValue = BigNumber(quote.amountOutRaw)
     .times(1 - quote.slippage / 100)
     .div(10 ** Number(tokenBuy.decimals))
     .toFixed(Number(tokenBuy.decimals));
 
-  // const maxSlippageValue = `${quote.slippage}%`;
-  // const mevProtectionValue = true ? "Active" : "Inactive";
   const estimatedFeesValue = `${BigNumber(quote.estimatedFee)
     .div(10 ** Number(tokenSell.decimals))
     .toString()} ${tokenSell.symbol}`;
@@ -121,7 +108,7 @@ export function SwapDetails({
   return (
     <Box background="highlight">
       <dl className="flex flex-col gap-2">
-        <SwapDetailsItem label="Price" value={priceValue} />
+        <SwapDetailsItem label="Price" value={<SwapRate quote={quote} />} />
         {/* <SwapDetailsItem
           impact={impact}
           label="Price Impact"
@@ -129,7 +116,18 @@ export function SwapDetails({
         /> */}
         <SwapDetailsItem label="Max Slippage" value={`${slippage}%`} />
         <SwapDetailsItem label="Min. Output" value={minOutputValue} />
-        <SwapDetailsItem label="MEV Protection" value="Active" />
+        <SwapDetailsItem
+          label="MEV Protection"
+          tooltip={
+            <Text.Body2 className="max-w-xs text-green-300">
+              Your trade details are cryptographically hidden from MEV bots,
+              preventing sandwich attacks and ensuring you get the price you
+              expect.
+            </Text.Body2>
+          }
+          tooltipId="mev-protection-tooltip"
+          value="Active"
+        />
         <SwapDetailsItem
           label="Est. Fees"
           tooltip={
