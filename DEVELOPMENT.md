@@ -182,24 +182,24 @@ The project uses Drizzle ORM for schema management. The database schema is defin
 
 **Run database migrations:**
 ```sh
-npx drizzle-kit push --config libs/orpc/drizzle.config.ts
+npx drizzle-kit push --config libs/db/drizzle.config.ts
 ```
 
 **Generate migrations (when you change the schema):**
 ```sh
-npx drizzle-kit generate --config libs/orpc/drizzle.config.ts
+npx drizzle-kit generate --config libs/db/drizzle.config.ts
 ```
 
 ### 4. Database Management Commands
 
 **View database schema:**
 ```sh
-npx drizzle-kit introspect --config libs/orpc/drizzle.config.ts
+npx drizzle-kit introspect --config libs/db/drizzle.config.ts
 ```
 
 **Open Drizzle Studio (database browser):**
 ```sh
-npx drizzle-kit studio --config libs/orpc/drizzle.config.ts
+npx drizzle-kit studio --config libs/db/drizzle.config.ts
 ```
 
 This opens a web interface at [http://localhost:4983](http://localhost:4983) where you can browse and edit your database.
