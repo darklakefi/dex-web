@@ -10,9 +10,16 @@ const DISCLAIMER_COOKIE_EXPIRY_DAYS = 365; // 1 year
 interface DisclaimerModalProps {
   isOpen: boolean;
   onAccept: () => void;
+  country?: string | null;
 }
 
-function DisclaimerModalContent({ onAccept }: { onAccept: () => void }) {
+function DisclaimerModalContent({
+  onAccept,
+  country,
+}: {
+  onAccept: () => void;
+  country?: string | null;
+}) {
   return (
     <div className="mx-4 max-w-md rounded-lg border border-gray-700 bg-gray-900 p-6 text-white">
       <div className="mb-4">
@@ -29,6 +36,14 @@ function DisclaimerModalContent({ onAccept }: { onAccept: () => void }) {
             Please carefully consider your investment experience, and risk
             tolerance before trading.
           </p>
+          {country === "GB" && (
+            <p className="font-medium text-orange-200">
+              <strong>UK Users:</strong> This product is not intended to be used
+              in the United Kingdom. By proceeding, you acknowledge that you are
+              accessing this service from outside the UK or are aware of the
+              regulatory restrictions in your jurisdiction.
+            </p>
+          )}
           <p className="font-medium text-green-200">
             By clicking "I Understand", you acknowledge that you have read and
             understood these risks.
@@ -48,12 +63,16 @@ function DisclaimerModalContent({ onAccept }: { onAccept: () => void }) {
   );
 }
 
-export function DisclaimerModal({ isOpen, onAccept }: DisclaimerModalProps) {
+export function DisclaimerModal({
+  isOpen,
+  onAccept,
+  country,
+}: DisclaimerModalProps) {
   if (!isOpen) return null;
 
   return (
     <Modal onClose={() => {}}>
-      <DisclaimerModalContent onAccept={onAccept} />
+      <DisclaimerModalContent country={country} onAccept={onAccept} />
     </Modal>
   );
 }
