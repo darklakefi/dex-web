@@ -4,7 +4,7 @@ import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Icon } from "@dex-web/ui";
 import { numberFormatHelper } from "@dex-web/utils";
 import BigNumber from "bignumber.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface SwapRateProps {
   quote: GetQuoteOutput;
@@ -12,6 +12,10 @@ export interface SwapRateProps {
 
 export function SwapRate({ quote }: SwapRateProps) {
   const [isXtoY, setIsXtoY] = useState(quote.isXtoY);
+
+  useEffect(() => {
+    setIsXtoY(quote.isXtoY);
+  }, [quote.isXtoY]);
   const rateXtoY = quote.isXtoY
     ? quote.rate
     : BigNumber(1)
