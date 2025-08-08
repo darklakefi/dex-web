@@ -261,6 +261,26 @@
       "code": 6033,
       "msg": "Output is zero",
       "name": "OutputIsZero"
+    },
+    {
+      "code": 6034,
+      "msg": "Invalid associated token program",
+      "name": "InvalidAssociatedTokenProgram"
+    },
+    {
+      "code": 6035,
+      "msg": "User token account X is uninitialized",
+      "name": "UserTokenAccountXUninitialized"
+    },
+    {
+      "code": 6036,
+      "msg": "User token account Y is uninitialized",
+      "name": "UserTokenAccountYUninitialized"
+    },
+    {
+      "code": 6037,
+      "msg": "Caller token account WSOL is uninitialized",
+      "name": "CallerTokenAccountWSolUninitialized"
     }
   ],
   "events": [
@@ -626,12 +646,8 @@
           "name": "user_token_account_x",
           "pda": {
             "program": {
-              "kind": "const",
-              "value": [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89
-              ]
+              "kind": "account",
+              "path": "associated_token_program"
             },
             "seeds": [
               {
@@ -654,12 +670,8 @@
           "name": "user_token_account_y",
           "pda": {
             "program": {
-              "kind": "const",
-              "value": [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89
-              ]
+              "kind": "account",
+              "path": "associated_token_program"
             },
             "seeds": [
               {
@@ -682,12 +694,8 @@
           "name": "user_token_account_wsol",
           "pda": {
             "program": {
-              "kind": "const",
-              "value": [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89
-              ]
+              "kind": "account",
+              "path": "associated_token_program"
             },
             "seeds": [
               {
@@ -710,12 +718,8 @@
           "name": "caller_token_account_wsol",
           "pda": {
             "program": {
-              "kind": "const",
-              "value": [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89
-              ]
+              "kind": "account",
+              "path": "associated_token_program"
             },
             "seeds": [
               {
@@ -757,6 +761,10 @@
         {
           "address": "11111111111111111111111111111111",
           "name": "system_program"
+        },
+        {
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+          "name": "associated_token_program"
         },
         {
           "name": "token_mint_x_program"
@@ -965,7 +973,7 @@
     {
       "accounts": [
         {
-          "address": "43RPeUeQ1c4eAqvAYiS43wVfr81PjfWSteTxyHx49kMr",
+          "address": "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB",
           "docs": ["Address to be set as protocol owner."],
           "name": "admin",
           "signer": true,
@@ -1360,7 +1368,7 @@
           "writable": true
         },
         {
-          "address": "HNQdnRgtnsgcx7E836nZ1JwrQstWBEJMnRVy8doY366A",
+          "address": "HNVk87PuSDucX14Eh6CJ5dNm2mG6iNpuT3PHLdbGZeLo",
           "name": "create_pool_fee_vault",
           "writable": true
         },
@@ -1815,12 +1823,8 @@
           "name": "user_token_account_wsol",
           "pda": {
             "program": {
-              "kind": "const",
-              "value": [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89
-              ]
+              "kind": "account",
+              "path": "associated_token_program"
             },
             "seeds": [
               {
@@ -1843,12 +1847,8 @@
           "name": "caller_token_account_wsol",
           "pda": {
             "program": {
-              "kind": "const",
-              "value": [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89
-              ]
+              "kind": "account",
+              "path": "associated_token_program"
             },
             "seeds": [
               {
@@ -1874,6 +1874,26 @@
               {
                 "kind": "const",
                 "value": [111, 114, 100, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "account",
+                "path": "order_owner"
+              }
+            ]
+          },
+          "writable": true
+        },
+        {
+          "name": "order_token_account_wsol",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [111, 114, 100, 101, 114, 95, 119, 115, 111, 108]
               },
               {
                 "kind": "account",
@@ -1935,6 +1955,10 @@
               2
             ]
           }
+        },
+        {
+          "name": "unwrap_wsol",
+          "type": "bool"
         }
       ],
       "discriminator": [175, 42, 185, 87, 144, 131, 102, 212],
@@ -2123,12 +2147,8 @@
           "name": "caller_token_account_wsol",
           "pda": {
             "program": {
-              "kind": "const",
-              "value": [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89
-              ]
+              "kind": "account",
+              "path": "associated_token_program"
             },
             "seeds": [
               {
@@ -2472,7 +2492,7 @@
     {
       "accounts": [
         {
-          "address": "43RPeUeQ1c4eAqvAYiS43wVfr81PjfWSteTxyHx49kMr",
+          "address": "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB",
           "docs": ["The config admin"],
           "name": "admin",
           "signer": true

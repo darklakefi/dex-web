@@ -1,8 +1,6 @@
-// Import and re-export the Darklake IDL
-import type { Idl } from "@coral-xyz/anchor";
-// @ts-ignore - We know this file exists
+import type { Darklake } from "../darklake";
 import idlData from "../darklake.json";
 
-const IDL: Idl = idlData as Idl;
+const IDL = idlData as Darklake;
 
 export default IDL;
