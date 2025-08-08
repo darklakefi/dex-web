@@ -7,6 +7,7 @@ import "./global.css";
 import { NextIntlClientProvider } from "next-intl";
 import { AppFooter } from "./_components/AppFooter";
 import { AppHeader } from "./_components/AppHeader";
+import { GeolocationAwareDisclaimerProvider } from "./_components/GeolocationAware";
 
 const bitsumishiRegular = localFont({
   src: "./_fonts/bitsumishi-regular.woff2",
@@ -46,6 +47,7 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider>
           <Providers>
+            <GeolocationAwareDisclaimerProvider />
             <Toaster expand={true} position="top-right" visibleToasts={5} />
             <PageLayout
               backgroundImageUrl={backgroundImage.src}
