@@ -340,7 +340,7 @@ export async function getSwapRateHandler(
       amountOutRaw: amountOutBigDecimal.toNumber(),
       estimatedFee: swapResult.tradeFee,
       priceImpact: priceImpactTruncated,
-      rate: adjustedRate, // don't round up - truncate
+      rate: adjustedRate,
       tokenX,
       tokenY,
     };
