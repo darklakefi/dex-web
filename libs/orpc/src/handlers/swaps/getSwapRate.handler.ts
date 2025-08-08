@@ -329,7 +329,7 @@ export async function getSwapRateHandler(
       ? newAvailableReserveY / newAvailableReserveX
       : newAvailableReserveX / newAvailableReserveY;
 
-    // Calculate rate  impact as percentage change
+    // Calculate rate impact as percentage change
     const priceImpact = ((originalRate - newRate) / originalRate) * 100;
     const priceImpactTruncated = Math.floor(priceImpact * 100) / 100;
 
