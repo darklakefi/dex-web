@@ -47,6 +47,7 @@ export const AppHeader = () => {
         as="a"
         className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"
         href="https://docs.darklake.fi"
+        target="_blank"
         variant="link"
       >
         {tx("about")} <Icon className="size-4" name="external-link" />
@@ -55,6 +56,7 @@ export const AppHeader = () => {
         as="a"
         className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"
         href="https://darklake.typeform.com/contact"
+        target="_blank"
         variant="link"
       >
         {tx("contact")} <Icon className="size-4" name="external-link" />

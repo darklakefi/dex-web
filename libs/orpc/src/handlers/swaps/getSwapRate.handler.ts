@@ -1,7 +1,5 @@
 "use server";
 
-import type { Idl } from "@coral-xyz/anchor";
-import { BorshCoder } from "@coral-xyz/anchor";
 import {
   getAccount,
   TOKEN_2022_PROGRAM_ID,
@@ -9,19 +7,17 @@ import {
 } from "@solana/spl-token";
 import { type Connection, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
-import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
   GetSwapRateInput,
   GetSwapRateOutput,
 } from "../../schemas/swaps/getSwapRate.schema";
+import {
+  EXCHANGE_PROGRAM_ID,
+  getPoolAccount,
+  IDL_CODER,
+} from "../../utils/solana";
 import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
-
-// TODO: put this somewhere configurable based on env
-const EXCHANGE_PROGRAM_ID = new PublicKey(
-  process.env.EXCHANGE_PROGRAM_ID ||
-    "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
-);
 
 // 100% = 1000000, 0.0001% = 1
 const MAX_PERCENTAGE = 1000000;
@@ -143,35 +139,6 @@ function calculateSwap(
   };
 }
 
-// Load the IDL
-// const idlPath = path.join(__dirname, "../../../darklake.json");
-// const idl = JSON.parse(fs.readFileSync(idlPath, "utf8")) as Idl;
-
-// Use Anchor's coder directly for decoding
-const coder = new BorshCoder(IDL as Idl);
-
-// Helper function to fetch and parse Pool account
-async function getPoolAccount(
-  connection: Connection,
-  poolPubkey: PublicKey,
-): Promise<any> {
-  const accountInfo = await connection.getAccountInfo(poolPubkey);
-
-  if (!accountInfo) {
-    throw new Error("Pool not found");
-  }
-
-  // Decode the Pool account using Anchor's built-in decoder
-  try {
-    const pool = coder.accounts.decode("Pool", accountInfo.data);
-    // console.log("Pool data:", pool);
-    return pool;
-  } catch (error) {
-    console.error("Failed to decode Pool account:", error);
-    throw new Error("Failed to decode Pool account data");
-  }
-}
-
 // The response should be CACHED (or outright provided as env param since fees will change almost never)
 async function getAmmConfigAccount(
   connection: Connection,
@@ -185,7 +152,7 @@ async function getAmmConfigAccount(
 
   // Decode the AmmConfig account using Anchor's built-in decoder
   try {
-    const ammConfig = coder.accounts.decode("AmmConfig", accountInfo.data);
+    const ammConfig = IDL_CODER.accounts.decode("AmmConfig", accountInfo.data);
     return ammConfig;
   } catch (error) {
     console.error("Failed to decode AmmConfig account:", error);
