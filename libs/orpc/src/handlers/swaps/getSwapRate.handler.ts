@@ -297,13 +297,37 @@ export async function getSwapRateHandler(
       }
     }
 
+    // Calculate price impact (we are actually calculating rate impact)
+    // Original rate before trade (using available reserves)
+    const originalRate = isXtoY
+      ? availableReserveY / availableReserveX
+      : availableReserveX / availableReserveY;
+
+    // Apply trade amounts to reserves
+    const newAvailableReserveX = isXtoY
+      ? availableReserveX + roundedInput
+      : availableReserveX - swapResult.destinationAmount;
+
+    const newAvailableReserveY = isXtoY
+      ? availableReserveY - swapResult.destinationAmount
+      : availableReserveY + roundedInput;
+
+    // New rate after trade
+    const newRate = isXtoY
+      ? newAvailableReserveY / newAvailableReserveX
+      : newAvailableReserveX / newAvailableReserveY;
+
+    // Calculate rate  impact as percentage change
+    const priceImpact = ((originalRate - newRate) / originalRate) * 100;
+
     return {
       amountIn,
       amountInRaw: roundedInput,
       amountOut,
       amountOutRaw: amountOutBigDecimal.toNumber(),
       estimatedFee: swapResult.tradeFee,
-      rate: adjustedRate,
+      priceImpact: Math.floor(priceImpact * 100) / 100,
+      rate: adjustedRate, // don't round up - truncate
       tokenX,
       tokenY,
     };
