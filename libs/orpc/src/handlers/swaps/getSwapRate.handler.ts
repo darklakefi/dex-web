@@ -82,7 +82,7 @@ async function getTokenBalance(
 }
 
 // Helper function to calculate trade fee
-function getTradeFee(sourceAmount: number, tradeFeeRate: number): number {
+function gateFee(sourceAmount: number, tradeFeeRate: number): number {
   // tradeFeeRate is in basis points (e.g., 1000000 = 100%, 1 = 0.0001%)
   // rounding up in our favor
   return Math.ceil((sourceAmount * tradeFeeRate) / MAX_PERCENTAGE);
@@ -108,14 +108,18 @@ function calculateSwap(
   poolSourceAmount: number,
   poolDestinationAmount: number,
   tradeFeeRate: number,
+  protocolFeeRate: number,
 ): {
   destinationAmount: number;
-  tradeFee: number;
   sourceAmountPostFees: number;
   rate: number;
+  tradeFee: number;
+  protocolFee: number;
 } {
-  // Calculate fee from input
-  const tradeFee = getTradeFee(sourceAmount, tradeFeeRate);
+  // Calculate trade fee from input
+  const tradeFee = gateFee(sourceAmount, tradeFeeRate);
+  // Protocol fee is a percentage of the trade fee
+  const protocolFee = gateFee(tradeFee, protocolFeeRate);
 
   // Subtract fee from input
   const sourceAmountPostFees = sourceAmount - tradeFee;
@@ -132,6 +136,7 @@ function calculateSwap(
 
   return {
     destinationAmount: destinationAmountSwapped,
+    protocolFee,
     rate,
     sourceAmountPostFees,
     tradeFee,
@@ -260,11 +265,13 @@ export async function getSwapRateHandler(
 
     // Calculate swap using AMM formula
     const tradeFeeRate = Number(ammConfig.trade_fee_rate) || 0;
+    const protocolFeeRate = Number(ammConfig.protocol_fee_rate) || 0;
     const swapResult = calculateSwap(
       roundedInput,
       isXtoY ? availableReserveX : availableReserveY,
       isXtoY ? availableReserveY : availableReserveX,
       tradeFeeRate,
+      protocolFeeRate,
     );
 
     const amountOutBigDecimal = BigNumber(swapResult.destinationAmount);
@@ -297,6 +304,11 @@ export async function getSwapRateHandler(
       }
     }
 
+    const poolInputAmount =
+      swapResult.sourceAmountPostFees +
+      swapResult.tradeFee -
+      swapResult.protocolFee;
+
     // Calculate price impact (we are actually calculating rate impact)
     // Original rate before trade (using available reserves)
     const originalRate = isXtoY
@@ -305,12 +317,12 @@ export async function getSwapRateHandler(
 
     // Apply trade amounts to reserves
     const newAvailableReserveX = isXtoY
-      ? availableReserveX + roundedInput
+      ? availableReserveX + poolInputAmount
       : availableReserveX - swapResult.destinationAmount;
 
     const newAvailableReserveY = isXtoY
       ? availableReserveY - swapResult.destinationAmount
-      : availableReserveY + roundedInput;
+      : availableReserveY + poolInputAmount;
 
     // New rate after trade
     const newRate = isXtoY
@@ -319,6 +331,7 @@ export async function getSwapRateHandler(
 
     // Calculate rate  impact as percentage change
     const priceImpact = ((originalRate - newRate) / originalRate) * 100;
+    const priceImpactTruncated = Math.floor(priceImpact * 100) / 100;
 
     return {
       amountIn,
@@ -326,7 +339,7 @@ export async function getSwapRateHandler(
       amountOut,
       amountOutRaw: amountOutBigDecimal.toNumber(),
       estimatedFee: swapResult.tradeFee,
-      priceImpact: Math.floor(priceImpact * 100) / 100,
+      priceImpact: priceImpactTruncated,
       rate: adjustedRate, // don't round up - truncate
       tokenX,
       tokenY,
