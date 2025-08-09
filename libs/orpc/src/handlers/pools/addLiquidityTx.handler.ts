@@ -112,10 +112,58 @@ async function addLiquidity(
   const modifyComputeUnits = web3.ComputeBudgetProgram.setComputeUnitLimit({
     units: 250_000,
   });
+
+  // const recentBlockhash = await program.provider.connection.getLatestBlockhash();
+  // tx.recentBlockhash = recentBlockhash.blockhash;
+
   tx.add(modifyComputeUnits);
 
   return tx;
 }
+
+// Usage example
+/*
+  // this is optional if you don't have access to a wallet here
+  const dummy = Keypair.generate();
+  const dummyWallet = {
+    publicKey: dummy.publicKey,
+    signTransaction: async (tx: any) => tx,      // no-op
+    signAllTransactions: async (txs: any[]) => txs, // no-op
+  };
+
+  // this or the dummyWallet
+  const wallet = useWallet();
+
+  const provider = new AnchorProvider(
+    helius.connection,
+    wallet, // or dummyWallet
+  );
+
+  const res = await addLiquidityTxHandler({
+    lpTokensToMint: 10,
+    maxAmountX: 1000,
+    maxAmountY: 1000,
+    tokenXMint: 'DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX',
+    tokenXProgramId: 'DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX',
+    tokenYMint: 'DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX',
+    tokenYProgramId: 'DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX',
+    user: 'browser-wallet-pubkey',
+    provider,
+  });
+
+
+  if (!res.success || !res.transaction) {
+    return; // failure
+  }
+
+  const tx = res.transaction;
+  tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash
+  tx.feePayer = wallet.publicKey
+
+  const signedTx = await wallet?.signTransaction(res.transaction)
+  const rawTransaction = signedTx.serialize()
+  await provider.connection.sendRawTransaction(rawTransaction)
+*/
 
 // Tries to mint exactly lpTokensToMint at the same time not exceeding neither maxAmountX nor maxAmountY (if it does it will fail)
 export async function addLiquidityTxHandler(
@@ -130,8 +178,9 @@ export async function addLiquidityTxHandler(
     maxAmountX,
     maxAmountY,
     lpTokensToMint,
+    provider,
   } = input;
-  const program = new Program(IDL);
+  const program = new Program(IDL, provider);
 
   try {
     const tx = await addLiquidity(

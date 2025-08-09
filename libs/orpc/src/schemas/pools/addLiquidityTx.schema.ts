@@ -1,3 +1,4 @@
+import { AnchorProvider } from "@coral-xyz/anchor";
 import { Transaction } from "@solana/web3.js";
 import { z } from "zod/v4";
 
@@ -5,6 +6,7 @@ export const addLiquidityTxInputSchema = z.object({
   lpTokensToMint: z.number(),
   maxAmountX: z.number(),
   maxAmountY: z.number(),
+  provider: z.instanceof(AnchorProvider),
   tokenXMint: z.string(),
   tokenXProgramId: z.string(),
   tokenYMint: z.string(),
