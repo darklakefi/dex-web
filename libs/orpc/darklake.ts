@@ -859,7 +859,7 @@ export type Darklake = {
           docs: ["Address to be set as protocol owner."];
           writable: true;
           signer: true;
-          address: "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB";
+          address: "43RPeUeQ1c4eAqvAYiS43wVfr81PjfWSteTxyHx49kMr";
         },
         {
           name: "ammConfig";
@@ -1516,7 +1516,7 @@ export type Darklake = {
         {
           name: "createPoolFeeVault";
           writable: true;
-          address: "HNVk87PuSDucX14Eh6CJ5dNm2mG6iNpuT3PHLdbGZeLo";
+          address: "HNQdnRgtnsgcx7E836nZ1JwrQstWBEJMnRVy8doY366A";
         },
         {
           name: "mplProgram";
@@ -2773,7 +2773,7 @@ export type Darklake = {
           name: "admin";
           docs: ["The config admin"];
           signer: true;
-          address: "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB";
+          address: "43RPeUeQ1c4eAqvAYiS43wVfr81PjfWSteTxyHx49kMr";
         },
         {
           name: "ammConfig";
