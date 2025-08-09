@@ -1,10 +1,10 @@
 "use server";
 
+import { MAINNET_POOLS, MOCK_POOLS } from "../../mocks/pool.mock";
 import type {
   GetQuoteInput,
   GetQuoteOutput,
 } from "../../schemas/swaps/getQuote.schema";
-import { MAINNET_POOLS, MOCK_POOLS } from "../pools/getPoolDetails.handler";
 import { getSwapRateHandler } from "./getSwapRate.handler";
 
 export async function getSwapQuoteHandler(

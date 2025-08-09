@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Modal } from "@dex-web/ui";
+import { Box, Button, Modal, Text } from "@dex-web/ui";
 import { useEffect, useState } from "react";
 import { getCookie, setCookie } from "../_utils/cookies";
 
@@ -21,45 +21,43 @@ function DisclaimerModalContent({
   country?: string | null;
 }) {
   return (
-    <div className="mx-4 max-w-md rounded-lg border border-gray-700 bg-gray-900 p-6 text-white">
+    <Box className="mx-4 max-w-md" shadow="xl">
       <div className="mb-4">
-        <h2 className="mb-2 font-bold text-green-100 text-xl">
-          Risk Disclaimer
-        </h2>
-        <div className="space-y-3 text-gray-300 text-sm">
-          <p>
+        <Text.Heading className="">Risk Disclaimer</Text.Heading>
+        <div className="space-y-3">
+          <Text.Body2 className="text-gray-300">
             Trading digital assets involves significant risk and may not be
             suitable for all investors. The value of digital assets can be
             highly volatile and may result in substantial losses.
-          </p>
-          <p>
+          </Text.Body2>
+          <Text.Body2 className="text-gray-300">
             Please carefully consider your investment experience, and risk
             tolerance before trading.
-          </p>
+          </Text.Body2>
           {country === "GB" && (
-            <p className="font-medium text-orange-200">
+            <Text.Body2 className="text-orange-200">
               <strong>UK Users:</strong> This product is not intended to be used
               in the United Kingdom. By proceeding, you acknowledge that you are
               accessing this service from outside the UK or are aware of the
               regulatory restrictions in your jurisdiction.
-            </p>
+            </Text.Body2>
           )}
-          <p className="font-medium text-green-200">
-            By clicking "I Understand", you acknowledge that you have read and
-            understood these risks.
-          </p>
+          <Text.Body2 className="text-green-200">
+            By clicking &quot;I Understand&quot;, you acknowledge that you have
+            read and understood these risks.
+          </Text.Body2>
         </div>
       </div>
 
       <div className="flex justify-end">
         <Button
-          className="px-6 py-2"
+          className="cursor-pointer px-6 py-2"
           onClick={onAccept}
           text="I Understand"
           variant="primary"
         />
       </div>
-    </div>
+    </Box>
   );
 }
 
