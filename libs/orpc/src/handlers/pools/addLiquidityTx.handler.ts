@@ -113,6 +113,7 @@ async function addLiquidity(
     units: 250_000,
   });
 
+  // shouldn't be needed but leaving as an example just in case
   // const recentBlockhash = await program.provider.connection.getLatestBlockhash();
   // tx.recentBlockhash = recentBlockhash.blockhash;
 
