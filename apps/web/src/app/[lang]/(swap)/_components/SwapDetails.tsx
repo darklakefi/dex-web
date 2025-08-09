@@ -38,7 +38,7 @@ const swapDetailsItemVariants = cva(
       impact: {
         HIGH: "**:text-red-300",
         LOW: "**:text-green-300",
-        MEDIUM: "**:text-yellow-300",
+        MEDIUM: "**:text-yellow-500",
       },
     },
   },
@@ -94,7 +94,6 @@ export function SwapDetails({
   const tokenBuy =
     quote.tokenX.address === tokenBuyMint ? quote.tokenX : quote.tokenY;
 
-  // const priceImpactValue = `${quote.priceImpactPercentage}%`;
   const minOutputValue = BigNumber(quote.amountOutRaw)
     .times(1 - quote.slippage / 100)
     .div(10 ** Number(tokenBuy.decimals))
@@ -103,17 +102,17 @@ export function SwapDetails({
   const estimatedFeesValue = `${BigNumber(quote.estimatedFee)
     .div(10 ** Number(tokenSell.decimals))
     .toString()} ${tokenSell.symbol}`;
-  // const impact = getImpact(quote.priceImpactPercentage);
+  const impact = getImpact(quote.priceImpactPercentage);
 
   return (
     <Box background="highlight">
       <dl className="flex flex-col gap-2">
         <SwapDetailsItem label="Price" value={<SwapRate quote={quote} />} />
-        {/* <SwapDetailsItem
+        <SwapDetailsItem
           impact={impact}
           label="Price Impact"
-          value={priceImpactValue}
-        /> */}
+          value={`${quote.priceImpactPercentage}%`}
+        />
         <SwapDetailsItem label="Max Slippage" value={`${slippage}%`} />
         <SwapDetailsItem label="Min. Output" value={minOutputValue} />
         <SwapDetailsItem
