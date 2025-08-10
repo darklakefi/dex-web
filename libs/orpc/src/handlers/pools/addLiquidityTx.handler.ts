@@ -197,12 +197,14 @@ export async function addLiquidityTxHandler(
     );
     return {
       success: true,
+      trackingId: input.trackingId,
       transaction: tx,
     };
   } catch (error) {
     console.error("Error during liquidity addition:", error);
     return {
       success: false,
+      trackingId: input.trackingId,
       transaction: null,
     };
   }

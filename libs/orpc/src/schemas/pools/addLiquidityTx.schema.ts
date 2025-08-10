@@ -11,11 +11,13 @@ export const addLiquidityTxInputSchema = z.object({
   tokenXProgramId: z.string(),
   tokenYMint: z.string(),
   tokenYProgramId: z.string(),
+  trackingId: z.string(),
   user: z.string(),
 });
 
 export const addLiquidityTxOutputSchema = z.object({
   success: z.boolean(),
+  trackingId: z.string(),
   transaction: z.instanceof(Transaction).nullable(),
 });
 

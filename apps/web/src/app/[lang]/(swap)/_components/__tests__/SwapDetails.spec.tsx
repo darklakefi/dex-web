@@ -6,7 +6,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { screen } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
-import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
+import {
+  DEFAULT_BUY_TOKEN,
+  DEFAULT_SELL_TOKEN,
+} from "../../../../_utils/constants";
 
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();

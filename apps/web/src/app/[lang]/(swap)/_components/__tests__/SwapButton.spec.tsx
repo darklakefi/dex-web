@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
-import { SwapButton } from "../SwapButton";
+import { TokenTransactionButton } from "../../../../_components/TokenTransactionButton";
 
 const onUrlUpdate = vi.fn();
 
@@ -10,7 +10,7 @@ describe("SwapButton", () => {
   it("swaps tokens", async () => {
     const user = userEvent.setup();
 
-    render(<SwapButton onClickSwapToken={() => {}} />, {
+    render(<TokenTransactionButton onClickTokenTransaction={() => {}} />, {
       wrapper: withNuqsTestingAdapter({
         onUrlUpdate,
         searchParams: "?buyTokenAddress=abc&sellTokenAddress=def",

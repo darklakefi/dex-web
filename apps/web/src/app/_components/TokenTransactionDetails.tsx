@@ -4,18 +4,7 @@ import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Icon, Text, Tooltip } from "@dex-web/ui";
 import BigNumber from "bignumber.js";
 import { cva, type VariantProps } from "class-variance-authority";
-import { SwapRate } from "./SwapRate";
-
-function getImpact(priceImpactPercentage: number) {
-  switch (true) {
-    case priceImpactPercentage <= 0.5:
-      return "LOW";
-    case priceImpactPercentage <= 2:
-      return "MEDIUM";
-    default:
-      return "HIGH";
-  }
-}
+import { SwapRate } from "../[lang]/(swap)/_components/SwapRate";
 
 function getSwapDetailsIcon(impact: "LOW" | "MEDIUM" | "HIGH") {
   switch (impact) {
@@ -76,19 +65,19 @@ function SwapDetailsItem({
   );
 }
 
-export interface SwapDetailsProps {
+export interface TokenTransactionDetailsProps {
   quote: GetQuoteOutput;
   tokenSellMint: string;
   tokenBuyMint: string;
   slippage: string;
 }
 
-export function SwapDetails({
+export function TokenTransactionDetails({
   quote,
   tokenSellMint,
   tokenBuyMint,
   slippage,
-}: SwapDetailsProps) {
+}: TokenTransactionDetailsProps) {
   const tokenSell =
     quote.tokenX.address === tokenSellMint ? quote.tokenX : quote.tokenY;
   const tokenBuy =

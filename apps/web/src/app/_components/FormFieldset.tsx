@@ -14,7 +14,7 @@ import { useRef } from "react";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { useFormatPrice } from "../_utils/useFormatPrice";
 
-interface SwapFormFieldsetProps extends NumericInputProps {
+interface FormFieldsetProps extends NumericInputProps {
   name: "buyAmount" | "sellAmount";
   disabled?: boolean;
   tokenAccount?: {
@@ -26,14 +26,14 @@ interface SwapFormFieldsetProps extends NumericInputProps {
 }
 const QUOTE_CURRENCY = "USD" as const;
 
-export function SwapFormFieldset({
+export function FormFieldset({
   name,
   onChange,
   value,
   disabled,
   tokenAccount,
   ...rest
-}: SwapFormFieldsetProps) {
+}: FormFieldsetProps) {
   const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
     selectedTokensParsers,
   );

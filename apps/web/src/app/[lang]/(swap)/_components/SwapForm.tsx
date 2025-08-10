@@ -14,15 +14,15 @@ import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
+import { FormFieldset } from "../../../_components/FormFieldset";
+import { SelectTokenButton } from "../../../_components/SelectTokenButton";
+import { TokenTransactionButton } from "../../../_components/TokenTransactionButton";
+import { TokenTransactionDetails } from "../../../_components/TokenTransactionDetails";
+import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
+import { selectedTokensParsers } from "../../../_utils/searchParams";
+import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
-import { selectedTokensParsers } from "../_utils/searchParams";
-import { sortSolanaAddresses } from "../_utils/sortSolanaAddresses";
-import { SelectTokenButton } from "./SelectTokenButton";
-import { SwapButton } from "./SwapButton";
-import { SwapDetails } from "./SwapDetails";
-import { SwapFormFieldset } from "./SwapFormFieldset";
 import { SwapPageRefreshButton } from "./SwapPageRefreshButton";
-import { SwapPageSettingButton } from "./SwapPageSettingButton";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -35,7 +35,7 @@ type SwapFormSchema = z.infer<typeof swapFormSchema>;
 
 const { useAppForm } = createFormHook({
   fieldComponents: {
-    SwapFormFieldset,
+    SwapFormFieldset: FormFieldset,
   },
 
   fieldContext,
@@ -466,7 +466,7 @@ export function SwapForm() {
       <div className="mb-4 flex items-center justify-between md:hidden">
         <Text.Heading className="text-green-200">Swap</Text.Heading>
         <div className="flex gap-3">
-          <SwapPageSettingButton
+          <TokenTransactionSettingsButton
             onChange={(slippage) => {
               setIsUseSlippage(slippage !== "0");
               setSlippage(slippage);
@@ -506,7 +506,7 @@ export function SwapForm() {
               </div>
               <form.Field name="sellAmount">
                 {(field) => (
-                  <SwapFormFieldset
+                  <FormFieldset
                     name={field.name}
                     onBlur={field.handleBlur}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -520,7 +520,9 @@ export function SwapForm() {
               </form.Field>
             </Box>
             <div className="flex items-center justify-center">
-              <SwapButton onClickSwapToken={onClickSwapToken} />
+              <TokenTransactionButton
+                onClickTokenTransaction={onClickSwapToken}
+              />
             </div>
             <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
               <div>
@@ -534,7 +536,7 @@ export function SwapForm() {
               </div>
               <form.Field name="buyAmount">
                 {(field) => (
-                  <SwapFormFieldset
+                  <FormFieldset
                     disabled={true}
                     name={field.name}
                     onBlur={field.handleBlur}
@@ -573,7 +575,7 @@ export function SwapForm() {
             </div>
           </div>
           {quote && (
-            <SwapDetails
+            <TokenTransactionDetails
               quote={quote}
               slippage={slippage}
               tokenBuyMint={buyTokenAddress}
@@ -582,7 +584,7 @@ export function SwapForm() {
           )}
         </Box>
         <div className="hidden flex-col gap-1 md:flex">
-          <SwapPageSettingButton
+          <TokenTransactionSettingsButton
             onChange={(slippage) => {
               setIsUseSlippage(slippage !== "0");
               setSlippage(slippage);

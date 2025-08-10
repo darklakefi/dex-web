@@ -9,7 +9,7 @@ import { vi } from "vitest";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
-} from "../../../_utils/constants";
+} from "../../../../../_utils/constants";
 
 export function mockOrpc() {
   vi.mock("@dex-web/orpc", () => ({

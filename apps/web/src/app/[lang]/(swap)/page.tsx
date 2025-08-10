@@ -2,10 +2,10 @@ import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
 import { QueryClient } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
-import { FeaturesAndTrendingPoolPanel } from "./_components/FeaturesAndTrendingPoolPanel";
 import { SwapForm } from "./_components/SwapForm";
+import { MOCK_OWNER_ADDRESS, MOCK_SWAP_ID } from "../../_utils/constants";
+import { selectedTokensCache } from "../../_utils/searchParams";
 import { SwapTransactionHistory } from "./_components/SwapTransactionHistory";
-import { selectedTokensCache } from "./_utils/searchParams";
 
 export default async function Page({
   searchParams,

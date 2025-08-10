@@ -5,11 +5,13 @@ import { useQueryStates } from "nuqs";
 import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../_utils/constants";
 import { selectedTokensParsers } from "../_utils/searchParams";
 
-type SwapButtonProps = {
-  onClickSwapToken: () => void;
+type TokenTransactionButtonProps = {
+  onClickTokenTransaction: () => void;
 };
 
-export function SwapButton({ onClickSwapToken }: SwapButtonProps) {
+export function TokenTransactionButton({
+  onClickTokenTransaction,
+}: TokenTransactionButtonProps) {
   const [{ buyTokenAddress, sellTokenAddress }, setSelectedTokens] =
     useQueryStates(selectedTokensParsers);
 
@@ -21,7 +23,7 @@ export function SwapButton({ onClickSwapToken }: SwapButtonProps) {
       sellTokenAddress: buyTokenAddress ?? DEFAULT_SELL_TOKEN,
     });
 
-    onClickSwapToken();
+    onClickTokenTransaction();
   }
 
   return (

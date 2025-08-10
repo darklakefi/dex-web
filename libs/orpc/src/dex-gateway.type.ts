@@ -57,6 +57,19 @@ export interface SwapRequest {
   tracking_id: string;
 }
 
+export interface AddLiquidityRequest {
+  user_address: string;
+  token_mint_x: string;
+  token_mint_y: string;
+  amount_in: number;
+  min_out: number;
+}
+
+export interface AddLiquidityResponse {
+  unsigned_transaction: string; // Base64 encoded transaction
+  trade_id: string;
+}
+
 export interface SwapResponse {
   unsigned_transaction: string; // Base64 encoded transaction
   trade_id: string;

@@ -12,6 +12,10 @@ export type {
 } from "./helius/searchAssets.schema";
 export { searchAssetsInputSchema } from "./helius/searchAssets.schema";
 export type {
+  AddLiquidityTxInput,
+  AddLiquidityTxOutput,
+} from "./pools/addLiquidityTx.schema";
+export type {
   GetQuoteInput,
   GetQuoteOutput,
 } from "./swaps/getQuote.schema";
