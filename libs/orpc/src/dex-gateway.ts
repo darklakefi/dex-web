@@ -10,6 +10,10 @@ import { PROTO_DEFINITION } from "./dex-gateway.proto";
 import type {
   CheckTradeStatusRequest,
   CheckTradeStatusResponse,
+  GetTokenMetadataListRequest,
+  GetTokenMetadataListResponse,
+  GetTokenMetadataRequest,
+  GetTokenMetadataResponse,
   GetTradesListByUserRequest,
   GetTradesListByUserResponse,
   GrpcClient,
@@ -69,6 +73,38 @@ function createGrpcClient(): GrpcClient {
         client.CheckTradeStatus(
           request,
           (error: any, response: CheckTradeStatusResponse) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      });
+    },
+    getTokenMetadata: (
+      request: GetTokenMetadataRequest,
+    ): Promise<GetTokenMetadataResponse> => {
+      return new Promise((resolve, reject) => {
+        client.GetTokenMetadata(
+          request,
+          (error: any, response: GetTokenMetadataResponse) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      });
+    },
+    getTokenMetadataList: (
+      request: GetTokenMetadataListRequest,
+    ): Promise<GetTokenMetadataListResponse> => {
+      return new Promise((resolve, reject) => {
+        client.GetTokenMetadataList(
+          request,
+          (error: any, response: GetTokenMetadataListResponse) => {
             if (error) {
               reject(error);
             } else {

@@ -89,6 +89,50 @@ message GetTradesListByUserResponse {
     int32 current_page    = 3;
 }
 
+message GetTokenMetadataRequest {
+    oneof search_by {
+        string token_address = 1;
+        string token_symbol  = 2;
+        string token_name    = 3;
+    }
+}
+
+message GetTokenMetadataResponse {
+    string name     = 1;
+    string symbol   = 2;
+    int32 decimals  = 3;
+    string logo_uri = 4;
+    string address  = 5;
+}
+
+message TokenAddressesList {
+    repeated string token_addresses = 1;
+}
+
+message TokenSymbolsList {
+    repeated string token_symbols = 1;
+}
+
+message TokenNamesList {
+    repeated string token_names = 1;
+}
+
+message GetTokenMetadataListRequest {
+    oneof filter_by {
+        TokenAddressesList addresses_list = 1;
+        TokenSymbolsList symbols_list     = 2;
+        TokenNamesList names_list         = 3;
+    }
+    int32 page_size   = 4;
+    int32 page_number = 5;
+}
+
+message GetTokenMetadataListResponse {
+    repeated GetTokenMetadataResponse tokens = 1;
+    int32 total_pages                        = 2;
+    int32 current_page                       = 3;
+}
+
 // --------------------------------- SERVICES
 
 service SolanaGatewayService {
@@ -103,5 +147,11 @@ service SolanaGatewayService {
 
     rpc GetTradesListByUser(GetTradesListByUserRequest)
         returns (GetTradesListByUserResponse);
+
+    rpc GetTokenMetadata(GetTokenMetadataRequest)
+        returns (GetTokenMetadataResponse);
+
+    rpc GetTokenMetadataList(GetTokenMetadataListRequest)
+        returns (GetTokenMetadataListResponse);
 }
 `;

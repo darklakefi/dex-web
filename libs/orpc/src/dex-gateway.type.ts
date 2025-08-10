@@ -38,6 +38,12 @@ export interface GrpcClient {
   getTradesListByUser: (
     request: GetTradesListByUserRequest,
   ) => Promise<GetTradesListByUserResponse>;
+  getTokenMetadata: (
+    request: GetTokenMetadataRequest,
+  ) => Promise<GetTokenMetadataResponse>;
+  getTokenMetadataList: (
+    request: GetTokenMetadataListRequest,
+  ) => Promise<GetTokenMetadataListResponse>;
 }
 
 export interface SwapRequest {
@@ -102,4 +108,44 @@ export interface Trade {
   signature: string;
   created_at: number;
   updated_at: number;
+}
+
+export interface GetTokenMetadataRequest {
+  token_address?: string;
+  token_symbol?: string;
+  token_name?: string;
+}
+
+export interface GetTokenMetadataResponse {
+  name: string;
+  symbol: string;
+  decimals: number;
+  logo_uri: string;
+  address: string;
+}
+
+export interface TokenAddressesList {
+  token_addresses: string[];
+}
+
+export interface TokenSymbolsList {
+  token_symbols: string[];
+}
+
+export interface TokenNamesList {
+  token_names: string[];
+}
+
+export interface GetTokenMetadataListRequest {
+  addresses_list?: TokenAddressesList;
+  symbols_list?: TokenSymbolsList;
+  names_list?: TokenNamesList;
+  page_size: number;
+  page_number: number;
+}
+
+export interface GetTokenMetadataListResponse {
+  tokens: GetTokenMetadataResponse[];
+  total_pages: number;
+  current_page: number;
 }

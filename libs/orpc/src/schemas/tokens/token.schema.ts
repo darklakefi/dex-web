@@ -6,7 +6,7 @@ export const tokenSchema = z.object({
   imageUrl: z.string().optional(),
   name: z.string().optional(),
   symbol: z.string(),
-  value: z.string(),
+  value: z.string().optional(),
 });
 
 export type Token = z.infer<typeof tokenSchema>;
