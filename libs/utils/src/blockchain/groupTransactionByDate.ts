@@ -3,7 +3,7 @@ type GroupedTransaction<T> = {
   keys: string[];
 };
 
-export const groupTransactionByDate = <T extends { executedAt: Date }>(
+export const groupTransactionByDate = <T extends { createdAt: number }>(
   sortedItems: T[],
 ): GroupedTransaction<T> => {
   if (sortedItems.length === 0) {
@@ -16,7 +16,7 @@ export const groupTransactionByDate = <T extends { executedAt: Date }>(
   const keys = new Set<string>();
   const grouped = sortedItems.reduce(
     (groups: GroupedTransaction<T>["data"], item) => {
-      const dateString = item.executedAt.toISOString().split("T")[0];
+      const dateString = new Date(item.createdAt).toISOString().split("T")[0];
       if (!dateString) {
         return groups;
       }
@@ -30,6 +30,6 @@ export const groupTransactionByDate = <T extends { executedAt: Date }>(
 
   return {
     data: grouped,
-    keys: Array.from(keys),
+    keys: Array.from(keys).reverse(),
   };
 };

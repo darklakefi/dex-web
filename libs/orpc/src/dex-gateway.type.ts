@@ -35,6 +35,9 @@ export interface GrpcClient {
   checkTradeStatus: (
     request: CheckTradeStatusRequest,
   ) => Promise<CheckTradeStatusResponse>;
+  getTradesListByUser: (
+    request: GetTradesListByUserRequest,
+  ) => Promise<GetTradesListByUserResponse>;
 }
 
 export interface SwapRequest {
@@ -73,4 +76,30 @@ export interface CheckTradeStatusRequest {
 export interface CheckTradeStatusResponse {
   trade_id: string;
   status: TradeStatus;
+}
+
+export interface GetTradesListByUserRequest {
+  user_address: string;
+  page_size: number;
+  page_number: number;
+}
+
+export interface GetTradesListByUserResponse {
+  trades: Trade[];
+  total_pages: number;
+  current_page: number;
+}
+
+export interface Trade {
+  trade_id: string;
+  order_id: string;
+  user_address: string;
+  token_mint_x: string;
+  token_mint_y: string;
+  amount_in: number;
+  minimal_amount_out: number;
+  status: TradeStatus;
+  signature: string;
+  created_at: number;
+  updated_at: number;
 }

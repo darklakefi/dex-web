@@ -9,6 +9,8 @@ import * as path from "path";
 import type {
   CheckTradeStatusRequest,
   CheckTradeStatusResponse,
+  GetTradesListByUserRequest,
+  GetTradesListByUserResponse,
   GrpcClient,
   SignedTransactionRequest,
   SignedTransactionResponse,
@@ -48,6 +50,20 @@ enum TradeStatus {
 
 // --------------------------------- MESSAGES
 
+message Trade {
+    string trade_id          = 1;
+    string order_id          = 2;
+    string user_address      = 3;
+    string token_mint_x      = 4;
+    string token_mint_y      = 5;
+    int64 amount_in          = 6;
+    int64 minimal_amount_out = 7;
+    TradeStatus status       = 8;
+    string signature         = 9;
+    int64 created_at         = 10;
+    int64 updated_at         = 11;
+}
+
 message CreateUnsignedTransactionRequest {
     string user_address = 1;
     string token_mint_x = 2;
@@ -63,7 +79,6 @@ message CreateUnsignedTransactionResponse {
     string unsigned_transaction = 1;
     string order_id             = 2;
     string trade_id             = 3;
-    // TODO: DAR-488 discuss necessary return values
 }
 
 message SendSignedTransactionRequest {
@@ -73,8 +88,8 @@ message SendSignedTransactionRequest {
 }
 
 message SendSignedTransactionResponse {
-    bool success    = 1;
-    string trade_id = 2;
+    bool success               = 1;
+    string trade_id            = 2;
     repeated string error_logs = 3;
 }
 
@@ -88,6 +103,18 @@ message CheckTradeStatusResponse {
     TradeStatus status = 2;
 }
 
+message GetTradesListByUserRequest {
+    string user_address = 1;
+    int32 page_size     = 2;
+    int32 page_number   = 3;
+}
+
+message GetTradesListByUserResponse {
+    repeated Trade trades = 1;
+    int32 total_pages     = 2;
+    int32 current_page    = 3;
+}
+
 // --------------------------------- SERVICES
 
 service SolanaGatewayService {
@@ -99,6 +126,9 @@ service SolanaGatewayService {
 
     rpc CheckTradeStatus(CheckTradeStatusRequest)
         returns (CheckTradeStatusResponse);
+
+    rpc GetTradesListByUser(GetTradesListByUserRequest)
+        returns (GetTradesListByUserResponse);
 }
 `;
 
@@ -146,6 +176,22 @@ function createGrpcClient(): GrpcClient {
         client.CheckTradeStatus(
           request,
           (error: any, response: CheckTradeStatusResponse) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      });
+    },
+    getTradesListByUser: (
+      request: GetTradesListByUserRequest,
+    ): Promise<GetTradesListByUserResponse> => {
+      return new Promise((resolve, reject) => {
+        client.GetTradesListByUser(
+          request,
+          (error: any, response: GetTradesListByUserResponse) => {
             if (error) {
               reject(error);
             } else {

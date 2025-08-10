@@ -1,11 +1,25 @@
-import type { Token } from "./token";
+export enum TradeStatus {
+  UNSIGNED = "UNSIGNED",
+  SIGNED = "SIGNED",
+  CONFIRMED = "CONFIRMED",
+  SETTLED = "SETTLED",
+  SLASHED = "SLASHED",
+  CANCELLED = "CANCELLED",
+  FAILED = "FAILED",
+}
 
 export interface SwapTransaction {
-  id: string;
-  address: string;
-  executedAt: Date;
+  tradeId: string;
+  orderId: string;
+  userAddress: string;
+  tokenMintX: string;
+  tokenMintY: string;
   amountIn: number;
-  amountOut: number;
-  tokenIn: Token;
-  tokenOut: Token;
+  minimalAmountOut: number;
+  displayAmountIn: string;
+  displayMinimalAmountOut: string;
+  status: TradeStatus;
+  signature: string;
+  createdAt: number;
+  updatedAt: number;
 }
