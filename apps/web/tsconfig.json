@@ -13,12 +13,13 @@
   "files": [],
   "include": [
     "../../apps/web/dist/dist/types/**/*.ts",
+    "../../dist/.next/types/**/*.ts",
     "../../types/css.d.ts",
     "../../types/image.d.ts",
     "../../types/svg.d.ts",
     "../../vite.config.base.ts",
     "dist/types/**/*.ts",
-    "../../dist/.next/types/**/*.ts"
+    ".next/types/**/*.ts"
   ],
   "references": [
     {
