@@ -23,13 +23,20 @@ enum TradeStatus {
 }
 
 // --------------------------------- MESSAGES
+message TokenMetadata {
+    string name     = 1;
+    string symbol   = 2;
+    int32 decimals  = 3;
+    string logo_uri = 4;
+    string address  = 5;
+}
 
 message Trade {
     string trade_id          = 1;
     string order_id          = 2;
     string user_address      = 3;
-    string token_mint_x      = 4;
-    string token_mint_y      = 5;
+    TokenMetadata token_x    = 4;
+    TokenMetadata token_y    = 5;
     int64 amount_in          = 6;
     int64 minimal_amount_out = 7;
     TradeStatus status       = 8;
@@ -98,11 +105,7 @@ message GetTokenMetadataRequest {
 }
 
 message GetTokenMetadataResponse {
-    string name     = 1;
-    string symbol   = 2;
-    int32 decimals  = 3;
-    string logo_uri = 4;
-    string address  = 5;
+    TokenMetadata token_metadata = 1;
 }
 
 message TokenAddressesList {
@@ -128,9 +131,9 @@ message GetTokenMetadataListRequest {
 }
 
 message GetTokenMetadataListResponse {
-    repeated GetTokenMetadataResponse tokens = 1;
-    int32 total_pages                        = 2;
-    int32 current_page                       = 3;
+    repeated TokenMetadata tokens = 1;
+    int32 total_pages             = 2;
+    int32 current_page            = 3;
 }
 
 // --------------------------------- SERVICES

@@ -11,10 +11,8 @@ export async function getTradesListByUserHandler(
 ) {
   try {
     const grpcClient = getDexGatewayClient();
-    // console.log(input, "input");
     const tradesListResponse: GetTradesListByUserResponse =
       await grpcClient.getTradesListByUser(input);
-    // console.log(tradesListResponse, "tradesListResponse");
     return {
       data: tradesListResponse,
       success: true,

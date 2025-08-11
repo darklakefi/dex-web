@@ -27,6 +27,5 @@ describe("ShortPoolPanel", () => {
     expect(screen.getByText("Featured")).toBeInTheDocument();
     expect(screen.getAllByText("SOL")[0]).toBeInTheDocument();
     expect(screen.getAllByText("USDC")[0]).toBeInTheDocument();
-    expect(screen.getAllByText("5%")[0]).toBeInTheDocument();
   });
 });

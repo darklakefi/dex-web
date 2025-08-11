@@ -9,6 +9,7 @@ import {
   getTimeString,
   getTimezoneString,
   groupTransactionByDate,
+  numberFormatHelper,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -29,7 +30,7 @@ export function SwapTransactionHistory() {
     const response = await client.dexGateway.getTradesListByUser({
       limit,
       offset,
-      user_address: publicKey.toBase58(),
+      userAddress: publicKey.toBase58(),
     });
 
     setHasMore(response.hasMore);
@@ -47,7 +48,7 @@ export function SwapTransactionHistory() {
       input: {
         limit: 1,
         offset: 0,
-        user_address: publicKey?.toBase58() ?? "",
+        userAddress: publicKey?.toBase58() ?? "",
       },
     }),
   );
@@ -85,38 +86,36 @@ export function SwapTransactionHistory() {
                 <Text.Body2 className="text-green-400">
                   {getDateDifference(key)}
                 </Text.Body2>
-                {groupedTrades.data[key]?.map(
-                  (transaction: SwapTransaction) => (
-                    <div
-                      className="flex flex-col border-green-400 border-b pb-3"
-                      key={transaction.tradeId}
-                    >
-                      <div className=" flex flex-row items-center gap-2">
-                        <Text.Body2 className="text-green-200">SWAP</Text.Body2>
-                        <Icon
-                          className="size-4 cursor-pointer text-green-300"
-                          name="external-link"
-                        />
-                      </div>
-                      <div className="flex flex-row justify-between">
-                        <Text.Body2 className="text-green-300">
-                          {`${transaction.displayAmountIn} TOKI FOR ${transaction.displayMinimalAmountOut} TOKO`}
-                        </Text.Body2>
-                        <Text.Body2 className="text-green-300">
-                          {getDateString(transaction.createdAt)}
-                        </Text.Body2>
-                      </div>
-                      <div className="flex flex-row justify-between">
-                        <Text.Body2 className="text-green-400">
-                          {`1 TOKI ≈ ${transaction.minimalAmountOut / transaction.amountIn} TOKO`}
-                        </Text.Body2>
-                        <Text.Body2 className="text-green-300">
-                          {getTimeString(transaction.createdAt)} {timezone}
-                        </Text.Body2>
-                      </div>
+                {groupedTrades.data[key]?.map((tx: SwapTransaction) => (
+                  <div
+                    className="flex flex-col border-green-400 border-b pb-3"
+                    key={tx.tradeId}
+                  >
+                    <div className=" flex flex-row items-center gap-2">
+                      <Text.Body2 className="text-green-200">SWAP</Text.Body2>
+                      <Icon
+                        className="size-4 cursor-pointer text-green-300"
+                        name="external-link"
+                      />
                     </div>
-                  ),
-                )}
+                    <div className="flex flex-row justify-between">
+                      <Text.Body2 className="text-green-300">
+                        {`${numberFormatHelper({ decimalScale: tx.tokenX.decimals, trimTrailingZeros: true, value: tx.displayAmountIn })} ${tx.tokenX.symbol} FOR ${numberFormatHelper({ decimalScale: tx.tokenY.decimals, trimTrailingZeros: true, value: tx.displayMinimalAmountOut })} ${tx.tokenY.symbol}`}
+                      </Text.Body2>
+                      <Text.Body2 className="text-green-300">
+                        {getDateString(tx.createdAt)}
+                      </Text.Body2>
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <Text.Body2 className="text-green-400">
+                        {`1 ${tx.tokenX.symbol} ≈ ${tx.minimalAmountOut / tx.amountIn} ${tx.tokenY.symbol}`}
+                      </Text.Body2>
+                      <Text.Body2 className="text-green-300">
+                        {getTimeString(tx.createdAt)} {timezone}
+                      </Text.Body2>
+                    </div>
+                  </div>
+                ))}
               </div>
             ))}
           </div>

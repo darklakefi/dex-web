@@ -13,16 +13,16 @@ export const getTokenDetailsHandler = async (
 
   const grpcClient = getDexGatewayClient();
   try {
-    const tokenMetadata = await grpcClient.getTokenMetadata({
+    const { token_metadata } = await grpcClient.getTokenMetadata({
       token_address: address,
     });
 
     return {
-      address: tokenMetadata.address,
-      decimals: tokenMetadata.decimals,
-      imageUrl: tokenMetadata.logo_uri,
-      name: tokenMetadata.name,
-      symbol: tokenMetadata.symbol,
+      address: token_metadata.address,
+      decimals: token_metadata.decimals,
+      imageUrl: token_metadata.logo_uri,
+      name: token_metadata.name,
+      symbol: token_metadata.symbol,
     };
   } catch (error) {
     console.error(error, "error");
