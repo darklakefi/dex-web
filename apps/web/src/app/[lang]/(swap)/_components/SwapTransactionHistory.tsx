@@ -58,7 +58,7 @@ export function SwapTransactionHistory() {
       <Text.Heading className="text-green-200">
         mev-protected trades
       </Text.Heading>
-      <div className="max-h-100 overflow-y-auto">
+      <div className="scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-transparent max-h-100 overflow-y-auto">
         <InfiniteScroll
           dataLength={trades.length}
           endMessage={

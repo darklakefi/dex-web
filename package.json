@@ -93,6 +93,7 @@
     "postcss": "^8.5.6",
     "router-plugin": "link:@nx/react/router-plugin",
     "storybook": "9.0.15",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.11",
     "tsx": "^4.20.3",
     "typescript": "~5.8.3",
