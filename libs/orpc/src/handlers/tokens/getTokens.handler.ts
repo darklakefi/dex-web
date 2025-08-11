@@ -1,43 +1,71 @@
 "use server";
 
+import { getDexGatewayClient } from "../../dex-gateway";
+import type { GetTokenMetadataListRequest } from "../../dex-gateway.type";
 import { tokensData, tokensDataMainnet } from "../../mocks/tokens.mock";
 import type {
   GetTokensInput,
   GetTokensOutput,
 } from "../../schemas/tokens/getTokens.schema";
-import { jupiterTokensResponseSchema } from "../../schemas/tokens/jupiterTokens.schema";
+import { isSolanaAddress } from "../../utils/solana";
 
 export const getTokensHandler = async (
   input: GetTokensInput,
 ): Promise<GetTokensOutput> => {
-  const { limit, query } = input;
+  const { limit = 10, query, offset = 0 } = input;
 
-  const rawData = process.env.NETWORK === "2" ? tokensData : tokensDataMainnet;
+  if (!query) {
+    const defaultList =
+      process.env.NETWORK === "2" ? tokensData : tokensDataMainnet;
 
-  const { data, error } = jupiterTokensResponseSchema.safeParse(rawData);
-
-  if (error) {
-    throw new Error(`Invalid token data: ${error.message}`);
-  }
-
-  return {
-    hasMore: (data?.length ?? 0) > limit,
-    tokens: (data ?? [])
-      .filter(
-        (token) =>
-          token.name.toLowerCase().includes(query?.toLowerCase() ?? "") ||
-          token.symbol.toLowerCase().includes(query?.toLowerCase() ?? "") ||
-          token.address.toLowerCase().includes(query?.toLowerCase() ?? ""),
-      )
-      .slice(0, limit)
-      .map((token) => ({
+    return {
+      hasMore: defaultList.length > limit,
+      tokens: defaultList.slice(0, limit).map((token) => ({
         address: token.address,
         decimals: token.decimals,
         imageUrl: token.logoURI,
         name: token.name,
         symbol: token.symbol,
-        value: token.address,
       })),
-    total: data?.length ?? 0,
+      total: defaultList.length,
+    };
+  }
+
+  const grpcClient = getDexGatewayClient();
+
+  const page = Math.floor(offset / limit) + 1;
+
+  const gatewayInput: GetTokenMetadataListRequest = {
+    page_number: page,
+    page_size: limit,
+  };
+
+  if (query) {
+    if (isSolanaAddress(query)) {
+      gatewayInput.addresses_list = {
+        token_addresses: [query],
+      };
+    } else {
+      gatewayInput.symbols_list = {
+        token_symbols: [query],
+      };
+    }
+  }
+
+  const tokenMetadataList = await grpcClient.getTokenMetadataList(gatewayInput);
+  const total = tokenMetadataList.total_pages * limit;
+  const hasMore =
+    tokenMetadataList.current_page < tokenMetadataList.total_pages;
+
+  return {
+    hasMore,
+    tokens: tokenMetadataList.tokens.map((token) => ({
+      address: token.address,
+      decimals: token.decimals,
+      imageUrl: token.logo_uri,
+      name: token.name,
+      symbol: token.symbol,
+    })),
+    total,
   };
 };

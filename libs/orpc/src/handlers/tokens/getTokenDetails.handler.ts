@@ -1,27 +1,31 @@
 "use server";
 
+import { getDexGatewayClient } from "../../dex-gateway";
 import type {
   GetTokenDetailsInput,
   GetTokenDetailsOutput,
 } from "../../schemas/tokens/getTokenDetails.schema";
-import { getTokensHandler } from "./getTokens.handler";
 
 export const getTokenDetailsHandler = async (
   input: GetTokenDetailsInput,
 ): Promise<GetTokenDetailsOutput> => {
   const { address } = input;
 
-  const { tokens } = await getTokensHandler({
-    limit: 1,
-    offset: 0,
-    query: address,
-  });
+  const grpcClient = getDexGatewayClient();
+  try {
+    const tokenMetadata = await grpcClient.getTokenMetadata({
+      token_address: address,
+    });
 
-  const matchingToken = tokens.find((token) => token.address === address);
-
-  if (!matchingToken) {
+    return {
+      address: tokenMetadata.address,
+      decimals: tokenMetadata.decimals,
+      imageUrl: tokenMetadata.logo_uri,
+      name: tokenMetadata.name,
+      symbol: tokenMetadata.symbol,
+    };
+  } catch (error) {
+    console.error(error, "error");
     throw new Error(`Token ${address} not found`);
   }
-
-  return matchingToken;
 };

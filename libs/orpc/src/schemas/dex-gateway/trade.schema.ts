@@ -1,0 +1,16 @@
+import { z } from "zod";
+import { TradeStatus } from "../../dex-gateway.type";
+
+export const tradeSchema = z.object({
+  amount_in: z.number(),
+  created_at: z.number(),
+  minimal_amount_out: z.number(),
+  order_id: z.string(),
+  signature: z.string(),
+  status: z.nativeEnum(TradeStatus),
+  token_mint_x: z.string(),
+  token_mint_y: z.string(),
+  trade_id: z.string(),
+  updated_at: z.number(),
+  user_address: z.string(),
+});

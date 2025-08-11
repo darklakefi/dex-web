@@ -35,6 +35,15 @@ export interface GrpcClient {
   checkTradeStatus: (
     request: CheckTradeStatusRequest,
   ) => Promise<CheckTradeStatusResponse>;
+  getTradesListByUser: (
+    request: GetTradesListByUserRequest,
+  ) => Promise<GetTradesListByUserResponse>;
+  getTokenMetadata: (
+    request: GetTokenMetadataRequest,
+  ) => Promise<GetTokenMetadataResponse>;
+  getTokenMetadataList: (
+    request: GetTokenMetadataListRequest,
+  ) => Promise<GetTokenMetadataListResponse>;
 }
 
 export interface SwapRequest {
@@ -73,4 +82,70 @@ export interface CheckTradeStatusRequest {
 export interface CheckTradeStatusResponse {
   trade_id: string;
   status: TradeStatus;
+}
+
+export interface GetTradesListByUserRequest {
+  user_address: string;
+  page_size: number;
+  page_number: number;
+}
+
+export interface GetTradesListByUserResponse {
+  trades: Trade[];
+  total_pages: number;
+  current_page: number;
+}
+
+export interface Trade {
+  trade_id: string;
+  order_id: string;
+  user_address: string;
+  token_mint_x: string;
+  token_mint_y: string;
+  amount_in: number;
+  minimal_amount_out: number;
+  status: TradeStatus;
+  signature: string;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface GetTokenMetadataRequest {
+  token_address?: string;
+  token_symbol?: string;
+  token_name?: string;
+}
+
+export interface GetTokenMetadataResponse {
+  name: string;
+  symbol: string;
+  decimals: number;
+  logo_uri: string;
+  address: string;
+}
+
+export interface TokenAddressesList {
+  token_addresses: string[];
+}
+
+export interface TokenSymbolsList {
+  token_symbols: string[];
+}
+
+export interface TokenNamesList {
+  token_names: string[];
+}
+
+export interface GetTokenMetadataListRequest {
+  addresses_list?: TokenAddressesList;
+  symbols_list?: TokenSymbolsList;
+  names_list?: TokenNamesList;
+  page_size: number;
+  page_number: number;
+}
+
+export interface GetTokenMetadataListResponse {
+  tokens: GetTokenMetadataResponse[];
+  total_pages: number;
+  current_page: number;
 }
