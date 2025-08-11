@@ -1,29 +1,38 @@
+"use client";
+
 import type { Pool } from "@dex-web/core";
-import { Button } from "@dex-web/ui";
+import { tanstackClient } from "@dex-web/orpc";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { ShortPoolPanel } from "./ShortPoolPanel";
 
-interface FeaturesAndTrendingPoolPanelProps {
-  featuredPools: Pool[];
-  trendingPools: Pool[];
-}
+export function FeaturesAndTrendingPoolPanel() {
+  const { data } = useSuspenseQuery(
+    tanstackClient.getPinedPool.queryOptions({}),
+  );
 
-export function FeaturesAndTrendingPoolPanel({
-  featuredPools = [],
-  trendingPools = [],
-}: FeaturesAndTrendingPoolPanelProps) {
+  const onPoolClick = (pool: Pool) => {
+    console.log(pool);
+  };
+
   return (
-    <div className="flex w-full flex-col items-center gap-10 bg-transparent">
-      <ShortPoolPanel
-        icon="crown"
-        pools={featuredPools}
-        title="Featured Pools"
-      />
-      <ShortPoolPanel
-        icon="fire"
-        pools={trendingPools}
-        title="Trending Pools"
-      />
-      <Button className="w-fit" text="explore all pools" variant="tertiary" />
+    <div className="flex w-full min-w-xs flex-col items-center gap-10 bg-transparent">
+      {data.featuredPools.length > 0 && (
+        <ShortPoolPanel
+          icon="crown"
+          onPoolClick={onPoolClick}
+          pools={data.featuredPools}
+          title="Featured Pools"
+        />
+      )}
+      {data.trendingPools.length > 0 && (
+        <ShortPoolPanel
+          icon="fire"
+          onPoolClick={onPoolClick}
+          pools={data.trendingPools}
+          title="Trending Pools"
+        />
+      )}
+      {/* <Button className="w-fit" text="explore all pools" variant="tertiary" /> */}
     </div>
   );
 }

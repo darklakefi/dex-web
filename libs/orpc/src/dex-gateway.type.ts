@@ -96,18 +96,27 @@ export interface GetTradesListByUserResponse {
   current_page: number;
 }
 
+export interface TokenMetadata {
+  name: string;
+  symbol: string;
+  decimals: number;
+  logo_uri: string;
+  address: string;
+}
+
 export interface Trade {
   trade_id: string;
   order_id: string;
   user_address: string;
-  token_mint_x: string;
-  token_mint_y: string;
+  token_x: TokenMetadata;
+  token_y: TokenMetadata;
   amount_in: number;
   minimal_amount_out: number;
   status: TradeStatus;
   signature: string;
   created_at: number;
   updated_at: number;
+  is_swap_x_to_y: boolean;
 }
 
 export interface GetTokenMetadataRequest {
@@ -117,11 +126,7 @@ export interface GetTokenMetadataRequest {
 }
 
 export interface GetTokenMetadataResponse {
-  name: string;
-  symbol: string;
-  decimals: number;
-  logo_uri: string;
-  address: string;
+  token_metadata: TokenMetadata;
 }
 
 export interface TokenAddressesList {
@@ -145,7 +150,7 @@ export interface GetTokenMetadataListRequest {
 }
 
 export interface GetTokenMetadataListResponse {
-  tokens: GetTokenMetadataResponse[];
+  tokens: TokenMetadata[];
   total_pages: number;
   current_page: number;
 }

@@ -19,8 +19,11 @@ function getPoolOnLocalData(tokenXMint: string, tokenYMint: string) {
 
 async function savePoolToLocalData(pool: PoolAccount) {
   return {
+    apr: 0,
     tokenXMint: pool.reserve_x.toBase58(),
+    tokenXSymbol: pool.reserve_x.toBase58(),
     tokenYMint: pool.reserve_y.toBase58(),
+    tokenYSymbol: pool.reserve_y.toBase58(),
   };
 }
 

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "tailwind-scrollbar";
 
 @source "./libs/ui/src";
 @source "./apps/web/src";

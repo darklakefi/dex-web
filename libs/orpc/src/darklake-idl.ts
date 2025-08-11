@@ -1,6 +1,6 @@
 import type { Darklake } from "../darklake";
-import idlData from "../darklake.json";
+import { IDL_JSON } from "../darklake-json";
 
-const IDL = idlData as Darklake;
+const IDL = IDL_JSON as Darklake;
 
 export default IDL;

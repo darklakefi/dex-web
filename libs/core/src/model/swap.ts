@@ -1,3 +1,5 @@
+import type { Token } from "./token";
+
 export enum TradeStatus {
   UNSIGNED = "UNSIGNED",
   SIGNED = "SIGNED",
@@ -12,8 +14,8 @@ export interface SwapTransaction {
   tradeId: string;
   orderId: string;
   userAddress: string;
-  tokenMintX: string;
-  tokenMintY: string;
+  tokenIn: Token;
+  tokenOut: Token;
   amountIn: number;
   minimalAmountOut: number;
   displayAmountIn: string;
@@ -21,5 +23,6 @@ export interface SwapTransaction {
   status: TradeStatus;
   signature: string;
   createdAt: number;
-  updatedAt: number;
+  isSwapXToY: boolean;
+  rate: string;
 }

@@ -24,7 +24,7 @@
     "src/**/*.tsx",
     "src/**/*.json",
     "darklake.ts",
-    "*.json"
+    "darklake-json.ts"
   ],
   "references": [
     {
