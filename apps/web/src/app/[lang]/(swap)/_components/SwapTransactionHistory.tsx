@@ -100,7 +100,7 @@ export function SwapTransactionHistory() {
                     </div>
                     <div className="flex flex-row justify-between">
                       <Text.Body2 className="text-green-300">
-                        {`${numberFormatHelper({ decimalScale: tx.tokenX.decimals, trimTrailingZeros: true, value: tx.displayAmountIn })} ${tx.tokenX.symbol} FOR ${numberFormatHelper({ decimalScale: tx.tokenY.decimals, trimTrailingZeros: true, value: tx.displayMinimalAmountOut })} ${tx.tokenY.symbol}`}
+                        {`${numberFormatHelper({ decimalScale: tx.tokenIn.decimals, trimTrailingZeros: true, value: tx.displayAmountIn })} ${tx.tokenIn.symbol} FOR ${numberFormatHelper({ decimalScale: tx.tokenOut.decimals, trimTrailingZeros: true, value: tx.displayMinimalAmountOut })} ${tx.tokenOut.symbol}`}
                       </Text.Body2>
                       <Text.Body2 className="text-green-300">
                         {getDateString(tx.createdAt)}
@@ -108,7 +108,7 @@ export function SwapTransactionHistory() {
                     </div>
                     <div className="flex flex-row justify-between">
                       <Text.Body2 className="text-green-400">
-                        {`1 ${tx.tokenX.symbol} ≈ ${tx.minimalAmountOut / tx.amountIn} ${tx.tokenY.symbol}`}
+                        {`1 ${tx.tokenIn.symbol} ≈ ${numberFormatHelper({ decimalScale: 2, trimTrailingZeros: true, value: tx.rate })} ${tx.tokenOut.symbol}`}
                       </Text.Body2>
                       <Text.Body2 className="text-green-300">
                         {getTimeString(tx.createdAt)} {timezone}

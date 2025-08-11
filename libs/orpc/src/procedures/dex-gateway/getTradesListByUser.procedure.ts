@@ -22,38 +22,47 @@ export const getTradesListByUser = baseProcedure
       user_address: userAddress,
     });
 
-    const items = response?.data?.trades.map((trade) => ({
-      amountIn: trade.amount_in,
-      createdAt: BigNumber(trade.created_at).div(1_000).toNumber(),
-      displayAmountIn: BigNumber(trade.amount_in)
-        .div(10 ** trade.token_x.decimals)
-        .toFixed(2)
-        .toString(),
-      displayMinimalAmountOut: BigNumber(trade.minimal_amount_out)
-        .div(10 ** trade.token_y.decimals)
-        .toFixed(2)
-        .toString(),
-      minimalAmountOut: trade.minimal_amount_out,
-      orderId: trade.order_id,
-      signature: trade.signature,
-      status: trade.status,
-      tokenX: {
-        address: trade.token_x.address,
-        decimals: trade.token_x.decimals,
-        imageUrl: trade.token_x.logo_uri,
-        name: trade.token_x.name,
-        symbol: trade.token_x.symbol,
-      },
-      tokenY: {
-        address: trade.token_y.address,
-        decimals: trade.token_y.decimals,
-        imageUrl: trade.token_y.logo_uri,
-        name: trade.token_y.name,
-        symbol: trade.token_y.symbol,
-      },
-      tradeId: trade.trade_id,
-      userAddress: trade.user_address,
-    }));
+    const items = response?.data?.trades.map((trade) => {
+      const tokenIn = trade.is_swap_x_to_y ? trade.token_x : trade.token_y;
+      const tokenOut = trade.is_swap_x_to_y ? trade.token_y : trade.token_x;
+      const displayAmountIn = BigNumber(trade.amount_in).div(
+        10 ** tokenIn.decimals,
+      );
+      const displayMinimalAmountOut = BigNumber(trade.minimal_amount_out).div(
+        10 ** tokenOut.decimals,
+      );
+
+      return {
+        amountIn: trade.amount_in,
+        createdAt: BigNumber(trade.created_at).div(1_000).toNumber(),
+        displayAmountIn: displayAmountIn.toFixed(2).toString(),
+        displayMinimalAmountOut: displayMinimalAmountOut.toFixed(2).toString(),
+        isSwapXToY: trade.is_swap_x_to_y,
+        minimalAmountOut: trade.minimal_amount_out,
+        orderId: trade.order_id,
+        rate: displayAmountIn
+          .div(displayMinimalAmountOut.isZero() ? 1 : displayMinimalAmountOut)
+          .toString(),
+        signature: trade.signature,
+        status: trade.status,
+        tokenIn: {
+          address: tokenIn.address,
+          decimals: tokenIn.decimals,
+          imageUrl: tokenIn.logo_uri,
+          name: tokenIn.name,
+          symbol: tokenIn.symbol,
+        },
+        tokenOut: {
+          address: tokenOut.address,
+          decimals: tokenOut.decimals,
+          imageUrl: tokenOut.logo_uri,
+          name: tokenOut.name,
+          symbol: tokenOut.symbol,
+        },
+        tradeId: trade.trade_id,
+        userAddress: trade.user_address,
+      };
+    });
 
     return {
       hasMore:

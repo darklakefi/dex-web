@@ -43,6 +43,7 @@ message Trade {
     string signature         = 9;
     int64 created_at         = 10;
     int64 updated_at         = 11;
+    bool is_swap_x_to_y      = 12;
 }
 
 message CreateUnsignedTransactionRequest {

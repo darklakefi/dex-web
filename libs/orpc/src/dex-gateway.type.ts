@@ -116,6 +116,7 @@ export interface Trade {
   signature: string;
   created_at: number;
   updated_at: number;
+  is_swap_x_to_y: boolean;
 }
 
 export interface GetTokenMetadataRequest {

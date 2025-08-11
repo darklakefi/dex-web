@@ -14,8 +14,8 @@ export interface SwapTransaction {
   tradeId: string;
   orderId: string;
   userAddress: string;
-  tokenX: Token;
-  tokenY: Token;
+  tokenIn: Token;
+  tokenOut: Token;
   amountIn: number;
   minimalAmountOut: number;
   displayAmountIn: string;
@@ -23,4 +23,6 @@ export interface SwapTransaction {
   status: TradeStatus;
   signature: string;
   createdAt: number;
+  isSwapXToY: boolean;
+  rate: string;
 }
