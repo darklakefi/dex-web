@@ -1,9 +1,7 @@
-import type { Token } from "./token";
-
 export interface Pool {
-  id: string;
-  address: string;
-  tokenX: Token;
-  tokenY: Token;
+  tokenXMint: string;
+  tokenYMint: string;
+  tokenXSymbol: string;
+  tokenYSymbol: string;
   apr: number;
 }

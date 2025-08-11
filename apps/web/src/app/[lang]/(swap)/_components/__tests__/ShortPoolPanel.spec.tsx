@@ -6,23 +6,24 @@ import { ShortPoolPanel } from "../ShortPoolPanel";
 
 const pools = [
   {
-    address: "1",
     apr: 5,
-    id: "1",
-    tokenX: { address: "1", decimals: 9, id: "1", name: "SOL", symbol: "SOL" },
-    tokenY: {
-      address: "2",
-      decimals: 6,
-      id: "2",
-      name: "USDC",
-      symbol: "USDC",
-    },
+    tokenXMint: "1",
+    tokenXSymbol: "SOL",
+    tokenYMint: "2",
+    tokenYSymbol: "USDC",
   },
 ] satisfies Pool[];
 
 describe("ShortPoolPanel", () => {
   it("renders title, icon, and pool data", () => {
-    render(<ShortPoolPanel icon="crown" pools={pools} title="Featured" />);
+    render(
+      <ShortPoolPanel
+        icon="crown"
+        onPoolClick={() => {}}
+        pools={pools}
+        title="Featured"
+      />,
+    );
     expect(screen.getByText("Featured")).toBeInTheDocument();
     expect(screen.getAllByText("SOL")[0]).toBeInTheDocument();
     expect(screen.getAllByText("USDC")[0]).toBeInTheDocument();

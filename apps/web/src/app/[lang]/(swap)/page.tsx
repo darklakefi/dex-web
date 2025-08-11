@@ -2,9 +2,9 @@ import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
 import { QueryClient } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
+import { FeaturesAndTrendingPoolPanel } from "./_components/FeaturesAndTrendingPoolPanel";
 import { SwapForm } from "./_components/SwapForm";
 import { SwapTransactionHistory } from "./_components/SwapTransactionHistory";
-import { MOCK_OWNER_ADDRESS, MOCK_SWAP_ID } from "./_utils/constants";
 import { selectedTokensCache } from "./_utils/searchParams";
 
 export default async function Page({
@@ -16,19 +16,7 @@ export default async function Page({
 
   const queryClient = new QueryClient();
 
-  await Promise.all([
-    queryClient.prefetchQuery(
-      tanstackClient.getSwapDetails.queryOptions({
-        input: { swapId: MOCK_SWAP_ID },
-      }),
-    ),
-
-    queryClient.prefetchQuery(
-      tanstackClient.helius.getTokenAccounts.queryOptions({
-        input: { ownerAddress: MOCK_OWNER_ADDRESS },
-      }),
-    ),
-  ]);
+  await queryClient.prefetchQuery(tanstackClient.getPinedPool.queryOptions({}));
 
   return (
     <div className="flex justify-center gap-12">
@@ -64,9 +52,9 @@ export default async function Page({
           <div className="hidden size-9 md:block" />
         </div>
       </div>
-      {/* <div className="max-w-xs">
-        <FeaturesAndTrendingPoolPanel featuredPools={[]} trendingPools={[]} />
-      </div> */}
+      <div className="hidden max-w-xs md:block">
+        <FeaturesAndTrendingPoolPanel />
+      </div>
     </div>
   );
 }
