@@ -40,9 +40,7 @@ export const getTradesListByUser = baseProcedure
         isSwapXToY: trade.is_swap_x_to_y,
         minimalAmountOut: trade.minimal_amount_out,
         orderId: trade.order_id,
-        rate: displayAmountIn
-          .div(displayMinimalAmountOut.isZero() ? 1 : displayMinimalAmountOut)
-          .toString(),
+        rate: displayMinimalAmountOut.div(displayAmountIn).toString(),
         signature: trade.signature,
         status: trade.status,
         tokenIn: {
