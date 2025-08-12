@@ -28,8 +28,8 @@ import { SwapPageRefreshButton } from "./SwapPageRefreshButton";
 export const { fieldContext, formContext } = createFormHookContexts();
 
 const swapFormSchema = z.object({
-  buyAmount: z.string(),
-  sellAmount: z.string(),
+  tokenAAmount: z.string(),
+  tokenBAmount: z.string(),
 });
 
 type SwapFormSchema = z.infer<typeof swapFormSchema>;
@@ -46,13 +46,13 @@ const { useAppForm } = createFormHook({
 
 const formConfig = {
   defaultValues: {
-    buyAmount: "0",
-    sellAmount: "0",
+    tokenAAmount: "0",
+    tokenBAmount: "0",
   } satisfies SwapFormSchema,
   onSubmit: async ({
     value,
   }: {
-    value: { buyAmount: string; sellAmount: string };
+    value: { tokenAAmount: string; tokenBAmount: string };
   }) => {
     console.log(value);
   },
@@ -223,7 +223,7 @@ export function SwapForm() {
       ) {
         resetButtonState();
         toast({
-          description: `SWAPPED ${form.state.values.sellAmount} ${sellTokenAddress} FOR ${form.state.values.buyAmount} ${buyTokenAddress}. protected from MEV attacks.`,
+          description: `SWAPPED ${form.state.values.tokenAAmount} ${sellTokenAddress} FOR ${form.state.values.tokenBAmount} ${buyTokenAddress}. protected from MEV attacks.`,
           title: "Swap complete",
           variant: "success",
         });
@@ -283,8 +283,8 @@ export function SwapForm() {
 
     try {
       const formState = form.state.values;
-      const sellAmount = Number(formState.sellAmount.replace(/,/g, ""));
-      const buyAmount = Number(formState.buyAmount.replace(/,/g, ""));
+      const sellAmount = Number(formState.tokenAAmount.replace(/,/g, ""));
+      const buyAmount = Number(formState.tokenBAmount.replace(/,/g, ""));
 
       if (!buyTokenAddress || !sellTokenAddress) {
         throw new Error("Missing token addresses");
@@ -358,9 +358,9 @@ export function SwapForm() {
     });
     setQuote(quote);
     if (type === "sell") {
-      form.setFieldValue("buyAmount", String(quote.amountOut));
+      form.setFieldValue("tokenBAmount", String(quote.amountOut));
     } else {
-      form.setFieldValue("sellAmount", String(quote.amountOut));
+      form.setFieldValue("tokenAAmount", String(quote.amountOut));
     }
     setIsDisableSwapButton(false);
     setIsLoadingQuote(false);
@@ -404,12 +404,12 @@ export function SwapForm() {
   };
 
   const onClickSwapToken = () => {
-    const sellAmount = Number(form.state.values.sellAmount.replace(/,/g, ""));
+    const sellAmount = Number(form.state.values.tokenAAmount.replace(/,/g, ""));
     checkInsufficientBalance(String(sellAmount));
     if (!poolDetails || BigNumber(sellAmount).lte(0)) return;
 
     debouncedGetQuote({
-      amountIn: form.state.values.sellAmount,
+      amountIn: form.state.values.tokenAAmount,
       isXtoY: !isXtoY,
       slippage: parseFloat(slippage),
       type: "sell",
@@ -435,8 +435,8 @@ export function SwapForm() {
       return BUTTON_MESSAGE.LOADING;
     }
 
-    if (form.state.values.sellAmount) {
-      const inputClean = form.state.values.sellAmount.replace(/,/g, "");
+    if (form.state.values.tokenAAmount) {
+      const inputClean = form.state.values.tokenAAmount.replace(/,/g, "");
       if (BigNumber(inputClean).lte(0)) {
         return BUTTON_MESSAGE.ENTER_AMOUNT;
       }
@@ -473,7 +473,7 @@ export function SwapForm() {
               setIsUseSlippage(slippage !== "0");
               setSlippage(slippage);
               debouncedGetQuote({
-                amountIn: form.state.values.sellAmount,
+                amountIn: form.state.values.tokenAAmount,
                 isXtoY,
                 slippage: parseFloat(slippage),
                 type: "sell",
@@ -483,7 +483,7 @@ export function SwapForm() {
           <SwapPageRefreshButton
             onClick={() => {
               debouncedGetQuote({
-                amountIn: form.state.values.sellAmount,
+                amountIn: form.state.values.tokenAAmount,
                 isXtoY,
                 slippage: parseFloat(slippage),
                 type: "sell",
@@ -506,7 +506,7 @@ export function SwapForm() {
                 </Text.Body2>
                 <SelectTokenButton returnUrl={""} type="sell" />
               </div>
-              <form.Field name="sellAmount">
+              <form.Field name="tokenAAmount">
                 {(field) => (
                   <FormFieldset
                     name={field.name}
@@ -536,7 +536,7 @@ export function SwapForm() {
                 </Text.Body2>
                 <SelectTokenButton type="buy" />
               </div>
-              <form.Field name="buyAmount">
+              <form.Field name="tokenBAmount">
                 {(field) => (
                   <FormFieldset
                     disabled={true}
@@ -595,7 +595,7 @@ export function SwapForm() {
               setIsUseSlippage(slippage !== "0");
               setSlippage(slippage);
               debouncedGetQuote({
-                amountIn: form.state.values.sellAmount,
+                amountIn: form.state.values.tokenAAmount,
                 isXtoY,
                 slippage: parseFloat(slippage),
                 type: "sell",
@@ -605,7 +605,7 @@ export function SwapForm() {
           <SwapPageRefreshButton
             onClick={() => {
               debouncedGetQuote({
-                amountIn: form.state.values.sellAmount,
+                amountIn: form.state.values.tokenAAmount,
                 isXtoY,
                 slippage: parseFloat(slippage),
                 type: "sell",

@@ -3,7 +3,12 @@ import {
   getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { Keypair, PublicKey, type Transaction } from "@solana/web3.js";
+import {
+  Keypair,
+  PublicKey,
+  type Transaction,
+  type VersionedTransaction,
+} from "@solana/web3.js";
 import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
@@ -191,8 +196,12 @@ export async function addLiquidityTxHandler(
   const dummyKeypair = Keypair.generate();
   const dummyWallet = {
     publicKey: dummyKeypair.publicKey,
-    signAllTransactions: async (txs: Transaction[]) => txs,
-    signTransaction: async (tx: Transaction) => tx,
+    signAllTransactions: async <T extends Transaction | VersionedTransaction>(
+      txs: T[],
+    ): Promise<T[]> => txs,
+    signTransaction: async <T extends Transaction | VersionedTransaction>(
+      tx: T,
+    ): Promise<T> => tx,
   };
 
   const provider = new AnchorProvider(connection, dummyWallet, {

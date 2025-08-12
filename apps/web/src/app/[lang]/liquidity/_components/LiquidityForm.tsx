@@ -4,7 +4,7 @@ import { client, TradeStatus, tanstackClient } from "@dex-web/orpc";
 import type { AddLiquidityTxInput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -58,13 +58,6 @@ const formConfig = {
   },
 };
 
-const MESSAGE_STEP = {
-  1: "protecting liquidity transaction [1/3]",
-  2: "confirm liquidity in your wallet [2/3]",
-  3: "verifying liquidity transaction [3/3]",
-  10: "calculating amounts...",
-};
-
 const BUTTON_MESSAGE = {
   ADD_LIQUIDITY: "Add Liquidity",
   CALCULATING: "calculating amounts...",
@@ -78,9 +71,7 @@ const BUTTON_MESSAGE = {
 
 export function LiquidityForm() {
   const form = useAppForm(formConfig);
-  const { publicKey, wallet, signTransaction, signAllTransactions } =
-    useWallet();
-  const { connection } = useConnection();
+  const { publicKey, wallet, signTransaction } = useWallet();
   const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
     selectedTokensParsers,
   );

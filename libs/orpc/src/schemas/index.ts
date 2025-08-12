@@ -16,6 +16,10 @@ export type {
   AddLiquidityTxOutput,
 } from "./pools/addLiquidityTx.schema";
 export type {
+  CreatePoolTxInput,
+  CreatePoolTxOutput,
+} from "./pools/createPoolTx.schema";
+export type {
   GetQuoteInput,
   GetQuoteOutput,
 } from "./swaps/getQuote.schema";

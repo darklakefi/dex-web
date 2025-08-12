@@ -3,7 +3,12 @@ import {
   getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { Keypair, PublicKey, type Transaction } from "@solana/web3.js";
+import {
+  Keypair,
+  PublicKey,
+  type Transaction,
+  type VersionedTransaction,
+} from "@solana/web3.js";
 import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
@@ -109,17 +114,18 @@ export async function createPoolTxHandler(
     depositAmountY,
   } = input;
 
-  // Create a server-side provider for transaction preparation
   const helius = getHelius();
   const connection = helius.connection;
-  
-  // Create a dummy wallet for server-side operations
-  // The actual signing will be done on the client side
+
   const dummyKeypair = Keypair.generate();
   const dummyWallet = {
     publicKey: dummyKeypair.publicKey,
-    signTransaction: async (tx: Transaction) => tx,
-    signAllTransactions: async (txs: Transaction[]) => txs,
+    signAllTransactions: async <T extends Transaction | VersionedTransaction>(
+      txs: T[],
+    ): Promise<T[]> => txs,
+    signTransaction: async <T extends Transaction | VersionedTransaction>(
+      tx: T,
+    ): Promise<T> => tx,
   };
 
   const provider = new AnchorProvider(connection, dummyWallet, {

@@ -15,7 +15,7 @@ import { selectedTokensParsers } from "../_utils/searchParams";
 import { useFormatPrice } from "../_utils/useFormatPrice";
 
 interface FormFieldsetProps extends NumericInputProps {
-  name: "buyAmount" | "sellAmount";
+  name: "tokenAAmount" | "tokenBAmount" | "initialPrice";
   disabled?: boolean;
   tokenAccount?: {
     address: string;
@@ -42,7 +42,7 @@ export function FormFieldset({
     tanstackClient.getTokenPrice.queryOptions({
       input: {
         amount: 1,
-        mint: name === "buyAmount" ? buyTokenAddress : sellTokenAddress,
+        mint: name === "tokenAAmount" ? buyTokenAddress : sellTokenAddress,
         quoteCurrency: QUOTE_CURRENCY,
       },
     }),
@@ -95,7 +95,7 @@ export function FormFieldset({
 
     // if the last character is a comma, replace it with a dot
     if (value.endsWith(",")) {
-      value = value.slice(0, -1) + ".";
+      value = `${value.slice(0, -1)}.`;
     }
 
     const cleanValue = value.replace(/,/g, "");

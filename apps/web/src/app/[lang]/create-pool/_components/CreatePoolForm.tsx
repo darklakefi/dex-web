@@ -1,11 +1,10 @@
 "use client";
 
-import { AnchorProvider } from "@coral-xyz/anchor";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { CreatePoolTxInput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text, TextInput } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import type { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -31,9 +30,7 @@ const createPoolFormSchema = z.object({
 type CreatePoolFormSchema = z.infer<typeof createPoolFormSchema>;
 
 const { useAppForm } = createFormHook({
-  fieldComponents: {
-    CreatePoolFormFieldset: FormFieldset,
-  },
+  fieldComponents: {},
   fieldContext,
   formComponents: {},
   formContext,
@@ -68,9 +65,7 @@ const BUTTON_MESSAGE = {
 
 export function CreatePoolForm() {
   const form = useAppForm(formConfig);
-  const { publicKey, wallet, signTransaction, signAllTransactions } =
-    useWallet();
-  const { connection } = useConnection();
+  const { publicKey, wallet, signTransaction } = useWallet();
   const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
     selectedTokensParsers,
   );
@@ -79,7 +74,6 @@ export function CreatePoolForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInsufficientBalanceA, setIsInsufficientBalanceA] = useState(false);
   const [isInsufficientBalanceB, setIsInsufficientBalanceB] = useState(false);
-  const [poolExists, setPoolExists] = useState(false);
 
   const { data: tokenAAccount, refetch: refetchTokenAAccount } =
     useSuspenseQuery(
@@ -170,7 +164,7 @@ export function CreatePoolForm() {
 
   const requestSigning = async (
     transaction: Transaction,
-    trackingId: string,
+    _trackingId: string,
   ) => {
     try {
       if (!publicKey) throw new Error("Wallet not connected!");
@@ -185,7 +179,7 @@ export function CreatePoolForm() {
         variant: "loading",
       });
 
-      const signedTransaction = await signTransaction(transaction);
+      await signTransaction(transaction);
 
       setCreateStep(3);
       toast({
@@ -274,28 +268,6 @@ export function CreatePoolForm() {
         throw new Error("Missing wallet");
       }
 
-      const hasSigner =
-        publicKey &&
-        typeof signTransaction === "function" &&
-        typeof signAllTransactions === "function";
-
-      const anchorWallet = hasSigner
-        ? ({
-            publicKey,
-            signAllTransactions,
-            signTransaction,
-          } as const)
-        : null;
-
-      if (!anchorWallet) {
-        throw new Error("Missing wallet");
-      }
-
-      const provider = new AnchorProvider(connection, anchorWallet, {
-        commitment: "confirmed",
-        skipPreflight: true,
-      });
-
       const sortedTokens = sortSolanaAddresses(
         buyTokenAddress,
         sellTokenAddress,
@@ -320,7 +292,7 @@ export function CreatePoolForm() {
       if (response.success && response.transaction) {
         await requestSigning(
           response.transaction,
-          "pool-creation-" + Date.now(),
+          `pool-creation-${Date.now()}`,
         );
       } else {
         throw new Error("Failed to create pool transaction");
@@ -349,7 +321,7 @@ export function CreatePoolForm() {
     }
 
     // Check if pool already exists
-    if (existingPool && existingPool.tokenXMint && existingPool.tokenYMint) {
+    if (existingPool?.tokenXMint && existingPool.tokenYMint) {
       return BUTTON_MESSAGE.POOL_EXISTS;
     }
 
@@ -390,7 +362,7 @@ export function CreatePoolForm() {
 
     return (
       sellTokenAddress !== buyTokenAddress && // Different tokens
-      !(existingPool && existingPool.tokenXMint && existingPool.tokenYMint) && // Pool doesn't exist
+      !(existingPool?.tokenXMint && existingPool.tokenYMint) && // Pool doesn't exist
       BigNumber(tokenAAmount).gt(0) &&
       BigNumber(tokenBAmount).gt(0) &&
       BigNumber(initialPrice).gt(0) &&
@@ -444,6 +416,7 @@ export function CreatePoolForm() {
               {(field) => (
                 <TextInput
                   className="w-full border border-green-500 bg-green-700 text-white placeholder:text-green-300"
+                  label="Initial Price"
                   name={field.name}
                   onBlur={field.handleBlur}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
