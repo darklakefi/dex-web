@@ -8,7 +8,6 @@ import { AppHeaderButton } from "./AppHeaderButton";
 export const AppHeader = () => {
   const tx = useTranslations("pages");
   const pathname = usePathname();
-  console.log(pathname);
   return (
     <Header
       button={<AppHeaderButton />}

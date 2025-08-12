@@ -47,9 +47,13 @@ const formConfig = {
 
 interface SelectTokenModalProps {
   type: "buy" | "sell";
+  returnUrl: string;
 }
 
-export function SelectTokenModal({ type }: SelectTokenModalProps) {
+export function SelectTokenModal({
+  type,
+  returnUrl = "",
+}: SelectTokenModalProps) {
   const router = useRouter();
 
   const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
@@ -58,7 +62,7 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
 
   const handleClose = () => {
     router.push(
-      `/?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${buyTokenAddress}`,
+      `/${returnUrl}?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${buyTokenAddress}`,
     );
   };
 
@@ -73,7 +77,7 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
           ? buyTokenAddress
           : sellTokenAddress;
       router.push(
-        `/?sellTokenAddress=${sellAddress}&buyTokenAddress=${selectedTokenAddress}`,
+        `/${returnUrl}?sellTokenAddress=${sellAddress}&buyTokenAddress=${selectedTokenAddress}`,
       );
     } else {
       const buyAddress =
@@ -81,7 +85,7 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
           ? sellTokenAddress
           : buyTokenAddress;
       router.push(
-        `/?sellTokenAddress=${selectedTokenAddress}&buyTokenAddress=${buyAddress}`,
+        `/${returnUrl}?sellTokenAddress=${selectedTokenAddress}&buyTokenAddress=${buyAddress}`,
       );
     }
   };

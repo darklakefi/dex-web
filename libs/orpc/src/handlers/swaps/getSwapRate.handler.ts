@@ -230,7 +230,6 @@ export async function getSwapRateHandler(
       amountIn * 10 ** (isXtoY ? tokenX.decimals : tokenY.decimals);
     const roundedInput = Math.floor(scaledInput);
 
-    // Calculate swap using AMM formula
     const tradeFeeRate = Number(ammConfig.trade_fee_rate) || 0;
     const protocolFeeRate = Number(ammConfig.protocol_fee_rate) || 0;
     const swapResult = calculateSwap(
@@ -249,24 +248,17 @@ export async function getSwapRateHandler(
 
     const decDiff = Math.abs(tokenX.decimals - tokenY.decimals);
 
-    // Adjust rate for decimal differences
     let adjustedRate = swapResult.rate;
     if (isXtoY) {
-      // When swapping X to Y, adjust based on decimal difference
       if (tokenX.decimals < tokenY.decimals) {
-        // X has more decimals, so we need to downscale the rate
         adjustedRate = swapResult.rate / 10 ** decDiff;
       } else if (tokenX.decimals > tokenY.decimals) {
-        // X has fewer decimals, so we need to upscale the rate
         adjustedRate = swapResult.rate * 10 ** decDiff;
       }
     } else {
-      // When swapping Y to X, adjust based on decimal difference
       if (tokenY.decimals < tokenX.decimals) {
-        // Y has more decimals, so we need to downscale the rate
         adjustedRate = swapResult.rate / 10 ** decDiff;
       } else if (tokenY.decimals > tokenX.decimals) {
-        // Y has fewer decimals, so we need to upscale the rate
         adjustedRate = swapResult.rate * 10 ** decDiff;
       }
     }
@@ -276,13 +268,10 @@ export async function getSwapRateHandler(
       swapResult.tradeFee -
       swapResult.protocolFee;
 
-    // Calculate price impact (we are actually calculating rate impact)
-    // Original rate before trade (using available reserves)
     const originalRate = isXtoY
       ? availableReserveY / availableReserveX
       : availableReserveX / availableReserveY;
 
-    // Apply trade amounts to reserves
     const newAvailableReserveX = isXtoY
       ? availableReserveX + poolInputAmount
       : availableReserveX - swapResult.destinationAmount;
@@ -291,12 +280,10 @@ export async function getSwapRateHandler(
       ? availableReserveY - swapResult.destinationAmount
       : availableReserveY + poolInputAmount;
 
-    // New rate after trade
     const newRate = isXtoY
       ? newAvailableReserveY / newAvailableReserveX
       : newAvailableReserveX / newAvailableReserveY;
 
-    // Calculate rate impact as percentage change
     const priceImpact = ((originalRate - newRate) / originalRate) * 100;
     const priceImpactTruncated = Math.floor(priceImpact * 100) / 100;
 

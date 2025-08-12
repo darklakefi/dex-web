@@ -77,6 +77,7 @@ export function SwapForm() {
   const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
     selectedTokensParsers,
   );
+
   const [swapStep, setSwapStep] = useState(0);
   const [isDisableSwap, setIsDisableSwapButton] = useState(true);
   const [isLoadingSwapButton, setIsLoadingSwapButton] = useState(false);
