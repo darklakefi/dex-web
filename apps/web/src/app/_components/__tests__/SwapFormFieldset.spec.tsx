@@ -35,7 +35,7 @@ describe.skip("SwapFormFieldset", () => {
   const handleChange = vi.fn();
 
   it("renders label, balance, and NumericInput", async () => {
-    render(<FormFieldset name="buyAmount" onChange={handleChange} />, {
+    render(<FormFieldset name="tokenAAmount" onChange={handleChange} />, {
       wrapper,
     });
     expect(await screen.findByText("Half")).toBeDefined();

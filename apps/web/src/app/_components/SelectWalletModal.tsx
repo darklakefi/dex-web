@@ -13,7 +13,7 @@ export function SelectWalletModal() {
   const { wallets, wallet, select } = useWallet();
   const router = useRouter();
   const [shouldClose, setShouldClose] = useState(false);
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
@@ -38,7 +38,7 @@ export function SelectWalletModal() {
 
   const handleClose = () => {
     router.push(
-      `/?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${buyTokenAddress}&wallet=${wallet?.adapter.name}`,
+      `/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}&wallet=${wallet?.adapter.name}`,
     );
   };
 

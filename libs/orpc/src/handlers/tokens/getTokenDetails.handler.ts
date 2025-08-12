@@ -12,7 +12,13 @@ export const getTokenDetailsHandler = async (
   const { address } = input;
 
   if (!address || address.trim() === "") {
-    throw new Error("Token address is required");
+    return {
+      address: "",
+      decimals: 0,
+      imageUrl: undefined,
+      name: "Select Token",
+      symbol: "SELECT",
+    };
   }
 
   const grpcClient = getDexGatewayClient();

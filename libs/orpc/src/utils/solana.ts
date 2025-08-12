@@ -1,5 +1,5 @@
 import type { Idl } from "@coral-xyz/anchor";
-import { BorshCoder } from "@coral-xyz/anchor";
+import { BN, BorshCoder } from "@coral-xyz/anchor";
 import { type Connection, PublicKey } from "@solana/web3.js";
 import IDL from "../darklake-idl";
 import { getHelius } from "../getHelius";
@@ -64,11 +64,8 @@ export async function getPoolPubkey(tokenA: string, tokenB: string) {
     tokenB,
   );
 
-  const amm_config_index = Buffer.alloc(4);
-  amm_config_index.writeUInt8(0, 0);
-
   const [ammConfigPubkey] = PublicKey.findProgramAddressSync(
-    [Buffer.from("amm_config"), amm_config_index],
+    [Buffer.from("amm_config"), new BN(0).toArrayLike(Buffer, "le", 4)],
     EXCHANGE_PROGRAM_ID,
   );
 

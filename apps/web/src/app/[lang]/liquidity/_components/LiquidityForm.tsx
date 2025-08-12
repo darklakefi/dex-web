@@ -5,7 +5,7 @@ import type { AddLiquidityTxInput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Transaction } from "@solana/web3.js";
+import { VersionedTransaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -18,6 +18,10 @@ import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { TokenTransactionButton } from "../../../_components/TokenTransactionButton";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
+import {
+  DEFAULT_BUY_TOKEN,
+  DEFAULT_SELL_TOKEN,
+} from "../../../_utils/constants";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
@@ -72,7 +76,7 @@ const BUTTON_MESSAGE = {
 export function LiquidityForm() {
   const form = useAppForm(formConfig);
   const { publicKey, wallet, signTransaction } = useWallet();
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
   const [liquidityStep, setLiquidityStep] = useState(0);
@@ -93,8 +97,8 @@ export function LiquidityForm() {
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.getPoolDetails.queryOptions({
       input: {
-        tokenXMint: sellTokenAddress || "",
-        tokenYMint: buyTokenAddress || "",
+        tokenXMint: tokenBAddress ?? DEFAULT_SELL_TOKEN,
+        tokenYMint: tokenAAddress ?? DEFAULT_BUY_TOKEN,
       },
     }),
   );
@@ -103,7 +107,7 @@ export function LiquidityForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: buyTokenAddress || "",
+          mint: tokenAAddress || DEFAULT_BUY_TOKEN,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -113,7 +117,7 @@ export function LiquidityForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: sellTokenAddress || "",
+          mint: tokenBAddress || DEFAULT_SELL_TOKEN,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -168,13 +172,14 @@ export function LiquidityForm() {
         unsignedTransaction,
         "base64",
       );
-      const transactionJson = unsignedTransactionBuffer;
-      const transaction = Transaction.from(transactionJson);
+      const transaction = VersionedTransaction.deserialize(
+        unsignedTransactionBuffer,
+      );
 
       const signedTransaction = await signTransaction(transaction);
-      const signedTransactionBase64 = signedTransaction
-        .serialize()
-        .toString("base64");
+      const signedTransactionBase64 = Buffer.from(
+        signedTransaction.serialize(),
+      ).toString("base64");
 
       setTrackDetails({
         trackingId,
@@ -234,7 +239,7 @@ export function LiquidityForm() {
       ) {
         setLiquidityStep(0);
         toast({
-          description: `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${sellTokenAddress} + ${form.state.values.tokenBAmount} ${buyTokenAddress}. Protected from MEV attacks.`,
+          description: `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}. Protected from MEV attacks.`,
           title: "Liquidity Added Successfully",
           variant: "success",
         });
@@ -292,19 +297,22 @@ export function LiquidityForm() {
     setLiquidityStep(1);
 
     try {
-      if (!buyTokenAddress || !sellTokenAddress) {
-        throw new Error("Missing token addresses");
-      }
+      const finalTokenAAddress = tokenAAddress?.trim() || DEFAULT_BUY_TOKEN;
+      const finalTokenBAddress = tokenBAddress?.trim() || DEFAULT_SELL_TOKEN;
 
       const sortedTokens = sortSolanaAddresses(
-        buyTokenAddress,
-        sellTokenAddress,
+        finalTokenAAddress,
+        finalTokenBAddress,
       );
 
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
       if (!wallet) {
         throw new Error("Missing wallet");
+      }
+
+      if (!tokenXAddress || !tokenYAddress) {
+        throw new Error("Invalid token addresses after sorting");
       }
 
       const sellAmount = Number(
@@ -314,7 +322,7 @@ export function LiquidityForm() {
         form.state.values.tokenAAmount.replace(/,/g, ""),
       );
 
-      const isTokenXSell = poolDetails?.tokenXMint === sellTokenAddress;
+      const isTokenXSell = poolDetails?.tokenXMint === tokenBAddress;
       const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
       const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
@@ -322,7 +330,7 @@ export function LiquidityForm() {
       const estimatedLpTokens = Math.sqrt(maxAmountX * maxAmountY);
       const minLpTokens = estimatedLpTokens * slippageMultiplier;
 
-      const response = await client.dexGateway.addLiquidity({
+      const requestPayload = {
         lpTokensToMint: Math.floor(minLpTokens),
         maxAmountX: Math.floor(maxAmountX),
         maxAmountY: Math.floor(maxAmountY),
@@ -332,16 +340,18 @@ export function LiquidityForm() {
         tokenYProgramId: poolDetails?.tokenYMint ?? "",
         trackingId: "",
         user: publicKey.toBase58(),
-      } satisfies AddLiquidityTxInput);
+      } satisfies AddLiquidityTxInput;
 
-      if (response.success && response.transaction) {
+      const response = await client.dexGateway.addLiquidity(requestPayload);
+
+      if (response.success && response.transaction && response.tradeId) {
         requestSigning(
           response.transaction,
-          response.trackingId,
+          response.tradeId,
           response.trackingId,
         );
       } else {
-        // throw new Error("Failed to create swap transaction");
+        throw new Error("Failed to create liquidity transaction");
       }
     } catch (error) {
       console.error("Liquidity error:", error);
@@ -395,8 +405,8 @@ export function LiquidityForm() {
 
     if (BigNumber(value).gt(0) && !hasInsufficientBalance) {
       const inputType =
-        (type === "sell" && poolDetails?.tokenXMint === sellTokenAddress) ||
-        (type === "buy" && poolDetails?.tokenXMint === buyTokenAddress)
+        (type === "sell" && poolDetails?.tokenXMint === tokenBAddress) ||
+        (type === "buy" && poolDetails?.tokenXMint === tokenAAddress)
           ? "tokenX"
           : "tokenY";
 
@@ -636,9 +646,7 @@ export function LiquidityForm() {
             setSlippage(slippage);
             if (form.state.values.tokenBAmount !== "0") {
               const inputType =
-                poolDetails?.tokenXMint === sellTokenAddress
-                  ? "tokenX"
-                  : "tokenY";
+                poolDetails?.tokenXMint === tokenBAddress ? "tokenX" : "tokenY";
               debouncedCalculateTokenAmounts({
                 inputAmount: form.state.values.tokenBAmount,
                 inputType,

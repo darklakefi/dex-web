@@ -16,14 +16,14 @@ export function SelectTokenButton({
   type,
   returnUrl = "",
 }: SelectTokenButtonProps) {
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
-  const tokenAddress = type === "buy" ? buyTokenAddress : sellTokenAddress;
+  const tokenAddress = type === "buy" ? tokenAAddress : tokenBAddress;
 
   const validAddress =
-    tokenAddress || (type === "buy" ? buyTokenAddress : sellTokenAddress);
+    tokenAddress || (type === "buy" ? tokenAAddress : tokenBAddress);
 
   const { data: tokenDetails } = useSuspenseQuery(
     tanstackClient.getTokenDetails.queryOptions({
@@ -35,7 +35,7 @@ export function SelectTokenButton({
     <Button
       as={Link}
       className="mt-1 w-full items-center justify-between bg-green-700 p-2"
-      href={`${returnUrl.length > 0 ? `/${returnUrl}` : "/"}/select-token/${type}/?buyTokenAddress=${buyTokenAddress}&sellTokenAddress=${sellTokenAddress}`}
+      href={`${returnUrl.length > 0 ? `/${returnUrl}` : "/"}/select-token/${type}/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`}
       prefetch={true}
       variant="secondary"
     >

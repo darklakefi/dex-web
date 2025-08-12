@@ -17,6 +17,12 @@ function getSwapDetailsIcon(impact: "LOW" | "MEDIUM" | "HIGH") {
   }
 }
 
+function getImpact(priceImpactPercentage: number): "LOW" | "MEDIUM" | "HIGH" {
+  if (priceImpactPercentage < 2) return "LOW";
+  if (priceImpactPercentage < 5) return "MEDIUM";
+  return "HIGH";
+}
+
 const swapDetailsItemVariants = cva(
   "flex justify-between text-lg uppercase leading-6 tracking-wider",
   {

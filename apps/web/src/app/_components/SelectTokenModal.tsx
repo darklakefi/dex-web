@@ -56,13 +56,13 @@ export function SelectTokenModal({
 }: SelectTokenModalProps) {
   const router = useRouter();
 
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
   const handleClose = () => {
     router.push(
-      `/${returnUrl}?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${buyTokenAddress}`,
+      `/${returnUrl}?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`,
     );
   };
 
@@ -73,17 +73,13 @@ export function SelectTokenModal({
     e.preventDefault();
     if (type === "buy") {
       const sellAddress =
-        selectedTokenAddress === sellTokenAddress
-          ? buyTokenAddress
-          : sellTokenAddress;
+        selectedTokenAddress === tokenBAddress ? tokenAAddress : tokenBAddress;
       router.push(
         `/${returnUrl}?sellTokenAddress=${sellAddress}&buyTokenAddress=${selectedTokenAddress}`,
       );
     } else {
       const buyAddress =
-        selectedTokenAddress === buyTokenAddress
-          ? sellTokenAddress
-          : buyTokenAddress;
+        selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
       router.push(
         `/${returnUrl}?sellTokenAddress=${selectedTokenAddress}&buyTokenAddress=${buyAddress}`,
       );

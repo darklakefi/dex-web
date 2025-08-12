@@ -12,15 +12,16 @@ type TokenTransactionButtonProps = {
 export function TokenTransactionButton({
   onClickTokenTransaction,
 }: TokenTransactionButtonProps) {
-  const [{ buyTokenAddress, sellTokenAddress }, setSelectedTokens] =
-    useQueryStates(selectedTokensParsers);
+  const [{ tokenAAddress, tokenBAddress }, setSelectedTokens] = useQueryStates(
+    selectedTokensParsers,
+  );
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
 
     setSelectedTokens({
-      buyTokenAddress: sellTokenAddress ?? DEFAULT_BUY_TOKEN,
-      sellTokenAddress: buyTokenAddress ?? DEFAULT_SELL_TOKEN,
+      tokenAAddress: tokenBAddress ?? DEFAULT_BUY_TOKEN,
+      tokenBAddress: tokenAAddress ?? DEFAULT_SELL_TOKEN,
     });
 
     onClickTokenTransaction();

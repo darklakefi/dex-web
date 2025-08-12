@@ -34,7 +34,7 @@ export function FormFieldset({
   tokenAccount,
   ...rest
 }: FormFieldsetProps) {
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
@@ -42,7 +42,7 @@ export function FormFieldset({
     tanstackClient.getTokenPrice.queryOptions({
       input: {
         amount: 1,
-        mint: name === "tokenAAmount" ? buyTokenAddress : sellTokenAddress,
+        mint: name === "tokenAAmount" ? tokenAAddress : tokenBAddress,
         quoteCurrency: QUOTE_CURRENCY,
       },
     }),

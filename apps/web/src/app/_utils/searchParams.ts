@@ -1,12 +1,9 @@
 import { createSearchParamsCache, parseAsString } from "nuqs/server";
+import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "./constants";
 
 export const selectedTokensParsers = {
-  buyTokenAddress: parseAsString.withDefault(
-    process.env.NEXT_PUBLIC_DEFAULT_BUY_TOKEN ?? "",
-  ),
-  sellTokenAddress: parseAsString.withDefault(
-    process.env.NEXT_PUBLIC_DEFAULT_SELL_TOKEN ?? "",
-  ),
+  tokenAAddress: parseAsString.withDefault(DEFAULT_BUY_TOKEN),
+  tokenBAddress: parseAsString.withDefault(DEFAULT_SELL_TOKEN),
 };
 export const selectedTokensCache = createSearchParamsCache(
   selectedTokensParsers,

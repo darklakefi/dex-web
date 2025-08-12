@@ -75,7 +75,7 @@ const BUTTON_MESSAGE = {
 export function SwapForm() {
   const form = useAppForm(formConfig);
   const { signTransaction, publicKey } = useWallet();
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
@@ -97,8 +97,8 @@ export function SwapForm() {
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.getPoolDetails.queryOptions({
       input: {
-        tokenXMint: sellTokenAddress,
-        tokenYMint: buyTokenAddress,
+        tokenXMint: tokenBAddress,
+        tokenYMint: tokenAAddress,
       },
     }),
   );
@@ -107,7 +107,7 @@ export function SwapForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: buyTokenAddress,
+          mint: tokenAAddress,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -117,7 +117,7 @@ export function SwapForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: sellTokenAddress,
+          mint: tokenBAddress,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -125,7 +125,7 @@ export function SwapForm() {
 
   const [quote, setQuote] = useState<GetQuoteOutput | null>(null);
 
-  const isXtoY = poolDetails?.tokenXMint === sellTokenAddress;
+  const isXtoY = poolDetails?.tokenXMint === tokenBAddress;
 
   const resetButtonState = () => {
     setSwapStep(0);
@@ -223,7 +223,7 @@ export function SwapForm() {
       ) {
         resetButtonState();
         toast({
-          description: `SWAPPED ${form.state.values.tokenAAmount} ${sellTokenAddress} FOR ${form.state.values.tokenBAmount} ${buyTokenAddress}. protected from MEV attacks.`,
+          description: `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`,
           title: "Swap complete",
           variant: "success",
         });
@@ -286,14 +286,11 @@ export function SwapForm() {
       const sellAmount = Number(formState.tokenAAmount.replace(/,/g, ""));
       const buyAmount = Number(formState.tokenBAmount.replace(/,/g, ""));
 
-      if (!buyTokenAddress || !sellTokenAddress) {
+      if (!tokenAAddress || !tokenBAddress) {
         throw new Error("Missing token addresses");
       }
 
-      const sortedTokens = sortSolanaAddresses(
-        buyTokenAddress,
-        sellTokenAddress,
-      );
+      const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
 
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
@@ -584,8 +581,8 @@ export function SwapForm() {
             <TokenTransactionDetails
               quote={quote}
               slippage={slippage}
-              tokenBuyMint={buyTokenAddress}
-              tokenSellMint={sellTokenAddress}
+              tokenBuyMint={tokenAAddress}
+              tokenSellMint={tokenBAddress}
             />
           )}
         </Box>

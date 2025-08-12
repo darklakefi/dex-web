@@ -1,12 +1,17 @@
 import { AnchorProvider, BN, Program, web3 } from "@coral-xyz/anchor";
 import {
+  createAssociatedTokenAccountIdempotentInstruction,
+  getAccount,
   getAssociatedTokenAddressSync,
+  getMint,
+  TOKEN_2022_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
-  Keypair,
   PublicKey,
   type Transaction,
+  type TransactionInstruction,
+  TransactionMessage,
   type VersionedTransaction,
 } from "@solana/web3.js";
 import IDL from "../../darklake-idl";
@@ -22,17 +27,83 @@ const POOL_SEED = "pool";
 const AMM_CONFIG_SEED = "amm_config";
 const LIQUIDITY_SEED = "lp";
 
+// Utility functions
+async function toBaseUnits(
+  connection: web3.Connection,
+  mint: PublicKey,
+  uiAmount: string | number | bigint,
+  tokenProgram: PublicKey,
+): Promise<BN> {
+  const info = await getMint(connection, mint, "confirmed", tokenProgram);
+  const decimals = info.decimals;
+  const asStr = uiAmount.toString();
+  const [i, f = ""] = asStr.split(".");
+  const frac = (f + "0".repeat(decimals)).slice(0, decimals);
+  return new BN(i)
+    .mul(new BN(10).pow(new BN(decimals)))
+    .add(new BN(frac || "0"));
+}
+
+async function detectTokenProgram(
+  connection: web3.Connection,
+  mint: PublicKey,
+): Promise<PublicKey> {
+  try {
+    await getMint(connection, mint, "confirmed", TOKEN_2022_PROGRAM_ID);
+    return TOKEN_2022_PROGRAM_ID;
+  } catch {
+    return TOKEN_PROGRAM_ID;
+  }
+}
+
+async function ensureAtaIx(
+  connection: web3.Connection,
+  owner: PublicKey,
+  mint: PublicKey,
+  tokenProgram: PublicKey,
+): Promise<TransactionInstruction | null> {
+  const ata = getAssociatedTokenAddressSync(mint, owner, false, tokenProgram);
+  try {
+    await getAccount(connection, ata, "confirmed", tokenProgram);
+    return null;
+  } catch {
+    return createAssociatedTokenAccountIdempotentInstruction(
+      owner,
+      ata,
+      owner,
+      mint,
+      tokenProgram,
+    );
+  }
+}
+
 async function addLiquidity(
   user: PublicKey,
   program: Program<typeof IDL>,
+  connection: web3.Connection,
   tokenXMint: PublicKey,
-  tokenXProgramId: PublicKey,
   tokenYMint: PublicKey,
-  tokenYProgramId: PublicKey,
-  amountX: number,
-  amountY: number,
-  lpTokensToMint: number,
-): Promise<Transaction> {
+  maxAmountX: string | number | bigint,
+  maxAmountY: string | number | bigint,
+  lpTokensToMint: string | number | bigint,
+): Promise<VersionedTransaction> {
+  // Detect token programs for each mint
+  const tokenXProgramId = await detectTokenProgram(connection, tokenXMint);
+  const tokenYProgramId = await detectTokenProgram(connection, tokenYMint);
+
+  // Validate mint/program coherence
+  try {
+    await getMint(connection, tokenXMint, "confirmed", tokenXProgramId);
+    await getMint(connection, tokenYMint, "confirmed", tokenYProgramId);
+  } catch (error) {
+    throw new Error(`Invalid mint/token program combination: ${error}`);
+  }
+
+  // Sort mints canonically for consistent PDA derivation
+  const [mintA, mintB] = [tokenXMint, tokenYMint].sort((a, b) =>
+    a.toBuffer().compare(b.toBuffer()),
+  );
+
   const [ammConfig] = PublicKey.findProgramAddressSync(
     [Buffer.from(AMM_CONFIG_SEED), new BN(0).toArrayLike(Buffer, "le", 4)],
     program.programId,
@@ -42,8 +113,8 @@ async function addLiquidity(
     [
       Buffer.from(POOL_SEED),
       ammConfig.toBuffer(),
-      tokenXMint.toBuffer(),
-      tokenYMint.toBuffer(),
+      mintA?.toBuffer() ?? Buffer.from([]),
+      mintB?.toBuffer() ?? Buffer.from([]),
     ],
     program.programId,
   );
@@ -53,25 +124,27 @@ async function addLiquidity(
     program.programId,
   );
 
-  const userTokenAccountX = getAssociatedTokenAddressSync(
+  // LP token program (usually TOKEN_PROGRAM_ID)
+  const lpTokenProgramId = TOKEN_PROGRAM_ID;
+
+  // Convert amounts to base units
+  const maxAmountXBN = await toBaseUnits(
+    connection,
     tokenXMint,
-    user,
-    false,
+    maxAmountX,
     tokenXProgramId,
   );
-
-  const userTokenAccountY = getAssociatedTokenAddressSync(
+  const maxAmountYBN = await toBaseUnits(
+    connection,
     tokenYMint,
-    user,
-    false,
+    maxAmountY,
     tokenYProgramId,
   );
-
-  const userTokenAccountLp = getAssociatedTokenAddressSync(
+  const lpTokensToMintBN = await toBaseUnits(
+    connection,
     lpMint,
-    user,
-    false,
-    TOKEN_PROGRAM_ID,
+    lpTokensToMint,
+    lpTokenProgramId,
   );
 
   const [poolTokenAccountX] = PublicKey.findProgramAddressSync(
@@ -92,36 +165,61 @@ async function addLiquidity(
     program.programId,
   );
 
-  const tx = await program.methods
-    .addLiquidity(new BN(lpTokensToMint), new BN(amountX), new BN(amountY))
-    .accountsPartial({
-      pool: poolPubkey,
+  // Create ATA instructions if needed
+  const ataInstructions: TransactionInstruction[] = [];
+
+  const ataXIx = await ensureAtaIx(
+    connection,
+    user,
+    tokenXMint,
+    tokenXProgramId,
+  );
+  if (ataXIx) ataInstructions.push(ataXIx);
+
+  const ataYIx = await ensureAtaIx(
+    connection,
+    user,
+    tokenYMint,
+    tokenYProgramId,
+  );
+  if (ataYIx) ataInstructions.push(ataYIx);
+
+  const ataLpIx = await ensureAtaIx(connection, user, lpMint, lpTokenProgramId);
+  if (ataLpIx) ataInstructions.push(ataLpIx);
+
+  // Build program instruction
+  const programIx = await program.methods
+    .addLiquidity(lpTokensToMintBN, maxAmountXBN, maxAmountYBN)
+    .accounts({
       poolTokenReserveX: poolTokenAccountX,
       poolTokenReserveY: poolTokenAccountY,
-      tokenMintLp: lpMint,
       tokenMintX: tokenXMint,
       tokenMintXProgram: tokenXProgramId,
       tokenMintY: tokenYMint,
       tokenMintYProgram: tokenYProgramId,
-      tokenProgram: TOKEN_PROGRAM_ID,
       user,
-      userTokenAccountLp: userTokenAccountLp,
-      userTokenAccountX: userTokenAccountX,
-      userTokenAccountY: userTokenAccountY,
     })
-    .transaction();
+    .instruction();
 
-  const modifyComputeUnits = web3.ComputeBudgetProgram.setComputeUnitLimit({
-    units: 250_000,
+  // Compute budget instructions (put first)
+  const cuLimitIx = web3.ComputeBudgetProgram.setComputeUnitLimit({
+    units: 400_000,
+  });
+  const cuPriceIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
+    microLamports: 50_000,
   });
 
-  // shouldn't be needed but leaving as an example just in case
-  // const recentBlockhash = await program.provider.connection.getLatestBlockhash();
-  // tx.recentBlockhash = recentBlockhash.blockhash;
+  // Build versioned transaction
+  const { blockhash } = await connection.getLatestBlockhash();
+  const instructions = [cuLimitIx, cuPriceIx, ...ataInstructions, programIx];
 
-  tx.add(modifyComputeUnits);
+  const message = new TransactionMessage({
+    instructions,
+    payerKey: user,
+    recentBlockhash: blockhash,
+  }).compileToV0Message();
 
-  return tx;
+  return new web3.VersionedTransaction(message);
 }
 
 // Usage example
@@ -176,22 +274,21 @@ export async function addLiquidityTxHandler(
     user,
     tokenXMint,
     tokenYMint,
-    tokenXProgramId,
-    tokenYProgramId,
     maxAmountX,
     maxAmountY,
     lpTokensToMint,
   } = input;
 
-  // Create a server-side provider for transaction preparation
+  // Generate unique IDs for tracking
+  const trackingId =
+    input.trackingId || `id${Math.random().toString(16).slice(2)}`;
+  const tradeId = `trade${Math.random().toString(16).slice(2)}`;
+
   const helius = getHelius();
   const connection = helius.connection;
 
-  // Create a dummy wallet for server-side operations
-  // The actual signing will be done on the client side
-  const dummyKeypair = Keypair.generate();
-  const dummyWallet = {
-    publicKey: dummyKeypair.publicKey,
+  const userWallet = {
+    publicKey: new PublicKey(user),
     signAllTransactions: async <T extends Transaction | VersionedTransaction>(
       txs: T[],
     ): Promise<T[]> => txs,
@@ -200,40 +297,47 @@ export async function addLiquidityTxHandler(
     ): Promise<T> => tx,
   };
 
-  const provider = new AnchorProvider(connection, dummyWallet, {
+  const provider = new AnchorProvider(connection, userWallet, {
     commitment: "confirmed",
-    skipPreflight: true,
   });
 
   const program = new Program(IDL, provider);
 
   try {
-    const tx = await addLiquidity(
+    const vtx = await addLiquidity(
       new PublicKey(user),
       program,
+      connection,
       new PublicKey(tokenXMint),
-      new PublicKey(tokenXProgramId),
       new PublicKey(tokenYMint),
-      new PublicKey(tokenYProgramId),
       maxAmountX,
       maxAmountY,
       lpTokensToMint,
     );
 
-    const serializedTx = tx
-      .serialize({ requireAllSignatures: false })
-      .toString("base64");
+    const serializedTx = Buffer.from(vtx.serialize()).toString("base64");
 
     return {
       success: true,
-      trackingId: input.trackingId,
+      trackingId,
+      tradeId,
       transaction: serializedTx,
     };
   } catch (error) {
     console.error("Error during liquidity addition:", error);
+
+    let errorMessage = "Unknown error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === "string") {
+      errorMessage = error;
+    }
+
     return {
+      error: errorMessage,
       success: false,
-      trackingId: input.trackingId,
+      trackingId,
+      tradeId,
       transaction: null,
     };
   }

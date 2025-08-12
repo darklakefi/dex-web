@@ -66,7 +66,7 @@ const BUTTON_MESSAGE = {
 export function CreatePoolForm() {
   const form = useAppForm(formConfig);
   const { publicKey, wallet, signTransaction } = useWallet();
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
@@ -79,7 +79,7 @@ export function CreatePoolForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: sellTokenAddress,
+          mint: tokenBAddress,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -89,7 +89,7 @@ export function CreatePoolForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: buyTokenAddress,
+          mint: tokenAAddress,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -99,8 +99,8 @@ export function CreatePoolForm() {
   const { data: existingPool } = useSuspenseQuery(
     tanstackClient.getPoolDetails.queryOptions({
       input: {
-        tokenXMint: sellTokenAddress,
-        tokenYMint: buyTokenAddress,
+        tokenXMint: tokenBAddress,
+        tokenYMint: tokenAAddress,
       },
     }),
   );
@@ -260,7 +260,7 @@ export function CreatePoolForm() {
         variant: "loading",
       });
 
-      if (!buyTokenAddress || !sellTokenAddress) {
+      if (!tokenAAddress || !tokenBAddress) {
         throw new Error("Missing token addresses");
       }
 
@@ -268,14 +268,11 @@ export function CreatePoolForm() {
         throw new Error("Missing wallet");
       }
 
-      const sortedTokens = sortSolanaAddresses(
-        buyTokenAddress,
-        sellTokenAddress,
-      );
+      const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
       // Determine which token is X and which is Y based on sorted addresses
-      const isTokenASellToken = sellTokenAddress === tokenXAddress;
+      const isTokenASellToken = tokenBAddress === tokenXAddress;
       const depositAmountX = isTokenASellToken ? tokenAAmount : tokenBAmount;
       const depositAmountY = isTokenASellToken ? tokenBAmount : tokenAAmount;
 
@@ -317,7 +314,7 @@ export function CreatePoolForm() {
     if (createStep === 3) return BUTTON_MESSAGE.STEP_3;
 
     // Check if same tokens are selected
-    if (sellTokenAddress === buyTokenAddress) {
+    if (tokenBAddress === tokenAAddress) {
       return BUTTON_MESSAGE.SAME_TOKENS;
     }
 
@@ -362,7 +359,7 @@ export function CreatePoolForm() {
     const initialPrice = form.state.values.initialPrice;
 
     return (
-      sellTokenAddress !== buyTokenAddress && // Different tokens
+      tokenBAddress !== tokenAAddress && // Different tokens
       !(existingPool?.tokenXMint && existingPool.tokenYMint) && // Pool doesn't exist
       BigNumber(tokenAAmount).gt(0) &&
       BigNumber(tokenBAmount).gt(0) &&

@@ -3,7 +3,6 @@
 import type { Pool } from "@dex-web/core";
 import { tanstackClient } from "@dex-web/orpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Button } from "@dex-web/ui";
 import { ShortPoolPanel } from "../[lang]/(swap)/_components/ShortPoolPanel";
 
 export function FeaturesAndTrendingPoolPanel() {
