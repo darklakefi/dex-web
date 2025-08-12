@@ -366,6 +366,19 @@ export function SwapForm() {
 
   const debouncedGetQuote = useDebouncedCallback(getQuote, 500);
 
+  const checkInsufficientBalance = (input: string) => {
+    const value = input.replace(/,/g, "");
+    const accountAmount = sellTokenAccount?.tokenAccounts[0]?.amount || 0;
+    const decimal = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
+
+    if (BigNumber(value).gt(convertToDecimal(accountAmount, decimal))) {
+      setIsInsufficientBalance(true);
+      return;
+    }
+
+    setIsInsufficientBalance(false);
+  };
+
   const handleAmountChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "buy" | "sell",
@@ -373,15 +386,7 @@ export function SwapForm() {
     const value = e.target.value.replace(/,/g, "");
 
     if (type === "sell") {
-      const accountAmount = sellTokenAccount?.tokenAccounts[0]?.amount || 0;
-      const decimal = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
-
-      if (BigNumber(value).gt(convertToDecimal(accountAmount, decimal))) {
-        setIsInsufficientBalance(true);
-        return;
-      }
-
-      setIsInsufficientBalance(false);
+      checkInsufficientBalance(value);
     }
 
     if (BigNumber(value).gt(0)) {
@@ -398,6 +403,7 @@ export function SwapForm() {
 
   const onClickSwapToken = () => {
     const sellAmount = Number(form.state.values.sellAmount.replace(/,/g, ""));
+    checkInsufficientBalance(String(sellAmount));
     if (!poolDetails || BigNumber(sellAmount).lte(0)) return;
 
     debouncedGetQuote({
