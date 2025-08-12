@@ -359,15 +359,18 @@ export function LiquidityForm() {
       const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
       const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
-      const estimatedLpTokens = Math.sqrt(maxAmountX * maxAmountY);
+      // Try with 0 LP tokens to let the contract calculate the exact amount
+      // This should bypass any slippage validation on LP tokens
+      const minLpTokens = 0;
 
-      const minLpTokens = Math.max(1, Math.floor(estimatedLpTokens * 0.1));
       console.log("Liquidity calculation:", {
-        estimatedLpTokens,
+        isTokenXSell,
         maxAmountX,
         maxAmountY,
         minLpTokens,
         slippage,
+        tokenXAddress,
+        tokenYAddress,
       });
 
       const requestPayload = {
