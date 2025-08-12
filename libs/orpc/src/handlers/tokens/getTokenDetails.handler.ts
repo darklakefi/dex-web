@@ -11,6 +11,8 @@ export const getTokenDetailsHandler = async (
 ): Promise<GetTokenDetailsOutput> => {
   const { address } = input;
 
+  console.log(address, "address");
+
   const grpcClient = getDexGatewayClient();
   try {
     const { token_metadata } = await grpcClient.getTokenMetadata({
