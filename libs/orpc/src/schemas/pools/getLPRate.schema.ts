@@ -11,7 +11,6 @@ export const getLPRateInputSchema = z.object({
 export const getLPRateOutputSchema = z.object({
   estimatedLPTokens: z.float64().positive(),
   estimatedLPTokensRaw: z.number().positive(),
-  poolLPSupply: z.number().positive(),
 });
 
 export type GetLPRateInput = z.infer<typeof getLPRateInputSchema>;

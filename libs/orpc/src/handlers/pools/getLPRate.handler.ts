@@ -22,6 +22,8 @@ const EXCHANGE_PROGRAM_ID = new PublicKey(
     "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
 );
 
+const LP_TOKEN_DECIMALS = 9;
+
 // Helper function to determine token program ID
 async function getTokenProgramId(
   connection: Connection,
@@ -163,9 +165,9 @@ export async function getLPRateHandler(
     );
 
     // Calculate available reserves (excluding locked amounts and protocol fees)
-    const availableReserveX =
+    const liquidityReserveX =
       reserveXBalance - pool.user_locked_x - pool.protocol_fee_x;
-    const availableReserveY =
+    const liquidityReserveY =
       reserveYBalance - pool.user_locked_y - pool.protocol_fee_y;
 
     // Get LP token supply from pool account
@@ -186,17 +188,19 @@ export async function getLPRateHandler(
     const estimatedLP = estimateLPTokens(
       scaledTokenXAmount,
       scaledTokenYAmount,
-      availableReserveX,
-      availableReserveY,
+      liquidityReserveX,
+      liquidityReserveY,
       poolLPSupply,
     );
 
+    // Truncate estimatedLP to 9 decimal precision to avoid max float values
+    const truncatedEstimatedLP = Math.floor(estimatedLP);
+
     // Convert LP tokens back to user-friendly format (assuming 9 decimals for LP tokens)
-    const lpTokenDecimals = 9; // Standard for most LP tokens
-    const userFriendlyLP = estimatedLP / 10 ** lpTokenDecimals;
+    const userFriendlyLP = truncatedEstimatedLP / 10 ** LP_TOKEN_DECIMALS;
 
     // APPLY SLIPPAGE
-    let finalEstimatedLP = estimatedLP;
+    let finalEstimatedLP = truncatedEstimatedLP;
     let finalUserFriendlyLP = userFriendlyLP;
 
     if (input.slippage && input.slippage > 0) {
@@ -204,17 +208,16 @@ export async function getLPRateHandler(
       const slippageDecimal = input.slippage / 100;
 
       // Apply slippage to raw units and round down
-      const slippageAmount = Math.floor(estimatedLP * slippageDecimal);
-      finalEstimatedLP = estimatedLP - slippageAmount;
+      const slippageAmount = Math.floor(truncatedEstimatedLP * slippageDecimal);
+      finalEstimatedLP = truncatedEstimatedLP - slippageAmount;
 
       // Convert back to user-friendly format
-      finalUserFriendlyLP = finalEstimatedLP / 10 ** lpTokenDecimals;
+      finalUserFriendlyLP = finalEstimatedLP / 10 ** LP_TOKEN_DECIMALS;
     }
 
     return {
       estimatedLPTokens: finalUserFriendlyLP,
       estimatedLPTokensRaw: finalEstimatedLP,
-      poolLPSupply,
     };
   } catch (error) {
     console.error("Failed to get LP rate:", error);
