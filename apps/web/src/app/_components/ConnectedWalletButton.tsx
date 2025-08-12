@@ -5,8 +5,27 @@ import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { getFirstConnectedWalletAddress } from "../_utils/getFirstConnectedWalletAddress";
+import { ClientOnly } from "./ClientOnly";
 
 export function ConnectedWalletButton() {
+  return (
+    <ClientOnly
+      fallback={
+        <Button
+          as="div"
+          className="cursor-pointer normal-case"
+          variant="secondary"
+        >
+          Loading...
+        </Button>
+      }
+    >
+      <ConnectedWalletContent />
+    </ClientOnly>
+  );
+}
+
+function ConnectedWalletContent() {
   const { wallet, disconnect } = useWallet();
 
   if (!wallet || !wallet.adapter) {
