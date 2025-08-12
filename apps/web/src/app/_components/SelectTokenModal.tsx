@@ -75,13 +75,13 @@ export function SelectTokenModal({
       const sellAddress =
         selectedTokenAddress === tokenBAddress ? tokenAAddress : tokenBAddress;
       router.push(
-        `/${returnUrl}?sellTokenAddress=${sellAddress}&buyTokenAddress=${selectedTokenAddress}`,
+        `/${returnUrl}?tokenBAddress=${sellAddress}&tokenAAddress=${selectedTokenAddress}`,
       );
     } else {
       const buyAddress =
         selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
       router.push(
-        `/${returnUrl}?sellTokenAddress=${selectedTokenAddress}&buyTokenAddress=${buyAddress}`,
+        `/${returnUrl}?tokenBAddress=${selectedTokenAddress}&tokenAAddress=${buyAddress}`,
       );
     }
   };

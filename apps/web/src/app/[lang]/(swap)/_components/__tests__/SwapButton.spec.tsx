@@ -13,7 +13,7 @@ describe("SwapButton", () => {
     render(<TokenTransactionButton onClickTokenTransaction={() => {}} />, {
       wrapper: withNuqsTestingAdapter({
         onUrlUpdate,
-        searchParams: "?buyTokenAddress=abc&sellTokenAddress=def",
+        searchParams: "?tokenAAddress=abc&tokenBAddress=def",
       }),
     });
     const button = screen.getByRole("button");
@@ -25,10 +25,10 @@ describe("SwapButton", () => {
         scroll: false,
         shallow: true,
       },
-      queryString: "?buyTokenAddress=def&sellTokenAddress=abc",
+      queryString: "?tokenAAddress=def&tokenBAddress=abc",
       searchParams: new URLSearchParams({
-        buyTokenAddress: "def",
-        sellTokenAddress: "abc",
+        tokenAAddress: "def",
+        tokenBAddress: "abc",
       }),
     });
   });

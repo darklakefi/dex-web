@@ -22,8 +22,8 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     <NuqsTestingAdapter
       onUrlUpdate={onUrlUpdate}
       searchParams={{
-        buyTokenAddress: DEFAULT_BUY_TOKEN,
-        sellTokenAddress: DEFAULT_SELL_TOKEN,
+        tokenAAddress: DEFAULT_BUY_TOKEN,
+        tokenBAddress: DEFAULT_SELL_TOKEN,
       }}
     >
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
