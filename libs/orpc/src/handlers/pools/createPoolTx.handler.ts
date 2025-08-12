@@ -1,10 +1,11 @@
-import { BN, Program, web3 } from "@coral-xyz/anchor";
+import { AnchorProvider, BN, Program, web3 } from "@coral-xyz/anchor";
 import {
   getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { PublicKey, type Transaction } from "@solana/web3.js";
+import { Keypair, PublicKey, type Transaction } from "@solana/web3.js";
 import IDL from "../../darklake-idl";
+import { getHelius } from "../../getHelius";
 import type {
   CreatePoolTxInput,
   CreatePoolTxOutput,
@@ -106,8 +107,26 @@ export async function createPoolTxHandler(
     tokenYProgramId,
     depositAmountX,
     depositAmountY,
-    provider,
   } = input;
+
+  // Create a server-side provider for transaction preparation
+  const helius = getHelius();
+  const connection = helius.connection;
+  
+  // Create a dummy wallet for server-side operations
+  // The actual signing will be done on the client side
+  const dummyKeypair = Keypair.generate();
+  const dummyWallet = {
+    publicKey: dummyKeypair.publicKey,
+    signTransaction: async (tx: Transaction) => tx,
+    signAllTransactions: async (txs: Transaction[]) => txs,
+  };
+
+  const provider = new AnchorProvider(connection, dummyWallet, {
+    commitment: "confirmed",
+    skipPreflight: true,
+  });
+
   const program = new Program(IDL, provider);
 
   try {

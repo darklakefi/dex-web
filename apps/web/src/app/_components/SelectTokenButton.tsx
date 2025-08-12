@@ -9,7 +9,7 @@ import { selectedTokensParsers } from "../_utils/searchParams";
 
 interface SelectTokenButtonProps {
   type: "buy" | "sell";
-  returnUrl: string;
+  returnUrl?: string;
 }
 
 export function SelectTokenButton({

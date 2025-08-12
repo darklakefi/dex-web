@@ -1,4 +1,5 @@
 import { Box, Button, Text } from "@dex-web/ui";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 interface PoolsHeaderProps {
@@ -15,7 +16,9 @@ export function PoolsHeader({ tvl, volume, fees }: PoolsHeaderProps) {
       <div className="mb-10 flex flex-row items-center justify-between md:hidden">
         <Text variant="heading">{tx("pools")}</Text>
         <div className="flex items-center">
-          <Button variant="secondary">Create Pool</Button>
+          <Button as={Link} href="/create-pool" variant="secondary">
+            Create Pool
+          </Button>
         </div>
       </div>
       <Box className="flex flex-row items-center justify-between gap-4">
@@ -62,7 +65,9 @@ export function PoolsHeader({ tvl, volume, fees }: PoolsHeaderProps) {
             </div>
           </dl>
           <div className="hidden items-center md:flex">
-            <Button variant="secondary">Create Pool</Button>
+            <Button as={Link} href="/create-pool" variant="secondary">
+              Create Pool
+            </Button>
           </div>
         </div>
       </Box>

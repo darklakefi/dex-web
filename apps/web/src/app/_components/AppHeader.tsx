@@ -27,23 +27,22 @@ export const AppHeader = () => {
         active={pathname === "/liquidity"}
         as={Link}
         className="inline-flex items-baseline justify-center leading-none no-underline"
-        data-testid="home-link"
+        data-testid="liquidity-link"
         href="/liquidity"
         variant="link"
       >
         {tx("liquidity")}
       </Text>
-      {/*
       <Text
-        active={pathname === "/pools"}
+        active={pathname === "/create-pool"}
         as={Link}
         className="inline-flex items-baseline justify-center leading-none no-underline"
-        data-testid="home-link"
-        href="/pools"
+        data-testid="create-pool-link"
+        href="/create-pool"
         variant="link"
       >
-        {tx("pools")}
-      </Text> */}
+        {tx("createPool")}
+      </Text>
       <Text
         as="a"
         className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"

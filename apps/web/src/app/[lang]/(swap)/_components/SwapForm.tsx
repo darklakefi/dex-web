@@ -9,6 +9,7 @@ import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
+import Link from "next/link";
 import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -503,7 +504,7 @@ export function SwapForm() {
                 >
                   Selling
                 </Text.Body2>
-                <SelectTokenButton type="sell" />
+                <SelectTokenButton returnUrl={""} type="sell" />
               </div>
               <form.Field name="sellAmount">
                 {(field) => (
@@ -569,7 +570,11 @@ export function SwapForm() {
                   {getButtonMessage()}
                 </Button>
               ) : (
-                <Button className="w-full cursor-pointer py-3" disabled={true}>
+                <Button
+                  as={Link}
+                  className="w-full cursor-pointer py-3"
+                  href="/create-pool"
+                >
                   Create Pool
                 </Button>
               )}

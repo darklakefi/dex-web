@@ -5,6 +5,7 @@
   "pages": {
     "about": "about",
     "contact": "contact",
+    "createPool": "create pool",
     "liquidity": "liquidity",
     "pools": "pools",
     "swap": "swap"

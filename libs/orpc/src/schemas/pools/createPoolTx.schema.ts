@@ -1,11 +1,9 @@
-import { AnchorProvider } from "@coral-xyz/anchor";
 import { Transaction } from "@solana/web3.js";
 import { z } from "zod/v4";
 
 export const createPoolTxInputSchema = z.object({
   depositAmountX: z.number(),
   depositAmountY: z.number(),
-  provider: z.instanceof(AnchorProvider),
   tokenXMint: z.string(),
   tokenXProgramId: z.string(),
   tokenYMint: z.string(),

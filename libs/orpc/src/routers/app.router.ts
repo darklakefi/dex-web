@@ -1,3 +1,4 @@
+import { createPoolTx } from "../procedures/pools/createPoolTx.prodcedure";
 import { getPinedPool } from "../procedures/pools/getPinedPool.procedure";
 import { getPoolDetails } from "../procedures/pools/getPoolDetail.procedure";
 import { getSwapDetails } from "../procedures/swaps/getSwapDetails.procedure";
@@ -9,6 +10,7 @@ import { dexGatewayRouter } from "./dex-gateway.router";
 import { heliusRouter } from "./helius.router";
 
 export const appRouter = {
+  createPoolTx,
   dexGateway: dexGatewayRouter,
   getPinedPool,
   getPoolDetails,

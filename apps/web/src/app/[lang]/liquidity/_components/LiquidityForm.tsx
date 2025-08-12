@@ -1,6 +1,5 @@
 "use client";
 
-import { AnchorProvider } from "@coral-xyz/anchor";
 import { client, TradeStatus, tanstackClient } from "@dex-web/orpc";
 import type { AddLiquidityTxInput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text } from "@dex-web/ui";
@@ -318,28 +317,6 @@ export function LiquidityForm() {
         throw new Error("Missing wallet");
       }
 
-      const hasSigner =
-        publicKey &&
-        typeof signTransaction === "function" &&
-        typeof signAllTransactions === "function";
-
-      const anchorWallet = hasSigner
-        ? ({
-            publicKey,
-            signAllTransactions,
-            signTransaction,
-          } as const)
-        : null;
-
-      if (!anchorWallet) {
-        throw new Error("Missing wallet");
-      }
-
-      const provider = new AnchorProvider(connection, anchorWallet, {
-        commitment: "confirmed",
-        skipPreflight: true,
-      });
-
       const sellAmount = Number(form.state.values.sellAmount.replace(/,/g, ""));
       const buyAmount = Number(form.state.values.buyAmount.replace(/,/g, ""));
 
@@ -357,7 +334,6 @@ export function LiquidityForm() {
         lpTokensToMint: Math.floor(minLpTokens),
         maxAmountX: Math.floor(maxAmountX),
         maxAmountY: Math.floor(maxAmountY),
-        provider,
         tokenXMint: tokenXAddress,
         tokenXProgramId: poolDetails?.tokenXMint ?? "",
         tokenYMint: tokenYAddress,

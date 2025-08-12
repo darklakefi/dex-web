@@ -54,6 +54,7 @@ export async function getPoolAccount(
     return pool;
   } catch (error) {
     console.error("Failed to decode Pool account:", error);
+    throw new Error("Failed to decode pool account data");
   }
 }
 
