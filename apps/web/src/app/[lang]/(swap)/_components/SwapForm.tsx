@@ -548,7 +548,12 @@ export function SwapForm() {
               ) : poolDetails ? (
                 <Button
                   className="w-full cursor-pointer py-3 leading-6"
-                  disabled={isDisableSwap || isInsufficientBalance}
+                  disabled={
+                    isDisableSwap ||
+                    isInsufficientBalance ||
+                    isLoadingQuote ||
+                    isLoadingSwapButton
+                  }
                   loading={isLoadingSwapButton || isLoadingQuote}
                   onClick={handleSwap}
                 >
