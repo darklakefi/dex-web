@@ -359,19 +359,21 @@ export function LiquidityForm() {
       const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
       const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
-      // Scale amounts to proper token units (assuming 6 decimals for now)
-      const scaledAmountX = Math.floor(maxAmountX * 1e6);
-      const scaledAmountY = Math.floor(maxAmountY * 1e6);
+      const estimatedLpTokens = Math.sqrt(maxAmountX * maxAmountY);
 
-      // Use a more conservative LP token estimate to avoid slippage issues
-      // Instead of applying slippage to LP tokens, let the contract calculate them
-      const estimatedLpTokens = Math.sqrt(scaledAmountX * scaledAmountY);
-      const minLpTokens = Math.floor(estimatedLpTokens * 0.95); // 5% buffer for LP calculation
+      const minLpTokens = Math.max(1, Math.floor(estimatedLpTokens * 0.1));
+      console.log("Liquidity calculation:", {
+        estimatedLpTokens,
+        maxAmountX,
+        maxAmountY,
+        minLpTokens,
+        slippage,
+      });
 
       const requestPayload = {
         lpTokensToMint: minLpTokens,
-        maxAmountX: scaledAmountX,
-        maxAmountY: scaledAmountY,
+        maxAmountX: maxAmountX,
+        maxAmountY: maxAmountY,
         tokenXMint: tokenXAddress,
         tokenXProgramId: poolDetails?.tokenXMint ?? "",
         tokenYMint: tokenYAddress,
