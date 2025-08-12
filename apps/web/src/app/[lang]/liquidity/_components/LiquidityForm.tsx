@@ -1,6 +1,6 @@
 "use client";
 
-import { client, TradeStatus, tanstackClient } from "@dex-web/orpc";
+import { client, tanstackClient } from "@dex-web/orpc";
 import type { AddLiquidityTxInput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
@@ -192,26 +192,19 @@ export function LiquidityForm() {
 
       setLiquidityStep(3);
       toast({
-        description:
-          "Checking if liquidity transaction stayed within your slippage tolerance before finalizing.",
-        title: "Verify slippage requirements [3/3]",
+        description: "Submitting liquidity transaction to Solana network.",
+        title: "Confirming transaction [3/3]",
         variant: "loading",
       });
 
-      // Use direct Solana submission for liquidity operations
       const liquidityTxResponse =
         await client.dexGateway.submitLiquidityTx(signedTxRequest);
 
-      if (liquidityTxResponse.success) {
-        dismissToast();
-        toast({
-          description: `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}. Transaction confirmed: ${liquidityTxResponse.signature}`,
-          title: "Liquidity Added Successfully",
-          variant: "success",
-        });
-        setLiquidityStep(0);
-        refetchBuyTokenAccount();
-        refetchSellTokenAccount();
+      if (liquidityTxResponse.success && liquidityTxResponse.signature) {
+        checkLiquidityTransactionStatus(
+          liquidityTxResponse.signature,
+          trackingId,
+        );
       } else {
         const errorMessage =
           liquidityTxResponse.error_logs || "Unknown error occurred";
@@ -234,61 +227,86 @@ export function LiquidityForm() {
     }
   };
 
-  const checkLiquidityStatus = async (
+  const checkLiquidityTransactionStatus = async (
+    signature: string,
     trackingId: string,
-    tradeId: string,
-    maxAttempts = 10,
+    maxAttempts = 15,
   ) => {
     for (let i = 0; i < maxAttempts; i++) {
-      if (!trackingId || !tradeId) return;
-      const response = await client.dexGateway.checkTradeStatus({
-        tracking_id: trackingId,
-        trade_id: tradeId,
-      });
-
-      dismissToast();
-
-      if (
-        response.status === TradeStatus.SETTLED ||
-        response.status === TradeStatus.SLASHED
-      ) {
-        setLiquidityStep(0);
-        toast({
-          description: `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}. Protected from MEV attacks.`,
-          title: "Liquidity Added Successfully",
-          variant: "success",
+      try {
+        const response = await client.dexGateway.checkLiquidityTxStatus({
+          signature,
+          tracking_id: trackingId,
         });
-        refetchBuyTokenAccount();
-        refetchSellTokenAccount();
-        return;
-      }
 
-      if (
-        response.status === TradeStatus.CANCELLED ||
-        response.status === TradeStatus.FAILED
-      ) {
-        setLiquidityStep(0);
+        if (response.status === "finalized") {
+          if (response.error) {
+            // Transaction failed
+            dismissToast();
+            setLiquidityStep(0);
+            toast({
+              description: `Transaction failed: ${response.error}, trackingId: ${trackingId}`,
+              title: "Liquidity Transaction Failed",
+              variant: "error",
+            });
+            return;
+          } else {
+            // Transaction succeeded
+            dismissToast();
+            setLiquidityStep(0);
+            toast({
+              description: `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}. Transaction: ${signature}`,
+              title: "Liquidity Added Successfully",
+              variant: "success",
+            });
+            refetchBuyTokenAccount();
+            refetchSellTokenAccount();
+            return;
+          }
+        }
+
+        if (response.status === "failed") {
+          // Transaction failed
+          dismissToast();
+          setLiquidityStep(0);
+          toast({
+            description: `Transaction failed: ${response.error || "Unknown error"}, trackingId: ${trackingId}`,
+            title: "Liquidity Transaction Failed",
+            variant: "error",
+          });
+          return;
+        }
+
+        // Still processing (pending or confirmed)
         toast({
-          description: `Trade ${response.status}!, trackingId: ${trackingId}`,
-          title: `Trade ${response.status}`,
-          variant: "error",
+          description: `Finalizing transaction... (${i + 1}/${maxAttempts}) - ${response.status}, trackingId: ${trackingId}`,
+          title: "Confirming liquidity transaction",
+          variant: "loading",
         });
-        return;
-      }
 
-      toast({
-        description: `TrackingId: ${trackingId}`,
-        title: "Checking trade status",
-        variant: "loading",
-      });
-
-      if (i < maxAttempts - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        if (i < maxAttempts - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+      } catch (error) {
+        console.error("Error checking transaction status:", error);
+        if (i === maxAttempts - 1) {
+          dismissToast();
+          setLiquidityStep(0);
+          toast({
+            description: `Unable to confirm transaction status. Check your wallet or explorer with signature: ${signature}`,
+            title: "Transaction Status Unknown",
+            variant: "error",
+          });
+        }
       }
     }
+
+    // Timeout
+    dismissToast();
+    setLiquidityStep(0);
     toast({
-      description: `TrackingId: ${trackingId}`,
-      title: "Failed to check trade status",
+      description: `Transaction may still be processing. Check explorer with signature: ${signature}`,
+      title: "Transaction Status Timeout",
       variant: "error",
     });
   };
@@ -341,14 +359,19 @@ export function LiquidityForm() {
       const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
       const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
-      const slippageMultiplier = (100 - parseFloat(slippage)) / 100;
-      const estimatedLpTokens = Math.sqrt(maxAmountX * maxAmountY);
-      const minLpTokens = estimatedLpTokens * slippageMultiplier;
+      // Scale amounts to proper token units (assuming 6 decimals for now)
+      const scaledAmountX = Math.floor(maxAmountX * 1e6);
+      const scaledAmountY = Math.floor(maxAmountY * 1e6);
+
+      // Use a more conservative LP token estimate to avoid slippage issues
+      // Instead of applying slippage to LP tokens, let the contract calculate them
+      const estimatedLpTokens = Math.sqrt(scaledAmountX * scaledAmountY);
+      const minLpTokens = Math.floor(estimatedLpTokens * 0.95); // 5% buffer for LP calculation
 
       const requestPayload = {
-        lpTokensToMint: Math.floor(minLpTokens),
-        maxAmountX: Math.floor(maxAmountX),
-        maxAmountY: Math.floor(maxAmountY),
+        lpTokensToMint: minLpTokens,
+        maxAmountX: scaledAmountX,
+        maxAmountY: scaledAmountY,
         tokenXMint: tokenXAddress,
         tokenXProgramId: poolDetails?.tokenXMint ?? "",
         tokenYMint: tokenYAddress,

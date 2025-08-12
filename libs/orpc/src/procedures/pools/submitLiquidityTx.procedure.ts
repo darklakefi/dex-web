@@ -1,11 +1,9 @@
-import { procedure } from "@dex-web/orpc/core";
 import { submitLiquidityTxHandler } from "../../handlers/pools/submitLiquidityTx.handler";
-import {
-  submitLiquidityTxInputSchema,
-  submitLiquidityTxOutputSchema,
-} from "../../schemas/pools/submitLiquidityTx.schema";
+import { submitLiquidityTxInputSchema } from "../../schemas/pools/submitLiquidityTx.schema";
+import { baseProcedure } from "../base.procedure";
 
-export const submitLiquidityTx = procedure
+export const submitLiquidityTx = baseProcedure
   .input(submitLiquidityTxInputSchema)
-  .output(submitLiquidityTxOutputSchema)
-  .handler(submitLiquidityTxHandler);
+  .handler(async ({ input }) => {
+    return await submitLiquidityTxHandler(input);
+  });
