@@ -359,7 +359,7 @@ export function LiquidityForm() {
       const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
       const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
-      const minLpTokens = 0;
+      const minLpTokens = 1;
 
       console.log("Liquidity calculation:", {
         isTokenXSell,
