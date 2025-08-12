@@ -3,15 +3,21 @@
 import type { Pool } from "@dex-web/core";
 import { tanstackClient } from "@dex-web/orpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryStates } from "nuqs";
+import { selectedTokensParsers } from "../_utils/searchParams";
 import { ShortPoolPanel } from "../[lang]/(swap)/_components/ShortPoolPanel";
 
 export function FeaturesAndTrendingPoolPanel() {
   const { data } = useSuspenseQuery(
     tanstackClient.getPinedPool.queryOptions({}),
   );
+  const [_, setSelectedTokens] = useQueryStates(selectedTokensParsers);
 
   const onPoolClick = (pool: Pool) => {
-    console.log(pool);
+    setSelectedTokens({
+      tokenAAddress: pool.tokenXMint,
+      tokenBAddress: pool.tokenYMint,
+    });
   };
 
   return (
