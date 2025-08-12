@@ -16,6 +16,7 @@ export const AppHeader = () => {
     >
       <Text
         active={pathname === "/"}
+        as={Link}
         className="inline-flex items-baseline justify-center leading-none no-underline"
         data-testid="home-link"
         href="/"
@@ -44,7 +45,7 @@ export const AppHeader = () => {
         {tx("createPool")}
       </Text>
       <Text
-        as="a"
+        as={Link}
         className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"
         href="https://docs.darklake.fi"
         target="_blank"
@@ -53,7 +54,7 @@ export const AppHeader = () => {
         {tx("about")} <Icon className="size-4" name="external-link" />
       </Text>
       <Text
-        as="a"
+        as={Link}
         className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"
         href="https://darklake.typeform.com/contact"
         target="_blank"
