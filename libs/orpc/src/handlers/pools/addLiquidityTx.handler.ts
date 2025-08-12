@@ -279,10 +279,8 @@ export async function addLiquidityTxHandler(
     lpTokensToMint,
   } = input;
 
-  // Generate unique IDs for tracking
   const trackingId =
     input.trackingId || `id${Math.random().toString(16).slice(2)}`;
-  const tradeId = `trade${Math.random().toString(16).slice(2)}`;
 
   const helius = getHelius();
   const connection = helius.connection;
@@ -320,7 +318,7 @@ export async function addLiquidityTxHandler(
     return {
       success: true,
       trackingId,
-      tradeId,
+      tradeId: trackingId,
       transaction: serializedTx,
     };
   } catch (error) {
@@ -337,7 +335,7 @@ export async function addLiquidityTxHandler(
       error: errorMessage,
       success: false,
       trackingId,
-      tradeId,
+      tradeId: trackingId,
       transaction: null,
     };
   }

@@ -6,6 +6,7 @@ import { addLiquidity } from "../procedures/pools/addLiquidityTx.procedure";
 import { createPoolTx } from "../procedures/pools/createPoolTx.prodcedure";
 import { getPoolDetails } from "../procedures/pools/getPoolDetail.procedure";
 import { removeLiquidity } from "../procedures/pools/removeLiquidityTx.procedure";
+import { submitLiquidityTx } from "../procedures/pools/submitLiquidityTx.procedure";
 
 export const dexGatewayRouter = {
   addLiquidity,
@@ -15,6 +16,7 @@ export const dexGatewayRouter = {
   getSwap,
   getTradesListByUser,
   removeLiquidity,
+  submitLiquidityTx,
   submitSignedTransaction,
 };
 

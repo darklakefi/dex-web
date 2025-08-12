@@ -188,7 +188,6 @@ export function LiquidityForm() {
       const signedTxRequest = {
         signed_transaction: signedTransactionBase64,
         tracking_id: trackingId,
-        trade_id: tradeId,
       };
 
       setLiquidityStep(3);
@@ -199,13 +198,29 @@ export function LiquidityForm() {
         variant: "loading",
       });
 
-      const signedTxResponse =
-        await client.dexGateway.submitSignedTransaction(signedTxRequest);
+      // Use direct Solana submission for liquidity operations
+      const liquidityTxResponse =
+        await client.dexGateway.submitLiquidityTx(signedTxRequest);
 
-      if (signedTxResponse.success) {
-        checkLiquidityStatus(trackingId, tradeId);
+      if (liquidityTxResponse.success) {
+        dismissToast();
+        toast({
+          description: `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}. Transaction confirmed: ${liquidityTxResponse.signature}`,
+          title: "Liquidity Added Successfully",
+          variant: "success",
+        });
+        setLiquidityStep(0);
+        refetchBuyTokenAccount();
+        refetchSellTokenAccount();
       } else {
-        throw new Error("Failed to submit signed transaction");
+        const errorMessage =
+          liquidityTxResponse.error_logs || "Unknown error occurred";
+        console.error("Liquidity transaction submission failed:", {
+          error_logs: liquidityTxResponse.error_logs,
+          success: liquidityTxResponse.success,
+          tracking_id: liquidityTxResponse.tracking_id,
+        });
+        throw new Error(`Liquidity transaction failed: ${errorMessage}`);
       }
     } catch (error) {
       console.error("Signing error:", error);

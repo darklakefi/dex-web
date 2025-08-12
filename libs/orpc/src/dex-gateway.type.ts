@@ -77,12 +77,12 @@ export interface SwapResponse {
 
 export interface SignedTransactionRequest {
   signed_transaction: string; // Base64 encoded signed transaction
-  trade_id: string;
+  trade_id?: string;
   tracking_id: string;
 }
 
 export interface SignedTransactionResponse {
-  trade_id: string;
+  trade_id?: string;
   success: boolean;
   error_logs: string;
 }
