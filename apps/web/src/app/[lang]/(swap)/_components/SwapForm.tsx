@@ -3,6 +3,7 @@
 import { client, TradeStatus, tanstackClient } from "@dex-web/orpc";
 import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text } from "@dex-web/ui";
+import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
@@ -59,11 +60,15 @@ const formConfig = {
   },
 };
 
-const MESSAGE_STEP = {
-  1: "protecting trade [1/3]",
-  2: "confirm trade in your wallet[2/3]",
-  3: "verifying trade [3/3]",
-  10: "loading quote...",
+const BUTTON_MESSAGE = {
+  ENTER_AMOUNT: "enter an amount",
+  HIGH_PRICE_IMPACT: "CONFIRM SWAP WITH {value}% PRICE IMPACT",
+  INSUFFICIENT_BALANCE: "insufficient",
+  LOADING: "loading",
+  STEP_1: "ENCRYPTING TRADE PARAMETERs [1/3]",
+  STEP_2: "Confirm transaction in your wallet [2/3]",
+  STEP_3: "Processing transaction [3/3]",
+  SWAP: "swap",
 };
 
 export function SwapForm() {
@@ -73,7 +78,9 @@ export function SwapForm() {
     selectedTokensParsers,
   );
   const [swapStep, setSwapStep] = useState(0);
-  const [disableSwap, setDisableSwap] = useState(true);
+  const [isDisableSwap, setIsDisableSwapButton] = useState(true);
+  const [isLoadingSwapButton, setIsLoadingSwapButton] = useState(false);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [_trackDetails, setTrackDetails] = useState<{
     tradeId: string;
     trackingId: string;
@@ -81,6 +88,7 @@ export function SwapForm() {
     trackingId: "",
     tradeId: "",
   });
+  const [isInsufficientBalance, setIsInsufficientBalance] = useState(false);
   const [isUseSlippage, setIsUseSlippage] = useState(false);
   const [slippage, setSlippage] = useState("0.5");
 
@@ -117,6 +125,11 @@ export function SwapForm() {
 
   const isXtoY = poolDetails?.tokenXMint === sellTokenAddress;
 
+  const resetButtonState = () => {
+    setSwapStep(0);
+    setIsLoadingSwapButton(false);
+  };
+
   const requestSigning = async (
     unsignedTransaction: string,
     tradeId: string,
@@ -128,6 +141,7 @@ export function SwapForm() {
         throw new Error("Wallet does not support transaction signing!");
 
       setSwapStep(2);
+      setIsLoadingSwapButton(true);
       toast({
         description:
           "Tokens will be secured until slippage verification completes.",
@@ -159,6 +173,7 @@ export function SwapForm() {
       };
 
       setSwapStep(3);
+      setIsLoadingSwapButton(true);
       toast({
         description:
           "Checking if swap stayed within your hidden slippage tolerance before finalizing trade.",
@@ -182,7 +197,7 @@ export function SwapForm() {
         title: "Signing Error",
         variant: "error",
       });
-      setSwapStep(0);
+      resetButtonState();
     }
   };
 
@@ -204,7 +219,7 @@ export function SwapForm() {
         response.status === TradeStatus.SETTLED ||
         response.status === TradeStatus.SLASHED
       ) {
-        setSwapStep(0);
+        resetButtonState();
         toast({
           description: `SWAPPED ${form.state.values.sellAmount} ${sellTokenAddress} FOR ${form.state.values.buyAmount} ${buyTokenAddress}. protected from MEV attacks.`,
           title: "Swap complete",
@@ -219,7 +234,7 @@ export function SwapForm() {
         response.status === TradeStatus.CANCELLED ||
         response.status === TradeStatus.FAILED
       ) {
-        setSwapStep(0);
+        resetButtonState();
         toast({
           description: `Trade ${response.status}!, trackingId: ${trackingId}`,
           title: `Trade ${response.status}`,
@@ -262,6 +277,7 @@ export function SwapForm() {
       variant: "loading",
     });
     setSwapStep(1);
+    setIsLoadingSwapButton(true);
 
     try {
       const formState = form.state.values;
@@ -311,7 +327,7 @@ export function SwapForm() {
         title: "Swap Error",
         variant: "error",
       });
-      setSwapStep(0);
+      resetButtonState();
     }
   };
 
@@ -329,8 +345,8 @@ export function SwapForm() {
     const amountInNumber = Number(amountIn.replace(/,/g, ""));
     if (!poolDetails || BigNumber(amountInNumber).lte(0)) return;
 
-    setSwapStep(10);
-    setDisableSwap(true);
+    setIsLoadingQuote(true);
+    setIsDisableSwapButton(true);
     const quote = await client.getSwapQuote({
       amountIn: amountInNumber,
       isXtoY,
@@ -344,8 +360,8 @@ export function SwapForm() {
     } else {
       form.setFieldValue("sellAmount", String(quote.amountOut));
     }
-    setDisableSwap(false);
-    setSwapStep(0);
+    setIsDisableSwapButton(false);
+    setIsLoadingQuote(false);
   };
 
   const debouncedGetQuote = useDebouncedCallback(getQuote, 500);
@@ -355,6 +371,19 @@ export function SwapForm() {
     type: "buy" | "sell",
   ) => {
     const value = e.target.value.replace(/,/g, "");
+
+    if (type === "sell") {
+      const accountAmount = sellTokenAccount?.tokenAccounts[0]?.amount || 0;
+      const decimal = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
+
+      if (BigNumber(value).gt(convertToDecimal(accountAmount, decimal))) {
+        setIsInsufficientBalance(true);
+        return;
+      }
+
+      setIsInsufficientBalance(false);
+    }
+
     if (BigNumber(value).gt(0)) {
       debouncedGetQuote({
         amountIn: value,
@@ -363,7 +392,7 @@ export function SwapForm() {
         type,
       });
     } else {
-      setDisableSwap(true);
+      setIsDisableSwapButton(true);
     }
   };
 
@@ -377,6 +406,53 @@ export function SwapForm() {
       slippage: parseFloat(slippage),
       type: "sell",
     });
+  };
+
+  const getButtonMessage = () => {
+    const message = BUTTON_MESSAGE.SWAP;
+
+    if (swapStep === 1) {
+      return BUTTON_MESSAGE.STEP_1;
+    }
+
+    if (swapStep === 2) {
+      return BUTTON_MESSAGE.STEP_2;
+    }
+
+    if (swapStep === 3) {
+      return BUTTON_MESSAGE.STEP_3;
+    }
+
+    if (isLoadingQuote) {
+      return BUTTON_MESSAGE.LOADING;
+    }
+
+    if (form.state.values.sellAmount) {
+      const inputClean = form.state.values.sellAmount.replace(/,/g, "");
+      if (BigNumber(inputClean).lte(0)) {
+        return BUTTON_MESSAGE.ENTER_AMOUNT;
+      }
+
+      const accountAmount = sellTokenAccount?.tokenAccounts[0]?.amount || 0;
+      const decimal = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
+      const symbol = sellTokenAccount?.tokenAccounts[0]?.symbol || "";
+
+      if (BigNumber(inputClean).gt(convertToDecimal(accountAmount, decimal))) {
+        return `${BUTTON_MESSAGE.INSUFFICIENT_BALANCE} ${symbol}`;
+      }
+    }
+
+    if (quote) {
+      const slippageImpact = quote.priceImpactPercentage;
+      if (slippageImpact > 0.5) {
+        return BUTTON_MESSAGE.HIGH_PRICE_IMPACT.replace(
+          "{value}",
+          slippageImpact.toString(),
+        );
+      }
+    }
+
+    return message;
   };
 
   return (
@@ -472,13 +548,11 @@ export function SwapForm() {
               ) : poolDetails ? (
                 <Button
                   className="w-full cursor-pointer py-3 leading-6"
-                  disabled={swapStep !== 0 || disableSwap}
-                  loading={swapStep !== 0}
+                  disabled={isDisableSwap || isInsufficientBalance}
+                  loading={isLoadingSwapButton || isLoadingQuote}
                   onClick={handleSwap}
                 >
-                  {swapStep === 0
-                    ? "Swap"
-                    : MESSAGE_STEP[swapStep as keyof typeof MESSAGE_STEP]}
+                  {getButtonMessage()}
                 </Button>
               ) : (
                 <Button className="w-full cursor-pointer py-3" disabled={true}>
@@ -517,6 +591,9 @@ export function SwapForm() {
                 slippage: parseFloat(slippage),
                 type: "sell",
               });
+
+              refetchBuyTokenAccount();
+              refetchSellTokenAccount();
             }}
           />
         </div>
