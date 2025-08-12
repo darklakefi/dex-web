@@ -11,7 +11,9 @@ export const getTokenDetailsHandler = async (
 ): Promise<GetTokenDetailsOutput> => {
   const { address } = input;
 
-  console.log(address, "address");
+  if (!address || address.trim() === "") {
+    throw new Error("Token address is required");
+  }
 
   const grpcClient = getDexGatewayClient();
   try {

@@ -5,7 +5,7 @@ import type { CreatePoolTxInput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text, TextInput } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import type { Transaction } from "@solana/web3.js";
+import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -290,10 +290,11 @@ export function CreatePoolForm() {
       } satisfies CreatePoolTxInput);
 
       if (response.success && response.transaction) {
-        await requestSigning(
-          response.transaction,
-          `pool-creation-${Date.now()}`,
-        );
+        // Deserialize the base64 transaction string back to a Transaction object
+        const transactionBuffer = Buffer.from(response.transaction, "base64");
+        const transaction = Transaction.from(transactionBuffer);
+
+        await requestSigning(transaction, `pool-creation-${Date.now()}`);
       } else {
         throw new Error("Failed to create pool transaction");
       }

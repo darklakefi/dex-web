@@ -1,4 +1,3 @@
-import { Transaction } from "@solana/web3.js";
 import { z } from "zod/v4";
 
 export const addLiquidityTxInputSchema = z.object({
@@ -16,7 +15,7 @@ export const addLiquidityTxInputSchema = z.object({
 export const addLiquidityTxOutputSchema = z.object({
   success: z.boolean(),
   trackingId: z.string(),
-  transaction: z.instanceof(Transaction).nullable(),
+  transaction: z.string().nullable(),
 });
 
 export type AddLiquidityTxInput = z.infer<typeof addLiquidityTxInputSchema>;

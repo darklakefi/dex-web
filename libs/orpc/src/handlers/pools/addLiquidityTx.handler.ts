@@ -38,7 +38,6 @@ async function addLiquidity(
     program.programId,
   );
 
-  // Find pool
   const [poolPubkey] = PublicKey.findProgramAddressSync(
     [
       Buffer.from(POOL_SEED),
@@ -75,7 +74,6 @@ async function addLiquidity(
     TOKEN_PROGRAM_ID,
   );
 
-  // Get pool reserve accounts
   const [poolTokenAccountX] = PublicKey.findProgramAddressSync(
     [
       Buffer.from(POOL_RESERVE_SEED),
@@ -94,7 +92,6 @@ async function addLiquidity(
     program.programId,
   );
 
-  // Create add liquidity transaction
   const tx = await program.methods
     .addLiquidity(new BN(lpTokensToMint), new BN(amountX), new BN(amountY))
     .accountsPartial({
@@ -114,7 +111,6 @@ async function addLiquidity(
     })
     .transaction();
 
-  // Add compute budget instruction
   const modifyComputeUnits = web3.ComputeBudgetProgram.setComputeUnitLimit({
     units: 250_000,
   });
@@ -223,10 +219,15 @@ export async function addLiquidityTxHandler(
       maxAmountY,
       lpTokensToMint,
     );
+
+    const serializedTx = tx
+      .serialize({ requireAllSignatures: false })
+      .toString("base64");
+
     return {
       success: true,
       trackingId: input.trackingId,
-      transaction: tx,
+      transaction: serializedTx,
     };
   } catch (error) {
     console.error("Error during liquidity addition:", error);

@@ -21,9 +21,13 @@ export function SelectTokenButton({
   );
 
   const tokenAddress = type === "buy" ? buyTokenAddress : sellTokenAddress;
+
+  const validAddress =
+    tokenAddress || (type === "buy" ? buyTokenAddress : sellTokenAddress);
+
   const { data: tokenDetails } = useSuspenseQuery(
     tanstackClient.getTokenDetails.queryOptions({
-      input: { address: tokenAddress },
+      input: { address: validAddress || "" },
     }),
   );
 

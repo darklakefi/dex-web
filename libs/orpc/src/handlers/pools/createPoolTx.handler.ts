@@ -146,9 +146,14 @@ export async function createPoolTxHandler(
       depositAmountX,
       depositAmountY,
     );
+
+    const serializedTx = tx
+      .serialize({ requireAllSignatures: false })
+      .toString("base64");
+
     return {
       success: true,
-      transaction: tx,
+      transaction: serializedTx,
     };
   } catch (error) {
     console.error("Error during liquidity addition:", error);

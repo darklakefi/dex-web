@@ -25,8 +25,8 @@ import { dismissToast, toast } from "../../../_utils/toast";
 export const { fieldContext, formContext } = createFormHookContexts();
 
 const liquidityFormSchema = z.object({
-  buyAmount: z.string(),
-  sellAmount: z.string(),
+  tokenAAmount: z.string(),
+  tokenBAmount: z.string(),
 });
 
 type LiquidityFormSchema = z.infer<typeof liquidityFormSchema>;
@@ -43,13 +43,13 @@ const { useAppForm } = createFormHook({
 
 const formConfig = {
   defaultValues: {
-    buyAmount: "0",
-    sellAmount: "0",
+    tokenAAmount: "0",
+    tokenBAmount: "0",
   } satisfies LiquidityFormSchema,
   onSubmit: async ({
     value,
   }: {
-    value: { buyAmount: string; sellAmount: string };
+    value: { tokenAAmount: string; tokenBAmount: string };
   }) => {
     console.log(value);
   },
@@ -93,8 +93,8 @@ export function LiquidityForm() {
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.getPoolDetails.queryOptions({
       input: {
-        tokenXMint: sellTokenAddress,
-        tokenYMint: buyTokenAddress,
+        tokenXMint: sellTokenAddress || "",
+        tokenYMint: buyTokenAddress || "",
       },
     }),
   );
@@ -103,7 +103,7 @@ export function LiquidityForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: buyTokenAddress,
+          mint: buyTokenAddress || "",
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -113,7 +113,7 @@ export function LiquidityForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: sellTokenAddress,
+          mint: sellTokenAddress || "",
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -175,7 +175,6 @@ export function LiquidityForm() {
       const signedTransactionBase64 = signedTransaction
         .serialize()
         .toString("base64");
-      // Prepare signed transaction request
 
       setTrackDetails({
         trackingId,
@@ -235,7 +234,7 @@ export function LiquidityForm() {
       ) {
         setLiquidityStep(0);
         toast({
-          description: `ADDED LIQUIDITY: ${form.state.values.sellAmount} ${sellTokenAddress} + ${form.state.values.buyAmount} ${buyTokenAddress}. Protected from MEV attacks.`,
+          description: `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${sellTokenAddress} + ${form.state.values.tokenBAmount} ${buyTokenAddress}. Protected from MEV attacks.`,
           title: "Liquidity Added Successfully",
           variant: "success",
         });
@@ -308,17 +307,19 @@ export function LiquidityForm() {
         throw new Error("Missing wallet");
       }
 
-      const sellAmount = Number(form.state.values.sellAmount.replace(/,/g, ""));
-      const buyAmount = Number(form.state.values.buyAmount.replace(/,/g, ""));
+      const sellAmount = Number(
+        form.state.values.tokenBAmount.replace(/,/g, ""),
+      );
+      const buyAmount = Number(
+        form.state.values.tokenAAmount.replace(/,/g, ""),
+      );
 
-      // Determine which token is X and which is Y
       const isTokenXSell = poolDetails?.tokenXMint === sellTokenAddress;
       const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
       const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
-      // Calculate minimum LP tokens to receive (with slippage protection)
       const slippageMultiplier = (100 - parseFloat(slippage)) / 100;
-      const estimatedLpTokens = Math.sqrt(maxAmountX * maxAmountY); // Geometric mean approximation
+      const estimatedLpTokens = Math.sqrt(maxAmountX * maxAmountY);
       const minLpTokens = estimatedLpTokens * slippageMultiplier;
 
       const response = await client.dexGateway.addLiquidity({
@@ -335,8 +336,8 @@ export function LiquidityForm() {
 
       if (response.success && response.transaction) {
         requestSigning(
-          response.transaction.serialize().toString("base64"),
-          response.transaction.signature?.toString() ?? "",
+          response.transaction,
+          response.trackingId,
           response.trackingId,
         );
       } else {
@@ -367,15 +368,12 @@ export function LiquidityForm() {
     setLiquidityStep(10);
     setDisableLiquidity(true);
 
-    // Calculate the required amount of the other token based on pool ratio
     if (inputType === "tokenX") {
-      // If user inputs tokenX (sell token), calculate required tokenY (buy token)
       const requiredTokenY = amountNumber * poolRatio;
-      form.setFieldValue("buyAmount", String(requiredTokenY));
+      form.setFieldValue("tokenAAmount", String(requiredTokenY));
     } else {
-      // If user inputs tokenY (buy token), calculate required tokenX (sell token)
       const requiredTokenX = amountNumber / poolRatio;
-      form.setFieldValue("sellAmount", String(requiredTokenX));
+      form.setFieldValue("tokenBAmount", String(requiredTokenX));
     }
 
     setDisableLiquidity(false);
@@ -393,11 +391,9 @@ export function LiquidityForm() {
   ) => {
     const value = e.target.value.replace(/,/g, "");
 
-    // Check insufficient balance
     const hasInsufficientBalance = checkInsufficientBalance(value, type);
 
     if (BigNumber(value).gt(0) && !hasInsufficientBalance) {
-      // Determine if this is tokenX or tokenY based on the token addresses
       const inputType =
         (type === "sell" && poolDetails?.tokenXMint === sellTokenAddress) ||
         (type === "buy" && poolDetails?.tokenXMint === buyTokenAddress)
@@ -414,8 +410,8 @@ export function LiquidityForm() {
   };
 
   const getButtonMessage = () => {
-    const sellAmount = form.state.values.sellAmount.replace(/,/g, "");
-    const buyAmount = form.state.values.buyAmount.replace(/,/g, "");
+    const sellAmount = form.state.values.tokenBAmount.replace(/,/g, "");
+    const buyAmount = form.state.values.tokenAAmount.replace(/,/g, "");
 
     if (liquidityStep === 1) {
       return BUTTON_MESSAGE.STEP_1;
@@ -433,7 +429,6 @@ export function LiquidityForm() {
       return BUTTON_MESSAGE.CALCULATING;
     }
 
-    // Check if amounts are entered
     if (
       !sellAmount ||
       BigNumber(sellAmount).lte(0) ||
@@ -443,7 +438,6 @@ export function LiquidityForm() {
       return BUTTON_MESSAGE.ENTER_AMOUNT;
     }
 
-    // Check insufficient balance for sell token
     if (isInsufficientBalanceSell) {
       const symbol = sellTokenAccount?.tokenAccounts[0]?.symbol || "";
       return `${BUTTON_MESSAGE.INSUFFICIENT_BALANCE} ${symbol}`;
@@ -458,8 +452,8 @@ export function LiquidityForm() {
   };
 
   const onClickDeposit = () => {
-    const sellAmount = Number(form.state.values.sellAmount.replace(/,/g, ""));
-    const buyAmount = Number(form.state.values.buyAmount.replace(/,/g, ""));
+    const sellAmount = Number(form.state.values.tokenBAmount.replace(/,/g, ""));
+    const buyAmount = Number(form.state.values.tokenAAmount.replace(/,/g, ""));
 
     if (
       !poolDetails ||
@@ -488,7 +482,7 @@ export function LiquidityForm() {
               </Text.Body2>
               <SelectTokenButton returnUrl="liquidity" type="sell" />
             </div>
-            <form.Field name="sellAmount">
+            <form.Field name="tokenBAmount">
               {(field) => (
                 <FormFieldset
                   name={field.name}
@@ -516,7 +510,7 @@ export function LiquidityForm() {
               </Text.Body2>
               <SelectTokenButton returnUrl="liquidity" type="buy" />
             </div>
-            <form.Field name="buyAmount">
+            <form.Field name="tokenAAmount">
               {(field) => (
                 <FormFieldset
                   name={field.name}
@@ -549,15 +543,19 @@ export function LiquidityForm() {
                 {getButtonMessage()}
               </Button>
             ) : (
-              <Button className="w-full cursor-pointer py-3" disabled={true}>
+              <Button
+                className="w-full cursor-pointer py-3"
+                disabled={true}
+                loading={false}
+              >
                 Add Liquidity
               </Button>
             )}
           </div>
         </div>
         {poolDetails &&
-          form.state.values.sellAmount !== "0" &&
-          form.state.values.buyAmount !== "0" && (
+          form.state.values.tokenBAmount !== "0" &&
+          form.state.values.tokenAAmount !== "0" && (
             <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
               <Text.Body2 className="mb-3 text-green-300 uppercase">
                 Liquidity Details
@@ -570,11 +568,11 @@ export function LiquidityForm() {
                 </Text.Body3>
                 <div className="text-right">
                   <Text.Body3 className="text-white">
-                    {form.state.values.sellAmount}{" "}
+                    {form.state.values.tokenBAmount}{" "}
                     {sellTokenAccount?.tokenAccounts[0]?.symbol}
                   </Text.Body3>
                   <Text.Body3 className="text-white">
-                    {form.state.values.buyAmount}{" "}
+                    {form.state.values.tokenAAmount}{" "}
                     {buyTokenAccount?.tokenAccounts[0]?.symbol}
                   </Text.Body3>
                 </div>
@@ -596,8 +594,8 @@ export function LiquidityForm() {
                 <Text.Body3 className="text-white">
                   ~
                   {Math.sqrt(
-                    Number(form.state.values.sellAmount) *
-                      Number(form.state.values.buyAmount),
+                    Number(form.state.values.tokenBAmount) *
+                      Number(form.state.values.tokenAAmount),
                   ).toFixed(6)}
                 </Text.Body3>
               </div>
@@ -636,14 +634,13 @@ export function LiquidityForm() {
         <TokenTransactionSettingsButton
           onChange={(slippage) => {
             setSlippage(slippage);
-            // Recalculate with new slippage if amounts are present
-            if (form.state.values.sellAmount !== "0") {
+            if (form.state.values.tokenBAmount !== "0") {
               const inputType =
                 poolDetails?.tokenXMint === sellTokenAddress
                   ? "tokenX"
                   : "tokenY";
               debouncedCalculateTokenAmounts({
-                inputAmount: form.state.values.sellAmount,
+                inputAmount: form.state.values.tokenBAmount,
                 inputType,
               });
             }

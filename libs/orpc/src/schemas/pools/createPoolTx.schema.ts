@@ -1,4 +1,3 @@
-import { Transaction } from "@solana/web3.js";
 import { z } from "zod/v4";
 
 export const createPoolTxInputSchema = z.object({
@@ -13,7 +12,7 @@ export const createPoolTxInputSchema = z.object({
 
 export const createPoolTxOutputSchema = z.object({
   success: z.boolean(),
-  transaction: z.instanceof(Transaction).nullable(),
+  transaction: z.string().nullable(),
 });
 
 export type CreatePoolTxInput = z.infer<typeof createPoolTxInputSchema>;
