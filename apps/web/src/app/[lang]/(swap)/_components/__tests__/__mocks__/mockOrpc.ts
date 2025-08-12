@@ -9,7 +9,7 @@ import { vi } from "vitest";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
-} from "../../../_utils/constants";
+} from "../../../../../_utils/constants";
 
 export function mockOrpc() {
   vi.mock("@dex-web/orpc", () => ({
@@ -21,7 +21,6 @@ export function mockOrpc() {
           address: DEFAULT_BUY_TOKEN,
           decimals: 9,
           symbol: "SOL",
-          value: "1000",
         },
         estimatedFeesUsd: 100,
         exchangeRate: 0.00669,
@@ -33,7 +32,6 @@ export function mockOrpc() {
           address: DEFAULT_SELL_TOKEN,
           decimals: 9,
           symbol: "USDC",
-          value: "1000",
         },
         slippageTolerancePercentage: 12,
         swapProgressStep: 1,
@@ -48,8 +46,7 @@ export function mockOrpc() {
         imageUrl: "https://example.com/image.png",
         name: "Solana",
         symbol: "SOL",
-        value: "1000",
-      } satisfies GetTokenDetailsOutput),
+      }),
     },
     tanstackClient: {
       getSwapDetails: {
@@ -62,7 +59,6 @@ export function mockOrpc() {
                 address: DEFAULT_BUY_TOKEN,
                 decimals: 9,
                 symbol: "SOL",
-                value: "1000",
               },
               estimatedFeesUsd: 100,
               exchangeRate: 0.00669,
@@ -74,7 +70,6 @@ export function mockOrpc() {
                 address: DEFAULT_SELL_TOKEN,
                 decimals: 9,
                 symbol: "USDC",
-                value: "1000",
               },
               slippageTolerancePercentage: 12,
               swapProgressStep: 1,
@@ -95,7 +90,6 @@ export function mockOrpc() {
               imageUrl: "https://example.com/image.png",
               name: "Solana",
               symbol: "SOL",
-              value: "1000",
             } satisfies GetTokenDetailsOutput),
           queryKey: ["getTokenDetails"],
         })),
@@ -123,7 +117,6 @@ export function mockOrpc() {
                   imageUrl: "https://example.com/image.png",
                   name: "Solana",
                   symbol: "SOL",
-                  value: "1000",
                 },
               ],
               total: 0,

@@ -152,7 +152,7 @@ export function Button<TElement extends React.ElementType>(
       icon && !text && !children
         ? twMerge(mergedClassName, "w-fit p-2.5")
         : mergedClassName,
-    loading,
+    ...(loading && { "data-loading": "true" }),
     ...restProps,
   };
 

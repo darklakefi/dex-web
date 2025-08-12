@@ -11,6 +11,16 @@ export const getTokenDetailsHandler = async (
 ): Promise<GetTokenDetailsOutput> => {
   const { address } = input;
 
+  if (!address || address.trim() === "") {
+    return {
+      address: "",
+      decimals: 0,
+      imageUrl: undefined,
+      name: "Select Token",
+      symbol: "SELECT",
+    };
+  }
+
   const grpcClient = getDexGatewayClient();
   try {
     const { token_metadata } = await grpcClient.getTokenMetadata({

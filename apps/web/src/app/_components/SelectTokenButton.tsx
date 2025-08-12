@@ -9,17 +9,25 @@ import { selectedTokensParsers } from "../_utils/searchParams";
 
 interface SelectTokenButtonProps {
   type: "buy" | "sell";
+  returnUrl?: string;
 }
 
-export function SelectTokenButton({ type }: SelectTokenButtonProps) {
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+export function SelectTokenButton({
+  type,
+  returnUrl = "",
+}: SelectTokenButtonProps) {
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
-  const tokenAddress = type === "buy" ? buyTokenAddress : sellTokenAddress;
+  const tokenAddress = type === "buy" ? tokenAAddress : tokenBAddress;
+
+  const validAddress =
+    tokenAddress || (type === "buy" ? tokenAAddress : tokenBAddress);
+
   const { data: tokenDetails } = useSuspenseQuery(
     tanstackClient.getTokenDetails.queryOptions({
-      input: { address: tokenAddress },
+      input: { address: validAddress || "" },
     }),
   );
 
@@ -27,7 +35,7 @@ export function SelectTokenButton({ type }: SelectTokenButtonProps) {
     <Button
       as={Link}
       className="mt-1 w-full items-center justify-between bg-green-700 p-2"
-      href={`/select-token/${type}/?buyTokenAddress=${buyTokenAddress}&sellTokenAddress=${sellTokenAddress}`}
+      href={`${returnUrl.length > 0 ? `/${returnUrl}` : "/"}/select-token/${type}/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`}
       prefetch={true}
       variant="secondary"
     >

@@ -7,15 +7,18 @@ import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
-import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
+import {
+  DEFAULT_BUY_TOKEN,
+  DEFAULT_SELL_TOKEN,
+} from "../../../../_utils/constants";
 import { SwapForm } from "../SwapForm";
 
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 vi.mock("next/navigation", () => ({
   useSearchParams: () =>
     new URLSearchParams({
-      buyTokenAddress: DEFAULT_BUY_TOKEN,
-      sellTokenAddress: DEFAULT_SELL_TOKEN,
+      tokenAAddress: DEFAULT_BUY_TOKEN,
+      tokenBAddress: DEFAULT_SELL_TOKEN,
     }),
 }));
 
@@ -27,8 +30,8 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     <NuqsTestingAdapter
       onUrlUpdate={onUrlUpdate}
       searchParams={{
-        buyTokenAddress: DEFAULT_BUY_TOKEN,
-        sellTokenAddress: DEFAULT_SELL_TOKEN,
+        tokenAAddress: DEFAULT_BUY_TOKEN,
+        tokenBAddress: DEFAULT_SELL_TOKEN,
       }}
     >
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

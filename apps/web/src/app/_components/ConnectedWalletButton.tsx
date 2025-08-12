@@ -2,38 +2,33 @@
 import { Box, Button } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
-import type { WalletAdapter } from "@solana/wallet-adapter-base";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { isObject } from "effect/Predicate";
-import { isNonEmpty } from "effect/String";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { getFirstConnectedWalletAddress } from "../_utils/getFirstConnectedWalletAddress";
+import { ClientOnly } from "./ClientOnly";
 
 export function ConnectedWalletButton() {
-  const { wallet, disconnect } = useWallet();
-  const [selectedWalletAdapter, setSelectedWalletAdapter] =
-    useState<WalletAdapter | null>(null);
-
-  useEffect(() => {
-    const checkWallet = () => {
-      const currentWalletAddress = wallet
-        ? getFirstConnectedWalletAddress(wallet.adapter)
-        : null;
-      return currentWalletAddress && isNonEmpty(currentWalletAddress);
-    };
-
-    const interval = setInterval(() => {
-      if (wallet && checkWallet()) {
-        setSelectedWalletAdapter(wallet.adapter);
-        clearInterval(interval);
+  return (
+    <ClientOnly
+      fallback={
+        <Button
+          as="div"
+          className="cursor-pointer normal-case"
+          variant="secondary"
+        >
+          Loading...
+        </Button>
       }
-    }, 1000);
+    >
+      <ConnectedWalletContent />
+    </ClientOnly>
+  );
+}
 
-    return () => clearInterval(interval);
-  }, [wallet]);
+function ConnectedWalletContent() {
+  const { wallet, disconnect } = useWallet();
 
-  if (!isObject(selectedWalletAdapter)) {
+  if (!wallet || !wallet.adapter) {
     return (
       <Button
         as="div"
@@ -44,6 +39,8 @@ export function ConnectedWalletButton() {
       </Button>
     );
   }
+
+  const currentWalletAdapter = wallet.adapter;
 
   return (
     <Popover className="">
@@ -59,13 +56,13 @@ export function ConnectedWalletButton() {
               variant="secondary"
             >
               <Image
-                alt={selectedWalletAdapter.name}
+                alt={currentWalletAdapter.name}
                 height={18}
-                src={selectedWalletAdapter.icon}
+                src={currentWalletAdapter.icon}
                 width={18}
               />
               {truncate(
-                getFirstConnectedWalletAddress(selectedWalletAdapter) ?? "",
+                getFirstConnectedWalletAddress(currentWalletAdapter) ?? "",
               )}
             </Button>
           </PopoverButton>

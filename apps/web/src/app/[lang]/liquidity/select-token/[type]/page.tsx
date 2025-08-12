@@ -32,7 +32,7 @@ export default async function Page({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <Suspense fallback={<div>Loading...</div>}>
-        <SelectTokenModal returnUrl={""} type={(await params).type} />
+        <SelectTokenModal returnUrl={"liquidity"} type={(await params).type} />
       </Suspense>
     </HydrationBoundary>
   );

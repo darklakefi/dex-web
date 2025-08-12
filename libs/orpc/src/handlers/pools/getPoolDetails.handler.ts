@@ -36,9 +36,14 @@ export async function getPoolDetailsHandler(
 
   if (!pool) {
     console.log("Getting pool on chain");
-    const poolOnChain = await getPoolOnChain(tokenXMint, tokenYMint);
-    if (poolOnChain) {
-      pool = await savePoolToLocalData(poolOnChain);
+    try {
+      const poolOnChain = await getPoolOnChain(tokenXMint, tokenYMint);
+      if (poolOnChain) {
+        pool = await savePoolToLocalData(poolOnChain);
+      }
+    } catch (error) {
+      console.log("Pool not found on chain, returning null");
+      // Pool doesn't exist yet, this is expected for new pools
     }
   }
 

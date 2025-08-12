@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import { Suspense } from "react";
 import { selectedTokensParsers } from "../_utils/searchParams";
-import { TokenList } from "./TokenList";
+import { TokenList } from "../[lang]/(swap)/_components/TokenList";
 
 const selectTokenModalFormSchema = getTokensInputSchema.pick({
   query: true,
@@ -47,18 +47,22 @@ const formConfig = {
 
 interface SelectTokenModalProps {
   type: "buy" | "sell";
+  returnUrl: string;
 }
 
-export function SelectTokenModal({ type }: SelectTokenModalProps) {
+export function SelectTokenModal({
+  type,
+  returnUrl = "",
+}: SelectTokenModalProps) {
   const router = useRouter();
 
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
   const handleClose = () => {
     router.push(
-      `/?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${buyTokenAddress}`,
+      `/${returnUrl}?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`,
     );
   };
 
@@ -69,19 +73,15 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
     e.preventDefault();
     if (type === "buy") {
       const sellAddress =
-        selectedTokenAddress === sellTokenAddress
-          ? buyTokenAddress
-          : sellTokenAddress;
+        selectedTokenAddress === tokenBAddress ? tokenAAddress : tokenBAddress;
       router.push(
-        `/?sellTokenAddress=${sellAddress}&buyTokenAddress=${selectedTokenAddress}`,
+        `/${returnUrl}?tokenBAddress=${sellAddress}&tokenAAddress=${selectedTokenAddress}`,
       );
     } else {
       const buyAddress =
-        selectedTokenAddress === buyTokenAddress
-          ? sellTokenAddress
-          : buyTokenAddress;
+        selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
       router.push(
-        `/?sellTokenAddress=${selectedTokenAddress}&buyTokenAddress=${buyAddress}`,
+        `/${returnUrl}?tokenBAddress=${selectedTokenAddress}&tokenAAddress=${buyAddress}`,
       );
     }
   };
@@ -111,12 +111,6 @@ export function SelectTokenModal({ type }: SelectTokenModalProps) {
 
   return (
     <Modal onClose={handleClose}>
-      <Button
-        className="absolute top-5 right-5 cursor-pointer p-2.5 md:top-7 md:right-6 xl:right-10"
-        icon="times"
-        onClick={handleClose}
-        variant="secondary"
-      ></Button>
       <Box className="flex max-h-full w-full max-w-sm drop-shadow-xl">
         <form.Field name="query">
           {(field) => (

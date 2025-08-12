@@ -16,7 +16,7 @@ describe("SelectTokenButton", () => {
     render(<SelectTokenButton type="buy" />, {
       wrapper: withNuqsTestingAdapter({
         onUrlUpdate,
-        searchParams: "?buyTokenAddress=abc&sellTokenAddress=def",
+        searchParams: "?tokenAAddress=abc&tokenBAddress=def",
       }),
     });
     expect(screen.getAllByText("SOL")[0]).toBeInTheDocument();

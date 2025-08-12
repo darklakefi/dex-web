@@ -1,4 +1,4 @@
-import { mockOrpc } from "./__mocks__/mockOrpc";
+import { mockOrpc } from "../../[lang]/(swap)/_components/__tests__/__mocks__/mockOrpc";
 
 mockOrpc();
 
@@ -10,7 +10,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
-import { SwapFormFieldset } from "../SwapFormFieldset";
+import { FormFieldset } from "../FormFieldset";
 
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 
@@ -22,8 +22,8 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     <NuqsTestingAdapter
       onUrlUpdate={onUrlUpdate}
       searchParams={{
-        buyTokenAddress: DEFAULT_BUY_TOKEN,
-        sellTokenAddress: DEFAULT_SELL_TOKEN,
+        tokenAAddress: DEFAULT_BUY_TOKEN,
+        tokenBAddress: DEFAULT_SELL_TOKEN,
       }}
     >
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -35,7 +35,7 @@ describe.skip("SwapFormFieldset", () => {
   const handleChange = vi.fn();
 
   it("renders label, balance, and NumericInput", async () => {
-    render(<SwapFormFieldset name="buyAmount" onChange={handleChange} />, {
+    render(<FormFieldset name="tokenAAmount" onChange={handleChange} />, {
       wrapper,
     });
     expect(await screen.findByText("Half")).toBeDefined();

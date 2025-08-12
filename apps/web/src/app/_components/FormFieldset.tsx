@@ -14,8 +14,8 @@ import { useRef } from "react";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { useFormatPrice } from "../_utils/useFormatPrice";
 
-interface SwapFormFieldsetProps extends NumericInputProps {
-  name: "buyAmount" | "sellAmount";
+interface FormFieldsetProps extends NumericInputProps {
+  name: "tokenAAmount" | "tokenBAmount" | "initialPrice";
   disabled?: boolean;
   tokenAccount?: {
     address: string;
@@ -26,15 +26,15 @@ interface SwapFormFieldsetProps extends NumericInputProps {
 }
 const QUOTE_CURRENCY = "USD" as const;
 
-export function SwapFormFieldset({
+export function FormFieldset({
   name,
   onChange,
   value,
   disabled,
   tokenAccount,
   ...rest
-}: SwapFormFieldsetProps) {
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+}: FormFieldsetProps) {
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
@@ -42,7 +42,7 @@ export function SwapFormFieldset({
     tanstackClient.getTokenPrice.queryOptions({
       input: {
         amount: 1,
-        mint: name === "buyAmount" ? buyTokenAddress : sellTokenAddress,
+        mint: name === "tokenAAmount" ? tokenAAddress : tokenBAddress,
         quoteCurrency: QUOTE_CURRENCY,
       },
     }),
@@ -95,7 +95,7 @@ export function SwapFormFieldset({
 
     // if the last character is a comma, replace it with a dot
     if (value.endsWith(",")) {
-      value = value.slice(0, -1) + ".";
+      value = `${value.slice(0, -1)}.`;
     }
 
     const cleanValue = value.replace(/,/g, "");

@@ -6,14 +6,14 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
-import { getFirstAvailableWallet } from "../../../_utils/getFirstAvailableWallet";
+import { getFirstAvailableWallet } from "../_utils/getFirstAvailableWallet";
 import { selectedTokensParsers } from "../_utils/searchParams";
 
 export function SelectWalletModal() {
   const { wallets, wallet, select } = useWallet();
   const router = useRouter();
   const [shouldClose, setShouldClose] = useState(false);
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
@@ -38,7 +38,7 @@ export function SelectWalletModal() {
 
   const handleClose = () => {
     router.push(
-      `/?sellTokenAddress=${sellTokenAddress}&buyTokenAddress=${buyTokenAddress}&wallet=${wallet?.adapter.name}`,
+      `/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}&wallet=${wallet?.adapter.name}`,
     );
   };
 
@@ -56,13 +56,13 @@ export function SelectWalletModal() {
         <div className="flex flex-col gap-4">
           {wallets.map((wallet) => (
             <Button
-              className="inline-flex cursor-pointer justify-start gap-4 bg-green-800 py-3"
+              className="inline-flex cursor-pointer justify-start gap-4"
               key={wallet.adapter.name}
               onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
                 handleSelect(wallet, e)
               }
               type="button"
-              variant="primary-dark"
+              variant="secondary"
             >
               <Image
                 alt={wallet.adapter.name}

@@ -2,7 +2,7 @@ import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
-import { TokenList } from "../TokenList";
+import { TokenList } from "../../[lang]/(swap)/_components/TokenList";
 
 const tokens = [
   {
@@ -22,7 +22,7 @@ describe.skip("TokenList", () => {
     render(<TokenList onSelect={onSelect} tokens={tokens} />, {
       wrapper: withNuqsTestingAdapter({
         onUrlUpdate,
-        searchParams: "?buyTokenAddress=abc&sellTokenAddress=def",
+        searchParams: "?tokenAAddress=abc&tokenBAddress=def",
       }),
     });
     expect(screen.getAllByText("SOL")[0]).toBeInTheDocument();
@@ -36,7 +36,7 @@ describe.skip("TokenList", () => {
     render(<TokenList onSelect={onSelect} tokens={tokens} />, {
       wrapper: withNuqsTestingAdapter({
         onUrlUpdate,
-        searchParams: "?buyTokenAddress=abc&sellTokenAddress=def",
+        searchParams: "?tokenAAddress=abc&tokenBAddress=def",
       }),
     });
     const button = screen

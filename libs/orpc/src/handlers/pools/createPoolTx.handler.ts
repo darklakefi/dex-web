@@ -1,10 +1,16 @@
-import { BN, Program, web3 } from "@coral-xyz/anchor";
+import { AnchorProvider, BN, Program, web3 } from "@coral-xyz/anchor";
 import {
   getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { PublicKey, type Transaction } from "@solana/web3.js";
+import {
+  Keypair,
+  PublicKey,
+  type Transaction,
+  type VersionedTransaction,
+} from "@solana/web3.js";
 import IDL from "../../darklake-idl";
+import { getHelius } from "../../getHelius";
 import type {
   CreatePoolTxInput,
   CreatePoolTxOutput,
@@ -106,8 +112,27 @@ export async function createPoolTxHandler(
     tokenYProgramId,
     depositAmountX,
     depositAmountY,
-    provider,
   } = input;
+
+  const helius = getHelius();
+  const connection = helius.connection;
+
+  const dummyKeypair = Keypair.generate();
+  const dummyWallet = {
+    publicKey: dummyKeypair.publicKey,
+    signAllTransactions: async <T extends Transaction | VersionedTransaction>(
+      txs: T[],
+    ): Promise<T[]> => txs,
+    signTransaction: async <T extends Transaction | VersionedTransaction>(
+      tx: T,
+    ): Promise<T> => tx,
+  };
+
+  const provider = new AnchorProvider(connection, dummyWallet, {
+    commitment: "confirmed",
+    skipPreflight: true,
+  });
+
   const program = new Program(IDL, provider);
 
   try {
@@ -121,9 +146,14 @@ export async function createPoolTxHandler(
       depositAmountX,
       depositAmountY,
     );
+
+    const serializedTx = tx
+      .serialize({ requireAllSignatures: false })
+      .toString("base64");
+
     return {
       success: true,
-      transaction: tx,
+      transaction: serializedTx,
     };
   } catch (error) {
     console.error("Error during liquidity addition:", error);

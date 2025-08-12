@@ -1,7 +1,10 @@
 import { Text } from "@dex-web/ui";
 import { useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { type Slippage, slippageIsWithinRange } from "./SwapPageSettingButton";
+import {
+  type Slippage,
+  slippageIsWithinRange,
+} from "../../../_components/TokenTransactionSettingsButton";
 
 export interface SlippageCustomOptionProps {
   onClick: (slippage: Slippage) => void;

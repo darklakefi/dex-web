@@ -3,8 +3,8 @@
 import { Box, Icon, Text } from "@dex-web/ui";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { useState } from "react";
-import { SlippageCustomOption } from "./SlippageCustomOption";
-import { SlippageDefaultOption } from "./SlippageDefaultOption";
+import { SlippageCustomOption } from "../[lang]/(swap)/_components/SlippageCustomOption";
+import { SlippageDefaultOption } from "../[lang]/(swap)/_components/SlippageDefaultOption";
 
 export type Slippage = {
   type: string;
@@ -13,7 +13,7 @@ export type Slippage = {
 export function slippageIsWithinRange(slippage: string) {
   return Number(slippage) > 0 && Number(slippage) <= 99;
 }
-export function SwapPageSettingButton({
+export function TokenTransactionSettingsButton({
   onChange,
 }: {
   onChange: (slippage: string) => void;
