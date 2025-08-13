@@ -599,15 +599,15 @@ export function LiquidityForm() {
       tokenYMint: poolDetails.tokenYMint,
     });
 
-    const lpRate = await client.getLPRate({
-      slippage: Number(slippage || "0.5"),
-      tokenXAmount:
-        inputType === "tokenX" ? amountNumber : response.tokenAmount,
-      tokenXMint: poolDetails.tokenXMint,
-      tokenYAmount:
-        inputType === "tokenY" ? amountNumber : response.tokenAmount,
-      tokenYMint: poolDetails.tokenYMint,
-    });
+    // const lpRate = await client.getLPRate({
+    //   slippage: Number(slippage || "0.5"),
+    //   tokenXAmount:
+    //     inputType === "tokenX" ? amountNumber : response.tokenAmount,
+    //   tokenXMint: poolDetails.tokenXMint,
+    //   tokenYAmount:
+    //     inputType === "tokenY" ? amountNumber : response.tokenAmount,
+    //   tokenYMint: poolDetails.tokenYMint,
+    // });
 
     const oneXtoY =
       inputType === "tokenX"
@@ -622,7 +622,7 @@ export function LiquidityForm() {
       form.setFieldValue("tokenAAmount", String(response.tokenAmount));
     }
 
-    setLpRate(lpRate.estimatedLPTokens);
+    // setLpRate(lpRate.estimatedLPTokens);
     setDisableLiquidity(false);
     setLiquidityStep(0);
   };
@@ -761,22 +761,6 @@ export function LiquidityForm() {
     }
 
     return BUTTON_MESSAGE.ADD_LIQUIDITY;
-  };
-
-  const onClickDeposit = () => {
-    const sellAmount = Number(form.state.values.tokenBAmount.replace(/,/g, ""));
-    const buyAmount = Number(form.state.values.tokenAAmount.replace(/,/g, ""));
-
-    if (
-      !poolDetails ||
-      BigNumber(sellAmount).lte(0) ||
-      BigNumber(buyAmount).lte(0)
-    ) {
-      setDisableLiquidity(true);
-      return;
-    }
-
-    setDisableLiquidity(false);
   };
 
   const isCreateFormValid = () => {
@@ -964,7 +948,6 @@ export function LiquidityForm() {
                 Liquidity Details
               </Text.Body2>
 
-              {/* Total Deposit */}
               <div className="flex items-center justify-between">
                 <Text.Body2 className="text-green-300">
                   Total Deposit
@@ -981,7 +964,6 @@ export function LiquidityForm() {
                 </div>
               </div>
 
-              {/* Pool Price */}
               <div className="flex items-center justify-between">
                 <Text.Body2 className="text-green-300">Pool Price</Text.Body2>
                 <Text.Body2 className="text-green-300">
@@ -992,18 +974,6 @@ export function LiquidityForm() {
                     value: poolPrice,
                   })}{" "}
                   {buyTokenAccount?.tokenAccounts[0]?.symbol}
-                </Text.Body2>
-              </div>
-
-              {/* LP Tokens Received */}
-              <div className="flex items-center justify-between">
-                <Text.Body2 className="text-green-300">LP Tokens</Text.Body2>
-                <Text.Body2 className="text-green-300">
-                  {numberFormatHelper({
-                    decimalScale: 5,
-                    trimTrailingZeros: true,
-                    value: lpRate,
-                  })}
                 </Text.Body2>
               </div>
 
