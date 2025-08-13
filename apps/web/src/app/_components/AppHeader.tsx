@@ -34,15 +34,6 @@ export const AppHeader = () => {
       </Text>
       <Text
         as={Link}
-        className={`inline-flex items-baseline justify-center leading-none no-underline ${pathname === "/create-pool" ? "text-green-100" : "text-green-300"}`}
-        data-testid="create-pool-link"
-        href="/create-pool"
-        variant="link"
-      >
-        {tx("createPool")}
-      </Text>
-      <Text
-        as={Link}
         className="inline-flex items-baseline justify-center gap-2 text-green-300 leading-none no-underline"
         href="https://docs.darklake.fi"
         target="_blank"

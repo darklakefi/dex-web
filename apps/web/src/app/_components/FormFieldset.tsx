@@ -17,6 +17,9 @@ import { useFormatPrice } from "../_utils/useFormatPrice";
 interface FormFieldsetProps extends NumericInputProps {
   name: "tokenAAmount" | "tokenBAmount" | "initialPrice";
   disabled?: boolean;
+  exchangeRate?: number;
+  currencyCode?: string;
+  controls?: React.ReactNode;
   tokenAccount?: {
     address: string;
     amount: number;
@@ -32,6 +35,9 @@ export function FormFieldset({
   value,
   disabled,
   tokenAccount,
+  exchangeRate,
+  currencyCode,
+  controls,
   ...rest
 }: FormFieldsetProps) {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -113,47 +119,58 @@ export function FormFieldset({
   return (
     <fieldset className="flex min-w-0 flex-1 flex-col items-end gap-3">
       <div className="mb-3 flex gap-3">
-        <Text.Body2 className="flex gap-3 text-green-300 uppercase">
-          <span>
-            {amount
-              ? `${numberFormatHelper({
-                  decimalScale: 2,
-                  thousandSeparator: true,
-                  trimTrailingZeros: true,
-                  value: convertToDecimal(amount, decimals),
-                })}`
-              : "0.00"}{" "}
-            {tokenSymbol}
-          </span>
-          <button
-            className="cursor-pointer uppercase underline"
-            onClick={setValueToHalfAmount}
-            type="button"
-          >
-            Half
-          </button>
-          <button
-            className="cursor-pointer uppercase underline"
-            onClick={setValueToMaxAmount}
-            type="button"
-          >
-            Max
-          </button>
-        </Text.Body2>
+        {controls ? (
+          controls
+        ) : (
+          <Text.Body2 className="flex gap-3 text-green-300 uppercase">
+            <span>
+              {amount
+                ? `${numberFormatHelper({
+                    decimalScale: 2,
+                    thousandSeparator: true,
+                    trimTrailingZeros: true,
+                    value: convertToDecimal(amount, decimals),
+                  })}`
+                : "0.00"}{" "}
+              {tokenSymbol}
+            </span>
+            <button
+              className="cursor-pointer uppercase underline"
+              onClick={setValueToHalfAmount}
+              type="button"
+            >
+              Half
+            </button>
+            <button
+              className="cursor-pointer uppercase underline"
+              onClick={setValueToMaxAmount}
+              type="button"
+            >
+              Max
+            </button>
+          </Text.Body2>
+        )}
       </div>
       <div className="flex flex-col items-end">
-        <NumericInput
-          autoComplete="off"
-          className={!formattedPrice ? "leading-10" : ""}
-          disabled={disabled}
-          name={name}
-          onChange={handleChange}
-          placeholder="0.00"
-          ref={inputRef}
-          type="text"
-          value={formatValueWithThousandSeparator(String(value) ?? "0")}
-          {...rest}
-        />
+        <div className="flex items-center gap-2">
+          <NumericInput
+            autoComplete="off"
+            className={!formattedPrice ? "leading-10" : ""}
+            disabled={disabled}
+            name={name}
+            onChange={handleChange}
+            placeholder="0.00"
+            ref={inputRef}
+            type="text"
+            value={formatValueWithThousandSeparator(String(value) ?? "0")}
+            {...rest}
+          />
+          {currencyCode && (
+            <Text.Body2 className="text-2xl text-green-300 uppercase">
+              {currencyCode}
+            </Text.Body2>
+          )}
+        </div>
         <Text.Body2 className="text-green-300 uppercase">
           {formattedPrice}
         </Text.Body2>
