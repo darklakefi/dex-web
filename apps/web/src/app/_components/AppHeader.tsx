@@ -15,9 +15,8 @@ export const AppHeader = () => {
       logoSm={<Icon className="h-6 w-auto stroke-none" name="logo-sm" />}
     >
       <Text
-        active={pathname === "/"}
         as={Link}
-        className="inline-flex items-baseline justify-center leading-none no-underline"
+        className={`inline-flex items-baseline justify-center leading-none no-underline ${pathname === "/" ? "text-green-100" : "text-green-300"}`}
         data-testid="home-link"
         href="/"
         variant="link"
@@ -25,9 +24,8 @@ export const AppHeader = () => {
         {tx("swap")}
       </Text>
       <Text
-        active={pathname === "/liquidity"}
         as={Link}
-        className="inline-flex items-baseline justify-center leading-none no-underline"
+        className={`inline-flex items-baseline justify-center leading-none no-underline ${pathname === "/liquidity" ? "text-green-100" : "text-green-300"}`}
         data-testid="liquidity-link"
         href="/liquidity"
         variant="link"
@@ -35,9 +33,8 @@ export const AppHeader = () => {
         {tx("liquidity")}
       </Text>
       <Text
-        active={pathname === "/create-pool"}
         as={Link}
-        className="inline-flex items-baseline justify-center leading-none no-underline"
+        className={`inline-flex items-baseline justify-center leading-none no-underline ${pathname === "/create-pool" ? "text-green-100" : "text-green-300"}`}
         data-testid="create-pool-link"
         href="/create-pool"
         variant="link"
@@ -46,7 +43,7 @@ export const AppHeader = () => {
       </Text>
       <Text
         as={Link}
-        className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"
+        className="inline-flex items-baseline justify-center gap-2 text-green-300 leading-none no-underline"
         href="https://docs.darklake.fi"
         target="_blank"
         variant="link"
@@ -55,7 +52,7 @@ export const AppHeader = () => {
       </Text>
       <Text
         as={Link}
-        className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"
+        className="inline-flex items-baseline justify-center gap-2 text-green-300 leading-none no-underline"
         href="https://darklake.typeform.com/contact"
         target="_blank"
         variant="link"

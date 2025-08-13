@@ -2,7 +2,7 @@
 
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { AddLiquidityTxInput } from "@dex-web/orpc/schemas";
-import { Box, Button, Text } from "@dex-web/ui";
+import { Box, Button, Icon, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { VersionedTransaction } from "@solana/web3.js";
@@ -16,7 +16,6 @@ import { z } from "zod";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
-import { TokenTransactionButton } from "../../../_components/TokenTransactionButton";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
 import {
   DEFAULT_BUY_TOKEN,
@@ -519,183 +518,193 @@ export function LiquidityForm() {
   };
 
   return (
-    <section className="flex w-full max-w-xl items-start gap-1">
-      <div className="size-9" />
-      <Box padding="lg">
-        <div className="flex flex-col gap-4">
-          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
-            <div>
-              <Text.Body2
-                as="label"
-                className="mb-3 block text-green-300 uppercase"
-              >
-                Token A Amount
-              </Text.Body2>
-              <SelectTokenButton returnUrl="liquidity" type="sell" />
-            </div>
-            <form.Field name="tokenBAmount">
-              {(field) => (
-                <FormFieldset
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "sell");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </Box>
-          <div className="flex items-center justify-center">
-            <TokenTransactionButton onClickTokenTransaction={onClickDeposit} />
-          </div>
-          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
-            <div>
-              <Text.Body2
-                as="label"
-                className="mb-3 block text-green-300 uppercase"
-              >
-                Token B Amount
-              </Text.Body2>
-              <SelectTokenButton returnUrl="liquidity" type="buy" />
-            </div>
-            <form.Field name="tokenAAmount">
-              {(field) => (
-                <FormFieldset
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "buy");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={buyTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </Box>
-          <div className="w-full">
-            {!publicKey ? (
-              <ConnectWalletButton className="w-full py-3" />
-            ) : poolDetails ? (
-              <Button
-                className="w-full cursor-pointer py-3"
-                disabled={
-                  liquidityStep !== 0 ||
-                  disableLiquidity ||
-                  isInsufficientBalanceSell ||
-                  isInsufficientBalanceBuy
-                }
-                loading={liquidityStep !== 0}
-                onClick={handleDeposit}
-              >
-                {getButtonMessage()}
-              </Button>
-            ) : (
-              <Button
-                className="w-full cursor-pointer py-3"
-                disabled={true}
-                loading={false}
-              >
-                Add Liquidity
-              </Button>
-            )}
-          </div>
-        </div>
-        {poolDetails &&
-          form.state.values.tokenBAmount !== "0" &&
-          form.state.values.tokenAAmount !== "0" && (
-            <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
-              <Text.Body2 className="mb-3 text-green-300 uppercase">
-                Liquidity Details
-              </Text.Body2>
+    <div className="w-full">
+      <div className="mb-4 flex items-center justify-between md:hidden">
+        <Text.Heading className="text-green-200">Liquidity</Text.Heading>
+      </div>
 
-              {/* Total Deposit */}
-              <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">
-                  Total Deposit
-                </Text.Body3>
-                <div className="text-right">
-                  <Text.Body3 className="text-white">
-                    {form.state.values.tokenBAmount}{" "}
-                    {sellTokenAccount?.tokenAccounts[0]?.symbol}
+      <section className="flex gap-1">
+        <div className="hidden size-9 md:block" />
+        <Box className="bg-transparent md:bg-green-700 md:p-6" padding="none">
+          <div className="flex flex-col gap-4">
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  Token
+                </Text.Body2>
+                <SelectTokenButton returnUrl="liquidity" type="sell" />
+              </div>
+              <form.Field name="tokenBAmount">
+                {(field) => (
+                  <FormFieldset
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "sell");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                )}
+              </form.Field>
+            </Box>
+            <div className="flex items-center justify-center">
+              <div className="inline-flex items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300">
+                <Icon className="size-5" name="plus" />
+              </div>
+            </div>
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  Token
+                </Text.Body2>
+                <SelectTokenButton returnUrl="liquidity" type="buy" />
+              </div>
+              <form.Field name="tokenAAmount">
+                {(field) => (
+                  <FormFieldset
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "buy");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                )}
+              </form.Field>
+            </Box>
+            <div className="w-full">
+              {!publicKey ? (
+                <ConnectWalletButton className="w-full py-3" />
+              ) : poolDetails ? (
+                <Button
+                  className="w-full cursor-pointer py-3"
+                  disabled={
+                    liquidityStep !== 0 ||
+                    disableLiquidity ||
+                    isInsufficientBalanceSell ||
+                    isInsufficientBalanceBuy
+                  }
+                  loading={liquidityStep !== 0}
+                  onClick={handleDeposit}
+                >
+                  {getButtonMessage()}
+                </Button>
+              ) : (
+                <Button
+                  className="w-full cursor-pointer py-3"
+                  disabled={true}
+                  loading={false}
+                >
+                  Add Liquidity
+                </Button>
+              )}
+            </div>
+          </div>
+          {poolDetails &&
+            form.state.values.tokenBAmount !== "0" &&
+            form.state.values.tokenAAmount !== "0" && (
+              <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
+                <Text.Body2 className="mb-3 text-green-300 uppercase">
+                  Liquidity Details
+                </Text.Body2>
+
+                {/* Total Deposit */}
+                <div className="flex items-center justify-between">
+                  <Text.Body3 className="text-green-300">
+                    Total Deposit
                   </Text.Body3>
+                  <div className="text-right">
+                    <Text.Body3 className="text-white">
+                      {form.state.values.tokenBAmount}{" "}
+                      {sellTokenAccount?.tokenAccounts[0]?.symbol}
+                    </Text.Body3>
+                    <Text.Body3 className="text-white">
+                      {form.state.values.tokenAAmount}{" "}
+                      {buyTokenAccount?.tokenAccounts[0]?.symbol}
+                    </Text.Body3>
+                  </div>
+                </div>
+
+                {/* Pool Price */}
+                <div className="flex items-center justify-between">
+                  <Text.Body3 className="text-green-300">Pool Price</Text.Body3>
                   <Text.Body3 className="text-white">
-                    {form.state.values.tokenAAmount}{" "}
+                    1 {sellTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
+                    {poolRatio.toFixed(6)}{" "}
                     {buyTokenAccount?.tokenAccounts[0]?.symbol}
                   </Text.Body3>
                 </div>
-              </div>
 
-              {/* Pool Price */}
-              <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">Pool Price</Text.Body3>
-                <Text.Body3 className="text-white">
-                  1 {sellTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
-                  {poolRatio.toFixed(6)}{" "}
-                  {buyTokenAccount?.tokenAccounts[0]?.symbol}
-                </Text.Body3>
-              </div>
+                {/* LP Tokens Received */}
+                <div className="flex items-center justify-between">
+                  <Text.Body3 className="text-green-300">LP Tokens</Text.Body3>
+                  <Text.Body3 className="text-white">
+                    ~
+                    {Math.sqrt(
+                      Number(form.state.values.tokenBAmount) *
+                        Number(form.state.values.tokenAAmount),
+                    ).toFixed(6)}
+                  </Text.Body3>
+                </div>
 
-              {/* LP Tokens Received */}
-              <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">LP Tokens</Text.Body3>
-                <Text.Body3 className="text-white">
-                  ~
-                  {Math.sqrt(
-                    Number(form.state.values.tokenBAmount) *
-                      Number(form.state.values.tokenAAmount),
-                  ).toFixed(6)}
-                </Text.Body3>
-              </div>
+                {/* Pool Share */}
+                <div className="flex items-center justify-between">
+                  <Text.Body3 className="text-green-300">Pool Share</Text.Body3>
+                  <Text.Body3 className="text-white">
+                    ~0.01%{" "}
+                    {/* This would be calculated based on total pool liquidity */}
+                  </Text.Body3>
+                </div>
 
-              {/* Pool Share */}
-              <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">Pool Share</Text.Body3>
-                <Text.Body3 className="text-white">
-                  ~0.01%{" "}
-                  {/* This would be calculated based on total pool liquidity */}
-                </Text.Body3>
-              </div>
+                {/* Estimated Fees */}
+                <div className="flex items-center justify-between">
+                  <Text.Body3 className="text-green-300">
+                    Est. Fee (24h)
+                  </Text.Body3>
+                  <Text.Body3 className="text-green-400">
+                    $0.24{" "}
+                    {/* This would be calculated based on pool volume and fees */}
+                  </Text.Body3>
+                </div>
 
-              {/* Estimated Fees */}
-              <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">
-                  Est. Fee (24h)
-                </Text.Body3>
-                <Text.Body3 className="text-green-400">
-                  $0.24{" "}
-                  {/* This would be calculated based on pool volume and fees */}
-                </Text.Body3>
+                {/* Slippage Tolerance */}
+                <div className="flex items-center justify-between">
+                  <Text.Body3 className="text-green-300">
+                    Slippage Tolerance
+                  </Text.Body3>
+                  <Text.Body3 className="text-white">{slippage}%</Text.Body3>
+                </div>
               </div>
-
-              {/* Slippage Tolerance */}
-              <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">
-                  Slippage Tolerance
-                </Text.Body3>
-                <Text.Body3 className="text-white">{slippage}%</Text.Body3>
-              </div>
-            </div>
-          )}
-      </Box>
-      <div className="flex flex-col gap-1">
-        <TokenTransactionSettingsButton
-          onChange={(slippage) => {
-            setSlippage(slippage);
-            if (form.state.values.tokenBAmount !== "0") {
-              const inputType =
-                poolDetails?.tokenXMint === tokenBAddress ? "tokenX" : "tokenY";
-              debouncedCalculateTokenAmounts({
-                inputAmount: form.state.values.tokenBAmount,
-                inputType,
-              });
-            }
-          }}
-        />
-      </div>
-    </section>
+            )}
+        </Box>
+        <div className="hidden flex-col gap-1 md:flex">
+          <TokenTransactionSettingsButton
+            onChange={(slippage) => {
+              setSlippage(slippage);
+              if (form.state.values.tokenBAmount !== "0") {
+                const inputType =
+                  poolDetails?.tokenXMint === tokenBAddress
+                    ? "tokenX"
+                    : "tokenY";
+                debouncedCalculateTokenAmounts({
+                  inputAmount: form.state.values.tokenBAmount,
+                  inputType,
+                });
+              }
+            }}
+          />
+        </div>
+      </section>
+    </div>
   );
 }
