@@ -24,10 +24,10 @@ export type PoolAccount = {
   protocol_fee_y: number;
 };
 
-export async function sortSolanaAddresses(
+export function sortSolanaAddresses(
   addrA: string,
   addrB: string,
-): Promise<{ tokenXAddress: string; tokenYAddress: string }> {
+): { tokenXAddress: string; tokenYAddress: string } {
   const aKey = new PublicKey(addrA);
   const bKey = new PublicKey(addrB);
 
