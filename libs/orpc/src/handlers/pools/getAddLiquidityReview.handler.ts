@@ -163,7 +163,7 @@ export async function getAddLiquidityReviewHandler(
       const tokenYAmountRaw = new BigNumber(scaledTokenXAmount)
         .multipliedBy(liquidityReserveY)
         .dividedBy(liquidityReserveX)
-        .integerValue(BigNumber.ROUND_DOWN);
+        .integerValue(BigNumber.ROUND_UP);
 
       // Convert raw amount back to user-friendly format
       const tokenYAmount = tokenYAmountRaw.dividedBy(10 ** tokenY.decimals);
@@ -182,7 +182,7 @@ export async function getAddLiquidityReviewHandler(
       const tokenXAmountRaw = new BigNumber(scaledTokenYAmount)
         .multipliedBy(liquidityReserveX)
         .dividedBy(liquidityReserveY)
-        .integerValue(BigNumber.ROUND_DOWN);
+        .integerValue(BigNumber.ROUND_UP);
 
       // Convert raw amount back to user-friendly format
       const tokenXAmount = tokenXAmountRaw.dividedBy(10 ** tokenX.decimals);
