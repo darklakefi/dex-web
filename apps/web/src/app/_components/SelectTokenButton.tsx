@@ -31,11 +31,20 @@ export function SelectTokenButton({
     }),
   );
 
+  function buildHref(
+    type: string,
+    tokenA: string,
+    tokenB: string,
+    returnUrl?: string,
+  ) {
+    const basePath = `select-token/${type}?tokenAAddress=${tokenA}&tokenBAddress=${tokenB}`;
+    return returnUrl ? basePath : `/${basePath}`;
+  }
   return (
     <Button
       as={Link}
       className="mt-1 w-full items-center justify-between bg-green-700 p-2"
-      href={`${returnUrl.length > 0 ? `/${returnUrl}` : "/"}/select-token/${type}/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`}
+      href={buildHref(type, tokenAAddress, tokenBAddress, returnUrl)}
       prefetch={true}
       variant="secondary"
     >

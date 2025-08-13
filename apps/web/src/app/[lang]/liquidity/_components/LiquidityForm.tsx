@@ -1,14 +1,18 @@
 "use client";
 
 import { client, tanstackClient } from "@dex-web/orpc";
-import type { AddLiquidityTxInput } from "@dex-web/orpc/schemas";
-import { Box, Button, Text } from "@dex-web/ui";
+import type {
+  AddLiquidityTxInput,
+  CreatePoolTxInput,
+} from "@dex-web/orpc/schemas";
+import { Box, Button, Icon, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { VersionedTransaction } from "@solana/web3.js";
+import { Transaction, VersionedTransaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
+import Image from "next/image";
 import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -29,6 +33,7 @@ import { dismissToast, toast } from "../../../_utils/toast";
 export const { fieldContext, formContext } = createFormHookContexts();
 
 const liquidityFormSchema = z.object({
+  initialPrice: z.string(),
   tokenAAmount: z.string(),
   tokenBAmount: z.string(),
 });
@@ -47,6 +52,7 @@ const { useAppForm } = createFormHook({
 
 const formConfig = {
   defaultValues: {
+    initialPrice: "1",
     tokenAAmount: "0",
     tokenBAmount: "0",
   } satisfies LiquidityFormSchema,
@@ -65,9 +71,16 @@ const formConfig = {
 const BUTTON_MESSAGE = {
   ADD_LIQUIDITY: "Add Liquidity",
   CALCULATING: "calculating amounts...",
+  CREATE_POOL: "Create Pool",
+  CREATE_STEP_1: "Preparing pool creation [1/3]",
+  CREATE_STEP_2: "Confirm transaction in your wallet [2/3]",
+  CREATE_STEP_3: "Processing pool creation [3/3]",
   ENTER_AMOUNT: "enter an amount",
+  ENTER_AMOUNTS: "Enter token amounts",
   INSUFFICIENT_BALANCE: "insufficient",
+  INVALID_PRICE: "Invalid price",
   LOADING: "loading",
+  SAME_TOKENS: "Select different tokens",
   STEP_1: "protecting liquidity transaction [1/3]",
   STEP_2: "confirm liquidity in your wallet [2/3]",
   STEP_3: "verifying liquidity transaction [3/3]",
@@ -79,7 +92,12 @@ export function LiquidityForm() {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
+
+  const [initialPriceTokenOrder, setInitialPriceDirection] = useState<
+    "ab" | "ba"
+  >("ab");
   const [liquidityStep, setLiquidityStep] = useState(0);
+  const [createStep, setCreateStep] = useState(0);
   const [disableLiquidity, setDisableLiquidity] = useState(true);
   const [_trackDetails, setTrackDetails] = useState<{
     tradeId: string;
@@ -123,8 +141,18 @@ export function LiquidityForm() {
       }),
     );
 
-  // Pool ratio calculation for liquidity provision - using 1:1 ratio as default
-  // TODO: Get actual pool reserves from API to calculate proper ratio
+  const { data: tokenADetails } = useSuspenseQuery(
+    tanstackClient.getTokenDetails.queryOptions({
+      input: { address: tokenAAddress || DEFAULT_BUY_TOKEN },
+    }),
+  );
+
+  const { data: tokenBDetails } = useSuspenseQuery(
+    tanstackClient.getTokenDetails.queryOptions({
+      input: { address: tokenBAddress || DEFAULT_SELL_TOKEN },
+    }),
+  );
+
   const poolRatio = 1;
 
   const checkInsufficientBalance = (input: string, type: "sell" | "buy") => {
@@ -227,6 +255,154 @@ export function LiquidityForm() {
     }
   };
 
+  const resetCreateState = () => {
+    setCreateStep(0);
+  };
+
+  const requestCreatePoolSigning = async (
+    transaction: Transaction,
+    _trackingId: string,
+  ) => {
+    try {
+      if (!publicKey) throw new Error("Wallet not connected!");
+      if (!signTransaction)
+        throw new Error("Wallet does not support transaction signing!");
+
+      setCreateStep(2);
+      toast({
+        description:
+          "Please confirm the pool creation transaction in your wallet.",
+        title: "Confirm Pool Creation [2/3]",
+        variant: "loading",
+      });
+
+      await signTransaction(transaction);
+
+      setCreateStep(3);
+      toast({
+        description:
+          "Processing your pool creation transaction on the blockchain.",
+        title: "Creating Pool [3/3]",
+        variant: "loading",
+      });
+
+      setTimeout(() => {
+        dismissToast();
+        toast({
+          description: `Pool created successfully! Token A: ${form.state.values.tokenAAmount}, Token B: ${form.state.values.tokenBAmount}`,
+          title: "Pool Created",
+          variant: "success",
+        });
+        resetCreateState();
+        refetchBuyTokenAccount();
+        refetchSellTokenAccount();
+      }, 2000);
+    } catch (error) {
+      console.error("Pool creation signing error:", error);
+      dismissToast();
+      toast({
+        description: `${error instanceof Error ? error.message : "Unknown error occurred"}`,
+        title: "Pool Creation Error",
+        variant: "error",
+      });
+      resetCreateState();
+    }
+  };
+
+  const handleCreatePool = async () => {
+    if (!publicKey) {
+      toast({
+        description: "Please connect your wallet to create a pool",
+        title: "Wallet Not Connected",
+        variant: "error",
+      });
+      return;
+    }
+
+    const tokenAAmount = Number(
+      form.state.values.tokenAAmount.replace(/,/g, ""),
+    );
+    const tokenBAmount = Number(
+      form.state.values.tokenBAmount.replace(/,/g, ""),
+    );
+    const initialPrice = Number(form.state.values.initialPrice || "1");
+
+    if (tokenAAmount <= 0 || tokenBAmount <= 0) {
+      toast({
+        description: "Please enter valid amounts for both tokens",
+        title: "Invalid Amounts",
+        variant: "error",
+      });
+      return;
+    }
+
+    if (initialPrice <= 0) {
+      toast({
+        description: "Please enter a valid initial price",
+        title: "Invalid Price",
+        variant: "error",
+      });
+      return;
+    }
+
+    try {
+      setCreateStep(1);
+      toast({
+        description:
+          "Preparing pool creation transaction. This may take a few seconds.",
+        title: "Preparing Pool Creation [1/3]",
+        variant: "loading",
+      });
+
+      if (!tokenAAddress || !tokenBAddress) {
+        throw new Error("Missing token addresses");
+      }
+
+      if (!wallet) {
+        throw new Error("Missing wallet");
+      }
+
+      const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
+      const { tokenXAddress, tokenYAddress } = sortedTokens;
+
+      const isTokenASellToken = tokenBAddress === tokenXAddress;
+      const depositAmountX = isTokenASellToken ? tokenAAmount : tokenBAmount;
+      const depositAmountY = isTokenASellToken ? tokenBAmount : tokenAAmount;
+
+      const response = await client.createPoolTx({
+        depositAmountX: Math.floor(depositAmountX),
+        depositAmountY: Math.floor(depositAmountY),
+        tokenXMint: tokenXAddress,
+        tokenXProgramId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        tokenYMint: tokenYAddress,
+        tokenYProgramId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        user: publicKey.toBase58(),
+      } satisfies CreatePoolTxInput);
+
+      if (response.success && response.transaction) {
+        const transactionBuffer = Buffer.from(response.transaction, "base64");
+        const transaction = Transaction.from(transactionBuffer);
+
+        await requestCreatePoolSigning(
+          transaction,
+          `pool-creation-${Date.now()}`,
+        );
+      } else {
+        throw new Error("Failed to create pool transaction");
+      }
+    } catch (error) {
+      console.error("Pool creation error:", error);
+      dismissToast();
+      toast({
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
+        title: "Pool Creation Error",
+        variant: "error",
+      });
+      resetCreateState();
+    }
+  };
+
   const checkLiquidityTransactionStatus = async (
     signature: string,
     trackingId: string,
@@ -241,7 +417,6 @@ export function LiquidityForm() {
 
         if (response.status === "finalized") {
           if (response.error) {
-            // Transaction failed
             dismissToast();
             setLiquidityStep(0);
             toast({
@@ -251,7 +426,6 @@ export function LiquidityForm() {
             });
             return;
           } else {
-            // Transaction succeeded
             dismissToast();
             setLiquidityStep(0);
             toast({
@@ -266,7 +440,6 @@ export function LiquidityForm() {
         }
 
         if (response.status === "failed") {
-          // Transaction failed
           dismissToast();
           setLiquidityStep(0);
           toast({
@@ -277,7 +450,6 @@ export function LiquidityForm() {
           return;
         }
 
-        // Still processing (pending or confirmed)
         toast({
           description: `Finalizing transaction... (${i + 1}/${maxAttempts}) - ${response.status}, trackingId: ${trackingId}`,
           title: "Confirming liquidity transaction",
@@ -301,7 +473,6 @@ export function LiquidityForm() {
       }
     }
 
-    // Timeout
     dismissToast();
     setLiquidityStep(0);
     toast({
@@ -436,6 +607,24 @@ export function LiquidityForm() {
     500,
   );
 
+  const handleInitialPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const price = e.target.value;
+    const tokenAAmount = form.state.values.tokenAAmount.replace(/,/g, "");
+
+    if (
+      price &&
+      tokenAAmount &&
+      BigNumber(price).gt(0) &&
+      BigNumber(tokenAAmount).gt(0)
+    ) {
+      const calculatedTokenB = BigNumber(tokenAAmount)
+        .multipliedBy(price)
+        .toString();
+      form.setFieldValue("tokenBAmount", calculatedTokenB);
+      checkInsufficientBalance(calculatedTokenB, "sell");
+    }
+  };
+
   const handleAmountChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "buy" | "sell",
@@ -444,7 +633,7 @@ export function LiquidityForm() {
 
     const hasInsufficientBalance = checkInsufficientBalance(value, type);
 
-    if (BigNumber(value).gt(0) && !hasInsufficientBalance) {
+    if (poolDetails && BigNumber(value).gt(0) && !hasInsufficientBalance) {
       const inputType =
         (type === "sell" && poolDetails?.tokenXMint === tokenBAddress) ||
         (type === "buy" && poolDetails?.tokenXMint === tokenAAddress)
@@ -455,6 +644,17 @@ export function LiquidityForm() {
         inputAmount: value,
         inputType,
       });
+    } else if (!poolDetails) {
+      if (type === "buy") {
+        const price = form.state.values.initialPrice || "1";
+        if (BigNumber(value).gt(0) && BigNumber(price).gt(0)) {
+          const calculatedTokenB = BigNumber(value)
+            .multipliedBy(price)
+            .toString();
+          form.setFieldValue("tokenBAmount", calculatedTokenB);
+          checkInsufficientBalance(calculatedTokenB, "sell");
+        }
+      }
     } else {
       setDisableLiquidity(true);
     }
@@ -463,6 +663,11 @@ export function LiquidityForm() {
   const getButtonMessage = () => {
     const sellAmount = form.state.values.tokenBAmount.replace(/,/g, "");
     const buyAmount = form.state.values.tokenAAmount.replace(/,/g, "");
+    const initialPrice = form.state.values.initialPrice;
+
+    if (createStep === 1) return BUTTON_MESSAGE.CREATE_STEP_1;
+    if (createStep === 2) return BUTTON_MESSAGE.CREATE_STEP_2;
+    if (createStep === 3) return BUTTON_MESSAGE.CREATE_STEP_3;
 
     if (liquidityStep === 1) {
       return BUTTON_MESSAGE.STEP_1;
@@ -478,6 +683,37 @@ export function LiquidityForm() {
 
     if (liquidityStep === 10) {
       return BUTTON_MESSAGE.CALCULATING;
+    }
+
+    if (tokenBAddress === tokenAAddress) {
+      return BUTTON_MESSAGE.SAME_TOKENS;
+    }
+
+    if (!poolDetails) {
+      if (
+        !sellAmount ||
+        BigNumber(sellAmount).lte(0) ||
+        !buyAmount ||
+        BigNumber(buyAmount).lte(0)
+      ) {
+        return BUTTON_MESSAGE.ENTER_AMOUNTS;
+      }
+
+      if (!initialPrice || BigNumber(initialPrice).lte(0)) {
+        return BUTTON_MESSAGE.INVALID_PRICE;
+      }
+
+      if (isInsufficientBalanceSell) {
+        const symbol = sellTokenAccount?.tokenAccounts[0]?.symbol || "";
+        return `${BUTTON_MESSAGE.INSUFFICIENT_BALANCE} ${symbol}`;
+      }
+
+      if (isInsufficientBalanceBuy) {
+        const symbol = buyTokenAccount?.tokenAccounts[0]?.symbol || "";
+        return `${BUTTON_MESSAGE.INSUFFICIENT_BALANCE} ${symbol}`;
+      }
+
+      return BUTTON_MESSAGE.CREATE_POOL;
     }
 
     if (
@@ -518,6 +754,26 @@ export function LiquidityForm() {
     setDisableLiquidity(false);
   };
 
+  const isCreateFormValid = () => {
+    const sellAmount = form.state.values.tokenBAmount.replace(/,/g, "");
+    const buyAmount = form.state.values.tokenAAmount.replace(/,/g, "");
+    const initialPrice = form.state.values.initialPrice;
+
+    return (
+      tokenBAddress !== tokenAAddress &&
+      BigNumber(sellAmount).gt(0) &&
+      BigNumber(buyAmount).gt(0) &&
+      BigNumber(initialPrice || "0").gt(0) &&
+      !isInsufficientBalanceSell &&
+      !isInsufficientBalanceBuy &&
+      createStep === 0
+    );
+  };
+
+  const [initialPriceTokenX, initialPriceTokenY] =
+    initialPriceTokenOrder === "ba"
+      ? [tokenADetails, tokenBDetails]
+      : [tokenBDetails, tokenADetails];
   return (
     <section className="flex w-full max-w-xl items-start gap-1">
       <div className="size-9" />
@@ -529,7 +785,7 @@ export function LiquidityForm() {
                 as="label"
                 className="mb-3 block text-green-300 uppercase"
               >
-                Token A Amount
+                Token
               </Text.Body2>
               <SelectTokenButton returnUrl="liquidity" type="sell" />
             </div>
@@ -548,6 +804,7 @@ export function LiquidityForm() {
               )}
             </form.Field>
           </Box>
+
           <div className="flex items-center justify-center">
             <TokenTransactionButton onClickTokenTransaction={onClickDeposit} />
           </div>
@@ -576,6 +833,73 @@ export function LiquidityForm() {
               )}
             </form.Field>
           </Box>
+          {!poolDetails && (
+            <div>
+              <Text.Body2 className="mb-2 text-green-100">
+                Your selection will create a new liquidity pool
+              </Text.Body2>
+              <Box className="mb-3 flex-row border border-green-400 bg-green-600 px-5 py-3 hover:border-green-300">
+                <div>
+                  <Text.Body2
+                    as="label"
+                    className="mb-7 block text-green-300 uppercase"
+                  >
+                    Set initial price
+                  </Text.Body2>
+                  <div className="flex items-center">
+                    {initialPriceTokenX.imageUrl ? (
+                      <Image
+                        alt={initialPriceTokenX.symbol}
+                        className="mr-2 size-6 overflow-hidden rounded-full"
+                        height={24}
+                        priority
+                        src={initialPriceTokenX.imageUrl}
+                        unoptimized
+                        width={24}
+                      />
+                    ) : (
+                      <Icon className="mr-2 fill-green-200" name="seedlings" />
+                    )}
+                    <Text.Body2 className="text-green-200 text-lg">
+                      1 {initialPriceTokenX.symbol} =
+                    </Text.Body2>
+                  </div>
+                </div>
+                <form.Field name="initialPrice">
+                  {(field) => (
+                    <FormFieldset
+                      controls={
+                        <button
+                          onClick={() =>
+                            setInitialPriceDirection(
+                              initialPriceTokenOrder === "ab" ? "ba" : "ab",
+                            )
+                          }
+                          type="button"
+                        >
+                          <Icon className="rotate-90" name="swap" />
+                        </button>
+                      }
+                      currencyCode={initialPriceTokenY.symbol}
+                      exchangeRate={poolRatio}
+                      name={field.name}
+                      onBlur={field.handleBlur}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        handleInitialPriceChange(e);
+                        field.handleChange(e.target.value);
+                      }}
+                      value={field.state.value}
+                    />
+                  )}
+                </form.Field>
+              </Box>
+              <Text.Body2 className="text-green-300">
+                <span className="text-green-100">Warning:</span> Bots will
+                arbitrage any mispricing. you'll lose tokens if your rate is
+                off-market.
+              </Text.Body2>
+            </div>
+          )}
           <div className="w-full">
             {!publicKey ? (
               <ConnectWalletButton className="w-full py-3" />
@@ -596,10 +920,11 @@ export function LiquidityForm() {
             ) : (
               <Button
                 className="w-full cursor-pointer py-3"
-                disabled={true}
-                loading={false}
+                disabled={!isCreateFormValid()}
+                loading={createStep !== 0}
+                onClick={handleCreatePool}
               >
-                Add Liquidity
+                {getButtonMessage()}
               </Button>
             )}
           </div>
@@ -651,7 +976,6 @@ export function LiquidityForm() {
                 </Text.Body3>
               </div>
 
-              {/* Pool Share */}
               <div className="flex items-center justify-between">
                 <Text.Body3 className="text-green-300">Pool Share</Text.Body3>
                 <Text.Body3 className="text-white">
@@ -660,7 +984,6 @@ export function LiquidityForm() {
                 </Text.Body3>
               </div>
 
-              {/* Estimated Fees */}
               <div className="flex items-center justify-between">
                 <Text.Body3 className="text-green-300">
                   Est. Fee (24h)
@@ -671,12 +994,57 @@ export function LiquidityForm() {
                 </Text.Body3>
               </div>
 
-              {/* Slippage Tolerance */}
               <div className="flex items-center justify-between">
                 <Text.Body3 className="text-green-300">
                   Slippage Tolerance
                 </Text.Body3>
                 <Text.Body3 className="text-white">{slippage}%</Text.Body3>
+              </div>
+            </div>
+          )}
+
+        {/* Pool Creation Summary - only shown when pool doesn't exist */}
+        {!poolDetails &&
+          form.state.values.tokenAAmount !== "0" &&
+          form.state.values.tokenBAmount !== "0" &&
+          form.state.values.initialPrice !== "1" && (
+            <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
+              <Text.Body2 className="mb-3 text-green-300 uppercase">
+                Pool Creation Summary
+              </Text.Body2>
+
+              <div className="flex items-center justify-between">
+                <Text.Body3 className="text-green-300">
+                  Initial Deposit
+                </Text.Body3>
+                <div className="text-right">
+                  <Text.Body3 className="text-white">
+                    {form.state.values.tokenAAmount}{" "}
+                    {buyTokenAccount?.tokenAccounts[0]?.symbol}
+                  </Text.Body3>
+                  <Text.Body3 className="text-white">
+                    {form.state.values.tokenBAmount}{" "}
+                    {sellTokenAccount?.tokenAccounts[0]?.symbol}
+                  </Text.Body3>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Text.Body3 className="text-green-300">
+                  Initial Price
+                </Text.Body3>
+                <Text.Body3 className="text-white">
+                  1 {buyTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
+                  {form.state.values.initialPrice}{" "}
+                  {sellTokenAccount?.tokenAccounts[0]?.symbol}
+                </Text.Body3>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Text.Body3 className="text-green-300">
+                  Your Pool Share
+                </Text.Body3>
+                <Text.Body3 className="text-white">100%</Text.Body3>
               </div>
             </div>
           )}
