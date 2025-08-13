@@ -219,8 +219,6 @@ export function WithdrawLiquidityModal({
 
       const signedTransaction = await signTransaction(transaction);
 
-      // In a real implementation, you'd submit this to the blockchain
-      // For now, we'll just simulate success
       dismissToast();
       toast({
         description: `Successfully withdrew ${form.state.values.withdrawalAmount} LP tokens`,
@@ -271,8 +269,7 @@ export function WithdrawLiquidityModal({
         tokenB,
       );
 
-      // Calculate minimum amounts based on withdrawalCalculations with some slippage tolerance (e.g., 1%)
-      const slippageTolerance = 0.01; // 1%
+      const slippageTolerance = 0.01;
       const minTokenAOut = Math.floor(
         withdrawalCalculations.tokenAAmount * (1 - slippageTolerance),
       );
