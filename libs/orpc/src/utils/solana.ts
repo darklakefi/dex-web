@@ -9,6 +9,8 @@ export const EXCHANGE_PROGRAM_ID = new PublicKey(
     "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
 );
 
+export const LP_TOKEN_DECIMALS = 9;
+
 export const IDL_CODER = new BorshCoder(IDL as Idl);
 
 export type PoolAccount = {
