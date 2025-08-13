@@ -38,7 +38,7 @@ export function SelectTokenButton({
     returnUrl?: string,
   ) {
     const basePath = `select-token/${type}?tokenAAddress=${tokenA}&tokenBAddress=${tokenB}`;
-    return returnUrl ? basePath : `/${basePath}`;
+    return returnUrl ? `${returnUrl}/${basePath}` : `/${basePath}`;
   }
   return (
     <Button

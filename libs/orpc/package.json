@@ -1,7 +1,8 @@
 {
   "devDependencies": {
     "@dex-web/core": "workspace:*",
-    "@dex-web/db": "workspace:*"
+    "@dex-web/db": "workspace:*",
+    "@dex-web/utils": "workspace:*"
   },
   "exports": {
     ".": "./src/index.ts",

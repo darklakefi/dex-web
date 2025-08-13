@@ -36,6 +36,12 @@ export const getTokenDetailsHandler = async (
     };
   } catch (error) {
     console.error(error, "error");
-    throw new Error(`Token ${address} not found`);
+    return {
+      address: "",
+      decimals: 0,
+      imageUrl: undefined,
+      name: "Unknown Token",
+      symbol: address.slice(-4),
+    };
   }
 };

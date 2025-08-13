@@ -32,6 +32,8 @@ const { useAppForm } = createFormHook({
   formContext,
 });
 
+const allowUnknownTokenReturnUrls = ["liquidity"];
+
 const formConfig = {
   defaultValues: {
     query: "",
@@ -142,7 +144,14 @@ export function SelectTokenModal({
           {data.tokens.length > 0 ? (
             <TokenList onSelect={handleSelect} tokens={data.tokens} />
           ) : (
-            <NoResultFound className="py-20" search={debouncedQuery} />
+            <NoResultFound
+              allowUnknownTokens={allowUnknownTokenReturnUrls.includes(
+                returnUrl,
+              )}
+              className="py-20"
+              handleSelect={handleSelect}
+              search={debouncedQuery}
+            />
           )}
         </Suspense>
       </Box>

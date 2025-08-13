@@ -1,3 +1,4 @@
+export { NoResultFound } from "../../../apps/web/src/app/_components/NoResultFound";
 export { Box } from "./lib/Box/Box";
 export { Button } from "./lib/Button/Button";
 export { Footer } from "./lib/Footer/Footer";
@@ -5,7 +6,6 @@ export { Header } from "./lib/Header/Header";
 export { Hero } from "./lib/Hero/Hero";
 export { Icon, type IconName } from "./lib/Icon/Icon";
 export { Modal } from "./lib/Modal/Modal";
-export { NoResultFound } from "./lib/NoResultFound/NoResultFound";
 export {
   NumericInput,
   type NumericInputProps,

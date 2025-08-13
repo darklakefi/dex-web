@@ -1,4 +1,5 @@
 export { groupTransactionByDate } from "./blockchain/groupTransactionByDate";
+export { isValidSolanaAddress } from "./blockchain/isValidSolanaAddress";
 export { pasteFromClipboard } from "./browser/pasteFromClipboard";
 export { getBaseUrl } from "./common/getBaseUrl";
 export { parseJWT } from "./common/parseJwt";
