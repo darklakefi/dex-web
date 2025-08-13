@@ -6,7 +6,7 @@ import type {
   CreatePoolTxInput,
 } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
-import { convertToDecimal } from "@dex-web/utils";
+import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction, VersionedTransaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
@@ -20,7 +20,6 @@ import { z } from "zod";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
-import { TokenTransactionButton } from "../../../_components/TokenTransactionButton";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
 import {
   DEFAULT_BUY_TOKEN,
@@ -111,6 +110,9 @@ export function LiquidityForm() {
     useState(false);
   const [isInsufficientBalanceBuy, setIsInsufficientBalanceBuy] =
     useState(false);
+
+  const [lpRate, setLpRate] = useState(0);
+  const [poolPrice, setPoolPrice] = useState(0);
 
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.getPoolDetails.queryOptions({
@@ -577,7 +579,7 @@ export function LiquidityForm() {
     }
   };
 
-  const calculateTokenAmounts = ({
+  const calculateTokenAmounts = async ({
     inputAmount,
     inputType,
   }: {
@@ -585,19 +587,42 @@ export function LiquidityForm() {
     inputType: "tokenX" | "tokenY";
   }) => {
     const amountNumber = Number(inputAmount.replace(/,/g, ""));
-    if (!poolDetails || BigNumber(amountNumber).lte(0) || !poolRatio) return;
+    if (!poolDetails || BigNumber(amountNumber).lte(0)) return;
 
     setLiquidityStep(10);
     setDisableLiquidity(true);
 
+    const response = await client.getAddLiquidityReview({
+      isTokenX: inputType === "tokenX",
+      tokenAmount: amountNumber,
+      tokenXMint: poolDetails.tokenXMint,
+      tokenYMint: poolDetails.tokenYMint,
+    });
+
+    const lpRate = await client.getLPRate({
+      slippage: Number(slippage || "0.5"),
+      tokenXAmount:
+        inputType === "tokenX" ? amountNumber : response.tokenAmount,
+      tokenXMint: poolDetails.tokenXMint,
+      tokenYAmount:
+        inputType === "tokenY" ? amountNumber : response.tokenAmount,
+      tokenYMint: poolDetails.tokenYMint,
+    });
+
+    const oneXtoY =
+      inputType === "tokenX"
+        ? BigNumber(amountNumber).dividedBy(response.tokenAmount)
+        : BigNumber(response.tokenAmount).dividedBy(amountNumber);
+
+    setPoolPrice(oneXtoY.toNumber());
+
     if (inputType === "tokenX") {
-      const requiredTokenY = amountNumber * poolRatio;
-      form.setFieldValue("tokenAAmount", String(requiredTokenY));
+      form.setFieldValue("tokenBAmount", String(response.tokenAmount));
     } else {
-      const requiredTokenX = amountNumber / poolRatio;
-      form.setFieldValue("tokenBAmount", String(requiredTokenX));
+      form.setFieldValue("tokenAAmount", String(response.tokenAmount));
     }
 
+    setLpRate(lpRate.estimatedLPTokens);
     setDisableLiquidity(false);
     setLiquidityStep(0);
   };
@@ -785,7 +810,7 @@ export function LiquidityForm() {
                 as="label"
                 className="mb-3 block text-green-300 uppercase"
               >
-                Token
+                AMOUNT
               </Text.Body2>
               <SelectTokenButton returnUrl="liquidity" type="sell" />
             </div>
@@ -806,7 +831,9 @@ export function LiquidityForm() {
           </Box>
 
           <div className="flex items-center justify-center">
-            <TokenTransactionButton onClickTokenTransaction={onClickDeposit} />
+            <div className="inline-flex items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300">
+              <Icon className="size-5" name="plus" />
+            </div>
           </div>
           <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
             <div>
@@ -814,7 +841,7 @@ export function LiquidityForm() {
                 as="label"
                 className="mb-3 block text-green-300 uppercase"
               >
-                Token B Amount
+                AMOUNT
               </Text.Body2>
               <SelectTokenButton returnUrl="liquidity" type="buy" />
             </div>
@@ -939,66 +966,68 @@ export function LiquidityForm() {
 
               {/* Total Deposit */}
               <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">
+                <Text.Body2 className="text-green-300">
                   Total Deposit
-                </Text.Body3>
+                </Text.Body2>
                 <div className="text-right">
-                  <Text.Body3 className="text-white">
+                  <Text.Body2 className="text-green-300">
                     {form.state.values.tokenBAmount}{" "}
                     {sellTokenAccount?.tokenAccounts[0]?.symbol}
-                  </Text.Body3>
-                  <Text.Body3 className="text-white">
+                  </Text.Body2>
+                  <Text.Body2 className="text-green-300">
                     {form.state.values.tokenAAmount}{" "}
                     {buyTokenAccount?.tokenAccounts[0]?.symbol}
-                  </Text.Body3>
+                  </Text.Body2>
                 </div>
               </div>
 
               {/* Pool Price */}
               <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">Pool Price</Text.Body3>
-                <Text.Body3 className="text-white">
+                <Text.Body2 className="text-green-300">Pool Price</Text.Body2>
+                <Text.Body2 className="text-green-300">
                   1 {sellTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
-                  {poolRatio.toFixed(6)}{" "}
+                  {numberFormatHelper({
+                    decimalScale: 6,
+                    trimTrailingZeros: true,
+                    value: poolPrice,
+                  })}{" "}
                   {buyTokenAccount?.tokenAccounts[0]?.symbol}
-                </Text.Body3>
+                </Text.Body2>
               </div>
 
               {/* LP Tokens Received */}
               <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">LP Tokens</Text.Body3>
-                <Text.Body3 className="text-white">
-                  ~
-                  {Math.sqrt(
-                    Number(form.state.values.tokenBAmount) *
-                      Number(form.state.values.tokenAAmount),
-                  ).toFixed(6)}
-                </Text.Body3>
+                <Text.Body2 className="text-green-300">LP Tokens</Text.Body2>
+                <Text.Body2 className="text-green-300">
+                  {numberFormatHelper({
+                    decimalScale: 5,
+                    trimTrailingZeros: true,
+                    value: lpRate,
+                  })}
+                </Text.Body2>
               </div>
 
-              <div className="flex items-center justify-between">
+              {/* <div className="flex items-center justify-between">
                 <Text.Body3 className="text-green-300">Pool Share</Text.Body3>
                 <Text.Body3 className="text-white">
                   ~0.01%{" "}
-                  {/* This would be calculated based on total pool liquidity */}
                 </Text.Body3>
-              </div>
+              </div> */}
 
-              <div className="flex items-center justify-between">
+              {/* <div className="flex items-center justify-between">
                 <Text.Body3 className="text-green-300">
                   Est. Fee (24h)
                 </Text.Body3>
                 <Text.Body3 className="text-green-400">
                   $0.24{" "}
-                  {/* This would be calculated based on pool volume and fees */}
                 </Text.Body3>
-              </div>
+              </div> */}
 
               <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">
+                <Text.Body2 className="text-green-300">
                   Slippage Tolerance
-                </Text.Body3>
-                <Text.Body3 className="text-white">{slippage}%</Text.Body3>
+                </Text.Body2>
+                <Text.Body2 className="text-green-300">{slippage}%</Text.Body2>
               </div>
             </div>
           )}
