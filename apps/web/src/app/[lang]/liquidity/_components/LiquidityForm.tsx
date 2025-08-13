@@ -533,7 +533,7 @@ export function LiquidityForm() {
                   as="label"
                   className="mb-3 block text-green-300 uppercase"
                 >
-                  Token
+                  AMOUNT
                 </Text.Body2>
                 <SelectTokenButton returnUrl="liquidity" type="sell" />
               </div>
@@ -563,7 +563,7 @@ export function LiquidityForm() {
                   as="label"
                   className="mb-3 block text-green-300 uppercase"
                 >
-                  Token
+                  AMOUNT
                 </Text.Body2>
                 <SelectTokenButton returnUrl="liquidity" type="buy" />
               </div>

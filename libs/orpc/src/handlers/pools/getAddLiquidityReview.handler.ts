@@ -8,13 +8,14 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { type Connection, PublicKey } from "@solana/web3.js";
+import BigNumber from "bignumber.js";
 import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
-  GetLPRateInput,
-  GetLPRateOutput,
-} from "../../schemas/pools/getLPRate.schema";
-import { EXCHANGE_PROGRAM_ID, LP_TOKEN_DECIMALS } from "../../utils/solana";
+  GetAddLiquidityReviewInput,
+  GetAddLiquidityReviewOutput,
+} from "../../schemas/pools/getAddLiquidityReview.schema";
+import { EXCHANGE_PROGRAM_ID } from "../../utils/solana";
 import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
 
 // Helper function to determine token program ID
@@ -71,25 +72,6 @@ async function getTokenBalance(
   }
 }
 
-// LP token estimation function
-function estimateLPTokens(
-  tokenXAmount: number,
-  tokenYAmount: number,
-  poolXReserves: number,
-  poolYReserves: number,
-  poolLPSupply: number,
-): number {
-  // Use X token calculation
-  const lpFromX = (tokenXAmount * poolLPSupply) / poolXReserves;
-
-  // Use Y token calculation
-  const lpFromY = (tokenYAmount * poolLPSupply) / poolYReserves;
-
-  // Both should be equal if ratios match
-  // Return the smaller one to be conservative
-  return Math.min(lpFromX, lpFromY);
-}
-
 // Use Anchor's coder directly for decoding
 const coder = new BorshCoder(IDL as Idl);
 
@@ -114,11 +96,11 @@ async function getPoolAccount(
   }
 }
 
-export async function getLPRateHandler(
-  input: GetLPRateInput,
-): Promise<GetLPRateOutput> {
+export async function getAddLiquidityReviewHandler(
+  input: GetAddLiquidityReviewInput,
+): Promise<GetAddLiquidityReviewOutput> {
   try {
-    const { tokenXAmount, tokenYAmount, tokenXMint, tokenYMint } = input;
+    const { tokenAmount, tokenXMint, tokenYMint, isTokenX } = input;
 
     const helius = getHelius();
 
@@ -163,10 +145,7 @@ export async function getLPRateHandler(
     const liquidityReserveY =
       reserveYBalance - pool.user_locked_y - pool.protocol_fee_y;
 
-    // Get LP token supply from pool account
-    const poolLPSupply = Number(pool.token_lp_supply);
-
-    // Scale input amounts based on token decimals
+    // Get token details for decimals
     const tokenX = await getTokenDetailsHandler({
       address: tokenXMint.toString(),
     });
@@ -174,46 +153,47 @@ export async function getLPRateHandler(
       address: tokenYMint.toString(),
     });
 
-    const scaledTokenXAmount = tokenXAmount * 10 ** tokenX.decimals;
-    const scaledTokenYAmount = tokenYAmount * 10 ** tokenY.decimals;
+    if (isTokenX) {
+      const scaledTokenXAmount = new BigNumber(tokenAmount).multipliedBy(
+        10 ** tokenX.decimals,
+      );
 
-    // Estimate LP tokens using the formula
-    const estimatedLP = estimateLPTokens(
-      scaledTokenXAmount,
-      scaledTokenYAmount,
-      liquidityReserveX,
-      liquidityReserveY,
-      poolLPSupply,
-    );
+      // Calculate required Y amount based on the pool ratio
+      // Formula: Y = X * (reserveY / reserveX)
+      const tokenYAmountRaw = new BigNumber(scaledTokenXAmount)
+        .multipliedBy(liquidityReserveY)
+        .dividedBy(liquidityReserveX)
+        .integerValue(BigNumber.ROUND_DOWN);
 
-    // Truncate estimatedLP to 9 decimal precision to avoid max float values
-    const truncatedEstimatedLP = Math.floor(estimatedLP);
+      // Convert raw amount back to user-friendly format
+      const tokenYAmount = tokenYAmountRaw.dividedBy(10 ** tokenY.decimals);
 
-    // Convert LP tokens back to user-friendly format (assuming 9 decimals for LP tokens)
-    const userFriendlyLP = truncatedEstimatedLP / 10 ** LP_TOKEN_DECIMALS;
+      return {
+        tokenAmount: tokenYAmount.toNumber(),
+        tokenAmountRaw: tokenYAmountRaw.toString(),
+      };
+    } else {
+      const scaledTokenYAmount = new BigNumber(tokenAmount).multipliedBy(
+        10 ** tokenY.decimals,
+      );
 
-    // APPLY SLIPPAGE
-    let finalEstimatedLP = truncatedEstimatedLP;
-    let finalUserFriendlyLP = userFriendlyLP;
+      // Calculate required X amount based on the pool ratio
+      // Formula: X = Y * (reserveX / reserveY)
+      const tokenXAmountRaw = new BigNumber(scaledTokenYAmount)
+        .multipliedBy(liquidityReserveX)
+        .dividedBy(liquidityReserveY)
+        .integerValue(BigNumber.ROUND_DOWN);
 
-    if (input.slippage && input.slippage > 0) {
-      // Calculate slippage as a decimal (e.g., 5.5% becomes 0.055)
-      const slippageDecimal = input.slippage / 100;
+      // Convert raw amount back to user-friendly format
+      const tokenXAmount = tokenXAmountRaw.dividedBy(10 ** tokenX.decimals);
 
-      // Apply slippage to raw units and round down
-      const slippageAmount = Math.floor(truncatedEstimatedLP * slippageDecimal);
-      finalEstimatedLP = truncatedEstimatedLP - slippageAmount;
-
-      // Convert back to user-friendly format
-      finalUserFriendlyLP = finalEstimatedLP / 10 ** LP_TOKEN_DECIMALS;
+      return {
+        tokenAmount: tokenXAmount.toNumber(),
+        tokenAmountRaw: tokenXAmountRaw.toString(),
+      };
     }
-
-    return {
-      estimatedLPTokens: finalUserFriendlyLP,
-      estimatedLPTokensRaw: finalEstimatedLP,
-    };
   } catch (error) {
-    console.error("Failed to get LP rate:", error);
-    throw new Error("Failed to get LP rate");
+    console.error("Failed to calculate token Y amount:", error);
+    throw new Error("Failed to calculate token Y amount for liquidity");
   }
 }
