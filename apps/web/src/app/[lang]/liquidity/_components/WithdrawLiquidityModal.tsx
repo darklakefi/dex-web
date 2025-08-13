@@ -234,7 +234,6 @@ export function WithdrawLiquidityModal({
 
       const signedTransaction = await signTransaction(transaction);
 
-      // Submit the signed transaction to the blockchain
       setWithdrawStep(3);
       toast({
         description: "Submitting transaction to the blockchain...",
@@ -242,17 +241,14 @@ export function WithdrawLiquidityModal({
         variant: "loading",
       });
 
-      // Use the same RPC endpoint as the backend
       const connection = new Connection(
-        process.env.NEXT_PUBLIC_HELIUS_RPC_URL ||
-          "https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY",
+        process.env.NEXT_PUBLIC_HELIUS_RPC_URL ?? "",
       );
 
       const signature = await connection.sendRawTransaction(
         signedTransaction.serialize(),
       );
 
-      // Confirm the transaction
       await connection.confirmTransaction(signature, "confirmed");
 
       dismissToast();
@@ -342,13 +338,16 @@ export function WithdrawLiquidityModal({
     }
   };
 
-  // Removed useMemo and made this a simple computed value
+  const hasEnteredValue = (() => {
+    return !!(
+      form.state.values.withdrawalAmount &&
+      form.state.values.withdrawalAmount.trim() !== ""
+    );
+  })();
+
   const isValidAmount = (() => {
     try {
-      if (
-        !form.state.values.withdrawalAmount ||
-        form.state.values.withdrawalAmount.trim() === ""
-      ) {
+      if (!hasEnteredValue) {
         return false;
       }
 
@@ -375,7 +374,6 @@ export function WithdrawLiquidityModal({
 
   const pendingYield = "$0.00";
 
-  // Early return after all hooks
   if (!isOpen) return null;
 
   return (
@@ -489,7 +487,7 @@ export function WithdrawLiquidityModal({
                 ? "CONFIRM TRANSACTION IN WALLET [2/3]"
                 : withdrawStep === 3
                   ? "PROCESSING WITHDRAWAL [3/3]"
-                  : !isValidAmount
+                  : !hasEnteredValue
                     ? "SELECT OR ENTER AMOUNT"
                     : "WITHDRAW LIQUIDITY"}
           </Button>
