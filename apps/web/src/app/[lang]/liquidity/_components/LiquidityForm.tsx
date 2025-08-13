@@ -5,6 +5,7 @@ import type {
   AddLiquidityTxInput,
   CreatePoolTxInput,
 } from "@dex-web/orpc/schemas";
+
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -20,7 +21,6 @@ import { z } from "zod";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
-import { TokenTransactionButton } from "../../../_components/TokenTransactionButton";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
 import {
   DEFAULT_BUY_TOKEN,
@@ -789,18 +789,56 @@ export function LiquidityForm() {
               </Text.Body2>
               <SelectTokenButton returnUrl="liquidity" type="sell" />
             </div>
-            <form.Field name="tokenBAmount">
-              {(field) => (
-                <FormFieldset
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "sell");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  Token
+                </Text.Body2>
+                <SelectTokenButton returnUrl="liquidity" type="buy" />
+              </div>
+              <form.Field name="tokenAAmount">
+                {(field) => (
+                  <FormFieldset
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "buy");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                )}
+              </form.Field>
+            </Box>
+            <div className="w-full">
+              {!publicKey ? (
+                <ConnectWalletButton className="w-full py-3" />
+              ) : poolDetails ? (
+                <Button
+                  className="w-full cursor-pointer py-3"
+                  disabled={
+                    liquidityStep !== 0 ||
+                    disableLiquidity ||
+                    isInsufficientBalanceSell ||
+                    isInsufficientBalanceBuy
+                  }
+                  loading={liquidityStep !== 0}
+                  onClick={handleDeposit}
+                >
+                  {getButtonMessage()}
+                </Button>
+              ) : (
+                <Button
+                  className="w-full cursor-pointer py-3"
+                  disabled={true}
+                  loading={false}
+                >
+                  Add Liquidity
+                </Button>
               )}
             </form.Field>
           </Box>
@@ -927,54 +965,54 @@ export function LiquidityForm() {
                 {getButtonMessage()}
               </Button>
             )}
-          </div>
-        </div>
-        {poolDetails &&
-          form.state.values.tokenBAmount !== "0" &&
-          form.state.values.tokenAAmount !== "0" && (
-            <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
-              <Text.Body2 className="mb-3 text-green-300 uppercase">
-                Liquidity Details
-              </Text.Body2>
 
-              {/* Total Deposit */}
-              <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">
-                  Total Deposit
-                </Text.Body3>
-                <div className="text-right">
-                  <Text.Body3 className="text-white">
-                    {form.state.values.tokenBAmount}{" "}
-                    {sellTokenAccount?.tokenAccounts[0]?.symbol}
+          </div>
+          {poolDetails &&
+            form.state.values.tokenBAmount !== "0" &&
+            form.state.values.tokenAAmount !== "0" && (
+              <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
+                <Text.Body2 className="mb-3 text-green-300 uppercase">
+                  Liquidity Details
+                </Text.Body2>
+
+                {/* Total Deposit */}
+                <div className="flex items-center justify-between">
+                  <Text.Body3 className="text-green-300">
+                    Total Deposit
                   </Text.Body3>
+                  <div className="text-right">
+                    <Text.Body3 className="text-white">
+                      {form.state.values.tokenBAmount}{" "}
+                      {sellTokenAccount?.tokenAccounts[0]?.symbol}
+                    </Text.Body3>
+                    <Text.Body3 className="text-white">
+                      {form.state.values.tokenAAmount}{" "}
+                      {buyTokenAccount?.tokenAccounts[0]?.symbol}
+                    </Text.Body3>
+                  </div>
+                </div>
+
+                {/* Pool Price */}
+                <div className="flex items-center justify-between">
+                  <Text.Body3 className="text-green-300">Pool Price</Text.Body3>
                   <Text.Body3 className="text-white">
-                    {form.state.values.tokenAAmount}{" "}
+                    1 {sellTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
+                    {poolRatio.toFixed(6)}{" "}
                     {buyTokenAccount?.tokenAccounts[0]?.symbol}
                   </Text.Body3>
                 </div>
-              </div>
 
-              {/* Pool Price */}
-              <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">Pool Price</Text.Body3>
-                <Text.Body3 className="text-white">
-                  1 {sellTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
-                  {poolRatio.toFixed(6)}{" "}
-                  {buyTokenAccount?.tokenAccounts[0]?.symbol}
-                </Text.Body3>
-              </div>
-
-              {/* LP Tokens Received */}
-              <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">LP Tokens</Text.Body3>
-                <Text.Body3 className="text-white">
-                  ~
-                  {Math.sqrt(
-                    Number(form.state.values.tokenBAmount) *
-                      Number(form.state.values.tokenAAmount),
-                  ).toFixed(6)}
-                </Text.Body3>
-              </div>
+                {/* LP Tokens Received */}
+                <div className="flex items-center justify-between">
+                  <Text.Body3 className="text-green-300">LP Tokens</Text.Body3>
+                  <Text.Body3 className="text-white">
+                    ~
+                    {Math.sqrt(
+                      Number(form.state.values.tokenBAmount) *
+                        Number(form.state.values.tokenAAmount),
+                    ).toFixed(6)}
+                  </Text.Body3>
+                </div>
 
               <div className="flex items-center justify-between">
                 <Text.Body3 className="text-green-300">Pool Share</Text.Body3>
@@ -1065,5 +1103,6 @@ export function LiquidityForm() {
         />
       </div>
     </section>
+
   );
 }
