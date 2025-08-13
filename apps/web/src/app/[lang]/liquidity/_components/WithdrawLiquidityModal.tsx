@@ -5,7 +5,7 @@ import { sortSolanaAddresses } from "@dex-web/orpc/utils/solana";
 import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Transaction } from "@solana/web3.js";
+import { Connection, Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -76,9 +76,6 @@ export function WithdrawLiquidityModal({
 }: WithdrawLiquidityModalProps) {
   const { publicKey, signTransaction } = useWallet();
   const form = useAppForm(formConfig);
-  const [selectedPercentage, setSelectedPercentage] = useState<number | null>(
-    null,
-  );
   const [withdrawStep, setWithdrawStep] = useState(0);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
 
@@ -119,6 +116,7 @@ export function WithdrawLiquidityModal({
       !userLiquidity ||
       !poolReserves ||
       !form.state.values.withdrawalAmount ||
+      form.state.values.withdrawalAmount.trim() === "" ||
       poolReserves.totalLpSupply === 0
     ) {
       return {
@@ -133,7 +131,28 @@ export function WithdrawLiquidityModal({
       userLiquidity.lpTokenBalance,
       userLiquidity.decimals,
     );
-    const withdrawLpAmount = BigNumber(form.state.values.withdrawalAmount);
+
+    let withdrawLpAmount: BigNumber;
+    try {
+      withdrawLpAmount = BigNumber(
+        form.state.values.withdrawalAmount.replace(/,/g, ""),
+      );
+      if (withdrawLpAmount.isNaN() || withdrawLpAmount.lte(0)) {
+        return {
+          percentage: 0,
+          tokenAAmount: 0,
+          tokenBAmount: 0,
+          usdValue: 0,
+        };
+      }
+    } catch {
+      return {
+        percentage: 0,
+        tokenAAmount: 0,
+        tokenBAmount: 0,
+        usdValue: 0,
+      };
+    }
 
     const percentage = withdrawLpAmount
       .dividedBy(userLpBalance)
@@ -172,14 +191,11 @@ export function WithdrawLiquidityModal({
     tokenBPrice,
   ]);
 
-  if (!isOpen) return null;
-
   const maxLpTokens = userLiquidity
     ? convertToDecimal(userLiquidity.lpTokenBalance, userLiquidity.decimals)
     : 0;
 
   const handlePercentageClick = (percentage: number) => {
-    setSelectedPercentage(percentage);
     const amount = BigNumber(maxLpTokens)
       .multipliedBy(percentage / 100)
       .toString();
@@ -189,7 +205,6 @@ export function WithdrawLiquidityModal({
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, "");
     form.setFieldValue("withdrawalAmount", value);
-    setSelectedPercentage(null);
   };
 
   const resetWithdrawState = () => {
@@ -207,7 +222,7 @@ export function WithdrawLiquidityModal({
       setIsWithdrawing(true);
       toast({
         description: "Please confirm the transaction in your wallet.",
-        title: "Confirm withdrawal [2/2]",
+        title: "Confirm withdrawal [2/3]",
         variant: "loading",
       });
 
@@ -219,9 +234,30 @@ export function WithdrawLiquidityModal({
 
       const signedTransaction = await signTransaction(transaction);
 
+      // Submit the signed transaction to the blockchain
+      setWithdrawStep(3);
+      toast({
+        description: "Submitting transaction to the blockchain...",
+        title: "Processing withdrawal [3/3]",
+        variant: "loading",
+      });
+
+      // Use the same RPC endpoint as the backend
+      const connection = new Connection(
+        process.env.NEXT_PUBLIC_HELIUS_RPC_URL ||
+          "https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY",
+      );
+
+      const signature = await connection.sendRawTransaction(
+        signedTransaction.serialize(),
+      );
+
+      // Confirm the transaction
+      await connection.confirmTransaction(signature, "confirmed");
+
       dismissToast();
       toast({
-        description: `Successfully withdrew ${form.state.values.withdrawalAmount} LP tokens`,
+        description: `Successfully withdrew ${form.state.values.withdrawalAmount} LP tokens. Transaction: ${signature}`,
         title: "Withdrawal complete",
         variant: "success",
       });
@@ -234,7 +270,7 @@ export function WithdrawLiquidityModal({
       dismissToast();
       toast({
         description: `${error instanceof Error ? error.message : "Unknown error occurred"}`,
-        title: "Signing Error",
+        title: "Transaction Error",
         variant: "error",
       });
       resetWithdrawState();
@@ -255,7 +291,7 @@ export function WithdrawLiquidityModal({
 
     toast({
       description: "Building withdrawal transaction...",
-      title: "Preparing withdrawal [1/2]",
+      title: "Preparing withdrawal [1/3]",
       variant: "loading",
     });
     setWithdrawStep(1);
@@ -306,10 +342,28 @@ export function WithdrawLiquidityModal({
     }
   };
 
-  const isValidAmount =
-    form.state.values.withdrawalAmount &&
-    BigNumber(form.state.values.withdrawalAmount).gt(0) &&
-    BigNumber(form.state.values.withdrawalAmount).lte(maxLpTokens);
+  // Removed useMemo and made this a simple computed value
+  const isValidAmount = (() => {
+    try {
+      if (
+        !form.state.values.withdrawalAmount ||
+        form.state.values.withdrawalAmount.trim() === ""
+      ) {
+        return false;
+      }
+
+      const cleanAmount = form.state.values.withdrawalAmount.replace(/,/g, "");
+      const amount = BigNumber(cleanAmount);
+
+      if (amount.isNaN() || amount.lte(0)) {
+        return false;
+      }
+
+      return amount.lte(maxLpTokens);
+    } catch {
+      return false;
+    }
+  })();
 
   const totalLiquidity =
     userLiquidity && poolReserves
@@ -320,6 +374,9 @@ export function WithdrawLiquidityModal({
       : "0.00";
 
   const pendingYield = "$0.00";
+
+  // Early return after all hooks
+  if (!isOpen) return null;
 
   return (
     <Modal onClose={onClose}>
@@ -380,7 +437,8 @@ export function WithdrawLiquidityModal({
           </div>
 
           {form.state.values.withdrawalAmount &&
-            BigNumber(form.state.values.withdrawalAmount).gt(0) && (
+            form.state.values.withdrawalAmount.trim() !== "" &&
+            withdrawalCalculations.usdValue > 0 && (
               <div className="space-y-2 rounded border border-green-600 bg-green-900 p-3">
                 <Text.Body3 className="text-green-300">
                   Total Withdrawal
@@ -426,13 +484,14 @@ export function WithdrawLiquidityModal({
             variant={isValidAmount && !isWithdrawing ? "primary" : "secondary"}
           >
             {withdrawStep === 1
-              ? "PREPARING WITHDRAWAL [1/2]"
+              ? "PREPARING WITHDRAWAL [1/3]"
               : withdrawStep === 2
-                ? "CONFIRM TRANSACTION IN WALLET [2/2]"
-                : !form.state.values.withdrawalAmount ||
-                    BigNumber(form.state.values.withdrawalAmount).eq(0)
-                  ? "SELECT OR ENTER AMOUNT"
-                  : "WITHDRAW LIQUIDITY"}
+                ? "CONFIRM TRANSACTION IN WALLET [2/3]"
+                : withdrawStep === 3
+                  ? "PROCESSING WITHDRAWAL [3/3]"
+                  : !isValidAmount
+                    ? "SELECT OR ENTER AMOUNT"
+                    : "WITHDRAW LIQUIDITY"}
           </Button>
         </div>
       </Box>
