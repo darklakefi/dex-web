@@ -347,6 +347,9 @@ importers:
       '@dex-web/db':
         specifier: workspace:*
         version: link:../db
+      '@dex-web/utils':
+        specifier: workspace:*
+        version: link:../utils
 
   libs/ui: {}
 
