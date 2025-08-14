@@ -1,6 +1,5 @@
 "use server";
 
-import { getDexGatewayClient } from "../../dex-gateway";
 import type { GetTokenMetadataListRequest } from "../../dex-gateway.type";
 import { tokensData, tokensDataMainnet } from "../../mocks/tokens.mock";
 import type {
@@ -8,37 +7,38 @@ import type {
   GetTokensOutput,
 } from "../../schemas/tokens/getTokens.schema";
 import { isSolanaAddress } from "../../utils/solana";
+import { getTokenMetadataListHandler } from "../dex-gateway/getTokenMetadataList.handler";
 
 export const getTokensHandler = async (
   input: GetTokensInput,
 ): Promise<GetTokensOutput> => {
-  const { limit = 10, query, offset = 0 } = input;
-
-  if (!query) {
-    const defaultList =
-      process.env.NETWORK === "2" ? tokensData : tokensDataMainnet;
-
-    return {
-      hasMore: defaultList.length > limit,
-      tokens: defaultList.slice(0, limit).map((token) => ({
-        address: token.address,
-        decimals: token.decimals,
-        imageUrl: token.logoURI,
-        name: token.name,
-        symbol: token.symbol,
-      })),
-      total: defaultList.length,
-    };
-  }
-
-  const grpcClient = getDexGatewayClient();
-
+  const { limit = 10, query, offset = 0, allowList } = input;
   const page = Math.floor(offset / limit) + 1;
+
+  const localTokensList =
+    process.env.NETWORK === "2" ? tokensData : tokensDataMainnet;
 
   const gatewayInput: GetTokenMetadataListRequest = {
     page_number: page,
     page_size: limit,
   };
+  const { tokens: gatewayTokensList } =
+    await getTokenMetadataListHandler(gatewayInput);
+
+  const fullTokensList = [...localTokensList, ...gatewayTokensList];
+  if (!query) {
+    return {
+      hasMore: localTokensList.length > limit,
+      tokens: localTokensList.map((token) => ({
+        address: token.address,
+        decimals: token.decimals,
+        imageUrl: token.logo_uri,
+        name: token.name,
+        symbol: token.symbol,
+      })),
+      total: localTokensList.length,
+    };
+  }
 
   if (query) {
     if (isSolanaAddress(query)) {
@@ -52,14 +52,16 @@ export const getTokensHandler = async (
     }
   }
 
-  const tokenMetadataList = await grpcClient.getTokenMetadataList(gatewayInput);
-  const total = tokenMetadataList.total_pages * limit;
-  const hasMore =
-    tokenMetadataList.current_page < tokenMetadataList.total_pages;
+  const total = fullTokensList.length;
+  const hasMore = fullTokensList.length > limit;
+
+  const filteredTokensList = fullTokensList.filter((token) =>
+    allowList ? allowList.includes(token.address) : true,
+  );
 
   return {
     hasMore,
-    tokens: tokenMetadataList.tokens.map((token) => ({
+    tokens: filteredTokensList.map((token) => ({
       address: token.address,
       decimals: token.decimals,
       imageUrl: token.logo_uri,
