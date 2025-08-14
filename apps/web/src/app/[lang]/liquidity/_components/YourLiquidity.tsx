@@ -112,6 +112,7 @@ export function YourLiquidity({
       userLiquidity.lpTokenBalance,
       userLiquidity.decimals,
     );
+
     const userLpShare = BigNumber(userLpBalance).dividedBy(
       poolReserves.totalLpSupply,
     );
@@ -139,21 +140,9 @@ export function YourLiquidity({
     };
   }, [userLiquidity, poolReserves, tokenAPrice, tokenBPrice, poolDetails]);
 
-  console.log("liquidityCalculations", liquidityCalculations);
-  console.log("userLiquidity", userLiquidity);
-  console.log("poolDetails", poolDetails);
-  console.log("publicKey", publicKey?.toBase58());
-  console.log("tokenXAddress", tokenXAddress, "tokenYAddress", tokenYAddress);
-
   if (!userLiquidity?.hasLiquidity || !poolDetails) {
     return null;
   }
-
-  const formattedUsdValue = numberFormatHelper({
-    decimalScale: 2,
-    trimTrailingZeros: true,
-    value: liquidityCalculations.totalUsdValue,
-  });
 
   const pendingYield = "0.00";
 
@@ -168,16 +157,27 @@ export function YourLiquidity({
         </div>
 
         <Box className="flex flex-row">
-          <div className="flex flex-1 flex-col justify-between border-green-500 border-r pr-2">
+          <div className="flex flex-1 flex-col justify-between gap-2 border-green-500 border-r pr-2">
             <Text.Body2 className="text-green-200">
-              ${formattedUsdValue}
+              {numberFormatHelper({
+                decimalScale: 5,
+                trimTrailingZeros: true,
+                value: liquidityCalculations.userTokenAAmount,
+              })}{" "}
+              {tokenADetails.symbol}
             </Text.Body2>
-            <Text.Body2 className="mb-4 text-green-300">
-              {tokenADetails.symbol}/{tokenBDetails.symbol} DEPOSIT
+            <Text.Body2 className="text-green-200">
+              {numberFormatHelper({
+                decimalScale: 5,
+                trimTrailingZeros: true,
+                value: liquidityCalculations.userTokenBAmount,
+              })}{" "}
+              {tokenBDetails.symbol}
             </Text.Body2>
+            <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
 
             <Button
-              className="max-w-fit"
+              className="max-w-fit cursor-pointer"
               onClick={() => {
                 setIsWithdrawModalOpen(true);
                 onWithdraw?.();
@@ -188,12 +188,16 @@ export function YourLiquidity({
             </Button>
           </div>
 
-          <div className="flex flex-1 flex-col justify-between pl-2">
+          <div className="hidden flex-1 flex-col justify-between pl-2">
             <Text.Body2 className="text-green-200">${pendingYield}</Text.Body2>
             <Text.Body2 className="mb-4 text-green-300">
               PENDING YIELD
             </Text.Body2>
-            <Button className="max-w-fit" onClick={onClaim} variant="secondary">
+            <Button
+              className="max-w-fit cursor-pointer"
+              onClick={onClaim}
+              variant="secondary"
+            >
               CLAIM
             </Button>
           </div>
