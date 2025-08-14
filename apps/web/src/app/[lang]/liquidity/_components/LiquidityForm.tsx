@@ -111,7 +111,6 @@ export function LiquidityForm() {
   const [isInsufficientBalanceBuy, setIsInsufficientBalanceBuy] =
     useState(false);
 
-  const [lpRate, setLpRate] = useState(0);
   const [poolPrice, setPoolPrice] = useState(0);
 
   const { data: poolDetails } = useSuspenseQuery(
@@ -1048,6 +1047,7 @@ export function LiquidityForm() {
             </div>
           )}
       </Box>
+
       <div className="flex flex-col gap-1">
         <TokenTransactionSettingsButton
           onChange={(slippage) => {

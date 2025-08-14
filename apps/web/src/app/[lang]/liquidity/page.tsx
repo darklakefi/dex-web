@@ -5,13 +5,14 @@ import { tanstackClient } from "../../../../../../libs/orpc/src/client";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
 import { selectedTokensCache } from "../../_utils/searchParams";
 import { LiquidityForm } from "./_components/LiquidityForm";
+import { YourLiquidity } from "./_components/YourLiquidity";
 
 export default async function Page({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
-  await selectedTokensCache.parse(searchParams);
+  const parsedSearchParams = await selectedTokensCache.parse(searchParams);
 
   const queryClient = new QueryClient();
 
@@ -45,6 +46,10 @@ export default async function Page({
           <div className="size-9" />
         </section>
         <LiquidityForm />
+        <YourLiquidity
+          tokenAAddress={parsedSearchParams.tokenAAddress}
+          tokenBAddress={parsedSearchParams.tokenBAddress}
+        />
       </div>
       <div className="hidden max-w-xs md:block">
         <FeaturesAndTrendingPoolPanel />

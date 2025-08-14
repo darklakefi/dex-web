@@ -15,7 +15,7 @@ import { selectedTokensParsers } from "../_utils/searchParams";
 import { useFormatPrice } from "../_utils/useFormatPrice";
 
 interface FormFieldsetProps extends NumericInputProps {
-  name: "tokenAAmount" | "tokenBAmount" | "initialPrice";
+  name: string;
   disabled?: boolean;
   exchangeRate?: number;
   currencyCode?: string;

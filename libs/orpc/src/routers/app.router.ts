@@ -3,6 +3,9 @@ import { getAddLiquidityReview } from "../procedures/pools/getAddLiquidityReview
 import { getLPRate } from "../procedures/pools/getLPRate.procedure";
 import { getPinedPool } from "../procedures/pools/getPinedPool.procedure";
 import { getPoolDetails } from "../procedures/pools/getPoolDetail.procedure";
+import { getPoolReserves } from "../procedures/pools/getPoolReserves.procedure";
+import { getUserLiquidity } from "../procedures/pools/getUserLiquidity.procedure";
+import { withdrawLiquidity } from "../procedures/pools/withdrawLiquidity.procedure";
 import { getSwapDetails } from "../procedures/swaps/getSwapDetails.procedure";
 import { getSwapQuote } from "../procedures/swaps/getSwapQuote.procedure";
 import { getTokenDetails } from "../procedures/tokens/getTokenDetails.procedure";
@@ -18,12 +21,15 @@ export const appRouter = {
   getLPRate,
   getPinedPool,
   getPoolDetails,
+  getPoolReserves,
   getSwapDetails,
   getSwapQuote,
   getTokenDetails,
   getTokenPrice,
   getTokens,
+  getUserLiquidity,
   helius: heliusRouter,
+  withdrawLiquidity,
 };
 
 export type AppRouter = typeof appRouter;
