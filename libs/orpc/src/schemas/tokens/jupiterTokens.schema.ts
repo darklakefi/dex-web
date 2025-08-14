@@ -5,7 +5,7 @@ export const jupiterTokenSchema = z.object({
   chainId: z.number().int().nonnegative(),
   decimals: z.number().int().nonnegative(),
   description: z.string().optional(),
-  logoURI: z.string(),
+  logo_uri: z.string(),
   name: z.string(),
   symbol: z.string(),
   tags: z.array(z.string()).optional(),
