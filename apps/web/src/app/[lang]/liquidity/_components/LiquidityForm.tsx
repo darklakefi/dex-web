@@ -98,13 +98,6 @@ export function LiquidityForm() {
   const [liquidityStep, setLiquidityStep] = useState(0);
   const [createStep, setCreateStep] = useState(0);
   const [disableLiquidity, setDisableLiquidity] = useState(true);
-  const [_trackDetails, setTrackDetails] = useState<{
-    tradeId: string;
-    trackingId: string;
-  }>({
-    trackingId: "",
-    tradeId: "",
-  });
   const [slippage, setSlippage] = useState("0.5");
   const [isInsufficientBalanceSell, setIsInsufficientBalanceSell] =
     useState(false);
