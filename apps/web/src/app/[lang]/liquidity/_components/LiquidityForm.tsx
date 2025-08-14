@@ -208,7 +208,6 @@ export function LiquidityForm() {
 
       const signedTxRequest = {
         signed_transaction: signedTransactionBase64,
-        tracking_id: "",
       };
 
       setLiquidityStep(3);
