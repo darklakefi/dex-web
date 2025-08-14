@@ -1,5 +1,7 @@
 import { BN, Program, web3 } from "@coral-xyz/anchor";
 import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  createAssociatedTokenAccountInstruction,
   getAssociatedTokenAddressSync,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
@@ -88,8 +90,8 @@ async function removeLiquidity(
     program.programId,
   );
 
-  // Create add liquidity transaction
-  const tx = await program.methods
+  // Create remove liquidity transaction
+  const programTx = await program.methods
     .removeLiquidity(
       new BN(lpTokensToBurn),
       new BN(minAmountX),
@@ -111,19 +113,46 @@ async function removeLiquidity(
     })
     .transaction();
 
-  // Add compute budget instruction
-  const modifyComputeUnits = web3.ComputeBudgetProgram.setComputeUnitLimit({
-    units: 250_000,
-  });
+  const conn = program.provider.connection;
+  const ixes: web3.TransactionInstruction[] = [];
 
-  tx.add(modifyComputeUnits);
+  // Conditionally create user ATAs for X and Y if missing
+  const userTokenXInfo = await conn.getAccountInfo(userTokenAccountX);
+  if (!userTokenXInfo) {
+    ixes.push(
+      createAssociatedTokenAccountInstruction(
+        user, // payer
+        userTokenAccountX,
+        user, // owner
+        tokenXMint,
+        tokenXProgramId,
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+      ),
+    );
+  }
+  const userTokenYInfo = await conn.getAccountInfo(userTokenAccountY);
+  if (!userTokenYInfo) {
+    ixes.push(
+      createAssociatedTokenAccountInstruction(
+        user,
+        userTokenAccountY,
+        user,
+        tokenYMint,
+        tokenYProgramId,
+        ASSOCIATED_TOKEN_PROGRAM_ID,
+      ),
+    );
+  }
 
-  return tx;
+  ixes.push(web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 250_000 }));
+
+  const finalTx = new web3.Transaction();
+  for (const ix of ixes) finalTx.add(ix);
+  for (const ix of programTx.instructions) finalTx.add(ix);
+
+  return finalTx;
 }
 
-// Usage same as addLiquidityTxHandler
-
-// Tries to burn exactly lpTokensToBurn at the same time checking that user receives at least minAmountX and minAmountY (if it does not it will fail)
 export async function removeLiquidityTxHandler(
   input: RemoveLiquidityTxInput,
 ): Promise<RemoveLiquidityTxOutput> {
