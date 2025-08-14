@@ -2,7 +2,7 @@ import { AnchorProvider } from "@coral-xyz/anchor";
 import { Transaction } from "@solana/web3.js";
 import { z } from "zod/v4";
 
-export const removeLiquidityTxInputSchema = z.object({
+export const removeLiquidityTransactionInputSchema = z.object({
   lpTokensToBurn: z.number(),
   minAmountX: z.number(),
   minAmountY: z.number(),
@@ -14,14 +14,14 @@ export const removeLiquidityTxInputSchema = z.object({
   user: z.string(),
 });
 
-export const removeLiquidityTxOutputSchema = z.object({
+export const removeLiquidityTransactionOutputSchema = z.object({
   success: z.boolean(),
   transaction: z.instanceof(Transaction).nullable(),
 });
 
-export type RemoveLiquidityTxInput = z.infer<
-  typeof removeLiquidityTxInputSchema
+export type RemoveLiquidityTransactionInput = z.infer<
+  typeof removeLiquidityTransactionInputSchema
 >;
-export type RemoveLiquidityTxOutput = z.infer<
-  typeof removeLiquidityTxOutputSchema
+export type RemoveLiquidityTransactionOutput = z.infer<
+  typeof removeLiquidityTransactionOutputSchema
 >;

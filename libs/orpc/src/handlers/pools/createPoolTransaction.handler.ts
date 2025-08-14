@@ -16,10 +16,13 @@ import type {
   CreatePoolTransactionOutput,
 } from "../../schemas/pools/createPoolTransaction.schema";
 
+// TODO: Move to constants file
 const POOL_SEED = "pool";
 const AMM_CONFIG_SEED = "amm_config";
 const LIQUIDITY_SEED = "lp";
 
+// devnet and mainnet uses different ones
+// should be re-generated from IDL
 const createPoolFeeVaultDevnet = new PublicKey(
   "6vUjEKC5mkiDMdMhkxV8SYzPQAk39aPKbjGataVnkUss",
 );
@@ -70,6 +73,7 @@ async function createPool(
     TOKEN_PROGRAM_ID,
   );
 
+  // Create add liquidity transaction
   const tx = await program.methods
     .initializePool(new BN(depositAmountX), new BN(depositAmountY))
     .accountsPartial({
@@ -93,6 +97,10 @@ async function createPool(
   return tx;
 }
 
+// Usage example same as createLiquidityTransactionHandler
+
+// Tries to create a pool with and deposit given amounts of tokenX and tokenY
+// (if pool exists or amounts too small it will fail)
 export async function createPoolTransactionHandler(
   input: CreatePoolTransactionInput,
 ): Promise<CreatePoolTransactionOutput> {

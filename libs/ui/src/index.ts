@@ -1,4 +1,3 @@
-export { NoResultFound } from "../../../apps/web/src/app/_components/NoResultFound";
 export { Box } from "./lib/Box/Box";
 export { Button } from "./lib/Button/Button";
 export { Footer } from "./lib/Footer/Footer";

@@ -1,5 +1,5 @@
-import { withdrawLiquidityHandler } from "../../handlers/pools/withdrawLiquidity.handler";
-import { withdrawLiquidityInputSchema } from "../../schemas/pools/withdrawLiquidity.schema";
+import { withdrawLiquidityHandler } from "../../handlers/liquidity/withdrawLiquidity.handler";
+import { withdrawLiquidityInputSchema } from "../../schemas/liquidity/withdrawLiquidity.schema";
 import { baseProcedure } from "../base.procedure";
 
 export const withdrawLiquidity = baseProcedure

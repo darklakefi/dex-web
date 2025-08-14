@@ -9,7 +9,7 @@ import { ShortPoolPanel } from "../[lang]/(swap)/_components/ShortPoolPanel";
 
 export function FeaturesAndTrendingPoolPanel() {
   const { data } = useSuspenseQuery(
-    tanstackClient.getPinedPool.queryOptions({}),
+    tanstackClient.pools.getPinedPool.queryOptions({}),
   );
   const [_, setSelectedTokens] = useQueryStates(selectedTokensParsers);
 

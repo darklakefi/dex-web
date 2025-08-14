@@ -95,7 +95,7 @@ export function SwapForm() {
   const [slippage, setSlippage] = useState("0.5");
 
   const { data: poolDetails } = useSuspenseQuery(
-    tanstackClient.getPoolDetails.queryOptions({
+    tanstackClient.pools.getPoolDetails.queryOptions({
       input: {
         tokenXMint: tokenBAddress,
         tokenYMint: tokenAAddress,
@@ -346,7 +346,7 @@ export function SwapForm() {
 
     setIsLoadingQuote(true);
     setIsDisableSwapButton(true);
-    const quote = await client.getSwapQuote({
+    const quote = await client.swap.getSwapQuote({
       amountIn: amountInNumber,
       isXtoY,
       slippage,

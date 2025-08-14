@@ -2,8 +2,8 @@
 
 import { client, tanstackClient } from "@dex-web/orpc";
 import type {
-  AddLiquidityTxInput,
-  CreatePoolTxInput,
+  CreateLiquidityTransactionInput,
+  CreatePoolTransactionInput,
 } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
@@ -115,7 +115,7 @@ export function LiquidityForm() {
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
 
   const { data: poolDetails } = useSuspenseQuery(
-    tanstackClient.getPoolDetails.queryOptions({
+    tanstackClient.pools.getPoolDetails.queryOptions({
       input: {
         tokenXMint,
         tokenYMint,
@@ -144,13 +144,13 @@ export function LiquidityForm() {
     );
 
   const { data: tokenADetails } = useSuspenseQuery(
-    tanstackClient.getTokenDetails.queryOptions({
+    tanstackClient.tokens.getTokenDetails.queryOptions({
       input: { address: tokenXMint },
     }),
   );
 
   const { data: tokenBDetails } = useSuspenseQuery(
-    tanstackClient.getTokenDetails.queryOptions({
+    tanstackClient.tokens.getTokenDetails.queryOptions({
       input: { address: tokenYMint },
     }),
   );
@@ -219,7 +219,7 @@ export function LiquidityForm() {
       });
 
       const liquidityTxResponse =
-        await client.dexGateway.submitLiquidityTx(signedTxRequest);
+        await client.liquidity.submitLiquidityTransaction(signedTxRequest);
 
       if (liquidityTxResponse.success && liquidityTxResponse.signature) {
         checkLiquidityTransactionStatus(liquidityTxResponse.signature);
@@ -358,7 +358,7 @@ export function LiquidityForm() {
       const depositAmountX = isTokenASellToken ? tokenAAmount : tokenBAmount;
       const depositAmountY = isTokenASellToken ? tokenBAmount : tokenAAmount;
 
-      const response = await client.createPoolTx({
+      const response = await client.pools.createPoolTransaction({
         depositAmountX: Math.floor(depositAmountX),
         depositAmountY: Math.floor(depositAmountY),
         tokenXMint: tokenXAddress,
@@ -366,7 +366,7 @@ export function LiquidityForm() {
         tokenYMint: tokenYAddress,
         tokenYProgramId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
         user: publicKey.toBase58(),
-      } satisfies CreatePoolTxInput);
+      } satisfies CreatePoolTransactionInput);
 
       if (response.success && response.transaction) {
         const transactionBuffer = Buffer.from(response.transaction, "base64");
@@ -398,9 +398,11 @@ export function LiquidityForm() {
   ) => {
     for (let i = 0; i < maxAttempts; i++) {
       try {
-        const response = await client.dexGateway.checkLiquidityTxStatus({
-          signature,
-        });
+        const response = await client.liquidity.checkLiquidityTransactionStatus(
+          {
+            signature,
+          },
+        );
 
         if (response.status === "finalized") {
           if (response.error) {
@@ -524,9 +526,10 @@ export function LiquidityForm() {
         tokenXMint: tokenXAddress,
         tokenYMint: tokenYAddress,
         user: publicKey.toBase58(),
-      } satisfies AddLiquidityTxInput;
+      } satisfies CreateLiquidityTransactionInput;
 
-      const response = await client.dexGateway.addLiquidity(requestPayload);
+      const response =
+        await client.liquidity.createLiquidityTransaction(requestPayload);
 
       if (response.success && response.transaction) {
         requestSigning(response.transaction);
@@ -558,7 +561,7 @@ export function LiquidityForm() {
     setLiquidityStep(10);
     setDisableLiquidity(true);
 
-    const response = await client.getAddLiquidityReview({
+    const response = await client.liquidity.getAddLiquidityReview({
       isTokenX: inputType === "tokenX",
       tokenAmount: amountNumber,
       tokenXMint: poolDetails.tokenXMint,
@@ -730,7 +733,8 @@ export function LiquidityForm() {
       BigNumber(initialPrice || "0").gt(0) &&
       !isInsufficientBalanceSell &&
       !isInsufficientBalanceBuy &&
-      createStep === 0
+      createStep === 0 &&
+      form.state.canSubmit
     );
   };
 
@@ -753,18 +757,50 @@ export function LiquidityForm() {
               </Text.Body2>
               <SelectTokenButton returnUrl="liquidity" type="sell" />
             </div>
-            <form.Field name="tokenBAmount">
+            <form.Field
+              name="tokenBAmount"
+              validators={{
+                onChange: ({ value }) => {
+                  const numericValue = value.replace(/,/g, "");
+                  if (!numericValue || BigNumber(numericValue).lte(0)) {
+                    return undefined;
+                  }
+
+                  const tokenAccount = sellTokenAccount?.tokenAccounts[0];
+                  if (!tokenAccount) {
+                    return undefined;
+                  }
+
+                  const accountAmount = tokenAccount.amount || 0;
+                  const decimal = tokenAccount.decimals || 0;
+                  const maxBalance = convertToDecimal(accountAmount, decimal);
+
+                  if (BigNumber(numericValue).gt(maxBalance)) {
+                    return `Insufficient ${tokenAccount.symbol || "token"} balance. Max: ${numberFormatHelper({ decimalScale: 6, trimTrailingZeros: true, value: maxBalance })}`;
+                  }
+
+                  return undefined;
+                },
+              }}
+            >
               {(field) => (
-                <FormFieldset
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "sell");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
+                <div>
+                  <FormFieldset
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "sell");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                  {!field.state.meta.isValid && (
+                    <Text.Body3 className="mt-1 text-red-400" role="alert">
+                      {field.state.meta.errors.join(", ")}
+                    </Text.Body3>
+                  )}
+                </div>
               )}
             </form.Field>
           </Box>
@@ -784,18 +820,50 @@ export function LiquidityForm() {
               </Text.Body2>
               <SelectTokenButton returnUrl="liquidity" type="buy" />
             </div>
-            <form.Field name="tokenAAmount">
+            <form.Field
+              name="tokenAAmount"
+              validators={{
+                onChange: ({ value }) => {
+                  const numericValue = value.replace(/,/g, "");
+                  if (!numericValue || BigNumber(numericValue).lte(0)) {
+                    return undefined;
+                  }
+
+                  const tokenAccount = buyTokenAccount?.tokenAccounts[0];
+                  if (!tokenAccount) {
+                    return undefined;
+                  }
+
+                  const accountAmount = tokenAccount.amount || 0;
+                  const decimal = tokenAccount.decimals || 0;
+                  const maxBalance = convertToDecimal(accountAmount, decimal);
+
+                  if (BigNumber(numericValue).gt(maxBalance)) {
+                    return `Insufficient ${tokenAccount.symbol || "token"} balance. Max: ${numberFormatHelper({ decimalScale: 6, trimTrailingZeros: true, value: maxBalance })}`;
+                  }
+
+                  return undefined;
+                },
+              }}
+            >
               {(field) => (
-                <FormFieldset
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "buy");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={buyTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
+                <div>
+                  <FormFieldset
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "buy");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                  {!field.state.meta.isValid && (
+                    <Text.Body3 className="mt-1 text-red-400" role="alert">
+                      {field.state.meta.errors.join(", ")}
+                    </Text.Body3>
+                  )}
+                </div>
               )}
             </form.Field>
           </Box>
@@ -876,7 +944,8 @@ export function LiquidityForm() {
                   liquidityStep !== 0 ||
                   disableLiquidity ||
                   isInsufficientBalanceSell ||
-                  isInsufficientBalanceBuy
+                  isInsufficientBalanceBuy ||
+                  !form.state.canSubmit
                 }
                 loading={liquidityStep !== 0}
                 onClick={handleDeposit}

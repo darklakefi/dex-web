@@ -47,7 +47,7 @@ export function FormFieldset({
   );
 
   const { data: usdExchangeRate } = useSuspenseQuery(
-    tanstackClient.getTokenPrice.queryOptions({
+    tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
         mint: name === "tokenAAmount" ? tokenAAddress : tokenBAddress,

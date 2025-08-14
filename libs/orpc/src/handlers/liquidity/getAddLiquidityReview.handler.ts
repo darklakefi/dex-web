@@ -14,11 +14,10 @@ import { getHelius } from "../../getHelius";
 import type {
   GetAddLiquidityReviewInput,
   GetAddLiquidityReviewOutput,
-} from "../../schemas/pools/getAddLiquidityReview.schema";
-import { EXCHANGE_PROGRAM_ID } from "../../utils/solana";
+} from "../../schemas/liquidity/getAddLiquidityReview.schema";
+import { EXCHANGE_PROGRAM_ID, type PoolAccount } from "../../utils/solana";
 import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
 
-// Helper function to determine token program ID
 async function getTokenProgramId(
   connection: Connection,
   accountPubkey: PublicKey,
@@ -29,7 +28,6 @@ async function getTokenProgramId(
       throw new Error("Account not found");
     }
 
-    // Check if the account owner is TOKEN_2022_PROGRAM_ID
     if (accountInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
       return TOKEN_2022_PROGRAM_ID;
     } else if (accountInfo.owner.equals(TOKEN_PROGRAM_ID)) {
@@ -39,22 +37,18 @@ async function getTokenProgramId(
     }
   } catch (error) {
     console.error("Failed to determine token program ID:", error);
-    // Default to legacy program
     return TOKEN_PROGRAM_ID;
   }
 }
 
-// Helper function to get token balance using SPL library
 async function getTokenBalance(
   connection: Connection,
   accountPubkey: PublicKey,
   accountName: string,
 ): Promise<number> {
   try {
-    // Determine the correct program ID for this token account
     const programId = await getTokenProgramId(connection, accountPubkey);
 
-    // Use SPL token library to get account info with the correct program ID
     const account = await getAccount(
       connection,
       accountPubkey,
@@ -79,7 +73,7 @@ const coder = new BorshCoder(IDL as Idl);
 async function getPoolAccount(
   connection: Connection,
   poolPubkey: PublicKey,
-): Promise<any> {
+): Promise<PoolAccount> {
   const accountInfo = await connection.getAccountInfo(poolPubkey);
 
   if (!accountInfo) {
@@ -139,13 +133,11 @@ export async function getAddLiquidityReviewHandler(
       "Reserve Y",
     );
 
-    // Calculate available reserves (excluding locked amounts and protocol fees)
     const liquidityReserveX =
       reserveXBalance - pool.user_locked_x - pool.protocol_fee_x;
     const liquidityReserveY =
       reserveYBalance - pool.user_locked_y - pool.protocol_fee_y;
 
-    // Get token details for decimals
     const tokenX = await getTokenDetailsHandler({
       address: tokenXMint.toString(),
     });
@@ -158,14 +150,11 @@ export async function getAddLiquidityReviewHandler(
         10 ** tokenX.decimals,
       );
 
-      // Calculate required Y amount based on the pool ratio
-      // Formula: Y = X * (reserveY / reserveX)
       const tokenYAmountRaw = new BigNumber(scaledTokenXAmount)
         .multipliedBy(liquidityReserveY)
         .dividedBy(liquidityReserveX)
         .integerValue(BigNumber.ROUND_UP);
 
-      // Convert raw amount back to user-friendly format
       const tokenYAmount = tokenYAmountRaw.dividedBy(10 ** tokenY.decimals);
 
       return {
@@ -177,14 +166,11 @@ export async function getAddLiquidityReviewHandler(
         10 ** tokenY.decimals,
       );
 
-      // Calculate required X amount based on the pool ratio
-      // Formula: X = Y * (reserveX / reserveY)
       const tokenXAmountRaw = new BigNumber(scaledTokenYAmount)
         .multipliedBy(liquidityReserveX)
         .dividedBy(liquidityReserveY)
         .integerValue(BigNumber.ROUND_UP);
 
-      // Convert raw amount back to user-friendly format
       const tokenXAmount = tokenXAmountRaw.dividedBy(10 ** tokenX.decimals);
 
       return {

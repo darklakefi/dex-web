@@ -1,5 +1,5 @@
-import { submitWithdrawalHandler } from "../../handlers/pools/submitWithdrawal.handler";
-import { submitWithdrawalInputSchema } from "../../schemas/pools/submitWithdrawal.schema";
+import { submitWithdrawalHandler } from "../../handlers/liquidity/submitWithdrawal.handler";
+import { submitWithdrawalInputSchema } from "../../schemas/liquidity/submitWithdrawal.schema";
 import { baseProcedure } from "../base.procedure";
 
 export const submitWithdrawal = baseProcedure

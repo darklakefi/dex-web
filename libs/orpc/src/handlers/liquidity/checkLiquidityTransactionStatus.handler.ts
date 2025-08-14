@@ -2,19 +2,19 @@
 
 import { getHelius } from "../../getHelius";
 
-export interface CheckLiquidityTxStatusInput {
+export interface CheckLiquidityTransactionStatusInput {
   signature: string;
 }
 
-export interface CheckLiquidityTxStatusOutput {
+export interface CheckLiquidityTransactionStatusOutput {
   status: "pending" | "confirmed" | "finalized" | "failed";
   error?: string;
   signature: string;
 }
 
-export async function checkLiquidityTxStatusHandler(
-  input: CheckLiquidityTxStatusInput,
-): Promise<CheckLiquidityTxStatusOutput> {
+export async function checkLiquidityTransactionStatusHandler(
+  input: CheckLiquidityTransactionStatusInput,
+): Promise<CheckLiquidityTransactionStatusOutput> {
   const { signature } = input;
 
   try {

@@ -16,7 +16,9 @@ export default async function Page({
 
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery(tanstackClient.getPinedPool.queryOptions({}));
+  await queryClient.prefetchQuery(
+    tanstackClient.pools.getPinedPool.queryOptions({}),
+  );
 
   return (
     <div className="flex justify-center gap-12">
