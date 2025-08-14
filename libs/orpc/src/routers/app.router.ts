@@ -5,6 +5,7 @@ import { getPinedPool } from "../procedures/pools/getPinedPool.procedure";
 import { getPoolDetails } from "../procedures/pools/getPoolDetail.procedure";
 import { getPoolReserves } from "../procedures/pools/getPoolReserves.procedure";
 import { getUserLiquidity } from "../procedures/pools/getUserLiquidity.procedure";
+import { submitWithdrawal } from "../procedures/pools/submitWithdrawal.procedure";
 import { withdrawLiquidity } from "../procedures/pools/withdrawLiquidity.procedure";
 import { getSwapDetails } from "../procedures/swaps/getSwapDetails.procedure";
 import { getSwapQuote } from "../procedures/swaps/getSwapQuote.procedure";
@@ -29,6 +30,7 @@ export const appRouter = {
   getTokens,
   getUserLiquidity,
   helius: heliusRouter,
+  submitWithdrawal,
   withdrawLiquidity,
 };
 

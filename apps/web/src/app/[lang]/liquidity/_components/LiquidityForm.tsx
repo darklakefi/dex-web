@@ -106,11 +106,19 @@ export function LiquidityForm() {
 
   const [poolPrice, setPoolPrice] = useState(0);
 
+  const sortedTokenAddresses = sortSolanaAddresses(
+    tokenAAddress,
+    tokenBAddress,
+  );
+
+  const tokenXMint = sortedTokenAddresses.tokenXAddress;
+  const tokenYMint = sortedTokenAddresses.tokenYAddress;
+
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.getPoolDetails.queryOptions({
       input: {
-        tokenXMint: tokenBAddress ?? DEFAULT_SELL_TOKEN,
-        tokenYMint: tokenAAddress ?? DEFAULT_BUY_TOKEN,
+        tokenXMint,
+        tokenYMint,
       },
     }),
   );
@@ -119,7 +127,7 @@ export function LiquidityForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: tokenAAddress || DEFAULT_BUY_TOKEN,
+          mint: tokenXMint,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -129,7 +137,7 @@ export function LiquidityForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: tokenBAddress || DEFAULT_SELL_TOKEN,
+          mint: tokenYMint,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -137,13 +145,13 @@ export function LiquidityForm() {
 
   const { data: tokenADetails } = useSuspenseQuery(
     tanstackClient.getTokenDetails.queryOptions({
-      input: { address: tokenAAddress || DEFAULT_BUY_TOKEN },
+      input: { address: tokenXMint },
     }),
   );
 
   const { data: tokenBDetails } = useSuspenseQuery(
     tanstackClient.getTokenDetails.queryOptions({
-      input: { address: tokenBAddress || DEFAULT_SELL_TOKEN },
+      input: { address: tokenYMint },
     }),
   );
 

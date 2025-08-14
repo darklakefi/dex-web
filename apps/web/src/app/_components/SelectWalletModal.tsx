@@ -5,25 +5,14 @@ import { useWallet, type Wallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
-import { useEffect, useState } from "react";
-import { getFirstAvailableWallet } from "../_utils/getFirstAvailableWallet";
 import { selectedTokensParsers } from "../_utils/searchParams";
 
 export function SelectWalletModal() {
   const { wallets, wallet, select } = useWallet();
   const router = useRouter();
-  const [shouldClose, setShouldClose] = useState(false);
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
-
-  const firstAvailableWallet = getFirstAvailableWallet(wallets);
-
-  useEffect(() => {
-    if (firstAvailableWallet && shouldClose) {
-      handleClose();
-    }
-  }, [firstAvailableWallet, shouldClose]);
 
   const handleSelect = (
     wallet: Wallet,
@@ -32,7 +21,7 @@ export function SelectWalletModal() {
     e.preventDefault();
     select(wallet.adapter.name);
     setTimeout(() => {
-      setShouldClose(true);
+      handleClose();
     }, 2000);
   };
 
