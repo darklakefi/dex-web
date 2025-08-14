@@ -6,7 +6,6 @@ import type {
   GetTokensInput,
   GetTokensOutput,
 } from "../../schemas/tokens/getTokens.schema";
-import { isSolanaAddress } from "../../utils/solana";
 import { getTokenMetadataListHandler } from "../dex-gateway/getTokenMetadataList.handler";
 
 export const getTokensHandler = async (
@@ -19,8 +18,18 @@ export const getTokensHandler = async (
     process.env.NETWORK === "2" ? tokensData : tokensDataMainnet;
 
   const gatewayInput: GetTokenMetadataListRequest = {
+    addresses_list: query
+      ? {
+          token_addresses: [query],
+        }
+      : undefined,
     page_number: page,
     page_size: limit,
+    symbols_list: query
+      ? {
+          token_symbols: [query],
+        }
+      : undefined,
   };
   const { tokens: gatewayTokensList } =
     await getTokenMetadataListHandler(gatewayInput);
@@ -40,24 +49,16 @@ export const getTokensHandler = async (
     };
   }
 
-  if (query) {
-    if (isSolanaAddress(query)) {
-      gatewayInput.addresses_list = {
-        token_addresses: [query],
-      };
-    } else {
-      gatewayInput.symbols_list = {
-        token_symbols: [query],
-      };
-    }
-  }
-
   const total = fullTokensList.length;
   const hasMore = fullTokensList.length > limit;
 
-  const filteredTokensList = fullTokensList.filter((token) =>
-    allowList ? allowList.includes(token.address) : true,
-  );
+  const filteredTokensList = fullTokensList
+    .filter((token) => (allowList ? allowList.includes(token.address) : true))
+    .filter(
+      (token) =>
+        token.address.toUpperCase().includes(query.toUpperCase()) ||
+        token.symbol.toUpperCase().includes(query.toUpperCase()),
+    );
 
   return {
     hasMore,
