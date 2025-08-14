@@ -4,6 +4,7 @@ import { Button, Icon } from "@dex-web/ui";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import { selectedTokensParsers } from "../_utils/searchParams";
 
@@ -31,13 +32,19 @@ export function SelectTokenButton({
     }),
   );
 
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   function buildHref(
     type: string,
     tokenA: string,
     tokenB: string,
     returnUrl?: string,
   ) {
-    const basePath = `select-token/${type}?tokenAAddress=${tokenA}&tokenBAddress=${tokenB}`;
+    const from = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    const basePath = `select-token/${type}?tokenAAddress=${tokenA}&tokenBAddress=${tokenB}&from=${encodeURIComponent(
+      from,
+    )}`;
     return returnUrl ? `${returnUrl}/${basePath}` : `/${basePath}`;
   }
   return (

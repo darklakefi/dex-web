@@ -11,8 +11,8 @@ import {
   useStore,
 } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useQueryStates } from "nuqs";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createSerializer, useQueryStates } from "nuqs";
 import { Suspense } from "react";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { TokenList } from "../[lang]/(swap)/_components/TokenList";
@@ -33,6 +33,8 @@ const { useAppForm } = createFormHook({
 });
 
 const allowUnknownTokenReturnUrls = ["liquidity"];
+
+const serialize = createSerializer(selectedTokensParsers);
 
 const formConfig = {
   defaultValues: {
@@ -57,15 +59,19 @@ export function SelectTokenModal({
   returnUrl = "",
 }: SelectTokenModalProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
   const handleClose = () => {
-    router.push(
-      `/${returnUrl}?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`,
-    );
+    const from = searchParams.get("from");
+    if (from) {
+      router.push(from);
+      return;
+    }
+    router.back();
   };
 
   const handleSelect = (
@@ -73,18 +79,26 @@ export function SelectTokenModal({
     e: React.MouseEvent<HTMLButtonElement>,
   ) => {
     e.preventDefault();
+
+    const currentFrom = searchParams.get("from");
+    const baseReturn = currentFrom || `/${returnUrl}`;
+
     if (type === "buy") {
       const sellAddress =
         selectedTokenAddress === tokenBAddress ? tokenAAddress : tokenBAddress;
-      router.push(
-        `/${returnUrl}?tokenBAddress=${sellAddress}&tokenAAddress=${selectedTokenAddress}`,
-      );
+      const urlWithParams = serialize(baseReturn, {
+        tokenAAddress: selectedTokenAddress,
+        tokenBAddress: sellAddress,
+      });
+      router.push(urlWithParams);
     } else {
       const buyAddress =
         selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
-      router.push(
-        `/${returnUrl}?tokenBAddress=${selectedTokenAddress}&tokenAAddress=${buyAddress}`,
-      );
+      const urlWithParams = serialize(baseReturn, {
+        tokenAAddress: buyAddress,
+        tokenBAddress: selectedTokenAddress,
+      });
+      router.push(urlWithParams);
     }
   };
 
