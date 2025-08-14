@@ -73,10 +73,6 @@ export function WithdrawLiquidityModal({
     usdValue: 0,
   });
 
-  const maxLpTokens = userLiquidity
-    ? convertToDecimal(userLiquidity.lpTokenBalance, userLiquidity.decimals)
-    : 0;
-
   const form = useAppForm({
     defaultValues: {
       withdrawalAmount: "",
@@ -318,7 +314,7 @@ export function WithdrawLiquidityModal({
   };
 
   const handleWithdraw = async () => {
-    if (!publicKey) {
+    if (!publicKey || !userLiquidity || !poolReserves) {
       toast({
         description: "Missing wallet address or token information",
         title: "Withdrawal Error",
@@ -346,8 +342,8 @@ export function WithdrawLiquidityModal({
       );
 
       const userLpBalance = convertToDecimal(
-        userLiquidity?.lpTokenBalance || 0,
-        9,
+        userLiquidity.lpTokenBalance || 0,
+        userLiquidity.decimals,
       );
 
       const slippageTolerance = 0.01;
