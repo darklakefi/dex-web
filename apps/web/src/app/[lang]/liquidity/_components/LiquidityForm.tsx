@@ -28,6 +28,7 @@ import {
 import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
+import { getLiquidityFormButtonMessage } from "../_utils/getLiquidityFormButtonMessage";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -37,13 +38,12 @@ const liquidityFormSchema = z.object({
   tokenBAmount: z.string(),
 });
 
-type LiquidityFormSchema = z.infer<typeof liquidityFormSchema>;
+export type LiquidityFormSchema = z.infer<typeof liquidityFormSchema>;
 
 const { useAppForm } = createFormHook({
   fieldComponents: {
     SwapFormFieldset: FormFieldset,
   },
-
   fieldContext,
   formComponents: {},
   formContext,
@@ -67,24 +67,6 @@ const formConfig = {
   },
 };
 
-const BUTTON_MESSAGE = {
-  ADD_LIQUIDITY: "Add Liquidity",
-  CALCULATING: "calculating amounts...",
-  CREATE_POOL: "Create Pool",
-  CREATE_STEP_1: "Preparing pool creation [1/3]",
-  CREATE_STEP_2: "Confirm transaction in your wallet [2/3]",
-  CREATE_STEP_3: "Processing pool creation [3/3]",
-  ENTER_AMOUNT: "enter an amount",
-  ENTER_AMOUNTS: "Enter token amounts",
-  INSUFFICIENT_BALANCE: "insufficient",
-  INVALID_PRICE: "Invalid price",
-  LOADING: "loading",
-  SAME_TOKENS: "Select different tokens",
-  STEP_1: "protecting liquidity transaction [1/3]",
-  STEP_2: "confirm liquidity in your wallet [2/3]",
-  STEP_3: "verifying liquidity transaction [3/3]",
-};
-
 export function LiquidityForm() {
   const form = useAppForm(formConfig);
   const { publicKey, wallet, signTransaction } = useWallet();
@@ -99,11 +81,6 @@ export function LiquidityForm() {
   const [createStep, setCreateStep] = useState(0);
   const [disableLiquidity, setDisableLiquidity] = useState(true);
   const [slippage, setSlippage] = useState("0.5");
-  const [isInsufficientBalanceSell, setIsInsufficientBalanceSell] =
-    useState(false);
-  const [isInsufficientBalanceBuy, setIsInsufficientBalanceBuy] =
-    useState(false);
-
   const [poolPrice, setPoolPrice] = useState(0);
 
   const sortedTokenAddresses = sortSolanaAddresses(
@@ -156,29 +133,6 @@ export function LiquidityForm() {
   );
 
   const poolRatio = 1;
-
-  const checkInsufficientBalance = (input: string, type: "sell" | "buy") => {
-    const value = input.replace(/,/g, "");
-    const tokenAccount = type === "sell" ? sellTokenAccount : buyTokenAccount;
-    const accountAmount = tokenAccount?.tokenAccounts[0]?.amount || 0;
-    const decimal = tokenAccount?.tokenAccounts[0]?.decimals || 0;
-
-    if (BigNumber(value).gt(convertToDecimal(accountAmount, decimal))) {
-      if (type === "sell") {
-        setIsInsufficientBalanceSell(true);
-      } else {
-        setIsInsufficientBalanceBuy(true);
-      }
-      return true;
-    }
-
-    if (type === "sell") {
-      setIsInsufficientBalanceSell(false);
-    } else {
-      setIsInsufficientBalanceBuy(false);
-    }
-    return false;
-  };
 
   const requestSigning = async (unsignedTransaction: string) => {
     try {
@@ -604,7 +558,6 @@ export function LiquidityForm() {
         .multipliedBy(price)
         .toString();
       form.setFieldValue("tokenBAmount", calculatedTokenB);
-      checkInsufficientBalance(calculatedTokenB, "sell");
     }
   };
 
@@ -614,9 +567,7 @@ export function LiquidityForm() {
   ) => {
     const value = e.target.value.replace(/,/g, "");
 
-    const hasInsufficientBalance = checkInsufficientBalance(value, type);
-
-    if (poolDetails && BigNumber(value).gt(0) && !hasInsufficientBalance) {
+    if (poolDetails && BigNumber(value).gt(0)) {
       const inputType =
         (type === "sell" && poolDetails?.tokenXMint === tokenBAddress) ||
         (type === "buy" && poolDetails?.tokenXMint === tokenAAddress)
@@ -635,107 +586,11 @@ export function LiquidityForm() {
             .multipliedBy(price)
             .toString();
           form.setFieldValue("tokenBAmount", calculatedTokenB);
-          checkInsufficientBalance(calculatedTokenB, "sell");
         }
       }
     } else {
       setDisableLiquidity(true);
     }
-  };
-
-  const getButtonMessage = () => {
-    const sellAmount = form.state.values.tokenBAmount.replace(/,/g, "");
-    const buyAmount = form.state.values.tokenAAmount.replace(/,/g, "");
-    const initialPrice = form.state.values.initialPrice;
-
-    if (createStep === 1) return BUTTON_MESSAGE.CREATE_STEP_1;
-    if (createStep === 2) return BUTTON_MESSAGE.CREATE_STEP_2;
-    if (createStep === 3) return BUTTON_MESSAGE.CREATE_STEP_3;
-
-    if (liquidityStep === 1) {
-      return BUTTON_MESSAGE.STEP_1;
-    }
-
-    if (liquidityStep === 2) {
-      return BUTTON_MESSAGE.STEP_2;
-    }
-
-    if (liquidityStep === 3) {
-      return BUTTON_MESSAGE.STEP_3;
-    }
-
-    if (liquidityStep === 10) {
-      return BUTTON_MESSAGE.CALCULATING;
-    }
-
-    if (tokenBAddress === tokenAAddress) {
-      return BUTTON_MESSAGE.SAME_TOKENS;
-    }
-
-    if (!poolDetails) {
-      if (
-        !sellAmount ||
-        BigNumber(sellAmount).lte(0) ||
-        !buyAmount ||
-        BigNumber(buyAmount).lte(0)
-      ) {
-        return BUTTON_MESSAGE.ENTER_AMOUNTS;
-      }
-
-      if (!initialPrice || BigNumber(initialPrice).lte(0)) {
-        return BUTTON_MESSAGE.INVALID_PRICE;
-      }
-
-      if (isInsufficientBalanceSell) {
-        const symbol = sellTokenAccount?.tokenAccounts[0]?.symbol || "";
-        return `${BUTTON_MESSAGE.INSUFFICIENT_BALANCE} ${symbol}`;
-      }
-
-      if (isInsufficientBalanceBuy) {
-        const symbol = buyTokenAccount?.tokenAccounts[0]?.symbol || "";
-        return `${BUTTON_MESSAGE.INSUFFICIENT_BALANCE} ${symbol}`;
-      }
-
-      return BUTTON_MESSAGE.CREATE_POOL;
-    }
-
-    if (
-      !sellAmount ||
-      BigNumber(sellAmount).lte(0) ||
-      !buyAmount ||
-      BigNumber(buyAmount).lte(0)
-    ) {
-      return BUTTON_MESSAGE.ENTER_AMOUNT;
-    }
-
-    if (isInsufficientBalanceSell) {
-      const symbol = sellTokenAccount?.tokenAccounts[0]?.symbol || "";
-      return `${BUTTON_MESSAGE.INSUFFICIENT_BALANCE} ${symbol}`;
-    }
-
-    if (isInsufficientBalanceBuy) {
-      const symbol = buyTokenAccount?.tokenAccounts[0]?.symbol || "";
-      return `${BUTTON_MESSAGE.INSUFFICIENT_BALANCE} ${symbol}`;
-    }
-
-    return BUTTON_MESSAGE.ADD_LIQUIDITY;
-  };
-
-  const isCreateFormValid = () => {
-    const sellAmount = form.state.values.tokenBAmount.replace(/,/g, "");
-    const buyAmount = form.state.values.tokenAAmount.replace(/,/g, "");
-    const initialPrice = form.state.values.initialPrice;
-
-    return (
-      tokenBAddress !== tokenAAddress &&
-      BigNumber(sellAmount).gt(0) &&
-      BigNumber(buyAmount).gt(0) &&
-      BigNumber(initialPrice || "0").gt(0) &&
-      !isInsufficientBalanceSell &&
-      !isInsufficientBalanceBuy &&
-      createStep === 0 &&
-      form.state.canSubmit
-    );
   };
 
   const [initialPriceTokenX, initialPriceTokenY] =
@@ -768,15 +623,17 @@ export function LiquidityForm() {
 
                   const tokenAccount = sellTokenAccount?.tokenAccounts[0];
                   if (!tokenAccount) {
-                    return undefined;
+                    return "Could not find token account.";
                   }
 
-                  const accountAmount = tokenAccount.amount || 0;
-                  const decimal = tokenAccount.decimals || 0;
-                  const maxBalance = convertToDecimal(accountAmount, decimal);
+                  const maxBalance = convertToDecimal(
+                    tokenAccount.amount || 0,
+                    tokenAccount.decimals || 0,
+                  );
 
                   if (BigNumber(numericValue).gt(maxBalance)) {
-                    return `Insufficient ${tokenAccount.symbol || "token"} balance. Max: ${numberFormatHelper({ decimalScale: 6, trimTrailingZeros: true, value: maxBalance })}`;
+                    const symbol = tokenAccount.symbol || "token";
+                    return `Insufficient ${symbol} balance.`;
                   }
 
                   return undefined;
@@ -831,15 +688,17 @@ export function LiquidityForm() {
 
                   const tokenAccount = buyTokenAccount?.tokenAccounts[0];
                   if (!tokenAccount) {
-                    return undefined;
+                    return "Could not find token account.";
                   }
 
-                  const accountAmount = tokenAccount.amount || 0;
-                  const decimal = tokenAccount.decimals || 0;
-                  const maxBalance = convertToDecimal(accountAmount, decimal);
+                  const maxBalance = convertToDecimal(
+                    tokenAccount.amount || 0,
+                    tokenAccount.decimals || 0,
+                  );
 
                   if (BigNumber(numericValue).gt(maxBalance)) {
-                    return `Insufficient ${tokenAccount.symbol || "token"} balance. Max: ${numberFormatHelper({ decimalScale: 6, trimTrailingZeros: true, value: maxBalance })}`;
+                    const symbol = tokenAccount.symbol || "token";
+                    return `Insufficient ${symbol} balance.`;
                   }
 
                   return undefined;
@@ -943,23 +802,39 @@ export function LiquidityForm() {
                 disabled={
                   liquidityStep !== 0 ||
                   disableLiquidity ||
-                  isInsufficientBalanceSell ||
-                  isInsufficientBalanceBuy ||
                   !form.state.canSubmit
                 }
                 loading={liquidityStep !== 0}
                 onClick={handleDeposit}
               >
-                {getButtonMessage()}
+                {getLiquidityFormButtonMessage({
+                  createStep,
+                  initialPrice: form.state.values.initialPrice,
+                  liquidityStep,
+                  poolDetails,
+                  tokenAAddress,
+                  tokenAAmount: form.state.values.tokenAAmount,
+                  tokenBAddress,
+                  tokenBAmount: form.state.values.tokenBAmount,
+                })}
               </Button>
             ) : (
               <Button
                 className="w-full cursor-pointer py-3 leading-6"
-                disabled={!isCreateFormValid()}
+                disabled={!form.state.canSubmit || createStep !== 0}
                 loading={createStep !== 0}
                 onClick={handleCreatePool}
               >
-                {getButtonMessage()}
+                {getLiquidityFormButtonMessage({
+                  createStep,
+                  initialPrice: form.state.values.initialPrice,
+                  liquidityStep,
+                  poolDetails,
+                  tokenAAddress,
+                  tokenAAmount: form.state.values.tokenAAmount,
+                  tokenBAddress,
+                  tokenBAmount: form.state.values.tokenBAmount,
+                })}
               </Button>
             )}
           </div>
@@ -1001,22 +876,6 @@ export function LiquidityForm() {
                 </Text.Body2>
               </div>
 
-              {/* <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">Pool Share</Text.Body3>
-                <Text.Body3 className="text-white">
-                  ~0.01%{" "}
-                </Text.Body3>
-              </div> */}
-
-              {/* <div className="flex items-center justify-between">
-                <Text.Body3 className="text-green-300">
-                  Est. Fee (24h)
-                </Text.Body3>
-                <Text.Body3 className="text-green-400">
-                  $0.24{" "}
-                </Text.Body3>
-              </div> */}
-
               <div className="flex items-center justify-between">
                 <Text.Body2 className="text-green-300">
                   Slippage Tolerance
@@ -1026,7 +885,6 @@ export function LiquidityForm() {
             </div>
           )}
 
-        {/* Pool Creation Summary - only shown when pool doesn't exist */}
         {!poolDetails &&
           form.state.values.tokenAAmount !== "0" &&
           form.state.values.tokenBAmount !== "0" &&
