@@ -1,8 +1,7 @@
+import { Button, Text } from "@dex-web/ui";
 import { isValidSolanaAddress, truncate } from "@dex-web/utils";
 import Image from "next/image";
 import { twMerge } from "tailwind-merge";
-import { Button } from "../../../../../libs/ui/src/lib/Button/Button";
-import { Text } from "../../../../../libs/ui/src/lib/Text/Text";
 
 export interface NoResultFoundProps {
   search: string;
