@@ -814,7 +814,7 @@ export function LiquidityForm() {
           </Box>
 
           <div className="flex items-center justify-center">
-            <div className="inline-flex items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300">
+            <div className="inline-flex size-8 items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300">
               <Icon className="size-5" name="plus" />
             </div>
           </div>
@@ -915,7 +915,7 @@ export function LiquidityForm() {
               <ConnectWalletButton className="w-full py-3" />
             ) : poolDetails ? (
               <Button
-                className="w-full cursor-pointer py-3"
+                className="w-full cursor-pointer py-3 leading-6"
                 disabled={
                   liquidityStep !== 0 ||
                   disableLiquidity ||
@@ -929,7 +929,7 @@ export function LiquidityForm() {
               </Button>
             ) : (
               <Button
-                className="w-full cursor-pointer py-3"
+                className="w-full cursor-pointer py-3 leading-6"
                 disabled={!isCreateFormValid()}
                 loading={createStep !== 0}
                 onClick={handleCreatePool}

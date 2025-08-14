@@ -13,7 +13,8 @@ export function ConnectedWalletButton() {
       fallback={
         <Button
           as="div"
-          className="cursor-pointer normal-case"
+          className="cursor-pointer leading-6"
+          loading={true}
           variant="secondary"
         >
           Loading...
@@ -32,7 +33,8 @@ function ConnectedWalletContent() {
     return (
       <Button
         as="div"
-        className="cursor-pointer normal-case"
+        className="cursor-pointer leading-6"
+        loading={true}
         variant="secondary"
       >
         Loading...
@@ -52,7 +54,7 @@ function ConnectedWalletContent() {
           >
             <Button
               as="div"
-              className="cursor-pointer normal-case"
+              className="cursor-pointer normal-case leading-6"
               variant="secondary"
             >
               <Image

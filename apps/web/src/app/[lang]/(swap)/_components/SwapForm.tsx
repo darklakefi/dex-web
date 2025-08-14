@@ -569,8 +569,8 @@ export function SwapForm() {
               ) : (
                 <Button
                   as={Link}
-                  className="w-full cursor-pointer py-3"
-                  href={`/create-pool/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`}
+                  className="w-full cursor-pointer py-3 leading-6"
+                  href={`/liquidity/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`}
                 >
                   Create Pool
                 </Button>

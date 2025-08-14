@@ -44,7 +44,7 @@ export default async function RootLayout({
       className={`${bitsumishiRegular.variable} ${classicConsoleNeue.variable} font-sans antialiased`}
       lang={locale}
     >
-      <body>
+      <body className="bg-green-900">
         <NextIntlClientProvider>
           <Providers>
             <GeolocationAwareDisclaimerProvider />
