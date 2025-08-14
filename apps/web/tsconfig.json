@@ -2,6 +2,7 @@
   "compilerOptions": {
     "incremental": true,
     "jsx": "preserve",
+    "noEmit": true,
     "plugins": [
       {
         "name": "next"
