@@ -1,4 +1,6 @@
 import type { GetPoolDetailsOutput } from "@dex-web/orpc/schemas/pools/getPoolDetails.schema";
+import { convertToDecimal } from "@dex-web/utils";
+import type { PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 
 const BUTTON_MESSAGE = {
@@ -10,6 +12,7 @@ const BUTTON_MESSAGE = {
   CREATE_STEP_3: "Processing pool creation [3/3]",
   ENTER_AMOUNT: "enter an amount",
   ENTER_AMOUNTS: "Enter token amounts",
+  INSUFFICIENT_BALANCE: "Insufficient balance",
   INVALID_PRICE: "Invalid price",
   LOADING: "loading",
   SAME_TOKENS: "Select different tokens",
@@ -17,6 +20,14 @@ const BUTTON_MESSAGE = {
   STEP_2: "confirm liquidity in your wallet [2/3]",
   STEP_3: "verifying liquidity transaction [3/3]",
 };
+
+interface TokenAccountData {
+  tokenAccounts?: Array<{
+    amount: number;
+    decimals: number;
+    symbol: string;
+  }>;
+}
 
 interface LiquidityFormButtonMessageProps {
   tokenAAmount: string;
@@ -27,6 +38,9 @@ interface LiquidityFormButtonMessageProps {
   poolDetails: GetPoolDetailsOutput | null;
   tokenBAddress: string;
   tokenAAddress: string;
+  buyTokenAccount?: TokenAccountData | null;
+  sellTokenAccount?: TokenAccountData | null;
+  publicKey: PublicKey;
 }
 
 export function getLiquidityFormButtonMessage({
@@ -38,6 +52,9 @@ export function getLiquidityFormButtonMessage({
   poolDetails,
   tokenBAddress,
   tokenAAddress,
+  buyTokenAccount,
+  sellTokenAccount,
+  publicKey,
 }: LiquidityFormButtonMessageProps) {
   const sellAmount = tokenBAmount.replace(/,/g, "");
   const buyAmount = tokenAAmount.replace(/,/g, "");
@@ -53,6 +70,32 @@ export function getLiquidityFormButtonMessage({
 
   if (tokenBAddress === tokenAAddress) {
     return BUTTON_MESSAGE.SAME_TOKENS;
+  }
+
+  if (publicKey && sellAmount && BigNumber(sellAmount).gt(0)) {
+    const sellTokenAcc = sellTokenAccount?.tokenAccounts?.[0];
+    if (sellTokenAcc) {
+      const maxBalance = convertToDecimal(
+        sellTokenAcc.amount || 0,
+        sellTokenAcc.decimals || 0,
+      );
+      if (BigNumber(sellAmount).gt(maxBalance)) {
+        return BUTTON_MESSAGE.INSUFFICIENT_BALANCE;
+      }
+    }
+  }
+
+  if (publicKey && buyAmount && BigNumber(buyAmount).gt(0)) {
+    const buyTokenAcc = buyTokenAccount?.tokenAccounts?.[0];
+    if (buyTokenAcc) {
+      const maxBalance = convertToDecimal(
+        buyTokenAcc.amount || 0,
+        buyTokenAcc.decimals || 0,
+      );
+      if (BigNumber(buyAmount).gt(maxBalance)) {
+        return BUTTON_MESSAGE.INSUFFICIENT_BALANCE;
+      }
+    }
   }
 
   if (!poolDetails) {

@@ -1,0 +1,32 @@
+import type { TokenAccount } from "@dex-web/orpc/schemas";
+import { convertToDecimal } from "@dex-web/utils";
+import BigNumber from "bignumber.js";
+
+interface ValidateHasSuffificentBalanceProps {
+  amount: string;
+  tokenAccount?: TokenAccount;
+}
+
+export function validateHasSuffificentBalance({
+  amount,
+  tokenAccount,
+}: ValidateHasSuffificentBalanceProps) {
+  if (!tokenAccount) {
+    return "No token account found";
+  }
+
+  const tokenANumericValue = amount.replace(/,/g, "");
+  const symbol = tokenAccount.symbol || "token";
+  if (BigNumber(tokenANumericValue).gt(0)) {
+    const maxBalance = convertToDecimal(
+      tokenAccount.amount || 0,
+      tokenAccount.decimals || 0,
+    );
+
+    if (BigNumber(tokenANumericValue).gt(maxBalance)) {
+      return `Insufficient ${symbol} balance.`;
+    }
+  }
+
+  return undefined;
+}
