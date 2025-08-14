@@ -207,8 +207,8 @@ export function YourLiquidity({
         isOpen={isWithdrawModalOpen}
         onClose={() => setIsWithdrawModalOpen(false)}
         poolReserves={poolReserves}
-        tokenAAddress={tokenAAddress}
-        tokenBAddress={tokenBAddress}
+        tokenAAddress={tokenXAddress}
+        tokenBAddress={tokenYAddress}
         userLiquidity={userLiquidity}
       />
     </div>
