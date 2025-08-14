@@ -5,27 +5,20 @@ import { getHelius } from "../../getHelius";
 
 export interface SubmitLiquidityTxInput {
   signed_transaction: string; // Base64 encoded signed transaction
-  tracking_id: string;
 }
 
 export interface SubmitLiquidityTxOutput {
   success: boolean;
   signature?: string;
   error_logs?: string;
-  tracking_id: string;
 }
 
 export async function submitLiquidityTxHandler(
   input: SubmitLiquidityTxInput,
 ): Promise<SubmitLiquidityTxOutput> {
-  const { signed_transaction, tracking_id } = input;
+  const { signed_transaction } = input;
 
   try {
-    console.log(
-      "Direct liquidity transaction submission for tracking_id:",
-      tracking_id,
-    );
-
     // Deserialize the signed transaction
     const transactionBuffer = Buffer.from(signed_transaction, "base64");
     const transaction = VersionedTransaction.deserialize(transactionBuffer);
@@ -44,11 +37,6 @@ export async function submitLiquidityTxHandler(
       },
     );
 
-    console.log("Liquidity transaction submitted successfully:", {
-      signature,
-      tracking_id,
-    });
-
     // Wait for confirmation
     const confirmation = await connection.confirmTransaction(
       signature,
@@ -60,14 +48,12 @@ export async function submitLiquidityTxHandler(
       return {
         error_logs: `Transaction failed: ${JSON.stringify(confirmation.value.err)}`,
         success: false,
-        tracking_id,
       };
     }
 
     return {
       signature,
       success: true,
-      tracking_id,
     };
   } catch (error) {
     console.error("Error submitting liquidity transaction:", error);
@@ -82,7 +68,6 @@ export async function submitLiquidityTxHandler(
     return {
       error_logs: errorMessage,
       success: false,
-      tracking_id,
     };
   }
 }

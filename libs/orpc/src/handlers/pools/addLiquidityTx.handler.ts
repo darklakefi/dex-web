@@ -20,6 +20,7 @@ import type {
   AddLiquidityTxInput,
   AddLiquidityTxOutput,
 } from "../../schemas/pools/addLiquidityTx.schema";
+import { getLPRateHandler } from "../pools/getLPRate.handler";
 
 // TODO: Move to constants file
 const POOL_RESERVE_SEED = "pool_reserve";
@@ -270,17 +271,8 @@ async function addLiquidity(
 export async function addLiquidityTxHandler(
   input: AddLiquidityTxInput,
 ): Promise<AddLiquidityTxOutput> {
-  const {
-    user,
-    tokenXMint,
-    tokenYMint,
-    maxAmountX,
-    maxAmountY,
-    lpTokensToMint,
-  } = input;
-
-  const trackingId =
-    input.trackingId || `id${Math.random().toString(16).slice(2)}`;
+  const { user, tokenXMint, tokenYMint, maxAmountX, maxAmountY, slippage } =
+    input;
 
   const helius = getHelius();
   const connection = helius.connection;
@@ -301,6 +293,14 @@ export async function addLiquidityTxHandler(
 
   const program = new Program(IDL, provider);
 
+  const lpRate = await getLPRateHandler({
+    slippage,
+    tokenXAmount: Number(maxAmountX),
+    tokenXMint,
+    tokenYAmount: Number(maxAmountY),
+    tokenYMint,
+  });
+
   try {
     const vtx = await addLiquidity(
       new PublicKey(user),
@@ -310,15 +310,13 @@ export async function addLiquidityTxHandler(
       new PublicKey(tokenYMint),
       maxAmountX,
       maxAmountY,
-      lpTokensToMint,
+      lpRate.estimatedLPTokens,
     );
 
     const serializedTx = Buffer.from(vtx.serialize()).toString("base64");
 
     return {
       success: true,
-      trackingId,
-      tradeId: trackingId,
       transaction: serializedTx,
     };
   } catch (error) {
@@ -334,8 +332,6 @@ export async function addLiquidityTxHandler(
     return {
       error: errorMessage,
       success: false,
-      trackingId,
-      tradeId: trackingId,
       transaction: null,
     };
   }

@@ -179,11 +179,7 @@ export function LiquidityForm() {
     return false;
   };
 
-  const requestSigning = async (
-    unsignedTransaction: string,
-    tradeId: string,
-    trackingId: string,
-  ) => {
+  const requestSigning = async (unsignedTransaction: string) => {
     try {
       if (!publicKey) throw new Error("Wallet not connected!");
       if (!signTransaction)
@@ -210,13 +206,9 @@ export function LiquidityForm() {
         signedTransaction.serialize(),
       ).toString("base64");
 
-      setTrackDetails({
-        trackingId,
-        tradeId,
-      });
       const signedTxRequest = {
         signed_transaction: signedTransactionBase64,
-        tracking_id: trackingId,
+        tracking_id: "",
       };
 
       setLiquidityStep(3);
@@ -230,17 +222,13 @@ export function LiquidityForm() {
         await client.dexGateway.submitLiquidityTx(signedTxRequest);
 
       if (liquidityTxResponse.success && liquidityTxResponse.signature) {
-        checkLiquidityTransactionStatus(
-          liquidityTxResponse.signature,
-          trackingId,
-        );
+        checkLiquidityTransactionStatus(liquidityTxResponse.signature);
       } else {
         const errorMessage =
           liquidityTxResponse.error_logs || "Unknown error occurred";
         console.error("Liquidity transaction submission failed:", {
           error_logs: liquidityTxResponse.error_logs,
           success: liquidityTxResponse.success,
-          tracking_id: liquidityTxResponse.tracking_id,
         });
         throw new Error(`Liquidity transaction failed: ${errorMessage}`);
       }
@@ -248,7 +236,7 @@ export function LiquidityForm() {
       console.error("Signing error:", error);
       dismissToast();
       toast({
-        description: `${error instanceof Error ? error.message : "Unknown error occurred"}, trackingId: ${trackingId}`,
+        description: `${error instanceof Error ? error.message : "Unknown error occurred"}`,
         title: "Signing Error",
         variant: "error",
       });
@@ -406,14 +394,12 @@ export function LiquidityForm() {
 
   const checkLiquidityTransactionStatus = async (
     signature: string,
-    trackingId: string,
     maxAttempts = 15,
   ) => {
     for (let i = 0; i < maxAttempts; i++) {
       try {
         const response = await client.dexGateway.checkLiquidityTxStatus({
           signature,
-          tracking_id: trackingId,
         });
 
         if (response.status === "finalized") {
@@ -421,7 +407,7 @@ export function LiquidityForm() {
             dismissToast();
             setLiquidityStep(0);
             toast({
-              description: `Transaction failed: ${response.error}, trackingId: ${trackingId}`,
+              description: `Transaction failed: ${response.error}`,
               title: "Liquidity Transaction Failed",
               variant: "error",
             });
@@ -444,7 +430,7 @@ export function LiquidityForm() {
           dismissToast();
           setLiquidityStep(0);
           toast({
-            description: `Transaction failed: ${response.error || "Unknown error"}, trackingId: ${trackingId}`,
+            description: `Transaction failed: ${response.error || "Unknown error"}`,
             title: "Liquidity Transaction Failed",
             variant: "error",
           });
@@ -452,7 +438,7 @@ export function LiquidityForm() {
         }
 
         toast({
-          description: `Finalizing transaction... (${i + 1}/${maxAttempts}) - ${response.status}, trackingId: ${trackingId}`,
+          description: `Finalizing transaction... (${i + 1}/${maxAttempts}) - ${response.status}`,
           title: "Confirming liquidity transaction",
           variant: "loading",
         });
@@ -531,38 +517,19 @@ export function LiquidityForm() {
       const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
       const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
-      const minLpTokens = 1;
-
-      console.log("Liquidity calculation:", {
-        isTokenXSell,
-        maxAmountX,
-        maxAmountY,
-        minLpTokens,
-        slippage,
-        tokenXAddress,
-        tokenYAddress,
-      });
-
       const requestPayload = {
-        lpTokensToMint: minLpTokens,
         maxAmountX: maxAmountX,
         maxAmountY: maxAmountY,
+        slippage: Number(slippage || "0.5"),
         tokenXMint: tokenXAddress,
-        tokenXProgramId: poolDetails?.tokenXMint ?? "",
         tokenYMint: tokenYAddress,
-        tokenYProgramId: poolDetails?.tokenYMint ?? "",
-        trackingId: "",
         user: publicKey.toBase58(),
       } satisfies AddLiquidityTxInput;
 
       const response = await client.dexGateway.addLiquidity(requestPayload);
 
-      if (response.success && response.transaction && response.tradeId) {
-        requestSigning(
-          response.transaction,
-          response.tradeId,
-          response.trackingId,
-        );
+      if (response.success && response.transaction) {
+        requestSigning(response.transaction);
       } else {
         throw new Error("Failed to create liquidity transaction");
       }
@@ -598,16 +565,6 @@ export function LiquidityForm() {
       tokenYMint: poolDetails.tokenYMint,
     });
 
-    // const lpRate = await client.getLPRate({
-    //   slippage: Number(slippage || "0.5"),
-    //   tokenXAmount:
-    //     inputType === "tokenX" ? amountNumber : response.tokenAmount,
-    //   tokenXMint: poolDetails.tokenXMint,
-    //   tokenYAmount:
-    //     inputType === "tokenY" ? amountNumber : response.tokenAmount,
-    //   tokenYMint: poolDetails.tokenYMint,
-    // });
-
     const oneXtoY =
       inputType === "tokenX"
         ? BigNumber(amountNumber).dividedBy(response.tokenAmount)
@@ -621,7 +578,6 @@ export function LiquidityForm() {
       form.setFieldValue("tokenAAmount", String(response.tokenAmount));
     }
 
-    // setLpRate(lpRate.estimatedLPTokens);
     setDisableLiquidity(false);
     setLiquidityStep(0);
   };
