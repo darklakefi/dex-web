@@ -26,6 +26,7 @@ interface FormFieldsetProps extends NumericInputProps {
     decimals: number;
     symbol: string;
   };
+  maxAmount?: number;
 }
 const QUOTE_CURRENCY = "USD" as const;
 
@@ -38,6 +39,7 @@ export function FormFieldset({
   exchangeRate,
   currencyCode,
   controls,
+  maxAmount,
   ...rest
 }: FormFieldsetProps) {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -106,6 +108,10 @@ export function FormFieldset({
 
     const cleanValue = value.replace(/,/g, "");
     if (value && !isValidNumberFormat(cleanValue)) {
+      return;
+    }
+
+    if (maxAmount && Number(cleanValue) > maxAmount) {
       return;
     }
 
