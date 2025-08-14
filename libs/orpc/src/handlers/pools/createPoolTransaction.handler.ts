@@ -12,9 +12,9 @@ import {
 import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
-  CreatePoolTxInput,
-  CreatePoolTxOutput,
-} from "../../schemas/pools/createPoolTx.schema";
+  CreatePoolTransactionInput,
+  CreatePoolTransactionOutput,
+} from "../../schemas/pools/createPoolTransaction.schema";
 
 // TODO: Move to constants file
 const POOL_SEED = "pool";
@@ -50,7 +50,6 @@ async function createPool(
     program.programId,
   );
 
-  // Find pool
   const [poolPubkey] = PublicKey.findProgramAddressSync(
     [
       Buffer.from(POOL_SEED),
@@ -73,7 +72,6 @@ async function createPool(
     TOKEN_PROGRAM_ID,
   );
 
-  // Create add liquidity transaction
   const tx = await program.methods
     .initializePool(new BN(depositAmountX), new BN(depositAmountY))
     .accountsPartial({
@@ -87,7 +85,6 @@ async function createPool(
     })
     .transaction();
 
-  // Add compute budget instruction
   const modifyComputeUnits = web3.ComputeBudgetProgram.setComputeUnitLimit({
     units: 500_000,
   });
@@ -97,13 +94,9 @@ async function createPool(
   return tx;
 }
 
-// Usage example same as addLiquidityTxHandler
-
-// Tries to create a pool with and deposit given amounts of tokenX and tokenY
-// (if pool exists or amounts too small it will fail)
-export async function createPoolTxHandler(
-  input: CreatePoolTxInput,
-): Promise<CreatePoolTxOutput> {
+export async function createPoolTransactionHandler(
+  input: CreatePoolTransactionInput,
+): Promise<CreatePoolTransactionOutput> {
   const {
     user,
     tokenXMint,

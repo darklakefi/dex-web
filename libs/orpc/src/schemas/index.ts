@@ -12,13 +12,25 @@ export type {
 } from "./helius/searchAssets.schema";
 export { searchAssetsInputSchema } from "./helius/searchAssets.schema";
 export type {
-  AddLiquidityTxInput,
-  AddLiquidityTxOutput,
-} from "./pools/addLiquidityTx.schema";
+  CheckLiquidityTransactionStatusInput,
+  CheckLiquidityTransactionStatusOutput,
+} from "./liquidity/checkLiquidityTransactionStatus.schema";
 export type {
-  CreatePoolTxInput,
-  CreatePoolTxOutput,
-} from "./pools/createPoolTx.schema";
+  CreateLiquidityTransactionInput,
+  CreateLiquidityTransactionOutput,
+} from "./liquidity/createLiquidityTransaction.schema";
+export type {
+  RemoveLiquidityTransactionInput,
+  RemoveLiquidityTransactionOutput,
+} from "./liquidity/removeLiquidityTransaction.schema";
+export type {
+  SubmitLiquidityTransactionInput,
+  SubmitLiquidityTransactionOutput,
+} from "./liquidity/submitLiquidityTransaction.schema";
+export type {
+  CreatePoolTransactionInput,
+  CreatePoolTransactionOutput,
+} from "./pools/createPoolTransaction.schema";
 export type {
   GetQuoteInput,
   GetQuoteOutput,

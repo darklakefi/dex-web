@@ -80,19 +80,19 @@ export function WithdrawLiquidityModal({
   const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const { data: tokenADetails } = useSuspenseQuery(
-    tanstackClient.getTokenDetails.queryOptions({
+    tanstackClient.tokens.getTokenDetails.queryOptions({
       input: { address: tokenAAddress || DEFAULT_BUY_TOKEN },
     }),
   );
 
   const { data: tokenBDetails } = useSuspenseQuery(
-    tanstackClient.getTokenDetails.queryOptions({
+    tanstackClient.tokens.getTokenDetails.queryOptions({
       input: { address: tokenBAddress || DEFAULT_SELL_TOKEN },
     }),
   );
 
   const { data: tokenAPrice } = useSuspenseQuery(
-    tanstackClient.getTokenPrice.queryOptions({
+    tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
         mint: tokenAAddress || DEFAULT_BUY_TOKEN,
@@ -102,7 +102,7 @@ export function WithdrawLiquidityModal({
   );
 
   const { data: tokenBPrice } = useSuspenseQuery(
-    tanstackClient.getTokenPrice.queryOptions({
+    tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
         mint: tokenBAddress || DEFAULT_SELL_TOKEN,
@@ -240,7 +240,7 @@ export function WithdrawLiquidityModal({
         signedTransaction.serialize(),
       ).toString("base64");
 
-      const submitRes = await client.submitWithdrawal({
+      const submitRes = await client.liquidity.submitWithdrawal({
         lpTokenAmount: opts.lpTokenAmount,
         minTokenXOut: opts.minTokenXOut,
         minTokenYOut: opts.minTokenYOut,
@@ -263,14 +263,15 @@ export function WithdrawLiquidityModal({
 
       // Invalidate related queries
       try {
-        const userLiqOpts = tanstackClient.getUserLiquidity.queryOptions({
-          input: {
-            ownerAddress: publicKey.toBase58(),
-            tokenXMint: opts.tokenXMint,
-            tokenYMint: opts.tokenYMint,
-          },
-        });
-        const reservesOpts = tanstackClient.getPoolReserves.queryOptions({
+        const userLiqOpts =
+          tanstackClient.liquidity.getUserLiquidity.queryOptions({
+            input: {
+              ownerAddress: publicKey.toBase58(),
+              tokenXMint: opts.tokenXMint,
+              tokenYMint: opts.tokenYMint,
+            },
+          });
+        const reservesOpts = tanstackClient.pools.getPoolReserves.queryOptions({
           input: { tokenXMint: opts.tokenXMint, tokenYMint: opts.tokenYMint },
         });
         await Promise.all([
@@ -341,7 +342,7 @@ export function WithdrawLiquidityModal({
         .integerValue(BigNumber.ROUND_FLOOR)
         .toString();
 
-      const response = await client.withdrawLiquidity({
+      const response = await client.liquidity.withdrawLiquidity({
         lpTokenAmount: form.state.values.withdrawalAmount,
         minTokenXOut: minXOut,
         minTokenYOut: minYOut,

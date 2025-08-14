@@ -15,12 +15,6 @@
     "src/**/*.test.jsx"
   ],
   "extends": "./tsconfig.json",
-  "include": [
-    "src/**/*.js",
-    "src/**/*.jsx",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "../../apps/web/src/app/_components/NoResultFound.tsx"
-  ],
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
   "references": []
 }

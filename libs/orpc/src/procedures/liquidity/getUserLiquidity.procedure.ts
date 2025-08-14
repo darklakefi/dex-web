@@ -1,4 +1,4 @@
-import { getUserLiquidityHandler } from "../../handlers/pools/getUserLiquidity.handler";
+import { getUserLiquidityHandler } from "../../handlers/liquidity/getUserLiquidity.handler";
 import { getUserLiquidityInputSchema } from "../../schemas/pools/getUserLiquidity.schema";
 import { baseProcedure } from "../base.procedure";
 

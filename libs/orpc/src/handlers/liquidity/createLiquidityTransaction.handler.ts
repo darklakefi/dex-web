@@ -17,18 +17,16 @@ import {
 import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
-  AddLiquidityTxInput,
-  AddLiquidityTxOutput,
-} from "../../schemas/pools/addLiquidityTx.schema";
+  CreateLiquidityTransactionInput,
+  CreateLiquidityTransactionOutput,
+} from "../../schemas/liquidity/createLiquidityTransaction.schema";
 import { getLPRateHandler } from "../pools/getLPRate.handler";
 
-// TODO: Move to constants file
 const POOL_RESERVE_SEED = "pool_reserve";
 const POOL_SEED = "pool";
 const AMM_CONFIG_SEED = "amm_config";
 const LIQUIDITY_SEED = "lp";
 
-// Utility functions
 async function toBaseUnits(
   connection: web3.Connection,
   mint: PublicKey,
@@ -78,7 +76,7 @@ async function ensureAtaIx(
   }
 }
 
-async function addLiquidity(
+async function createLiquidityTransaction(
   user: PublicKey,
   program: Program<typeof IDL>,
   connection: web3.Connection,
@@ -88,11 +86,9 @@ async function addLiquidity(
   maxAmountY: string | number | bigint,
   lpTokensToMint: string | number | bigint,
 ): Promise<VersionedTransaction> {
-  // Detect token programs for each mint
   const tokenXProgramId = await detectTokenProgram(connection, tokenXMint);
   const tokenYProgramId = await detectTokenProgram(connection, tokenYMint);
 
-  // Validate mint/program coherence
   try {
     await getMint(connection, tokenXMint, "confirmed", tokenXProgramId);
     await getMint(connection, tokenYMint, "confirmed", tokenYProgramId);
@@ -100,7 +96,6 @@ async function addLiquidity(
     throw new Error(`Invalid mint/token program combination: ${error}`);
   }
 
-  // Sort mints canonically for consistent PDA derivation
   const [mintA, mintB] = [tokenXMint, tokenYMint].sort((a, b) =>
     a.toBuffer().compare(b.toBuffer()),
   );
@@ -125,10 +120,8 @@ async function addLiquidity(
     program.programId,
   );
 
-  // LP token program (usually TOKEN_PROGRAM_ID)
   const lpTokenProgramId = TOKEN_PROGRAM_ID;
 
-  // Convert amounts to base units
   const maxAmountXBN = await toBaseUnits(
     connection,
     tokenXMint,
@@ -166,7 +159,6 @@ async function addLiquidity(
     program.programId,
   );
 
-  // Create ATA instructions if needed
   const ataInstructions: TransactionInstruction[] = [];
 
   const ataXIx = await ensureAtaIx(
@@ -188,7 +180,6 @@ async function addLiquidity(
   const ataLpIx = await ensureAtaIx(connection, user, lpMint, lpTokenProgramId);
   if (ataLpIx) ataInstructions.push(ataLpIx);
 
-  // Build program instruction
   const programIx = await program.methods
     .addLiquidity(lpTokensToMintBN, maxAmountXBN, maxAmountYBN)
     .accounts({
@@ -202,7 +193,6 @@ async function addLiquidity(
     })
     .instruction();
 
-  // Compute budget instructions (put first)
   const cuLimitIx = web3.ComputeBudgetProgram.setComputeUnitLimit({
     units: 400_000,
   });
@@ -210,7 +200,6 @@ async function addLiquidity(
     microLamports: 50_000,
   });
 
-  // Build versioned transaction
   const { blockhash } = await connection.getLatestBlockhash();
   const instructions = [cuLimitIx, cuPriceIx, ...ataInstructions, programIx];
 
@@ -223,54 +212,9 @@ async function addLiquidity(
   return new web3.VersionedTransaction(message);
 }
 
-// Usage example
-/*
-  // this is optional if you don't have access to a wallet here
-  const dummy = Keypair.generate();
-  const dummyWallet = {
-    publicKey: dummy.publicKey,
-    signTransaction: async (tx: any) => tx,      // no-op
-    signAllTransactions: async (txs: any[]) => txs, // no-op
-  };
-
-  // this or the dummyWallet
-  const wallet = useWallet();
-
-  const provider = new AnchorProvider(
-    helius.connection,
-    wallet, // or dummyWallet
-  );
-
-  const res = await addLiquidityTxHandler({
-    lpTokensToMint: 10,
-    maxAmountX: 1000,
-    maxAmountY: 1000,
-    tokenXMint: 'DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX',
-    tokenXProgramId: 'DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX',
-    tokenYMint: 'DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX',
-    tokenYProgramId: 'DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX',
-    user: 'browser-wallet-pubkey',
-    provider,
-  });
-
-
-  if (!res.success || !res.transaction) {
-    return; // failure
-  }
-
-  const tx = res.transaction;
-  tx.recentBlockhash = (await provider.connection.getLatestBlockhash()).blockhash
-  tx.feePayer = wallet.publicKey
-
-  const signedTx = await wallet?.signTransaction(res.transaction)
-  const rawTransaction = signedTx.serialize()
-  await provider.connection.sendRawTransaction(rawTransaction)
-*/
-
-// Tries to mint exactly lpTokensToMint at the same time not exceeding neither maxAmountX nor maxAmountY (if it does it will fail)
-export async function addLiquidityTxHandler(
-  input: AddLiquidityTxInput,
-): Promise<AddLiquidityTxOutput> {
+export async function createLiquidityTransactionHandler(
+  input: CreateLiquidityTransactionInput,
+): Promise<CreateLiquidityTransactionOutput> {
   const { user, tokenXMint, tokenYMint, maxAmountX, maxAmountY, slippage } =
     input;
 
@@ -302,7 +246,7 @@ export async function addLiquidityTxHandler(
   });
 
   try {
-    const vtx = await addLiquidity(
+    const vtx = await createLiquidityTransaction(
       new PublicKey(user),
       program,
       connection,

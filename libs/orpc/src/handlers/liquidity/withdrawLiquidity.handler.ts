@@ -12,9 +12,9 @@ import { getHelius } from "../../getHelius";
 import type {
   WithdrawLiquidityInput,
   WithdrawLiquidityOutput,
-} from "../../schemas/pools/withdrawLiquidity.schema";
+} from "../../schemas/liquidity/withdrawLiquidity.schema";
 import { LP_TOKEN_DECIMALS, sortSolanaAddresses } from "../../utils/solana";
-import { removeLiquidityTxHandler } from "./removeLiquidityTx.handler";
+import { removeLiquidityTransactionHandler } from "./removeLiquidityTransaction.handler";
 
 async function detectTokenProgram(
   connection: Parameters<typeof getMint>[0],
@@ -102,7 +102,7 @@ export async function withdrawLiquidityHandler({
       return bn.toNumber();
     };
 
-    const txResult = await removeLiquidityTxHandler({
+    const txResult = await removeLiquidityTransactionHandler({
       lpTokensToBurn: toSafeNumber(lpAmountBase, "LP amount"),
       minAmountX: toSafeNumber(minXBase, "minTokenXOut"),
       minAmountY: toSafeNumber(minYBase, "minTokenYOut"),

@@ -33,7 +33,7 @@ export function YourLiquidity({
   const tokenB = tokenBAddress || DEFAULT_SELL_TOKEN;
   const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(tokenA, tokenB);
   const { data: userLiquidity } = useSuspenseQuery(
-    tanstackClient.getUserLiquidity.queryOptions({
+    tanstackClient.liquidity.getUserLiquidity.queryOptions({
       enabled: !!publicKey,
       input: {
         ownerAddress: publicKey?.toBase58() ?? "",
@@ -44,19 +44,19 @@ export function YourLiquidity({
   );
 
   const { data: tokenADetails } = useSuspenseQuery(
-    tanstackClient.getTokenDetails.queryOptions({
+    tanstackClient.tokens.getTokenDetails.queryOptions({
       input: { address: tokenAAddress || DEFAULT_BUY_TOKEN },
     }),
   );
 
   const { data: tokenBDetails } = useSuspenseQuery(
-    tanstackClient.getTokenDetails.queryOptions({
+    tanstackClient.tokens.getTokenDetails.queryOptions({
       input: { address: tokenBAddress || DEFAULT_SELL_TOKEN },
     }),
   );
 
   const { data: poolDetails } = useSuspenseQuery(
-    tanstackClient.getPoolDetails.queryOptions({
+    tanstackClient.pools.getPoolDetails.queryOptions({
       input: {
         tokenXMint: tokenXAddress,
         tokenYMint: tokenYAddress,
@@ -65,7 +65,7 @@ export function YourLiquidity({
   );
 
   const { data: poolReserves } = useSuspenseQuery(
-    tanstackClient.getPoolReserves.queryOptions({
+    tanstackClient.pools.getPoolReserves.queryOptions({
       input: {
         tokenXMint: tokenXAddress,
         tokenYMint: tokenYAddress,
@@ -74,7 +74,7 @@ export function YourLiquidity({
   );
 
   const { data: tokenAPrice } = useSuspenseQuery(
-    tanstackClient.getTokenPrice.queryOptions({
+    tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
         mint: tokenAAddress || DEFAULT_BUY_TOKEN,
@@ -84,7 +84,7 @@ export function YourLiquidity({
   );
 
   const { data: tokenBPrice } = useSuspenseQuery(
-    tanstackClient.getTokenPrice.queryOptions({
+    tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
         mint: tokenBAddress || DEFAULT_SELL_TOKEN,
@@ -157,7 +157,7 @@ export function YourLiquidity({
         </div>
 
         <Box className="flex flex-row">
-          <div className="flex flex-1 flex-col justify-between gap-2 border-green-500 border-r pr-2">
+          <div className="flex flex-1 flex-col justify-between gap-2 border-green-500 border-r pr-2 only:border-r-0 only:pr-0">
             <Text.Body2 className="text-green-200">
               {numberFormatHelper({
                 decimalScale: 5,
@@ -175,7 +175,6 @@ export function YourLiquidity({
               {tokenBDetails.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
-
             <Button
               className="max-w-fit cursor-pointer"
               onClick={() => {

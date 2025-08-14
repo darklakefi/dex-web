@@ -18,7 +18,7 @@ export default async function Page({
 }) {
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery(
-    tanstackClient.getTokens.queryOptions({
+    tanstackClient.tokens.getTokens.queryOptions({
       input: {
         limit: 8,
         offset: 0,

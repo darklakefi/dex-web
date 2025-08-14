@@ -3,19 +3,19 @@
 import { VersionedTransaction } from "@solana/web3.js";
 import { getHelius } from "../../getHelius";
 
-export interface SubmitLiquidityTxInput {
+export interface SubmitLiquidityTransactionInput {
   signed_transaction: string; // Base64 encoded signed transaction
 }
 
-export interface SubmitLiquidityTxOutput {
+export interface SubmitLiquidityTransactionOutput {
   success: boolean;
   signature?: string;
   error_logs?: string;
 }
 
-export async function submitLiquidityTxHandler(
-  input: SubmitLiquidityTxInput,
-): Promise<SubmitLiquidityTxOutput> {
+export async function submitLiquidityTransactionHandler(
+  input: SubmitLiquidityTransactionInput,
+): Promise<SubmitLiquidityTransactionOutput> {
   const { signed_transaction } = input;
 
   try {

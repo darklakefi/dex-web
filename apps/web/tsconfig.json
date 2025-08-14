@@ -17,7 +17,6 @@
     "../../types/image.d.ts",
     "../../types/svg.d.ts",
     "../../vite.config.base.ts",
-    "dist/types/**/*.ts",
     ".next/types/**/*.ts"
   ],
   "references": [

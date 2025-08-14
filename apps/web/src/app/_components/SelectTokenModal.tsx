@@ -2,7 +2,7 @@
 
 import { tanstackClient } from "@dex-web/orpc";
 import { getTokensInputSchema } from "@dex-web/orpc/schemas";
-import { Box, Button, Modal, NoResultFound, TextInput } from "@dex-web/ui";
+import { Box, Button, Modal, TextInput } from "@dex-web/ui";
 import { pasteFromClipboard, useDebouncedValue } from "@dex-web/utils";
 import {
   type AnyFieldApi,
@@ -16,6 +16,7 @@ import { createSerializer, useQueryStates } from "nuqs";
 import { Suspense } from "react";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { TokenList } from "../[lang]/(swap)/_components/TokenList";
+import { NoResultFound } from "./NoResultFound";
 
 const selectTokenModalFormSchema = getTokensInputSchema.pick({
   query: true,
@@ -110,7 +111,7 @@ export function SelectTokenModal({
   const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 300);
 
   const { data } = useSuspenseQuery(
-    tanstackClient.getTokens.queryOptions({
+    tanstackClient.tokens.getTokens.queryOptions({
       input: {
         limit: 8,
         offset: 0,
@@ -120,7 +121,7 @@ export function SelectTokenModal({
   );
 
   const handlePaste = (field: AnyFieldApi) => {
-    pasteFromClipboard((pasted) => {
+    pasteFromClipboard((pasted: string) => {
       field.handleChange(pasted.trim());
     });
   };

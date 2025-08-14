@@ -8,9 +8,9 @@ import {
 import { PublicKey, type Transaction } from "@solana/web3.js";
 import IDL from "../../darklake-idl";
 import type {
-  RemoveLiquidityTxInput,
-  RemoveLiquidityTxOutput,
-} from "../../schemas/pools/removeLiquidityTx.schema";
+  RemoveLiquidityTransactionInput,
+  RemoveLiquidityTransactionOutput,
+} from "../../schemas/liquidity/removeLiquidityTransaction.schema";
 
 // TODO: Move to constants file
 const POOL_RESERVE_SEED = "pool_reserve";
@@ -153,9 +153,9 @@ async function removeLiquidity(
   return finalTx;
 }
 
-export async function removeLiquidityTxHandler(
-  input: RemoveLiquidityTxInput,
-): Promise<RemoveLiquidityTxOutput> {
+export async function removeLiquidityTransactionHandler(
+  input: RemoveLiquidityTransactionInput,
+): Promise<RemoveLiquidityTransactionOutput> {
   const {
     user,
     tokenXMint,

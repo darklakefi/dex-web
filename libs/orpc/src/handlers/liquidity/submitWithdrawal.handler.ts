@@ -5,7 +5,7 @@ import { getHelius } from "../../getHelius";
 import type {
   SubmitWithdrawalInput,
   SubmitWithdrawalOutput,
-} from "../../schemas/pools/submitWithdrawal.schema";
+} from "../../schemas/liquidity/submitWithdrawal.schema";
 
 export async function submitWithdrawalHandler({
   signedTransaction,
