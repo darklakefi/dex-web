@@ -14,6 +14,9 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),
+  useSearchParams: () => ({
+    get: vi.fn().mockReturnValue(""),
+  }),
 }));
 
 vi.mock("@dex-web/orpc", () => ({
