@@ -1,13 +1,7 @@
-//"use client";
 import { Footer, Icon, Text } from "@dex-web/ui";
-//import { useWallet } from "@solana/wallet-adapter-react";
+import Link from "next/link";
 
 export const AppFooter = () => {
-  //const { disconnect } = useWallet();
-  //const handleClick = () => {
-  //  disconnect();
-  //};
-
   return (
     <Footer
       logo={<Icon className="h-6 w-auto stroke-none" name="logo-lg" />}
@@ -23,9 +17,10 @@ export const AppFooter = () => {
         </Text.Link>
         */}
         <Text
-          as="a"
+          as={Link}
           className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
           href="https://mev-checker.darklake.fi/"
+          target="_blank"
           variant="link"
         >
           MEV Checker{" "}
@@ -37,26 +32,29 @@ export const AppFooter = () => {
           Resources
         </Text.Link>
         <Text
-          as="a"
+          as={Link}
           className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
           href="https://docs.darklake.fi"
+          target="_blank"
           variant="link"
         >
           Docs <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
         <Text
-          as="a"
+          as={Link}
           className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
           href="https://darklake.typeform.com/contact"
+          target="_blank"
           variant="link"
         >
           Support{" "}
           <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
         <Text
-          as="a"
+          as={Link}
           className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
           href="https://docs.darklake.fi/cookies-policy"
+          target="_blank"
           variant="link"
         >
           Cookies Policy{" "}
