@@ -41,7 +41,7 @@ export function SelectTokenButton({
     tokenB: string,
     returnUrl?: string,
   ) {
-    const from = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    const from = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ""}`;
     const basePath = `select-token/${type}?tokenAAddress=${tokenA}&tokenBAddress=${tokenB}&from=${encodeURIComponent(
       from,
     )}`;
