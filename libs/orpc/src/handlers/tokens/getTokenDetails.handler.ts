@@ -1,27 +1,47 @@
 "use server";
 
+import { getDexGatewayClient } from "../../dex-gateway";
 import type {
   GetTokenDetailsInput,
   GetTokenDetailsOutput,
 } from "../../schemas/tokens/getTokenDetails.schema";
-import { getTokensHandler } from "./getTokens.handler";
 
 export const getTokenDetailsHandler = async (
   input: GetTokenDetailsInput,
 ): Promise<GetTokenDetailsOutput> => {
   const { address } = input;
 
-  const { tokens } = await getTokensHandler({
-    limit: 1,
-    offset: 0,
-    query: address,
-  });
-
-  const matchingToken = tokens.find((token) => token.address === address);
-
-  if (!matchingToken) {
-    throw new Error(`Token ${address} not found`);
+  if (!address || address.trim() === "") {
+    return {
+      address: "",
+      decimals: 0,
+      imageUrl: undefined,
+      name: "Select Token",
+      symbol: "SELECT",
+    };
   }
 
-  return matchingToken;
+  const grpcClient = getDexGatewayClient();
+  try {
+    const { token_metadata } = await grpcClient.getTokenMetadata({
+      token_address: address,
+    });
+
+    return {
+      address: token_metadata.address,
+      decimals: token_metadata.decimals,
+      imageUrl: token_metadata.logo_uri,
+      name: token_metadata.name,
+      symbol: token_metadata.symbol,
+    };
+  } catch (error) {
+    console.error(error, "error");
+    return {
+      address: "",
+      decimals: 0,
+      imageUrl: undefined,
+      name: "Unknown Token",
+      symbol: address.slice(-4),
+    };
+  }
 };

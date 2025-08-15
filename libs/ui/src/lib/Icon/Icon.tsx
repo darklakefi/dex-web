@@ -17,6 +17,7 @@ import LogoLgIcon from "./icons/logo-lg.svg";
 import LogoSmIcon from "./icons/logo-sm.svg";
 import PhantomWalletIcon from "./icons/phantom-icon.svg";
 import PlayIcon from "./icons/play.svg";
+import PlusIcon from "./icons/plus.svg";
 import RefreshIcon from "./icons/refresh.svg";
 import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
@@ -55,7 +56,8 @@ export type IconName =
   | "phantom"
   | "solflare"
   | "backpack"
-  | "swap";
+  | "swap"
+  | "plus";
 
 const iconComponents = {
   analytics: AnalyticsIcon,
@@ -75,6 +77,7 @@ const iconComponents = {
   "logo-sm": LogoSmIcon,
   phantom: PhantomWalletIcon,
   play: PlayIcon,
+  plus: PlusIcon,
   refresh: RefreshIcon,
   search: SearchIcon,
   seedlings: SeedlingsIcon,

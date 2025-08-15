@@ -3,38 +3,40 @@
 import { client, TradeStatus, tanstackClient } from "@dex-web/orpc";
 import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text } from "@dex-web/ui";
+import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
+import Link from "next/link";
 import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
+import { FormFieldset } from "../../../_components/FormFieldset";
+import { SelectTokenButton } from "../../../_components/SelectTokenButton";
+import { TokenTransactionButton } from "../../../_components/TokenTransactionButton";
+import { TokenTransactionDetails } from "../../../_components/TokenTransactionDetails";
+import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
+import { selectedTokensParsers } from "../../../_utils/searchParams";
+import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
-import { selectedTokensParsers } from "../_utils/searchParams";
-import { sortSolanaAddresses } from "../_utils/sortSolanaAddresses";
-import { SelectTokenButton } from "./SelectTokenButton";
-import { SwapButton } from "./SwapButton";
-import { SwapDetails } from "./SwapDetails";
-import { SwapFormFieldset } from "./SwapFormFieldset";
 import { SwapPageRefreshButton } from "./SwapPageRefreshButton";
-import { SwapPageSettingButton } from "./SwapPageSettingButton";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
 const swapFormSchema = z.object({
-  buyAmount: z.string(),
-  sellAmount: z.string(),
+  tokenAAmount: z.string(),
+  tokenBAmount: z.string(),
 });
 
 type SwapFormSchema = z.infer<typeof swapFormSchema>;
 
 const { useAppForm } = createFormHook({
   fieldComponents: {
-    SwapFormFieldset,
+    SwapFormFieldset: FormFieldset,
   },
 
   fieldContext,
@@ -44,13 +46,13 @@ const { useAppForm } = createFormHook({
 
 const formConfig = {
   defaultValues: {
-    buyAmount: "0",
-    sellAmount: "0",
+    tokenAAmount: "0",
+    tokenBAmount: "0",
   } satisfies SwapFormSchema,
   onSubmit: async ({
     value,
   }: {
-    value: { buyAmount: string; sellAmount: string };
+    value: { tokenAAmount: string; tokenBAmount: string };
   }) => {
     console.log(value);
   },
@@ -59,21 +61,28 @@ const formConfig = {
   },
 };
 
-const MESSAGE_STEP = {
-  1: "protecting trade [1/3]",
-  2: "confirm trade in your wallet[2/3]",
-  3: "verifying trade [3/3]",
-  10: "loading quote...",
+const BUTTON_MESSAGE = {
+  ENTER_AMOUNT: "enter an amount",
+  HIGH_PRICE_IMPACT: "CONFIRM SWAP WITH {value}% PRICE IMPACT",
+  INSUFFICIENT_BALANCE: "insufficient",
+  LOADING: "loading",
+  STEP_1: "ENCRYPTING TRADE PARAMETERs [1/3]",
+  STEP_2: "Confirm transaction in your wallet [2/3]",
+  STEP_3: "Processing transaction [3/3]",
+  SWAP: "swap",
 };
 
 export function SwapForm() {
   const form = useAppForm(formConfig);
-  const { wallets, signTransaction, publicKey } = useWallet();
-  const [{ buyTokenAddress, sellTokenAddress }] = useQueryStates(
+  const { signTransaction, publicKey } = useWallet();
+  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
+
   const [swapStep, setSwapStep] = useState(0);
-  const [disableSwap, setDisableSwap] = useState(true);
+  const [isDisableSwap, setIsDisableSwapButton] = useState(true);
+  const [isLoadingSwapButton, setIsLoadingSwapButton] = useState(false);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [_trackDetails, setTrackDetails] = useState<{
     tradeId: string;
     trackingId: string;
@@ -81,14 +90,15 @@ export function SwapForm() {
     trackingId: "",
     tradeId: "",
   });
+  const [isInsufficientBalance, setIsInsufficientBalance] = useState(false);
   const [isUseSlippage, setIsUseSlippage] = useState(false);
   const [slippage, setSlippage] = useState("0.5");
 
   const { data: poolDetails } = useSuspenseQuery(
-    tanstackClient.getPoolDetails.queryOptions({
+    tanstackClient.pools.getPoolDetails.queryOptions({
       input: {
-        tokenXMint: sellTokenAddress,
-        tokenYMint: buyTokenAddress,
+        tokenXMint: tokenBAddress,
+        tokenYMint: tokenAAddress,
       },
     }),
   );
@@ -97,7 +107,7 @@ export function SwapForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: buyTokenAddress,
+          mint: tokenAAddress,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -107,7 +117,7 @@ export function SwapForm() {
     useSuspenseQuery(
       tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: sellTokenAddress,
+          mint: tokenBAddress,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -115,7 +125,12 @@ export function SwapForm() {
 
   const [quote, setQuote] = useState<GetQuoteOutput | null>(null);
 
-  const isXtoY = poolDetails?.tokenXMint === sellTokenAddress;
+  const isXtoY = poolDetails?.tokenXMint === tokenBAddress;
+
+  const resetButtonState = () => {
+    setSwapStep(0);
+    setIsLoadingSwapButton(false);
+  };
 
   const requestSigning = async (
     unsignedTransaction: string,
@@ -128,6 +143,7 @@ export function SwapForm() {
         throw new Error("Wallet does not support transaction signing!");
 
       setSwapStep(2);
+      setIsLoadingSwapButton(true);
       toast({
         description:
           "Tokens will be secured until slippage verification completes.",
@@ -159,6 +175,7 @@ export function SwapForm() {
       };
 
       setSwapStep(3);
+      setIsLoadingSwapButton(true);
       toast({
         description:
           "Checking if swap stayed within your hidden slippage tolerance before finalizing trade.",
@@ -182,7 +199,7 @@ export function SwapForm() {
         title: "Signing Error",
         variant: "error",
       });
-      setSwapStep(0);
+      resetButtonState();
     }
   };
 
@@ -204,9 +221,9 @@ export function SwapForm() {
         response.status === TradeStatus.SETTLED ||
         response.status === TradeStatus.SLASHED
       ) {
-        setSwapStep(0);
+        resetButtonState();
         toast({
-          description: `SWAPPED ${form.state.values.sellAmount} ${sellTokenAddress} FOR ${form.state.values.buyAmount} ${buyTokenAddress}. protected from MEV attacks.`,
+          description: `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`,
           title: "Swap complete",
           variant: "success",
         });
@@ -219,7 +236,7 @@ export function SwapForm() {
         response.status === TradeStatus.CANCELLED ||
         response.status === TradeStatus.FAILED
       ) {
-        setSwapStep(0);
+        resetButtonState();
         toast({
           description: `Trade ${response.status}!, trackingId: ${trackingId}`,
           title: `Trade ${response.status}`,
@@ -262,20 +279,18 @@ export function SwapForm() {
       variant: "loading",
     });
     setSwapStep(1);
+    setIsLoadingSwapButton(true);
 
     try {
       const formState = form.state.values;
-      const sellAmount = Number(formState.sellAmount.replace(/,/g, ""));
-      const buyAmount = Number(formState.buyAmount.replace(/,/g, ""));
+      const sellAmount = Number(formState.tokenAAmount.replace(/,/g, ""));
+      const buyAmount = Number(formState.tokenBAmount.replace(/,/g, ""));
 
-      if (!buyTokenAddress || !sellTokenAddress) {
+      if (!tokenAAddress || !tokenBAddress) {
         throw new Error("Missing token addresses");
       }
 
-      const sortedTokens = sortSolanaAddresses(
-        buyTokenAddress,
-        sellTokenAddress,
-      );
+      const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
 
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
@@ -311,7 +326,7 @@ export function SwapForm() {
         title: "Swap Error",
         variant: "error",
       });
-      setSwapStep(0);
+      resetButtonState();
     }
   };
 
@@ -329,9 +344,9 @@ export function SwapForm() {
     const amountInNumber = Number(amountIn.replace(/,/g, ""));
     if (!poolDetails || BigNumber(amountInNumber).lte(0)) return;
 
-    setSwapStep(10);
-    setDisableSwap(true);
-    const quote = await client.getSwapQuote({
+    setIsLoadingQuote(true);
+    setIsDisableSwapButton(true);
+    const quote = await client.swap.getSwapQuote({
       amountIn: amountInNumber,
       isXtoY,
       slippage,
@@ -340,21 +355,39 @@ export function SwapForm() {
     });
     setQuote(quote);
     if (type === "sell") {
-      form.setFieldValue("buyAmount", String(quote.amountOut));
+      form.setFieldValue("tokenBAmount", String(quote.amountOut));
     } else {
-      form.setFieldValue("sellAmount", String(quote.amountOut));
+      form.setFieldValue("tokenAAmount", String(quote.amountOut));
     }
-    setDisableSwap(false);
-    setSwapStep(0);
+    setIsDisableSwapButton(false);
+    setIsLoadingQuote(false);
   };
 
   const debouncedGetQuote = useDebouncedCallback(getQuote, 500);
+
+  const checkInsufficientBalance = (input: string) => {
+    const value = input.replace(/,/g, "");
+    const accountAmount = sellTokenAccount?.tokenAccounts[0]?.amount || 0;
+    const decimal = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
+
+    if (BigNumber(value).gt(convertToDecimal(accountAmount, decimal))) {
+      setIsInsufficientBalance(true);
+      return;
+    }
+
+    setIsInsufficientBalance(false);
+  };
 
   const handleAmountChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "buy" | "sell",
   ) => {
     const value = e.target.value.replace(/,/g, "");
+
+    if (type === "sell") {
+      checkInsufficientBalance(value);
+    }
+
     if (BigNumber(value).gt(0)) {
       debouncedGetQuote({
         amountIn: value,
@@ -363,135 +396,224 @@ export function SwapForm() {
         type,
       });
     } else {
-      setDisableSwap(true);
+      setIsDisableSwapButton(true);
     }
   };
 
   const onClickSwapToken = () => {
-    const sellAmount = Number(form.state.values.sellAmount.replace(/,/g, ""));
+    const sellAmount = Number(form.state.values.tokenAAmount.replace(/,/g, ""));
+    checkInsufficientBalance(String(sellAmount));
     if (!poolDetails || BigNumber(sellAmount).lte(0)) return;
 
     debouncedGetQuote({
-      amountIn: form.state.values.sellAmount,
+      amountIn: form.state.values.tokenAAmount,
       isXtoY: !isXtoY,
       slippage: parseFloat(slippage),
       type: "sell",
     });
   };
 
+  const getButtonMessage = () => {
+    const message = BUTTON_MESSAGE.SWAP;
+
+    if (swapStep === 1) {
+      return BUTTON_MESSAGE.STEP_1;
+    }
+
+    if (swapStep === 2) {
+      return BUTTON_MESSAGE.STEP_2;
+    }
+
+    if (swapStep === 3) {
+      return BUTTON_MESSAGE.STEP_3;
+    }
+
+    if (isLoadingQuote) {
+      return BUTTON_MESSAGE.LOADING;
+    }
+
+    if (form.state.values.tokenAAmount) {
+      const inputClean = form.state.values.tokenAAmount.replace(/,/g, "");
+      if (BigNumber(inputClean).lte(0)) {
+        return BUTTON_MESSAGE.ENTER_AMOUNT;
+      }
+
+      const accountAmount = sellTokenAccount?.tokenAccounts[0]?.amount || 0;
+      const decimal = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
+      const symbol = sellTokenAccount?.tokenAccounts[0]?.symbol || "";
+
+      if (BigNumber(inputClean).gt(convertToDecimal(accountAmount, decimal))) {
+        return `${BUTTON_MESSAGE.INSUFFICIENT_BALANCE} ${symbol}`;
+      }
+    }
+
+    if (quote) {
+      const slippageImpact = quote.priceImpactPercentage;
+      if (slippageImpact > 0.5) {
+        return BUTTON_MESSAGE.HIGH_PRICE_IMPACT.replace(
+          "{value}",
+          slippageImpact.toString(),
+        );
+      }
+    }
+
+    return message;
+  };
+
   return (
-    <section className="flex w-full max-w-xl items-start gap-1">
-      <div className="size-9" />
-      <Box padding="lg">
-        <div className="flex flex-col gap-4">
-          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
-            <div>
-              <Text.Body2
-                as="label"
-                className="mb-3 block text-green-300 uppercase"
-              >
-                Selling
-              </Text.Body2>
-              <SelectTokenButton type="sell" />
-            </div>
-            <form.Field name="sellAmount">
-              {(field) => (
-                <SwapFormFieldset
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "sell");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </Box>
-          <div className="flex items-center justify-center">
-            <SwapButton onClickSwapToken={onClickSwapToken} />
-          </div>
-          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
-            <div>
-              <Text.Body2
-                as="label"
-                className="mb-3 block text-green-300 uppercase"
-              >
-                Buying
-              </Text.Body2>
-              <SelectTokenButton type="buy" />
-            </div>
-            <form.Field name="buyAmount">
-              {(field) => (
-                <SwapFormFieldset
-                  disabled={true}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "buy");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={buyTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </Box>
-          <div className="w-full">
-            {!publicKey ? (
-              <ConnectWalletButton className="w-full py-3" wallets={wallets} />
-            ) : poolDetails ? (
-              <Button
-                className="w-full cursor-pointer py-3"
-                disabled={swapStep !== 0 || disableSwap}
-                loading={swapStep !== 0}
-                onClick={handleSwap}
-              >
-                {swapStep === 0
-                  ? "Swap"
-                  : MESSAGE_STEP[swapStep as keyof typeof MESSAGE_STEP]}
-              </Button>
-            ) : (
-              <Button className="w-full cursor-pointer py-3" disabled={true}>
-                Create Pool
-              </Button>
-            )}
-          </div>
-        </div>
-        {quote && (
-          <SwapDetails
-            quote={quote}
-            slippage={slippage}
-            tokenBuyMint={buyTokenAddress}
-            tokenSellMint={sellTokenAddress}
+    <div className="w-full">
+      <div className="mb-4 flex items-center justify-between md:hidden">
+        <Text.Heading className="text-green-200">Swap</Text.Heading>
+        <div className="flex gap-3">
+          <TokenTransactionSettingsButton
+            onChange={(slippage) => {
+              setIsUseSlippage(slippage !== "0");
+              setSlippage(slippage);
+              debouncedGetQuote({
+                amountIn: form.state.values.tokenAAmount,
+                isXtoY,
+                slippage: parseFloat(slippage),
+                type: "sell",
+              });
+            }}
           />
-        )}
-      </Box>
-      <div className="flex flex-col gap-1">
-        <SwapPageSettingButton
-          onChange={(slippage) => {
-            setIsUseSlippage(slippage !== "0");
-            setSlippage(slippage);
-            debouncedGetQuote({
-              amountIn: form.state.values.sellAmount,
-              isXtoY,
-              slippage: parseFloat(slippage),
-              type: "sell",
-            });
-          }}
-        />
-        <SwapPageRefreshButton
-          onClick={() => {
-            debouncedGetQuote({
-              amountIn: form.state.values.sellAmount,
-              isXtoY,
-              slippage: parseFloat(slippage),
-              type: "sell",
-            });
-          }}
-        />
+          <SwapPageRefreshButton
+            onClick={() => {
+              debouncedGetQuote({
+                amountIn: form.state.values.tokenAAmount,
+                isXtoY,
+                slippage: parseFloat(slippage),
+                type: "sell",
+              });
+            }}
+          />
+        </div>
       </div>
-    </section>
+      <section className="flex gap-1">
+        <div className="hidden size-9 md:block" />
+        <Box className="bg-transparent md:bg-green-700 md:p-6" padding="none">
+          <div className="flex flex-col gap-4">
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  Selling
+                </Text.Body2>
+                <SelectTokenButton returnUrl={""} type="sell" />
+              </div>
+              <form.Field name="tokenAAmount">
+                {(field) => (
+                  <FormFieldset
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "sell");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                )}
+              </form.Field>
+            </Box>
+            <div className="flex items-center justify-center">
+              <TokenTransactionButton
+                onClickTokenTransaction={onClickSwapToken}
+              />
+            </div>
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  Buying
+                </Text.Body2>
+                <SelectTokenButton type="buy" />
+              </div>
+              <form.Field name="tokenBAmount">
+                {(field) => (
+                  <FormFieldset
+                    disabled={true}
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "buy");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                )}
+              </form.Field>
+            </Box>
+            <div className="w-full">
+              {!publicKey ? (
+                <ConnectWalletButton className="w-full py-3" />
+              ) : poolDetails ? (
+                <Button
+                  className="w-full cursor-pointer py-3 leading-6"
+                  disabled={
+                    isDisableSwap ||
+                    isInsufficientBalance ||
+                    isLoadingQuote ||
+                    isLoadingSwapButton
+                  }
+                  loading={isLoadingSwapButton || isLoadingQuote}
+                  onClick={handleSwap}
+                >
+                  {getButtonMessage()}
+                </Button>
+              ) : (
+                <Button
+                  as={Link}
+                  className="w-full cursor-pointer py-3 leading-6"
+                  href={`/liquidity/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`}
+                >
+                  Create Pool
+                </Button>
+              )}
+            </div>
+          </div>
+          {quote && (
+            <TokenTransactionDetails
+              quote={quote}
+              slippage={slippage}
+              tokenBuyMint={tokenAAddress}
+              tokenSellMint={tokenBAddress}
+            />
+          )}
+        </Box>
+        <div className="hidden flex-col gap-1 md:flex">
+          <TokenTransactionSettingsButton
+            onChange={(slippage) => {
+              setIsUseSlippage(slippage !== "0");
+              setSlippage(slippage);
+              debouncedGetQuote({
+                amountIn: form.state.values.tokenAAmount,
+                isXtoY,
+                slippage: parseFloat(slippage),
+                type: "sell",
+              });
+            }}
+          />
+          <SwapPageRefreshButton
+            onClick={() => {
+              debouncedGetQuote({
+                amountIn: form.state.values.tokenAAmount,
+                isXtoY,
+                slippage: parseFloat(slippage),
+                type: "sell",
+              });
+
+              refetchBuyTokenAccount();
+              refetchSellTokenAccount();
+            }}
+          />
+        </div>
+      </section>
+    </div>
   );
 }

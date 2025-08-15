@@ -1,5 +1,6 @@
 "use client";
 import { Header, Icon, Text } from "@dex-web/ui";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AppHeaderButton } from "./AppHeaderButton";
@@ -7,7 +8,6 @@ import { AppHeaderButton } from "./AppHeaderButton";
 export const AppHeader = () => {
   const tx = useTranslations("pages");
   const pathname = usePathname();
-  console.log(pathname);
   return (
     <Header
       button={<AppHeaderButton />}
@@ -15,46 +15,37 @@ export const AppHeader = () => {
       logoSm={<Icon className="h-6 w-auto stroke-none" name="logo-sm" />}
     >
       <Text
-        active={pathname === "/"}
-        className="inline-flex items-baseline justify-center leading-none no-underline"
+        as={Link}
+        className={`inline-flex items-baseline justify-center leading-none no-underline ${pathname === "/" ? "text-green-100" : "text-green-300"}`}
         data-testid="home-link"
         href="/"
         variant="link"
       >
         {tx("swap")}
       </Text>
-      {/* <Text
-        active={pathname === "/liquidity"}
+      <Text
         as={Link}
-        className="inline-flex items-baseline justify-center leading-none no-underline"
-        data-testid="home-link"
+        className={`inline-flex items-baseline justify-center leading-none no-underline ${pathname === "/liquidity" ? "text-green-100" : "text-green-300"}`}
+        data-testid="liquidity-link"
         href="/liquidity"
         variant="link"
       >
         {tx("liquidity")}
       </Text>
       <Text
-        active={pathname === "/pools"}
         as={Link}
-        className="inline-flex items-baseline justify-center leading-none no-underline"
-        data-testid="home-link"
-        href="/pools"
+        className="inline-flex items-baseline justify-center gap-2 text-green-300 leading-none no-underline"
+        href="https://docs.darklake.fi"
+        target="_blank"
         variant="link"
       >
-        {tx("pools")}
-      </Text> */}
-      <Text
-        active={pathname === "/about"}
-        className="inline-flex items-baseline justify-center leading-none no-underline"
-        href="/about"
-        variant="link"
-      >
-        {tx("about")}
+        {tx("about")} <Icon className="size-4" name="external-link" />
       </Text>
       <Text
-        active={pathname === "/contact"}
-        className="inline-flex items-baseline justify-center gap-2 leading-none no-underline"
-        href="/contact"
+        as={Link}
+        className="inline-flex items-baseline justify-center gap-2 text-green-300 leading-none no-underline"
+        href="https://darklake.typeform.com/contact"
+        target="_blank"
         variant="link"
       >
         {tx("contact")} <Icon className="size-4" name="external-link" />

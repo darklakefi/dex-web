@@ -6,7 +6,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { screen } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
-import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
+import {
+  DEFAULT_BUY_TOKEN,
+  DEFAULT_SELL_TOKEN,
+} from "../../../../_utils/constants";
 
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();
@@ -15,8 +18,8 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <NuqsTestingAdapter
     onUrlUpdate={onUrlUpdate}
     searchParams={{
-      buyTokenAddress: DEFAULT_BUY_TOKEN,
-      sellTokenAddress: DEFAULT_SELL_TOKEN,
+      tokenAAddress: DEFAULT_BUY_TOKEN,
+      tokenBAddress: DEFAULT_SELL_TOKEN,
     }}
   >
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

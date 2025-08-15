@@ -1,7 +1,5 @@
 "use server";
 
-import type { Idl } from "@coral-xyz/anchor";
-import { BorshCoder } from "@coral-xyz/anchor";
 import {
   getAccount,
   TOKEN_2022_PROGRAM_ID,
@@ -9,19 +7,17 @@ import {
 } from "@solana/spl-token";
 import { type Connection, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
-import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
   GetSwapRateInput,
   GetSwapRateOutput,
 } from "../../schemas/swaps/getSwapRate.schema";
+import {
+  EXCHANGE_PROGRAM_ID,
+  getPoolAccount,
+  IDL_CODER,
+} from "../../utils/solana";
 import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
-
-// TODO: put this somewhere configurable based on env
-const EXCHANGE_PROGRAM_ID = new PublicKey(
-  process.env.EXCHANGE_PROGRAM_ID ||
-    "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
-);
 
 // 100% = 1000000, 0.0001% = 1
 const MAX_PERCENTAGE = 1000000;
@@ -82,7 +78,7 @@ async function getTokenBalance(
 }
 
 // Helper function to calculate trade fee
-function getTradeFee(sourceAmount: number, tradeFeeRate: number): number {
+function gateFee(sourceAmount: number, tradeFeeRate: number): number {
   // tradeFeeRate is in basis points (e.g., 1000000 = 100%, 1 = 0.0001%)
   // rounding up in our favor
   return Math.ceil((sourceAmount * tradeFeeRate) / MAX_PERCENTAGE);
@@ -108,14 +104,18 @@ function calculateSwap(
   poolSourceAmount: number,
   poolDestinationAmount: number,
   tradeFeeRate: number,
+  protocolFeeRate: number,
 ): {
   destinationAmount: number;
-  tradeFee: number;
   sourceAmountPostFees: number;
   rate: number;
+  tradeFee: number;
+  protocolFee: number;
 } {
-  // Calculate fee from input
-  const tradeFee = getTradeFee(sourceAmount, tradeFeeRate);
+  // Calculate trade fee from input
+  const tradeFee = gateFee(sourceAmount, tradeFeeRate);
+  // Protocol fee is a percentage of the trade fee
+  const protocolFee = gateFee(tradeFee, protocolFeeRate);
 
   // Subtract fee from input
   const sourceAmountPostFees = sourceAmount - tradeFee;
@@ -132,39 +132,11 @@ function calculateSwap(
 
   return {
     destinationAmount: destinationAmountSwapped,
+    protocolFee,
     rate,
     sourceAmountPostFees,
     tradeFee,
   };
-}
-
-// Load the IDL
-// const idlPath = path.join(__dirname, "../../../darklake.json");
-// const idl = JSON.parse(fs.readFileSync(idlPath, "utf8")) as Idl;
-
-// Use Anchor's coder directly for decoding
-const coder = new BorshCoder(IDL as Idl);
-
-// Helper function to fetch and parse Pool account
-async function getPoolAccount(
-  connection: Connection,
-  poolPubkey: PublicKey,
-): Promise<any> {
-  const accountInfo = await connection.getAccountInfo(poolPubkey);
-
-  if (!accountInfo) {
-    throw new Error("Pool not found");
-  }
-
-  // Decode the Pool account using Anchor's built-in decoder
-  try {
-    const pool = coder.accounts.decode("Pool", accountInfo.data);
-    // console.log("Pool data:", pool);
-    return pool;
-  } catch (error) {
-    console.error("Failed to decode Pool account:", error);
-    throw new Error("Failed to decode Pool account data");
-  }
 }
 
 // The response should be CACHED (or outright provided as env param since fees will change almost never)
@@ -180,7 +152,7 @@ async function getAmmConfigAccount(
 
   // Decode the AmmConfig account using Anchor's built-in decoder
   try {
-    const ammConfig = coder.accounts.decode("AmmConfig", accountInfo.data);
+    const ammConfig = IDL_CODER.accounts.decode("AmmConfig", accountInfo.data);
     return ammConfig;
   } catch (error) {
     console.error("Failed to decode AmmConfig account:", error);
@@ -258,13 +230,14 @@ export async function getSwapRateHandler(
       amountIn * 10 ** (isXtoY ? tokenX.decimals : tokenY.decimals);
     const roundedInput = Math.floor(scaledInput);
 
-    // Calculate swap using AMM formula
     const tradeFeeRate = Number(ammConfig.trade_fee_rate) || 0;
+    const protocolFeeRate = Number(ammConfig.protocol_fee_rate) || 0;
     const swapResult = calculateSwap(
       roundedInput,
       isXtoY ? availableReserveX : availableReserveY,
       isXtoY ? availableReserveY : availableReserveX,
       tradeFeeRate,
+      protocolFeeRate,
     );
 
     const amountOutBigDecimal = BigNumber(swapResult.destinationAmount);
@@ -275,27 +248,44 @@ export async function getSwapRateHandler(
 
     const decDiff = Math.abs(tokenX.decimals - tokenY.decimals);
 
-    // Adjust rate for decimal differences
     let adjustedRate = swapResult.rate;
     if (isXtoY) {
-      // When swapping X to Y, adjust based on decimal difference
       if (tokenX.decimals < tokenY.decimals) {
-        // X has more decimals, so we need to downscale the rate
         adjustedRate = swapResult.rate / 10 ** decDiff;
       } else if (tokenX.decimals > tokenY.decimals) {
-        // X has fewer decimals, so we need to upscale the rate
         adjustedRate = swapResult.rate * 10 ** decDiff;
       }
     } else {
-      // When swapping Y to X, adjust based on decimal difference
       if (tokenY.decimals < tokenX.decimals) {
-        // Y has more decimals, so we need to downscale the rate
         adjustedRate = swapResult.rate / 10 ** decDiff;
       } else if (tokenY.decimals > tokenX.decimals) {
-        // Y has fewer decimals, so we need to upscale the rate
         adjustedRate = swapResult.rate * 10 ** decDiff;
       }
     }
+
+    const poolInputAmount =
+      swapResult.sourceAmountPostFees +
+      swapResult.tradeFee -
+      swapResult.protocolFee;
+
+    const originalRate = isXtoY
+      ? availableReserveY / availableReserveX
+      : availableReserveX / availableReserveY;
+
+    const newAvailableReserveX = isXtoY
+      ? availableReserveX + poolInputAmount
+      : availableReserveX - swapResult.destinationAmount;
+
+    const newAvailableReserveY = isXtoY
+      ? availableReserveY - swapResult.destinationAmount
+      : availableReserveY + poolInputAmount;
+
+    const newRate = isXtoY
+      ? newAvailableReserveY / newAvailableReserveX
+      : newAvailableReserveX / newAvailableReserveY;
+
+    const priceImpact = ((originalRate - newRate) / originalRate) * 100;
+    const priceImpactTruncated = Math.floor(priceImpact * 100) / 100;
 
     return {
       amountIn,
@@ -303,6 +293,7 @@ export async function getSwapRateHandler(
       amountOut,
       amountOutRaw: amountOutBigDecimal.toNumber(),
       estimatedFee: swapResult.tradeFee,
+      priceImpact: priceImpactTruncated,
       rate: adjustedRate,
       tokenX,
       tokenY,

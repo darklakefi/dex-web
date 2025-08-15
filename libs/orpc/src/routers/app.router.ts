@@ -1,21 +1,18 @@
-import { getPoolDetails } from "../procedures/pools/getPoolDetail.procedure";
-import { getSwapDetails } from "../procedures/swaps/getSwapDetails.procedure";
-import { getSwapQuote } from "../procedures/swaps/getSwapQuote.procedure";
-import { getTokenDetails } from "../procedures/tokens/getTokenDetails.procedure";
-import { getTokenPrice } from "../procedures/tokens/getTokenPrice.procedure";
-import { getTokens } from "../procedures/tokens/getTokens.procedure";
 import { dexGatewayRouter } from "./dex-gateway.router";
 import { heliusRouter } from "./helius.router";
+import { liquidityRouter } from "./liquidity.router";
+import { poolsRouter } from "./pools.router";
+import { swapRouter } from "./swap.router";
+import { tokensRouter } from "./tokens.router";
 
 export const appRouter = {
   dexGateway: dexGatewayRouter,
-  getPoolDetails,
-  getSwapDetails,
-  getSwapQuote,
-  getTokenDetails,
-  getTokenPrice,
-  getTokens,
+
   helius: heliusRouter,
+  liquidity: liquidityRouter,
+  pools: poolsRouter,
+  swap: swapRouter,
+  tokens: tokensRouter,
 };
 
 export type AppRouter = typeof appRouter;

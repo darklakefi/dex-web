@@ -14,6 +14,7 @@ export const getSwapRateOutputSchema = z.object({
   amountOut: z.float64().positive(),
   amountOutRaw: z.number().positive(),
   estimatedFee: z.number().positive(),
+  priceImpact: z.float64(),
   rate: z.float64().positive(),
   tokenX: tokenSchema,
   tokenY: tokenSchema,

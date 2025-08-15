@@ -8,6 +8,7 @@ import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
 export async function getSwapHandler(input: SwapRequest) {
   try {
     const grpcClient = getDexGatewayClient();
+
     const { is_swap_x_to_y } = input;
 
     const tokenX = await getTokenDetailsHandler({

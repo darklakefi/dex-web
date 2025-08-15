@@ -11,7 +11,33 @@ export async function submitSignedTransactionHandler(
 ) {
   const grpcClient = getDexGatewayClient();
   console.log("input", input);
-  const response: SignedTransactionResponse =
-    await grpcClient.submitSignedTransaction(input);
-  return response;
+
+  try {
+    const requestWithTradeId = {
+      ...input,
+      trade_id: input.trade_id || input.tracking_id,
+    };
+
+    const response: SignedTransactionResponse =
+      await grpcClient.submitSignedTransaction(requestWithTradeId);
+
+    console.log("submitSignedTransaction response:", response);
+
+    if (!response.success) {
+      console.error("Transaction submission failed:", {
+        errorLogs: response.error_logs,
+        trackingId: input.tracking_id,
+        tradeId: response.trade_id,
+      });
+    }
+
+    return response;
+  } catch (error) {
+    console.error("gRPC client error:", error);
+    return {
+      error_logs: error instanceof Error ? error.message : "Unknown gRPC error",
+      success: false,
+      trade_id: input.trade_id,
+    };
+  }
 }

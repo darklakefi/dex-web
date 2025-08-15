@@ -5,9 +5,15 @@ interface ShortPoolPanelProps {
   pools: Pool[];
   title: string;
   icon: IconName;
+  onPoolClick: (pool: Pool) => void;
 }
 
-export function ShortPoolPanel({ pools, title, icon }: ShortPoolPanelProps) {
+export function ShortPoolPanel({
+  pools,
+  title,
+  icon,
+  onPoolClick,
+}: ShortPoolPanelProps) {
   return (
     <Box
       className="flex w-full flex-col gap-5 bg-green-800"
@@ -19,29 +25,31 @@ export function ShortPoolPanel({ pools, title, icon }: ShortPoolPanelProps) {
           <Icon className="size-4" name={icon} />
           <Text.Body2>{title}</Text.Body2>
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <Text.Body2 className="text-green-300">24H APR</Text.Body2>
           <Icon className="text-green-300" name="chevron-down" />
-        </div>
+        </div> */}
       </div>
       <div className="flex w-full flex-col gap-3">
         {pools.map((pool) => (
-          <div
-            className="flex w-full justify-between bg-green-700 p-3"
-            key={pool.address}
+          <button
+            className="flex w-full cursor-pointer justify-between bg-green-700 p-3 hover:opacity-80"
+            key={`${pool.tokenXMint}-${pool.tokenYMint}`}
+            onClick={() => onPoolClick(pool)}
+            type="button"
           >
-            <div className="flex text-green-300">
+            <div className="flex gap-1">
               <Text.Body2 className="text-green-300">
-                {pool.tokenX.symbol}
+                {pool.tokenXSymbol}
               </Text.Body2>
-              /
+              <span className="text-green-300">/</span>
               <Text.Body2 className="text-green-300">
-                {pool.tokenY.symbol}
+                {pool.tokenYSymbol}
               </Text.Body2>
             </div>
 
-            <Text.Body2 className="text-green-100">{pool.apr}%</Text.Body2>
-          </div>
+            {/* <Text.Body2 className="text-green-100">{pool.apr}%</Text.Body2> */}
+          </button>
         ))}
       </div>
     </Box>

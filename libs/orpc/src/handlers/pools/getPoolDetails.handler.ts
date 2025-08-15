@@ -1,40 +1,51 @@
+"use server";
+
+import { MAINNET_POOLS, MOCK_POOLS } from "../../mocks/pool.mock";
 import type {
   GetPoolDetailsInput,
   GetPoolDetailsOutput,
 } from "../../schemas/pools/getPoolDetails.schema";
+import { getPoolOnChain, type PoolAccount } from "../../utils/solana";
 
-export const MOCK_POOLS = [
-  {
-    tokenXMint: "DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX",
-    tokenYMint: "HXsKnhXPtGr2mq4uTpxbxyy7ZydYWJwx4zMuYPEDukY",
-  },
-];
-
-export const MAINNET_POOLS = [
-  {
-    tokenXMint: "DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX",
-    tokenYMint: "HXsKnhXPtGr2mq4uTpxbxyy7ZydYWJwx4zMuYPEDukY",
-  },
-  {
-    tokenXMint: "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
-    tokenYMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-  },
-];
-
-export function getPoolDetailsHandler(
-  input: GetPoolDetailsInput,
-): GetPoolDetailsOutput | null {
-  const { tokenXMint, tokenYMint } = input;
-  const rawData = process.env.NETWORK === "2" ? MOCK_POOLS : MAINNET_POOLS;
-  const pool = rawData.find(
+function getPoolOnLocalData(tokenXMint: string, tokenYMint: string) {
+  const localDataPool =
+    process.env.NETWORK === "2" ? MOCK_POOLS : MAINNET_POOLS;
+  return localDataPool.find(
     (pool) =>
       (pool.tokenXMint === tokenXMint && pool.tokenYMint === tokenYMint) ||
       (pool.tokenXMint === tokenYMint && pool.tokenYMint === tokenXMint),
   );
+}
+
+async function savePoolToLocalData(pool: PoolAccount) {
+  return {
+    apr: 0,
+    tokenXMint: pool.reserve_x.toBase58(),
+    tokenXSymbol: pool.reserve_x.toBase58(),
+    tokenYMint: pool.reserve_y.toBase58(),
+    tokenYSymbol: pool.reserve_y.toBase58(),
+  };
+}
+
+export async function getPoolDetailsHandler(
+  input: GetPoolDetailsInput,
+): Promise<GetPoolDetailsOutput | null> {
+  const { tokenXMint, tokenYMint } = input;
+  let pool = getPoolOnLocalData(tokenXMint, tokenYMint);
+  console.log("Getting pool on local data", pool);
 
   if (!pool) {
-    return null;
+    console.log("Getting pool on chain");
+    try {
+      const poolOnChain = await getPoolOnChain(tokenXMint, tokenYMint);
+      if (poolOnChain) {
+        pool = await savePoolToLocalData(poolOnChain);
+      }
+    } catch (error) {
+      console.log("Pool not found on chain, returning null");
+      // Pool doesn't exist yet, this is expected for new pools
+    }
   }
 
-  return pool;
+  return pool ?? null;
 }

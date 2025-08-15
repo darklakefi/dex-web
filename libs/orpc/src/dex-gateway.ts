@@ -6,9 +6,16 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { PROTO_DEFINITION } from "./dex-gateway.proto";
 import type {
   CheckTradeStatusRequest,
   CheckTradeStatusResponse,
+  GetTokenMetadataListRequest,
+  GetTokenMetadataListResponse,
+  GetTokenMetadataRequest,
+  GetTokenMetadataResponse,
+  GetTradesListByUserRequest,
+  GetTradesListByUserResponse,
   GrpcClient,
   SignedTransactionRequest,
   SignedTransactionResponse,
@@ -21,86 +28,6 @@ const config = {
     process.env.GATEWAY_HOST || "dex-gateway-staging.dex.darklake.fi",
   gatewayPort: parseInt(process.env.GATEWAY_PORT || "50051"),
 };
-
-// Define the proto definition directly in code instead of loading from a file
-const PROTO_DEFINITION = `
-syntax = "proto3";
-
-package gateway_solana;
-
-// --------------------------------- ENUMS
-
-enum Network {
-    MAINNET_BETA = 0;
-    TESTNET      = 1;
-    DEVNET       = 2;
-}
-
-enum TradeStatus {
-    UNSIGNED  = 0;
-    SIGNED    = 1;
-    CONFIRMED = 2;
-    SETTLED   = 3;
-    SLASHED   = 4;
-    CANCELLED = 5;
-    FAILED    = 6;
-}
-
-// --------------------------------- MESSAGES
-
-message CreateUnsignedTransactionRequest {
-    string user_address = 1;
-    string token_mint_x = 2;
-    string token_mint_y = 3;
-    uint64 amount_in    = 4;
-    uint64 min_out      = 5;
-    string tracking_id  = 6;
-    bool is_swap_x_to_y = 7;
-}
-
-message CreateUnsignedTransactionResponse {
-    // Base64 encoded transaction
-    string unsigned_transaction = 1;
-    string order_id             = 2;
-    string trade_id             = 3;
-    // TODO: DAR-488 discuss necessary return values
-}
-
-message SendSignedTransactionRequest {
-    string signed_transaction = 1;
-    string tracking_id        = 2;
-    string trade_id           = 3;
-}
-
-message SendSignedTransactionResponse {
-    bool success    = 1;
-    string trade_id = 2;
-    repeated string error_logs = 3;
-}
-
-message CheckTradeStatusRequest {
-    string tracking_id = 1;
-    string trade_id    = 2;
-}
-
-message CheckTradeStatusResponse {
-    string trade_id    = 1;
-    TradeStatus status = 2;
-}
-
-// --------------------------------- SERVICES
-
-service SolanaGatewayService {
-    rpc CreateUnsignedTransaction(CreateUnsignedTransactionRequest)
-        returns (CreateUnsignedTransactionResponse);
-
-    rpc SendSignedTransaction(SendSignedTransactionRequest)
-        returns (SendSignedTransactionResponse);
-
-    rpc CheckTradeStatus(CheckTradeStatusRequest)
-        returns (CheckTradeStatusResponse);
-}
-`;
 
 // Create a unique temporary file path
 const tempDir = os.tmpdir();
@@ -146,6 +73,54 @@ function createGrpcClient(): GrpcClient {
         client.CheckTradeStatus(
           request,
           (error: any, response: CheckTradeStatusResponse) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      });
+    },
+    getTokenMetadata: (
+      request: GetTokenMetadataRequest,
+    ): Promise<GetTokenMetadataResponse> => {
+      return new Promise((resolve, reject) => {
+        client.GetTokenMetadata(
+          request,
+          (error: any, response: GetTokenMetadataResponse) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      });
+    },
+    getTokenMetadataList: (
+      request: GetTokenMetadataListRequest,
+    ): Promise<GetTokenMetadataListResponse> => {
+      return new Promise((resolve, reject) => {
+        client.GetTokenMetadataList(
+          request,
+          (error: any, response: GetTokenMetadataListResponse) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(response);
+            }
+          },
+        );
+      });
+    },
+    getTradesListByUser: (
+      request: GetTradesListByUserRequest,
+    ): Promise<GetTradesListByUserResponse> => {
+      return new Promise((resolve, reject) => {
+        client.GetTradesListByUser(
+          request,
+          (error: any, response: GetTradesListByUserResponse) => {
             if (error) {
               reject(error);
             } else {

@@ -6,9 +6,11 @@ import {
 } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
-import { SelectTokenModal } from "../../../[lang]/(swap)/_components/SelectTokenModal";
-import { selectedTokensCache } from "../../../[lang]/(swap)/_utils/searchParams";
+import { SelectTokenModal } from "../../../_components/SelectTokenModal";
+import { getTokensAllowList } from "../../../_utils/getTokensAllowList";
+import { selectedTokensCache } from "../../../_utils/searchParams";
 
+const allowList = getTokensAllowList();
 export default async function Page({
   searchParams,
   params,
@@ -18,7 +20,7 @@ export default async function Page({
 }) {
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery(
-    tanstackClient.getTokens.queryOptions({
+    tanstackClient.tokens.getTokens.queryOptions({
       input: {
         limit: 8,
         offset: 0,
@@ -32,7 +34,11 @@ export default async function Page({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <Suspense fallback={<div>Loading...</div>}>
-        <SelectTokenModal type={(await params).type} />
+        <SelectTokenModal
+          allowList={allowList}
+          returnUrl={""}
+          type={(await params).type}
+        />
       </Suspense>
     </HydrationBoundary>
   );
