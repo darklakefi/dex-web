@@ -595,23 +595,17 @@ export function LiquidityForm() {
               }}
             >
               {(field) => (
-                <div>
-                  <FormFieldset
-                    name={field.name}
-                    onBlur={field.handleBlur}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      handleAmountChange(e, "sell");
-                      field.handleChange(e.target.value);
-                    }}
-                    tokenAccount={sellTokenAccount?.tokenAccounts[0]}
-                    value={field.state.value}
-                  />
-                  {!field.state.meta.isValid && (
-                    <Text.Body3 className="mt-1 text-red-400" role="alert">
-                      {field.state.meta.errors.join(", ")}
-                    </Text.Body3>
-                  )}
-                </div>
+                <FormFieldset
+                  maxDecimals={5}
+                  name={field.name}
+                  onBlur={field.handleBlur}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleAmountChange(e, "sell");
+                    field.handleChange(e.target.value);
+                  }}
+                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                  value={field.state.value}
+                />
               )}
             </form.Field>
           </Box>
@@ -644,23 +638,17 @@ export function LiquidityForm() {
               }}
             >
               {(field) => (
-                <div>
-                  <FormFieldset
-                    name={field.name}
-                    onBlur={field.handleBlur}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      handleAmountChange(e, "buy");
-                      field.handleChange(e.target.value);
-                    }}
-                    tokenAccount={buyTokenAccount?.tokenAccounts[0]}
-                    value={field.state.value}
-                  />
-                  {!field.state.meta.isValid && (
-                    <Text.Body3 className="mt-1 text-red-400" role="alert">
-                      {field.state.meta.errors.join(", ")}
-                    </Text.Body3>
-                  )}
-                </div>
+                <FormFieldset
+                  maxDecimals={5}
+                  name={field.name}
+                  onBlur={field.handleBlur}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleAmountChange(e, "buy");
+                    field.handleChange(e.target.value);
+                  }}
+                  tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                  value={field.state.value}
+                />
               )}
             </form.Field>
           </Box>
