@@ -506,6 +506,7 @@ export function SwapForm() {
               <form.Field name="tokenAAmount">
                 {(field) => (
                   <FormFieldset
+                    maxDecimals={5}
                     name={field.name}
                     onBlur={field.handleBlur}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -537,6 +538,7 @@ export function SwapForm() {
                 {(field) => (
                   <FormFieldset
                     disabled={true}
+                    maxDecimals={5}
                     name={field.name}
                     onBlur={field.handleBlur}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
