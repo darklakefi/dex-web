@@ -22,20 +22,18 @@ export function AddLiquidityDetails({
   const rateAtoB = BigNumber(tokenAAmount).dividedBy(tokenBAmount);
   const [isAtoB, setIsAtoB] = useState(true);
 
-  const rate = isAtoB ? rateAtoB : rateBtoA;
-
   const priceAtoB = `1 ${tokenASymbol} ≈ ${numberFormatHelper({
     decimalScale: 5,
     thousandSeparator: true,
     trimTrailingZeros: true,
-    value: rate,
+    value: rateAtoB,
   })} ${tokenBSymbol}`;
 
   const priceBtoA = `1 ${tokenBSymbol} ≈ ${numberFormatHelper({
     decimalScale: 5,
     thousandSeparator: true,
     trimTrailingZeros: true,
-    value: rate,
+    value: rateBtoA,
   })} ${tokenASymbol}`;
 
   const handleClick = () => {
