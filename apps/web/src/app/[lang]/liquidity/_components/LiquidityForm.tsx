@@ -6,7 +6,7 @@ import type {
   CreatePoolTransactionInput,
 } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
-import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
+import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
@@ -31,6 +31,7 @@ import { dismissToast, toast } from "../../../_utils/toast";
 import { getLiquidityFormButtonMessage } from "../_utils/getLiquidityFormButtonMessage";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
 import { validateHasSuffificentBalance } from "../_utils/validateHasSuffificentBalance";
+import { AddLiquidityDetails } from "./AddLiquidityDetaili";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -64,7 +65,6 @@ export function LiquidityForm() {
   const [createStep, setCreateStep] = useState(0);
   const [disableLiquidity, setDisableLiquidity] = useState(true);
   const [slippage, setSlippage] = useState("0.5");
-  const [poolPrice, setPoolPrice] = useState(0);
 
   const sortedTokenAddresses = sortSolanaAddresses(
     tokenAAddress,
@@ -490,13 +490,6 @@ export function LiquidityForm() {
       tokenYMint: poolDetails.tokenYMint,
     });
 
-    const oneXtoY =
-      inputType === "tokenX"
-        ? BigNumber(amountNumber).dividedBy(response.tokenAmount)
-        : BigNumber(response.tokenAmount).dividedBy(amountNumber);
-
-    setPoolPrice(oneXtoY.toNumber());
-
     if (inputType === "tokenX") {
       form.setFieldValue("tokenBAmount", String(response.tokenAmount));
       form.validateAllFields("change");
@@ -570,6 +563,7 @@ export function LiquidityForm() {
   return (
     <section className="flex w-full max-w-xl items-start gap-1">
       <div className="size-9" />
+
       <Box padding="lg">
         <div className="flex flex-col gap-4">
           <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
@@ -782,47 +776,13 @@ export function LiquidityForm() {
         {poolDetails &&
           form.state.values.tokenBAmount !== "0" &&
           form.state.values.tokenAAmount !== "0" && (
-            <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
-              <Text.Body2 className="mb-3 text-green-300 uppercase">
-                Liquidity Details
-              </Text.Body2>
-
-              <div className="flex items-center justify-between">
-                <Text.Body2 className="text-green-300">
-                  Total Deposit
-                </Text.Body2>
-                <div className="text-right">
-                  <Text.Body2 className="text-green-300">
-                    {form.state.values.tokenBAmount}{" "}
-                    {sellTokenAccount?.tokenAccounts[0]?.symbol}
-                  </Text.Body2>
-                  <Text.Body2 className="text-green-300">
-                    {form.state.values.tokenAAmount}{" "}
-                    {buyTokenAccount?.tokenAccounts[0]?.symbol}
-                  </Text.Body2>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Text.Body2 className="text-green-300">Pool Price</Text.Body2>
-                <Text.Body2 className="text-green-300">
-                  1 {sellTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
-                  {numberFormatHelper({
-                    decimalScale: 6,
-                    trimTrailingZeros: true,
-                    value: poolPrice,
-                  })}{" "}
-                  {buyTokenAccount?.tokenAccounts[0]?.symbol}
-                </Text.Body2>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Text.Body2 className="text-green-300">
-                  Slippage Tolerance
-                </Text.Body2>
-                <Text.Body2 className="text-green-300">{slippage}%</Text.Body2>
-              </div>
-            </div>
+            <AddLiquidityDetails
+              slippage={slippage}
+              tokenAAmount={form.state.values.tokenAAmount}
+              tokenASymbol={buyTokenAccount?.tokenAccounts[0]?.symbol || ""}
+              tokenBAmount={form.state.values.tokenBAmount}
+              tokenBSymbol={sellTokenAccount?.tokenAccounts[0]?.symbol || ""}
+            />
           )}
 
         {!poolDetails &&
