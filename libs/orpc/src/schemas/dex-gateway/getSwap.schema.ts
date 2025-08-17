@@ -8,7 +8,7 @@ export const getSwapInputSchema = z.object({
   network: z.number(),
   token_mint_x: z.string(),
   token_mint_y: z.string(),
-  tracking_id: z.string(),
+  tracking_id: z.string().optional(),
   user_address: z.string(),
 });
 

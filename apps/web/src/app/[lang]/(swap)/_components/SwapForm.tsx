@@ -295,17 +295,14 @@ export function SwapForm() {
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
       const response = await client.dexGateway.getSwap({
-        amount_in: Number(sellAmount),
+        amount_in: sellAmount,
         is_swap_x_to_y: isXtoY,
-        min_out: isUseSlippage
-          ? BigNumber(buyAmount)
-              .multipliedBy(1 - Number(slippage) / 100)
-              .toNumber()
-          : Number(buyAmount),
+        min_out: BigNumber(buyAmount)
+          .multipliedBy(1 - Number(slippage || 0) / 100)
+          .toNumber(),
         network: parseInt(process.env.NETWORK || "2", 10),
         token_mint_x: tokenXAddress,
         token_mint_y: tokenYAddress,
-        tracking_id: "123", // should place this in the orpc and better structure for tracking
         user_address: publicKey.toBase58(),
       });
 
@@ -316,7 +313,7 @@ export function SwapForm() {
           response.trackingId,
         );
       } else {
-        // throw new Error("Failed to create swap transaction");
+        throw new Error("Failed to create swap transaction");
       }
     } catch (error) {
       console.error("Swap error:", error);

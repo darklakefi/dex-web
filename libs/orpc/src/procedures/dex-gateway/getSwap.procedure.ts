@@ -5,5 +5,8 @@ import { baseProcedure } from "../base.procedure";
 export const getSwap = baseProcedure
   .input(getSwapInputSchema)
   .handler(async ({ input }) => {
-    return await getSwapHandler(input);
+    return await getSwapHandler({
+      ...input,
+      tracking_id: `id-${Math.random().toString(16).slice(2)}`,
+    });
   });
