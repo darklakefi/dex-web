@@ -48,10 +48,20 @@ export function AddLiquidityDetails({
         <Text.Body2 className="text-green-300">Total Deposit</Text.Body2>
         <div className="text-right">
           <Text.Body2 className="text-green-200">
-            {tokenBAmount} {tokenBSymbol}
+            {numberFormatHelper({
+              decimalScale: 5,
+              trimTrailingZeros: true,
+              value: tokenBAmount,
+            })}{" "}
+            {tokenBSymbol}
           </Text.Body2>
           <Text.Body2 className="text-green-200">
-            {tokenAAmount} {tokenASymbol}
+            {numberFormatHelper({
+              decimalScale: 5,
+              trimTrailingZeros: true,
+              value: tokenAAmount,
+            })}{" "}
+            {tokenASymbol}
           </Text.Body2>
         </div>
       </div>
