@@ -16,7 +16,6 @@ import {
   MAX_PERCENTAGE,
   toRawUnits,
 } from "../../utils/solana";
-import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
 // Helper function to calculate trade fee
 function gateFee(sourceAmount: BigNumber, tradeFeeRate: BigNumber): BigNumber {
@@ -164,17 +163,15 @@ export async function getSwapRateHandler(
       returnAsObject: true,
     })) as Record<string, Token>;
 
-    const tokenX = tokenMetadata[tokenXMint]!;
-    const tokenY = tokenMetadata[tokenYMint]!;
-
     const scaledInput = toRawUnits(
       amountIn,
       isXtoY ? tokenX.decimals : tokenY.decimals,
     );
     const roundedInput = scaledInput.integerValue(BigNumber.ROUND_DOWN);
 
-    const tradeFeeRate = BigNumber(ammConfig.trade_fee_rate || 0);
-    const protocolFeeRate = BigNumber(ammConfig.protocol_fee_rate || 0);
+    const tradeFeeRate = BigNumber(ammConfig.trade_fee_rate) || BigNumber(0);
+    const protocolFeeRate =
+      BigNumber(ammConfig.protocol_fee_rate) || BigNumber(0);
     const swapResult = calculateSwap(
       roundedInput,
       isXtoY ? availableReserveX : availableReserveY,
@@ -230,7 +227,7 @@ export async function getSwapRateHandler(
       .minus(newRate)
       .dividedBy(originalRate)
       .multipliedBy(100);
-    const priceImpactTruncated = priceImpact.toFixed(2);
+    const priceImpactTruncated = priceImpact.integerValue(BigNumber.ROUND_DOWN);
 
     return {
       amountIn,
@@ -238,7 +235,7 @@ export async function getSwapRateHandler(
       amountOut: amountOut.toNumber(),
       amountOutRaw: amountOutBigDecimal.toString(),
       estimatedFee: swapResult.tradeFee.toString(),
-      priceImpact: Number(priceImpactTruncated),
+      priceImpact: priceImpactTruncated.toNumber(),
       rate: adjustedRate.toNumber(),
       tokenX,
       tokenY,
