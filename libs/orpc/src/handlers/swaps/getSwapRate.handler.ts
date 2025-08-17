@@ -171,9 +171,8 @@ export async function getSwapRateHandler(
     );
     const roundedInput = scaledInput.integerValue(BigNumber.ROUND_DOWN);
 
-    const tradeFeeRate = BigNumber(ammConfig.trade_fee_rate) || BigNumber(0);
-    const protocolFeeRate =
-      BigNumber(ammConfig.protocol_fee_rate) || BigNumber(0);
+    const tradeFeeRate = BigNumber(ammConfig.trade_fee_rate || 0);
+    const protocolFeeRate = BigNumber(ammConfig.protocol_fee_rate || 0);
     const swapResult = calculateSwap(
       roundedInput,
       isXtoY ? availableReserveX : availableReserveY,
@@ -229,7 +228,7 @@ export async function getSwapRateHandler(
       .minus(newRate)
       .dividedBy(originalRate)
       .multipliedBy(100);
-    const priceImpactTruncated = priceImpact.integerValue(BigNumber.ROUND_DOWN);
+    const priceImpactTruncated = priceImpact.toFixed(2);
 
     return {
       amountIn,
@@ -237,7 +236,7 @@ export async function getSwapRateHandler(
       amountOut: amountOut.toNumber(),
       amountOutRaw: amountOutBigDecimal.toString(),
       estimatedFee: swapResult.tradeFee.toString(),
-      priceImpact: priceImpactTruncated.toNumber(),
+      priceImpact: Number(priceImpactTruncated),
       rate: adjustedRate.toNumber(),
       tokenX,
       tokenY,
