@@ -9,7 +9,7 @@ import { getPoolOnChain, type PoolAccount } from "../../utils/solana";
 
 function getPoolOnLocalData(tokenXMint: string, tokenYMint: string) {
   const localDataPool =
-    process.env.NETWORK === "2" ? MOCK_POOLS : MAINNET_POOLS;
+    process.env.NEXT_PUBLIC_NETWORK === "2" ? MOCK_POOLS : MAINNET_POOLS;
   return localDataPool.find(
     (pool) =>
       (pool.tokenXMint === tokenXMint && pool.tokenYMint === tokenYMint) ||

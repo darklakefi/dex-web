@@ -13,8 +13,10 @@ import {
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
 
 export function SwapTransactionHistory() {
   const { publicKey } = useWallet();
@@ -93,10 +95,16 @@ export function SwapTransactionHistory() {
                   >
                     <div className=" flex flex-row items-center gap-2">
                       <Text.Body2 className="text-green-200">SWAP</Text.Body2>
-                      <Icon
-                        className="size-4 cursor-pointer text-green-300"
-                        name="external-link"
-                      />
+                      <Text
+                        as={Link}
+                        href={getExplorerUrl({ tx: tx.signature })}
+                        target="_blank"
+                      >
+                        <Icon
+                          className="size-4 cursor-pointer text-green-300"
+                          name="external-link"
+                        />
+                      </Text>
                     </div>
                     <div className="flex flex-row justify-between">
                       <Text.Body2 className="text-green-300">

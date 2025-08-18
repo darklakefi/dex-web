@@ -31,7 +31,7 @@ const createPoolFeeVaultMainnet = new PublicKey(
 );
 
 const createPoolFeeVault =
-  process.env.NETWORK === "2"
+  process.env.NEXT_PUBLIC_NETWORK === "2"
     ? createPoolFeeVaultDevnet
     : createPoolFeeVaultMainnet;
 

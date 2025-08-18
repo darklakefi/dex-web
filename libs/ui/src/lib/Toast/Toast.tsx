@@ -25,12 +25,13 @@ interface ToastProps
   extends React.HTMLAttributes<HTMLDivElement>,
     ToastVariants {
   title: string;
-  description: string;
+  description: string | React.ReactNode;
   onClose: () => void;
   actions?: {
     label: string;
     onClick: () => void;
   }[];
+  customAction?: React.ReactNode;
 }
 
 const IconMap = {
@@ -66,6 +67,7 @@ export function Toast({
   description,
   onClose,
   actions,
+  customAction = null,
   ...props
 }: ToastProps) {
   return (
@@ -105,6 +107,7 @@ export function Toast({
             ))}
           </div>
         )}
+        {customAction}
       </div>
     </div>
   );
