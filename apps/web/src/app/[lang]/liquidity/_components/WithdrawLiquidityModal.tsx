@@ -252,7 +252,7 @@ export function WithdrawLiquidityModal({
         customAction: (
           <Text
             as={Link}
-            className="inline-flex items-center gap-2 text-green-300 leading-none no-underline"
+            className="inline-flex items-baseline justify-center gap-2 text-green-300 leading-none no-underline"
             href={getExplorerUrl({ tx: submitRes.signature })}
             target="_blank"
             variant="link"
@@ -267,6 +267,7 @@ export function WithdrawLiquidityModal({
               {tokenXDetails.symbol} + {withdrawalCalculations.tokenYAmount}{" "}
               {tokenYDetails.symbol}
             </Text.Body2>
+            <Text.Body2>Transaction: {submitRes.signature}</Text.Body2>
           </div>
         ),
         title: "Withdrawal complete",

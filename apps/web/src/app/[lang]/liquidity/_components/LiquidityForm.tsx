@@ -339,7 +339,7 @@ export function LiquidityForm() {
               customAction: (
                 <Text
                   as={Link}
-                  className="inline-flex items-center gap-2 text-green-300 leading-none no-underline hover:text-green-200"
+                  className="inline-flex items-baseline justify-center gap-2 text-green-300 leading-none no-underline"
                   href={getExplorerUrl({ tx: signature })}
                   target="_blank"
                   variant="link"
@@ -352,9 +352,10 @@ export function LiquidityForm() {
                 <div className="flex flex-col gap-1">
                   <Text.Body2>
                     ADDED LIQUIDITY: {form.state.values.tokenAAmount}{" "}
-                    {tokenADetails?.symbol} + {form.state.values.tokenBAmount}{" "}
-                    {tokenBDetails?.symbol}
+                    {tokenADetails.symbol} + {form.state.values.tokenBAmount}{" "}
+                    {tokenBDetails.symbol}
                   </Text.Body2>
+                  <Text.Body2>Transaction: {signature}</Text.Body2>
                 </div>
               ),
               title: "Liquidity Added Successfully",

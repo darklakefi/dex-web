@@ -1,6 +1,5 @@
 "use client";
 import { tanstackClient } from "@dex-web/orpc";
-import type { Token } from "@dex-web/orpc/schemas";
 import { sortSolanaAddresses } from "@dex-web/orpc/utils/solana";
 import { Box, Button, Text } from "@dex-web/ui";
 import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
@@ -44,18 +43,17 @@ export function YourLiquidity({
     }),
   );
 
-  const { data: tokenMetadata } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenMetadata.queryOptions({
-      input: {
-        addresses: [tokenXAddress, tokenYAddress],
-        returnAsObject: true,
-      },
+  const { data: tokenXDetails } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenDetails.queryOptions({
+      input: { address: tokenXAddress },
     }),
   );
 
-  const metadata = tokenMetadata as Record<string, Token>;
-  const tokenXDetails = metadata[tokenXAddress]!;
-  const tokenYDetails = metadata[tokenYAddress]!;
+  const { data: tokenYDetails } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenDetails.queryOptions({
+      input: { address: tokenYAddress },
+    }),
+  );
 
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.pools.getPoolDetails.queryOptions({
@@ -126,11 +124,11 @@ export function YourLiquidity({
       .multipliedBy(poolReserves.reserveX)
       .toNumber();
 
-    const tokenYValue = BigNumber(userTokenYAmount).multipliedBy(
-      tokenYPrice.price || 0,
-    );
-    const tokenXValue = BigNumber(userTokenXAmount).multipliedBy(
+    const tokenAValue = BigNumber(userTokenYAmount).multipliedBy(
       tokenXPrice.price || 0,
+    );
+    const tokenBValue = BigNumber(userTokenXAmount).multipliedBy(
+      tokenYPrice.price || 0,
     );
     const totalUsdValue = tokenYValue.plus(tokenXValue).toNumber();
 
@@ -166,7 +164,7 @@ export function YourLiquidity({
                 trimTrailingZeros: true,
                 value: liquidityCalculations.userTokenXAmount,
               })}{" "}
-              {tokenXDetails?.symbol}
+              {tokenXDetails.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-200">
               {numberFormatHelper({
@@ -174,7 +172,7 @@ export function YourLiquidity({
                 trimTrailingZeros: true,
                 value: liquidityCalculations.userTokenYAmount,
               })}{" "}
-              {tokenYDetails?.symbol}
+              {tokenYDetails.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
             <Button
