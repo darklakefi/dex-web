@@ -1,8 +1,8 @@
 "use server";
 
-import BigNumber from "bignumber.js";
 import { getDexGatewayClient } from "../../dex-gateway";
 import type { SwapRequest, SwapResponse } from "../../dex-gateway.type";
+import { toRawUnits } from "../../utils/solana";
 import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
 
 export async function getSwapHandler(input: SwapRequest) {
@@ -25,18 +25,10 @@ export async function getSwapHandler(input: SwapRequest) {
       [amountInDecimals, minOutDecimals] = [minOutDecimals, amountInDecimals];
     }
 
-    input.amount_in = BigNumber(input.amount_in)
-      .multipliedBy(BigNumber(10 ** amountInDecimals))
-      .toNumber();
-    input.min_out = BigNumber(input.min_out)
-      .multipliedBy(BigNumber(10 ** minOutDecimals))
-      .toNumber();
+    input.amount_in = toRawUnits(input.amount_in, amountInDecimals).toNumber();
+    input.min_out = toRawUnits(input.min_out, minOutDecimals).toNumber();
 
-    input.tracking_id = `id${Math.random().toString(16).slice(2)}`;
-
-    console.log(input, "input");
     const swapResponse: SwapResponse = await grpcClient.swap(input);
-    console.log(swapResponse, "swapResponse");
 
     return {
       success: true,
