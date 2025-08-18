@@ -124,13 +124,13 @@ export function YourLiquidity({
       .multipliedBy(poolReserves.reserveX)
       .toNumber();
 
-    const tokenAValue = BigNumber(userTokenYAmount).multipliedBy(
-      tokenXPrice.price || 0,
-    );
-    const tokenBValue = BigNumber(userTokenXAmount).multipliedBy(
+    const tokenYValue = BigNumber(userTokenYAmount).multipliedBy(
       tokenYPrice.price || 0,
     );
-    const totalUsdValue = tokenAValue.plus(tokenBValue).toNumber();
+    const tokenXValue = BigNumber(userTokenXAmount).multipliedBy(
+      tokenXPrice.price || 0,
+    );
+    const totalUsdValue = tokenYValue.plus(tokenXValue).toNumber();
 
     return {
       totalUsdValue,
