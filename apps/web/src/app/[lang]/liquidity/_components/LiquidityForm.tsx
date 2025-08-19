@@ -13,6 +13,7 @@ import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
+import Link from "next/link";
 import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -25,6 +26,7 @@ import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
+import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
@@ -334,7 +336,27 @@ export function LiquidityForm() {
             dismissToast();
             setLiquidityStep(0);
             toast({
-              description: `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}. Transaction: ${signature}`,
+              customAction: (
+                <Text
+                  as={Link}
+                  className="inline-flex items-center gap-2 text-green-300 leading-none no-underline"
+                  href={getExplorerUrl({ tx: signature })}
+                  target="_blank"
+                  variant="link"
+                >
+                  View Transaction{" "}
+                  <Icon className="size-4" name="external-link" />
+                </Text>
+              ),
+              description: (
+                <div className="flex flex-col gap-1">
+                  <Text.Body2>
+                    ADDED LIQUIDITY: {form.state.values.tokenAAmount}{" "}
+                    {tokenADetails.symbol} + {form.state.values.tokenBAmount}{" "}
+                    {tokenBDetails.symbol}
+                  </Text.Body2>
+                </div>
+              ),
               title: "Liquidity Added Successfully",
               variant: "success",
             });

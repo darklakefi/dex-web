@@ -300,7 +300,7 @@ export function SwapForm() {
         min_out: BigNumber(buyAmount)
           .multipliedBy(1 - Number(slippage || 0) / 100)
           .toNumber(),
-        network: parseInt(process.env.NETWORK || "2", 10),
+        network: parseInt(process.env.NEXT_PUBLIC_NETWORK || "2", 10),
         token_mint_x: tokenXAddress,
         token_mint_y: tokenYAddress,
         user_address: publicKey.toBase58(),
