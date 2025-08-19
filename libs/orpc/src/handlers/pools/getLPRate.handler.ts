@@ -8,13 +8,62 @@ import type {
   GetLPRateOutput,
 } from "../../schemas/pools/getLPRate.schema";
 import type { Token } from "../../schemas/tokens/token.schema";
-import {
-  EXCHANGE_PROGRAM_ID,
-  getPoolAccount,
-  getTokenBalance,
-  toRawUnits,
-} from "../../utils/solana";
+import { EXCHANGE_PROGRAM_ID } from "../../utils/solana";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
+
+// Helper function to determine token program ID
+async function getTokenProgramId(
+  connection: Connection,
+  accountPubkey: PublicKey,
+): Promise<PublicKey> {
+  try {
+    const accountInfo = await connection.getAccountInfo(accountPubkey);
+    if (!accountInfo) {
+      throw new Error("Account not found");
+    }
+
+    // Check if the account owner is TOKEN_2022_PROGRAM_ID
+    if (accountInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
+      return TOKEN_2022_PROGRAM_ID;
+    } else if (accountInfo.owner.equals(TOKEN_PROGRAM_ID)) {
+      return TOKEN_PROGRAM_ID;
+    } else {
+      throw new Error("Invalid token program ID");
+    }
+  } catch (error) {
+    console.error("Failed to determine token program ID:", error);
+    // Default to legacy program
+    return TOKEN_PROGRAM_ID;
+  }
+}
+
+// Helper function to get token balance using SPL library
+async function getTokenBalance(
+  connection: Connection,
+  accountPubkey: PublicKey,
+  accountName: string,
+): Promise<number> {
+  try {
+    // Determine the correct program ID for this token account
+    const programId = await getTokenProgramId(connection, accountPubkey);
+
+    // Use SPL token library to get account info with the correct program ID
+    const account = await getAccount(
+      connection,
+      accountPubkey,
+      undefined,
+      programId,
+    );
+    const balance = Number(account.amount);
+    console.log(`${accountName} Balance: ${balance}`);
+    return balance;
+  } catch (error) {
+    console.error(
+      `${accountName} failed to get balance: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return 0;
+  }
+}
 
 // LP token estimation function
 function estimateLPTokens(
@@ -98,6 +147,9 @@ export async function getLPRateHandler(
       addresses: [tokenXMint, tokenYMint],
       returnAsObject: true,
     })) as Record<string, Token>;
+
+    const tokenX = tokenMetadata[tokenXMint]!;
+    const tokenY = tokenMetadata[tokenYMint]!;
 
     const tokenX = tokenMetadata[tokenXMint];
     const tokenY = tokenMetadata[tokenYMint];

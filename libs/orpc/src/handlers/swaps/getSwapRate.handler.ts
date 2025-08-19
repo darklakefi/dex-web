@@ -16,6 +16,7 @@ import {
   MAX_PERCENTAGE,
   toRawUnits,
 } from "../../utils/solana";
+import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
 // Helper function to calculate trade fee
 function gateFee(sourceAmount: BigNumber, tradeFeeRate: BigNumber): BigNumber {
@@ -162,6 +163,9 @@ export async function getSwapRateHandler(
       addresses: [tokenXMint, tokenYMint],
       returnAsObject: true,
     })) as Record<string, Token>;
+
+    const tokenX = tokenMetadata[tokenXMint]!;
+    const tokenY = tokenMetadata[tokenYMint]!;
 
     const scaledInput = toRawUnits(
       amountIn,
