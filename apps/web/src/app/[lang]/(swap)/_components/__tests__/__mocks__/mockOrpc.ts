@@ -133,7 +133,6 @@ export function mockOrpc() {
                   {
                     address: "0x123",
                     amount: 1000,
-                    balance: 1000,
                     decimals: 9,
                     mint: "0x123",
                     symbol: "SOL",

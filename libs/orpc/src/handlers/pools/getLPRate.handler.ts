@@ -14,8 +14,9 @@ import type {
   GetLPRateInput,
   GetLPRateOutput,
 } from "../../schemas/pools/getLPRate.schema";
+import type { Token } from "../../schemas/tokens/token.schema";
 import { EXCHANGE_PROGRAM_ID, LP_TOKEN_DECIMALS } from "../../utils/solana";
-import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
+import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
 // Helper function to determine token program ID
 async function getTokenProgramId(
@@ -167,12 +168,13 @@ export async function getLPRateHandler(
     const poolLPSupply = Number(pool.token_lp_supply);
 
     // Scale input amounts based on token decimals
-    const tokenX = await getTokenDetailsHandler({
-      address: tokenXMint.toString(),
-    });
-    const tokenY = await getTokenDetailsHandler({
-      address: tokenYMint.toString(),
-    });
+    const tokenMetadata = (await getTokenMetadataHandler({
+      addresses: [tokenXMint, tokenYMint],
+      returnAsObject: true,
+    })) as Record<string, Token>;
+
+    const tokenX = tokenMetadata[tokenXMint]!;
+    const tokenY = tokenMetadata[tokenYMint]!;
 
     const scaledTokenXAmount = tokenXAmount * 10 ** tokenX.decimals;
     const scaledTokenYAmount = tokenYAmount * 10 ** tokenY.decimals;

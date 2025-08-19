@@ -2,8 +2,9 @@
 
 import { getDexGatewayClient } from "../../dex-gateway";
 import type { SwapRequest, SwapResponse } from "../../dex-gateway.type";
+import type { Token } from "../../schemas/tokens/token.schema";
 import { toRawUnits } from "../../utils/solana";
-import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
+import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
 export async function getSwapHandler(input: SwapRequest) {
   try {
@@ -11,12 +12,13 @@ export async function getSwapHandler(input: SwapRequest) {
 
     const { is_swap_x_to_y } = input;
 
-    const tokenX = await getTokenDetailsHandler({
-      address: input.token_mint_x,
-    });
-    const tokenY = await getTokenDetailsHandler({
-      address: input.token_mint_y,
-    });
+    const tokenMetadata = (await getTokenMetadataHandler({
+      addresses: [input.token_mint_x, input.token_mint_y],
+      returnAsObject: true,
+    })) as Record<string, Token>;
+
+    const tokenX = tokenMetadata[input.token_mint_x]!;
+    const tokenY = tokenMetadata[input.token_mint_y]!;
 
     let amountInDecimals = tokenX.decimals;
     let minOutDecimals = tokenY.decimals;
