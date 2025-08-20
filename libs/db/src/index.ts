@@ -1,1 +1,2 @@
-export { tokens } from "./schemas";
+export { database } from "./database";
+export { tokens, wallets } from "./schemas";
