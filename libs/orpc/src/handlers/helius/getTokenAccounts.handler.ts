@@ -33,7 +33,7 @@ export async function getTokenAccountsHandler({
   const hasTokenAccounts =
     (getTokenAccountsResponse?.token_accounts?.length ?? 0) > 0;
 
-  const tokenMetadata = (tokenMetadataResponse as Token[])[0];
+  const tokenMetadata = (tokenMetadataResponse as Token[])?.[0];
   const tokenAccounts = (
     hasTokenAccounts
       ? getTokenAccountsResponse?.token_accounts

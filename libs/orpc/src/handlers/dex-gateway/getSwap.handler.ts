@@ -17,9 +17,6 @@ export async function getSwapHandler(input: SwapRequest) {
       returnAsObject: true,
     })) as Record<string, Token>;
 
-    const tokenX = tokenMetadata[input.token_mint_x]!;
-    const tokenY = tokenMetadata[input.token_mint_y]!;
-
     const tokenX = tokenMetadata[input.token_mint_x];
     const tokenY = tokenMetadata[input.token_mint_y];
 
