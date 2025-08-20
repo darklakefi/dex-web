@@ -6,8 +6,9 @@ import type {
   GetTokenAccountsInput,
   GetTokenAccountsOutput,
 } from "../../schemas/helius/getTokenAccounts.schema";
+import type { Token } from "../../schemas/tokens";
 import type { TokenAccount } from "../../schemas/tokens/tokenAccount.schema";
-import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
+import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
 export async function getTokenAccountsHandler({
   ownerAddress,
@@ -15,7 +16,7 @@ export async function getTokenAccountsHandler({
 }: GetTokenAccountsInput): Promise<GetTokenAccountsOutput> {
   const helius = getHelius();
 
-  const [getTokenAccountsResponse, tokenMetadata] = await Promise.all([
+  const [getTokenAccountsResponse, tokenMetadataResponse] = await Promise.all([
     helius.rpc
       .getTokenAccounts({
         mint: mint,
@@ -23,14 +24,16 @@ export async function getTokenAccountsHandler({
         page: 1,
       })
       .catch(() => null),
-    getTokenDetailsHandler({
-      address: mint ?? "",
+    getTokenMetadataHandler({
+      addresses: [mint ?? ""],
+      returnAsObject: false,
     }).catch(() => null),
   ]);
 
   const hasTokenAccounts =
     (getTokenAccountsResponse?.token_accounts?.length ?? 0) > 0;
 
+  const tokenMetadata = (tokenMetadataResponse as Token[])?.[0];
   const tokenAccounts = (
     hasTokenAccounts
       ? getTokenAccountsResponse?.token_accounts
@@ -48,7 +51,6 @@ export async function getTokenAccountsHandler({
       ({
         address: tokenAccount.address ?? "",
         amount: tokenAccount.amount ?? 0,
-        balance: tokenAccount.amount ?? 0,
         decimals: tokenMetadata?.decimals ?? 0,
         mint: tokenAccount.mint ?? "",
         symbol: tokenMetadata?.symbol ?? "",

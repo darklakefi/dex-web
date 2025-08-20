@@ -91,7 +91,6 @@ export function SwapForm() {
     tradeId: "",
   });
   const [isInsufficientBalance, setIsInsufficientBalance] = useState(false);
-  const [isUseSlippage, setIsUseSlippage] = useState(false);
   const [slippage, setSlippage] = useState("0.5");
 
   const { data: poolDetails } = useSuspenseQuery(
@@ -464,7 +463,6 @@ export function SwapForm() {
         <div className="flex gap-3">
           <TokenTransactionSettingsButton
             onChange={(slippage) => {
-              setIsUseSlippage(slippage !== "0");
               setSlippage(slippage);
               debouncedGetQuote({
                 amountIn: form.state.values.tokenAAmount,
@@ -588,7 +586,6 @@ export function SwapForm() {
         <div className="hidden flex-col gap-1 md:flex">
           <TokenTransactionSettingsButton
             onChange={(slippage) => {
-              setIsUseSlippage(slippage !== "0");
               setSlippage(slippage);
               debouncedGetQuote({
                 amountIn: form.state.values.tokenAAmount,

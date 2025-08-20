@@ -15,8 +15,9 @@ import type {
   GetAddLiquidityReviewInput,
   GetAddLiquidityReviewOutput,
 } from "../../schemas/liquidity/getAddLiquidityReview.schema";
+import type { Token } from "../../schemas/tokens/token.schema";
 import { EXCHANGE_PROGRAM_ID, type PoolAccount } from "../../utils/solana";
-import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
+import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
 async function getTokenProgramId(
   connection: Connection,
@@ -138,12 +139,13 @@ export async function getAddLiquidityReviewHandler(
     const liquidityReserveY =
       reserveYBalance - pool.user_locked_y - pool.protocol_fee_y;
 
-    const tokenX = await getTokenDetailsHandler({
-      address: tokenXMint.toString(),
-    });
-    const tokenY = await getTokenDetailsHandler({
-      address: tokenYMint.toString(),
-    });
+    const tokenMetadata = (await getTokenMetadataHandler({
+      addresses: [tokenXMint, tokenYMint],
+      returnAsObject: true,
+    })) as Record<string, Token>;
+
+    const tokenX = tokenMetadata[tokenXMint]!;
+    const tokenY = tokenMetadata[tokenYMint]!;
 
     if (isTokenX) {
       const scaledTokenXAmount = new BigNumber(tokenAmount).multipliedBy(

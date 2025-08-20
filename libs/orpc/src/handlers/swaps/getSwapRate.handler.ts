@@ -7,6 +7,7 @@ import type {
   GetSwapRateInput,
   GetSwapRateOutput,
 } from "../../schemas/swaps/getSwapRate.schema";
+import type { Token } from "../../schemas/tokens/token.schema";
 import {
   EXCHANGE_PROGRAM_ID,
   getPoolAccount,
@@ -15,7 +16,7 @@ import {
   MAX_PERCENTAGE,
   toRawUnits,
 } from "../../utils/solana";
-import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
+import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
 // Helper function to calculate trade fee
 function gateFee(sourceAmount: BigNumber, tradeFeeRate: BigNumber): BigNumber {
@@ -158,12 +159,13 @@ export async function getSwapRateHandler(
       .minus(pool.user_locked_y)
       .minus(pool.protocol_fee_y);
 
-    const tokenX = await getTokenDetailsHandler({
-      address: tokenXMint.toString(),
-    });
-    const tokenY = await getTokenDetailsHandler({
-      address: tokenYMint.toString(),
-    });
+    const tokenMetadata = (await getTokenMetadataHandler({
+      addresses: [tokenXMint, tokenYMint],
+      returnAsObject: true,
+    })) as Record<string, Token>;
+
+    const tokenX = tokenMetadata[tokenXMint]!;
+    const tokenY = tokenMetadata[tokenYMint]!;
 
     const scaledInput = toRawUnits(
       amountIn,
