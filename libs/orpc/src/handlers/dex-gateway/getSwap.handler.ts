@@ -17,11 +17,11 @@ export async function getSwapHandler(input: SwapRequest) {
       returnAsObject: true,
     })) as Record<string, Token>;
 
-    const tokenX = tokenMetadata[input.token_mint_x]!;
-    const tokenY = tokenMetadata[input.token_mint_y]!;
+    const tokenX = tokenMetadata[input.token_mint_x];
+    const tokenY = tokenMetadata[input.token_mint_y];
 
-    let amountInDecimals = tokenX.decimals;
-    let minOutDecimals = tokenY.decimals;
+    let amountInDecimals = tokenX?.decimals ?? 0;
+    let minOutDecimals = tokenY?.decimals ?? 0;
 
     if (!is_swap_x_to_y) {
       [amountInDecimals, minOutDecimals] = [minOutDecimals, amountInDecimals];
