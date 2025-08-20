@@ -1,6 +1,4 @@
-import type { Token } from "./../../schemas/tokens/token.schema";
-
-("use server");
+"use server";
 
 import { getDexGatewayClient } from "../../dex-gateway";
 import type { TokenMetadata } from "../../dex-gateway.type";
@@ -8,6 +6,7 @@ import type {
   GetTokenMetadataInput,
   GetTokenMetadataOutput,
 } from "../../schemas/tokens/getTokenMetadata.schema";
+import type { Token } from "./../../schemas/tokens/token.schema";
 
 const parseToken = (token: TokenMetadata): Token => ({
   address: token.address,

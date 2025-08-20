@@ -339,7 +339,7 @@ export function LiquidityForm() {
               customAction: (
                 <Text
                   as={Link}
-                  className="inline-flex items-center gap-2 text-green-300 leading-none no-underline"
+                  className="inline-flex items-center gap-2 text-green-300 leading-none no-underline hover:text-green-200"
                   href={getExplorerUrl({ tx: signature })}
                   target="_blank"
                   variant="link"
