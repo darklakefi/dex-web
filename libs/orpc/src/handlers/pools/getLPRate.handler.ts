@@ -148,14 +148,11 @@ export async function getLPRateHandler(
       returnAsObject: true,
     })) as Record<string, Token>;
 
-    const tokenX = tokenMetadata[tokenXMint]!;
-    const tokenY = tokenMetadata[tokenYMint]!;
-
     const tokenX = tokenMetadata[tokenXMint];
     const tokenY = tokenMetadata[tokenYMint];
 
-    const scaledTokenXAmount = toRawUnits(tokenXAmount, tokenX?.decimals ?? 0);
-    const scaledTokenYAmount = toRawUnits(tokenYAmount, tokenY?.decimals ?? 0);
+    const scaledTokenXAmount = tokenXAmount * 10 ** (tokenX?.decimals ?? 0);
+    const scaledTokenYAmount = tokenYAmount * 10 ** (tokenY?.decimals ?? 0);
 
     // Estimate LP tokens using the formula
     const estimatedLP = estimateLPTokens(
