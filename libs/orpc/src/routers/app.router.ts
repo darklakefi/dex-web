@@ -4,6 +4,7 @@ import { liquidityRouter } from "./liquidity.router";
 import { poolsRouter } from "./pools.router";
 import { swapRouter } from "./swap.router";
 import { tokensRouter } from "./tokens.router";
+import { walletsRouter } from "./wallets.router";
 
 export const appRouter = {
   dexGateway: dexGatewayRouter,
@@ -13,6 +14,7 @@ export const appRouter = {
   pools: poolsRouter,
   swap: swapRouter,
   tokens: tokensRouter,
+  wallets: walletsRouter,
 };
 
 export type AppRouter = typeof appRouter;

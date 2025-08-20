@@ -3,3 +3,4 @@ export { config } from "./config";
 export { sandwichEvents } from "./sandwichEvents";
 export { tokenMetadata } from "./tokenMetadata";
 export { tokens } from "./tokens";
+export { wallets } from "./wallets";
