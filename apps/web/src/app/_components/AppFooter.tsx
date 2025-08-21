@@ -1,4 +1,4 @@
-import { Footer, Icon, type IconName, Text } from "@dex-web/ui";
+import { Footer, Icon, Text } from "@dex-web/ui";
 import Link from "next/link";
 
 const SOCIAL_MEDIA_LINKS = [
@@ -96,20 +96,23 @@ export const AppFooter = () => {
           <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
       </div>
-      {SOCIAL_MEDIA_LINKS.some((link) => link.href !== undefined) && (
-        <div className="flex items-start gap-10">
-          {SOCIAL_MEDIA_LINKS.filter((link) => link.href !== undefined).map(
-            (link) => (
-              <Text as={Link} href={link.href} key={link.name} target="_blank">
-                <Icon
-                  className="size-6 cursor-pointer text-green-300 hover:text-green-200"
-                  name={link.icon as IconName}
-                />
-              </Text>
-            ),
-          )}
-        </div>
-      )}
+      <div className="flex flex-col items-start gap-5">
+        <Text className="inline-flex items-baseline justify-center no-underline">
+          Darklake is a decentralized, non-custodial protocol. Trading digital
+          assets carries high risk, including total loss, smart contract
+          vulnerabilities, and extreme volatility. Not available to UK residents
+          and not covered by FSCS, FOS, or any investor protection scheme.{" "}
+          <Text
+            as={Link}
+            className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
+            href="https://docs.darklake.fi/legal-disclaimer-and-user-notice"
+            target="_blank"
+            variant="link"
+          >
+            [Learn more]
+          </Text>
+        </Text>
+      </div>
     </Footer>
   );
 };
