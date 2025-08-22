@@ -1,5 +1,6 @@
 "use client";
 import { tanstackClient } from "@dex-web/orpc";
+import type { Token } from "@dex-web/orpc/schemas";
 import { Button, Icon } from "@dex-web/ui";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -26,11 +27,14 @@ export function SelectTokenButton({
   const validAddress =
     tokenAddress || (type === "buy" ? tokenAAddress : tokenBAddress);
 
-  const { data: tokenDetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: validAddress || "" },
+  const { data: tokenMetadata } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenMetadata.queryOptions({
+      input: { addresses: [validAddress || ""], returnAsObject: true },
     }),
   );
+
+  const metadata = tokenMetadata as Record<string, Token>;
+  const tokenDetails = metadata[validAddress]!;
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -55,7 +59,7 @@ export function SelectTokenButton({
       prefetch={true}
       variant="secondary"
     >
-      {tokenDetails.imageUrl ? (
+      {tokenDetails?.imageUrl ? (
         <Image
           alt={tokenDetails.symbol}
           className="size-8 overflow-hidden rounded-full"
@@ -69,7 +73,7 @@ export function SelectTokenButton({
         <Icon name="seedlings" />
       )}
       <span className="flex items-center justify-center text-lg leading-6!">
-        {tokenDetails.symbol}
+        {tokenDetails?.symbol}
       </span>
       <Icon className="size-4 fill-green-300" name="chevron-down" />
     </Button>

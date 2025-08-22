@@ -38,7 +38,11 @@ export function SelectWalletModal() {
           <Text className="font-bold text-2xl" variant="heading">
             Connect Wallet
           </Text>{" "}
-          <button onClick={handleClose} type="button">
+          <button
+            className="cursor-pointer"
+            onClick={handleClose}
+            type="button"
+          >
             <Icon className="size-6" name="times" />
           </button>
         </div>

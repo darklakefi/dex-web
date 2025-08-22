@@ -147,6 +147,7 @@ export function SelectTokenModal({
                 <>
                   Search Token or{" "}
                   <Button
+                    className="cursor-pointer"
                     onClick={() => handlePaste(field)}
                     variant="secondary"
                   >
