@@ -118,8 +118,8 @@ export function LiquidityForm() {
   );
 
   const metadata = tokenMetadata as Record<string, Token>;
-  const tokenADetails = metadata[tokenXMint]!;
-  const tokenBDetails = metadata[tokenYMint]!;
+  const tokenADetails = metadata[tokenXMint];
+  const tokenBDetails = metadata[tokenYMint];
 
   const resetCreateState = () => {
     setCreateStep(0);
@@ -352,8 +352,8 @@ export function LiquidityForm() {
                 <div className="flex flex-col gap-1">
                   <Text.Body2>
                     ADDED LIQUIDITY: {form.state.values.tokenAAmount}{" "}
-                    {tokenADetails.symbol} + {form.state.values.tokenBAmount}{" "}
-                    {tokenBDetails.symbol}
+                    {tokenADetails?.symbol} + {form.state.values.tokenBAmount}{" "}
+                    {tokenBDetails?.symbol}
                   </Text.Body2>
                 </div>
               ),
@@ -682,13 +682,13 @@ export function LiquidityForm() {
                     Set initial price
                   </Text.Body2>
                   <div className="flex items-center">
-                    {initialPriceTokenX.imageUrl ? (
+                    {initialPriceTokenX?.imageUrl ? (
                       <Image
-                        alt={initialPriceTokenX.symbol}
+                        alt={initialPriceTokenX?.symbol}
                         className="mr-2 size-6 overflow-hidden rounded-full"
                         height={24}
                         priority
-                        src={initialPriceTokenX.imageUrl}
+                        src={initialPriceTokenX?.imageUrl}
                         unoptimized
                         width={24}
                       />
@@ -696,7 +696,7 @@ export function LiquidityForm() {
                       <Icon className="mr-2 fill-green-200" name="seedlings" />
                     )}
                     <Text.Body2 className="text-green-200 text-lg">
-                      1 {initialPriceTokenX.symbol} =
+                      1 {initialPriceTokenX?.symbol} =
                     </Text.Body2>
                   </div>
                 </div>
@@ -715,7 +715,7 @@ export function LiquidityForm() {
                           <Icon className="rotate-90" name="swap" />
                         </button>
                       }
-                      currencyCode={initialPriceTokenY.symbol}
+                      currencyCode={initialPriceTokenY?.symbol}
                       name={field.name}
                       onBlur={field.handleBlur}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
