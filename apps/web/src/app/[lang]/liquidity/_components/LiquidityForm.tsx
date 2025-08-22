@@ -4,6 +4,7 @@ import { client, tanstackClient } from "@dex-web/orpc";
 import type {
   CreateLiquidityTransactionInput,
   CreatePoolTransactionInput,
+  Token,
 } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
@@ -107,19 +108,18 @@ export function LiquidityForm() {
     },
   );
 
-  const { data: tokenADetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: tokenXMint },
+  const { data: tokenMetadata } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenMetadata.queryOptions({
+      input: {
+        addresses: [tokenXMint, tokenYMint],
+        returnAsObject: true,
+      },
     }),
   );
 
-  const { data: tokenBDetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: tokenYMint },
-    }),
-  );
-
-  const poolRatio = 1;
+  const metadata = tokenMetadata as Record<string, Token>;
+  const tokenADetails = metadata[tokenXMint]!;
+  const tokenBDetails = metadata[tokenYMint]!;
 
   const resetCreateState = () => {
     setCreateStep(0);
@@ -716,7 +716,6 @@ export function LiquidityForm() {
                         </button>
                       }
                       currencyCode={initialPriceTokenY.symbol}
-                      exchangeRate={poolRatio}
                       name={field.name}
                       onBlur={field.handleBlur}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

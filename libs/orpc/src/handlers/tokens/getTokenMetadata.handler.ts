@@ -1,7 +1,15 @@
 "use server";
 
+import {
+  fetchAllDigitalAsset,
+  mplTokenMetadata,
+} from "@metaplex-foundation/mpl-token-metadata";
+import { publicKey } from "@metaplex-foundation/umi";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { Connection } from "@solana/web3.js";
 import { getDexGatewayClient } from "../../dex-gateway";
 import type { TokenMetadata } from "../../dex-gateway.type";
+import { getHelius } from "../../getHelius";
 import type {
   GetTokenMetadataInput,
   GetTokenMetadataOutput,
@@ -35,6 +43,14 @@ export const getTokenMetadataHandler = async (
       page_size: addresses.length,
     });
 
+    const notFoundTokens = addresses.filter(
+      (address) => !tokens.some((token) => token.address === address),
+    );
+    if (notFoundTokens.length > 0) {
+      const tokensFromChain = await fetchTokenMetadataFromChain(notFoundTokens);
+      tokens.push(...tokensFromChain);
+    }
+
     if (returnAsObject) {
       return tokens.reduce(
         (acc, token) => {
@@ -51,3 +67,27 @@ export const getTokenMetadataHandler = async (
     return returnAsObject ? ({} as Record<string, Token>) : [];
   }
 };
+
+async function fetchTokenMetadataFromChain(
+  tokenAddress: string[],
+): Promise<TokenMetadata[]> {
+  const helius = getHelius();
+  const rpc = new Connection(helius.endpoint);
+  const umi = createUmi(rpc);
+  umi.use(mplTokenMetadata());
+  try {
+    const digitalAsset = await fetchAllDigitalAsset(
+      umi,
+      tokenAddress.map((address) => publicKey(address)),
+    );
+    return digitalAsset.map((asset) => ({
+      address: asset.mint.publicKey.toString(),
+      decimals: asset.mint.decimals,
+      logo_uri: "",
+      name: asset.metadata.name,
+      symbol: asset.metadata.symbol,
+    }));
+  } catch (error) {
+    return [];
+  }
+}

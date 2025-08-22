@@ -17,7 +17,6 @@ import { useFormatPrice } from "../_utils/useFormatPrice";
 interface FormFieldsetProps extends NumericInputProps {
   name: string;
   disabled?: boolean;
-  exchangeRate?: number;
   currencyCode?: string;
   controls?: React.ReactNode;
   tokenAccount?: {
@@ -37,7 +36,6 @@ export function FormFieldset({
   value,
   disabled,
   tokenAccount,
-  exchangeRate,
   currencyCode,
   controls,
   maxAmount,
