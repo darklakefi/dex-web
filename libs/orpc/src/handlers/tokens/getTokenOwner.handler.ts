@@ -6,18 +6,11 @@ import type {
   GetTokenOwnerInput,
   GetTokenOwnerOutput,
 } from "../../schemas/tokens/getTokenOwner.schema";
-import { isSolanaAddress } from "../../utils/solana";
 
 export const getTokenOwnerHandler = async (
   input: GetTokenOwnerInput,
 ): Promise<GetTokenOwnerOutput> => {
   const { address } = input;
-
-  if (!isSolanaAddress(address)) {
-    return {
-      owner: "",
-    };
-  }
 
   const helius = getHelius();
   const connection = helius.connection;
