@@ -118,8 +118,8 @@ export function LiquidityForm() {
   );
 
   const metadata = tokenMetadata as Record<string, Token>;
-  const tokenADetails = metadata[tokenXMint]!;
-  const tokenBDetails = metadata[tokenYMint]!;
+  const tokenADetails = metadata[tokenXMint];
+  const tokenBDetails = metadata[tokenYMint];
 
   const resetCreateState = () => {
     setCreateStep(0);
@@ -352,8 +352,8 @@ export function LiquidityForm() {
                 <div className="flex flex-col gap-1">
                   <Text.Body2>
                     ADDED LIQUIDITY: {form.state.values.tokenAAmount}{" "}
-                    {tokenADetails.symbol} + {form.state.values.tokenBAmount}{" "}
-                    {tokenBDetails.symbol}
+                    {tokenADetails?.symbol} + {form.state.values.tokenBAmount}{" "}
+                    {tokenBDetails?.symbol}
                   </Text.Body2>
                 </div>
               ),
@@ -716,7 +716,7 @@ export function LiquidityForm() {
                           <Icon className="rotate-90" name="swap" />
                         </button>
                       }
-                      currencyCode={initialPriceTokenY.symbol}
+                      currencyCode={initialPriceTokenY?.symbol}
                       name={field.name}
                       onBlur={field.handleBlur}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
