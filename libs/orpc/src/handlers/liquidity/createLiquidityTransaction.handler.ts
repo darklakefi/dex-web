@@ -134,12 +134,6 @@ async function createLiquidityTransaction(
     maxAmountY,
     tokenYProgramId,
   );
-  const lpTokensToMintBN = await toBaseUnits(
-    connection,
-    lpMint,
-    lpTokensToMint,
-    lpTokenProgramId,
-  );
 
   const [poolTokenAccountX] = PublicKey.findProgramAddressSync(
     [
@@ -181,7 +175,7 @@ async function createLiquidityTransaction(
   if (ataLpIx) ataInstructions.push(ataLpIx);
 
   const programIx = await program.methods
-    .addLiquidity(lpTokensToMintBN, maxAmountXBN, maxAmountYBN)
+    .addLiquidity(new BN(lpTokensToMint), maxAmountXBN, maxAmountYBN)
     .accounts({
       poolTokenReserveX: poolTokenAccountX,
       poolTokenReserveY: poolTokenAccountY,

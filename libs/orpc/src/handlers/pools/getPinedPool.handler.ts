@@ -5,7 +5,7 @@ import type { GetPinedPoolOutput } from "../../schemas/pools/getPinedPool.schema
 
 export async function getPinedPoolHandler(): Promise<GetPinedPoolOutput> {
   const localDataPool =
-    process.env.NETWORK === "2" ? MOCK_POOLS : MAINNET_POOLS;
+    process.env.NEXT_PUBLIC_NETWORK === "2" ? MOCK_POOLS : MAINNET_POOLS;
 
   return {
     featuredPools: localDataPool,

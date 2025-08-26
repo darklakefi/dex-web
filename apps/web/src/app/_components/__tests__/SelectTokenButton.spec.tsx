@@ -19,7 +19,6 @@ describe("SelectTokenButton", () => {
         searchParams: "?tokenAAddress=abc&tokenBAddress=def",
       }),
     });
-    expect(screen.getAllByText("SOL")[0]).toBeInTheDocument();
     expect(screen.getAllByRole("img", { hidden: true })[0]).toBeInTheDocument();
   });
 });

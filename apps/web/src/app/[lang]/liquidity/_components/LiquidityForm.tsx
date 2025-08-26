@@ -4,15 +4,17 @@ import { client, tanstackClient } from "@dex-web/orpc";
 import type {
   CreateLiquidityTransactionInput,
   CreatePoolTransactionInput,
+  Token,
 } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
-import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
+import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
+import Link from "next/link";
 import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -25,12 +27,14 @@ import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
+import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getLiquidityFormButtonMessage } from "../_utils/getLiquidityFormButtonMessage";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
 import { validateHasSuffificentBalance } from "../_utils/validateHasSuffificentBalance";
+import { AddLiquidityDetails } from "./AddLiquidityDetaili";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -64,7 +68,6 @@ export function LiquidityForm() {
   const [createStep, setCreateStep] = useState(0);
   const [disableLiquidity, setDisableLiquidity] = useState(true);
   const [slippage, setSlippage] = useState("0.5");
-  const [poolPrice, setPoolPrice] = useState(0);
 
   const sortedTokenAddresses = sortSolanaAddresses(
     tokenAAddress,
@@ -105,19 +108,18 @@ export function LiquidityForm() {
     },
   );
 
-  const { data: tokenADetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: tokenXMint },
+  const { data: tokenMetadata } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenMetadata.queryOptions({
+      input: {
+        addresses: [tokenXMint, tokenYMint],
+        returnAsObject: true,
+      },
     }),
   );
 
-  const { data: tokenBDetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: tokenYMint },
-    }),
-  );
-
-  const poolRatio = 1;
+  const metadata = tokenMetadata as Record<string, Token>;
+  const tokenADetails = metadata[tokenXMint];
+  const tokenBDetails = metadata[tokenYMint];
 
   const resetCreateState = () => {
     setCreateStep(0);
@@ -334,7 +336,27 @@ export function LiquidityForm() {
             dismissToast();
             setLiquidityStep(0);
             toast({
-              description: `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}. Transaction: ${signature}`,
+              customAction: (
+                <Text
+                  as={Link}
+                  className="inline-flex items-center gap-2 text-green-300 leading-none no-underline hover:text-green-200"
+                  href={getExplorerUrl({ tx: signature })}
+                  target="_blank"
+                  variant="link"
+                >
+                  View Transaction{" "}
+                  <Icon className="size-4" name="external-link" />
+                </Text>
+              ),
+              description: (
+                <div className="flex flex-col gap-1">
+                  <Text.Body2>
+                    ADDED LIQUIDITY: {form.state.values.tokenAAmount}{" "}
+                    {tokenADetails?.symbol} + {form.state.values.tokenBAmount}{" "}
+                    {tokenBDetails?.symbol}
+                  </Text.Body2>
+                </div>
+              ),
               title: "Liquidity Added Successfully",
               variant: "success",
             });
@@ -490,13 +512,6 @@ export function LiquidityForm() {
       tokenYMint: poolDetails.tokenYMint,
     });
 
-    const oneXtoY =
-      inputType === "tokenX"
-        ? BigNumber(amountNumber).dividedBy(response.tokenAmount)
-        : BigNumber(response.tokenAmount).dividedBy(amountNumber);
-
-    setPoolPrice(oneXtoY.toNumber());
-
     if (inputType === "tokenX") {
       form.setFieldValue("tokenBAmount", String(response.tokenAmount));
       form.validateAllFields("change");
@@ -570,6 +585,7 @@ export function LiquidityForm() {
   return (
     <section className="flex w-full max-w-xl items-start gap-1">
       <div className="size-9" />
+
       <Box padding="lg">
         <div className="flex flex-col gap-4">
           <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
@@ -595,23 +611,17 @@ export function LiquidityForm() {
               }}
             >
               {(field) => (
-                <div>
-                  <FormFieldset
-                    name={field.name}
-                    onBlur={field.handleBlur}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      handleAmountChange(e, "sell");
-                      field.handleChange(e.target.value);
-                    }}
-                    tokenAccount={sellTokenAccount?.tokenAccounts[0]}
-                    value={field.state.value}
-                  />
-                  {!field.state.meta.isValid && (
-                    <Text.Body3 className="mt-1 text-red-400" role="alert">
-                      {field.state.meta.errors.join(", ")}
-                    </Text.Body3>
-                  )}
-                </div>
+                <FormFieldset
+                  maxDecimals={5}
+                  name={field.name}
+                  onBlur={field.handleBlur}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleAmountChange(e, "sell");
+                    field.handleChange(e.target.value);
+                  }}
+                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                  value={field.state.value}
+                />
               )}
             </form.Field>
           </Box>
@@ -644,23 +654,17 @@ export function LiquidityForm() {
               }}
             >
               {(field) => (
-                <div>
-                  <FormFieldset
-                    name={field.name}
-                    onBlur={field.handleBlur}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      handleAmountChange(e, "buy");
-                      field.handleChange(e.target.value);
-                    }}
-                    tokenAccount={buyTokenAccount?.tokenAccounts[0]}
-                    value={field.state.value}
-                  />
-                  {!field.state.meta.isValid && (
-                    <Text.Body3 className="mt-1 text-red-400" role="alert">
-                      {field.state.meta.errors.join(", ")}
-                    </Text.Body3>
-                  )}
-                </div>
+                <FormFieldset
+                  maxDecimals={5}
+                  name={field.name}
+                  onBlur={field.handleBlur}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleAmountChange(e, "buy");
+                    field.handleChange(e.target.value);
+                  }}
+                  tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                  value={field.state.value}
+                />
               )}
             </form.Field>
           </Box>
@@ -678,13 +682,13 @@ export function LiquidityForm() {
                     Set initial price
                   </Text.Body2>
                   <div className="flex items-center">
-                    {initialPriceTokenX.imageUrl ? (
+                    {initialPriceTokenX?.imageUrl ? (
                       <Image
-                        alt={initialPriceTokenX.symbol}
+                        alt={initialPriceTokenX?.symbol}
                         className="mr-2 size-6 overflow-hidden rounded-full"
                         height={24}
                         priority
-                        src={initialPriceTokenX.imageUrl}
+                        src={initialPriceTokenX?.imageUrl}
                         unoptimized
                         width={24}
                       />
@@ -692,7 +696,7 @@ export function LiquidityForm() {
                       <Icon className="mr-2 fill-green-200" name="seedlings" />
                     )}
                     <Text.Body2 className="text-green-200 text-lg">
-                      1 {initialPriceTokenX.symbol} =
+                      1 {initialPriceTokenX?.symbol} =
                     </Text.Body2>
                   </div>
                 </div>
@@ -711,8 +715,7 @@ export function LiquidityForm() {
                           <Icon className="rotate-90" name="swap" />
                         </button>
                       }
-                      currencyCode={initialPriceTokenY.symbol}
-                      exchangeRate={poolRatio}
+                      currencyCode={initialPriceTokenY?.symbol}
                       name={field.name}
                       onBlur={field.handleBlur}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -794,47 +797,13 @@ export function LiquidityForm() {
         {poolDetails &&
           form.state.values.tokenBAmount !== "0" &&
           form.state.values.tokenAAmount !== "0" && (
-            <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
-              <Text.Body2 className="mb-3 text-green-300 uppercase">
-                Liquidity Details
-              </Text.Body2>
-
-              <div className="flex items-center justify-between">
-                <Text.Body2 className="text-green-300">
-                  Total Deposit
-                </Text.Body2>
-                <div className="text-right">
-                  <Text.Body2 className="text-green-300">
-                    {form.state.values.tokenBAmount}{" "}
-                    {sellTokenAccount?.tokenAccounts[0]?.symbol}
-                  </Text.Body2>
-                  <Text.Body2 className="text-green-300">
-                    {form.state.values.tokenAAmount}{" "}
-                    {buyTokenAccount?.tokenAccounts[0]?.symbol}
-                  </Text.Body2>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Text.Body2 className="text-green-300">Pool Price</Text.Body2>
-                <Text.Body2 className="text-green-300">
-                  1 {sellTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
-                  {numberFormatHelper({
-                    decimalScale: 6,
-                    trimTrailingZeros: true,
-                    value: poolPrice,
-                  })}{" "}
-                  {buyTokenAccount?.tokenAccounts[0]?.symbol}
-                </Text.Body2>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Text.Body2 className="text-green-300">
-                  Slippage Tolerance
-                </Text.Body2>
-                <Text.Body2 className="text-green-300">{slippage}%</Text.Body2>
-              </div>
-            </div>
+            <AddLiquidityDetails
+              slippage={slippage}
+              tokenAAmount={form.state.values.tokenAAmount}
+              tokenASymbol={buyTokenAccount?.tokenAccounts[0]?.symbol || ""}
+              tokenBAmount={form.state.values.tokenBAmount}
+              tokenBSymbol={sellTokenAccount?.tokenAccounts[0]?.symbol || ""}
+            />
           )}
 
         {!poolDetails &&

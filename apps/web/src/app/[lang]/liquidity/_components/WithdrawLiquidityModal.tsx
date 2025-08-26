@@ -1,7 +1,7 @@
 "use client";
 
 import { client, tanstackClient } from "@dex-web/orpc";
-import { sortSolanaAddresses } from "@dex-web/orpc/utils/solana";
+import type { Token } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -9,6 +9,7 @@ import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
+import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
 import { FormFieldset } from "../../../_components/FormFieldset";
@@ -16,9 +17,8 @@ import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
+import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
 import { dismissToast, toast } from "../../../_utils/toast";
-
-//
 
 type WithdrawLiquidityFormSchema = z.infer<typeof withdrawLiquidityFormSchema>;
 
@@ -39,8 +39,8 @@ const { useAppForm } = createFormHook({
 interface WithdrawLiquidityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  tokenAAddress?: string;
-  tokenBAddress?: string;
+  tokenXAddress: string;
+  tokenYAddress: string;
   poolReserves?: {
     reserveX: number;
     reserveY: number;
@@ -54,22 +54,33 @@ interface WithdrawLiquidityModalProps {
     decimals: number;
     hasLiquidity: boolean;
   };
+  liquidityCalculations: {
+    totalUsdValue: number;
+    userLpShare: number;
+    userTokenXAmount: number;
+    userTokenYAmount: number;
+  };
+  tokenXDetails: Token;
+  tokenYDetails: Token;
 }
 
 export function WithdrawLiquidityModal({
   isOpen,
   onClose,
-  tokenAAddress,
-  tokenBAddress,
+  tokenXAddress,
+  tokenYAddress,
   poolReserves,
   userLiquidity,
+  liquidityCalculations,
+  tokenXDetails,
+  tokenYDetails,
 }: WithdrawLiquidityModalProps) {
   const { publicKey, signTransaction } = useWallet();
   const queryClient = useQueryClient();
   const [withdrawalCalculations, setWithdrawalCalculations] = useState({
     percentage: 0,
-    tokenAAmount: 0,
-    tokenBAmount: 0,
+    tokenXAmount: 0,
+    tokenYAmount: 0,
     usdValue: 0,
   });
 
@@ -81,37 +92,34 @@ export function WithdrawLiquidityModal({
   const [withdrawStep, setWithdrawStep] = useState(0);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
 
-  const { data: tokenADetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: tokenAAddress || DEFAULT_BUY_TOKEN },
-    }),
-  );
-
-  const { data: tokenBDetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: tokenBAddress || DEFAULT_SELL_TOKEN },
-    }),
-  );
-
-  const { data: tokenAPrice } = useSuspenseQuery(
+  const { data: tokenXPrice } = useSuspenseQuery(
     tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
-        mint: tokenAAddress || DEFAULT_BUY_TOKEN,
+        mint: tokenXAddress || DEFAULT_BUY_TOKEN,
         quoteCurrency: "USD",
       },
     }),
   );
 
-  const { data: tokenBPrice } = useSuspenseQuery(
+  const { data: tokenYPrice } = useSuspenseQuery(
     tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
-        mint: tokenBAddress || DEFAULT_SELL_TOKEN,
+        mint: tokenYAddress || DEFAULT_SELL_TOKEN,
         quoteCurrency: "USD",
       },
     }),
   );
+
+  const setCalculationEmpty = () => {
+    setWithdrawalCalculations({
+      percentage: 0,
+      tokenXAmount: 0,
+      tokenYAmount: 0,
+      usdValue: 0,
+    });
+  };
 
   const onWithdrawalAmountChange = (withdrawalAmountPercentage: string) => {
     if (
@@ -122,12 +130,7 @@ export function WithdrawLiquidityModal({
       withdrawalAmountPercentage === "0" ||
       poolReserves.totalLpSupply === 0
     ) {
-      setWithdrawalCalculations({
-        percentage: 0,
-        tokenAAmount: 0,
-        tokenBAmount: 0,
-        usdValue: 0,
-      });
+      setCalculationEmpty();
       return;
     }
 
@@ -142,61 +145,33 @@ export function WithdrawLiquidityModal({
         withdrawalAmountPercentage.replace(/,/g, ""),
       );
       if (withdrawLpPercentage.isNaN() || withdrawLpPercentage.lte(0)) {
-        setWithdrawalCalculations({
-          percentage: 0,
-          tokenAAmount: 0,
-          tokenBAmount: 0,
-          usdValue: 0,
-        });
+        setCalculationEmpty();
         return;
       }
     } catch {
-      setWithdrawalCalculations({
-        percentage: 0,
-        tokenAAmount: 0,
-        tokenBAmount: 0,
-        usdValue: 0,
-      });
+      setCalculationEmpty();
       return;
     }
 
     const percentage = withdrawLpPercentage.toNumber();
-
-    const withdrawLpAmount = userLpBalance.multipliedBy(percentage / 100);
-    const withdrawLpShare = withdrawLpAmount.dividedBy(
-      poolReserves.totalLpSupply,
-    );
-
     // Compute X/Y withdrawal then map to A/B for display
-    const tokenXAmount = withdrawLpShare
-      .multipliedBy(poolReserves.reserveX)
-      .toNumber();
-    const tokenYAmount = withdrawLpShare
-      .multipliedBy(poolReserves.reserveY)
-      .toNumber();
+    const tokenXAmount =
+      (liquidityCalculations.userTokenXAmount * percentage) / 100;
+    const tokenYAmount =
+      (liquidityCalculations.userTokenYAmount * percentage) / 100;
 
-    const tokenA = tokenAAddress || DEFAULT_BUY_TOKEN;
-    const tokenB = tokenBAddress || DEFAULT_SELL_TOKEN;
-    const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
-      tokenA,
-      tokenB,
+    const tokenXValue = BigNumber(tokenXAmount).multipliedBy(
+      tokenXPrice.price || 0,
     );
-
-    const tokenAAmount = tokenA === tokenXAddress ? tokenXAmount : tokenYAmount;
-    const tokenBAmount = tokenB === tokenYAddress ? tokenYAmount : tokenXAmount;
-
-    const tokenAValue = BigNumber(tokenAAmount).multipliedBy(
-      tokenAPrice.price || 0,
+    const tokenYValue = BigNumber(tokenYAmount).multipliedBy(
+      tokenYPrice.price || 0,
     );
-    const tokenBValue = BigNumber(tokenBAmount).multipliedBy(
-      tokenBPrice.price || 0,
-    );
-    const usdValue = tokenAValue.plus(tokenBValue).toNumber();
+    const usdValue = tokenXValue.plus(tokenYValue).toNumber();
 
     setWithdrawalCalculations({
       percentage,
-      tokenAAmount,
-      tokenBAmount,
+      tokenXAmount,
+      tokenYAmount,
       usdValue,
     });
   };
@@ -274,7 +249,26 @@ export function WithdrawLiquidityModal({
 
       dismissToast();
       toast({
-        description: `Successfully withdrew ${form.state.values.withdrawalAmount} LP tokens. Transaction: ${submitRes.signature}`,
+        customAction: (
+          <Text
+            as={Link}
+            className="inline-flex items-center gap-2 text-green-300 leading-none no-underline"
+            href={getExplorerUrl({ tx: submitRes.signature })}
+            target="_blank"
+            variant="link"
+          >
+            View Transaction <Icon className="size-4" name="external-link" />
+          </Text>
+        ),
+        description: (
+          <div className="flex flex-col gap-1">
+            <Text.Body2>
+              Successfully withdrew {withdrawalCalculations.tokenXAmount}{" "}
+              {tokenXDetails.symbol} + {withdrawalCalculations.tokenYAmount}{" "}
+              {tokenYDetails.symbol}
+            </Text.Body2>
+          </div>
+        ),
         title: "Withdrawal complete",
         variant: "success",
       });
@@ -334,13 +328,6 @@ export function WithdrawLiquidityModal({
     setIsWithdrawing(true);
 
     try {
-      const tokenA = tokenAAddress || DEFAULT_BUY_TOKEN;
-      const tokenB = tokenBAddress || DEFAULT_SELL_TOKEN;
-      const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
-        tokenA,
-        tokenB,
-      );
-
       const userLpBalance = convertToDecimal(
         userLiquidity.lpTokenBalance || 0,
         userLiquidity.decimals,
@@ -404,36 +391,6 @@ export function WithdrawLiquidityModal({
     }
   };
 
-  const totalLiquidity =
-    userLiquidity && poolReserves
-      ? numberFormatHelper({
-          decimalScale: 2,
-          value: withdrawalCalculations.usdValue,
-        })
-      : "0.00";
-
-  const userLpShare =
-    userLiquidity && poolReserves
-      ? BigNumber(userLiquidity.lpTokenBalance).dividedBy(
-          poolReserves.totalLpSupply,
-        )
-      : BigNumber(0);
-
-  const userTokenAAmount =
-    userLpShare && poolReserves
-      ? userLpShare
-          .multipliedBy(poolReserves.reserveY)
-          .dividedBy(10 ** tokenADetails.decimals)
-          .toNumber()
-      : 0;
-  const userTokenBAmount =
-    userLpShare && poolReserves
-      ? userLpShare
-          .multipliedBy(poolReserves.reserveX)
-          .dividedBy(10 ** tokenBDetails.decimals)
-          .toNumber()
-      : 0;
-
   const pendingYield = "$0.00";
 
   if (!isOpen) return null;
@@ -445,7 +402,7 @@ export function WithdrawLiquidityModal({
           <Text className="font-bold text-2xl" variant="heading">
             WITHDRAW LIQUIDITY
           </Text>
-          <button onClick={onClose} type="button">
+          <button className="cursor-pointer" onClick={onClose} type="button">
             <Icon className="size-6" name="times" />
           </button>
         </div>
@@ -461,7 +418,7 @@ export function WithdrawLiquidityModal({
                   Withdrawal Amount
                 </Text.Body2>
                 <Text.Body2 className="flex max-w-fit items-center bg-green-700 p-2 text-green-300 leading-none">
-                  {tokenADetails.symbol} / {tokenBDetails.symbol}
+                  {tokenXDetails.symbol} / {tokenYDetails.symbol}
                 </Text.Body2>
               </div>
               <form.Field
@@ -514,7 +471,7 @@ export function WithdrawLiquidityModal({
           </div>
 
           {withdrawalCalculations.percentage > 0 && (
-            <div className="space-y-2 rounded border border-green-600 bg-green-800 p-3">
+            <div className="space-y-2 bg-green-800 p-3">
               <Text.Body2 className="text-green-300">
                 Total Withdrawal
               </Text.Body2>
@@ -523,40 +480,40 @@ export function WithdrawLiquidityModal({
                   {numberFormatHelper({
                     decimalScale: 4,
                     trimTrailingZeros: true,
-                    value: withdrawalCalculations.tokenAAmount,
+                    value: withdrawalCalculations.tokenXAmount,
                   })}{" "}
-                  {tokenADetails.symbol}
+                  {tokenXDetails.symbol}
                 </div>
                 <div>
                   {numberFormatHelper({
                     decimalScale: 4,
                     trimTrailingZeros: true,
-                    value: withdrawalCalculations.tokenBAmount,
+                    value: withdrawalCalculations.tokenYAmount,
                   })}{" "}
-                  {tokenBDetails.symbol}
+                  {tokenYDetails.symbol}
                 </div>
               </Text.Body2>
             </div>
           )}
 
-          <div className="space-y-2 rounded border border-green-400 bg-green-600 p-3">
+          <div className="space-y-2 bg-green-600 p-3">
             <Text.Body2 className="text-green-300">Your Liquidity</Text.Body2>
             <Text.Body2 className="text-green-200 text-lg">
               <div>
                 {numberFormatHelper({
                   decimalScale: 4,
                   trimTrailingZeros: true,
-                  value: userTokenAAmount,
+                  value: liquidityCalculations.userTokenXAmount,
                 })}{" "}
-                {tokenADetails.symbol}
+                {tokenXDetails.symbol}
               </div>
               <div>
                 {numberFormatHelper({
                   decimalScale: 4,
                   trimTrailingZeros: true,
-                  value: userTokenBAmount,
+                  value: liquidityCalculations.userTokenYAmount,
                 })}{" "}
-                {tokenBDetails.symbol}
+                {tokenYDetails.symbol}
               </div>
             </Text.Body2>
           </div>
@@ -565,7 +522,7 @@ export function WithdrawLiquidityModal({
             <div className="flex justify-between">
               <Text.Body2 className="text-green-300">YOUR LIQUIDITY</Text.Body2>
               <Text.Body2 className="text-green-300">
-                ${totalLiquidity}
+                ${liquidityCalculations.totalUsdValue}
               </Text.Body2>
             </div>
             <div className="flex justify-between">

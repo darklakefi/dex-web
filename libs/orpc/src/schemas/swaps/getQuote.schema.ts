@@ -11,11 +11,11 @@ export const getQuoteInputSchema = z.object({
 
 export const getQuoteOutputSchema = z.object({
   amountIn: z.number().positive(),
-  amountInRaw: z.number().positive(),
+  amountInRaw: z.string(),
   amountOut: z.number().positive(),
-  amountOutRaw: z.number().positive(),
-  estimatedFee: z.number().positive(),
-  estimatedFeesUsd: z.number().positive(),
+  amountOutRaw: z.string(),
+  estimatedFee: z.string(),
+  estimatedFeesUsd: z.string(),
   isXtoY: z.boolean(),
   priceImpactPercentage: z.number().positive(),
   rate: z.number().positive(),

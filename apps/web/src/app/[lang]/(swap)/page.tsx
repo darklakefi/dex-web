@@ -48,11 +48,7 @@ export default async function Page({
           <div className="size-9" />
         </section>
         <SwapForm />
-        <div className="mt-20 flex w-full gap-1">
-          <div className="hidden size-9 md:block" />
-          <SwapTransactionHistory />
-          <div className="hidden size-9 md:block" />
-        </div>
+        <SwapTransactionHistory />
       </div>
       <div className="hidden max-w-xs md:block">
         <FeaturesAndTrendingPoolPanel />
