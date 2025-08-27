@@ -33,8 +33,8 @@ import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getLiquidityFormButtonMessage } from "../_utils/getLiquidityFormButtonMessage";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
-import { validateHasSuffificentBalance } from "../_utils/validateHasSuffificentBalance";
-import { AddLiquidityDetails } from "./AddLiquidityDetaili";
+import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
+import { AddLiquidityDetails } from "./AddLiquidityDetail";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -89,7 +89,7 @@ export function LiquidityForm() {
   const { data: buyTokenAccount, refetch: refetchBuyTokenAccount } = useQuery({
     ...tanstackClient.helius.getTokenAccounts.queryOptions({
       input: {
-        mint: tokenXMint,
+        mint: tokenAAddress,
         ownerAddress: publicKey?.toBase58() ?? "",
       },
     }),
@@ -100,7 +100,7 @@ export function LiquidityForm() {
     {
       ...tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: tokenYMint,
+          mint: tokenBAddress,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -582,6 +582,7 @@ export function LiquidityForm() {
     initialPriceTokenOrder === "ba"
       ? [tokenADetails, tokenBDetails]
       : [tokenBDetails, tokenADetails];
+
   return (
     <section className="flex w-full max-w-xl items-start gap-1">
       <div className="size-9" />
@@ -602,7 +603,7 @@ export function LiquidityForm() {
               name="tokenBAmount"
               validators={{
                 onChange: ({ value }) => {
-                  return validateHasSuffificentBalance({
+                  return validateHasSufficientBalance({
                     amount: value,
                     tokenAccount: sellTokenAccount?.tokenAccounts[0],
                   });
@@ -645,7 +646,7 @@ export function LiquidityForm() {
               name="tokenAAmount"
               validators={{
                 onChange: ({ value }) => {
-                  return validateHasSuffificentBalance({
+                  return validateHasSufficientBalance({
                     amount: value,
                     tokenAccount: buyTokenAccount?.tokenAccounts[0],
                   });
@@ -820,11 +821,11 @@ export function LiquidityForm() {
                   Initial Deposit
                 </Text.Body3>
                 <div className="text-right">
-                  <Text.Body3 className="text-white">
+                  <Text.Body3 className="text-green-200">
                     {form.state.values.tokenAAmount}{" "}
                     {buyTokenAccount?.tokenAccounts[0]?.symbol}
                   </Text.Body3>
-                  <Text.Body3 className="text-white">
+                  <Text.Body3 className="text-green-200">
                     {form.state.values.tokenBAmount}{" "}
                     {sellTokenAccount?.tokenAccounts[0]?.symbol}
                   </Text.Body3>
@@ -835,7 +836,7 @@ export function LiquidityForm() {
                 <Text.Body3 className="text-green-300">
                   Initial Price
                 </Text.Body3>
-                <Text.Body3 className="text-white">
+                <Text.Body3 className="text-green-200">
                   1 {buyTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
                   {form.state.values.initialPrice}{" "}
                   {sellTokenAccount?.tokenAccounts[0]?.symbol}
@@ -846,7 +847,7 @@ export function LiquidityForm() {
                 <Text.Body3 className="text-green-300">
                   Your Pool Share
                 </Text.Body3>
-                <Text.Body3 className="text-white">100%</Text.Body3>
+                <Text.Body3 className="text-green-200">100%</Text.Body3>
               </div>
             </div>
           )}
