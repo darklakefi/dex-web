@@ -54,7 +54,7 @@ export const AppFooter = () => {
         <Text
           as={Link}
           className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
-          href="https://mev-checker.darklake.fi/"
+          href="https://mev.darklake.fi/"
           target="_blank"
           variant="link"
         >
