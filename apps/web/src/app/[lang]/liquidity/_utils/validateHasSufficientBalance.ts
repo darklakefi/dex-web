@@ -2,15 +2,15 @@ import type { TokenAccount } from "@dex-web/orpc/schemas";
 import { convertToDecimal } from "@dex-web/utils";
 import BigNumber from "bignumber.js";
 
-interface ValidateHasSuffificentBalanceProps {
+interface ValidateHasSufficientBalanceProps {
   amount: string;
   tokenAccount?: TokenAccount;
 }
 
-export function validateHasSuffificentBalance({
+export function validateHasSufficientBalance({
   amount,
   tokenAccount,
-}: ValidateHasSuffificentBalanceProps) {
+}: ValidateHasSufficientBalanceProps) {
   if (!tokenAccount) {
     return "No token account found";
   }
