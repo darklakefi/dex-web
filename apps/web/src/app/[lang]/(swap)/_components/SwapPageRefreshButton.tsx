@@ -15,7 +15,7 @@ export function SwapPageRefreshButton({
   return (
     <button
       aria-label="refresh"
-      className={`$ inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200`}
+      className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
       onClick={handleClick}
       type="button"
     >
