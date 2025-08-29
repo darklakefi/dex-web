@@ -4,6 +4,7 @@ import { client, tanstackClient } from "@dex-web/orpc";
 import type {
   CreateLiquidityTransactionInput,
   CreatePoolTransactionInput,
+  Token,
 } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
@@ -13,6 +14,7 @@ import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
+import Link from "next/link";
 import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -25,13 +27,14 @@ import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
+import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getLiquidityFormButtonMessage } from "../_utils/getLiquidityFormButtonMessage";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
-import { validateHasSuffificentBalance } from "../_utils/validateHasSuffificentBalance";
-import { AddLiquidityDetails } from "./AddLiquidityDetaili";
+import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
+import { AddLiquidityDetails } from "./AddLiquidityDetail";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -86,7 +89,7 @@ export function LiquidityForm() {
   const { data: buyTokenAccount, refetch: refetchBuyTokenAccount } = useQuery({
     ...tanstackClient.helius.getTokenAccounts.queryOptions({
       input: {
-        mint: tokenXMint,
+        mint: tokenAAddress,
         ownerAddress: publicKey?.toBase58() ?? "",
       },
     }),
@@ -97,7 +100,7 @@ export function LiquidityForm() {
     {
       ...tanstackClient.helius.getTokenAccounts.queryOptions({
         input: {
-          mint: tokenYMint,
+          mint: tokenBAddress,
           ownerAddress: publicKey?.toBase58() ?? "",
         },
       }),
@@ -105,19 +108,18 @@ export function LiquidityForm() {
     },
   );
 
-  const { data: tokenADetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: tokenXMint },
+  const { data: tokenMetadata } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenMetadata.queryOptions({
+      input: {
+        addresses: [tokenXMint, tokenYMint],
+        returnAsObject: true,
+      },
     }),
   );
 
-  const { data: tokenBDetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: tokenYMint },
-    }),
-  );
-
-  const poolRatio = 1;
+  const metadata = tokenMetadata as Record<string, Token>;
+  const tokenADetails = metadata[tokenXMint];
+  const tokenBDetails = metadata[tokenYMint];
 
   const resetCreateState = () => {
     setCreateStep(0);
@@ -334,7 +336,27 @@ export function LiquidityForm() {
             dismissToast();
             setLiquidityStep(0);
             toast({
-              description: `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}. Transaction: ${signature}`,
+              customAction: (
+                <Text
+                  as={Link}
+                  className="inline-flex items-center gap-2 text-green-300 leading-none no-underline hover:text-green-200"
+                  href={getExplorerUrl({ tx: signature })}
+                  target="_blank"
+                  variant="link"
+                >
+                  View Transaction{" "}
+                  <Icon className="size-4" name="external-link" />
+                </Text>
+              ),
+              description: (
+                <div className="flex flex-col gap-1">
+                  <Text.Body2>
+                    ADDED LIQUIDITY: {form.state.values.tokenAAmount}{" "}
+                    {tokenADetails?.symbol} + {form.state.values.tokenBAmount}{" "}
+                    {tokenBDetails?.symbol}
+                  </Text.Body2>
+                </div>
+              ),
               title: "Liquidity Added Successfully",
               variant: "success",
             });
@@ -560,6 +582,7 @@ export function LiquidityForm() {
     initialPriceTokenOrder === "ba"
       ? [tokenADetails, tokenBDetails]
       : [tokenBDetails, tokenADetails];
+
   return (
     <section className="flex w-full max-w-xl items-start gap-1">
       <div className="size-9" />
@@ -580,7 +603,7 @@ export function LiquidityForm() {
               name="tokenBAmount"
               validators={{
                 onChange: ({ value }) => {
-                  return validateHasSuffificentBalance({
+                  return validateHasSufficientBalance({
                     amount: value,
                     tokenAccount: sellTokenAccount?.tokenAccounts[0],
                   });
@@ -623,7 +646,7 @@ export function LiquidityForm() {
               name="tokenAAmount"
               validators={{
                 onChange: ({ value }) => {
-                  return validateHasSuffificentBalance({
+                  return validateHasSufficientBalance({
                     amount: value,
                     tokenAccount: buyTokenAccount?.tokenAccounts[0],
                   });
@@ -660,13 +683,13 @@ export function LiquidityForm() {
                     Set initial price
                   </Text.Body2>
                   <div className="flex items-center">
-                    {initialPriceTokenX.imageUrl ? (
+                    {initialPriceTokenX?.imageUrl ? (
                       <Image
-                        alt={initialPriceTokenX.symbol}
+                        alt={initialPriceTokenX?.symbol}
                         className="mr-2 size-6 overflow-hidden rounded-full"
                         height={24}
                         priority
-                        src={initialPriceTokenX.imageUrl}
+                        src={initialPriceTokenX?.imageUrl}
                         unoptimized
                         width={24}
                       />
@@ -674,7 +697,7 @@ export function LiquidityForm() {
                       <Icon className="mr-2 fill-green-200" name="seedlings" />
                     )}
                     <Text.Body2 className="text-green-200 text-lg">
-                      1 {initialPriceTokenX.symbol} =
+                      1 {initialPriceTokenX?.symbol} =
                     </Text.Body2>
                   </div>
                 </div>
@@ -693,8 +716,7 @@ export function LiquidityForm() {
                           <Icon className="rotate-90" name="swap" />
                         </button>
                       }
-                      currencyCode={initialPriceTokenY.symbol}
-                      exchangeRate={poolRatio}
+                      currencyCode={initialPriceTokenY?.symbol}
                       name={field.name}
                       onBlur={field.handleBlur}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -799,11 +821,11 @@ export function LiquidityForm() {
                   Initial Deposit
                 </Text.Body3>
                 <div className="text-right">
-                  <Text.Body3 className="text-white">
+                  <Text.Body3 className="text-green-200">
                     {form.state.values.tokenAAmount}{" "}
                     {buyTokenAccount?.tokenAccounts[0]?.symbol}
                   </Text.Body3>
-                  <Text.Body3 className="text-white">
+                  <Text.Body3 className="text-green-200">
                     {form.state.values.tokenBAmount}{" "}
                     {sellTokenAccount?.tokenAccounts[0]?.symbol}
                   </Text.Body3>
@@ -814,7 +836,7 @@ export function LiquidityForm() {
                 <Text.Body3 className="text-green-300">
                   Initial Price
                 </Text.Body3>
-                <Text.Body3 className="text-white">
+                <Text.Body3 className="text-green-200">
                   1 {buyTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
                   {form.state.values.initialPrice}{" "}
                   {sellTokenAccount?.tokenAccounts[0]?.symbol}
@@ -825,7 +847,7 @@ export function LiquidityForm() {
                 <Text.Body3 className="text-green-300">
                   Your Pool Share
                 </Text.Body3>
-                <Text.Body3 className="text-white">100%</Text.Body3>
+                <Text.Body3 className="text-green-200">100%</Text.Body3>
               </div>
             </div>
           )}

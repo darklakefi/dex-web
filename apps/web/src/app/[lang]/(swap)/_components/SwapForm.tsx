@@ -11,7 +11,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
 import { useQueryStates } from "nuqs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
@@ -91,7 +91,6 @@ export function SwapForm() {
     tradeId: "",
   });
   const [isInsufficientBalance, setIsInsufficientBalance] = useState(false);
-  const [isUseSlippage, setIsUseSlippage] = useState(false);
   const [slippage, setSlippage] = useState("0.5");
 
   const { data: poolDetails } = useSuspenseQuery(
@@ -262,7 +261,7 @@ export function SwapForm() {
     });
   };
 
-  const handleSwap = async () => {
+  const getSwap = async () => {
     if (!publicKey) {
       toast({
         description: "Missing wallet address or token information",
@@ -300,7 +299,7 @@ export function SwapForm() {
         min_out: BigNumber(buyAmount)
           .multipliedBy(1 - Number(slippage || 0) / 100)
           .toNumber(),
-        network: parseInt(process.env.NETWORK || "2", 10),
+        network: parseInt(process.env.NEXT_PUBLIC_NETWORK || "2", 10),
         token_mint_x: tokenXAddress,
         token_mint_y: tokenYAddress,
         user_address: publicKey.toBase58(),
@@ -325,6 +324,15 @@ export function SwapForm() {
       });
       resetButtonState();
     }
+  };
+
+  const handleSwap = async () => {
+    getQuote({
+      amountIn: form.state.values.tokenAAmount,
+      isXtoY,
+      slippage: parseFloat(slippage),
+      type: "sell",
+    }).then(getSwap);
   };
 
   const getQuote = async ({
@@ -361,6 +369,32 @@ export function SwapForm() {
   };
 
   const debouncedGetQuote = useDebouncedCallback(getQuote, 500);
+
+  // Set up interval to call debouncedGetQuote every 5 seconds
+  useEffect(() => {
+    const amountIn = form.state.values.tokenAAmount;
+    const amountInNumber = amountIn?.replace(/,/g, "") || "0";
+
+    if (poolDetails && BigNumber(amountInNumber).gt(0)) {
+      const intervalId = setInterval(() => {
+        debouncedGetQuote({
+          amountIn,
+          isXtoY,
+          slippage: parseFloat(slippage),
+          type: "sell",
+        });
+      }, 10000);
+
+      // Clean up the interval when the component unmounts or dependencies change
+      return () => clearInterval(intervalId);
+    }
+  }, [
+    poolDetails,
+    form.state.values.tokenAAmount,
+    isXtoY,
+    slippage,
+    debouncedGetQuote,
+  ]);
 
   const checkInsufficientBalance = (input: string) => {
     const value = input.replace(/,/g, "");
@@ -464,7 +498,6 @@ export function SwapForm() {
         <div className="flex gap-3">
           <TokenTransactionSettingsButton
             onChange={(slippage) => {
-              setIsUseSlippage(slippage !== "0");
               setSlippage(slippage);
               debouncedGetQuote({
                 amountIn: form.state.values.tokenAAmount,
@@ -588,7 +621,6 @@ export function SwapForm() {
         <div className="hidden flex-col gap-1 md:flex">
           <TokenTransactionSettingsButton
             onChange={(slippage) => {
-              setIsUseSlippage(slippage !== "0");
               setSlippage(slippage);
               debouncedGetQuote({
                 amountIn: form.state.values.tokenAAmount,
@@ -599,6 +631,7 @@ export function SwapForm() {
             }}
           />
           <SwapPageRefreshButton
+            isLoading={isLoadingQuote}
             onClick={() => {
               debouncedGetQuote({
                 amountIn: form.state.values.tokenAAmount,

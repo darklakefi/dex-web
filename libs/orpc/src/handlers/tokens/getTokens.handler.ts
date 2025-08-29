@@ -15,7 +15,7 @@ export const getTokensHandler = async (
   const page = Math.floor(offset / limit) + 1;
 
   const localTokensList =
-    process.env.NETWORK === "2" ? tokensData : tokensDataMainnet;
+    process.env.NEXT_PUBLIC_NETWORK === "2" ? tokensData : tokensDataMainnet;
 
   const gatewayInput: GetTokenMetadataListRequest = {
     addresses_list: query

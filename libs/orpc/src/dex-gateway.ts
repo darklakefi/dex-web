@@ -24,8 +24,7 @@ import type {
 } from "./dex-gateway.type";
 
 const config = {
-  gatewayHost:
-    process.env.GATEWAY_HOST || "dex-gateway-staging.dex.darklake.fi",
+  gatewayHost: process.env.GATEWAY_HOST,
   gatewayPort: parseInt(process.env.GATEWAY_PORT || "50051"),
 };
 

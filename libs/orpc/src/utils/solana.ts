@@ -31,6 +31,7 @@ export type PoolAccount = {
   user_locked_y: number;
   protocol_fee_x: number;
   protocol_fee_y: number;
+  token_lp_supply: number;
 };
 
 export function sortSolanaAddresses(
@@ -150,6 +151,10 @@ export const isSolanaAddress = (address: string) => {
 
 export const toRawUnits = (amount: number, decimals: number) => {
   return BigNumber(amount).multipliedBy(BigNumber(10 ** decimals));
+};
+
+export const toDecimals = (amount: number | BigNumber, decimals: number) => {
+  return BigNumber(amount).dividedBy(BigNumber(10 ** decimals));
 };
 
 // Helper function to get token balance using SPL library

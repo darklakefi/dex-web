@@ -1,6 +1,12 @@
 import { Icon } from "@dex-web/ui";
 
-export function SwapPageRefreshButton({ onClick }: { onClick: () => void }) {
+export function SwapPageRefreshButton({
+  onClick,
+  isLoading,
+}: {
+  onClick: () => void;
+  isLoading?: boolean;
+}) {
   async function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     onClick();
@@ -13,7 +19,10 @@ export function SwapPageRefreshButton({ onClick }: { onClick: () => void }) {
       onClick={handleClick}
       type="button"
     >
-      <Icon className="size-5" name="refresh" />
+      <Icon
+        className={`size-5 ${isLoading ? "animate-spin-pause" : ""}`}
+        name="refresh"
+      />
     </button>
   );
 }

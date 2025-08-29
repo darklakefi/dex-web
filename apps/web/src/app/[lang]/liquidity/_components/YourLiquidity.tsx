@@ -1,5 +1,6 @@
 "use client";
 import { tanstackClient } from "@dex-web/orpc";
+import type { Token } from "@dex-web/orpc/schemas";
 import { sortSolanaAddresses } from "@dex-web/orpc/utils/solana";
 import { Box, Button, Text } from "@dex-web/ui";
 import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
@@ -43,17 +44,18 @@ export function YourLiquidity({
     }),
   );
 
-  const { data: tokenADetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: tokenAAddress || DEFAULT_BUY_TOKEN },
+  const { data: tokenMetadata } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenMetadata.queryOptions({
+      input: {
+        addresses: [tokenXAddress, tokenYAddress],
+        returnAsObject: true,
+      },
     }),
   );
 
-  const { data: tokenBDetails } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenDetails.queryOptions({
-      input: { address: tokenBAddress || DEFAULT_SELL_TOKEN },
-    }),
-  );
+  const metadata = tokenMetadata as Record<string, Token>;
+  const tokenXDetails = metadata[tokenXAddress]!;
+  const tokenYDetails = metadata[tokenYAddress]!;
 
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.pools.getPoolDetails.queryOptions({
@@ -73,21 +75,21 @@ export function YourLiquidity({
     }),
   );
 
-  const { data: tokenAPrice } = useSuspenseQuery(
+  const { data: tokenXPrice } = useSuspenseQuery(
     tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
-        mint: tokenAAddress || DEFAULT_BUY_TOKEN,
+        mint: tokenXAddress,
         quoteCurrency: "USD",
       },
     }),
   );
 
-  const { data: tokenBPrice } = useSuspenseQuery(
+  const { data: tokenYPrice } = useSuspenseQuery(
     tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
-        mint: tokenBAddress || DEFAULT_SELL_TOKEN,
+        mint: tokenYAddress,
         quoteCurrency: "USD",
       },
     }),
@@ -103,8 +105,8 @@ export function YourLiquidity({
       return {
         totalUsdValue: 0,
         userLpShare: 0,
-        userTokenAAmount: 0,
-        userTokenBAmount: 0,
+        userTokenXAmount: 0,
+        userTokenYAmount: 0,
       };
     }
 
@@ -117,28 +119,28 @@ export function YourLiquidity({
       poolReserves.totalLpSupply,
     );
 
-    const userTokenAAmount = userLpShare
+    const userTokenYAmount = userLpShare
       .multipliedBy(poolReserves.reserveY)
       .toNumber();
-    const userTokenBAmount = userLpShare
+    const userTokenXAmount = userLpShare
       .multipliedBy(poolReserves.reserveX)
       .toNumber();
 
-    const tokenAValue = BigNumber(userTokenAAmount).multipliedBy(
-      tokenAPrice.price || 0,
+    const tokenYValue = BigNumber(userTokenYAmount).multipliedBy(
+      tokenYPrice.price || 0,
     );
-    const tokenBValue = BigNumber(userTokenBAmount).multipliedBy(
-      tokenBPrice.price || 0,
+    const tokenXValue = BigNumber(userTokenXAmount).multipliedBy(
+      tokenXPrice.price || 0,
     );
-    const totalUsdValue = tokenAValue.plus(tokenBValue).toNumber();
+    const totalUsdValue = tokenYValue.plus(tokenXValue).toNumber();
 
     return {
       totalUsdValue,
       userLpShare: userLpShare.toNumber(),
-      userTokenAAmount,
-      userTokenBAmount,
+      userTokenXAmount,
+      userTokenYAmount,
     };
-  }, [userLiquidity, poolReserves, tokenAPrice, tokenBPrice, poolDetails]);
+  }, [userLiquidity, poolReserves, tokenXPrice, tokenYPrice, poolDetails]);
 
   if (!userLiquidity?.hasLiquidity || !poolDetails) {
     return null;
@@ -162,17 +164,17 @@ export function YourLiquidity({
               {numberFormatHelper({
                 decimalScale: 5,
                 trimTrailingZeros: true,
-                value: liquidityCalculations.userTokenAAmount,
+                value: liquidityCalculations.userTokenXAmount,
               })}{" "}
-              {tokenADetails.symbol}
+              {tokenXDetails?.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-200">
               {numberFormatHelper({
                 decimalScale: 5,
                 trimTrailingZeros: true,
-                value: liquidityCalculations.userTokenBAmount,
+                value: liquidityCalculations.userTokenYAmount,
               })}{" "}
-              {tokenBDetails.symbol}
+              {tokenYDetails?.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
             <Button
@@ -205,10 +207,18 @@ export function YourLiquidity({
 
       <WithdrawLiquidityModal
         isOpen={isWithdrawModalOpen}
+        liquidityCalculations={{
+          totalUsdValue: liquidityCalculations.totalUsdValue,
+          userLpShare: liquidityCalculations.userLpShare,
+          userTokenXAmount: liquidityCalculations.userTokenXAmount,
+          userTokenYAmount: liquidityCalculations.userTokenYAmount,
+        }}
         onClose={() => setIsWithdrawModalOpen(false)}
         poolReserves={poolReserves}
-        tokenAAddress={tokenXAddress}
-        tokenBAddress={tokenYAddress}
+        tokenXAddress={tokenXAddress}
+        tokenXDetails={tokenXDetails}
+        tokenYAddress={tokenYAddress}
+        tokenYDetails={tokenYDetails}
         userLiquidity={userLiquidity}
       />
     </div>

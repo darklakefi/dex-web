@@ -8,6 +8,6 @@ export function getHelius(): Helius {
 
   return new Helius(
     apiKey,
-    process.env.NETWORK === "2" ? "devnet" : "mainnet-beta",
+    process.env.NEXT_PUBLIC_NETWORK === "2" ? "devnet" : "mainnet-beta",
   );
 }

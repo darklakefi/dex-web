@@ -10,7 +10,6 @@ export async function submitSignedTransactionHandler(
   input: SignedTransactionRequest,
 ) {
   const grpcClient = getDexGatewayClient();
-  console.log("input", input);
 
   try {
     const requestWithTradeId = {
@@ -20,8 +19,6 @@ export async function submitSignedTransactionHandler(
 
     const response: SignedTransactionResponse =
       await grpcClient.submitSignedTransaction(requestWithTradeId);
-
-    console.log("submitSignedTransaction response:", response);
 
     if (!response.success) {
       console.error("Transaction submission failed:", {
