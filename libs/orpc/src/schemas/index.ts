@@ -32,6 +32,20 @@ export type {
   CreatePoolTransactionOutput,
 } from "./pools/createPoolTransaction.schema";
 export type {
+  CreatePinnedPoolInput,
+  CreatePinnedPoolOutput,
+} from "./pools/pinned/createPinnedPool.schema";
+export type {
+  DeletePinnedPoolInput,
+  DeletePinnedPoolOutput,
+} from "./pools/pinned/deletePinnedPool.schema";
+export type { ListPinnedPoolsOutput } from "./pools/pinned/listPinnedPools.schema";
+export type { PinnedPool } from "./pools/pinned/pinnedPool.schema";
+export type {
+  UpdatePinnedPoolInput,
+  UpdatePinnedPoolOutput,
+} from "./pools/pinned/updatePinnedPool.schema";
+export type {
   GetQuoteInput,
   GetQuoteOutput,
 } from "./swaps/getQuote.schema";
