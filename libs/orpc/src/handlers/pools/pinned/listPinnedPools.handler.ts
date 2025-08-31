@@ -32,9 +32,9 @@ export async function listPinnedPoolsHandler(): Promise<ListPinnedPoolsOutput> {
         (row.updated_at as unknown as Date | undefined)?.toISOString?.() ??
         String(row.updated_at ?? ""),
     }));
-    return { items };
+    return items;
   } catch (error) {
     console.error("Error listing pinned pools:", error);
-    return { items: [] };
+    return [];
   }
 }
