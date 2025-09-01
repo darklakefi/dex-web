@@ -174,7 +174,7 @@ jobs:
             echo "export VERCEL_URL=$VERCEL_URL" >> $BASH_ENV
       - run:
           name: Create GitHub Deployment & Status
-          command: .circleci/scripts/github-deployment.sh
+          command: bash .circleci/scripts/github-deployment.sh
 
   deploy-production:
     docker:
