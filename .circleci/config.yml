@@ -151,7 +151,7 @@ jobs:
               exit 0
             fi
             pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD \
-              --target=test --parallel --maxParallel=${CIRCLE_NODE_TOTAL}
+              --target=test --parallel
       - save-nx-cache
       - store_test_results:
           path: test-results
@@ -161,7 +161,7 @@ jobs:
 
   e2e:
     docker:
-      - image: mcr.microsoft.com/playwright:v1.53.1-noble
+      - image: mcr.microsoft.com/playwright:v1.53.2-noble
     resource_class: large
     parallelism: 2
     steps:
@@ -206,7 +206,7 @@ jobs:
     resource_class: large
     steps:
       - checkout
-      - setup
+      - attach-and-install
       - restore-vercel-cache
       - run:
           name: Pull Vercel Environment Information
@@ -237,10 +237,18 @@ jobs:
       - restore-vercel-cache
       - run:
           name: Plan production deployment
-          command: circleci run release plan --target-version=production-$CIRCLE_SHA1 --environment-name=production --component-name=dex-web
+          command: |
+            if ! circleci run release plan --target-version=production-$CIRCLE_SHA1 --environment-name=production --component-name=dex-web; then
+              echo "Failed to plan release"
+              exit 1
+            fi
       - run:
           name: Update deployment status to running
-          command: circleci run release update --status=running
+          command: |
+            if ! circleci run release update --status=running; then
+              echo "Failed to update deployment status to running"
+              exit 1
+            fi
       - run:
           name: Pull Vercel Environment Information
           command: npx vercel@latest pull --yes --environment=production --token=$VERCEL_TOKEN
