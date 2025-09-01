@@ -291,7 +291,9 @@ workflows:
           requires:
             - chromatic
       - deploy-preview:
-          context: darklakefi-deployments
+          context:
+            - darklakefi-deployments
+            - darklakefi-development
           requires:
             - check
             - test
@@ -299,7 +301,9 @@ workflows:
             branches:
               ignore: /main/
       - deploy-production:
-          context: darklakefi-deployments
+          context:
+            - darklakefi-deployments
+            - darklakefi-production
           requires:
             - check
             - test
