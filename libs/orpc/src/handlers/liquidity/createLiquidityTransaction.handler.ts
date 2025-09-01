@@ -61,7 +61,7 @@ async function ensureAtaIx(
   mint: PublicKey,
   tokenProgram: PublicKey,
 ): Promise<TransactionInstruction | null> {
-  const ata = getAssociatedTokenAddressSync(mint, owner, false, tokenProgram);
+  const ata = getAssociatedTokenAddressSync(mint, owner, true, tokenProgram);
   try {
     await getAccount(connection, ata, "confirmed", tokenProgram);
     return null;
@@ -197,11 +197,15 @@ async function createLiquidityTransaction(
   const { blockhash } = await connection.getLatestBlockhash();
   const instructions = [cuLimitIx, cuPriceIx, ...ataInstructions, programIx];
 
+  // Get optional lookup table for transaction size optimization (SquadsX compatibility)
+  const { getOptionalLookupTable } = await import("../../utils/lookupTable");
+  const lookupTable = await getOptionalLookupTable(connection);
+
   const message = new TransactionMessage({
     instructions,
     payerKey: user,
     recentBlockhash: blockhash,
-  }).compileToV0Message();
+  }).compileToV0Message(lookupTable ? [lookupTable] : []);
 
   return new web3.VersionedTransaction(message);
 }

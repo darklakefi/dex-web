@@ -18,6 +18,7 @@ import {
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
 import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
+import { isSquadsX } from "../../../_utils/isSquadsX";
 import { dismissToast, toast } from "../../../_utils/toast";
 
 type WithdrawLiquidityFormSchema = z.infer<typeof withdrawLiquidityFormSchema>;
@@ -75,7 +76,7 @@ export function WithdrawLiquidityModal({
   tokenXDetails,
   tokenYDetails,
 }: WithdrawLiquidityModalProps) {
-  const { publicKey, signTransaction } = useWallet();
+  const { publicKey, signTransaction, wallet } = useWallet();
   const queryClient = useQueryClient();
   const [withdrawalCalculations, setWithdrawalCalculations] = useState({
     percentage: 0,
@@ -248,6 +249,7 @@ export function WithdrawLiquidityModal({
       }
 
       dismissToast();
+      const squads = isSquadsX(wallet);
       toast({
         customAction: (
           <Text
@@ -263,13 +265,14 @@ export function WithdrawLiquidityModal({
         description: (
           <div className="flex flex-col gap-1">
             <Text.Body2>
-              Successfully withdrew {withdrawalCalculations.tokenXAmount}{" "}
-              {tokenXDetails.symbol} + {withdrawalCalculations.tokenYAmount}{" "}
-              {tokenYDetails.symbol}
+              {squads
+                ? `Transaction initiated. You can now cast votes for this proposal on the Squads app.`
+                : `Successfully withdrew ${form.state.values.withdrawalAmount} LP tokens. Transaction: ${submitRes.signature}`}
             </Text.Body2>
           </div>
         ),
-        title: "Withdrawal complete",
+
+        title: squads ? "Proposal created" : "Withdrawal complete",
         variant: "success",
       });
 
@@ -298,9 +301,12 @@ export function WithdrawLiquidityModal({
     } catch (error) {
       console.error("Signing error:", error);
       dismissToast();
+      const squads = isSquadsX(wallet);
       toast({
-        description: `${error instanceof Error ? error.message : "Unknown error occurred"}`,
-        title: "Transaction Error",
+        description: squads
+          ? `Transaction failed in Squads. Please review the proposal in the Squads app.`
+          : `${error instanceof Error ? error.message : "Unknown error occurred"}`,
+        title: squads ? "Proposal failed" : "Transaction Error",
         variant: "error",
       });
       resetWithdrawState();
