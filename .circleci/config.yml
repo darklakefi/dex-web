@@ -30,7 +30,6 @@ commands:
           paths:
             - .nx/cache
             - node_modules/.cache/nx
-            - ~/.pnpm-store
 
   restore-vercel-cache:
     description: "Restore Vercel build cache"
@@ -63,54 +62,7 @@ commands:
           pkg-manager: pnpm
           cache-path: ~/.pnpm-store
 
-      - persist_to_workspace:
-          root: .
-          paths:
-            - node_modules
-            - .pnpm-store
-
-  attach-and-install:
-    description: "Attach workspace and ensure pnpm is available"
-    steps:
-      - attach_workspace:
-          at: .
-      - node/install:
-          install-pnpm: true
-          pnpm-version: 10.12.4
-
 jobs:
-  setup:
-    docker:
-      - image: cimg/node:24.3.0
-    resource_class: large
-    steps:
-      - checkout
-      - run:
-          name: Validate configuration files
-          command: |
-            echo "🔍 Validating project configuration..."
-
-            for file in package.json nx.json .nvmrc; do
-              if [[ ! -f "$file" ]]; then
-                echo "❌ Required file missing: $file"
-                exit 1
-              fi
-            done
-
-            if ! jq empty package.json 2>/dev/null; then
-              echo "❌ Invalid package.json syntax"
-              exit 1
-            fi
-
-            EXPECTED_NODE=$(cat .nvmrc | tr -d '\n')
-            CURRENT_NODE=$(node -v | sed 's/v//')
-            if [[ "$CURRENT_NODE" != "$EXPECTED_NODE"* ]]; then
-              echo "⚠️  Node version mismatch: expected $EXPECTED_NODE, got $CURRENT_NODE"
-            fi
-
-            echo "✅ Configuration validation passed"
-      - setup
-
   check:
     docker:
       - image: cimg/node:24.3.0
@@ -287,20 +239,16 @@ jobs:
 workflows:
   ci-cd:
     jobs:
-      - setup
-      - check:
-          requires:
-            - setup
-      - test:
-          requires:
-            - setup
+      - check
+      - test
       - chromatic:
           requires:
             - check
             - test
       - e2e:
           requires:
-            - setup
+            - check
+            - test
       - deploy-preview:
           context:
             - darklakefi-deployments
