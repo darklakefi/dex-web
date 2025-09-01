@@ -11,8 +11,8 @@ commands:
       - restore_cache:
           name: Restore Nx Cache
           keys:
-            - nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
-            - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
+            - nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "pnpm-lock.yaml" }}
+            - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}-{{ checksum "pnpm-lock.yaml" }}
             - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}
             - nx-cache-{{ .Branch }}-
             - nx-cache-
@@ -28,10 +28,11 @@ commands:
     steps:
       - save_cache:
           name: Save Nx Cache
-          key: nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
+          key: nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - .nx/cache
             - node_modules/.cache/nx
+            - ~/.pnpm-store
 
   restore-vercel-cache:
     description: "Restore Vercel build cache"
@@ -70,6 +71,15 @@ commands:
           paths:
             - node_modules
             - .pnpm-store
+
+  attach-and-install:
+    description: "Attach workspace and ensure pnpm is available"
+    steps:
+      - attach_workspace:
+          at: .
+      - node/install:
+          install-pnpm: true
+          pnpm-version: 10.12.4
 
 jobs:
   setup:
@@ -110,8 +120,7 @@ jobs:
     resource_class: medium
     steps:
       - checkout
-      - attach_workspace:
-          at: .
+      - attach-and-install
       - setup-nx
       - restore-nx-cache
       - run:
@@ -131,8 +140,7 @@ jobs:
     parallelism: 4
     steps:
       - checkout
-      - attach_workspace:
-          at: .
+      - attach-and-install
       - setup-nx
       - restore-nx-cache
       - run:
@@ -158,8 +166,7 @@ jobs:
     parallelism: 2
     steps:
       - checkout
-      - attach_workspace:
-          at: .
+      - attach-and-install
       - setup-nx
       - restore-nx-cache
       - run:
@@ -185,8 +192,7 @@ jobs:
       CI: true
     steps:
       - checkout
-      - attach_workspace:
-          at: .
+      - attach-and-install
       - setup-nx
       - restore-nx-cache
       - run:
