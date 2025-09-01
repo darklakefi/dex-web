@@ -64,14 +64,29 @@ commands:
           pkg-manager: pnpm
           cache-path: ~/.pnpm-store
 
+      - persist_to_workspace:
+          root: .
+          paths:
+            - node_modules
+            - .pnpm-store
+
 jobs:
-  check:
+  setup:
     docker:
       - image: cimg/node:24.3.0
     resource_class: medium
     steps:
       - checkout
       - setup
+
+  check:
+    docker:
+      - image: cimg/node:24.3.0
+    resource_class: medium
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
       - setup-nx
       - restore-nx-cache
       - run:
@@ -86,7 +101,8 @@ jobs:
     parallelism: 4
     steps:
       - checkout
-      - setup
+      - attach_workspace:
+          at: .
       - setup-nx
       - restore-nx-cache
       - run:
@@ -108,7 +124,8 @@ jobs:
     parallelism: 2
     steps:
       - checkout
-      - setup
+      - attach_workspace:
+          at: .
       - setup-nx
       - restore-nx-cache
       - run:
@@ -130,7 +147,8 @@ jobs:
       CI: true
     steps:
       - checkout
-      - setup
+      - attach_workspace:
+          at: .
       - setup-nx
       - restore-nx-cache
       - run:
@@ -142,7 +160,6 @@ jobs:
     docker:
       - image: cimg/node:24.3.0
     resource_class: large
-    context: darklakefi-deployments
     steps:
       - checkout
       - setup
@@ -170,7 +187,6 @@ jobs:
     docker:
       - image: cimg/node:24.3.0
     resource_class: medium
-    context: darklakefi-deployments
     steps:
       - checkout
       - setup
@@ -222,17 +238,22 @@ jobs:
 workflows:
   ci-cd:
     jobs:
-      - check
-      - test
-      - e2e:
+      - setup
+      - check:
           requires:
-            - check
-            - test
+            - setup
+      - test:
+          requires:
+            - setup
       - chromatic:
           requires:
             - check
             - test
+      - e2e:
+          requires:
+            - chromatic
       - deploy-preview:
+          context: darklakefi-deployments
           requires:
             - check
             - test
@@ -240,6 +261,7 @@ workflows:
             branches:
               ignore: /main/
       - deploy-production:
+          context: darklakefi-deployments
           requires:
             - check
             - test
