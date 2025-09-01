@@ -45,6 +45,11 @@ if [ "$HTTP_STATUS" -ne 201 ]; then
   exit 1
 fi
 
+if ! command -v jq &> /dev/null; then
+  echo "❌ jq not found, installing..."
+  sudo apt-get update && sudo apt-get install -y jq
+fi
+
 DEPLOYMENT_ID=$(echo $DEPLOYMENT_BODY | jq -r '.id')
 echo "✅ Deployment created (ID: $DEPLOYMENT_ID)"
 
