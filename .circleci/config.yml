@@ -71,6 +71,8 @@ commands:
           paths:
             - node_modules
             - .pnpm-store
+            - libs
+            - apps
 
   attach-and-install:
     description: "Attach workspace and ensure pnpm is available"
