@@ -11,11 +11,9 @@ commands:
       - restore_cache:
           name: Restore Nx Cache
           keys:
-            - nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "pnpm-lock.yaml" }}
-            - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}-{{ checksum "pnpm-lock.yaml" }}
-            - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}
-            - nx-cache-{{ .Branch }}-
-            - nx-cache-
+            - nx-cache-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "nx.json" }}
+            - nx-cache-v1-{{ checksum "pnpm-lock.yaml" }}
+            - nx-cache-v1-
 
   setup-nx:
     description: "Set up Nx SHAs for affected detection"
@@ -28,7 +26,7 @@ commands:
     steps:
       - save_cache:
           name: Save Nx Cache
-          key: nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "pnpm-lock.yaml" }}
+          key: nx-cache-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "nx.json" }}
           paths:
             - .nx/cache
             - node_modules/.cache/nx
@@ -40,17 +38,16 @@ commands:
       - restore_cache:
           name: Restore Vercel Cache
           keys:
-            - vercel-cache-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}-{{ checksum "nx.json" }}-{{ checksum "tsconfig.base.json" }}
-            - vercel-cache-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}
-            - vercel-cache-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
-            - vercel-cache-{{ .Branch }}-
+            - vercel-cache-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}
+            - vercel-cache-v1-{{ checksum "pnpm-lock.yaml" }}
+            - vercel-cache-v1-
 
   save-vercel-cache:
     description: "Save Vercel build cache"
     steps:
       - save_cache:
           name: Save Vercel Cache
-          key: vercel-cache-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}-{{ checksum "nx.json" }}-{{ checksum "tsconfig.base.json" }}
+          key: vercel-cache-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}
           paths:
             - .vercel
             - .next/cache
@@ -85,7 +82,7 @@ jobs:
   setup:
     docker:
       - image: cimg/node:24.3.0
-    resource_class: medium
+    resource_class: large
     steps:
       - checkout
       - run:
@@ -233,7 +230,7 @@ jobs:
     resource_class: medium
     steps:
       - checkout
-      - setup
+      - attach-and-install
       - restore-vercel-cache
       - run:
           name: Plan production deployment
@@ -303,7 +300,7 @@ workflows:
             - test
       - e2e:
           requires:
-            - chromatic
+            - setup
       - deploy-preview:
           context:
             - darklakefi-deployments
@@ -322,7 +319,6 @@ workflows:
             - check
             - test
             - e2e
-            - chromatic
           filters:
             branches:
               only: /main/
