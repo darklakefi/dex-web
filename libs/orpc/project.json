@@ -34,6 +34,7 @@
     },
     "test": {
       "cache": true,
+      "dependsOn": [],
       "executor": "@nx/vite:test",
       "options": {
         "config": "libs/orpc/vite.config.ts",
