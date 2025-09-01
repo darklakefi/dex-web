@@ -77,6 +77,7 @@ export const config = mergeConfig(baseConfig, {
     nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
       outDir: "../../dist/libs/ui",
+      rollupTypes: false,
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),
   ],
