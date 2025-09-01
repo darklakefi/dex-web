@@ -21,6 +21,7 @@ import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { TokenTransactionButton } from "../../../_components/TokenTransactionButton";
 import { TokenTransactionDetails } from "../../../_components/TokenTransactionDetails";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
+import { isSquadsX } from "../../../_utils/isSquadsX";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
@@ -75,7 +76,7 @@ const BUTTON_MESSAGE = {
 
 export function SwapForm() {
   const form = useAppForm(formConfig);
-  const { signTransaction, publicKey } = useWallet();
+  const { wallet, signTransaction, publicKey } = useWallet();
   const { trackSwap, trackError } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
@@ -161,7 +162,6 @@ export function SwapForm() {
 
       const signedTransaction = await signTransaction(transaction);
 
-      // Track swap signed
       const sellAmount = Number(
         form.state.values.tokenAAmount.replace(/,/g, ""),
       );
@@ -178,7 +178,6 @@ export function SwapForm() {
       const signedTransactionBase64 = signedTransaction
         .serialize()
         .toString("base64");
-      // Prepare signed transaction request
 
       setTrackDetails({
         trackingId,
@@ -203,7 +202,6 @@ export function SwapForm() {
         await client.dexGateway.submitSignedTransaction(signedTxRequest);
 
       if (signedTxResponse.success) {
-        // Track swap submitted
         const sellAmount = Number(
           form.state.values.tokenAAmount.replace(/,/g, ""),
         );
@@ -231,7 +229,6 @@ export function SwapForm() {
         variant: "error",
       });
 
-      // Track signing error
       trackError({
         context: "swap_signing",
         details: {
@@ -264,9 +261,12 @@ export function SwapForm() {
         response.status === TradeStatus.SLASHED
       ) {
         resetButtonState();
+        const squads = isSquadsX(wallet);
         toast({
-          description: `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`,
-          title: "Swap complete",
+          description: squads
+            ? `Transaction initiated. You can now cast votes for this proposal on the Squads app.`
+            : `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`,
+          title: squads ? "Proposal created" : "Swap complete",
           variant: "success",
         });
 
@@ -296,13 +296,15 @@ export function SwapForm() {
         response.status === TradeStatus.FAILED
       ) {
         resetButtonState();
+        const squads = isSquadsX(wallet);
         toast({
-          description: `Trade ${response.status}!, trackingId: ${trackingId}`,
-          title: `Trade ${response.status}`,
+          description: squads
+            ? `Transaction failed in Squads. Please review the proposal in the Squads app.`
+            : `Trade ${response.status}!, trackingId: ${trackingId}`,
+          title: squads ? "Proposal failed" : `Trade ${response.status}`,
           variant: "error",
         });
 
-        // Track swap failed
         const sellAmount = Number(
           form.state.values.tokenAAmount.replace(/,/g, ""),
         );

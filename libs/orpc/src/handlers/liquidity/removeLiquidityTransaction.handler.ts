@@ -34,7 +34,6 @@ async function removeLiquidity(
     program.programId,
   );
 
-  // Find pool
   const [poolPubkey] = PublicKey.findProgramAddressSync(
     [
       Buffer.from(POOL_SEED),
@@ -53,21 +52,21 @@ async function removeLiquidity(
   const userTokenAccountX = getAssociatedTokenAddressSync(
     tokenXMint,
     user,
-    false,
+    true,
     tokenXProgramId,
   );
 
   const userTokenAccountY = getAssociatedTokenAddressSync(
     tokenYMint,
     user,
-    false,
+    true,
     tokenYProgramId,
   );
 
   const userTokenAccountLp = getAssociatedTokenAddressSync(
     lpMint,
     user,
-    false,
+    true,
     TOKEN_PROGRAM_ID,
   );
 
