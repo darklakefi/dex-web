@@ -71,8 +71,6 @@ commands:
           paths:
             - node_modules
             - .pnpm-store
-            - libs
-            - apps
 
   attach-and-install:
     description: "Attach workspace and ensure pnpm is available"
@@ -128,7 +126,7 @@ jobs:
       - run:
           name: Run affected tasks
           command: |
-            if pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD --dry-run | grep -q "No projects"; then
+            if pnpm exec nx show projects --affected --base=$NX_BASE --head=$NX_HEAD | wc -l | grep -q "^0$"; then
               echo "✅ No affected projects found, skipping lint and typecheck"
               exit 0
             fi
@@ -148,7 +146,7 @@ jobs:
       - run:
           name: Run affected tests in parallel
           command: |
-            if pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD --target=test --dry-run | grep -q "No projects"; then
+            if pnpm exec nx show projects --affected --base=$NX_BASE --head=$NX_HEAD --with-target=test | wc -l | grep -q "^0$"; then
               echo "✅ No affected projects with tests found, skipping"
               exit 0
             fi
@@ -174,7 +172,7 @@ jobs:
       - run:
           name: Run affected e2e tests
           command: |
-            if pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD --target=e2e --dry-run | grep -q "No projects"; then
+            if pnpm exec nx show projects --affected --base=$NX_BASE --head=$NX_HEAD --with-target=e2e | wc -l | grep -q "^0$"; then
               echo "✅ No affected projects with e2e tests found, skipping"
               exit 0
             fi
