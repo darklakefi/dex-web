@@ -241,25 +241,43 @@ jobs:
           command: npx vercel@latest build --prod --token=$VERCEL_TOKEN
       - run:
           name: Deploy Project Artifacts to Vercel
-          command: npx vercel@latest deploy --prod --token=$VERCEL_TOKEN
+          command: |
+            PRODUCTION_URL=$(npx vercel@latest deploy --prod --token=$VERCEL_TOKEN)
+            echo "export PRODUCTION_URL=$PRODUCTION_URL" >> $BASH_ENV
+      - github-cli/install
       - run:
           name: Create GitHub Production Deployment
           command: |
+            source $BASH_ENV
             if [ -n "$GITHUB_TOKEN" ]; then
-              curl -s -X POST \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments \
-                -d '{
-                  "ref": "'$CIRCLE_SHA1'",
-                  "environment": "production",
-                  "auto_merge": false,
-                  "required_contexts": []
-                }' | jq -r '.id' | xargs -I {} curl -s -X POST \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments/{}/statuses \
-                -d '{"state": "success", "description": "Production deployment successful"}'
+              # Create deployment
+              DEPLOYMENT_ID=$(gh api repos/{owner}/{repo}/deployments \
+                --method POST \
+                -f ref="${CIRCLE_SHA1}" \
+                -f environment="production" \
+                -f description="Production deployment ${CIRCLE_TAG:-${CIRCLE_SHA1:0:7}}" \
+                -F production_environment=true \
+                --jq '.id')
+
+              # Update deployment status
+              gh api repos/{owner}/{repo}/deployments/${DEPLOYMENT_ID}/statuses \
+                --method POST \
+                -f state="success" \
+                -f environment_url="${PRODUCTION_URL:-https://dex.darklake.fi}" \
+                -f description="Production deployment successful" \
+                -f log_url="${CIRCLE_BUILD_URL}"
+
+              # Create commit status
+              gh api repos/{owner}/{repo}/statuses/${CIRCLE_SHA1} \
+                --method POST \
+                -f state="success" \
+                -f target_url="${PRODUCTION_URL:-https://dex.darklake.fi}" \
+                -f description="Deployed to production" \
+                -f context="deploy/production"
+
+              echo "✅ GitHub production deployment created: ${PRODUCTION_URL:-https://dex.darklake.fi}"
+            else
+              echo "⚠️ GITHUB_TOKEN not set, skipping GitHub integration"
             fi
       - run:
           name: Update deployment status to SUCCESS
