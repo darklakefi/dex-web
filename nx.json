@@ -142,10 +142,15 @@
       }
     },
     "lint:ci": {
-      "cache": true
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "outputs": ["{options.reportsDirectory}"]
     },
     "test": {
-      "cache": true
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default"],
+      "outputs": ["{options.reportsDirectory}"]
     },
     "typecheck": {
       "cache": true,
