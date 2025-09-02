@@ -187,14 +187,16 @@ jobs:
           command: |
             source $BASH_ENV
             if [ -n "$GITHUB_TOKEN" ]; then
-              DEPLOYMENT_ID=$(gh api repos/{owner}/{repo}/deployments \
+              DEPLOYMENT_JSON='{
+                "ref": "'${CIRCLE_SHA1}'",
+                "environment": "preview",
+                "description": "Preview deployment for '${CIRCLE_SHA1:0:7}'",
+                "required_contexts": []
+              }'
+              
+              DEPLOYMENT_ID=$(echo "$DEPLOYMENT_JSON" | gh api repos/{owner}/{repo}/deployments \
                 --method POST \
-                --input - \<<< '{
-                  "ref": "'${CIRCLE_SHA1}'",
-                  "environment": "preview",
-                  "description": "Preview deployment for '${CIRCLE_SHA1:0:7}'",
-                  "required_contexts": []
-                }' \
+                --input - \
                 --jq '.id')
 
               gh api repos/{owner}/{repo}/deployments/${DEPLOYMENT_ID}/statuses \
@@ -255,15 +257,17 @@ jobs:
           command: |
             source $BASH_ENV
             if [ -n "$GITHUB_TOKEN" ]; then
-              DEPLOYMENT_ID=$(gh api repos/{owner}/{repo}/deployments \
+              DEPLOYMENT_JSON='{
+                "ref": "'${CIRCLE_SHA1}'",
+                "environment": "production",
+                "description": "Production deployment '${CIRCLE_TAG:-${CIRCLE_SHA1:0:7}}'",
+                "production_environment": true,
+                "required_contexts": []
+              }'
+              
+              DEPLOYMENT_ID=$(echo "$DEPLOYMENT_JSON" | gh api repos/{owner}/{repo}/deployments \
                 --method POST \
-                --input - \<<< '{
-                  "ref": "'${CIRCLE_SHA1}'",
-                  "environment": "production",
-                  "description": "Production deployment '${CIRCLE_TAG:-${CIRCLE_SHA1:0:7}}'",
-                  "production_environment": true,
-                  "required_contexts": []
-                }' \
+                --input - \
                 --jq '.id')
 
               gh api repos/{owner}/{repo}/deployments/${DEPLOYMENT_ID}/statuses \
