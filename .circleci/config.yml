@@ -263,7 +263,7 @@ jobs:
               gh api repos/{owner}/{repo}/deployments/${DEPLOYMENT_ID}/statuses \
                 --method POST \
                 -f state="success" \
-                -f environment_url="${PRODUCTION_URL:-https://dex.darklake.fi}" \
+                -f environment_url="${PRODUCTION_URL:-https://darklake.fi}" \
                 -f description="Production deployment successful" \
                 -f log_url="${CIRCLE_BUILD_URL}"
 
@@ -271,11 +271,11 @@ jobs:
               gh api repos/{owner}/{repo}/statuses/${CIRCLE_SHA1} \
                 --method POST \
                 -f state="success" \
-                -f target_url="${PRODUCTION_URL:-https://dex.darklake.fi}" \
+                -f target_url="${PRODUCTION_URL:-https://darklake.fi}" \
                 -f description="Deployed to production" \
                 -f context="deploy/production"
 
-              echo "✅ GitHub production deployment created: ${PRODUCTION_URL:-https://dex.darklake.fi}"
+              echo "✅ GitHub production deployment created: ${PRODUCTION_URL:-https://darklake.fi}"
             else
               echo "⚠️ GITHUB_TOKEN not set, skipping GitHub integration"
             fi
