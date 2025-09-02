@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   nx: nrwl/nx@1.7.0
   node: circleci/node@7.1.0
+  github-cli: circleci/github-cli@2.4.0
 
 commands:
   restore-nx-cache:
@@ -172,9 +173,20 @@ jobs:
               exit 1
             fi
             echo "export VERCEL_URL=$VERCEL_URL" >> $BASH_ENV
-      - run:
-          name: Create GitHub Deployment & Status
-          command: bash .circleci/scripts/github-deployment.sh
+      - github-cli/create-deployment:
+          environment: "preview"
+      - github-cli/create-deployment-status:
+          deployment-id: ${GITHUB_DEPLOYMENT_ID}
+          state: "success"
+          environment-url: ${VERCEL_URL}
+      - github-cli/run:
+          command: |
+            gh api repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/statuses/${CIRCLE_SHA1} \
+              --method POST \
+              -f state='success' \
+              -f target_url="${VERCEL_URL}" \
+              -f description='Preview ready' \
+              -f context='deploy/preview'
 
   deploy-production:
     docker:
