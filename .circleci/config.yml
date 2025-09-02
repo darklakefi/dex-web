@@ -188,6 +188,7 @@ jobs:
                 -f ref="${CIRCLE_SHA1}" \
                 -f environment="preview" \
                 -f description="Preview deployment for ${CIRCLE_SHA1:0:7}" \
+                -F required_contexts='[]' \
                 --jq '.id')
 
               # Update deployment status
@@ -257,6 +258,7 @@ jobs:
                 -f environment="production" \
                 -f description="Production deployment ${CIRCLE_TAG:-${CIRCLE_SHA1:0:7}}" \
                 -F production_environment=true \
+                -F required_contexts='[]' \
                 --jq '.id')
 
               # Update deployment status
