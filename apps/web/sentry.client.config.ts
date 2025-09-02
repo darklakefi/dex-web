@@ -2,17 +2,22 @@ import * as Sentry from "@sentry/nextjs";
 import posthog from "posthog-js";
 
 Sentry.init({
-  dsn: "https://773fd9bc5b4d5d1ff4d35335fce01b3c@o4508075926618112.ingest.de.sentry.io/4508075930484816",
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
   // Replay may only be enabled for the client-side
   integrations: [
     Sentry.replayIntegration(),
     Sentry.browserTracingIntegration(),
     Sentry.browserProfilingIntegration(),
-    posthog.sentryIntegration({
-      organization: "darklake",
-      projectId: 4508075930484816,
-      severityAllowList: ["error", "info"], // optional: here is set to handle captureMessage (info) and captureException (error)
-    }),
+    ...(typeof window !== "undefined" && process.env.NEXT_PUBLIC_POSTHOG_KEY
+      ? [
+          posthog.sentryIntegration({
+            organization: process.env.SENTRY_ORG || "darklake",
+            projectId: parseInt(process.env.SENTRY_PROJECT_ID || "0"),
+            severityAllowList: ["error", "info"],
+          }),
+        ]
+      : []),
   ],
   replaysOnErrorSampleRate: 1.0,
 
