@@ -189,7 +189,7 @@ jobs:
             if [ -n "$GITHUB_TOKEN" ]; then
               DEPLOYMENT_ID=$(gh api repos/{owner}/{repo}/deployments \
                 --method POST \
-                --input - <<< '{
+                --input - \<<< '{
                   "ref": "'${CIRCLE_SHA1}'",
                   "environment": "preview",
                   "description": "Preview deployment for '${CIRCLE_SHA1:0:7}'",
@@ -257,7 +257,7 @@ jobs:
             if [ -n "$GITHUB_TOKEN" ]; then
               DEPLOYMENT_ID=$(gh api repos/{owner}/{repo}/deployments \
                 --method POST \
-                --input - <<< '{
+                --input - \<<< '{
                   "ref": "'${CIRCLE_SHA1}'",
                   "environment": "production",
                   "description": "Production deployment '${CIRCLE_TAG:-${CIRCLE_SHA1:0:7}}'",
