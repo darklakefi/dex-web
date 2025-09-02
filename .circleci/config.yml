@@ -184,7 +184,8 @@ jobs:
                 --method POST \
                 -f ref="${CIRCLE_SHA1}" \
                 -f environment="preview" \
-                -f auto_merge=false \
+                -F auto_merge=false \
+                -f required_contexts='[]' \
                 --jq '.id')
               
               # Update deployment status
