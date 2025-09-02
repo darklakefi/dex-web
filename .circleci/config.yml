@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  create_release_pr:
+    type: boolean
+    default: false
+
 orbs:
   nx: nrwl/nx@1.7.0
   node: circleci/node@7.1.0
@@ -63,7 +68,7 @@ commands:
 
       - node/install-packages:
           pkg-manager: pnpm
-          cache-path: ~/.pnpm-store
+          cache-path: "~/.pnpm-store"
           with-cache: true
 
 jobs:
@@ -182,18 +187,14 @@ jobs:
           command: |
             source $BASH_ENV
             if [ -n "$GITHUB_TOKEN" ]; then
-              # Create deployment
               DEPLOYMENT_ID=$(gh api repos/{owner}/{repo}/deployments \
                 --method POST \
-                --input - <<< '{
-                  "ref": "'${CIRCLE_SHA1}'",
-                  "environment": "preview",
-                  "description": "Preview deployment for '${CIRCLE_SHA1:0:7}'",
-                  "required_contexts": []
-                }' \
+                -f ref="${CIRCLE_SHA1}" \
+                -f environment="preview" \
+                -f description="Preview deployment for '${CIRCLE_SHA1:0:7}'" \
+                -F required_contexts='[]' \
                 --jq '.id')
 
-              # Update deployment status
               gh api repos/{owner}/{repo}/deployments/${DEPLOYMENT_ID}/statuses \
                 --method POST \
                 -f state="success" \
@@ -201,7 +202,6 @@ jobs:
                 -f description="Preview deployment ready" \
                 -f log_url="${CIRCLE_BUILD_URL}"
 
-              # Create commit status
               gh api repos/{owner}/{repo}/statuses/${CIRCLE_SHA1} \
                 --method POST \
                 -f state="success" \
@@ -253,19 +253,15 @@ jobs:
           command: |
             source $BASH_ENV
             if [ -n "$GITHUB_TOKEN" ]; then
-              # Create deployment
               DEPLOYMENT_ID=$(gh api repos/{owner}/{repo}/deployments \
                 --method POST \
-                --input - <<< '{
-                  "ref": "'${CIRCLE_SHA1}'",
-                  "environment": "production", 
-                  "description": "Production deployment '${CIRCLE_TAG:-${CIRCLE_SHA1:0:7}}'",
-                  "production_environment": true,
-                  "required_contexts": []
-                }' \
+                -f ref="${CIRCLE_SHA1}" \
+                -f environment="production" \
+                -f description="Production deployment ${CIRCLE_TAG:-${CIRCLE_SHA1:0:7}}" \
+                -F production_environment=true \
+                -F required_contexts='[]' \
                 --jq '.id')
 
-              # Update deployment status
               gh api repos/{owner}/{repo}/deployments/${DEPLOYMENT_ID}/statuses \
                 --method POST \
                 -f state="success" \
@@ -273,7 +269,6 @@ jobs:
                 -f description="Production deployment successful" \
                 -f log_url="${CIRCLE_BUILD_URL}"
 
-              # Create commit status
               gh api repos/{owner}/{repo}/statuses/${CIRCLE_SHA1} \
                 --method POST \
                 -f state="success" \
@@ -294,6 +289,42 @@ jobs:
           command: circleci run release update --status=FAILED
           when: on_fail
       - save-vercel-cache
+
+  create_release_pull_request:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - github-cli/install
+      - run:
+          name: Create Release Pull Request
+          command: |
+            REVIEWERS="darklakefi/release"
+            gh auth login --with-token <<< "$GITHUB_TOKEN"
+            EXISTING_PR=$(gh pr list --base main --head develop --json number -q '.[0].number')
+            if [ -n "$EXISTING_PR" ]; then
+              echo "Pull request from develop to main already exists: #$EXISTING_PR"
+              exit 0
+            fi
+            git fetch origin main
+            git fetch origin develop
+            CHANGELOG=$(git log origin/main..origin/develop --oneline --pretty=format:'- %s (%h)' --no-merges)
+            if [ -z "$CHANGELOG" ]; then
+              echo "No changes between develop and main. No PR created."
+              exit 0
+            fi
+            PR_BODY=$(cat <<EOF
+            Automated release pull request.
+            ## Changes
+            $CHANGELOG
+            EOF
+            )
+            gh pr create \
+              --base "main" \
+              --head "develop" \
+              --title "chore(release): Sync develop to main" \
+              --body "$PR_BODY" \
+              --reviewer "$REVIEWERS"
 
 workflows:
   ci-cd:
@@ -331,3 +362,10 @@ workflows:
           filters:
             branches:
               only: /main/
+
+  release-pr:
+    when: << pipeline.parameters.create_release_pr >>
+    jobs:
+      - create_release_pull_request:
+          context:
+            - darklakefi-deployments
