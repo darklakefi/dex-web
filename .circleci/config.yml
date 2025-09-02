@@ -173,20 +173,39 @@ jobs:
               exit 1
             fi
             echo "export VERCEL_URL=$VERCEL_URL" >> $BASH_ENV
-      - github-cli/create-deployment:
-          environment: "preview"
-      - github-cli/create-deployment-status:
-          deployment-id: ${GITHUB_DEPLOYMENT_ID}
-          state: "success"
-          environment-url: ${VERCEL_URL}
-      - github-cli/run:
+      - github-cli/install
+      - run:
+          name: Create GitHub Deployment
           command: |
-            gh api repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/statuses/${CIRCLE_SHA1} \
-              --method POST \
-              -f state='success' \
-              -f target_url="${VERCEL_URL}" \
-              -f description='Preview ready' \
-              -f context='deploy/preview'
+            source $BASH_ENV
+            if [ -n "$GITHUB_TOKEN" ]; then
+              # Create deployment
+              DEPLOYMENT_ID=$(gh api repos/:owner/:repo/deployments \
+                --method POST \
+                -f ref="${CIRCLE_SHA1}" \
+                -f environment="preview" \
+                -f auto_merge=false \
+                --jq '.id')
+              
+              # Update deployment status
+              gh api repos/:owner/:repo/deployments/${DEPLOYMENT_ID}/statuses \
+                --method POST \
+                -f state="success" \
+                -f environment_url="${VERCEL_URL}" \
+                -f description="Preview deployment ready"
+              
+              # Create commit status
+              gh api repos/:owner/:repo/statuses/${CIRCLE_SHA1} \
+                --method POST \
+                -f state="success" \
+                -f target_url="${VERCEL_URL}" \
+                -f description="Preview ready" \
+                -f context="deploy/preview"
+              
+              echo "✅ GitHub deployment created: ${VERCEL_URL}"
+            else
+              echo "⚠️ GITHUB_TOKEN not set, skipping GitHub integration"
+            fi
 
   deploy-production:
     docker:
