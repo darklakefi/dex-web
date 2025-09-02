@@ -185,10 +185,12 @@ jobs:
               # Create deployment
               DEPLOYMENT_ID=$(gh api repos/{owner}/{repo}/deployments \
                 --method POST \
-                -f ref="${CIRCLE_SHA1}" \
-                -f environment="preview" \
-                -f description="Preview deployment for ${CIRCLE_SHA1:0:7}" \
-                -f required_contexts='[]' \
+                --input - <<< '{
+                  "ref": "'${CIRCLE_SHA1}'",
+                  "environment": "preview",
+                  "description": "Preview deployment for '${CIRCLE_SHA1:0:7}'",
+                  "required_contexts": []
+                }' \
                 --jq '.id')
 
               # Update deployment status
@@ -254,11 +256,13 @@ jobs:
               # Create deployment
               DEPLOYMENT_ID=$(gh api repos/{owner}/{repo}/deployments \
                 --method POST \
-                -f ref="${CIRCLE_SHA1}" \
-                -f environment="production" \
-                -f description="Production deployment ${CIRCLE_TAG:-${CIRCLE_SHA1:0:7}}" \
-                -F production_environment=true \
-                -f required_contexts='[]' \
+                --input - <<< '{
+                  "ref": "'${CIRCLE_SHA1}'",
+                  "environment": "production", 
+                  "description": "Production deployment '${CIRCLE_TAG:-${CIRCLE_SHA1:0:7}}'",
+                  "production_environment": true,
+                  "required_contexts": []
+                }' \
                 --jq '.id')
 
               # Update deployment status
