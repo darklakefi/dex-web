@@ -299,6 +299,8 @@ workflows:
             - check
             - test
       - e2e:
+          context:
+            - darklakefi-development
           requires:
             - check
             - test
