@@ -29,6 +29,16 @@ commands:
           allow-on-hold-workflow: true
           error-on-no-successful-workflow: true
           workflow-name: "CI/CD"
+      - run:
+          name: Ensure base branch ref exists
+          command: |
+            # Fetch the develop branch ref so that using it as a base doesn't fail
+            git fetch --no-tags --prune origin develop:refs/remotes/origin/develop || true
+            # If NX_BASE wasn't set by nx/set-shas, fall back to origin/develop
+            if [ -z "$NX_BASE" ]; then
+              echo "NX_BASE not set; falling back to origin/develop"
+              echo 'export NX_BASE=origin/develop' >> $BASH_ENV
+            fi
 
   save-nx-cache:
     description: "Save Nx cache with revision-specific key"
@@ -84,11 +94,11 @@ jobs:
       - run:
           name: Run affected tasks
           command: |
-            if pnpm exec nx show projects --affected --base=$NX_BASE  | wc -l | grep -q "^0$"; then
+            if pnpm exec nx show projects --affected --base=${NX_BASE:-origin/develop}  | wc -l | grep -q "^0$"; then
               echo "✅ No affected projects found, skipping lint and typecheck"
               exit 0
             fi
-            pnpm exec nx affected --base=$NX_BASE -t lint:ci,typecheck
+            pnpm exec nx affected --base=${NX_BASE:-origin/develop} -t lint:ci,typecheck
       - save-nx-cache
 
   test:
@@ -104,11 +114,11 @@ jobs:
       - run:
           name: Run affected tests in parallel
           command: |
-            if pnpm exec nx show projects --affected --base=$NX_BASE --with-target=test | wc -l | grep -q "^0$"; then
+            if pnpm exec nx show projects --affected --base=${NX_BASE:-origin/develop} --with-target=test | wc -l | grep -q "^0$"; then
               echo "✅ No affected projects with tests found, skipping"
               exit 0
             fi
-            pnpm exec nx affected --base=$NX_BASE \
+            pnpm exec nx affected --base=${NX_BASE:-origin/develop} \
               --target=test --parallel
       - save-nx-cache
       - store_test_results:
@@ -130,11 +140,11 @@ jobs:
       - run:
           name: Run affected e2e tests
           command: |
-            if pnpm exec nx show projects --affected --base=$NX_BASE --with-target=e2e | wc -l | grep -q "^0$"; then
+            if pnpm exec nx show projects --affected --base=${NX_BASE:-origin/develop} --with-target=e2e | wc -l | grep -q "^0$"; then
               echo "✅ No affected projects with e2e tests found, skipping"
               exit 0
             fi
-            pnpm exec nx affected --base=$NX_BASE --target=e2e --parallel
+            pnpm exec nx affected --base=${NX_BASE:-origin/develop} --target=e2e --parallel
       - save-nx-cache
       - store_test_results:
           path: dist/apps/web-e2e/junit.xml
