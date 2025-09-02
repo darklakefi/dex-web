@@ -137,6 +137,58 @@ message GetTokenMetadataListResponse {
     int32 current_page            = 3;
 }
 
+//  CUSTOM TOKENS
+
+message CreateCustomTokenRequest {
+  string name = 1;
+  string symbol = 2;
+  uint32 decimals = 3;
+  string logo_uri = 4;
+  string address = 5;
+}
+
+message CreateCustomTokenResponse {
+  bool success = 1;
+  string message = 2;
+  TokenMetadata token_metadata = 3;
+}
+
+message EditCustomTokenRequest {
+  string address = 1;
+  string name = 2;
+  string symbol = 3;
+  uint32 decimals = 4;
+  string logo_uri = 5;
+}
+
+message EditCustomTokenResponse {
+  bool success = 1;
+  string message = 2;
+  TokenMetadata token_metadata = 3;
+}
+
+message DeleteCustomTokenRequest {
+  string address = 1;
+}
+
+message DeleteCustomTokenResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetCustomTokensRequest {}
+
+message GetCustomTokensResponse {
+  repeated TokenMetadata tokens = 1;
+}
+
+message GetCustomTokenRequest {
+  string address = 1;
+}
+
+message GetCustomTokenResponse {
+  TokenMetadata token_metadata = 1;
+}
 // --------------------------------- SERVICES
 
 service SolanaGatewayService {
@@ -157,5 +209,20 @@ service SolanaGatewayService {
 
     rpc GetTokenMetadataList(GetTokenMetadataListRequest)
         returns (GetTokenMetadataListResponse);
+
+    rpc CreateCustomToken(CreateCustomTokenRequest)
+        returns (CreateCustomTokenResponse);
+
+    rpc EditCustomToken(EditCustomTokenRequest)
+        returns (EditCustomTokenResponse);
+
+    rpc DeleteCustomToken(DeleteCustomTokenRequest)
+        returns (DeleteCustomTokenResponse);
+
+    rpc GetCustomTokens(GetCustomTokensRequest)
+        returns (GetCustomTokensResponse);
+
+    rpc GetCustomToken(GetCustomTokenRequest)
+        returns (GetCustomTokenResponse);
 }
 `;

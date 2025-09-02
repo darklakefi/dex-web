@@ -44,6 +44,21 @@ export interface GrpcClient {
   getTokenMetadataList: (
     request: GetTokenMetadataListRequest,
   ) => Promise<GetTokenMetadataListResponse>;
+  createCustomToken: (
+    request: CreateCustomTokenRequest,
+  ) => Promise<CreateCustomTokenResponse>;
+  editCustomToken: (
+    request: EditCustomTokenRequest,
+  ) => Promise<EditCustomTokenResponse>;
+  deleteCustomToken: (
+    request: DeleteCustomTokenRequest,
+  ) => Promise<DeleteCustomTokenResponse>;
+  getCustomTokens: (
+    request: GetCustomTokensRequest,
+  ) => Promise<GetCustomTokensResponse>;
+  getCustomToken: (
+    request: GetCustomTokenRequest,
+  ) => Promise<GetCustomTokenResponse>;
 }
 
 export interface SwapRequest {
@@ -166,4 +181,56 @@ export interface GetTokenMetadataListResponse {
   tokens: TokenMetadata[];
   total_pages: number;
   current_page: number;
+}
+
+// ---- Custom Token RPC Types ----
+export interface CreateCustomTokenRequest {
+  name: string;
+  symbol: string;
+  decimals: number;
+  logo_uri: string;
+  address: string;
+}
+
+export interface CreateCustomTokenResponse {
+  success: boolean;
+  message?: string;
+  token_metadata?: TokenMetadata;
+}
+
+export interface EditCustomTokenRequest {
+  address: string;
+  name?: string;
+  symbol?: string;
+  decimals?: number;
+  logo_uri?: string;
+}
+
+export interface EditCustomTokenResponse {
+  success: boolean;
+  message?: string;
+  token_metadata?: TokenMetadata;
+}
+
+export interface DeleteCustomTokenRequest {
+  address: string;
+}
+
+export interface DeleteCustomTokenResponse {
+  success: boolean;
+  message?: string;
+}
+
+export type GetCustomTokensRequest = Record<string, never>;
+
+export interface GetCustomTokensResponse {
+  tokens: TokenMetadata[];
+}
+
+export interface GetCustomTokenRequest {
+  address: string;
+}
+
+export interface GetCustomTokenResponse {
+  token_metadata?: TokenMetadata;
 }
