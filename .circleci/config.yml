@@ -55,13 +55,13 @@ commands:
   setup:
     description: "Common setup steps for all jobs"
     steps:
-      - node/install:
-          install-pnpm: true
-          pnpm-version: 10.12.4
+      - node/install-pnpm:
+          version: 10.12.4
 
       - node/install-packages:
           pkg-manager: pnpm
           cache-path: ~/.pnpm-store
+          with-cache: true
 
 jobs:
   check:
@@ -187,14 +187,14 @@ jobs:
                 -F auto_merge=false \
                 -f required_contexts='[]' \
                 --jq '.id')
-              
+
               # Update deployment status
               gh api repos/:owner/:repo/deployments/${DEPLOYMENT_ID}/statuses \
                 --method POST \
                 -f state="success" \
                 -f environment_url="${VERCEL_URL}" \
                 -f description="Preview deployment ready"
-              
+
               # Create commit status
               gh api repos/:owner/:repo/statuses/${CIRCLE_SHA1} \
                 --method POST \
@@ -202,7 +202,7 @@ jobs:
                 -f target_url="${VERCEL_URL}" \
                 -f description="Preview ready" \
                 -f context="deploy/preview"
-              
+
               echo "✅ GitHub deployment created: ${VERCEL_URL}"
             else
               echo "⚠️ GITHUB_TOKEN not set, skipping GitHub integration"
