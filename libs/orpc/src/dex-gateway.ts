@@ -10,6 +10,16 @@ import { PROTO_DEFINITION } from "./dex-gateway.proto";
 import type {
   CheckTradeStatusRequest,
   CheckTradeStatusResponse,
+  CreateCustomTokenRequest,
+  CreateCustomTokenResponse,
+  DeleteCustomTokenRequest,
+  DeleteCustomTokenResponse,
+  EditCustomTokenRequest,
+  EditCustomTokenResponse,
+  GetCustomTokenRequest,
+  GetCustomTokenResponse,
+  GetCustomTokensRequest,
+  GetCustomTokensResponse,
   GetTokenMetadataListRequest,
   GetTokenMetadataListResponse,
   GetTokenMetadataRequest,
@@ -77,6 +87,71 @@ function createGrpcClient(): GrpcClient {
             } else {
               resolve(response);
             }
+          },
+        );
+      });
+    },
+    createCustomToken: (
+      request: CreateCustomTokenRequest,
+    ): Promise<CreateCustomTokenResponse> => {
+      return new Promise((resolve, reject) => {
+        client.CreateCustomToken(
+          request,
+          (error: unknown, response: CreateCustomTokenResponse) => {
+            if (error) reject(error);
+            else resolve(response);
+          },
+        );
+      });
+    },
+    deleteCustomToken: (
+      request: DeleteCustomTokenRequest,
+    ): Promise<DeleteCustomTokenResponse> => {
+      return new Promise((resolve, reject) => {
+        client.DeleteCustomToken(
+          request,
+          (error: unknown, response: DeleteCustomTokenResponse) => {
+            if (error) reject(error);
+            else resolve(response);
+          },
+        );
+      });
+    },
+    editCustomToken: (
+      request: EditCustomTokenRequest,
+    ): Promise<EditCustomTokenResponse> => {
+      return new Promise((resolve, reject) => {
+        client.EditCustomToken(
+          request,
+          (error: unknown, response: EditCustomTokenResponse) => {
+            if (error) reject(error);
+            else resolve(response);
+          },
+        );
+      });
+    },
+    getCustomToken: (
+      request: GetCustomTokenRequest,
+    ): Promise<GetCustomTokenResponse> => {
+      return new Promise((resolve, reject) => {
+        client.GetCustomToken(
+          request,
+          (error: unknown, response: GetCustomTokenResponse) => {
+            if (error) reject(error);
+            else resolve(response);
+          },
+        );
+      });
+    },
+    getCustomTokens: (
+      request: GetCustomTokensRequest,
+    ): Promise<GetCustomTokensResponse> => {
+      return new Promise((resolve, reject) => {
+        client.GetCustomTokens(
+          request,
+          (error: unknown, response: GetCustomTokensResponse) => {
+            if (error) reject(error);
+            else resolve(response);
           },
         );
       });
