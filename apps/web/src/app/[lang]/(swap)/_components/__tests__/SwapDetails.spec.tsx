@@ -14,7 +14,7 @@ import {
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();
 
-const wrapper = ({ children }: { children: React.ReactNode }) => (
+const _wrapper = ({ children }: { children: React.ReactNode }) => (
   <NuqsTestingAdapter
     onUrlUpdate={onUrlUpdate}
     searchParams={{
