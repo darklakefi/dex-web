@@ -33,9 +33,15 @@ commands:
           name: Ensure base branch ref exists
           command: |
             git fetch --no-tags --prune origin develop:refs/remotes/origin/develop || true
+            git fetch --no-tags --prune origin develop || true
             if [ -z "$NX_BASE" ]; then
               echo "NX_BASE not set; falling back to origin/develop"
               echo 'export NX_BASE=origin/develop' >> $BASH_ENV
+            fi
+            # Verify the branch reference exists
+            if ! git rev-parse --verify origin/develop >/dev/null 2>&1; then
+              echo "Warning: origin/develop not found, using HEAD~1 as fallback"
+              echo 'export NX_BASE=HEAD~1' >> $BASH_ENV
             fi
 
   save-nx-cache:
