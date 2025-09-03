@@ -24,7 +24,10 @@ const baseConfig = {
       "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
     ],
     name: "utils",
-    outputFile: "./test-results/test-output.json",
+    outputFile: {
+      json: "./test-results/test-output.json",
+      junit: "../../test-results/libs-utils/junit.xml",
+    },
     pool: "forks" as const,
     poolOptions: {
       forks: {

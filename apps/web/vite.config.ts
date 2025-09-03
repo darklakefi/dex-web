@@ -24,7 +24,10 @@ export default defineConfig(() => {
         "tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       ],
       name: "web",
-      outputFile: "./test-results/test-output.json",
+      outputFile: {
+        json: "./test-results/test-output.json",
+        junit: "../../test-results/apps-web/junit.xml",
+      },
       pool: "forks" as const,
       poolOptions: {
         forks: {
