@@ -24,9 +24,7 @@
         "config": "libs/ui/vite.config.ts",
         "reportsDirectory": "../../coverage/libs/ui"
       },
-      "outputs": [
-        "{options.reportsDirectory}"
-      ]
+      "outputs": ["{options.reportsDirectory}"]
     }
   }
 }
