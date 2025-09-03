@@ -3,24 +3,6 @@ import { convertToDecimal } from "@dex-web/utils";
 import type { PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 
-const BUTTON_MESSAGE = {
-  ADD_LIQUIDITY: "Add Liquidity",
-  CALCULATING: "calculating amounts...",
-  CREATE_POOL: "Create Pool",
-  CREATE_STEP_1: "Preparing pool creation [1/3]",
-  CREATE_STEP_2: "Confirm transaction in your wallet [2/3]",
-  CREATE_STEP_3: "Processing pool creation [3/3]",
-  ENTER_AMOUNT: "enter an amount",
-  ENTER_AMOUNTS: "Enter token amounts",
-  INSUFFICIENT_BALANCE: "Insufficient balance",
-  INVALID_PRICE: "Invalid price",
-  LOADING: "loading",
-  SAME_TOKENS: "Select different tokens",
-  STEP_1: "protecting liquidity transaction [1/3]",
-  STEP_2: "confirm liquidity in your wallet [2/3]",
-  STEP_3: "verifying liquidity transaction [3/3]",
-};
-
 interface TokenAccountData {
   tokenAccounts?: Array<{
     amount: number;
@@ -41,6 +23,7 @@ interface LiquidityFormButtonMessageProps {
   buyTokenAccount?: TokenAccountData | null;
   sellTokenAccount?: TokenAccountData | null;
   publicKey: PublicKey;
+  t: (key: string) => string;
 }
 
 export function getLiquidityFormButtonMessage({
@@ -55,21 +38,22 @@ export function getLiquidityFormButtonMessage({
   buyTokenAccount,
   sellTokenAccount,
   publicKey,
+  t,
 }: LiquidityFormButtonMessageProps) {
   const sellAmount = tokenBAmount.replace(/,/g, "");
   const buyAmount = tokenAAmount.replace(/,/g, "");
 
-  if (createStep === 1) return BUTTON_MESSAGE.CREATE_STEP_1;
-  if (createStep === 2) return BUTTON_MESSAGE.CREATE_STEP_2;
-  if (createStep === 3) return BUTTON_MESSAGE.CREATE_STEP_3;
+  if (createStep === 1) return t("createStep1");
+  if (createStep === 2) return t("createStep2");
+  if (createStep === 3) return t("createStep3");
 
-  if (liquidityStep === 1) return BUTTON_MESSAGE.STEP_1;
-  if (liquidityStep === 2) return BUTTON_MESSAGE.STEP_2;
-  if (liquidityStep === 3) return BUTTON_MESSAGE.STEP_3;
-  if (liquidityStep === 10) return BUTTON_MESSAGE.CALCULATING;
+  if (liquidityStep === 1) return t("step1");
+  if (liquidityStep === 2) return t("step2");
+  if (liquidityStep === 3) return t("step3");
+  if (liquidityStep === 10) return t("calculating");
 
   if (tokenBAddress === tokenAAddress) {
-    return BUTTON_MESSAGE.SAME_TOKENS;
+    return t("sameTokens");
   }
 
   if (publicKey && sellAmount && BigNumber(sellAmount).gt(0)) {
@@ -80,7 +64,7 @@ export function getLiquidityFormButtonMessage({
         sellTokenAcc.decimals || 0,
       );
       if (BigNumber(sellAmount).gt(maxBalance)) {
-        return BUTTON_MESSAGE.INSUFFICIENT_BALANCE;
+        return t("insufficientBalance");
       }
     }
   }
@@ -93,7 +77,7 @@ export function getLiquidityFormButtonMessage({
         buyTokenAcc.decimals || 0,
       );
       if (BigNumber(buyAmount).gt(maxBalance)) {
-        return BUTTON_MESSAGE.INSUFFICIENT_BALANCE;
+        return t("insufficientBalance");
       }
     }
   }
@@ -105,14 +89,14 @@ export function getLiquidityFormButtonMessage({
       !buyAmount ||
       new BigNumber(buyAmount).lte(0)
     ) {
-      return BUTTON_MESSAGE.ENTER_AMOUNTS;
+      return t("enterAmounts");
     }
 
     if (!initialPrice || new BigNumber(initialPrice).lte(0)) {
-      return BUTTON_MESSAGE.INVALID_PRICE;
+      return t("invalidPrice");
     }
 
-    return BUTTON_MESSAGE.CREATE_POOL;
+    return t("createPool");
   }
 
   if (
@@ -121,8 +105,8 @@ export function getLiquidityFormButtonMessage({
     !buyAmount ||
     new BigNumber(buyAmount).lte(0)
   ) {
-    return BUTTON_MESSAGE.ENTER_AMOUNT;
+    return t("enterAmount");
   }
 
-  return BUTTON_MESSAGE.ADD_LIQUIDITY;
+  return t("addLiquidity");
 }

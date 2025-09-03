@@ -1,5 +1,6 @@
 import { Footer, Icon, type IconName, Text } from "@dex-web/ui";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 const SOCIAL_MEDIA_LINKS = [
   {
@@ -19,7 +20,8 @@ const SOCIAL_MEDIA_LINKS = [
   },
 ];
 
-export const AppFooter = () => {
+export const AppFooter = async () => {
+  const t = await getTranslations("footer");
   return (
     <Footer
       logo={<Icon className="h-6 w-auto stroke-none" name="logo-lg" />}
@@ -27,10 +29,7 @@ export const AppFooter = () => {
     >
       <div className="flex max-w-md flex-col items-start gap-2">
         <Text.Body2 className="inline-flex items-baseline justify-center no-underline">
-          Darklake is a decentralized, non-custodial protocol. Trading digital
-          assets carries high risk, including total loss, smart contract
-          vulnerabilities, and extreme volatility. Not available to UK residents
-          and not covered by FSCS, FOS, or any investor protection scheme.
+          {t("disclaimer")}
         </Text.Body2>
         <Text
           as={Link}
@@ -39,7 +38,7 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          [Learn more]
+          {t("learnMore")}
         </Text>
       </div>
       <div className="flex flex-col items-start gap-5">
@@ -58,13 +57,13 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          MEV Checker{" "}
+          {t("mevChecker")}{" "}
           <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
       </div>
       <div className="flex flex-col items-start gap-5">
         <Text.Link className="inline-flex items-baseline justify-center no-underline">
-          Resources
+          {t("resources")}
         </Text.Link>
         <Text
           as={Link}
@@ -73,7 +72,8 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          Docs <Icon className="size-4 fill-green-300" name="external-link" />
+          {t("docs")}{" "}
+          <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
         <Text
           as={Link}
@@ -82,7 +82,7 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          Support{" "}
+          {t("support")}{" "}
           <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
         <Text
@@ -92,7 +92,7 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          Cookies Policy{" "}
+          {t("cookiesPolicy")}{" "}
           <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
       </div>

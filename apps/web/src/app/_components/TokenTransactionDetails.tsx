@@ -4,6 +4,7 @@ import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Icon, Text, Tooltip } from "@dex-web/ui";
 import BigNumber from "bignumber.js";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useTranslations } from "next-intl";
 import { SwapRate } from "../[lang]/(swap)/_components/SwapRate";
 
 function getSwapDetailsIcon(impact: "LOW" | "MEDIUM" | "HIGH") {
@@ -84,6 +85,7 @@ export function TokenTransactionDetails({
   tokenBuyMint,
   slippage,
 }: TokenTransactionDetailsProps) {
+  const t = useTranslations("swap");
   const tokenSell =
     quote.tokenX.address === tokenSellMint ? quote.tokenX : quote.tokenY;
   const tokenBuy =
@@ -102,16 +104,19 @@ export function TokenTransactionDetails({
   return (
     <Box background="highlight">
       <dl className="flex flex-col gap-2">
-        <SwapDetailsItem label="Price" value={<SwapRate quote={quote} />} />
+        <SwapDetailsItem
+          label={t("price")}
+          value={<SwapRate quote={quote} />}
+        />
         <SwapDetailsItem
           impact={impact}
-          label="Price Impact"
+          label={t("priceImpact")}
           value={`${quote.priceImpactPercentage}%`}
         />
-        <SwapDetailsItem label="Max Slippage" value={`${slippage}%`} />
-        <SwapDetailsItem label="Min. Output" value={minOutputValue} />
+        <SwapDetailsItem label={t("maxSlippage")} value={`${slippage}%`} />
+        <SwapDetailsItem label={t("minOutput")} value={minOutputValue} />
         <SwapDetailsItem
-          label="MEV Protection"
+          label={t("mevProtection")}
           tooltip={
             <Text.Body2 className="max-w-xs text-green-300">
               Your trade details are cryptographically hidden from MEV bots,
@@ -120,14 +125,16 @@ export function TokenTransactionDetails({
             </Text.Body2>
           }
           tooltipId="mev-protection-tooltip"
-          value="Active"
+          value={t("active")}
         />
         <SwapDetailsItem
-          label="Est. Fees"
+          label={t("estimatedFees")}
           tooltip={
             <div className="flex flex-col gap-4">
               <div className="flex gap-10">
-                <Text.Body2 className="text-green-300">Protocol Fee</Text.Body2>
+                <Text.Body2 className="text-green-300">
+                  {t("protocolFee")}
+                </Text.Body2>
                 <Text.Body2 className="text-green-200">
                   {estimatedFeesValue} (0.5%)
                 </Text.Body2>

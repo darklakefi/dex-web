@@ -12,6 +12,7 @@ import {
 } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createSerializer, useQueryStates } from "nuqs";
 import { Suspense } from "react";
 import { selectedTokensParsers } from "../_utils/searchParams";
@@ -61,6 +62,7 @@ export function SelectTokenModal({
   returnUrl = "",
   allowList,
 }: SelectTokenModalProps) {
+  const t = useTranslations("tokens");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -158,7 +160,7 @@ export function SelectTokenModal({
               }
               leadingIcon="search"
               onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="Search for a token"
+              placeholder={t("searchPlaceholder")}
               value={field.state.value}
             />
           )}
