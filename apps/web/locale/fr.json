@@ -1,13 +1,120 @@
 {
   "common": {
-    "welcome": "bienvenue"
+    "half": "Moitié",
+    "loading": "Chargement...",
+    "max": "Max",
+    "placeholder": {
+      "amount": "0,00"
+    },
+    "welcome": "Bienvenue"
+  },
+  "footer": {
+    "cookiesPolicy": "Politique de cookies",
+    "disclaimer": "Darklake est un protocole décentralisé et non-custodial. Le trading d'actifs numériques comporte des risques élevés, y compris la perte totale, les vulnérabilités des smart contracts et une volatilité extrême. Non disponible pour les résidents britanniques et non couvert par FSCS, FOS ou tout autre système de protection des investisseurs.",
+    "docs": "Documentation",
+    "learnMore": "[En savoir plus]",
+    "mevChecker": "Vérificateur MEV",
+    "resources": "Ressources",
+    "support": "Support"
+  },
+  "legal": {
+    "iUnderstand": "Je comprends",
+    "riskDisclaimer": "Avertissement de risque",
+    "ukUsersWarning": "Utilisateurs britanniques: Ce produit n'est pas destiné à être utilisé"
+  },
+  "liquidity": {
+    "addLiquidity": "Ajouter de la liquidité",
+    "amountRequired": "Le montant est requis",
+    "calculating": "Calcul des montants...",
+    "confirmingLiquidityTransaction": "Confirmation de la transaction de liquidité",
+    "connectWalletMessage": "Veuillez connecter votre portefeuille pour créer un pool",
+    "createPool": "Créer un pool",
+    "createStep1": "Préparation de la création du pool [1/3]",
+    "createStep2": "Confirmez la transaction dans votre portefeuille [2/3]",
+    "createStep3": "Traitement de la création du pool [3/3]",
+    "deposit": "DÉPÔT",
+    "enterAmount": "Entrer un montant",
+    "enterAmounts": "Entrer les montants de jetons",
+    "enterValidAmounts": "Veuillez entrer des montants valides pour les deux jetons",
+    "enterValidPrice": "Veuillez entrer un prix initial valide",
+    "insufficientBalance": "Solde insuffisant",
+    "invalidAmounts": "Montants invalides",
+    "invalidPrice": "Prix invalide",
+    "liquidityAddedSuccessfully": "Liquidité ajoutée avec succès",
+    "liquidityError": "Erreur de liquidité",
+    "liquidityTransactionFailed": "Échec de la transaction de liquidité",
+    "loading": "Chargement",
+    "missingWalletOrTokenInfo": "Adresse de portefeuille ou informations de jeton manquantes",
+    "pendingYield": "RENDEMENT EN ATTENTE",
+    "poolCreated": "Pool créé",
+    "poolCreationError": "Erreur de création du pool",
+    "poolPrice": "Prix du pool",
+    "sameTokens": "Sélectionnez des jetons différents",
+    "selectOrEnterAmount": "SÉLECTIONNER OU ENTRER UN MONTANT",
+    "slippageTolerance": "Tolérance au glissement",
+    "step1": "Protection de la transaction de liquidité [1/3]",
+    "step2": "Confirmez la liquidité dans votre portefeuille [2/3]",
+    "step3": "Vérification de la transaction de liquidité [3/3]",
+    "totalDeposit": "Dépôt total",
+    "transactionError": "Erreur de transaction",
+    "transactionStatusTimeout": "Délai d'attente du statut de transaction dépassé",
+    "transactionStatusUnknown": "Statut de transaction inconnu",
+    "walletNotConnected": "Portefeuille non connecté",
+    "warningBotArbitrage": "Attention: Les bots arbitreront tout prix incorrect. Vous perdrez des jetons si votre taux n'est pas conforme au marché.",
+    "withdrawalComplete": "Retrait terminé",
+    "withdrawalError": "Erreur de retrait",
+    "withdrawLiquidity": "RETIRER LA LIQUIDITÉ",
+    "yourLiquidity": "Votre liquidité"
   },
   "pages": {
-    "about": "à propos",
-    "contact": "contact",
-    "createPool": "créer pool",
-    "liquidity": "liquidity",
-    "pools": "pools",
-    "swap": "swap"
+    "about": "À propos",
+    "contact": "Contact",
+    "createPool": "Créer un pool",
+    "liquidity": "Liquidité",
+    "pools": "Pools",
+    "swap": "Échanger"
+  },
+  "pools": {
+    "featuredPools": "Pools en vedette",
+    "trendingPools": "Pools tendance"
+  },
+  "settings": {
+    "setMaximumSlippage": "Définir le glissement maximum"
+  },
+  "swap": {
+    "active": "Actif",
+    "allSeen": "Yay! Vous avez tout vu",
+    "buying": "Achat",
+    "checkingTradeStatus": "Vérification du statut de l'échange",
+    "createPool": "Créer un pool",
+    "enterAmount": "Entrer un montant",
+    "highPriceImpact": "CONFIRMER L'ÉCHANGE AVEC {value}% D'IMPACT DE PRIX",
+    "insufficientBalance": "Solde insuffisant",
+    "loading": "Chargement",
+    "maxSlippage": "Glissement maximum",
+    "mevProtectedTrades": "Échanges protégés par MEV",
+    "mevProtection": "Protection MEV",
+    "price": "Prix",
+    "priceImpact": "Impact de prix",
+    "protocolFee": "Frais de protocole",
+    "selling": "Vente",
+    "signingError": "Erreur de signature",
+    "step1": "CHIFFREMENT DES PARAMÈTRES D'ÉCHANGE [1/3]",
+    "step2": "Confirmez l'échange dans votre portefeuille [2/3]",
+    "step3": "Vérification de la transaction d'échange [3/3]",
+    "swap": "Échanger",
+    "swapComplete": "Échange terminé",
+    "swapFor": "POUR"
+  },
+  "tokens": {
+    "noResultsFor": "Aucun résultat trouvé pour",
+    "noTokenFound": "Aucun jeton trouvé",
+    "searchPlaceholder": "Rechercher un jeton",
+    "selectTokenManually": "Sélectionner le jeton manuellement",
+    "validAddressDetected": "Adresse Solana valide détectée"
+  },
+  "wallet": {
+    "connectWallet": "Connecter le portefeuille",
+    "loading": "Chargement..."
   }
 }

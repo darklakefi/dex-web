@@ -10,6 +10,7 @@ import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -61,23 +62,26 @@ const formConfig = {
   },
 };
 
-const BUTTON_MESSAGE = {
-  ENTER_AMOUNT: "enter an amount",
-  HIGH_PRICE_IMPACT: "CONFIRM SWAP WITH {value}% PRICE IMPACT",
-  INSUFFICIENT_BALANCE: "insufficient",
-  LOADING: "loading",
-  STEP_1: "ENCRYPTING TRADE PARAMETERs [1/3]",
-  STEP_2: "Confirm transaction in your wallet [2/3]",
-  STEP_3: "Processing transaction [3/3]",
-  SWAP: "swap",
-};
+// BUTTON_MESSAGE will be defined inside the component to use translations
 
 export function SwapForm() {
+  const t = useTranslations("swap");
   const form = useAppForm(formConfig);
   const { signTransaction, publicKey } = useWallet();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
+
+  const BUTTON_MESSAGE = {
+    ENTER_AMOUNT: t("enterAmount"),
+    HIGH_PRICE_IMPACT: (value: string) => t("highPriceImpact", { value }),
+    INSUFFICIENT_BALANCE: t("insufficientBalance"),
+    LOADING: t("loading"),
+    STEP_1: t("step1"),
+    STEP_2: t("step2"),
+    STEP_3: t("step3"),
+    SWAP: t("swap"),
+  };
 
   const [swapStep, setSwapStep] = useState(0);
   const [isDisableSwap, setIsDisableSwapButton] = useState(true);
@@ -195,7 +199,7 @@ export function SwapForm() {
       dismissToast();
       toast({
         description: `${error instanceof Error ? error.message : "Unknown error occurred"}, trackingId: ${trackingId}`,
-        title: "Signing Error",
+        title: t("signingError"),
         variant: "error",
       });
       resetButtonState();
@@ -223,7 +227,7 @@ export function SwapForm() {
         resetButtonState();
         toast({
           description: `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`,
-          title: "Swap complete",
+          title: t("swapComplete"),
           variant: "success",
         });
         refetchBuyTokenAccount();
@@ -246,7 +250,7 @@ export function SwapForm() {
 
       toast({
         description: `TrackingId: ${trackingId}`,
-        title: "Checking trade status",
+        title: t("checkingTradeStatus"),
         variant: "loading",
       });
 
@@ -481,10 +485,7 @@ export function SwapForm() {
     if (quote) {
       const slippageImpact = quote.priceImpactPercentage;
       if (slippageImpact > 0.5) {
-        return BUTTON_MESSAGE.HIGH_PRICE_IMPACT.replace(
-          "{value}",
-          slippageImpact.toString(),
-        );
+        return BUTTON_MESSAGE.HIGH_PRICE_IMPACT(slippageImpact.toString());
       }
     }
 
@@ -494,7 +495,7 @@ export function SwapForm() {
   return (
     <div className="w-full">
       <div className="mb-4 flex items-center justify-between md:hidden">
-        <Text.Heading className="text-green-200">Swap</Text.Heading>
+        <Text.Heading className="text-green-200">{t("swap")}</Text.Heading>
         <div className="flex gap-3">
           <TokenTransactionSettingsButton
             onChange={(slippage) => {
@@ -529,7 +530,7 @@ export function SwapForm() {
                   as="label"
                   className="mb-3 block text-green-300 uppercase"
                 >
-                  Selling
+                  {t("selling")}
                 </Text.Body2>
                 <SelectTokenButton returnUrl={""} type="sell" />
               </div>
@@ -560,7 +561,7 @@ export function SwapForm() {
                   as="label"
                   className="mb-3 block text-green-300 uppercase"
                 >
-                  Buying
+                  {t("buying")}
                 </Text.Body2>
                 <SelectTokenButton type="buy" />
               </div>
@@ -604,7 +605,7 @@ export function SwapForm() {
                   className="w-full cursor-pointer py-3 leading-6"
                   href={`/liquidity/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`}
                 >
-                  Create Pool
+                  {t("createPool")}
                 </Button>
               )}
             </div>
