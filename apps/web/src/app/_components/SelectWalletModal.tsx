@@ -25,14 +25,14 @@ export function SelectWalletModal() {
     try {
       select(wallet.adapter.name);
 
-      // Track wallet connection attempt
-      trackWalletConnection({
-        address: publicKey?.toBase58(),
-        success: true,
-        wallet: wallet.adapter.name,
-      });
-
+      // Wait for wallet to connect and get the public key
       setTimeout(() => {
+        // Track wallet connection after wallet is actually connected
+        trackWalletConnection({
+          address: publicKey?.toBase58(),
+          success: true,
+          wallet: wallet.adapter.name,
+        });
         handleClose();
       }, 2000);
     } catch (error) {

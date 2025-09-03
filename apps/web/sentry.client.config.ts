@@ -9,11 +9,13 @@ Sentry.init({
     Sentry.replayIntegration(),
     Sentry.browserTracingIntegration(),
     Sentry.browserProfilingIntegration(),
-    ...(typeof window !== "undefined" && process.env.NEXT_PUBLIC_POSTHOG_KEY
+    ...(typeof window !== "undefined" &&
+    process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+    process.env.SENTRY_PROJECT_ID
       ? [
           posthog.sentryIntegration({
             organization: process.env.SENTRY_ORG || "darklake",
-            projectId: parseInt(process.env.SENTRY_PROJECT_ID || "0"),
+            projectId: parseInt(process.env.SENTRY_PROJECT_ID),
             severityAllowList: ["error", "info"],
           }),
         ]
