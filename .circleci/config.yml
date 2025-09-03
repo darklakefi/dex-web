@@ -98,7 +98,8 @@ jobs:
       - run:
           name: Run affected tasks
           command: |
-            if pnpm exec nx show projects --affected --base=${NX_BASE:-origin/develop}  | wc -l | grep -q "^0$"; then
+            AFFECTED_PROJECTS=$(pnpm exec nx show projects --affected --base=${NX_BASE:-origin/develop})
+            if [ -z "$AFFECTED_PROJECTS" ]; then
               echo "✅ No affected projects found, skipping lint and typecheck"
               exit 0
             fi
@@ -108,8 +109,8 @@ jobs:
   test:
     docker:
       - image: cimg/node:24.3.0
-    resource_class: large
-    parallelism: 4
+    resource_class: medium
+    parallelism: 8
     steps:
       - checkout
       - setup
@@ -118,12 +119,15 @@ jobs:
       - run:
           name: Run affected tests in parallel
           command: |
-            if pnpm exec nx show projects --affected --base=${NX_BASE:-origin/develop} --with-target=test | wc -l | grep -q "^0$"; then
+            AFFECTED_PROJECTS=$(pnpm exec nx show projects --affected --base=${NX_BASE:-origin/develop} --with-target=test)
+
+            if [ -z "$AFFECTED_PROJECTS" ]; then
               echo "✅ No affected projects with tests found, skipping"
               exit 0
             fi
-            pnpm exec nx affected --base=${NX_BASE:-origin/develop} \
-              --target=test --parallel
+
+            echo "$AFFECTED_PROJECTS" | circleci tests split --split-by=timings | \
+            pnpm exec nx run-many --target=test --parallel --projects=$(xargs)
       - save-nx-cache
       - store_test_results:
           path: test-results
