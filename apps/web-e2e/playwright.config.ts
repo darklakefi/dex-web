@@ -52,6 +52,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     } */
   ],
+  reporter: [
+    ["html", { outputFolder: "../../dist/apps/web-e2e/html-report" }],
+    ["junit", { outputFile: "../../dist/apps/web-e2e/junit.xml" }],
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
