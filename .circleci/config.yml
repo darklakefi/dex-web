@@ -32,9 +32,7 @@ commands:
       - run:
           name: Ensure base branch ref exists
           command: |
-            # Fetch the develop branch ref so that using it as a base doesn't fail
             git fetch --no-tags --prune origin develop:refs/remotes/origin/develop || true
-            # If NX_BASE wasn't set by nx/set-shas, fall back to origin/develop
             if [ -z "$NX_BASE" ]; then
               echo "NX_BASE not set; falling back to origin/develop"
               echo 'export NX_BASE=origin/develop' >> $BASH_ENV
@@ -203,7 +201,7 @@ jobs:
                 "description": "Preview deployment for '${CIRCLE_SHA1:0:7}'",
                 "required_contexts": []
               }'
-              
+
               DEPLOYMENT_ID=$(echo "$DEPLOYMENT_JSON" | gh api repos/{owner}/{repo}/deployments \
                 --method POST \
                 --input - \
@@ -274,7 +272,7 @@ jobs:
                 "production_environment": true,
                 "required_contexts": []
               }'
-              
+
               DEPLOYMENT_ID=$(echo "$DEPLOYMENT_JSON" | gh api repos/{owner}/{repo}/deployments \
                 --method POST \
                 --input - \
