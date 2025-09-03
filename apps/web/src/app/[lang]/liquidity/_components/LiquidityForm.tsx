@@ -15,6 +15,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -56,6 +57,7 @@ const { useAppForm } = createFormHook({
 });
 
 export function LiquidityForm() {
+  const t = useTranslations("liquidity");
   const { publicKey, wallet, signTransaction } = useWallet();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
@@ -179,7 +181,7 @@ export function LiquidityForm() {
       toast({
         description:
           "Please confirm the pool creation transaction in your wallet.",
-        title: "Confirm Pool Creation [2/3]",
+        title: t("createStep2"),
         variant: "loading",
       });
 
@@ -189,7 +191,7 @@ export function LiquidityForm() {
       toast({
         description:
           "Processing your pool creation transaction on the blockchain.",
-        title: "Creating Pool [3/3]",
+        title: t("createStep3"),
         variant: "loading",
       });
 
@@ -197,7 +199,7 @@ export function LiquidityForm() {
         dismissToast();
         toast({
           description: `Pool created successfully! Token A: ${form.state.values.tokenAAmount}, Token B: ${form.state.values.tokenBAmount}`,
-          title: "Pool Created",
+          title: t("poolCreated"),
           variant: "success",
         });
         resetCreateState();
@@ -209,7 +211,7 @@ export function LiquidityForm() {
       dismissToast();
       toast({
         description: `${error instanceof Error ? error.message : "Unknown error occurred"}`,
-        title: "Pool Creation Error",
+        title: t("poolCreationError"),
         variant: "error",
       });
       resetCreateState();
@@ -219,8 +221,8 @@ export function LiquidityForm() {
   const handleCreatePool = async () => {
     if (!publicKey) {
       toast({
-        description: "Please connect your wallet to create a pool",
-        title: "Wallet Not Connected",
+        description: t("connectWalletMessage"),
+        title: t("walletNotConnected"),
         variant: "error",
       });
       return;
@@ -236,8 +238,8 @@ export function LiquidityForm() {
 
     if (tokenAAmount <= 0 || tokenBAmount <= 0) {
       toast({
-        description: "Please enter valid amounts for both tokens",
-        title: "Invalid Amounts",
+        description: t("enterValidAmounts"),
+        title: t("invalidAmounts"),
         variant: "error",
       });
       return;
@@ -245,8 +247,8 @@ export function LiquidityForm() {
 
     if (initialPrice <= 0) {
       toast({
-        description: "Please enter a valid initial price",
-        title: "Invalid Price",
+        description: t("enterValidPrice"),
+        title: t("invalidPrice"),
         variant: "error",
       });
       return;
@@ -257,7 +259,7 @@ export function LiquidityForm() {
       toast({
         description:
           "Preparing pool creation transaction. This may take a few seconds.",
-        title: "Preparing Pool Creation [1/3]",
+        title: t("createStep1"),
         variant: "loading",
       });
 
@@ -303,7 +305,7 @@ export function LiquidityForm() {
       toast({
         description:
           error instanceof Error ? error.message : "Unknown error occurred",
-        title: "Pool Creation Error",
+        title: t("poolCreationError"),
         variant: "error",
       });
       resetCreateState();
@@ -328,7 +330,7 @@ export function LiquidityForm() {
             setLiquidityStep(0);
             toast({
               description: `Transaction failed: ${response.error}`,
-              title: "Liquidity Transaction Failed",
+              title: t("liquidityTransactionFailed"),
               variant: "error",
             });
             return;
@@ -357,7 +359,7 @@ export function LiquidityForm() {
                   </Text.Body2>
                 </div>
               ),
-              title: "Liquidity Added Successfully",
+              title: t("liquidityAddedSuccessfully"),
               variant: "success",
             });
             refetchBuyTokenAccount();
@@ -371,7 +373,7 @@ export function LiquidityForm() {
           setLiquidityStep(0);
           toast({
             description: `Transaction failed: ${response.error || "Unknown error"}`,
-            title: "Liquidity Transaction Failed",
+            title: t("liquidityTransactionFailed"),
             variant: "error",
           });
           return;
@@ -379,7 +381,7 @@ export function LiquidityForm() {
 
         toast({
           description: `Finalizing transaction... (${i + 1}/${maxAttempts}) - ${response.status}`,
-          title: "Confirming liquidity transaction",
+          title: t("confirmingLiquidityTransaction"),
           variant: "loading",
         });
 
@@ -393,7 +395,7 @@ export function LiquidityForm() {
           setLiquidityStep(0);
           toast({
             description: `Unable to confirm transaction status. Check your wallet or explorer with signature: ${signature}`,
-            title: "Transaction Status Unknown",
+            title: t("transactionStatusUnknown"),
             variant: "error",
           });
         }
@@ -404,7 +406,7 @@ export function LiquidityForm() {
     setLiquidityStep(0);
     toast({
       description: `Transaction may still be processing. Check explorer with signature: ${signature}`,
-      title: "Transaction Status Timeout",
+      title: t("transactionStatusTimeout"),
       variant: "error",
     });
   };
@@ -412,8 +414,8 @@ export function LiquidityForm() {
   const handleDeposit = async () => {
     if (!publicKey) {
       toast({
-        description: "Missing wallet address or token information",
-        title: "Liquidity Error",
+        description: t("missingWalletOrTokenInfo"),
+        title: t("liquidityError"),
         variant: "error",
       });
       return;
@@ -422,7 +424,7 @@ export function LiquidityForm() {
     toast({
       description:
         "Hiding your slippage tolerance from MEV bots until verification. This may take a few seconds.",
-      title: "Generating zero-knowledge proof [1/3]",
+      title: t("step1"),
       variant: "loading",
     });
     setLiquidityStep(1);
@@ -485,7 +487,7 @@ export function LiquidityForm() {
       toast({
         description:
           error instanceof Error ? error.message : "Unknown error occurred",
-        title: "Liquidity Error",
+        title: t("liquidityError"),
         variant: "error",
       });
       setLiquidityStep(0);
@@ -729,9 +731,7 @@ export function LiquidityForm() {
                 </form.Field>
               </Box>
               <Text.Body2 className="text-green-300">
-                <span className="text-green-100">Warning:</span> Bots will
-                arbitrage any mispricing. you'll lose tokens if your rate is
-                off-market.
+                {t("warningBotArbitrage")}
               </Text.Body2>
             </div>
           )}
@@ -763,6 +763,7 @@ export function LiquidityForm() {
                       poolDetails,
                       publicKey,
                       sellTokenAccount,
+                      t,
                       tokenAAddress,
                       tokenAAmount: form.state.values.tokenAAmount,
                       tokenBAddress,
@@ -786,6 +787,7 @@ export function LiquidityForm() {
                   poolDetails,
                   publicKey,
                   sellTokenAccount,
+                  t,
                   tokenAAddress,
                   tokenAAmount: form.state.values.tokenAAmount,
                   tokenBAddress,

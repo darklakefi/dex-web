@@ -4,10 +4,12 @@ import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import { useWallet, type Wallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { selectedTokensParsers } from "../_utils/searchParams";
 
 export function SelectWalletModal() {
+  const t = useTranslations("wallet");
   const { wallets, wallet, select } = useWallet();
   const router = useRouter();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -36,7 +38,7 @@ export function SelectWalletModal() {
       <Box className="fixed right-0 flex h-full max-h-full w-full max-w-sm drop-shadow-xl">
         <div className="mb-3 flex justify-between border-green-600 border-b pb-3">
           <Text className="font-bold text-2xl" variant="heading">
-            Connect Wallet
+            {t("connectWallet")}
           </Text>{" "}
           <button
             className="cursor-pointer"
