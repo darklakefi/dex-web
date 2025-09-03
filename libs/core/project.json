@@ -34,6 +34,7 @@
       },
       "outputs": ["{options.outputPath}"]
     },
+    "lint": {},
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",

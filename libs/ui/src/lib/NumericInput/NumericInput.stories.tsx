@@ -86,7 +86,7 @@ export const Interactive = {
 
       // if the last character is a comma, replace it with a dot
       if (value.endsWith(",")) {
-        value = value.slice(0, -1) + ".";
+        value = `${value.slice(0, -1)}.`;
       }
 
       const cleanValue = value.replace(/,/g, "");
