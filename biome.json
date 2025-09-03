@@ -64,12 +64,12 @@
         "recommended": true
       },
       "style": {
-        "recommended": true,
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "recommended": true
       },
       "suspicious": {
-        "recommended": true,
-        "noDocumentCookie": "off"
+        "noDocumentCookie": "off",
+        "recommended": true
       }
     }
   },
