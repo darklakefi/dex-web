@@ -1,4 +1,4 @@
-import { backgroundImage, PageLayout } from "@dex-web/ui";
+import { Box, backgroundImage, PageLayout, Text } from "@dex-web/ui";
 import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import "../lib/orpc.server";
@@ -44,7 +44,7 @@ export default async function RootLayout({
       className={`${bitsumishiRegular.variable} ${classicConsoleNeue.variable} font-sans antialiased`}
       lang={locale}
     >
-      <body>
+      <body className="bg-green-900">
         <NextIntlClientProvider>
           <Providers>
             <GeolocationAwareDisclaimerProvider />
@@ -54,7 +54,21 @@ export default async function RootLayout({
               footer={<AppFooter />}
               header={<AppHeader />}
             >
-              {children}
+              <Box className="flex w-full flex-col items-center justify-center gap-5 px-5 py-10 text-center md:hidden">
+                <Text.Heading className="text-3xl text-green-300">
+                  Thanks for joining our early access!
+                </Text.Heading>
+                <div className="flex flex-col">
+                  <Text.Body2 className="text-green-300 text-lg">
+                    We're optimizing mobile and it's coming soon.In the
+                    meantime,
+                  </Text.Body2>
+                  <Text.Body2 className="text-green-200 text-lg">
+                    please visit us on desktop.
+                  </Text.Body2>
+                </div>
+              </Box>
+              <div className="hidden md:block">{children}</div>
             </PageLayout>
             {modal}
           </Providers>

@@ -2,22 +2,20 @@
 
 import { getHelius } from "../../getHelius";
 
-export interface CheckLiquidityTxStatusInput {
+export interface CheckLiquidityTransactionStatusInput {
   signature: string;
-  tracking_id: string;
 }
 
-export interface CheckLiquidityTxStatusOutput {
+export interface CheckLiquidityTransactionStatusOutput {
   status: "pending" | "confirmed" | "finalized" | "failed";
   error?: string;
   signature: string;
-  tracking_id: string;
 }
 
-export async function checkLiquidityTxStatusHandler(
-  input: CheckLiquidityTxStatusInput,
-): Promise<CheckLiquidityTxStatusOutput> {
-  const { signature, tracking_id } = input;
+export async function checkLiquidityTransactionStatusHandler(
+  input: CheckLiquidityTransactionStatusInput,
+): Promise<CheckLiquidityTransactionStatusOutput> {
+  const { signature } = input;
 
   try {
     console.log(
@@ -38,7 +36,6 @@ export async function checkLiquidityTxStatusHandler(
       return {
         signature,
         status: "pending",
-        tracking_id,
       };
     }
 
@@ -47,7 +44,6 @@ export async function checkLiquidityTxStatusHandler(
         error: JSON.stringify(status.value.err),
         signature,
         status: "failed",
-        tracking_id,
       };
     }
 
@@ -56,7 +52,6 @@ export async function checkLiquidityTxStatusHandler(
       return {
         signature,
         status: "finalized",
-        tracking_id,
       };
     }
 
@@ -64,14 +59,12 @@ export async function checkLiquidityTxStatusHandler(
       return {
         signature,
         status: "confirmed",
-        tracking_id,
       };
     }
 
     return {
       signature,
       status: "pending",
-      tracking_id,
     };
   } catch (error) {
     console.error("Error checking liquidity transaction status:", error);
@@ -87,7 +80,6 @@ export async function checkLiquidityTxStatusHandler(
       error: errorMessage,
       signature,
       status: "failed",
-      tracking_id,
     };
   }
 }

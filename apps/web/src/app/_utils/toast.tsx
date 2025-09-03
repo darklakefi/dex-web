@@ -4,8 +4,9 @@ import { toast as sonnerToast } from "sonner";
 interface ToastProps {
   id: string | number;
   title: string;
-  description: string;
+  description: string | React.ReactNode;
   variant?: "success" | "error" | "warning" | "info" | "loading";
+  customAction?: React.ReactNode;
 }
 
 export function toast(toast: Omit<ToastProps, "id">) {
@@ -16,6 +17,7 @@ export function toast(toast: Omit<ToastProps, "id">) {
   return sonnerToast.custom(
     (id) => (
       <Toast
+        customAction={toast.customAction}
         description={toast.description}
         id={id}
         title={toast.title}
@@ -29,10 +31,11 @@ export function toast(toast: Omit<ToastProps, "id">) {
 }
 
 function Toast(props: ToastProps) {
-  const { title, description, id, variant } = props;
+  const { title, description, id, variant, customAction = null } = props;
 
   return (
     <UIToast
+      customAction={customAction}
       description={description}
       onClose={() => {
         sonnerToast.dismiss(id);

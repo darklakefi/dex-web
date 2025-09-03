@@ -2,9 +2,11 @@ import { getSwapHandler } from "../../handlers/dex-gateway/getSwap.handler";
 import { getSwapInputSchema } from "../../schemas/dex-gateway/getSwap.schema";
 import { baseProcedure } from "../base.procedure";
 
-// Create the ping procedure
 export const getSwap = baseProcedure
   .input(getSwapInputSchema)
   .handler(async ({ input }) => {
-    return await getSwapHandler(input);
+    return await getSwapHandler({
+      ...input,
+      tracking_id: `id-${Math.random().toString(16).slice(2)}`,
+    });
   });

@@ -1,9 +1,10 @@
 "use server";
 
-import BigNumber from "bignumber.js";
 import { getDexGatewayClient } from "../../dex-gateway";
 import type { SwapRequest, SwapResponse } from "../../dex-gateway.type";
-import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
+import type { Token } from "../../schemas/tokens/token.schema";
+import { toRawUnits } from "../../utils/solana";
+import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
 export async function getSwapHandler(input: SwapRequest) {
   try {
@@ -11,32 +12,25 @@ export async function getSwapHandler(input: SwapRequest) {
 
     const { is_swap_x_to_y } = input;
 
-    const tokenX = await getTokenDetailsHandler({
-      address: input.token_mint_x,
-    });
-    const tokenY = await getTokenDetailsHandler({
-      address: input.token_mint_y,
-    });
+    const tokenMetadata = (await getTokenMetadataHandler({
+      addresses: [input.token_mint_x, input.token_mint_y],
+      returnAsObject: true,
+    })) as Record<string, Token>;
 
-    let amountInDecimals = tokenX.decimals;
-    let minOutDecimals = tokenY.decimals;
+    const tokenX = tokenMetadata[input.token_mint_x];
+    const tokenY = tokenMetadata[input.token_mint_y];
+
+    let amountInDecimals = tokenX?.decimals ?? 0;
+    let minOutDecimals = tokenY?.decimals ?? 0;
 
     if (!is_swap_x_to_y) {
       [amountInDecimals, minOutDecimals] = [minOutDecimals, amountInDecimals];
     }
 
-    input.amount_in = BigNumber(input.amount_in)
-      .multipliedBy(BigNumber(10 ** amountInDecimals))
-      .toNumber();
-    input.min_out = BigNumber(input.min_out)
-      .multipliedBy(BigNumber(10 ** minOutDecimals))
-      .toNumber();
+    input.amount_in = toRawUnits(input.amount_in, amountInDecimals).toNumber();
+    input.min_out = toRawUnits(input.min_out, minOutDecimals).toNumber();
 
-    input.tracking_id = `id${Math.random().toString(16).slice(2)}`;
-
-    console.log(input, "input");
     const swapResponse: SwapResponse = await grpcClient.swap(input);
-    console.log(swapResponse, "swapResponse");
 
     return {
       success: true,

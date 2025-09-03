@@ -14,7 +14,7 @@ export function Header({ children, logoSm, logoLg, button }: HeaderProps) {
       <div className="md:hidden">{logoSm}</div>
       <div className="hidden md:block">{logoLg}</div>
       <nav className="hidden items-baseline gap-12 md:flex">{children}</nav>
-      <div>{button}</div>
+      <div className="hidden md:block">{button}</div>
     </header>
   );
 }

@@ -2,13 +2,13 @@
 
 import { getDexGatewayClient } from "../../dex-gateway";
 import type {
-  CheckTradeStatusInput,
-  CheckTradeStatusOutput,
-} from "../../schemas/dex-gateway/checkTradeStatus.schema";
+  CheckTradeStatusRequest,
+  CheckTradeStatusResponse,
+} from "../../dex-gateway.type";
 
-export async function checkTradeStatusHandler(input: CheckTradeStatusInput) {
+export async function checkTradeStatusHandler(input: CheckTradeStatusRequest) {
   const grpcClient = getDexGatewayClient();
-  const response: CheckTradeStatusOutput =
+  const response: CheckTradeStatusResponse =
     await grpcClient.checkTradeStatus(input);
   return response;
 }

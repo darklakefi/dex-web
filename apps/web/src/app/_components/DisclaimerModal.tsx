@@ -21,37 +21,34 @@ function DisclaimerModalContent({
   country?: string | null;
 }) {
   return (
-    <Box className="mx-4 max-w-md" shadow="xl">
-      <div className="mb-4">
-        <Text.Heading className="">Risk Disclaimer</Text.Heading>
-        <div className="space-y-3">
-          <Text.Body2 className="text-gray-300">
-            Trading digital assets involves significant risk and may not be
-            suitable for all investors. The value of digital assets can be
-            highly volatile and may result in substantial losses.
+    <Box className="mx-4 flex max-w-md gap-5" shadow="xl">
+      <Text.Heading className="">Risk Disclaimer</Text.Heading>
+      <div className="space-y-3">
+        <Text.Body2 className="text-green-300">
+          Trading digital assets involves significant risk and may not be
+          suitable for all investors. The value of digital assets can be highly
+          volatile and may result in substantial losses.
+        </Text.Body2>
+        <Text.Body2 className="text-green-300">
+          Please carefully consider your investment experience, and risk
+          tolerance before trading.
+        </Text.Body2>
+        {country === "GB" && (
+          <Text.Body2 className="text-green-300">
+            <strong>UK Users:</strong> This product is not intended to be used
+            in the United Kingdom. By proceeding, you acknowledge that you are
+            accessing this service from outside the UK or are aware of the
+            regulatory restrictions in your jurisdiction.
           </Text.Body2>
-          <Text.Body2 className="text-gray-300">
-            Please carefully consider your investment experience, and risk
-            tolerance before trading.
-          </Text.Body2>
-          {country === "GB" && (
-            <Text.Body2 className="text-orange-200">
-              <strong>UK Users:</strong> This product is not intended to be used
-              in the United Kingdom. By proceeding, you acknowledge that you are
-              accessing this service from outside the UK or are aware of the
-              regulatory restrictions in your jurisdiction.
-            </Text.Body2>
-          )}
-          <Text.Body2 className="text-green-200">
-            By clicking &quot;I Understand&quot;, you acknowledge that you have
-            read and understood these risks.
-          </Text.Body2>
-        </div>
+        )}
+        <Text.Body2 className="text-green-200">
+          By clicking &quot;I Understand&quot;, you acknowledge that you have
+          read and understood these risks.
+        </Text.Body2>
       </div>
-
-      <div className="flex justify-end">
+      <div className="flex w-full justify-end">
         <Button
-          className="cursor-pointer px-6 py-2"
+          className="w-full cursor-pointer py-3 leading-6"
           onClick={onAccept}
           text="I Understand"
           variant="primary"

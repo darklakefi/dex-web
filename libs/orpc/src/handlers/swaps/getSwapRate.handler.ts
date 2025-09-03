@@ -1,10 +1,5 @@
 "use server";
 
-import {
-  getAccount,
-  TOKEN_2022_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
 import { type Connection, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import { getHelius } from "../../getHelius";
@@ -12,105 +7,56 @@ import type {
   GetSwapRateInput,
   GetSwapRateOutput,
 } from "../../schemas/swaps/getSwapRate.schema";
+import type { Token } from "../../schemas/tokens/token.schema";
 import {
   EXCHANGE_PROGRAM_ID,
   getPoolAccount,
+  getTokenBalance,
   IDL_CODER,
+  MAX_PERCENTAGE,
+  toRawUnits,
 } from "../../utils/solana";
-import { getTokenDetailsHandler } from "../tokens/getTokenDetails.handler";
-
-// 100% = 1000000, 0.0001% = 1
-const MAX_PERCENTAGE = 1000000;
-
-// Helper function to determine token program ID
-// THIS CAN ALSO BE FETCHED FROM TOKEN HANDLER (token program never changes)
-async function getTokenProgramId(
-  connection: Connection,
-  accountPubkey: PublicKey,
-): Promise<PublicKey> {
-  try {
-    const accountInfo = await connection.getAccountInfo(accountPubkey);
-    if (!accountInfo) {
-      throw new Error("Account not found");
-    }
-
-    // Check if the account owner is TOKEN_2022_PROGRAM_ID
-    if (accountInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
-      return TOKEN_2022_PROGRAM_ID;
-    } else if (accountInfo.owner.equals(TOKEN_PROGRAM_ID)) {
-      return TOKEN_PROGRAM_ID;
-    } else {
-      throw new Error("Invalid token program ID");
-    }
-  } catch (error) {
-    console.error("Failed to determine token program ID:", error);
-    // Default to legacy program
-    return TOKEN_PROGRAM_ID;
-  }
-}
-
-// Helper function to get token balance using SPL library
-async function getTokenBalance(
-  connection: Connection,
-  accountPubkey: PublicKey,
-  accountName: string,
-): Promise<number> {
-  try {
-    // Determine the correct program ID for this token account
-    const programId = await getTokenProgramId(connection, accountPubkey);
-
-    // Use SPL token library to get account info with the correct program ID
-    const account = await getAccount(
-      connection,
-      accountPubkey,
-      undefined,
-      programId,
-    );
-    const balance = Number(account.amount);
-    console.log(`${accountName} Balance: ${balance}`);
-    return balance;
-  } catch (error) {
-    console.error(
-      `${accountName} failed to get balance: ${error instanceof Error ? error.message : String(error)}`,
-    );
-    return 0;
-  }
-}
+import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
 // Helper function to calculate trade fee
-function gateFee(sourceAmount: number, tradeFeeRate: number): number {
+function gateFee(sourceAmount: BigNumber, tradeFeeRate: BigNumber): BigNumber {
   // tradeFeeRate is in basis points (e.g., 1000000 = 100%, 1 = 0.0001%)
   // rounding up in our favor
-  return Math.ceil((sourceAmount * tradeFeeRate) / MAX_PERCENTAGE);
+  return sourceAmount
+    .multipliedBy(tradeFeeRate)
+    .dividedBy(MAX_PERCENTAGE)
+    .integerValue(BigNumber.ROUND_UP);
 }
 
 // Constant product formula (like Uniswap AMM)
 function swapBaseInputWithoutFees(
-  sourceAmount: number,
-  swapSourceAmount: number,
-  swapDestinationAmount: number,
-): number {
+  sourceAmount: BigNumber,
+  swapSourceAmount: BigNumber,
+  swapDestinationAmount: BigNumber,
+): BigNumber {
   // (x + delta_x) * (y - delta_y) = x * y
   // delta_y = (delta_x * y) / (x + delta_x)
-  const numerator = sourceAmount * swapDestinationAmount;
-  const denominator = swapSourceAmount + sourceAmount;
-  const destinationAmountSwapped = Math.floor(numerator / denominator);
+  const numerator = sourceAmount.multipliedBy(swapDestinationAmount);
+  const denominator = swapSourceAmount.plus(sourceAmount);
+  const destinationAmountSwapped = numerator
+    .dividedBy(denominator)
+    .integerValue(BigNumber.ROUND_DOWN);
   return destinationAmountSwapped;
 }
 
 // Main swap calculation function
 function calculateSwap(
-  sourceAmount: number,
-  poolSourceAmount: number,
-  poolDestinationAmount: number,
-  tradeFeeRate: number,
-  protocolFeeRate: number,
+  sourceAmount: BigNumber,
+  poolSourceAmount: BigNumber,
+  poolDestinationAmount: BigNumber,
+  tradeFeeRate: BigNumber,
+  protocolFeeRate: BigNumber,
 ): {
-  destinationAmount: number;
-  sourceAmountPostFees: number;
-  rate: number;
-  tradeFee: number;
-  protocolFee: number;
+  destinationAmount: BigNumber;
+  sourceAmountPostFees: BigNumber;
+  rate: BigNumber;
+  tradeFee: BigNumber;
+  protocolFee: BigNumber;
 } {
   // Calculate trade fee from input
   const tradeFee = gateFee(sourceAmount, tradeFeeRate);
@@ -118,7 +64,7 @@ function calculateSwap(
   const protocolFee = gateFee(tradeFee, protocolFeeRate);
 
   // Subtract fee from input
-  const sourceAmountPostFees = sourceAmount - tradeFee;
+  const sourceAmountPostFees = sourceAmount.minus(tradeFee);
 
   // Use post fee amount to calculate output
   const destinationAmountSwapped = swapBaseInputWithoutFees(
@@ -128,7 +74,7 @@ function calculateSwap(
   );
 
   // Calculate rate (output per input)
-  const rate = destinationAmountSwapped / sourceAmount;
+  const rate = destinationAmountSwapped.dividedBy(sourceAmount);
 
   return {
     destinationAmount: destinationAmountSwapped,
@@ -192,46 +138,43 @@ export async function getSwapRateHandler(
     const pool = await getPoolAccount(connection, poolPubkey);
     const ammConfig = await getAmmConfigAccount(connection, ammConfigPubkey);
 
-    // Get token balances from reserve accounts
-    let reserveXBalance = 0;
-    let reserveYBalance = 0;
-
     // Get token balances
-    reserveXBalance = await getTokenBalance(
+    const reserveXBalance = await getTokenBalance(
       connection,
       pool.reserve_x,
       "Reserve X",
     );
-    reserveYBalance = await getTokenBalance(
+    const reserveYBalance = await getTokenBalance(
       connection,
       pool.reserve_y,
       "Reserve Y",
     );
 
-    const availableReserveX =
-      reserveXBalance -
-      pool.locked_x -
-      pool.user_locked_x -
-      pool.protocol_fee_x;
-    const availableReserveY =
-      reserveYBalance -
-      pool.locked_y -
-      pool.user_locked_y -
-      pool.protocol_fee_y;
+    const availableReserveX = reserveXBalance
+      .minus(pool.locked_x)
+      .minus(pool.user_locked_x)
+      .minus(pool.protocol_fee_x);
+    const availableReserveY = reserveYBalance
+      .minus(pool.locked_y)
+      .minus(pool.user_locked_y)
+      .minus(pool.protocol_fee_y);
 
-    const tokenX = await getTokenDetailsHandler({
-      address: tokenXMint.toString(),
-    });
-    const tokenY = await getTokenDetailsHandler({
-      address: tokenYMint.toString(),
-    });
+    const tokenMetadata = (await getTokenMetadataHandler({
+      addresses: [tokenXMint, tokenYMint],
+      returnAsObject: true,
+    })) as Record<string, Token>;
 
-    const scaledInput =
-      amountIn * 10 ** (isXtoY ? tokenX.decimals : tokenY.decimals);
-    const roundedInput = Math.floor(scaledInput);
+    const tokenX = tokenMetadata[tokenXMint]!;
+    const tokenY = tokenMetadata[tokenYMint]!;
 
-    const tradeFeeRate = Number(ammConfig.trade_fee_rate) || 0;
-    const protocolFeeRate = Number(ammConfig.protocol_fee_rate) || 0;
+    const scaledInput = toRawUnits(
+      amountIn,
+      isXtoY ? tokenX.decimals : tokenY.decimals,
+    );
+    const roundedInput = scaledInput.integerValue(BigNumber.ROUND_DOWN);
+
+    const tradeFeeRate = BigNumber(ammConfig.trade_fee_rate || 0);
+    const protocolFeeRate = BigNumber(ammConfig.protocol_fee_rate || 0);
     const swapResult = calculateSwap(
       roundedInput,
       isXtoY ? availableReserveX : availableReserveY,
@@ -240,61 +183,63 @@ export async function getSwapRateHandler(
       protocolFeeRate,
     );
 
-    const amountOutBigDecimal = BigNumber(swapResult.destinationAmount);
+    const amountOutBigDecimal = swapResult.destinationAmount;
 
-    const amountOut = amountOutBigDecimal
-      .dividedBy(BigNumber(10 ** (isXtoY ? tokenY.decimals : tokenX.decimals)))
-      .toNumber();
+    const amountOut = amountOutBigDecimal.dividedBy(
+      toRawUnits(1, isXtoY ? tokenY.decimals : tokenX.decimals),
+    );
 
     const decDiff = Math.abs(tokenX.decimals - tokenY.decimals);
 
     let adjustedRate = swapResult.rate;
     if (isXtoY) {
       if (tokenX.decimals < tokenY.decimals) {
-        adjustedRate = swapResult.rate / 10 ** decDiff;
+        adjustedRate = swapResult.rate.dividedBy(toRawUnits(1, decDiff));
       } else if (tokenX.decimals > tokenY.decimals) {
-        adjustedRate = swapResult.rate * 10 ** decDiff;
+        adjustedRate = swapResult.rate.multipliedBy(toRawUnits(1, decDiff));
       }
     } else {
       if (tokenY.decimals < tokenX.decimals) {
-        adjustedRate = swapResult.rate / 10 ** decDiff;
+        adjustedRate = swapResult.rate.dividedBy(toRawUnits(1, decDiff));
       } else if (tokenY.decimals > tokenX.decimals) {
-        adjustedRate = swapResult.rate * 10 ** decDiff;
+        adjustedRate = swapResult.rate.multipliedBy(toRawUnits(1, decDiff));
       }
     }
 
-    const poolInputAmount =
-      swapResult.sourceAmountPostFees +
-      swapResult.tradeFee -
-      swapResult.protocolFee;
+    const poolInputAmount = swapResult.sourceAmountPostFees
+      .plus(swapResult.tradeFee)
+      .minus(swapResult.protocolFee);
 
     const originalRate = isXtoY
-      ? availableReserveY / availableReserveX
-      : availableReserveX / availableReserveY;
+      ? availableReserveY.dividedBy(availableReserveX)
+      : availableReserveX.dividedBy(availableReserveY);
 
     const newAvailableReserveX = isXtoY
-      ? availableReserveX + poolInputAmount
-      : availableReserveX - swapResult.destinationAmount;
+      ? availableReserveX.plus(poolInputAmount)
+      : availableReserveX.minus(swapResult.destinationAmount);
 
     const newAvailableReserveY = isXtoY
-      ? availableReserveY - swapResult.destinationAmount
-      : availableReserveY + poolInputAmount;
+      ? availableReserveY.minus(swapResult.destinationAmount)
+      : availableReserveY.plus(poolInputAmount);
 
     const newRate = isXtoY
-      ? newAvailableReserveY / newAvailableReserveX
-      : newAvailableReserveX / newAvailableReserveY;
+      ? newAvailableReserveY.dividedBy(newAvailableReserveX)
+      : newAvailableReserveX.dividedBy(newAvailableReserveY);
 
-    const priceImpact = ((originalRate - newRate) / originalRate) * 100;
-    const priceImpactTruncated = Math.floor(priceImpact * 100) / 100;
+    const priceImpact = originalRate
+      .minus(newRate)
+      .dividedBy(originalRate)
+      .multipliedBy(100);
+    const priceImpactTruncated = priceImpact.toFixed(2);
 
     return {
       amountIn,
-      amountInRaw: roundedInput,
-      amountOut,
-      amountOutRaw: amountOutBigDecimal.toNumber(),
-      estimatedFee: swapResult.tradeFee,
-      priceImpact: priceImpactTruncated,
-      rate: adjustedRate,
+      amountInRaw: roundedInput.toString(),
+      amountOut: amountOut.toNumber(),
+      amountOutRaw: amountOutBigDecimal.toString(),
+      estimatedFee: swapResult.tradeFee.toString(),
+      priceImpact: Number(priceImpactTruncated),
+      rate: adjustedRate.toNumber(),
       tokenX,
       tokenY,
     };

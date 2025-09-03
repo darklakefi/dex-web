@@ -1,9 +1,11 @@
 "use client";
 import { tanstackClient } from "@dex-web/orpc";
+import type { Token } from "@dex-web/orpc/schemas";
 import { Button, Icon } from "@dex-web/ui";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import { selectedTokensParsers } from "../_utils/searchParams";
 
@@ -25,11 +27,17 @@ export function SelectTokenButton({
   const validAddress =
     tokenAddress || (type === "buy" ? tokenAAddress : tokenBAddress);
 
-  const { data: tokenDetails } = useSuspenseQuery(
-    tanstackClient.getTokenDetails.queryOptions({
-      input: { address: validAddress || "" },
+  const { data: tokenMetadata } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenMetadata.queryOptions({
+      input: { addresses: [validAddress || ""], returnAsObject: true },
     }),
   );
+
+  const metadata = tokenMetadata as Record<string, Token>;
+  const tokenDetails = metadata[validAddress]!;
+
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   function buildHref(
     type: string,
@@ -37,8 +45,11 @@ export function SelectTokenButton({
     tokenB: string,
     returnUrl?: string,
   ) {
-    const basePath = `select-token/${type}?tokenAAddress=${tokenA}&tokenBAddress=${tokenB}`;
-    return returnUrl ? basePath : `/${basePath}`;
+    const from = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ""}`;
+    const basePath = `select-token/${type}?tokenAAddress=${tokenA}&tokenBAddress=${tokenB}&from=${encodeURIComponent(
+      from,
+    )}`;
+    return returnUrl ? `${returnUrl}/${basePath}` : `/${basePath}`;
   }
   return (
     <Button
@@ -48,7 +59,7 @@ export function SelectTokenButton({
       prefetch={true}
       variant="secondary"
     >
-      {tokenDetails.imageUrl ? (
+      {tokenDetails?.imageUrl ? (
         <Image
           alt={tokenDetails.symbol}
           className="size-8 overflow-hidden rounded-full"
@@ -62,7 +73,7 @@ export function SelectTokenButton({
         <Icon name="seedlings" />
       )}
       <span className="flex items-center justify-center text-lg leading-6!">
-        {tokenDetails.symbol}
+        {tokenDetails?.symbol}
       </span>
       <Icon className="size-4 fill-green-300" name="chevron-down" />
     </Button>

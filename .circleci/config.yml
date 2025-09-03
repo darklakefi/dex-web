@@ -1,8 +1,14 @@
 version: 2.1
 
+parameters:
+  create_release_pr:
+    type: boolean
+    default: false
+
 orbs:
   nx: nrwl/nx@1.7.0
   node: circleci/node@7.1.0
+  github-cli: circleci/github-cli@2.7.1
 
 commands:
   restore-nx-cache:
@@ -11,24 +17,25 @@ commands:
       - restore_cache:
           name: Restore Nx Cache
           keys:
-            - nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
-            - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
-            - nx-cache-{{ .Branch }}-{{ checksum "nx.json" }}
-            - nx-cache-{{ .Branch }}-
-            - nx-cache-
+            - nx-cache-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "nx.json" }}
+            - nx-cache-v1-{{ checksum "pnpm-lock.yaml" }}
+            - nx-cache-v1-
 
   setup-nx:
     description: "Set up Nx SHAs for affected detection"
     steps:
       - nx/set-shas:
-          main-branch-name: "develop"
+          main-branch-name: develop
+          allow-on-hold-workflow: true
+          error-on-no-successful-workflow: true
+          workflow-name: "CI/CD"
 
   save-nx-cache:
     description: "Save Nx cache with revision-specific key"
     steps:
       - save_cache:
           name: Save Nx Cache
-          key: nx-cache-{{ .Branch }}-{{ .Revision }}-{{ checksum "nx.json" }}-{{ checksum "package.json" }}
+          key: nx-cache-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "nx.json" }}
           paths:
             - .nx/cache
             - node_modules/.cache/nx
@@ -39,16 +46,16 @@ commands:
       - restore_cache:
           name: Restore Vercel Cache
           keys:
-            - vercel-cache-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}
-            - vercel-cache-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}
-            - vercel-cache-{{ .Branch }}-
+            - vercel-cache-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}
+            - vercel-cache-v1-{{ checksum "pnpm-lock.yaml" }}
+            - vercel-cache-v1-
 
   save-vercel-cache:
     description: "Save Vercel build cache"
     steps:
       - save_cache:
           name: Save Vercel Cache
-          key: vercel-cache-{{ .Branch }}-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}
+          key: vercel-cache-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "apps/web/next.config.ts" }}
           paths:
             - .vercel
             - .next/cache
@@ -56,18 +63,18 @@ commands:
   setup:
     description: "Common setup steps for all jobs"
     steps:
-      - node/install:
-          install-pnpm: true
-          pnpm-version: 10.12.4
+      - node/install-pnpm:
+          version: 10.12.4
 
       - node/install-packages:
           pkg-manager: pnpm
-          cache-path: ~/.pnpm-store
+          cache-path: "~/.pnpm-store"
+          with-cache: true
 
 jobs:
   check:
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:24.3.0
     resource_class: medium
     steps:
       - checkout
@@ -76,12 +83,17 @@ jobs:
       - restore-nx-cache
       - run:
           name: Run affected tasks
-          command: pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD -t lint:ci,typecheck
+          command: |
+            if pnpm exec nx show projects --affected --base=$NX_BASE  | wc -l | grep -q "^0$"; then
+              echo "✅ No affected projects found, skipping lint and typecheck"
+              exit 0
+            fi
+            pnpm exec nx affected --base=$NX_BASE -t lint:ci,typecheck
       - save-nx-cache
 
   test:
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:24.3.0
     resource_class: large
     parallelism: 4
     steps:
@@ -92,8 +104,12 @@ jobs:
       - run:
           name: Run affected tests in parallel
           command: |
-            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD \
-              --target=test --parallel --maxParallel=${CIRCLE_NODE_TOTAL}
+            if pnpm exec nx show projects --affected --base=$NX_BASE --with-target=test | wc -l | grep -q "^0$"; then
+              echo "✅ No affected projects with tests found, skipping"
+              exit 0
+            fi
+            pnpm exec nx affected --base=$NX_BASE \
+              --target=test --parallel
       - save-nx-cache
       - store_test_results:
           path: test-results
@@ -103,7 +119,7 @@ jobs:
 
   e2e:
     docker:
-      - image: mcr.microsoft.com/playwright:v1.53.1-noble
+      - image: mcr.microsoft.com/playwright:v1.53.2-noble
     resource_class: large
     parallelism: 2
     steps:
@@ -114,7 +130,11 @@ jobs:
       - run:
           name: Run affected e2e tests
           command: |
-            pnpm exec nx affected --base=$NX_BASE --head=$NX_HEAD --target=e2e --parallel --max-parallel=2
+            if pnpm exec nx show projects --affected --base=$NX_BASE --with-target=e2e | wc -l | grep -q "^0$"; then
+              echo "✅ No affected projects with e2e tests found, skipping"
+              exit 0
+            fi
+            pnpm exec nx affected --base=$NX_BASE --target=e2e --parallel
       - save-nx-cache
       - store_test_results:
           path: dist/apps/web-e2e/junit.xml
@@ -124,7 +144,7 @@ jobs:
 
   chromatic:
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:24.3.0
     resource_class: medium
     environment:
       CI: true
@@ -140,8 +160,8 @@ jobs:
 
   deploy-preview:
     docker:
-      - image: cimg/node:lts
-    resource_class: small
+      - image: cimg/node:24.3.0
+    resource_class: large
     steps:
       - checkout
       - setup
@@ -161,101 +181,46 @@ jobs:
               exit 1
             fi
             echo "export VERCEL_URL=$VERCEL_URL" >> $BASH_ENV
+      - github-cli/install
       - run:
-          name: Create GitHub Deployment & Status
+          name: Create GitHub Deployment
           command: |
-            set -e
-
-            if [ -z "$GITHUB_TOKEN" ]; then
-              echo "⚠️  GITHUB_TOKEN not set, skipping GitHub integration"
-              exit 0
-            fi
-
-            if [ -z "$VERCEL_URL" ]; then
-              echo "❌ VERCEL_URL not set, cannot create deployment"
-              exit 1
-            fi
-
-            if [[ ! "$VERCEL_URL" =~ ^https?:// ]]; then
-              echo "❌ Invalid Vercel URL format: $VERCEL_URL"
-              exit 1
-            fi
-
-            REPO_OWNER="darklakefi"
-            REPO_NAME="dex-web"
-            COMMIT_SHA="$CIRCLE_SHA1"
-
-            echo "🚀 Creating GitHub deployment for commit: $COMMIT_SHA"
-            echo "📁 Repository: $REPO_OWNER/$REPO_NAME"
-            echo "🔗 Preview URL: $VERCEL_URL"
-
-            DEPLOYMENT_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/deployments \
-              -d '{
-                "ref": "'$COMMIT_SHA'",
+            source $BASH_ENV
+            if [ -n "$GITHUB_TOKEN" ]; then
+              DEPLOYMENT_JSON='{
+                "ref": "'${CIRCLE_SHA1}'",
                 "environment": "preview",
-                "auto_merge": false,
+                "description": "Preview deployment for '${CIRCLE_SHA1:0:7}'",
                 "required_contexts": []
-              }')
+              }'
+              
+              DEPLOYMENT_ID=$(echo "$DEPLOYMENT_JSON" | gh api repos/{owner}/{repo}/deployments \
+                --method POST \
+                --input - \
+                --jq '.id')
 
-            HTTP_STATUS=$(echo $DEPLOYMENT_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-            DEPLOYMENT_BODY=$(echo $DEPLOYMENT_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')
+              gh api repos/{owner}/{repo}/deployments/${DEPLOYMENT_ID}/statuses \
+                --method POST \
+                -f state="success" \
+                -f environment_url="${VERCEL_URL}" \
+                -f description="Preview deployment ready" \
+                -f log_url="${CIRCLE_BUILD_URL}"
 
-            if [ "$HTTP_STATUS" -ne 201 ]; then
-              echo "❌ Failed to create deployment. HTTP Status: $HTTP_STATUS"
-              echo "Response: $DEPLOYMENT_BODY"
-              exit 1
-            fi
+              gh api repos/{owner}/{repo}/statuses/${CIRCLE_SHA1} \
+                --method POST \
+                -f state="success" \
+                -f target_url="${VERCEL_URL}" \
+                -f description="Preview ready" \
+                -f context="deploy/preview"
 
-            DEPLOYMENT_ID=$(echo $DEPLOYMENT_BODY | jq -r '.id')
-            echo "✅ Deployment created (ID: $DEPLOYMENT_ID)"
-
-            STATUS_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/deployments/$DEPLOYMENT_ID/statuses \
-              -d '{
-                "state": "success",
-                "environment_url": "'$VERCEL_URL'",
-                "description": "Preview deployment ready"
-              }')
-
-            STATUS_HTTP=$(echo $STATUS_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-
-            if [ "$STATUS_HTTP" -ne 201 ]; then
-              echo "⚠️  Failed to update deployment status. HTTP Status: $STATUS_HTTP"
-              echo "Response: $(echo $STATUS_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')"
+              echo "✅ GitHub deployment created: ${VERCEL_URL}"
             else
-              echo "✅ Deployment status updated"
+              echo "⚠️ GITHUB_TOKEN not set, skipping GitHub integration"
             fi
-
-            CHECK_RESPONSE=$(curl -s -w "HTTPSTATUS:%{http_code}" -X POST \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/statuses/$COMMIT_SHA \
-              -d '{
-                "state": "success",
-                "target_url": "'$VERCEL_URL'",
-                "description": "Preview ready",
-                "context": "deploy/preview"
-              }')
-
-            CHECK_HTTP=$(echo $CHECK_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-
-            if [ "$CHECK_HTTP" -ne 201 ]; then
-              echo "⚠️  Failed to create status check. HTTP Status: $CHECK_HTTP"
-              echo "Response: $(echo $CHECK_RESPONSE | sed -e 's/HTTPSTATUS:.*//g')"
-            else
-              echo "✅ Status check created for deploy/preview context"
-            fi
-
-            echo "🎉 GitHub integration completed successfully!"
 
   deploy-production:
     docker:
-      - image: cimg/node:lts
+      - image: cimg/node:24.3.0
     resource_class: medium
     steps:
       - checkout
@@ -263,10 +228,18 @@ jobs:
       - restore-vercel-cache
       - run:
           name: Plan production deployment
-          command: circleci run release plan --target-version=production-$CIRCLE_SHA1 --environment-name=production --component-name=dex-web
+          command: |
+            if ! circleci run release plan --target-version=production-$CIRCLE_SHA1 --environment-name=production --component-name=dex-web; then
+              echo "Failed to plan release"
+              exit 1
+            fi
       - run:
           name: Update deployment status to running
-          command: circleci run release update --status=running
+          command: |
+            if ! circleci run release update --status=running; then
+              echo "Failed to update deployment status to running"
+              exit 1
+            fi
       - run:
           name: Pull Vercel Environment Information
           command: npx vercel@latest pull --yes --environment=production --token=$VERCEL_TOKEN
@@ -275,25 +248,45 @@ jobs:
           command: npx vercel@latest build --prod --token=$VERCEL_TOKEN
       - run:
           name: Deploy Project Artifacts to Vercel
-          command: npx vercel@latest deploy --prod --token=$VERCEL_TOKEN
+          command: |
+            PRODUCTION_URL=$(npx vercel@latest deploy --prod --token=$VERCEL_TOKEN)
+            echo "export PRODUCTION_URL=$PRODUCTION_URL" >> $BASH_ENV
+      - github-cli/install
       - run:
           name: Create GitHub Production Deployment
           command: |
+            source $BASH_ENV
             if [ -n "$GITHUB_TOKEN" ]; then
-              curl -s -X POST \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments \
-                -d '{
-                  "ref": "'$CIRCLE_SHA1'",
-                  "environment": "production",
-                  "auto_merge": false,
-                  "required_contexts": []
-                }' | jq -r '.id' | xargs -I {} curl -s -X POST \
-                -H "Authorization: token $GITHUB_TOKEN" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/deployments/{}/statuses \
-                -d '{"state": "success", "description": "Production deployment successful"}'
+              DEPLOYMENT_JSON='{
+                "ref": "'${CIRCLE_SHA1}'",
+                "environment": "production",
+                "description": "Production deployment '${CIRCLE_TAG:-${CIRCLE_SHA1:0:7}}'",
+                "production_environment": true,
+                "required_contexts": []
+              }'
+              
+              DEPLOYMENT_ID=$(echo "$DEPLOYMENT_JSON" | gh api repos/{owner}/{repo}/deployments \
+                --method POST \
+                --input - \
+                --jq '.id')
+
+              gh api repos/{owner}/{repo}/deployments/${DEPLOYMENT_ID}/statuses \
+                --method POST \
+                -f state="success" \
+                -f environment_url="${PRODUCTION_URL:-https://darklake.fi}" \
+                -f description="Production deployment successful" \
+                -f log_url="${CIRCLE_BUILD_URL}"
+
+              gh api repos/{owner}/{repo}/statuses/${CIRCLE_SHA1} \
+                --method POST \
+                -f state="success" \
+                -f target_url="${PRODUCTION_URL:-https://darklake.fi}" \
+                -f description="Deployed to production" \
+                -f context="deploy/production"
+
+              echo "✅ GitHub production deployment created: ${PRODUCTION_URL:-https://darklake.fi}"
+            else
+              echo "⚠️ GITHUB_TOKEN not set, skipping GitHub integration"
             fi
       - run:
           name: Update deployment status to SUCCESS
@@ -305,20 +298,61 @@ jobs:
           when: on_fail
       - save-vercel-cache
 
+  create_release_pull_request:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - github-cli/install
+      - run:
+          name: Create Release Pull Request
+          command: |
+            REVIEWERS="darklakefi/release"
+            gh auth login --with-token <<< "$GITHUB_TOKEN"
+            EXISTING_PR=$(gh pr list --base main --head develop --json number -q '.[0].number')
+            if [ -n "$EXISTING_PR" ]; then
+              echo "Pull request from develop to main already exists: #$EXISTING_PR"
+              exit 0
+            fi
+            git fetch origin main
+            git fetch origin develop
+            CHANGELOG=$(git log origin/main..origin/develop --oneline --pretty=format:'- %s (%h)' --no-merges)
+            if [ -z "$CHANGELOG" ]; then
+              echo "No changes between develop and main. No PR created."
+              exit 0
+            fi
+            PR_BODY=$(cat <<EOF
+            Automated release pull request.
+            ## Changes
+            $CHANGELOG
+            EOF
+            )
+            gh pr create \
+              --base "main" \
+              --head "develop" \
+              --title "chore(release): Sync develop to main" \
+              --body "$PR_BODY" \
+              --reviewer "$REVIEWERS"
+
 workflows:
   ci-cd:
     jobs:
       - check
       - test
-      - e2e:
-          requires:
-            - check
-            - test
       - chromatic:
           requires:
             - check
             - test
+      - e2e:
+          context:
+            - darklakefi-development
+          requires:
+            - check
+            - test
       - deploy-preview:
+          context:
+            - darklakefi-deployments
+            - darklakefi-development
           requires:
             - check
             - test
@@ -326,11 +360,20 @@ workflows:
             branches:
               ignore: /main/
       - deploy-production:
+          context:
+            - darklakefi-deployments
+            - darklakefi-production
           requires:
             - check
             - test
             - e2e
-            - chromatic
           filters:
             branches:
               only: /main/
+
+  release-pr:
+    when: << pipeline.parameters.create_release_pr >>
+    jobs:
+      - create_release_pull_request:
+          context:
+            - darklakefi-deployments
