@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { withNx } from "@nx/next";
+import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -71,4 +72,14 @@ const nextConfig = {
   },
 } satisfies NextConfig;
 
-export default withNx(withNextIntl(nextConfig));
+const nxConfig = withNx(withNextIntl(nextConfig));
+
+export default withSentryConfig(nxConfig, {
+  automaticVercelMonitors: true,
+  disableLogger: true,
+  org: "darklake",
+  project: "darklake",
+  silent: !process.env.CI,
+  tunnelRoute: "/monitoring",
+  widenClientFileUpload: true,
+});

@@ -6,6 +6,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { PosthogProviderWrapper } from "./PosthogProvider";
 import { SolanaProvider } from "./SolanaProvider";
 
 function makeQueryClient() {
@@ -33,12 +34,14 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
   return (
-    <SolanaProvider>
-      <NuqsAdapter>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </NuqsAdapter>
-    </SolanaProvider>
+    <PosthogProviderWrapper>
+      <SolanaProvider>
+        <NuqsAdapter>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </NuqsAdapter>
+      </SolanaProvider>
+    </PosthogProviderWrapper>
   );
 }
