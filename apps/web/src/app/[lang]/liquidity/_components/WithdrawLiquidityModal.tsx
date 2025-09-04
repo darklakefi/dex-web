@@ -134,7 +134,7 @@ export function WithdrawLiquidityModal({
       return;
     }
 
-    const userLpBalance = convertToDecimal(
+    const _userLpBalance = convertToDecimal(
       userLiquidity.lpTokenBalance,
       userLiquidity.decimals,
     );

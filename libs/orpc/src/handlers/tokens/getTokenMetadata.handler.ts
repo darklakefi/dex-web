@@ -87,7 +87,7 @@ async function fetchTokenMetadataFromChain(
       name: asset.metadata.name,
       symbol: asset.metadata.symbol,
     }));
-  } catch (error) {
+  } catch (_error) {
     return [];
   }
 }

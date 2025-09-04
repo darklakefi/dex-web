@@ -19,7 +19,8 @@
       "!**/coverage/**",
       "!**/storybook-static/**",
       "!**/tmp/**",
-      "!**/.*/**"
+      "!**/.*/**",
+      "!**/test-results/**"
     ]
   },
   "formatter": {
@@ -63,9 +64,11 @@
         "recommended": true
       },
       "style": {
+        "noNonNullAssertion": "off",
         "recommended": true
       },
       "suspicious": {
+        "noDocumentCookie": "off",
         "recommended": true
       }
     }
