@@ -14,6 +14,7 @@ import { useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
+import { useAnalytics } from "../../../../hooks/useAnalytics";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
@@ -75,6 +76,7 @@ const BUTTON_MESSAGE = {
 export function SwapForm() {
   const form = useAppForm(formConfig);
   const { signTransaction, publicKey } = useWallet();
+  const { trackSwap, trackError } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
@@ -158,6 +160,21 @@ export function SwapForm() {
       const transaction = Transaction.from(transactionJson);
 
       const signedTransaction = await signTransaction(transaction);
+
+      // Track swap signed
+      const sellAmount = Number(
+        form.state.values.tokenAAmount.replace(/,/g, ""),
+      );
+      const buyAmount = Number(
+        form.state.values.tokenBAmount.replace(/,/g, ""),
+      );
+      trackSwap({
+        fromAmount: sellAmount,
+        fromToken: tokenAAddress || "",
+        status: "signed",
+        toAmount: buyAmount,
+        toToken: tokenBAddress || "",
+      });
       const signedTransactionBase64 = signedTransaction
         .serialize()
         .toString("base64");
@@ -186,6 +203,21 @@ export function SwapForm() {
         await client.dexGateway.submitSignedTransaction(signedTxRequest);
 
       if (signedTxResponse.success) {
+        // Track swap submitted
+        const sellAmount = Number(
+          form.state.values.tokenAAmount.replace(/,/g, ""),
+        );
+        const buyAmount = Number(
+          form.state.values.tokenBAmount.replace(/,/g, ""),
+        );
+        trackSwap({
+          fromAmount: sellAmount,
+          fromToken: tokenAAddress || "",
+          status: "submitted",
+          toAmount: buyAmount,
+          toToken: tokenBAddress || "",
+          transactionHash: trackingId,
+        });
         checkSwapStatus(trackingId, tradeId);
       } else {
         throw new Error("Failed to submit signed transaction");
@@ -198,6 +230,17 @@ export function SwapForm() {
         title: "Signing Error",
         variant: "error",
       });
+
+      // Track signing error
+      trackError({
+        context: "swap_signing",
+        details: {
+          trackingId,
+          tradeId,
+        },
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+
       resetButtonState();
     }
   };
@@ -226,6 +269,23 @@ export function SwapForm() {
           title: "Swap complete",
           variant: "success",
         });
+
+        // Track swap confirmed
+        const sellAmount = Number(
+          form.state.values.tokenAAmount.replace(/,/g, ""),
+        );
+        const buyAmount = Number(
+          form.state.values.tokenBAmount.replace(/,/g, ""),
+        );
+        trackSwap({
+          fromAmount: sellAmount,
+          fromToken: tokenAAddress || "",
+          status: "confirmed",
+          toAmount: buyAmount,
+          toToken: tokenBAddress || "",
+          transactionHash: trackingId,
+        });
+
         refetchBuyTokenAccount();
         refetchSellTokenAccount();
         return;
@@ -241,6 +301,23 @@ export function SwapForm() {
           title: `Trade ${response.status}`,
           variant: "error",
         });
+
+        // Track swap failed
+        const sellAmount = Number(
+          form.state.values.tokenAAmount.replace(/,/g, ""),
+        );
+        const buyAmount = Number(
+          form.state.values.tokenBAmount.replace(/,/g, ""),
+        );
+        trackSwap({
+          fromAmount: sellAmount,
+          fromToken: tokenAAddress || "",
+          status: "failed",
+          toAmount: buyAmount,
+          toToken: tokenBAddress || "",
+          transactionHash: trackingId,
+        });
+
         return;
       }
 
@@ -270,6 +347,17 @@ export function SwapForm() {
       });
       return;
     }
+
+    // Track swap initiated
+    const sellAmount = Number(form.state.values.tokenAAmount.replace(/,/g, ""));
+    const buyAmount = Number(form.state.values.tokenBAmount.replace(/,/g, ""));
+    trackSwap({
+      fromAmount: sellAmount,
+      fromToken: tokenAAddress || "",
+      status: "initiated",
+      toAmount: buyAmount,
+      toToken: tokenBAddress || "",
+    });
 
     toast({
       description:
@@ -322,6 +410,18 @@ export function SwapForm() {
         title: "Swap Error",
         variant: "error",
       });
+
+      // Track swap error
+      trackError({
+        context: "swap_initiation",
+        details: {
+          amount: form.state.values.tokenAAmount,
+          tokenA: tokenAAddress,
+          tokenB: tokenBAddress,
+        },
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+
       resetButtonState();
     }
   };

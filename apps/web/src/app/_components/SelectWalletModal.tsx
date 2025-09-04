@@ -5,24 +5,44 @@ import { useWallet, type Wallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
+import { useAnalytics } from "../../hooks/useAnalytics";
 import { selectedTokensParsers } from "../_utils/searchParams";
 
 export function SelectWalletModal() {
-  const { wallets, wallet, select } = useWallet();
+  const { wallets, wallet, select, publicKey } = useWallet();
   const router = useRouter();
+  const { trackWalletConnection } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
-  const handleSelect = (
+  const handleSelect = async (
     wallet: Wallet,
     e: React.MouseEvent<HTMLButtonElement>,
   ) => {
     e.preventDefault();
-    select(wallet.adapter.name);
-    setTimeout(() => {
-      handleClose();
-    }, 2000);
+
+    try {
+      select(wallet.adapter.name);
+
+      // Wait for wallet to connect and get the public key
+      setTimeout(() => {
+        // Track wallet connection after wallet is actually connected
+        trackWalletConnection({
+          address: publicKey?.toBase58(),
+          success: true,
+          wallet: wallet.adapter.name,
+        });
+        handleClose();
+      }, 2000);
+    } catch (error) {
+      // Track wallet connection failure
+      trackWalletConnection({
+        success: false,
+        wallet: wallet.adapter.name,
+      });
+      throw error;
+    }
   };
 
   const handleClose = () => {

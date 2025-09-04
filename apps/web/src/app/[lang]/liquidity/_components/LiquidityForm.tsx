@@ -19,6 +19,7 @@ import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
+import { useAnalytics } from "../../../../hooks/useAnalytics";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
@@ -57,6 +58,7 @@ const { useAppForm } = createFormHook({
 
 export function LiquidityForm() {
   const { publicKey, wallet, signTransaction } = useWallet();
+  const { trackLiquidity, trackError } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
@@ -331,10 +333,46 @@ export function LiquidityForm() {
               title: "Liquidity Transaction Failed",
               variant: "error",
             });
+
+            // Track liquidity failed
+            const tokenAAmount = Number(
+              form.state.values.tokenAAmount.replace(/,/g, ""),
+            );
+            const tokenBAmount = Number(
+              form.state.values.tokenBAmount.replace(/,/g, ""),
+            );
+            trackLiquidity({
+              action: "add",
+              amountA: tokenAAmount,
+              amountB: tokenBAmount,
+              status: "failed",
+              tokenA: tokenAAddress || "",
+              tokenB: tokenBAddress || "",
+              transactionHash: signature,
+            });
+
             return;
           } else {
             dismissToast();
             setLiquidityStep(0);
+
+            // Track liquidity confirmed
+            const tokenAAmount = Number(
+              form.state.values.tokenAAmount.replace(/,/g, ""),
+            );
+            const tokenBAmount = Number(
+              form.state.values.tokenBAmount.replace(/,/g, ""),
+            );
+            trackLiquidity({
+              action: "add",
+              amountA: tokenAAmount,
+              amountB: tokenBAmount,
+              status: "confirmed",
+              tokenA: tokenAAddress || "",
+              tokenB: tokenBAddress || "",
+              transactionHash: signature,
+            });
+
             toast({
               customAction: (
                 <Text
@@ -427,6 +465,22 @@ export function LiquidityForm() {
     });
     setLiquidityStep(1);
 
+    // Track liquidity addition initiated
+    const tokenAAmount = Number(
+      form.state.values.tokenAAmount.replace(/,/g, ""),
+    );
+    const tokenBAmount = Number(
+      form.state.values.tokenBAmount.replace(/,/g, ""),
+    );
+    trackLiquidity({
+      action: "add",
+      amountA: tokenAAmount,
+      amountB: tokenBAmount,
+      status: "initiated",
+      tokenA: tokenAAddress || "",
+      tokenB: tokenBAddress || "",
+    });
+
     try {
       const finalTokenAAddress = tokenAAddress?.trim() || DEFAULT_BUY_TOKEN;
       const finalTokenBAddress = tokenBAddress?.trim() || DEFAULT_SELL_TOKEN;
@@ -470,6 +524,16 @@ export function LiquidityForm() {
         await client.liquidity.createLiquidityTransaction(requestPayload);
 
       if (response.success && response.transaction) {
+        // Track liquidity transaction created
+        trackLiquidity({
+          action: "add",
+          amountA: buyAmount,
+          amountB: sellAmount,
+          status: "signed",
+          tokenA: tokenAAddress || "",
+          tokenB: tokenBAddress || "",
+        });
+
         requestLiquidityTransactionSigning({
           checkLiquidityTransactionStatus,
           publicKey,
@@ -488,6 +552,19 @@ export function LiquidityForm() {
         title: "Liquidity Error",
         variant: "error",
       });
+
+      // Track liquidity error
+      trackError({
+        context: "liquidity_add",
+        details: {
+          amountA: form.state.values.tokenAAmount,
+          amountB: form.state.values.tokenBAmount,
+          tokenA: tokenAAddress,
+          tokenB: tokenBAddress,
+        },
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+
       setLiquidityStep(0);
     }
   };
