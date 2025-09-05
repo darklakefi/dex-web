@@ -30,7 +30,6 @@ export function getComputeBudgetInstructions(
 }
 
 export function shouldUseJito(wallet: Wallet | null | undefined): boolean {
-  // Never use Jito with SquadsX
   if (isSquadsX(wallet)) {
     return false;
   }
