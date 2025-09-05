@@ -16,13 +16,10 @@ import type {
   CreatePoolTransactionOutput,
 } from "../../schemas/pools/createPoolTransaction.schema";
 
-// TODO: Move to constants file
 const POOL_SEED = "pool";
 const AMM_CONFIG_SEED = "amm_config";
 const LIQUIDITY_SEED = "lp";
 
-// devnet and mainnet uses different ones
-// should be re-generated from IDL
 const createPoolFeeVaultDevnet = new PublicKey(
   "6vUjEKC5mkiDMdMhkxV8SYzPQAk39aPKbjGataVnkUss",
 );
@@ -68,7 +65,7 @@ async function createPool(
   const userTokenAccountLp = getAssociatedTokenAddressSync(
     lpMint,
     user,
-    false,
+    true,
     TOKEN_PROGRAM_ID,
   );
 
