@@ -159,7 +159,7 @@ export async function verifyMemoSignature({
         : tx.transaction.message.compiledInstructions;
 
     const memoInstruction = instructions.find(
-      (ix: { programIdIndex: number; data: Uint8Array }) => {
+      (ix: { programIdIndex: number; data: string | Uint8Array }) => {
         const programId = accountKeys.get(ix.programIdIndex);
         return programId?.equals(MEMO_PROGRAM_ID);
       },
