@@ -1,17 +1,10 @@
 import type { Wallet } from "@solana/wallet-adapter-react";
 import { Keypair, PublicKey } from "@solana/web3.js";
 
-/**
- * Gets an ephemeral signer for SquadsX or fallback Keypair for other wallets
- * @param wallet - The connected wallet
- * @param count - Number of ephemeral signers needed (default: 1)
- * @returns Promise<{ publicKey: PublicKey, keypair?: Keypair }>
- */
 export async function getEphemeralSigner(
   wallet: Wallet | null | undefined,
   count = 1,
 ): Promise<{ publicKey: PublicKey; keypair?: Keypair }> {
-  // Check if connected wallet is SquadsX
   if (
     wallet?.adapter &&
     "standard" in wallet.adapter &&
