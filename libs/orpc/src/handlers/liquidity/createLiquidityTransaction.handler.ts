@@ -197,7 +197,6 @@ async function createLiquidityTransaction(
   const { blockhash } = await connection.getLatestBlockhash();
   const instructions = [cuLimitIx, cuPriceIx, ...ataInstructions, programIx];
 
-  // Get optional lookup table for transaction size optimization (SquadsX compatibility)
   const { getOptionalLookupTable } = await import("../../utils/lookupTable");
   const lookupTable = await getOptionalLookupTable(connection);
 
