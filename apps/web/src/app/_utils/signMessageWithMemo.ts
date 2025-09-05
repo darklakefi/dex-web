@@ -12,12 +12,6 @@ const MEMO_PROGRAM_ID = new PublicKey(
   "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
 );
 
-interface WalletContextState {
-  publicKey: PublicKey | null;
-  signTransaction?: <T extends Transaction>(transaction: T) => Promise<T>;
-  signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
-}
-
 export async function createMemoTransaction(
   connection: Connection,
   wallet: PublicKey,
