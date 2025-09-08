@@ -1,4 +1,5 @@
 import { tanstackClient } from "@dex-web/orpc";
+import type { Token } from "@dex-web/orpc/schemas";
 import { Button, Text } from "@dex-web/ui";
 import { isValidSolanaAddress, truncate } from "@dex-web/utils";
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@solana/spl-token";
@@ -11,7 +12,7 @@ export interface NoResultFoundProps {
   className?: string;
   allowUnknownTokens?: boolean;
   handleSelect: (
-    selectedTokenAddress: string,
+    selectedToken: Token,
     e: React.MouseEvent<HTMLButtonElement>,
   ) => void;
 }
@@ -62,7 +63,16 @@ export function NoResultFound({
           <Button
             className="cursor-pointer"
             onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-              handleSelect(search, e)
+              handleSelect(
+                {
+                  address: search,
+                  decimals: 0,
+                  imageUrl: "",
+                  name: search.slice(-4),
+                  symbol: search.slice(-4),
+                },
+                e,
+              )
             }
             variant="secondary"
           >
