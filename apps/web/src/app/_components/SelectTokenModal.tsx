@@ -1,9 +1,10 @@
 "use client";
 
 import { tanstackClient } from "@dex-web/orpc";
-import { getTokensInputSchema } from "@dex-web/orpc/schemas";
+import { getTokensInputSchema, type Token } from "@dex-web/orpc/schemas";
 import { Box, Button, Modal, TextInput } from "@dex-web/ui";
 import { pasteFromClipboard, useDebouncedValue } from "@dex-web/utils";
+import { useWallet } from "@solana/wallet-adapter-react";
 import {
   type AnyFieldApi,
   createFormHook,
@@ -14,6 +15,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { Suspense } from "react";
+import useLocalStorageState from "use-local-storage-state";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { TokenList } from "../[lang]/(swap)/_components/TokenList";
 import { NoResultFound } from "./NoResultFound";
@@ -63,6 +65,8 @@ export function SelectTokenModal({
 }: SelectTokenModalProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { publicKey } = useWallet();
+  const connectedWalletAddress: string = publicKey?.toBase58() ?? "";
 
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
@@ -77,15 +81,38 @@ export function SelectTokenModal({
     router.back();
   };
 
+  const [searchedTokens, setSearchedTokens] = useLocalStorageState<{
+    [key: string]: Token[];
+  }>("tokenSearched", {
+    defaultValue: {},
+  });
+
+  const walletRecentSearches = searchedTokens[connectedWalletAddress] ?? [];
+
+  const setRecentSearches = (token: Token) => {
+    if (connectedWalletAddress) {
+      const currentSearches = searchedTokens[connectedWalletAddress] || [];
+      const updatedSearches = [
+        token,
+        ...currentSearches.filter((t) => t.address !== token.address),
+      ].slice(0, 10);
+      setSearchedTokens({
+        ...searchedTokens,
+        [connectedWalletAddress]: updatedSearches,
+      });
+    }
+  };
+
   const handleSelect = (
-    selectedTokenAddress: string,
+    selectedToken: Token,
     e: React.MouseEvent<HTMLButtonElement>,
   ) => {
     e.preventDefault();
 
     const currentFrom = searchParams.get("from");
     const baseReturn = currentFrom || `/${returnUrl}`;
-
+    const selectedTokenAddress = selectedToken.address;
+    setRecentSearches(selectedToken);
     if (type === "buy") {
       const sellAddress =
         selectedTokenAddress === tokenBAddress ? tokenAAddress : tokenBAddress;
@@ -166,18 +193,37 @@ export function SelectTokenModal({
         <Suspense
           fallback={<div className="h-32 animate-pulse rounded bg-green-600" />}
         >
-          {data.tokens.length > 0 ? (
-            <TokenList onSelect={handleSelect} tokens={data.tokens} />
-          ) : (
-            <NoResultFound
-              allowUnknownTokens={allowUnknownTokenReturnUrls.includes(
-                returnUrl,
+          {isInitialLoad && (
+            <>
+              {walletRecentSearches.length > 0 && (
+                <TokenList
+                  onSelect={handleSelect}
+                  title="Recently Searches"
+                  tokens={walletRecentSearches}
+                />
               )}
-              className="py-20"
-              handleSelect={handleSelect}
-              search={debouncedQuery}
-            />
+              <TokenList
+                onSelect={handleSelect}
+                title="tokens by 24h volume"
+                tokens={data.tokens}
+              />
+            </>
           )}
+
+          {!isInitialLoad ? (
+            data.tokens.length > 0 ? (
+              <TokenList onSelect={handleSelect} tokens={data.tokens} />
+            ) : (
+              <NoResultFound
+                allowUnknownTokens={allowUnknownTokenReturnUrls.includes(
+                  returnUrl,
+                )}
+                className="py-20"
+                handleSelect={handleSelect}
+                search={debouncedQuery}
+              />
+            )
+          ) : null}
         </Suspense>
       </Box>
     </Modal>
