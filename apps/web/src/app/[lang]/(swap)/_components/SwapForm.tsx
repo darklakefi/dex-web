@@ -10,6 +10,7 @@ import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -93,6 +94,8 @@ export function SwapForm() {
 		trackingId: "",
 		tradeId: "",
 	});
+
+	const tx = useTranslations("swap");
 	const [isInsufficientBalance, setIsInsufficientBalance] = useState(false);
 	const [slippage, setSlippage] = useState("0.5");
 
@@ -261,8 +264,8 @@ export function SwapForm() {
 				if (response.status === TradeStatus.CONFIRMED) {
 					resetButtonState();
 					toast({
-						description: `Transaction initiated. You can now cast votes for this proposal on the Squads app.`,
-						title: "Proposal created",
+						description: tx("squadsX.responseStatus.confirmed.description"),
+						title: tx("squadsX.responseStatus.confirmed.title"),
 						variant: "success",
 					});
 					return;
@@ -276,9 +279,11 @@ export function SwapForm() {
 				resetButtonState();
 				toast({
 					description: squads
-						? `Transaction initiated. You can now cast votes for this proposal on the Squads app.`
+						? tx("swap.squadsX.responseStatus.confirmed.description")
 						: `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`,
-					title: squads ? "Proposal created" : "Swap complete",
+					title: squads
+						? tx("swap.squadsX.responseStatus.confirmed.title")
+						: "Swap complete",
 					variant: "success",
 				});
 
@@ -310,9 +315,11 @@ export function SwapForm() {
 				const squads = isSquadsX(wallet);
 				toast({
 					description: squads
-						? `Transaction failed in Squads. Please review the proposal in the Squads app.`
+						? tx("squadsX.responseStatus.failed.description")
 						: `Trade ${response.status}!, trackingId: ${trackingId}`,
-					title: squads ? "Proposal failed" : `Trade ${response.status}`,
+					title: squads
+						? tx("squadsX.responseStatus.failed.title")
+						: `Trade ${response.status}`,
 					variant: "error",
 				});
 

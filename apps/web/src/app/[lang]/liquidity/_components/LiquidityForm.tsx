@@ -15,6 +15,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -63,6 +64,8 @@ export function LiquidityForm() {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
+
+  const tx = useTranslations("liquidity");
 
   const [initialPriceTokenOrder, setInitialPriceDirection] = useState<
     "ab" | "ba"
@@ -201,9 +204,11 @@ export function LiquidityForm() {
         const squads = isSquadsX(wallet);
         toast({
           description: squads
-            ? `Transaction initiated. You can now cast votes for this proposal on the Squads app.`
+            ? tx("squadsX.responseStatus.confirmed.description")
             : `Pool created successfully! Token A: ${form.state.values.tokenAAmount}, Token B: ${form.state.values.tokenBAmount}`,
-          title: squads ? "Proposal created" : "Pool Created",
+          title: squads
+            ? tx("squadsX.responseStatus.confirmed.title")
+            : "Pool Created",
           variant: "success",
         });
         resetCreateState();
@@ -216,9 +221,11 @@ export function LiquidityForm() {
       const squads = isSquadsX(wallet);
       toast({
         description: squads
-          ? `Transaction failed in Squads. Please review the proposal in the Squads app.`
+          ? tx("squadsX.responseStatus.failed.description")
           : `${error instanceof Error ? error.message : "Unknown error occurred"}`,
-        title: squads ? "Proposal failed" : "Pool Creation Error",
+        title: squads
+          ? tx("squadsX.responseStatus.failed.title")
+          : "Pool Creation Error",
         variant: "error",
       });
       resetCreateState();
