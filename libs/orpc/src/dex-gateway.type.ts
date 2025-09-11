@@ -26,7 +26,6 @@ export interface WalletEmulatorConfig {
   trackingId: string;
 }
 
-// gRPC client types
 export interface GrpcClient {
   swap: (request: SwapRequest) => Promise<SwapResponse>;
   submitSignedTransaction: (

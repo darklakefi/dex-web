@@ -2,6 +2,20 @@
   "common": {
     "welcome": "bienvenue"
   },
+  "liquidity": {
+    "squadsX": {
+      "responseStatus": {
+        "confirmed": {
+          "description": "Transaction initiée. Vous pouvez maintenant voter pour cette proposition sur l'application Squads.",
+          "title": "Proposition créée"
+        },
+        "failed": {
+          "description": "Transaction échouée dans Squads. Veuillez examiner la proposition dans l'application Squads.",
+          "title": "Proposition échouée"
+        }
+      }
+    }
+  },
   "pages": {
     "about": "à propos",
     "contact": "contact",
@@ -9,5 +23,19 @@
     "liquidity": "liquidity",
     "pools": "pools",
     "swap": "swap"
+  },
+  "swap": {
+    "squadsX": {
+      "responseStatus": {
+        "confirmed": {
+          "description": "Transaction initiée. Vous pouvez maintenant voter pour cette proposition sur l'application Squads.",
+          "title": "Proposition créée"
+        },
+        "failed": {
+          "description": "Transaction échouée dans Squads. Veuillez examiner la proposition dans l'application Squads.",
+          "title": "Proposition échouée"
+        }
+      }
+    }
   }
 }
