@@ -78,6 +78,7 @@ export const createLiquidityProgram = (
 	return ProgramFactory.createDarklakeProgram(idl, provider, [
 		"add_liquidity",
 		"remove_liquidity",
+		"initialize_pool",
 	]);
 };
 

@@ -1,22 +1,26 @@
 import { AnchorProvider, BN, type Program, web3 } from "@coral-xyz/anchor";
 import {
+  createAssociatedTokenAccountIdempotentInstruction,
+  getAccount,
 	getAssociatedTokenAddressSync,
 	TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
 	Keypair,
 	PublicKey,
+	TransactionInstruction,
+	TransactionMessage,
 	type Transaction,
 	type VersionedTransaction,
 } from "@solana/web3.js";
-
-import { getHelius } from "../../getHelius";
 import IDL from "../../darklake-idl";
+import { getHelius } from "../../getHelius";
 import type {
-	CreatePoolTransactionInput,
-	CreatePoolTransactionOutput,
+  CreatePoolTransactionInput,
+  CreatePoolTransactionOutput,
 } from "../../schemas/pools/createPoolTransaction.schema";
-import { ProgramFactory } from "@dex-web/core";
+import { getTokenProgramId } from "../../utils/solana";
+import { createLiquidityProgram, ProgramFactory } from "@dex-web/core";
 
 const POOL_SEED = "pool";
 const AMM_CONFIG_SEED = "amm_config";
@@ -34,16 +38,38 @@ const createPoolFeeVault =
 		? createPoolFeeVaultDevnet
 		: createPoolFeeVaultMainnet;
 
+    async function ensureAtaIx(
+      connection: web3.Connection,
+      owner: PublicKey,
+      mint: PublicKey,
+      tokenProgram: PublicKey,
+    ): Promise<TransactionInstruction | null> {
+      const ata = getAssociatedTokenAddressSync(mint, owner, true, tokenProgram);
+      try {
+        await getAccount(connection, ata, "confirmed", tokenProgram);
+        return null;
+      } catch {
+        return createAssociatedTokenAccountIdempotentInstruction(
+          owner,
+          ata,
+          owner,
+          mint,
+          tokenProgram,
+        );
+      }
+    }
+
 async function createPool(
-	user: PublicKey,
-	program: Program<any>,
-	tokenXMint: PublicKey,
-	tokenXProgramId: PublicKey,
-	tokenYMint: PublicKey,
-	tokenYProgramId: PublicKey,
-	depositAmountX: number,
-	depositAmountY: number,
-): Promise<Transaction> {
+  user: PublicKey,
+  program: Program<any>,
+  tokenXMint: PublicKey,
+  tokenXProgramId: PublicKey,
+  tokenYMint: PublicKey,
+  tokenYProgramId: PublicKey,
+  depositAmountX: number,
+  depositAmountY: number,
+  connection: web3.Connection,
+): Promise<VersionedTransaction> {
 	const [ammConfig] = PublicKey.findProgramAddressSync(
 		[Buffer.from(AMM_CONFIG_SEED), new BN(0).toArrayLike(Buffer, "le", 4)],
 		program.programId,
@@ -71,82 +97,114 @@ async function createPool(
 		TOKEN_PROGRAM_ID,
 	);
 
-	const methods = program.methods as any;
-	if (!methods.initializePool) {
-		throw new Error("initializePool method not found on program");
-	}
+  const ataInstructions: TransactionInstruction[] = [];
 
-	const tx = await methods
-		.initializePool(new BN(depositAmountX), new BN(depositAmountY))
-		.accountsPartial({
-			createPoolFeeVault,
-			tokenMintX: tokenXMint,
-			tokenMintXProgram: tokenXProgramId,
-			tokenMintY: tokenYMint,
-			tokenMintYProgram: tokenYProgramId,
-			user,
-			userTokenAccountLp: userTokenAccountLp,
-		})
-		.transaction();
+  const ataXIx = await ensureAtaIx(
+		connection,
+		user,
+		tokenXMint,
+		tokenXProgramId,
+	);
+	if (ataXIx) ataInstructions.push(ataXIx);
 
-	const modifyComputeUnits = web3.ComputeBudgetProgram.setComputeUnitLimit({
-		units: 500_000,
-	});
+	const ataYIx = await ensureAtaIx(
+		connection,
+		user,
+		tokenYMint,
+		tokenYProgramId,
+	);
+	if (ataYIx) ataInstructions.push(ataYIx);
 
-	tx.add(modifyComputeUnits);
+  const initializePoolMethod = await program.methods.initializePool?.(new BN(depositAmountX), new BN(depositAmountY));
 
-	return tx;
+  if (!initializePoolMethod) {
+    throw new Error("Program methods not available for initializePool");
+  }
+
+  const programTx = await initializePoolMethod
+    ?.accountsPartial({
+      createPoolFeeVault,
+      tokenMintX: tokenXMint,
+      tokenMintXProgram: tokenXProgramId,
+      tokenMintY: tokenYMint,
+      tokenMintYProgram: tokenYProgramId,
+      user,
+      userTokenAccountLp: userTokenAccountLp,
+    })
+    .transaction();
+
+  const modifyComputeUnits = web3.ComputeBudgetProgram.setComputeUnitLimit({
+    units: 500_000,
+  });
+
+  const instructions = [modifyComputeUnits, ...ataInstructions];
+  for (const ix of programTx.instructions) {
+    instructions.push(ix);
+  }
+
+  const { blockhash } = await connection.getLatestBlockhash();
+
+	const { getOptionalLookupTable } = await import("../../utils/lookupTable");
+	const lookupTable = await getOptionalLookupTable(connection);
+
+	const message = new TransactionMessage({
+		instructions,
+		payerKey: user,
+		recentBlockhash: blockhash,
+	}).compileToV0Message(lookupTable ? [lookupTable] : []);
+
+	return new web3.VersionedTransaction(message);
 }
 
 export async function createPoolTransactionHandler(
 	input: CreatePoolTransactionInput,
 ): Promise<CreatePoolTransactionOutput> {
-	const {
-		user,
-		tokenXMint,
-		tokenYMint,
-		tokenXProgramId,
-		tokenYProgramId,
-		depositAmountX,
-		depositAmountY,
-	} = input;
+  const { user, tokenXMint, tokenYMint, depositAmountX, depositAmountY } =
+    input;
 
 	const helius = getHelius();
 	const connection = helius.connection;
 
-	const dummyKeypair = Keypair.generate();
-	const dummyWallet = {
-		publicKey: dummyKeypair.publicKey,
-		signAllTransactions: async <T extends Transaction | VersionedTransaction>(
-			txs: T[],
-		): Promise<T[]> => txs,
-		signTransaction: async <T extends Transaction | VersionedTransaction>(
-			tx: T,
-		): Promise<T> => tx,
-	};
+  const userWallet = {
+    publicKey: new PublicKey(user),
+    signAllTransactions: async <T extends Transaction | VersionedTransaction>(
+      txs: T[],
+    ): Promise<T[]> => txs,
+    signTransaction: async <T extends Transaction | VersionedTransaction>(
+      tx: T,
+    ): Promise<T> => tx,
+  };
 
-	const provider = new AnchorProvider(connection, dummyWallet, {
-		commitment: "confirmed",
-		skipPreflight: true,
-	});
+  const provider = new AnchorProvider(connection, userWallet, {
+    commitment: "confirmed",
+  });
 
-	const program = ProgramFactory.createDarklakeProgram(IDL, provider, ["initialize_pool"]);
+  // Create validated program using factory (includes IDL validation and method checking)
+	const program = createLiquidityProgram(IDL, provider);
 
-	try {
-		const tx = await createPool(
-			new PublicKey(user),
-			program,
-			new PublicKey(tokenXMint),
-			new PublicKey(tokenXProgramId),
-			new PublicKey(tokenYMint),
-			new PublicKey(tokenYProgramId),
-			depositAmountX,
-			depositAmountY,
-		);
+  const tokenXProgramId = await getTokenProgramId(
+    connection,
+    new PublicKey(tokenXMint),
+  );
+  const tokenYProgramId = await getTokenProgramId(
+    connection,
+    new PublicKey(tokenYMint),
+  );
 
-		const serializedTx = tx
-			.serialize({ requireAllSignatures: false })
-			.toString("base64");
+  try {
+    const vtx = await createPool(
+      new PublicKey(user),
+      program,
+      new PublicKey(tokenXMint),
+      new PublicKey(tokenXProgramId),
+      new PublicKey(tokenYMint),
+      new PublicKey(tokenYProgramId),
+      depositAmountX,
+      depositAmountY,
+      connection,
+    );
+
+		const serializedTx = Buffer.from(vtx.serialize()).toString("base64");
 
 		return {
 			success: true,

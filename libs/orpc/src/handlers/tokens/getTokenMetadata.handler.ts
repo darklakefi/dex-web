@@ -17,6 +17,7 @@ import type {
   GetTokenMetadataOutput,
 } from "../../schemas/tokens/getTokenMetadata.schema";
 import type { Token } from "./../../schemas/tokens/token.schema";
+import { isSolanaAddress } from "@dex-web/utils";
 
 const parseToken = (token: TokenMetadata): Token => ({
   address: token.address,
@@ -32,6 +33,12 @@ export const getTokenMetadataHandler = async (
   const { addresses, returnAsObject } = input;
 
   if (!addresses || addresses.length === 0) {
+    return returnAsObject ? ({} as Record<string, Token>) : [];
+  }
+
+  const solanaAddresses = addresses.filter(isSolanaAddress);
+
+  if (solanaAddresses.length === 0) {
     return returnAsObject ? ({} as Record<string, Token>) : [];
   }
 

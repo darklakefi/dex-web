@@ -17,6 +17,7 @@ import { createSerializer, useQueryStates } from "nuqs";
 import { Suspense } from "react";
 import useLocalStorageState from "use-local-storage-state";
 import { selectedTokensParsers } from "../_utils/searchParams";
+import type { RouteString } from "../_utils/types";
 import { TokenList } from "../[lang]/(swap)/_components/TokenList";
 import { NoResultFound } from "./NoResultFound";
 
@@ -75,7 +76,7 @@ export function SelectTokenModal({
   const handleClose = () => {
     const from = searchParams.get("from");
     if (from) {
-      router.push(from);
+      router.push(from as RouteString);
       return;
     }
     router.back();
@@ -120,7 +121,7 @@ export function SelectTokenModal({
         tokenAAddress: selectedTokenAddress,
         tokenBAddress: sellAddress,
       });
-      router.push(urlWithParams);
+      router.push(urlWithParams as RouteString);
     } else {
       const buyAddress =
         selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
@@ -128,7 +129,7 @@ export function SelectTokenModal({
         tokenAAddress: buyAddress,
         tokenBAddress: selectedTokenAddress,
       });
-      router.push(urlWithParams);
+      router.push(urlWithParams as RouteString);
     }
   };
 

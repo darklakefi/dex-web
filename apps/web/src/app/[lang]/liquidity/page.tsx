@@ -3,7 +3,9 @@ import { QueryClient } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
 import { tanstackClient } from "../../../../../../libs/orpc/src/client";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
-import { selectedTokensCache } from "../../_utils/searchParams";
+import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
+import { liquidityPageCache } from "../../_utils/searchParams";
+import { CreatePoolForm } from "./_components/CreatePoolForm";
 import { LiquidityForm } from "./_components/LiquidityForm";
 import { YourLiquidity } from "./_components/YourLiquidity";
 
@@ -12,13 +14,15 @@ export default async function Page({
 }: {
   searchParams: SearchParams;
 }) {
-  const parsedSearchParams = await selectedTokensCache.parse(searchParams);
+  const parsedSearchParams = await liquidityPageCache.parse(searchParams);
 
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery(
     tanstackClient.pools.getPinedPool.queryOptions({}),
   );
+
+  console.log("parsedSearchParams", parsedSearchParams);
 
   return (
     <div className="flex justify-center gap-12">
@@ -29,7 +33,7 @@ export default async function Page({
             <Hero
               className="gap-4"
               image="/images/waddles/pose4.png"
-              imageClassName="scale-x-[-1] "
+              imageClassName="scale-x-[-1]"
               imagePosition="end"
             >
               <div className="flex flex-col gap-3 uppercase">
@@ -47,11 +51,18 @@ export default async function Page({
           </Box>
           <div className="size-9" />
         </section>
-        <LiquidityForm />
-        <YourLiquidity
-          tokenAAddress={parsedSearchParams.tokenAAddress}
-          tokenBAddress={parsedSearchParams.tokenBAddress}
-        />
+        {parsedSearchParams.type === LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY && (
+          <>
+            <LiquidityForm />
+            <YourLiquidity
+              tokenAAddress={parsedSearchParams.tokenAAddress}
+              tokenBAddress={parsedSearchParams.tokenBAddress}
+            />
+          </>
+        )}
+        {parsedSearchParams.type === LIQUIDITY_PAGE_TYPE.CREATE_POOL && (
+          <CreatePoolForm />
+        )}
       </div>
       <div className="hidden max-w-xs md:block">
         <FeaturesAndTrendingPoolPanel />
