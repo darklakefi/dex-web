@@ -15,6 +15,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -29,6 +30,7 @@ import {
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
 import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
+import { isSquadsX } from "../../../_utils/isSquadsX";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
@@ -62,6 +64,8 @@ export function LiquidityForm() {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
+
+  const tx = useTranslations("liquidity");
 
   const [initialPriceTokenOrder, setInitialPriceDirection] = useState<
     "ab" | "ba"
@@ -197,9 +201,14 @@ export function LiquidityForm() {
 
       setTimeout(() => {
         dismissToast();
+        const squads = isSquadsX(wallet);
         toast({
-          description: `Pool created successfully! Token A: ${form.state.values.tokenAAmount}, Token B: ${form.state.values.tokenBAmount}`,
-          title: "Pool Created",
+          description: squads
+            ? tx("squadsX.responseStatus.confirmed.description")
+            : `Pool created successfully! Token A: ${form.state.values.tokenAAmount}, Token B: ${form.state.values.tokenBAmount}`,
+          title: squads
+            ? tx("squadsX.responseStatus.confirmed.title")
+            : "Pool Created",
           variant: "success",
         });
         resetCreateState();
@@ -209,9 +218,14 @@ export function LiquidityForm() {
     } catch (error) {
       console.error("Pool creation signing error:", error);
       dismissToast();
+      const squads = isSquadsX(wallet);
       toast({
-        description: `${error instanceof Error ? error.message : "Unknown error occurred"}`,
-        title: "Pool Creation Error",
+        description: squads
+          ? tx("squadsX.responseStatus.failed.description")
+          : `${error instanceof Error ? error.message : "Unknown error occurred"}`,
+        title: squads
+          ? tx("squadsX.responseStatus.failed.title")
+          : "Pool Creation Error",
         variant: "error",
       });
       resetCreateState();
@@ -328,13 +342,17 @@ export function LiquidityForm() {
           if (response.error) {
             dismissToast();
             setLiquidityStep(0);
+            const squads = isSquadsX(wallet);
             toast({
-              description: `Transaction failed: ${response.error}`,
-              title: "Liquidity Transaction Failed",
+              description: squads
+                ? `Transaction failed in Squads. Please review the proposal in the Squads app.`
+                : `Transaction failed: ${response.error}`,
+              title: squads
+                ? "Proposal failed"
+                : "Liquidity Transaction Failed",
               variant: "error",
             });
 
-            // Track liquidity failed
             const tokenAAmount = Number(
               form.state.values.tokenAAmount.replace(/,/g, ""),
             );
@@ -356,7 +374,6 @@ export function LiquidityForm() {
             dismissToast();
             setLiquidityStep(0);
 
-            // Track liquidity confirmed
             const tokenAAmount = Number(
               form.state.values.tokenAAmount.replace(/,/g, ""),
             );
@@ -373,6 +390,7 @@ export function LiquidityForm() {
               transactionHash: signature,
             });
 
+            const squads = isSquadsX(wallet);
             toast({
               customAction: (
                 <Text
@@ -389,13 +407,16 @@ export function LiquidityForm() {
               description: (
                 <div className="flex flex-col gap-1">
                   <Text.Body2>
-                    ADDED LIQUIDITY: {form.state.values.tokenAAmount}{" "}
-                    {tokenADetails?.symbol} + {form.state.values.tokenBAmount}{" "}
-                    {tokenBDetails?.symbol}
+                    {squads
+                      ? `Transaction initiated. You can now cast votes for this proposal on the Squads app.`
+                      : `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}. Transaction: ${signature}`}
                   </Text.Body2>
                 </div>
               ),
-              title: "Liquidity Added Successfully",
+
+              title: squads
+                ? "Proposal created"
+                : "Liquidity Added Successfully",
               variant: "success",
             });
             refetchBuyTokenAccount();
@@ -407,9 +428,12 @@ export function LiquidityForm() {
         if (response.status === "failed") {
           dismissToast();
           setLiquidityStep(0);
+          const squads = isSquadsX(wallet);
           toast({
-            description: `Transaction failed: ${response.error || "Unknown error"}`,
-            title: "Liquidity Transaction Failed",
+            description: squads
+              ? `Transaction failed in Squads. Please review the proposal in the Squads app.`
+              : `Transaction failed: ${response.error || "Unknown error"}`,
+            title: squads ? "Proposal failed" : "Liquidity Transaction Failed",
             variant: "error",
           });
           return;
@@ -465,7 +489,6 @@ export function LiquidityForm() {
     });
     setLiquidityStep(1);
 
-    // Track liquidity addition initiated
     const tokenAAmount = Number(
       form.state.values.tokenAAmount.replace(/,/g, ""),
     );
@@ -524,7 +547,6 @@ export function LiquidityForm() {
         await client.liquidity.createLiquidityTransaction(requestPayload);
 
       if (response.success && response.transaction) {
-        // Track liquidity transaction created
         trackLiquidity({
           action: "add",
           amountA: buyAmount,
@@ -553,7 +575,6 @@ export function LiquidityForm() {
         variant: "error",
       });
 
-      // Track liquidity error
       trackError({
         context: "liquidity_add",
         details: {
