@@ -6,7 +6,7 @@ import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Transaction } from "@solana/web3.js";
+import { Transaction, VersionedTransaction, VersionedMessage } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -161,8 +161,30 @@ export function SwapForm() {
 				unsignedTransaction,
 				"base64",
 			);
-			const transactionJson = unsignedTransactionBuffer;
-			const transaction = Transaction.from(transactionJson);
+
+			let transaction: VersionedTransaction | Transaction;
+			try {
+				transaction = VersionedTransaction.deserialize(
+					unsignedTransactionBuffer,
+				);
+			} catch (versionedError) {
+				if (versionedError.message.includes("Expected signatures length")) {
+					try {
+						const version = unsignedTransactionBuffer[0];
+						if (version === 0) {
+							const messageBuffer = unsignedTransactionBuffer.slice(1);
+							const message = VersionedMessage.deserialize(messageBuffer);
+							transaction = new VersionedTransaction(message);
+						} else {
+							throw new Error("Not a version 0 transaction");
+						}
+					} catch (fixError) {
+						transaction = Transaction.from(unsignedTransactionBuffer);
+					}
+				} else {
+					transaction = Transaction.from(unsignedTransactionBuffer);
+				}
+			}
 
 			const signedTransaction = await signTransaction(transaction);
 
@@ -180,7 +202,10 @@ export function SwapForm() {
 				toToken: tokenBAddress || "",
 			});
 			const signedTransactionBase64 = Buffer.from(
-				signedTransaction.serialize(),
+				signedTransaction.serialize({
+					requireAllSignatures: false,
+					verifySignatures: false,
+				}),
 			).toString("base64");
 
 			setTrackDetails({
@@ -401,15 +426,23 @@ export function SwapForm() {
 
 			const { tokenXAddress, tokenYAddress } = sortedTokens;
 
+			const sellTokenDecimals =
+				sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
+			const buyTokenDecimals = buyTokenAccount?.tokenAccounts[0]?.decimals || 0;
+
+			const sellAmountRaw = BigNumber(sellAmount)
+				.multipliedBy(BigNumber(10).pow(sellTokenDecimals))
+				.integerValue();
+
+			const buyAmountWithSlippage = BigNumber(buyAmount)
+				.multipliedBy(BigNumber(10).pow(buyTokenDecimals))
+				.multipliedBy(1 - Number(slippage || 0) / 100)
+				.integerValue();
+
 			const response = await client.dexGateway.getSwap({
-				amountIn: BigInt(sellAmount),
+				amountIn: BigInt(sellAmountRaw.toString()),
 				isSwapXToY: isXtoY,
-				minOut: BigInt(
-					BigNumber(buyAmount)
-						.multipliedBy(1 - Number(slippage || 0) / 100)
-						.integerValue()
-						.toString(),
-				),
+				minOut: BigInt(buyAmountWithSlippage.toString()),
 				tokenMintX: tokenXAddress,
 				tokenMintY: tokenYAddress,
 				userAddress: publicKey.toBase58(),

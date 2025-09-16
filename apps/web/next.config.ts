@@ -53,7 +53,20 @@ const nextConfig = {
 	},
 
 	webpack(config, { isServer }) {
-		// Add IgnorePlugin for server-only modules in client builds
+		config.infrastructureLogging = {
+			level: 'warn',
+			stream: process.stderr,
+			debug: false,
+		};
+		
+		const originalWarn = console.warn;
+		console.warn = (...args) => {
+			if (args[0]?.includes?.('PackFileCacheStrategy') && args[0]?.includes?.('Serializing big strings')) {
+				return;
+			}
+			originalWarn(...args);
+		};
+
 		if (!isServer) {
 			const webpack = require('webpack');
 			
@@ -81,6 +94,7 @@ const nextConfig = {
 				zlib: false,
 			};
 		}
+
 		config.module.rules.push({
 			test: /\.svg$/i,
 			use: ["@svgr/webpack"],
