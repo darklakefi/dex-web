@@ -1,28 +1,23 @@
-import { createClient } from "@connectrpc/connect";
-import { createGrpcTransport } from "@connectrpc/connect-node";
-import {
-  DarklakeIntegrationsService,
-  SolanaGatewayService,
-} from "./generated/api_connect";
-
-const grpcClientUrl = `http://${process.env.GATEWAY_HOST}:${process.env.GATEWAY_PORT || 50051}`;
-
-export function createSolanaGatewayClient(baseUrl: string = grpcClientUrl) {
-  const transport = createGrpcTransport({
-    baseUrl,
-    httpVersion: "1.1",
-  });
-
-  return createClient(SolanaGatewayService, transport);
+function isServer() {
+  return typeof window === "undefined";
 }
 
-export function createDarklakeIntegrationsClient(
-  baseUrl: string = process.env.GRPC_ENDPOINT!,
-) {
-  const transport = createGrpcTransport({
-    baseUrl,
-    httpVersion: "1.1",
-  });
+export async function createSolanaGatewayClient(baseUrl?: string) {
+  if (isServer()) {
+    const serverClient = await import("./client-server");
+    return serverClient.createSolanaGatewayClient(baseUrl);
+  } else {
+    const webClient = await import("./client-web");
+    return webClient.createSolanaGatewayClient(baseUrl);
+  }
+}
 
-  return createClient(DarklakeIntegrationsService, transport);
+export async function createDarklakeIntegrationsClient(baseUrl?: string) {
+  if (isServer()) {
+    const serverClient = await import("./client-server");
+    return serverClient.createDarklakeIntegrationsClient(baseUrl);
+  } else {
+    const webClient = await import("./client-web");
+    return webClient.createDarklakeIntegrationsClient(baseUrl);
+  }
 }

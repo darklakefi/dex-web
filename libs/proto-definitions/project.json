@@ -5,7 +5,7 @@
       "options": {
         "commands": [
           "mkdir -p libs/grpc-client/src/generated",
-          "npx protoc --plugin=./node_modules/.bin/protoc-gen-es --plugin=./node_modules/.bin/protoc-gen-connect-es --es_out=libs/grpc-client/src/generated --connect-es_out=libs/grpc-client/src/generated --proto_path=libs/proto-definitions/proto libs/proto-definitions/proto/api.proto"
+          "npx protoc --plugin=./node_modules/.bin/protoc-gen-es --es_out=libs/grpc-client/src/generated --es_opt=target=ts --proto_path=libs/proto-definitions/proto libs/proto-definitions/proto/api.proto libs/proto-definitions/proto/validate/validate.proto"
         ],
         "cwd": ".",
         "parallel": false

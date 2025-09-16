@@ -1,13 +1,11 @@
-// Export client creation functions (these use dynamic imports for universal compatibility)
+// Export only the types and enums needed by client-side code
 export {
-  createDarklakeIntegrationsClient,
-  createSolanaGatewayClient,
-} from "./client";
+  Network,
+  TradeStatus,
+} from "./generated/api_pb";
 
-// Export types only (no service implementations to avoid bundling server dependencies)
-export type { SolanaGatewayService, DarklakeIntegrationsService } from "./generated/api_pb";
-
-export {
+// Export type-only references to avoid importing the actual service implementations
+export type {
   CheckTradeStatusRequestSchema as CheckTradeStatusRequestPB,
   CheckTradeStatusResponseSchema as CheckTradeStatusResponsePB,
   CreateCustomTokenRequestSchema as CreateCustomTokenRequestPB,
@@ -28,14 +26,12 @@ export {
   GetTokenMetadataResponseSchema as GetTokenMetadataResponsePB,
   GetTradesListByUserRequestSchema as GetTradesListByUserRequestPB,
   GetTradesListByUserResponseSchema as GetTradesListByUserResponsePB,
-  Network,
   QuoteRequestSchema as QuoteRequestPB,
   QuoteResponseSchema as QuoteResponsePB,
   SendSignedTransactionRequestSchema as SendSignedTransactionRequestPB,
   SendSignedTransactionResponseSchema as SendSignedTransactionResponsePB,
   TokenMetadataSchema as TokenMetadataPB,
   TradeSchema as TradePB,
-  TradeStatus,
-  DarklakeIntegrationsService,
   SolanaGatewayService,
+  DarklakeIntegrationsService,
 } from "./generated/api_pb";

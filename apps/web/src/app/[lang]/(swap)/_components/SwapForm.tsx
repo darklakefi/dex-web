@@ -1,6 +1,6 @@
 "use client";
 
-import { TradeStatus } from "@dex-web/grpc-client";
+import { TradeStatus } from "@dex-web/grpc-client/types";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Button, Text } from "@dex-web/ui";

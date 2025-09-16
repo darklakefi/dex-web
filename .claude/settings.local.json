@@ -23,7 +23,16 @@
       "Bash(npx tsc:*)",
       "Bash(grep:*)",
       "Bash(nx dev:*)",
-      "Bash(printenv)"
+      "Bash(printenv)",
+      "Bash(pnpm nx lint:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm info:*)",
+      "Bash(pnpm nx build:*)",
+      "Bash(pnpm nx run:*)",
+      "Bash(pnpm view:*)",
+      "Bash(npx @connectrpc/connect-migrate:*)",
+      "Bash(pnpm next build:*)",
+      "Bash(pnpm dev:*)"
     ],
     "deny": [],
     "ask": []
