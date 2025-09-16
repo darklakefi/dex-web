@@ -1,0 +1,378 @@
+syntax = "proto3";
+
+package darklake.v1;
+
+import "validate/validate.proto";
+
+// --------------------------------- ENUMS
+
+enum Network {
+    MAINNET_BETA = 0;
+    TESTNET      = 1;
+    DEVNET       = 2;
+}
+
+enum TradeStatus {
+    UNSIGNED  = 0;
+    SIGNED    = 1;
+    CONFIRMED = 2;
+    SETTLED   = 3;
+    SLASHED   = 4;
+    CANCELLED = 5;
+    FAILED    = 6;
+}
+
+// --------------------------------- MESSAGES
+message TokenMetadata {
+    string name     = 1;
+    string symbol   = 2;
+    uint32 decimals = 3;
+    string logo_uri = 4;
+    string address  = 5;
+}
+
+message Trade {
+    string trade_id           = 1;
+    string order_id           = 2;
+    string user_address       = 3;
+    TokenMetadata token_x     = 4;
+    TokenMetadata token_y     = 5;
+    uint64 amount_in          = 6;
+    uint64 minimal_amount_out = 7;
+    TradeStatus status        = 8;
+    string signature          = 9;
+    int64 created_at          = 10;
+    int64 updated_at          = 11;
+    bool is_swap_x_to_y       = 12;
+}
+
+message QuoteRequest {
+    string token_mint_x = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    string token_mint_y = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    uint64 amount_in = 3 [(validate.rules).uint64.gt = 0];
+    bool is_swap_x_to_y = 4;
+}
+
+message QuoteResponse {
+    string token_mint_x = 1;
+    string token_mint_y = 2;
+    bool is_swap_x_to_y = 3;
+    uint64 amount_in = 4;
+    uint64 amount_out = 5;
+    uint64 fee_amount = 6;
+    double fee_pct = 7;
+}
+
+message CreateUnsignedTransactionRequest {
+    string user_address = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    string token_mint_x = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    string token_mint_y = 3 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    uint64 amount_in   = 4 [(validate.rules).uint64.gt = 0];
+    uint64 min_out     = 5 [(validate.rules).uint64.gt = 0];
+    string tracking_id = 6 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 250
+    ];
+    bool is_swap_x_to_y = 7;
+    string ref_code = 8;
+    string label = 9 [
+        (validate.rules).string.max_len = 10,
+        (validate.rules).string.pattern = "^[A-Za-z0-9_-]*$"
+    ];
+}
+
+message CreateUnsignedTransactionResponse {
+    // Base64 encoded transaction
+    string unsigned_transaction = 1;
+    string order_id             = 2;
+    string trade_id             = 3;
+}
+
+message SendSignedTransactionRequest {
+    string signed_transaction = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.pattern = "^[A-Za-z0-9+/=_-]*$"
+    ];
+    string tracking_id = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 250
+    ];
+    string trade_id = 3 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 250,
+        (validate.rules).string.pattern = "^[A-Za-z0-9_]*$"
+    ];
+}
+
+message SendSignedTransactionResponse {
+    bool success               = 1;
+    string trade_id            = 2;
+    repeated string error_logs = 3;
+}
+
+message CheckTradeStatusRequest {
+    string tracking_id = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 250
+    ];
+    string trade_id = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 250,
+        (validate.rules).string.pattern = "^[A-Za-z0-9_]*$"
+    ];
+}
+
+message CheckTradeStatusResponse {
+    string trade_id    = 1;
+    TradeStatus status = 2;
+}
+
+message GetTradesListByUserRequest {
+    string user_address = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    int32 page_size   = 2;
+    int32 page_number = 3;
+}
+
+message GetTradesListByUserResponse {
+    repeated Trade trades = 1;
+    int32 total_pages     = 2;
+    int32 current_page    = 3;
+}
+
+message GetTokenMetadataRequest {
+    oneof search_by {
+        string token_address = 1 [
+            (validate.rules).string.min_len = 1,
+            (validate.rules).string.max_len = 44,
+            (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+        ];
+        string token_symbol = 2 [
+            (validate.rules).string.min_len = 1,
+            (validate.rules).string.max_len = 250
+        ];
+        string token_name = 3 [
+            (validate.rules).string.min_len = 1,
+            (validate.rules).string.max_len = 250
+        ];
+        string substring = 4 [
+            (validate.rules).string.min_len = 1,
+            (validate.rules).string.max_len = 250
+        ];
+    }
+}
+
+message GetTokenMetadataResponse {
+    TokenMetadata token_metadata = 1;
+}
+
+message TokenAddressesList {
+    repeated string token_addresses = 1 [
+        (validate.rules).repeated .min_items            = 1,
+        (validate.rules).repeated .items.string.min_len = 1,
+        (validate.rules).repeated .items.string.max_len = 44,
+        (validate.rules).repeated .items.string.pattern = "^[A-Za-z0-9]+$"
+    ];
+}
+
+message TokenSymbolsList {
+    repeated string token_symbols = 1 [
+        (validate.rules).repeated .min_items            = 1,
+        (validate.rules).repeated .items.string.min_len = 1,
+        (validate.rules).repeated .items.string.max_len = 250
+    ];
+}
+
+message TokenNamesList {
+    repeated string token_names = 1 [
+        (validate.rules).repeated .min_items            = 1,
+        (validate.rules).repeated .items.string.min_len = 1,
+        (validate.rules).repeated .items.string.max_len = 250
+    ];
+}
+
+message GetTokenMetadataListRequest {
+    oneof filter_by {
+        TokenAddressesList addresses_list = 1;
+        TokenSymbolsList symbols_list     = 2;
+        TokenNamesList names_list         = 3;
+        string substring = 6 [
+            (validate.rules).string.min_len = 1,
+            (validate.rules).string.max_len = 250
+        ];
+    }
+    int32 page_size   = 4;
+    int32 page_number = 5;
+}
+
+message GetTokenMetadataListResponse {
+    repeated TokenMetadata tokens = 1;
+    int32 total_pages             = 2;
+    int32 current_page            = 3;
+}
+
+// Custom Token Management Messages
+message CreateCustomTokenRequest {
+    string name = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 250
+    ];
+    string symbol = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 250
+    ];
+    uint32 decimals = 3 [(validate.rules).uint32.lte = 18];
+    string logo_uri = 4 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 500
+    ];
+    string address = 5 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+}
+
+message CreateCustomTokenResponse {
+    bool success                 = 1;
+    string message               = 2;
+    TokenMetadata token_metadata = 3;
+}
+
+message EditCustomTokenRequest {
+    string address = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    string name = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 250
+    ];
+    string symbol = 3 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 250
+    ];
+    uint32 decimals = 4 [(validate.rules).uint32.lte = 18];
+    string logo_uri = 5 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 500
+    ];
+}
+
+message EditCustomTokenResponse {
+    bool success                 = 1;
+    string message               = 2;
+    TokenMetadata token_metadata = 3;
+}
+
+message DeleteCustomTokenRequest {
+    string address = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+}
+
+message DeleteCustomTokenResponse {
+    bool success   = 1;
+    string message = 2;
+}
+
+message GetCustomTokensRequest {}
+
+message GetCustomTokensResponse {
+    repeated TokenMetadata tokens = 1;
+}
+
+message GetCustomTokenRequest {
+    string address = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+}
+
+message GetCustomTokenResponse {
+    TokenMetadata token_metadata = 1;
+}
+
+
+service SolanaGatewayService {
+    rpc CreateUnsignedTransaction(CreateUnsignedTransactionRequest)
+        returns (CreateUnsignedTransactionResponse);
+
+    rpc SendSignedTransaction(SendSignedTransactionRequest)
+        returns (SendSignedTransactionResponse);
+
+    rpc CheckTradeStatus(CheckTradeStatusRequest)
+        returns (CheckTradeStatusResponse);
+
+    rpc GetTradesListByUser(GetTradesListByUserRequest)
+        returns (GetTradesListByUserResponse);
+
+    rpc GetTokenMetadata(GetTokenMetadataRequest)
+        returns (GetTokenMetadataResponse);
+
+    rpc GetTokenMetadataList(GetTokenMetadataListRequest)
+        returns (GetTokenMetadataListResponse);
+
+    rpc CreateCustomToken(CreateCustomTokenRequest)
+        returns (CreateCustomTokenResponse);
+
+    rpc EditCustomToken(EditCustomTokenRequest)
+        returns (EditCustomTokenResponse);
+
+    rpc DeleteCustomToken(DeleteCustomTokenRequest)
+        returns (DeleteCustomTokenResponse);
+
+    rpc GetCustomTokens(GetCustomTokensRequest)
+        returns (GetCustomTokensResponse);
+
+    rpc GetCustomToken(GetCustomTokenRequest)
+        returns (GetCustomTokenResponse);
+}
+
+
+service DarklakeIntegrationsService {
+    rpc Quote(QuoteRequest)
+        returns (QuoteResponse);
+
+    rpc CreateUnsignedTransaction(CreateUnsignedTransactionRequest)
+        returns (CreateUnsignedTransactionResponse);
+
+    rpc SendSignedTransaction(SendSignedTransactionRequest)
+        returns (SendSignedTransactionResponse);
+
+    rpc CheckTradeStatus(CheckTradeStatusRequest)
+        returns (CheckTradeStatusResponse);
+
+    rpc GetTradesListByUser(GetTradesListByUserRequest)
+        returns (GetTradesListByUserResponse);
+
+}
+
+
