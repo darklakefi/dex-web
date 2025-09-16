@@ -3,26 +3,32 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import posthog from "posthog-js";
 
 Sentry.init({
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+	dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+	enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+	integrations: [
+		Sentry.replayIntegration(),
+		Sentry.browserTracingIntegration(),
+		Sentry.browserProfilingIntegration(),
+		...(typeof window !== "undefined" &&
+		process.env.NEXT_PUBLIC_POSTHOG_KEY &&
+		process.env.SENTRY_PROJECT_ID
+			? [
+					posthog.sentryIntegration({
+						organization: process.env.SENTRY_ORG || "darklake",
+						projectId: parseInt(process.env.SENTRY_PROJECT_ID),
+						severityAllowList: ["error", "info"],
+					}),
+				]
+			: []),
+	],
+	replaysOnErrorSampleRate: 1.0,
 
-  // Add optional integrations for additional features
-  integrations: [Sentry.replayIntegration()],
+	replaysSessionSampleRate: 0.1,
 
-  // Define how likely Replay events are sampled when an error occurs.
-  replaysOnErrorSampleRate: 1.0,
-
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
-
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
+	tracesSampleRate: 1.0,
 });
 
-// Export the hook required for navigation instrumentation
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
