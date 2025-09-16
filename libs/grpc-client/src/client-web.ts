@@ -5,7 +5,9 @@ import {
   SolanaGatewayService,
 } from "./generated/api_pb";
 
-const grpcClientUrl = `http://${process.env.GATEWAY_HOST}:${process.env.GATEWAY_PORT || 50051}`;
+const grpcClientUrl = `http://${process.env.GATEWAY_HOST}:${
+  process.env.GATEWAY_PORT || 50051
+}`;
 
 export function createSolanaGatewayClient(baseUrl: string = grpcClientUrl) {
   const transport = createGrpcWebTransport({
@@ -15,7 +17,7 @@ export function createSolanaGatewayClient(baseUrl: string = grpcClientUrl) {
 }
 
 export function createDarklakeIntegrationsClient(
-  baseUrl: string = process.env.GRPC_ENDPOINT!,
+  baseUrl: string = process.env.GRPC_ENDPOINT!
 ) {
   const transport = createGrpcWebTransport({
     baseUrl,

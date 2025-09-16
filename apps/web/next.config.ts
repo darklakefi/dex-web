@@ -7,111 +7,114 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
-	experimental: {
-		reactCompiler: false,
-		typedRoutes: true,
-	},
-	images: {
-		unoptimized: false,
-	},
-	logging: {
-		fetches: {
-			fullUrl: true,
-			hmrRefreshes: true,
-		},
-	},
-	nx: {
-		svgr: false,
-	},
-	outputFileTracingRoot: join(__dirname, "../../"),
-	serverExternalPackages: [
-		"pg",
-		"@grpc/grpc-js",
-		"@grpc/proto-loader",
-		"@connectrpc/connect-node",
-	],
-	turbopack: {
-		rules: {
-			"*.svg": {
-				as: "*.js",
-				loaders: [
-					{
-						loader: "@svgr/webpack",
-						options: {
-							icon: true,
-							typescript: true,
-						},
-					},
-				],
-			},
-		},
-	},
-	typescript: {
-		ignoreBuildErrors: true,
-		// Use the main tsconfig for Next.js builds
-		tsconfigPath: "./tsconfig.json",
-	},
+  experimental: {
+    reactCompiler: false,
+    typedRoutes: true,
+  },
+  images: {
+    unoptimized: false,
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
+      hmrRefreshes: true,
+    },
+  },
+  nx: {
+    svgr: false,
+  },
+  outputFileTracingRoot: join(__dirname, "../../"),
+  serverExternalPackages: [
+    "pg",
+    "@grpc/grpc-js",
+    "@grpc/proto-loader",
+    "@connectrpc/connect-node",
+  ],
+  turbopack: {
+    rules: {
+      "*.svg": {
+        as: "*.js",
+        loaders: [
+          {
+            loader: "@svgr/webpack",
+            options: {
+              icon: true,
+              typescript: true,
+            },
+          },
+        ],
+      },
+    },
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+    // Use the main tsconfig for Next.js builds
+    tsconfigPath: "./tsconfig.json",
+  },
 
-	webpack(config, { isServer }) {
-		config.infrastructureLogging = {
-			level: 'warn',
-			stream: process.stderr,
-			debug: false,
-		};
-		
-		const originalWarn = console.warn;
-		console.warn = (...args) => {
-			if (args[0]?.includes?.('PackFileCacheStrategy') && args[0]?.includes?.('Serializing big strings')) {
-				return;
-			}
-			originalWarn(...args);
-		};
+  webpack(config, { isServer }) {
+    config.infrastructureLogging = {
+      level: "warn",
+      stream: process.stderr,
+      debug: false,
+    };
 
-		if (!isServer) {
-			const webpack = require('webpack');
-			
-			config.plugins.push(
-				new webpack.NormalModuleReplacementPlugin(
-					/client-server$/,
-					'./client-server.browser.ts'
-				)
-			);
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      if (
+        args[0]?.includes?.("PackFileCacheStrategy") &&
+        args[0]?.includes?.("Serializing big strings")
+      ) {
+        return;
+      }
+      originalWarn(...args);
+    };
 
-			config.resolve.fallback = {
-				...config.resolve.fallback,
-				child_process: false,
-				dns: false,
-				fs: false,
-				http: false,
-				http2: false,
-				https: false,
-				net: false,
-				os: false,
-				pg: false,
-				"pg-native": false,
-				tls: false,
-				util: false,
-				zlib: false,
-			};
-		}
+    if (!isServer) {
+      const webpack = require("webpack");
 
-		config.module.rules.push({
-			test: /\.svg$/i,
-			use: ["@svgr/webpack"],
-		});
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /client-server$/,
+          "./client-server.browser.ts"
+        )
+      );
 
-		return config;
-	},
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        child_process: false,
+        dns: false,
+        fs: false,
+        http: false,
+        http2: false,
+        https: false,
+        net: false,
+        os: false,
+        pg: false,
+        "pg-native": false,
+        tls: false,
+        util: false,
+        zlib: false,
+      };
+    }
+
+    config.module.rules.push({
+      test: /\.svg$/i,
+      use: ["@svgr/webpack"],
+    });
+
+    return config;
+  },
 } satisfies NextConfig;
 
 const nxConfig = withNx(withNextIntl(nextConfig));
 
 export default withSentryConfig(nxConfig, {
-	automaticVercelMonitors: true,
-	disableLogger: true,
-	org: "darklake",
-	project: "darklake",
-	silent: !process.env.CI,
-	tunnelRoute: "/monitoring",
-	widenClientFileUpload: true,
+  automaticVercelMonitors: true,
+  disableLogger: true,
+  org: "darklake",
+  project: "darklake",
+  silent: !process.env.CI,
+  tunnelRoute: "/monitoring",
+  widenClientFileUpload: true,
 });

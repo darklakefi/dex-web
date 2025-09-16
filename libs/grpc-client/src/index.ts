@@ -5,8 +5,8 @@ export {
 } from "./client";
 
 // Export types only (no service implementations to avoid bundling server dependencies)
-export type { 
-  SolanaGatewayService, 
+export type {
+  SolanaGatewayService,
   DarklakeIntegrationsService,
   CheckTradeStatusRequest,
   CheckTradeStatusResponse,

@@ -7,7 +7,7 @@ import type {
 import { getDexGatewayClient } from "../../dex-gateway";
 
 export async function getTokenMetadataListHandler(
-  input: GetTokenMetadataListRequest,
+  input: GetTokenMetadataListRequest
 ): Promise<GetTokenMetadataListResponse> {
   try {
     const grpcClient = await getDexGatewayClient();

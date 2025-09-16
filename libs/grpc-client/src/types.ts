@@ -1,8 +1,5 @@
 // Export only the types and enums needed by client-side code
-export {
-  Network,
-  TradeStatus,
-} from "./generated/api_pb";
+export { Network, TradeStatus } from "./generated/api_pb";
 
 // Export type-only references to avoid importing the actual service implementations
 export type {

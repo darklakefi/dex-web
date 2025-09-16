@@ -3,7 +3,7 @@ import { getTokenDetailsInputSchema } from "../../schemas/tokens/getTokenDetails
 import { baseProcedure } from "../base.procedure";
 
 export const getTokenDetails = baseProcedure
-	.input(getTokenDetailsInputSchema)
-	.handler(async ({ input }) => {
-		return await getTokenDetailsHandler(input);
-	});
+  .input(getTokenDetailsInputSchema)
+  .handler(async ({ input }) => {
+    return await getTokenDetailsHandler(input);
+  });

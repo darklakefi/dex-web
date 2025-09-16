@@ -27,7 +27,7 @@ const parseToken = (token: TokenMetadata): Token => ({
 });
 
 export const getTokenMetadataHandler = async (
-  input: GetTokenMetadataInput,
+  input: GetTokenMetadataInput
 ): Promise<GetTokenMetadataOutput> => {
   const { addresses, returnAsObject } = input;
 
@@ -49,7 +49,7 @@ export const getTokenMetadataHandler = async (
     });
 
     const notFoundTokens = addresses.filter(
-      (address) => !tokens.some((token) => token.address === address),
+      (address) => !tokens.some((token) => token.address === address)
     );
     if (notFoundTokens.length > 0) {
       const tokensFromChain = await fetchTokenMetadataFromChain(notFoundTokens);
@@ -57,13 +57,10 @@ export const getTokenMetadataHandler = async (
     }
 
     if (returnAsObject) {
-      return tokens.reduce(
-        (acc, token) => {
-          acc[token.address] = parseToken(token);
-          return acc;
-        },
-        {} as Record<string, Token>,
-      );
+      return tokens.reduce((acc, token) => {
+        acc[token.address] = parseToken(token);
+        return acc;
+      }, {} as Record<string, Token>);
     }
 
     return tokens.map(parseToken);
@@ -74,7 +71,7 @@ export const getTokenMetadataHandler = async (
 };
 
 async function fetchTokenMetadataFromChain(
-  tokenAddress: string[],
+  tokenAddress: string[]
 ): Promise<TokenMetadata[]> {
   const helius = getHelius();
   const rpc = new Connection(helius.endpoint);
@@ -83,17 +80,16 @@ async function fetchTokenMetadataFromChain(
   try {
     const digitalAsset = await fetchAllDigitalAsset(
       umi,
-      tokenAddress.map((address) => publicKey(address)),
+      tokenAddress.map((address) => publicKey(address))
     );
-    return digitalAsset.map(
-      (asset) =>
-        create(TokenMetadataPB, {
-          address: asset.mint.publicKey.toString(),
-          decimals: asset.mint.decimals,
-          logoUri: "",
-          name: asset.metadata.name,
-          symbol: asset.metadata.symbol,
-        }),
+    return digitalAsset.map((asset) =>
+      create(TokenMetadataPB, {
+        address: asset.mint.publicKey.toString(),
+        decimals: asset.mint.decimals,
+        logoUri: "",
+        name: asset.metadata.name,
+        symbol: asset.metadata.symbol,
+      })
     );
   } catch (_error) {
     return [];

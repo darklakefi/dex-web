@@ -7,7 +7,7 @@ import type {
 import { getDexGatewayClient } from "../../dex-gateway";
 
 export async function checkTradeStatusHandler(
-  input: CheckTradeStatusRequest,
+  input: CheckTradeStatusRequest
 ): Promise<CheckTradeStatusResponse> {
   const grpcClient = await getDexGatewayClient();
   const response = await grpcClient.checkTradeStatus(input);

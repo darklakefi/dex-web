@@ -4,7 +4,7 @@ import type { GetTradesListByUserRequest } from "@dex-web/grpc-client";
 import { getDexGatewayClient } from "../../dex-gateway";
 
 export async function getTradesListByUserHandler(
-  input: GetTradesListByUserRequest,
+  input: GetTradesListByUserRequest
 ) {
   try {
     const grpcClient = await getDexGatewayClient();
