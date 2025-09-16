@@ -5,7 +5,22 @@ export {
 } from "./client";
 
 // Export types only (no service implementations to avoid bundling server dependencies)
-export type { SolanaGatewayService, DarklakeIntegrationsService } from "./generated/api_pb";
+export type { 
+  SolanaGatewayService, 
+  DarklakeIntegrationsService,
+  CheckTradeStatusRequest,
+  CheckTradeStatusResponse,
+  CreateUnsignedTransactionRequest,
+  CreateUnsignedTransactionResponse,
+  GetTradesListByUserRequest,
+  GetTradesListByUserResponse,
+  GetTokenMetadataListRequest,
+  GetTokenMetadataListResponse,
+  SendSignedTransactionRequest,
+  SendSignedTransactionResponse,
+  TokenMetadata,
+  Trade,
+} from "./generated/api_pb";
 
 export {
   CheckTradeStatusRequestSchema as CheckTradeStatusRequestPB,
@@ -36,6 +51,4 @@ export {
   TokenMetadataSchema as TokenMetadataPB,
   TradeSchema as TradePB,
   TradeStatus,
-  DarklakeIntegrationsService,
-  SolanaGatewayService,
 } from "./generated/api_pb";

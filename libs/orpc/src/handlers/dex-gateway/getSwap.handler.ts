@@ -1,20 +1,19 @@
 "use server";
 
-import type { PartialMessage } from "@bufbuild/protobuf";
-import type { CreateUnsignedTransactionRequestPB } from "@dex-web/grpc-client";
+import type { CreateUnsignedTransactionRequest } from "@dex-web/grpc-client";
 import { getDexGatewayClient } from "../../dex-gateway";
 import type { Token } from "../../schemas/tokens/token.schema";
 import { toRawUnits } from "../../utils/solana";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
-export async function getSwapHandler(input: PartialMessage<CreateUnsignedTransactionRequestPB>) {
+export async function getSwapHandler(input: CreateUnsignedTransactionRequest) {
   try {
-    const grpcClient = getDexGatewayClient();
+    const grpcClient = await getDexGatewayClient();
 
     const { isSwapXToY } = input;
-    
+
     if (!input.tokenMintX || !input.tokenMintY) {
-      throw new Error('Token mint addresses are required');
+      throw new Error("Token mint addresses are required");
     }
 
     const tokenMetadata = (await getTokenMetadataHandler({
@@ -32,8 +31,12 @@ export async function getSwapHandler(input: PartialMessage<CreateUnsignedTransac
       [amountInDecimals, minOutDecimals] = [minOutDecimals, amountInDecimals];
     }
 
-    input.amountIn = BigInt(toRawUnits(Number(input.amountIn), amountInDecimals).toFixed(0));
-    input.minOut = BigInt(toRawUnits(Number(input.minOut), minOutDecimals).toFixed(0));
+    input.amountIn = BigInt(
+      toRawUnits(Number(input.amountIn), amountInDecimals).toFixed(0),
+    );
+    input.minOut = BigInt(
+      toRawUnits(Number(input.minOut), minOutDecimals).toFixed(0),
+    );
 
     const swapResponse = await grpcClient.createUnsignedTransaction(input);
 

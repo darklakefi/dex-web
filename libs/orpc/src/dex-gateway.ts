@@ -1,14 +1,12 @@
-import type { Client } from "@connectrpc/connect";
 import {
   createSolanaGatewayClient,
-  type SolanaGatewayService,
-} from "@dex-web/grpc-client/server";
+} from "@dex-web/grpc-client";
 
-let dexGatewayClientInstance: Client<typeof SolanaGatewayService> | null = null;
+let dexGatewayClientInstance: Awaited<ReturnType<typeof createSolanaGatewayClient>> | null = null;
 
-export function getDexGatewayClient(): Client<typeof SolanaGatewayService> {
+export async function getDexGatewayClient(): Promise<Awaited<ReturnType<typeof createSolanaGatewayClient>>> {
   if (!dexGatewayClientInstance) {
-    dexGatewayClientInstance = createSolanaGatewayClient();
+    dexGatewayClientInstance = await createSolanaGatewayClient();
   }
   return dexGatewayClientInstance;
 }

@@ -1,5 +1,7 @@
 "use server";
 
+import { create } from "@bufbuild/protobuf";
+import type { TokenMetadata } from "@dex-web/grpc-client";
 import { TokenMetadataPB } from "@dex-web/grpc-client";
 import {
   fetchAllDigitalAsset,
@@ -16,7 +18,7 @@ import type {
 } from "../../schemas/tokens/getTokenMetadata.schema";
 import type { Token } from "./../../schemas/tokens/token.schema";
 
-const parseToken = (token: TokenMetadataPB): Token => ({
+const parseToken = (token: TokenMetadata): Token => ({
   address: token.address,
   decimals: token.decimals,
   imageUrl: token.logoUri,
@@ -33,7 +35,7 @@ export const getTokenMetadataHandler = async (
     return returnAsObject ? ({} as Record<string, Token>) : [];
   }
 
-  const grpcClient = getDexGatewayClient();
+  const grpcClient = await getDexGatewayClient();
   try {
     const { tokens } = await grpcClient.getTokenMetadataList({
       filterBy: {
@@ -73,7 +75,7 @@ export const getTokenMetadataHandler = async (
 
 async function fetchTokenMetadataFromChain(
   tokenAddress: string[],
-): Promise<TokenMetadataPB[]> {
+): Promise<TokenMetadata[]> {
   const helius = getHelius();
   const rpc = new Connection(helius.endpoint);
   const umi = createUmi(rpc);
@@ -85,7 +87,7 @@ async function fetchTokenMetadataFromChain(
     );
     return digitalAsset.map(
       (asset) =>
-        new TokenMetadataPB({
+        create(TokenMetadataPB, {
           address: asset.mint.publicKey.toString(),
           decimals: asset.mint.decimals,
           logoUri: "",

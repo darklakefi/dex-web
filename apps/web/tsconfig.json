@@ -31,6 +31,9 @@
       "path": "../../libs/orpc"
     },
     {
+      "path": "../../libs/grpc-client"
+    },
+    {
       "path": "../../libs/core"
     },
     {

@@ -1,14 +1,13 @@
 "use server";
 
-import type { PartialMessage } from "@bufbuild/protobuf";
-import type { GetTradesListByUserRequestPB } from "@dex-web/grpc-client";
+import type { GetTradesListByUserRequest } from "@dex-web/grpc-client";
 import { getDexGatewayClient } from "../../dex-gateway";
 
 export async function getTradesListByUserHandler(
-  input: PartialMessage<GetTradesListByUserRequestPB>,
+  input: GetTradesListByUserRequest,
 ) {
   try {
-    const grpcClient = getDexGatewayClient();
+    const grpcClient = await getDexGatewayClient();
     const tradesListResponse = await grpcClient.getTradesListByUser(input);
     return {
       data: tradesListResponse,

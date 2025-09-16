@@ -1,13 +1,12 @@
 "use server";
 
-import type { PartialMessage } from "@bufbuild/protobuf";
-import type { SendSignedTransactionRequestPB } from "@dex-web/grpc-client";
+import type { SendSignedTransactionRequest } from "@dex-web/grpc-client";
 import { getDexGatewayClient } from "../../dex-gateway";
 
 export async function submitSignedTransactionHandler(
-  input: PartialMessage<SendSignedTransactionRequestPB>,
+  input: SendSignedTransactionRequest,
 ) {
-  const grpcClient = getDexGatewayClient();
+  const grpcClient = await getDexGatewayClient();
 
   try {
     const requestWithTradeId = {

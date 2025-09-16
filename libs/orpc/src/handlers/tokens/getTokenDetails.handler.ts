@@ -21,7 +21,7 @@ export const getTokenDetailsHandler = async (
     };
   }
 
-  const grpcClient = getDexGatewayClient();
+  const grpcClient = await getDexGatewayClient();
   try {
     const { tokenMetadata } = await grpcClient.getTokenMetadata({
       searchBy: {

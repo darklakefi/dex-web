@@ -1,80 +1,85 @@
 "use server";
 
-import type { PartialMessage } from "@bufbuild/protobuf";
-import type { GetTokenMetadataListRequestPB } from "@dex-web/grpc-client";
+import type { GetTokenMetadataListRequest } from "@dex-web/grpc-client";
 import { tokensData, tokensDataMainnet } from "../../mocks/tokens.mock";
 import type {
-  GetTokensInput,
-  GetTokensOutput,
+	GetTokensInput,
+	GetTokensOutput,
 } from "../../schemas/tokens/getTokens.schema";
 import { getTokenMetadataListHandler } from "../dex-gateway/getTokenMetadataList.handler";
 
 export const getTokensHandler = async (
-  input: GetTokensInput,
+	input: GetTokensInput,
 ): Promise<GetTokensOutput> => {
-  const { limit = 10, query, offset = 0, allowList } = input;
-  const page = Math.floor(offset / limit) + 1;
+	const { limit = 10, query, offset = 0, allowList } = input;
+	const page = Math.floor(offset / limit) + 1;
 
-  const localTokensList =
-    process.env.NEXT_PUBLIC_NETWORK === "2" ? tokensData : tokensDataMainnet;
+	const localTokensList =
+		process.env.NEXT_PUBLIC_NETWORK === "2" ? tokensData : tokensDataMainnet;
 
-  const gatewayInput: PartialMessage<GetTokenMetadataListRequestPB> = {
-    filterBy: query
-      ? query.length > 30
-        ? {
-            case: "addressesList",
-            value: {
-              tokenAddresses: [query],
-            },
-          }
-        : {
-            case: "symbolsList",
-            value: {
-              tokenSymbols: [query],
-            },
-          }
-      : undefined,
-    pageNumber: page,
-    pageSize: limit,
-  };
-  const { tokens: gatewayTokensList } =
-    await getTokenMetadataListHandler(gatewayInput);
+	const gatewayInput: GetTokenMetadataListRequest = {
+		filterBy: query
+			? query.length > 30
+				? {
+						case: "addressesList",
+						value: {
+							tokenAddresses: [query],
+							$typeName: "darklake.v1.TokenAddressesList",
+						},
+					}
+				: {
+						case: "symbolsList",
+						value: {
+							tokenSymbols: [query],
+							$typeName: "darklake.v1.TokenSymbolsList",
+						},
+					}
+			: {
+					case: "substring",
+					value: "",
+				},
+		pageNumber: page,
+		pageSize: limit,
+		$typeName: "darklake.v1.GetTokenMetadataListRequest",
+	};
+	const { tokens: gatewayTokensList } =
+		await getTokenMetadataListHandler(gatewayInput);
 
-  const fullTokensList = [...localTokensList, ...gatewayTokensList];
-  if (!query) {
-    return {
-      hasMore: localTokensList.length > limit,
-      tokens: localTokensList.map((token) => ({
-        address: token.address,
-        decimals: token.decimals,
-        imageUrl: token.logoUri,
-        name: token.name,
-        symbol: token.symbol,
-      })),
-      total: localTokensList.length,
-    };
-  }
+	const fullTokensList = [...localTokensList, ...gatewayTokensList];
+	if (!query) {
+		return {
+			hasMore: localTokensList.length > limit,
+			tokens: localTokensList.map((token) => ({
+				address: token.address,
+				decimals: token.decimals,
+				imageUrl: token.logoUri,
+				name: token.name,
+				symbol: token.symbol,
+			})),
+			total: localTokensList.length,
+		};
+	}
 
-  const total = fullTokensList.length;
-  const hasMore = fullTokensList.length > limit;
+	const total = fullTokensList.length;
+	const hasMore = fullTokensList.length > limit;
 
-  const filteredTokensList = fullTokensList
-    .filter((token) => (allowList ? allowList.includes(token.address) : true))
-    .filter(
-      (token) =>
-        token.address.toUpperCase().includes(query.toUpperCase()) ||
-        token.symbol.toUpperCase().includes(query.toUpperCase()),
-    );
+	const filteredTokensList = fullTokensList
+		.filter((token) => (allowList ? allowList.includes(token.address) : true))
+		.filter(
+			(token) =>
+				token.address.toUpperCase().includes(query.toUpperCase()) ||
+				token.symbol.toUpperCase().includes(query.toUpperCase()),
+		);
 
-  return {
-    hasMore,
-    tokens: filteredTokensList.map((token) => ({
-      address: token.address,
-      decimals: token.decimals,
-      imageUrl: token.logoUri,
-      name: token.name,
-      symbol: token.symbol,
-    })),
-    total,
-  };
+	return {
+		hasMore,
+		tokens: filteredTokensList.map((token) => ({
+			address: token.address,
+			decimals: token.decimals,
+			imageUrl: token.logoUri,
+			name: token.name,
+			symbol: token.symbol,
+		})),
+		total,
+	};
 };
