@@ -32,10 +32,10 @@ export async function getSwapHandler(input: CreateUnsignedTransactionRequest) {
     }
 
     input.amountIn = BigInt(
-      toRawUnits(Number(input.amountIn), amountInDecimals).toFixed(0),
+      toRawUnits(Number(input.amountIn), amountInDecimals).integerValue().toFixed(0),
     );
     input.minOut = BigInt(
-      toRawUnits(Number(input.minOut), minOutDecimals).toFixed(0),
+      toRawUnits(Number(input.minOut), minOutDecimals).integerValue().toFixed(0),
     );
 
     const swapResponse = await grpcClient.createUnsignedTransaction(input);
