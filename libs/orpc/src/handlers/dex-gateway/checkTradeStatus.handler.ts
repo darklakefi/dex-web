@@ -1,14 +1,16 @@
 "use server";
 
-import { getDexGatewayClient } from "../../dex-gateway";
+import type { PartialMessage } from "@bufbuild/protobuf";
 import type {
-  CheckTradeStatusRequest,
-  CheckTradeStatusResponse,
-} from "../../dex-gateway.type";
+  CheckTradeStatusRequestPB,
+  CheckTradeStatusResponsePB,
+} from "@dex-web/grpc-client";
+import { getDexGatewayClient } from "../../dex-gateway";
 
-export async function checkTradeStatusHandler(input: CheckTradeStatusRequest) {
+export async function checkTradeStatusHandler(
+  input: PartialMessage<CheckTradeStatusRequestPB>,
+): Promise<CheckTradeStatusResponsePB> {
   const grpcClient = getDexGatewayClient();
-  const response: CheckTradeStatusResponse =
-    await grpcClient.checkTradeStatus(input);
+  const response = await grpcClient.checkTradeStatus(input);
   return response;
 }

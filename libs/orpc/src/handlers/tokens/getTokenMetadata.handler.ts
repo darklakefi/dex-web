@@ -1,5 +1,6 @@
 "use server";
 
+import { TokenMetadataPB } from "@dex-web/grpc-client";
 import {
   fetchAllDigitalAsset,
   mplTokenMetadata,
@@ -8,7 +9,6 @@ import { publicKey } from "@metaplex-foundation/umi";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { Connection } from "@solana/web3.js";
 import { getDexGatewayClient } from "../../dex-gateway";
-import type { TokenMetadata } from "../../dex-gateway.type";
 import { getHelius } from "../../getHelius";
 import type {
   GetTokenMetadataInput,
@@ -16,10 +16,10 @@ import type {
 } from "../../schemas/tokens/getTokenMetadata.schema";
 import type { Token } from "./../../schemas/tokens/token.schema";
 
-const parseToken = (token: TokenMetadata): Token => ({
+const parseToken = (token: TokenMetadataPB): Token => ({
   address: token.address,
   decimals: token.decimals,
-  imageUrl: token.logo_uri,
+  imageUrl: token.logoUri,
   name: token.name,
   symbol: token.symbol,
 });
@@ -36,11 +36,14 @@ export const getTokenMetadataHandler = async (
   const grpcClient = getDexGatewayClient();
   try {
     const { tokens } = await grpcClient.getTokenMetadataList({
-      addresses_list: {
-        token_addresses: addresses,
+      filterBy: {
+        case: "addressesList",
+        value: {
+          tokenAddresses: addresses,
+        },
       },
-      page_number: 1,
-      page_size: addresses.length,
+      pageNumber: 1,
+      pageSize: addresses.length,
     });
 
     const notFoundTokens = addresses.filter(
@@ -70,7 +73,7 @@ export const getTokenMetadataHandler = async (
 
 async function fetchTokenMetadataFromChain(
   tokenAddress: string[],
-): Promise<TokenMetadata[]> {
+): Promise<TokenMetadataPB[]> {
   const helius = getHelius();
   const rpc = new Connection(helius.endpoint);
   const umi = createUmi(rpc);
@@ -80,13 +83,16 @@ async function fetchTokenMetadataFromChain(
       umi,
       tokenAddress.map((address) => publicKey(address)),
     );
-    return digitalAsset.map((asset) => ({
-      address: asset.mint.publicKey.toString(),
-      decimals: asset.mint.decimals,
-      logo_uri: "",
-      name: asset.metadata.name,
-      symbol: asset.metadata.symbol,
-    }));
+    return digitalAsset.map(
+      (asset) =>
+        new TokenMetadataPB({
+          address: asset.mint.publicKey.toString(),
+          decimals: asset.mint.decimals,
+          logoUri: "",
+          name: asset.metadata.name,
+          symbol: asset.metadata.symbol,
+        }),
+    );
   } catch (_error) {
     return [];
   }

@@ -1,6 +1,7 @@
 "use server";
 
-import type { GetTokenMetadataListRequest } from "../../dex-gateway.type";
+import type { PartialMessage } from "@bufbuild/protobuf";
+import type { GetTokenMetadataListRequestPB } from "@dex-web/grpc-client";
 import { tokensData, tokensDataMainnet } from "../../mocks/tokens.mock";
 import type {
   GetTokensInput,
@@ -17,19 +18,24 @@ export const getTokensHandler = async (
   const localTokensList =
     process.env.NEXT_PUBLIC_NETWORK === "2" ? tokensData : tokensDataMainnet;
 
-  const gatewayInput: GetTokenMetadataListRequest = {
-    addresses_list: query
-      ? {
-          token_addresses: [query],
-        }
+  const gatewayInput: PartialMessage<GetTokenMetadataListRequestPB> = {
+    filterBy: query
+      ? query.length > 30
+        ? {
+            case: "addressesList",
+            value: {
+              tokenAddresses: [query],
+            },
+          }
+        : {
+            case: "symbolsList",
+            value: {
+              tokenSymbols: [query],
+            },
+          }
       : undefined,
-    page_number: page,
-    page_size: limit,
-    symbols_list: query
-      ? {
-          token_symbols: [query],
-        }
-      : undefined,
+    pageNumber: page,
+    pageSize: limit,
   };
   const { tokens: gatewayTokensList } =
     await getTokenMetadataListHandler(gatewayInput);
@@ -41,7 +47,7 @@ export const getTokensHandler = async (
       tokens: localTokensList.map((token) => ({
         address: token.address,
         decimals: token.decimals,
-        imageUrl: token.logo_uri,
+        imageUrl: token.logoUri,
         name: token.name,
         symbol: token.symbol,
       })),
@@ -65,7 +71,7 @@ export const getTokensHandler = async (
     tokens: filteredTokensList.map((token) => ({
       address: token.address,
       decimals: token.decimals,
-      imageUrl: token.logo_uri,
+      imageUrl: token.logoUri,
       name: token.name,
       symbol: token.symbol,
     })),

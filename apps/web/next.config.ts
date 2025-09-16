@@ -69,20 +69,6 @@ const nextConfig = {
       use: ["@svgr/webpack"],
     });
 
-    if (isServer) {
-      const CopyWebpackPlugin = require("copy-webpack-plugin");
-      config.plugins.push(
-        new CopyWebpackPlugin({
-          patterns: [
-            {
-              from: join(__dirname, "../../libs/orpc/src/proto"),
-              to: join(config.output.path || "", "chunks/proto"),
-            },
-          ],
-        }),
-      );
-    }
-
     return config;
   },
 } satisfies NextConfig;

@@ -1,0 +1,7 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "grpc-client",
+  "projectType": "library",
+  "sourceRoot": "libs/grpc-client/src",
+  "tags": []
+}

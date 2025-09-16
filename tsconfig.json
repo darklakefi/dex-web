@@ -25,6 +25,9 @@
     },
     {
       "path": "./libs/db"
+    },
+    {
+      "path": "./libs/grpc-client"
     }
   ]
 }

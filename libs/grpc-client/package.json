@@ -1,0 +1,12 @@
+{
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "name": "@dex-web/grpc-client",
+  "type": "module",
+  "version": "0.0.1",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.13.4",
+    "@grpc/proto-loader": "^0.8.0"
+  }
+}

@@ -28,6 +28,9 @@
   ],
   "references": [
     {
+      "path": "../grpc-client/tsconfig.lib.json"
+    },
+    {
       "path": "../utils/tsconfig.lib.json"
     },
     {

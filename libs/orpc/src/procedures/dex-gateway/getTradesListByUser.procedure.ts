@@ -1,7 +1,13 @@
 import BigNumber from "bignumber.js";
+import { z } from "zod";
 import { getTradesListByUserHandler } from "../../handlers/dex-gateway/getTradesListByUser.handler";
-import { getTradesListByUserInputSchema } from "../../schemas/dex-gateway/getTradesListByUser.schema";
 import { baseProcedure } from "../base.procedure";
+
+const getTradesListByUserInputSchema = z.object({
+  limit: z.number().default(10),
+  offset: z.number().default(0),
+  userAddress: z.string(),
+});
 
 export const getTradesListByUser = baseProcedure
   .input(getTradesListByUserInputSchema)
@@ -17,56 +23,60 @@ export const getTradesListByUser = baseProcedure
     }
 
     const response = await getTradesListByUserHandler({
-      page_number: offset / limit + 1,
-      page_size: limit,
-      user_address: userAddress,
+      pageNumber: offset / limit + 1,
+      pageSize: limit,
+      userAddress: userAddress,
     });
 
     const items = response?.data?.trades.map((trade) => {
-      const tokenIn = trade.is_swap_x_to_y ? trade.token_x : trade.token_y;
-      const tokenOut = trade.is_swap_x_to_y ? trade.token_y : trade.token_x;
-      const displayAmountIn = BigNumber(trade.amount_in).div(
+      const tokenIn = trade.isSwapXToY ? trade.tokenX : trade.tokenY;
+      const tokenOut = trade.isSwapXToY ? trade.tokenY : trade.tokenX;
+
+      if (!tokenIn || !tokenOut) {
+        return null;
+      }
+
+      const displayAmountIn = BigNumber(trade.amountIn).div(
         10 ** tokenIn.decimals,
       );
-      const displayMinimalAmountOut = BigNumber(trade.minimal_amount_out).div(
+      const displayMinimalAmountOut = BigNumber(trade.minimalAmountOut).div(
         10 ** tokenOut.decimals,
       );
 
       return {
-        amountIn: trade.amount_in,
-        createdAt: BigNumber(trade.created_at).div(1_000).toNumber(),
+        amountIn: trade.amountIn,
+        createdAt: BigNumber(trade.createdAt).div(1_000).toNumber(),
         displayAmountIn: displayAmountIn.toFixed(2).toString(),
         displayMinimalAmountOut: displayMinimalAmountOut.toFixed(2).toString(),
-        isSwapXToY: trade.is_swap_x_to_y,
-        minimalAmountOut: trade.minimal_amount_out,
-        orderId: trade.order_id,
+        isSwapXToY: trade.isSwapXToY,
+        minimalAmountOut: trade.minimalAmountOut,
+        orderId: trade.orderId,
         rate: displayMinimalAmountOut.div(displayAmountIn).toString(),
         signature: trade.signature,
         status: trade.status,
         tokenIn: {
           address: tokenIn.address,
           decimals: tokenIn.decimals,
-          imageUrl: tokenIn.logo_uri,
+          imageUrl: tokenIn.logoUri,
           name: tokenIn.name,
           symbol: tokenIn.symbol,
         },
         tokenOut: {
           address: tokenOut.address,
           decimals: tokenOut.decimals,
-          imageUrl: tokenOut.logo_uri,
+          imageUrl: tokenOut.logoUri,
           name: tokenOut.name,
           symbol: tokenOut.symbol,
         },
-        tradeId: trade.trade_id,
-        userAddress: trade.user_address,
+        tradeId: trade.tradeId,
+        userAddress: trade.userAddress,
       };
     });
 
     return {
       hasMore:
-        (response?.data?.total_pages ?? 0) >
-        (response?.data?.current_page ?? 0),
-      totals: (response?.data?.total_pages ?? 0) * limit,
-      trades: items ?? [],
+        (response?.data?.totalPages ?? 0) > (response?.data?.currentPage ?? 0),
+      totals: (response?.data?.totalPages ?? 0) * limit,
+      trades: items?.filter(Boolean) ?? [],
     };
   });

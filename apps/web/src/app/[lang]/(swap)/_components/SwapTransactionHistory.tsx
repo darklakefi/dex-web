@@ -36,7 +36,11 @@ export function SwapTransactionHistory() {
     });
 
     setHasMore(response.hasMore);
-    setTrades([...trades, ...response.trades]);
+    setTrades(
+      [...trades, ...response.trades].filter(
+        (trade): trade is SwapTransaction => trade !== null,
+      ) satisfies SwapTransaction[],
+    );
 
     if (response.hasMore) {
       setOffset(offset + limit);

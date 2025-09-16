@@ -1,6 +1,10 @@
+import { z } from "zod";
 import { checkTradeStatusHandler } from "../../handlers/dex-gateway/checkTradeStatus.handler";
-import { checkTradeStatusInputSchema } from "../../schemas/dex-gateway/checkTradeStatus.schema";
 import { baseProcedure } from "../base.procedure";
+
+const checkTradeStatusInputSchema = z.object({
+  tradeId: z.string(),
+});
 
 export const checkTradeStatus = baseProcedure
   .input(checkTradeStatusInputSchema)

@@ -23,3 +23,6 @@ Sentry.init({
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
 });
+
+// Export the hook required for navigation instrumentation
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

@@ -1,42 +1,47 @@
 "use server";
 
+import type { PartialMessage } from "@bufbuild/protobuf";
+import type { CreateUnsignedTransactionRequestPB } from "@dex-web/grpc-client";
 import { getDexGatewayClient } from "../../dex-gateway";
-import type { SwapRequest, SwapResponse } from "../../dex-gateway.type";
 import type { Token } from "../../schemas/tokens/token.schema";
 import { toRawUnits } from "../../utils/solana";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
-export async function getSwapHandler(input: SwapRequest) {
+export async function getSwapHandler(input: PartialMessage<CreateUnsignedTransactionRequestPB>) {
   try {
     const grpcClient = getDexGatewayClient();
 
-    const { is_swap_x_to_y } = input;
+    const { isSwapXToY } = input;
+    
+    if (!input.tokenMintX || !input.tokenMintY) {
+      throw new Error('Token mint addresses are required');
+    }
 
     const tokenMetadata = (await getTokenMetadataHandler({
-      addresses: [input.token_mint_x, input.token_mint_y],
+      addresses: [input.tokenMintX, input.tokenMintY],
       returnAsObject: true,
     })) as Record<string, Token>;
 
-    const tokenX = tokenMetadata[input.token_mint_x];
-    const tokenY = tokenMetadata[input.token_mint_y];
+    const tokenX = tokenMetadata[input.tokenMintX];
+    const tokenY = tokenMetadata[input.tokenMintY];
 
     let amountInDecimals = tokenX?.decimals ?? 0;
     let minOutDecimals = tokenY?.decimals ?? 0;
 
-    if (!is_swap_x_to_y) {
+    if (!isSwapXToY) {
       [amountInDecimals, minOutDecimals] = [minOutDecimals, amountInDecimals];
     }
 
-    input.amount_in = toRawUnits(input.amount_in, amountInDecimals).toNumber();
-    input.min_out = toRawUnits(input.min_out, minOutDecimals).toNumber();
+    input.amountIn = BigInt(toRawUnits(Number(input.amountIn), amountInDecimals).toFixed(0));
+    input.minOut = BigInt(toRawUnits(Number(input.minOut), minOutDecimals).toFixed(0));
 
-    const swapResponse: SwapResponse = await grpcClient.swap(input);
+    const swapResponse = await grpcClient.createUnsignedTransaction(input);
 
     return {
       success: true,
-      trackingId: input.tracking_id,
-      tradeId: swapResponse.trade_id,
-      unsignedTransaction: swapResponse.unsigned_transaction,
+      trackingId: input.trackingId,
+      tradeId: swapResponse.tradeId,
+      unsignedTransaction: swapResponse.unsignedTransaction,
     };
   } catch (error) {
     console.error("Error calling dex-gateway swap:", error);
