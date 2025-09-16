@@ -17,9 +17,11 @@ export const getTokensHandler = async (
 	const localTokensList =
 		process.env.NEXT_PUBLIC_NETWORK === "2" ? tokensData : tokensDataMainnet;
 
-	const gatewayInput: GetTokenMetadataListRequest = {
-		filterBy: query
-			? query.length > 30
+	let gatewayTokensList: any[] = [];
+	
+	if (query) {
+		const gatewayInput: GetTokenMetadataListRequest = {
+			filterBy: query.length > 30
 				? {
 						case: "addressesList",
 						value: {
@@ -33,17 +35,14 @@ export const getTokensHandler = async (
 							tokenSymbols: [query],
 							$typeName: "darklake.v1.TokenSymbolsList",
 						},
-					}
-			: {
-					case: "substring",
-					value: "",
-				},
-		pageNumber: page,
-		pageSize: limit,
-		$typeName: "darklake.v1.GetTokenMetadataListRequest",
-	};
-	const { tokens: gatewayTokensList } =
-		await getTokenMetadataListHandler(gatewayInput);
+					},
+			pageNumber: page,
+			pageSize: limit,
+			$typeName: "darklake.v1.GetTokenMetadataListRequest",
+		};
+		const response = await getTokenMetadataListHandler(gatewayInput);
+		gatewayTokensList = response.tokens;
+	}
 
 	const fullTokensList = [...localTokensList, ...gatewayTokensList];
 	if (!query) {
