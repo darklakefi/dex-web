@@ -1,23 +1,28 @@
+import {
+	createDarklakeIntegrationsClient as createDarklakeIntegrationsWebClient,
+	createSolanaGatewayClient as createSolanaGatewayWebClient,
+} from "./client-web";
+
 function isServer() {
-  return typeof window === "undefined";
+	return typeof window === "undefined";
 }
 
 export async function createSolanaGatewayClient(baseUrl?: string) {
-  if (isServer()) {
-    const serverClient = await import("./client-server");
-    return serverClient.createSolanaGatewayClient(baseUrl);
-  } else {
-    const webClient = await import("./client-web");
-    return webClient.createSolanaGatewayClient(baseUrl);
-  }
+	if (isServer()) {
+		const { createSolanaGatewayClient } = await import("./client-server");
+		return createSolanaGatewayClient(baseUrl);
+	} else {
+		return createSolanaGatewayWebClient(baseUrl);
+	}
 }
 
 export async function createDarklakeIntegrationsClient(baseUrl?: string) {
-  if (isServer()) {
-    const serverClient = await import("./client-server");
-    return serverClient.createDarklakeIntegrationsClient(baseUrl);
-  } else {
-    const webClient = await import("./client-web");
-    return webClient.createDarklakeIntegrationsClient(baseUrl);
-  }
+	if (isServer()) {
+		const { createDarklakeIntegrationsClient } = await import(
+			"./client-server"
+		);
+		return createDarklakeIntegrationsClient(baseUrl);
+	} else {
+		return createDarklakeIntegrationsWebClient(baseUrl);
+	}
 }
