@@ -319,10 +319,14 @@ export function CreatePoolForm() {
       });
 
       const response = await client.pools.createPoolTransaction({
-        // depositAmountX: BigNumber(depositAmountX).multipliedBy(10**tokenXDecimals).toFixed(0),
-        // depositAmountY: BigNumber(depositAmountY).multipliedBy(10**tokenYDecimals).toFixed(0),
-        depositAmountX: depositAmountX.toString(),
-        depositAmountY: depositAmountY.toString(),
+        depositAmountX: BigNumber(depositAmountX)
+          .multipliedBy(10 ** tokenXDecimals)
+          .toFixed(0),
+        depositAmountY: BigNumber(depositAmountY)
+          .multipliedBy(10 ** tokenYDecimals)
+          .toFixed(0),
+        // depositAmountX: depositAmountX.toString(),
+        // depositAmountY: depositAmountY.toString(),
         tokenXMint: tokenXAddress,
         tokenYMint: tokenYAddress,
         user: publicKey.toBase58(),
