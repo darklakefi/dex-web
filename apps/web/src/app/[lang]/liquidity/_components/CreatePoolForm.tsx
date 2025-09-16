@@ -223,7 +223,11 @@ export function CreatePoolForm() {
     }
   };
 
-  const handleCreatePool = async () => {
+  const handleCreatePool = async (
+    tokenAmountA: string,
+    tokenAmountB: string,
+    exchangeRate: string,
+  ) => {
     if (!publicKey) {
       toast({
         description: "Please connect your wallet to create a pool",
@@ -242,13 +246,9 @@ export function CreatePoolForm() {
       return;
     }
 
-    const tokenAAmount = Number(
-      form.state.values.tokenAAmount.replace(/,/g, ""),
-    );
-    const tokenBAmount = Number(
-      form.state.values.tokenBAmount.replace(/,/g, ""),
-    );
-    const initialPrice = Number(form.state.values.initialPrice || "1");
+    const tokenAAmount = Number(tokenAmountA.replace(/,/g, ""));
+    const tokenBAmount = Number(tokenAmountB.replace(/,/g, ""));
+    const initialPrice = Number(exchangeRate || "1");
 
     if (tokenAAmount <= 0 || tokenBAmount <= 0) {
       toast({
@@ -288,13 +288,41 @@ export function CreatePoolForm() {
       const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
-      const isTokenASellToken = tokenBAddress === tokenXAddress;
-      const depositAmountX = isTokenASellToken ? tokenAAmount : tokenBAmount;
-      const depositAmountY = isTokenASellToken ? tokenBAmount : tokenAAmount;
+      console.log("sortedTokens", {
+        tokenAAddress,
+        tokenAAmount,
+        tokenBAddress,
+        tokenBAmount,
+      });
+
+      const depositAmountX =
+        tokenXAddress === tokenAAddress ? tokenAAmount : tokenBAmount;
+      const tokenXDecimals =
+        tokenXAddress === tokenAAddress
+          ? tokenADetails?.decimals || 0
+          : tokenBDetails?.decimals || 0;
+      console.log("tokenXDecimals", {
+        depositAmountX,
+        tokenXAddress,
+        tokenXDecimals,
+      });
+      const depositAmountY =
+        tokenYAddress === tokenAAddress ? tokenAAmount : tokenBAmount;
+      const tokenYDecimals =
+        tokenYAddress === tokenAAddress
+          ? tokenADetails?.decimals || 0
+          : tokenBDetails?.decimals || 0;
+      console.log("tokenYDecimals", {
+        depositAmountY,
+        tokenYAddress,
+        tokenYDecimals,
+      });
 
       const response = await client.pools.createPoolTransaction({
-        depositAmountX: Math.floor(depositAmountX),
-        depositAmountY: Math.floor(depositAmountY),
+        // depositAmountX: BigNumber(depositAmountX).multipliedBy(10**tokenXDecimals).toFixed(0),
+        // depositAmountY: BigNumber(depositAmountY).multipliedBy(10**tokenYDecimals).toFixed(0),
+        depositAmountX: depositAmountX.toString(),
+        depositAmountY: depositAmountY.toString(),
         tokenXMint: tokenXAddress,
         tokenYMint: tokenYAddress,
         user: publicKey.toBase58(),
@@ -541,7 +569,7 @@ export function CreatePoolForm() {
                 {tokenBAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
               </Text.Body2>
               <SelectTokenButton
-                additionalParams={{ type: LIQUIDITY_PAGE_TYPE.CREATE_POOL }}
+                // additionalParams={{ type: LIQUIDITY_PAGE_TYPE.CREATE_POOL }}
                 returnUrl="liquidity"
                 type="sell"
               />
@@ -589,7 +617,7 @@ export function CreatePoolForm() {
                 {tokenAAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
               </Text.Body2>
               <SelectTokenButton
-                additionalParams={{ type: LIQUIDITY_PAGE_TYPE.CREATE_POOL }}
+                // additionalParams={{ type: LIQUIDITY_PAGE_TYPE.CREATE_POOL }}
                 returnUrl="liquidity"
                 type="buy"
               />
@@ -714,7 +742,13 @@ export function CreatePoolForm() {
                       createStep !== 0
                     }
                     loading={createStep !== 0}
-                    onClick={handleCreatePool}
+                    onClick={() =>
+                      handleCreatePool(
+                        values.tokenAAmount,
+                        values.tokenBAmount,
+                        values.initialPrice,
+                      )
+                    }
                   >
                     {getCreatePoolFormButtonMessage({
                       buyTokenAccount,
@@ -735,57 +769,61 @@ export function CreatePoolForm() {
         </div>
 
         <form.Subscribe selector={(state) => state.values}>
-          {(values) => (
-            <>
-              {!poolDetails &&
-                values.tokenAAmount !== "0" &&
-                values.tokenBAmount !== "0" && (
-                  <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
-                    <div className="flex items-center justify-between">
-                      <Text.Body2 className="text-green-300">
-                        Initial Deposit
-                      </Text.Body2>
-                      <div className="text-right">
-                        <Text.Body2 className="text-green-200">
-                          {numberFormatHelper({
-                            decimalScale: 5,
-                            trimTrailingZeros: true,
-                            value: values.tokenAAmount,
-                          })}{" "}
-                          {buyTokenAccount?.tokenAccounts[0]?.symbol}
+          {(values) => {
+            const tokenAAmount = values.tokenAAmount.replace(/,/g, "");
+            const tokenBAmount = values.tokenBAmount.replace(/,/g, "");
+            return (
+              <>
+                {!poolDetails &&
+                  BigNumber(tokenAAmount).gt(0) &&
+                  BigNumber(tokenBAmount).gt(0) && (
+                    <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
+                      <div className="flex items-center justify-between">
+                        <Text.Body2 className="text-green-300">
+                          Initial Deposit
+                        </Text.Body2>
+                        <div className="text-right">
+                          <Text.Body2 className="text-green-200">
+                            {numberFormatHelper({
+                              decimalScale: 5,
+                              trimTrailingZeros: true,
+                              value: tokenAAmount,
+                            })}{" "}
+                            {buyTokenAccount?.tokenAccounts[0]?.symbol}
+                          </Text.Body2>
+                          <Text.Body2 className="text-green-200">
+                            {numberFormatHelper({
+                              decimalScale: 5,
+                              trimTrailingZeros: true,
+                              value: tokenBAmount,
+                            })}{" "}
+                            {sellTokenAccount?.tokenAccounts[0]?.symbol}
+                          </Text.Body2>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <Text.Body2 className="text-green-300">
+                          Initial Price
                         </Text.Body2>
                         <Text.Body2 className="text-green-200">
-                          {numberFormatHelper({
-                            decimalScale: 5,
-                            trimTrailingZeros: true,
-                            value: values.tokenBAmount,
-                          })}{" "}
+                          1 {buyTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
+                          {values.initialPrice}{" "}
                           {sellTokenAccount?.tokenAccounts[0]?.symbol}
                         </Text.Body2>
                       </div>
-                    </div>
 
-                    <div className="flex items-center justify-between">
-                      <Text.Body2 className="text-green-300">
-                        Initial Price
-                      </Text.Body2>
-                      <Text.Body2 className="text-green-200">
-                        1 {buyTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
-                        {values.initialPrice}{" "}
-                        {sellTokenAccount?.tokenAccounts[0]?.symbol}
-                      </Text.Body2>
+                      <div className="flex items-center justify-between">
+                        <Text.Body2 className="text-green-300">
+                          Your Pool Share
+                        </Text.Body2>
+                        <Text.Body2 className="text-green-200">100%</Text.Body2>
+                      </div>
                     </div>
-
-                    <div className="flex items-center justify-between">
-                      <Text.Body2 className="text-green-300">
-                        Your Pool Share
-                      </Text.Body2>
-                      <Text.Body2 className="text-green-200">100%</Text.Body2>
-                    </div>
-                  </div>
-                )}
-            </>
-          )}
+                  )}
+              </>
+            );
+          }}
         </form.Subscribe>
       </Box>
       <div className="size-9" />

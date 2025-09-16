@@ -66,8 +66,8 @@ async function createPool(
   tokenXProgramId: PublicKey,
   tokenYMint: PublicKey,
   tokenYProgramId: PublicKey,
-  depositAmountX: number,
-  depositAmountY: number,
+  depositAmountX: string,
+  depositAmountY: string,
   connection: web3.Connection,
 ): Promise<VersionedTransaction> {
 	const [ammConfig] = PublicKey.findProgramAddressSync(
@@ -161,6 +161,7 @@ export async function createPoolTransactionHandler(
 ): Promise<CreatePoolTransactionOutput> {
   const { user, tokenXMint, tokenYMint, depositAmountX, depositAmountY } =
     input;
+  console.log("input", input);
 
 	const helius = getHelius();
 	const connection = helius.connection;

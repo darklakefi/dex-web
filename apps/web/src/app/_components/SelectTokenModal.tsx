@@ -104,7 +104,7 @@ export function SelectTokenModal({
     }
   };
 
-  const handleSelect = (
+  const handleSelectToken = (
     selectedToken: Token,
     e: React.MouseEvent<HTMLButtonElement>,
   ) => {
@@ -198,13 +198,13 @@ export function SelectTokenModal({
             <>
               {walletRecentSearches.length > 0 && (
                 <TokenList
-                  onSelect={handleSelect}
+                  onSelect={handleSelectToken}
                   title="Recently Searches"
                   tokens={walletRecentSearches}
                 />
               )}
               <TokenList
-                onSelect={handleSelect}
+                onSelect={handleSelectToken}
                 title="tokens by 24h volume"
                 tokens={data.tokens}
               />
@@ -213,14 +213,14 @@ export function SelectTokenModal({
 
           {!isInitialLoad ? (
             data.tokens.length > 0 ? (
-              <TokenList onSelect={handleSelect} tokens={data.tokens} />
+              <TokenList onSelect={handleSelectToken} tokens={data.tokens} />
             ) : (
               <NoResultFound
                 allowUnknownTokens={allowUnknownTokenReturnUrls.includes(
                   returnUrl,
                 )}
                 className="py-20"
-                handleSelect={handleSelect}
+                handleSelect={handleSelectToken}
                 search={debouncedQuery}
               />
             )

@@ -1,8 +1,8 @@
 import { z } from "zod/v4";
 
 export const createPoolTransactionInputSchema = z.object({
-  depositAmountX: z.number(),
-  depositAmountY: z.number(),
+  depositAmountX: z.string(),
+  depositAmountY: z.string(),
   tokenXMint: z.string(),
   tokenYMint: z.string(),
   user: z.string(),

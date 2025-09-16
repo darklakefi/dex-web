@@ -53,11 +53,14 @@ export const getTokenMetadataHandler = async (
       },
       pageNumber: 1,
       pageSize: addresses.length,
-    });
+    }).catch(() => {
+      return { tokens: [] as TokenMetadata[] };
+    });;
 
     const notFoundTokens = addresses.filter(
       (address) => !tokens.some((token) => token.address === address)
     );
+
     if (notFoundTokens.length > 0) {
       const tokensFromChain = await fetchTokenMetadataFromChain(notFoundTokens);
       tokens.push(...tokensFromChain);
