@@ -3,7 +3,9 @@
     "allow": [
       "Bash(pnpm lint:*)",
       "Bash(nx lint:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__filesystem__list_directory"
     ],
     "deny": [],
     "ask": []

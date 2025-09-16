@@ -76,7 +76,7 @@ const nextConfig = {
           patterns: [
             {
               from: join(__dirname, "../../libs/orpc/src/proto"),
-              to: join(config.output.path || "", "proto"),
+              to: join(config.output.path || "", "chunks/proto"),
             },
           ],
         }),
