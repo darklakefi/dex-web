@@ -1,12 +1,15 @@
 "use client";
 
-import { TradeStatus } from "@dex-web/grpc-client/types";
+import { TradeStatus } from "@dex-web/grpc-client";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
+import {
+	deserializeVersionedTransaction,
+	toRawUnitsBigint,
+} from "@dex-web/orpc/utils/solana";
 import { Box, Button, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Transaction, VersionedTransaction, VersionedMessage } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -157,35 +160,7 @@ export function SwapForm() {
 				variant: "loading",
 			});
 
-			const unsignedTransactionBuffer = Buffer.from(
-				unsignedTransaction,
-				"base64",
-			);
-
-			let transaction: VersionedTransaction | Transaction;
-			try {
-				transaction = VersionedTransaction.deserialize(
-					unsignedTransactionBuffer,
-				);
-			} catch (versionedError) {
-				if (versionedError.message.includes("Expected signatures length")) {
-					try {
-						const version = unsignedTransactionBuffer[0];
-						if (version === 0) {
-							const messageBuffer = unsignedTransactionBuffer.slice(1);
-							const message = VersionedMessage.deserialize(messageBuffer);
-							transaction = new VersionedTransaction(message);
-						} else {
-							throw new Error("Not a version 0 transaction");
-						}
-					} catch (fixError) {
-						transaction = Transaction.from(unsignedTransactionBuffer);
-					}
-				} else {
-					transaction = Transaction.from(unsignedTransactionBuffer);
-				}
-			}
-
+			const transaction = deserializeVersionedTransaction(unsignedTransaction);
 			const signedTransaction = await signTransaction(transaction);
 
 			const sellAmount = Number(
@@ -202,10 +177,7 @@ export function SwapForm() {
 				toToken: tokenBAddress || "",
 			});
 			const signedTransactionBase64 = Buffer.from(
-				signedTransaction.serialize({
-					requireAllSignatures: false,
-					verifySignatures: false,
-				}),
+				signedTransaction.serialize(),
 			).toString("base64");
 
 			setTrackDetails({
@@ -279,8 +251,8 @@ export function SwapForm() {
 		for (let i = 0; i < maxAttempts; i++) {
 			if (!trackingId || !tradeId) return;
 			const response = await client.dexGateway.checkTradeStatus({
-				tradeId,
 				trackingId,
+				tradeId,
 			});
 
 			dismissToast();
@@ -430,19 +402,19 @@ export function SwapForm() {
 				sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
 			const buyTokenDecimals = buyTokenAccount?.tokenAccounts[0]?.decimals || 0;
 
-			const sellAmountRaw = BigNumber(sellAmount)
-				.multipliedBy(BigNumber(10).pow(sellTokenDecimals))
-				.integerValue();
-
-			const buyAmountWithSlippage = BigNumber(buyAmount)
-				.multipliedBy(BigNumber(10).pow(buyTokenDecimals))
-				.multipliedBy(1 - Number(slippage || 0) / 100)
-				.integerValue();
+			const buyAmountRaw = toRawUnitsBigint(buyAmount, buyTokenDecimals);
+			const slippageFactor = BigNumber(1).minus(
+				BigNumber(slippage || 0).dividedBy(100),
+			);
+			const minOutRaw = BigNumber(buyAmountRaw.toString())
+				.multipliedBy(slippageFactor)
+				.integerValue(BigNumber.ROUND_DOWN);
 
 			const response = await client.dexGateway.getSwap({
-				amountIn: BigInt(sellAmountRaw.toString()),
+				amountIn: toRawUnitsBigint(sellAmount, sellTokenDecimals),
 				isSwapXToY: isXtoY,
-				minOut: BigInt(buyAmountWithSlippage.toString()),
+				minOut: BigInt(minOutRaw.toString()),
+				trackingId: `swap-${Date.now()}`,
 				tokenMintX: tokenXAddress,
 				tokenMintY: tokenYAddress,
 				userAddress: publicKey.toBase58(),
@@ -452,7 +424,7 @@ export function SwapForm() {
 				requestSigning(
 					response.unsignedTransaction,
 					response.tradeId,
-					response.trackingId ?? "",
+					response.trackingId,
 				);
 			} else {
 				throw new Error("Failed to create swap transaction");

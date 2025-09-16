@@ -1,4 +1,5 @@
 import { client } from "@dex-web/orpc";
+import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import {
   type PublicKey,
   type Transaction,
@@ -37,13 +38,7 @@ export async function requestLiquidityTransactionSigning({
       variant: "loading",
     });
 
-    const unsignedTransactionBuffer = Buffer.from(
-      unsignedTransaction,
-      "base64",
-    );
-    const transaction = VersionedTransaction.deserialize(
-      unsignedTransactionBuffer,
-    );
+    const transaction = deserializeVersionedTransaction(unsignedTransaction);
 
     const signedTransaction = await signTransaction(transaction);
     const signedTransactionBase64 = Buffer.from(

@@ -9,7 +9,8 @@ import type {
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import { convertToDecimal } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Transaction } from "@solana/web3.js";
+import { deserializeVersionedTransaction, parseFormAmount, toRawUnitsBigint } from "@dex-web/orpc/utils/solana";
+import { Transaction, VersionedTransaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -173,7 +174,7 @@ export function LiquidityForm() {
   const form = useAppForm(formConfig);
 
   const requestCreatePoolSigning = async (
-    transaction: Transaction,
+    transaction: Transaction | VersionedTransaction,
     _trackingId: string,
   ) => {
     try {
@@ -242,12 +243,8 @@ export function LiquidityForm() {
       return;
     }
 
-    const tokenAAmount = Number(
-      form.state.values.tokenAAmount.replace(/,/g, ""),
-    );
-    const tokenBAmount = Number(
-      form.state.values.tokenBAmount.replace(/,/g, ""),
-    );
+    const tokenAAmount = parseFormAmount(form.state.values.tokenAAmount);
+    const tokenBAmount = parseFormAmount(form.state.values.tokenBAmount);
     const initialPrice = Number(form.state.values.initialPrice || "1");
 
     if (tokenAAmount <= 0 || tokenBAmount <= 0) {
@@ -288,13 +285,21 @@ export function LiquidityForm() {
       const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
+      // Get token decimals for proper raw unit conversion
+      const sellTokenDecimals = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
+      const buyTokenDecimals = buyTokenAccount?.tokenAccounts[0]?.decimals || 0;
+      
       const isTokenASellToken = tokenBAddress === tokenXAddress;
       const depositAmountX = isTokenASellToken ? tokenAAmount : tokenBAmount;
       const depositAmountY = isTokenASellToken ? tokenBAmount : tokenAAmount;
+      
+      // Get the correct decimals based on which token is X and Y
+      const tokenXDecimals = isTokenASellToken ? buyTokenDecimals : sellTokenDecimals;
+      const tokenYDecimals = isTokenASellToken ? sellTokenDecimals : buyTokenDecimals;
 
       const response = await client.pools.createPoolTransaction({
-        depositAmountX: Math.floor(depositAmountX),
-        depositAmountY: Math.floor(depositAmountY),
+        depositAmountX: depositAmountX,
+        depositAmountY: depositAmountY,
         tokenXMint: tokenXAddress,
         tokenXProgramId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
         tokenYMint: tokenYAddress,
@@ -303,8 +308,7 @@ export function LiquidityForm() {
       } satisfies CreatePoolTransactionInput);
 
       if (response.success && response.transaction) {
-        const transactionBuffer = Buffer.from(response.transaction, "base64");
-        const transaction = Transaction.from(transactionBuffer);
+        const transaction = deserializeVersionedTransaction(response.transaction);
 
         await requestCreatePoolSigning(
           transaction,
@@ -353,12 +357,8 @@ export function LiquidityForm() {
               variant: "error",
             });
 
-            const tokenAAmount = Number(
-              form.state.values.tokenAAmount.replace(/,/g, ""),
-            );
-            const tokenBAmount = Number(
-              form.state.values.tokenBAmount.replace(/,/g, ""),
-            );
+            const tokenAAmount = parseFormAmount(form.state.values.tokenAAmount);
+            const tokenBAmount = parseFormAmount(form.state.values.tokenBAmount);
             trackLiquidity({
               action: "add",
               amountA: tokenAAmount,
@@ -374,12 +374,8 @@ export function LiquidityForm() {
             dismissToast();
             setLiquidityStep(0);
 
-            const tokenAAmount = Number(
-              form.state.values.tokenAAmount.replace(/,/g, ""),
-            );
-            const tokenBAmount = Number(
-              form.state.values.tokenBAmount.replace(/,/g, ""),
-            );
+            const tokenAAmount = parseFormAmount(form.state.values.tokenAAmount);
+            const tokenBAmount = parseFormAmount(form.state.values.tokenBAmount);
             trackLiquidity({
               action: "add",
               amountA: tokenAAmount,
@@ -489,12 +485,8 @@ export function LiquidityForm() {
     });
     setLiquidityStep(1);
 
-    const tokenAAmount = Number(
-      form.state.values.tokenAAmount.replace(/,/g, ""),
-    );
-    const tokenBAmount = Number(
-      form.state.values.tokenBAmount.replace(/,/g, ""),
-    );
+    const tokenAAmount = parseFormAmount(form.state.values.tokenAAmount);
+    const tokenBAmount = parseFormAmount(form.state.values.tokenBAmount);
     trackLiquidity({
       action: "add",
       amountA: tokenAAmount,
@@ -523,16 +515,20 @@ export function LiquidityForm() {
         throw new Error("Invalid token addresses after sorting");
       }
 
-      const sellAmount = Number(
-        form.state.values.tokenBAmount.replace(/,/g, ""),
-      );
-      const buyAmount = Number(
-        form.state.values.tokenAAmount.replace(/,/g, ""),
-      );
+      const sellAmount = parseFormAmount(form.state.values.tokenBAmount);
+      const buyAmount = parseFormAmount(form.state.values.tokenAAmount);
+
+      // Get token decimals for proper raw unit conversion
+      const sellTokenDecimals = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
+      const buyTokenDecimals = buyTokenAccount?.tokenAccounts[0]?.decimals || 0;
 
       const isTokenXSell = poolDetails?.tokenXMint === tokenBAddress;
       const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
       const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
+      
+      // Get the correct decimals based on which token is X and Y
+      const tokenXDecimals = isTokenXSell ? sellTokenDecimals : buyTokenDecimals;
+      const tokenYDecimals = isTokenXSell ? buyTokenDecimals : sellTokenDecimals;
 
       const requestPayload = {
         maxAmountX: maxAmountX,
@@ -597,7 +593,7 @@ export function LiquidityForm() {
     inputAmount: string;
     inputType: "tokenX" | "tokenY";
   }) => {
-    const amountNumber = Number(inputAmount.replace(/,/g, ""));
+    const amountNumber = parseFormAmount(inputAmount);
     if (!poolDetails || BigNumber(amountNumber).lte(0)) return;
 
     setLiquidityStep(10);
