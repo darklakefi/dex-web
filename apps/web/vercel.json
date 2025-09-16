@@ -1,6 +1,14 @@
 {
   "buildCommand": "cd ../../ && npx nx build web",
   "framework": "nextjs",
+  "functions": {
+    "pages/api/**/*.js": {
+      "includeFiles": "../../libs/orpc/src/proto/**"
+    },
+    "pages/**/*.js": {
+      "includeFiles": "../../libs/orpc/src/proto/**"
+    }
+  },
   "git": {
     "deploymentEnabled": false
   },

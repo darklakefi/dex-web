@@ -17,11 +17,7 @@ import type {
 	SwapResponse,
 } from "./dex-gateway.type";
 
-const apiProtoPath = path.join(
-	process.cwd(),
-	"../../libs/orpc/src/proto",
-	"api.proto",
-);
+const apiProtoPath = path.join(__dirname, "proto", "api.proto");
 
 const config = {
 	gatewayHost: process.env.GATEWAY_HOST,
