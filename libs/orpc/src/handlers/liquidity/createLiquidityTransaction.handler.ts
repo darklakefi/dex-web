@@ -1,24 +1,24 @@
 import { AnchorProvider, BN, Program, web3 } from "@coral-xyz/anchor";
 import {
-  createAssociatedTokenAccountIdempotentInstruction,
-  getAccount,
-  getAssociatedTokenAddressSync,
-  getMint,
-  TOKEN_2022_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
+	createAssociatedTokenAccountIdempotentInstruction,
+	getAccount,
+	getAssociatedTokenAddressSync,
+	getMint,
+	TOKEN_2022_PROGRAM_ID,
+	TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
-  PublicKey,
-  type Transaction,
-  type TransactionInstruction,
-  TransactionMessage,
-  type VersionedTransaction,
+	PublicKey,
+	type Transaction,
+	type TransactionInstruction,
+	TransactionMessage,
+	type VersionedTransaction,
 } from "@solana/web3.js";
 import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
-  CreateLiquidityTransactionInput,
-  CreateLiquidityTransactionOutput,
+	CreateLiquidityTransactionInput,
+	CreateLiquidityTransactionOutput,
 } from "../../schemas/liquidity/createLiquidityTransaction.schema";
 import { getLPRateHandler } from "../pools/getLPRate.handler";
 
@@ -28,252 +28,252 @@ const AMM_CONFIG_SEED = "amm_config";
 const LIQUIDITY_SEED = "lp";
 
 async function toBaseUnits(
-  connection: web3.Connection,
-  mint: PublicKey,
-  uiAmount: string | number | bigint,
-  tokenProgram: PublicKey,
+	connection: web3.Connection,
+	mint: PublicKey,
+	uiAmount: string | number | bigint,
+	tokenProgram: PublicKey,
 ): Promise<BN> {
-  const info = await getMint(connection, mint, "confirmed", tokenProgram);
-  const decimals = info.decimals;
-  const asStr = uiAmount.toString();
-  const [i, f = ""] = asStr.split(".");
-  const frac = (f + "0".repeat(decimals)).slice(0, decimals);
-  return new BN(i)
-    .mul(new BN(10).pow(new BN(decimals)))
-    .add(new BN(frac || "0"));
+	const info = await getMint(connection, mint, "confirmed", tokenProgram);
+	const decimals = info.decimals;
+	const asStr = uiAmount.toString();
+	const [i, f = ""] = asStr.split(".");
+	const frac = (f + "0".repeat(decimals)).slice(0, decimals);
+	return new BN(i)
+		.mul(new BN(10).pow(new BN(decimals)))
+		.add(new BN(frac || "0"));
 }
 
 async function detectTokenProgram(
-  connection: web3.Connection,
-  mint: PublicKey,
+	connection: web3.Connection,
+	mint: PublicKey,
 ): Promise<PublicKey> {
-  try {
-    await getMint(connection, mint, "confirmed", TOKEN_2022_PROGRAM_ID);
-    return TOKEN_2022_PROGRAM_ID;
-  } catch {
-    return TOKEN_PROGRAM_ID;
-  }
+	try {
+		await getMint(connection, mint, "confirmed", TOKEN_2022_PROGRAM_ID);
+		return TOKEN_2022_PROGRAM_ID;
+	} catch {
+		return TOKEN_PROGRAM_ID;
+	}
 }
 
 async function ensureAtaIx(
-  connection: web3.Connection,
-  owner: PublicKey,
-  mint: PublicKey,
-  tokenProgram: PublicKey,
+	connection: web3.Connection,
+	owner: PublicKey,
+	mint: PublicKey,
+	tokenProgram: PublicKey,
 ): Promise<TransactionInstruction | null> {
-  const ata = getAssociatedTokenAddressSync(mint, owner, true, tokenProgram);
-  try {
-    await getAccount(connection, ata, "confirmed", tokenProgram);
-    return null;
-  } catch {
-    return createAssociatedTokenAccountIdempotentInstruction(
-      owner,
-      ata,
-      owner,
-      mint,
-      tokenProgram,
-    );
-  }
+	const ata = getAssociatedTokenAddressSync(mint, owner, true, tokenProgram);
+	try {
+		await getAccount(connection, ata, "confirmed", tokenProgram);
+		return null;
+	} catch {
+		return createAssociatedTokenAccountIdempotentInstruction(
+			owner,
+			ata,
+			owner,
+			mint,
+			tokenProgram,
+		);
+	}
 }
 
 async function createLiquidityTransaction(
-  user: PublicKey,
-  program: Program<typeof IDL>,
-  connection: web3.Connection,
-  tokenXMint: PublicKey,
-  tokenYMint: PublicKey,
-  maxAmountX: string | number | bigint,
-  maxAmountY: string | number | bigint,
-  lpTokensToMint: string | number | bigint,
+	user: PublicKey,
+	program: Program<typeof IDL>,
+	connection: web3.Connection,
+	tokenXMint: PublicKey,
+	tokenYMint: PublicKey,
+	maxAmountX: string | number | bigint,
+	maxAmountY: string | number | bigint,
+	lpTokensToMint: string | number | bigint,
 ): Promise<VersionedTransaction> {
-  const tokenXProgramId = await detectTokenProgram(connection, tokenXMint);
-  const tokenYProgramId = await detectTokenProgram(connection, tokenYMint);
+	const tokenXProgramId = await detectTokenProgram(connection, tokenXMint);
+	const tokenYProgramId = await detectTokenProgram(connection, tokenYMint);
 
-  try {
-    await getMint(connection, tokenXMint, "confirmed", tokenXProgramId);
-    await getMint(connection, tokenYMint, "confirmed", tokenYProgramId);
-  } catch (error) {
-    throw new Error(`Invalid mint/token program combination: ${error}`);
-  }
+	try {
+		await getMint(connection, tokenXMint, "confirmed", tokenXProgramId);
+		await getMint(connection, tokenYMint, "confirmed", tokenYProgramId);
+	} catch (error) {
+		throw new Error(`Invalid mint/token program combination: ${error}`);
+	}
 
-  const [mintA, mintB] = [tokenXMint, tokenYMint].sort((a, b) =>
-    a.toBuffer().compare(b.toBuffer()),
-  );
+	const [mintA, mintB] = [tokenXMint, tokenYMint].sort((a, b) =>
+		a.toBuffer().compare(b.toBuffer()),
+	);
 
-  const [ammConfig] = PublicKey.findProgramAddressSync(
-    [Buffer.from(AMM_CONFIG_SEED), new BN(0).toArrayLike(Buffer, "le", 4)],
-    program.programId,
-  );
+	const [ammConfig] = PublicKey.findProgramAddressSync(
+		[Buffer.from(AMM_CONFIG_SEED), new BN(0).toArrayLike(Buffer, "le", 4)],
+		program.programId,
+	);
 
-  const [poolPubkey] = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from(POOL_SEED),
-      ammConfig.toBuffer(),
-      mintA?.toBuffer() ?? Buffer.from([]),
-      mintB?.toBuffer() ?? Buffer.from([]),
-    ],
-    program.programId,
-  );
+	const [poolPubkey] = PublicKey.findProgramAddressSync(
+		[
+			Buffer.from(POOL_SEED),
+			ammConfig.toBuffer(),
+			mintA?.toBuffer() ?? Buffer.from([]),
+			mintB?.toBuffer() ?? Buffer.from([]),
+		],
+		program.programId,
+	);
 
-  const [lpMint] = PublicKey.findProgramAddressSync(
-    [Buffer.from(LIQUIDITY_SEED), poolPubkey.toBuffer()],
-    program.programId,
-  );
+	const [lpMint] = PublicKey.findProgramAddressSync(
+		[Buffer.from(LIQUIDITY_SEED), poolPubkey.toBuffer()],
+		program.programId,
+	);
 
-  const lpTokenProgramId = TOKEN_PROGRAM_ID;
+	const lpTokenProgramId = TOKEN_PROGRAM_ID;
 
-  const maxAmountXBN = await toBaseUnits(
-    connection,
-    tokenXMint,
-    maxAmountX,
-    tokenXProgramId,
-  );
-  const maxAmountYBN = await toBaseUnits(
-    connection,
-    tokenYMint,
-    maxAmountY,
-    tokenYProgramId,
-  );
+	const maxAmountXBN = await toBaseUnits(
+		connection,
+		tokenXMint,
+		maxAmountX,
+		tokenXProgramId,
+	);
+	const maxAmountYBN = await toBaseUnits(
+		connection,
+		tokenYMint,
+		maxAmountY,
+		tokenYProgramId,
+	);
 
-  const [poolTokenAccountX] = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from(POOL_RESERVE_SEED),
-      poolPubkey.toBuffer(),
-      tokenXMint.toBuffer(),
-    ],
-    program.programId,
-  );
+	const [poolTokenAccountX] = PublicKey.findProgramAddressSync(
+		[
+			Buffer.from(POOL_RESERVE_SEED),
+			poolPubkey.toBuffer(),
+			tokenXMint.toBuffer(),
+		],
+		program.programId,
+	);
 
-  const [poolTokenAccountY] = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from(POOL_RESERVE_SEED),
-      poolPubkey.toBuffer(),
-      tokenYMint.toBuffer(),
-    ],
-    program.programId,
-  );
+	const [poolTokenAccountY] = PublicKey.findProgramAddressSync(
+		[
+			Buffer.from(POOL_RESERVE_SEED),
+			poolPubkey.toBuffer(),
+			tokenYMint.toBuffer(),
+		],
+		program.programId,
+	);
 
-  const ataInstructions: TransactionInstruction[] = [];
+	const ataInstructions: TransactionInstruction[] = [];
 
-  const ataXIx = await ensureAtaIx(
-    connection,
-    user,
-    tokenXMint,
-    tokenXProgramId,
-  );
-  if (ataXIx) ataInstructions.push(ataXIx);
+	const ataXIx = await ensureAtaIx(
+		connection,
+		user,
+		tokenXMint,
+		tokenXProgramId,
+	);
+	if (ataXIx) ataInstructions.push(ataXIx);
 
-  const ataYIx = await ensureAtaIx(
-    connection,
-    user,
-    tokenYMint,
-    tokenYProgramId,
-  );
-  if (ataYIx) ataInstructions.push(ataYIx);
+	const ataYIx = await ensureAtaIx(
+		connection,
+		user,
+		tokenYMint,
+		tokenYProgramId,
+	);
+	if (ataYIx) ataInstructions.push(ataYIx);
 
-  const ataLpIx = await ensureAtaIx(connection, user, lpMint, lpTokenProgramId);
-  if (ataLpIx) ataInstructions.push(ataLpIx);
+	const ataLpIx = await ensureAtaIx(connection, user, lpMint, lpTokenProgramId);
+	if (ataLpIx) ataInstructions.push(ataLpIx);
 
-  const programIx = await program.methods
-    .addLiquidity(new BN(lpTokensToMint), maxAmountXBN, maxAmountYBN)
-    .accounts({
-      poolTokenReserveX: poolTokenAccountX,
-      poolTokenReserveY: poolTokenAccountY,
-      tokenMintX: tokenXMint,
-      tokenMintXProgram: tokenXProgramId,
-      tokenMintY: tokenYMint,
-      tokenMintYProgram: tokenYProgramId,
-      user,
-    })
-    .instruction();
+	const programIx = await program.methods
+		.addLiquidity(new BN(lpTokensToMint), maxAmountXBN, maxAmountYBN)
+		.accounts({
+			poolTokenReserveX: poolTokenAccountX,
+			poolTokenReserveY: poolTokenAccountY,
+			tokenMintX: tokenXMint,
+			tokenMintXProgram: tokenXProgramId,
+			tokenMintY: tokenYMint,
+			tokenMintYProgram: tokenYProgramId,
+			user,
+		})
+		.instruction();
 
-  const cuLimitIx = web3.ComputeBudgetProgram.setComputeUnitLimit({
-    units: 400_000,
-  });
-  const cuPriceIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
-    microLamports: 50_000,
-  });
+	const cuLimitIx = web3.ComputeBudgetProgram.setComputeUnitLimit({
+		units: 400_000,
+	});
+	const cuPriceIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
+		microLamports: 50_000,
+	});
 
-  const { blockhash } = await connection.getLatestBlockhash();
-  const instructions = [cuLimitIx, cuPriceIx, ...ataInstructions, programIx];
+	const { blockhash } = await connection.getLatestBlockhash();
+	const instructions = [cuLimitIx, cuPriceIx, ...ataInstructions, programIx];
 
-  const { getOptionalLookupTable } = await import("../../utils/lookupTable");
-  const lookupTable = await getOptionalLookupTable(connection);
+	const { getOptionalLookupTable } = await import("../../utils/lookupTable");
+	const lookupTable = await getOptionalLookupTable(connection);
 
-  const message = new TransactionMessage({
-    instructions,
-    payerKey: user,
-    recentBlockhash: blockhash,
-  }).compileToV0Message(lookupTable ? [lookupTable] : []);
+	const message = new TransactionMessage({
+		instructions,
+		payerKey: user,
+		recentBlockhash: blockhash,
+	}).compileToV0Message(lookupTable ? [lookupTable] : []);
 
-  return new web3.VersionedTransaction(message);
+	return new web3.VersionedTransaction(message);
 }
 
 export async function createLiquidityTransactionHandler(
-  input: CreateLiquidityTransactionInput,
+	input: CreateLiquidityTransactionInput,
 ): Promise<CreateLiquidityTransactionOutput> {
-  const { user, tokenXMint, tokenYMint, maxAmountX, maxAmountY, slippage } =
-    input;
+	const { user, tokenXMint, tokenYMint, maxAmountX, maxAmountY, slippage } =
+		input;
 
-  const helius = getHelius();
-  const connection = helius.connection;
+	const helius = getHelius();
+	const connection = helius.connection;
 
-  const userWallet = {
-    publicKey: new PublicKey(user),
-    signAllTransactions: async <T extends Transaction | VersionedTransaction>(
-      txs: T[],
-    ): Promise<T[]> => txs,
-    signTransaction: async <T extends Transaction | VersionedTransaction>(
-      tx: T,
-    ): Promise<T> => tx,
-  };
+	const userWallet = {
+		publicKey: new PublicKey(user),
+		signAllTransactions: async <T extends Transaction | VersionedTransaction>(
+			txs: T[],
+		): Promise<T[]> => txs,
+		signTransaction: async <T extends Transaction | VersionedTransaction>(
+			tx: T,
+		): Promise<T> => tx,
+	};
 
-  const provider = new AnchorProvider(connection, userWallet, {
-    commitment: "confirmed",
-  });
+	const provider = new AnchorProvider(connection, userWallet, {
+		commitment: "confirmed",
+	});
 
-  const program = new Program(IDL, provider);
+	const program = new Program(IDL, provider);
 
-  const lpRate = await getLPRateHandler({
-    slippage,
-    tokenXAmount: Number(maxAmountX),
-    tokenXMint,
-    tokenYAmount: Number(maxAmountY),
-    tokenYMint,
-  });
+	const lpRate = await getLPRateHandler({
+		slippage,
+		tokenXAmount: Number(maxAmountX),
+		tokenXMint,
+		tokenYAmount: Number(maxAmountY),
+		tokenYMint,
+	});
 
-  try {
-    const vtx = await createLiquidityTransaction(
-      new PublicKey(user),
-      program,
-      connection,
-      new PublicKey(tokenXMint),
-      new PublicKey(tokenYMint),
-      maxAmountX,
-      maxAmountY,
-      lpRate.estimatedLPTokens,
-    );
+	try {
+		const vtx = await createLiquidityTransaction(
+			new PublicKey(user),
+			program,
+			connection,
+			new PublicKey(tokenXMint),
+			new PublicKey(tokenYMint),
+			maxAmountX,
+			maxAmountY,
+			lpRate.estimatedLPTokens,
+		);
 
-    const serializedTx = Buffer.from(vtx.serialize()).toString("base64");
+		const serializedTx = Buffer.from(vtx.serialize()).toString("base64");
 
-    return {
-      success: true,
-      transaction: serializedTx,
-    };
-  } catch (error) {
-    console.error("Error during liquidity addition:", error);
+		return {
+			success: true,
+			transaction: serializedTx,
+		};
+	} catch (error) {
+		console.error("Error during liquidity addition:", error);
 
-    let errorMessage = "Unknown error occurred";
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    } else if (typeof error === "string") {
-      errorMessage = error;
-    }
+		let errorMessage = "Unknown error occurred";
+		if (error instanceof Error) {
+			errorMessage = error.message;
+		} else if (typeof error === "string") {
+			errorMessage = error;
+		}
 
-    return {
-      error: errorMessage,
-      success: false,
-      transaction: null,
-    };
-  }
+		return {
+			error: errorMessage,
+			success: false,
+			transaction: null,
+		};
+	}
 }
