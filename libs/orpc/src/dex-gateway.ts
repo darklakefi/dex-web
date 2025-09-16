@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
+
 import type {
 	CheckTradeStatusRequest,
 	CheckTradeStatusResponse,
@@ -26,41 +27,25 @@ const config = {
 let cachedProtoPath: string | null = null;
 
 const getProtoPath = () => {
-	if (cachedProtoPath) {
-		return cachedProtoPath;
-	}
-
-	console.log(`Current working directory: ${process.cwd()}`);
-	console.log(`__dirname: ${__dirname}`);
-
-	const possiblePaths = [
-		path.resolve(process.cwd(), "libs/orpc/src/proto", "api.proto"),
+	if (cachedProtoPath) return cachedProtoPath;
+	const possible = [
+		path.join(process.cwd(), "libs/orpc/src/proto", "api.proto"),
 		path.resolve(process.cwd(), "../../libs/orpc/src/proto", "api.proto"),
-		path.join(__dirname, "..", "chunks", "proto", "api.proto"),
 		path.join(__dirname, "proto", "api.proto"),
+		path.join(__dirname, "..", "chunks", "proto", "api.proto"),
 		path.join(__dirname, "../../chunks/proto", "api.proto"),
 		path.join(__dirname, "../../../libs/orpc/src/proto", "api.proto"),
 	];
-
-	for (const protoPath of possiblePaths) {
+	for (const p of possible) {
 		try {
-			fs.accessSync(protoPath);
-			console.log(`Found proto file at: ${protoPath}`);
-			cachedProtoPath = protoPath;
-			return protoPath;
+			fs.accessSync(p);
+			cachedProtoPath = p;
+			return p;
 		} catch {}
 	}
-
-	const fallbackPath = path.join(
-		process.cwd(),
-		"libs/orpc/src/proto",
-		"api.proto",
-	);
-	console.warn(
-		`Proto file not found in standard locations, using fallback: ${fallbackPath}`,
-	);
-	cachedProtoPath = fallbackPath;
-	return fallbackPath;
+	const fallback = path.join(process.cwd(), "libs/orpc/src/proto", "api.proto");
+	cachedProtoPath = fallback;
+	return fallback;
 };
 
 let gatewayProto: any = null;
@@ -71,15 +56,8 @@ function loadProtoDefinition() {
 	if (typeof window !== "undefined") {
 		throw new Error("gRPC client should not be used on the client side");
 	}
-
 	const protoPath = getProtoPath();
 	const protoDir = path.dirname(protoPath);
-
-	console.log(`Loading proto from: ${protoPath}`);
-
-	if (!fs.existsSync(protoPath)) {
-		throw new Error(`Proto file not found at ${protoPath}`);
-	}
 
 	const packageDefinition = protoLoader.loadSync(protoPath, {
 		defaults: true,

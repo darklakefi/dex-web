@@ -97,6 +97,7 @@
     "nx": "21.2.1",
     "playwright": "^1.53.2",
     "postcss": "^8.5.6",
+    "protobufjs": "^7.5.4",
     "router-plugin": "link:@nx/react/router-plugin",
     "storybook": "9.0.15",
     "tailwind-scrollbar": "^4.0.2",
@@ -115,6 +116,7 @@
   "name": "@dex-web/root",
   "private": true,
   "scripts": {
+    "prebuild": "node scripts/compile-proto.js",
     "affected": "nx affected",
     "affected:apps": "nx affected:apps",
     "affected:build": "nx affected:build",
@@ -139,6 +141,7 @@
     "lint": "nx workspace-lint && nx lint",
     "nx": "nx",
     "start": "nx dev web",
+    "proto:compile": "node scripts/compile-proto.js",
     "test": "nx test web",
     "update": "nx migrate latest",
     "workspace-generator": "nx workspace-generator"

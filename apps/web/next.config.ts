@@ -8,6 +8,11 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
   experimental: {
+    // Ensure proto files are included in Vercel's server output
+    // so @grpc/proto-loader can resolve imports like validate/validate.proto
+    outputFileTracingIncludes: {
+      "/(.*)": ["./libs/orpc/src/proto/**/*"],
+    },
     reactCompiler: false,
     typedRoutes: true,
   },
@@ -69,23 +74,8 @@ const nextConfig = {
       use: ["@svgr/webpack"],
     });
 
-    if (isServer) {
-      const CopyWebpackPlugin = require("copy-webpack-plugin");
-      config.plugins.push(
-        new CopyWebpackPlugin({
-          patterns: [
-            {
-              from: join(__dirname, "../../libs/orpc/src/proto"),
-              to: join(config.output.path || "", "chunks/proto"),
-            },
-            {
-              from: join(__dirname, "../../libs/orpc/src/proto"),
-              to: join(config.output.path || "", "proto"),
-            },
-          ],
-        }),
-      );
-    }
+    // Proto files are now included via readFileSync in dex-gateway.ts
+    // This forces Vercel's bundler to include them automatically
 
     return config;
   },
