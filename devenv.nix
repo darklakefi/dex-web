@@ -12,6 +12,10 @@ in
 
   languages.typescript.enable = true;
 
+  packages = [
+    pkgs-unstable.protobuf_29
+  ];
+
   enterShell = ''
     node --version
     pnpm --version

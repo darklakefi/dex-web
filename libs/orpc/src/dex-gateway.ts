@@ -1,12 +1,6 @@
-/**  biome-ignore lint/suspicious/noExplicitAny: will be removed **/
-
-import * as crypto from "node:crypto";
-import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
-import { PROTO_DEFINITION } from "./dex-gateway.proto";
 import type {
   CheckTradeStatusRequest,
   CheckTradeStatusResponse,
@@ -28,16 +22,8 @@ const config = {
   gatewayPort: parseInt(process.env.GATEWAY_PORT || "50051"),
 };
 
-// Create a unique temporary file path
-const tempDir = os.tmpdir();
-const randomId = crypto.randomBytes(16).toString("hex");
-const tempProtoPath = path.join(tempDir, `dex-gateway-${randomId}.proto`);
-
-// Write the proto definition to the temporary file
-fs.writeFileSync(tempProtoPath, PROTO_DEFINITION);
-
-// Load the proto from the temporary file
-const packageDefinition = protoLoader.loadSync(tempProtoPath, {
+const protoPath = path.join(__dirname, "proto", "api.proto");
+const packageDefinition = protoLoader.loadSync(protoPath, {
   defaults: true,
   enums: String,
   keepCase: true,
@@ -45,21 +31,13 @@ const packageDefinition = protoLoader.loadSync(tempProtoPath, {
   oneofs: true,
 });
 
-// Clean up the temporary file
-try {
-  fs.unlinkSync(tempProtoPath);
-} catch (err) {
-  // Ignore cleanup errors
-  console.warn("Failed to clean up temporary proto file:", err);
-}
-
-const gatewayProto = grpc.loadPackageDefinition(packageDefinition) as any;
+const gatewayProto = grpc.loadPackageDefinition(packageDefinition);
 
 // Create gRPC client
 function createGrpcClient(): GrpcClient {
-  const { gateway_solana } = gatewayProto;
+  const { darklake } = gatewayProto as any;
 
-  const client = new gateway_solana.SolanaGatewayService(
+  const client = new darklake.v1.SolanaGatewayService(
     `${config.gatewayHost}:${config.gatewayPort}`,
     grpc.credentials.createInsecure(),
   );
