@@ -5,7 +5,8 @@
       "Bash(nx lint:*)",
       "Bash(git add:*)",
       "mcp__sequential-thinking__sequentialthinking",
-      "mcp__filesystem__list_directory"
+      "mcp__filesystem__list_directory",
+      "mcp__filesystem__directory_tree"
     ],
     "deny": [],
     "ask": []
