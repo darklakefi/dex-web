@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { withNx } from "@nx/next";
+import CopyWebpackPlugin from "copy-webpack-plugin";
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
@@ -74,8 +75,20 @@ const nextConfig = {
       use: ["@svgr/webpack"],
     });
 
-    // Proto files are now included via readFileSync in dex-gateway.ts
-    // This forces Vercel's bundler to include them automatically
+    // Ensure proto files are present in the server bundle under chunks/proto
+    if (isServer) {
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new CopyWebpackPlugin({
+          patterns: [
+            {
+              from: join(__dirname, "../../libs/orpc/src/proto"),
+              to: join(process.cwd(), ".next/server/chunks/proto"),
+            },
+          ],
+        }),
+      );
+    }
 
     return config;
   },
