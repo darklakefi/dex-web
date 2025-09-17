@@ -8,11 +8,11 @@ import type {
   GetLPRateOutput,
 } from "../../schemas/pools/getLPRate.schema";
 import type { Token } from "../../schemas/tokens/token.schema";
+import { toRawUnits } from "@dex-web/utils";
 import {
   EXCHANGE_PROGRAM_ID,
   getPoolAccount,
   getTokenBalance,
-  toRawUnits,
 } from "../../utils/solana";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 

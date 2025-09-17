@@ -6,11 +6,14 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { isSquadsX } from "./isSquadsX";
 
 const MEMO_PROGRAM_ID = new PublicKey(
   "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
 );
+
+function isSquadsX(wallet: Wallet | null | undefined): boolean {
+  return wallet?.adapter?.name === "SquadsX";
+}
 
 export async function createMemoTransaction(
   connection: Connection,

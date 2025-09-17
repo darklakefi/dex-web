@@ -5,7 +5,7 @@ import type {
   GetUserLiquidityInput,
   GetUserLiquidityOutput,
 } from "../../schemas/pools/getUserLiquidity.schema";
-import { getLpTokenMint } from "../../utils/getLpTokenMint";
+import { getLpTokenMint } from "@dex-web/core";
 import { LP_TOKEN_DECIMALS } from "../../utils/solana";
 
 export async function getUserLiquidityHandler({

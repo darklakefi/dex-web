@@ -1,46 +1,46 @@
 {
-  "compilerOptions": {
-    "incremental": true,
-    "jsx": "preserve",
-    "noEmit": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
-  },
-  "extends": "../../tsconfig.base.json",
-  "files": [],
-  "include": [
-    "../../apps/web/dist/dist/types/**/*.ts",
-    "../../dist/.next/types/**/*.ts",
-    "../../types/css.d.ts",
-    "../../types/image.d.ts",
-    "../../types/svg.d.ts",
-    "../../vite.config.base.ts",
-    ".next/types/**/*.ts"
-  ],
-  "references": [
-    {
-      "path": "../../libs/utils"
-    },
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/orpc"
-    },
-    {
-      "path": "../../libs/grpc-client"
-    },
-    {
-      "path": "../../libs/core"
-    },
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ]
+	"compilerOptions": {
+		"incremental": true,
+		"jsx": "preserve",
+		"noEmit": false,
+		"plugins": [
+			{
+				"name": "next"
+			}
+		]
+	},
+	"extends": "../../tsconfig.base.json",
+	"files": [],
+	"include": [
+		"../../apps/web/dist/dist/types/**/*.ts",
+		"../../dist/.next/types/**/*.ts",
+		"../../types/css.d.ts",
+		"../../types/image.d.ts",
+		"../../types/svg.d.ts",
+		"../../vite.config.base.ts",
+		".next/types/**/*.ts"
+	],
+	"references": [
+		{
+			"path": "../../libs/utils"
+		},
+		{
+			"path": "../../libs/ui"
+		},
+		{
+			"path": "../../libs/orpc"
+		},
+		{
+			"path": "../../libs/grpc-client"
+		},
+		{
+			"path": "../../libs/core"
+		},
+		{
+			"path": "./tsconfig.lib.json"
+		},
+		{
+			"path": "./tsconfig.spec.json"
+		}
+	]
 }

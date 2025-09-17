@@ -9,6 +9,23 @@ export {
   type WalletSigningCapabilities,
 } from "./utils/walletValidation";
 export {
+  validateIdl,
+  validateIdlInstructions,
+  validateIdlComprehensive,
+} from "./utils/idlValidation";
+export {
+  ProgramFactory,
+  createLiquidityProgram,
+  createSwapProgram,
+} from "./utils/programFactory";
+export { getLpTokenMint, EXCHANGE_PROGRAM_ID } from "./utils/getLpTokenMint";
+export {
+  createMemoTransaction,
+  signMessageCompat,
+  verifyMemoSignature,
+  type VerifyMemoSignatureParams,
+} from "./utils/signMessageWithMemo";
+export {
   TRANSACTION_STEPS,
   TRANSACTION_DESCRIPTIONS,
   ERROR_MESSAGES,
@@ -22,6 +39,38 @@ export {
   type TransactionState,
   type UseTransactionStateReturn,
 } from "./hooks/useTransactionState";
+export {
+  useTransactionSigning,
+  type UseTransactionSigningParams,
+  type UseTransactionSigningReturn,
+} from "./hooks/useTransactionSigning";
+export {
+  useTransactionStatus,
+  type UseTransactionStatusConfig,
+  type UseTransactionStatusReturn,
+  type StatusCheckResult,
+} from "./hooks/useTransactionStatus";
+export {
+  useTransactionToasts,
+  type UseTransactionToastsParams,
+  type UseTransactionToastsReturn,
+  type ToastFunction,
+  type DismissToastFunction,
+} from "./hooks/useTransactionToasts";
+export {
+  useSwapTracking,
+  useLiquidityTracking,
+  type UseSwapTrackingParams,
+  type UseSwapTrackingReturn,
+  type UseLiquidityTrackingParams,
+  type UseLiquidityTrackingReturn,
+} from "./hooks/useTransactionTracking";
+export {
+  useTokenAccounts,
+  type UseTokenAccountsParams,
+  type UseTokenAccountsReturn,
+  type TokenAccountsQueryClient,
+} from "./hooks/useTokenAccounts";
 export {
   createSwapTracker,
   createLiquidityTracker,

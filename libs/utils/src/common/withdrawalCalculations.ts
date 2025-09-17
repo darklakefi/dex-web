@@ -1,7 +1,6 @@
-import { sortSolanaAddresses } from "@dex-web/orpc/utils/solana";
-import { convertToDecimal } from "@dex-web/utils";
 import BigNumber from "bignumber.js";
-import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "./constants";
+import { convertToDecimal } from "../number";
+import { sortSolanaAddresses } from "../blockchain/sortSolanaAddresses";
 
 interface WithdrawalCalculationParams {
   userLiquidity: {
@@ -18,6 +17,8 @@ interface WithdrawalCalculationParams {
   tokenBAddress: string;
   tokenAPrice: { price: number };
   tokenBPrice: { price: number };
+  defaultBuyToken?: string;
+  defaultSellToken?: string;
 }
 
 export function calculateWithdrawalDetails({
@@ -28,6 +29,8 @@ export function calculateWithdrawalDetails({
   tokenBAddress,
   tokenAPrice,
   tokenBPrice,
+  defaultBuyToken = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  defaultSellToken = "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
 }: WithdrawalCalculationParams) {
   if (
     !userLiquidity ||
@@ -83,8 +86,8 @@ export function calculateWithdrawalDetails({
     .multipliedBy(poolReserves.reserveY)
     .toNumber();
 
-  const tokenA = tokenAAddress || DEFAULT_BUY_TOKEN;
-  const tokenB = tokenBAddress || DEFAULT_SELL_TOKEN;
+  const tokenA = tokenAAddress || defaultBuyToken;
+  const tokenB = tokenBAddress || defaultSellToken;
   const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(tokenA, tokenB);
 
   const tokenAAmount = tokenA === tokenXAddress ? tokenXAmount : tokenYAmount;

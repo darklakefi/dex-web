@@ -1,4 +1,4 @@
-import { AnchorProvider, BN, Program, web3 } from "@coral-xyz/anchor";
+import { AnchorProvider, BN, type Program, web3 } from "@coral-xyz/anchor";
 import {
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 	createAssociatedTokenAccountIdempotentInstruction,
@@ -15,12 +15,12 @@ import {
 	TransactionMessage,
 	type VersionedTransaction,
 } from "@solana/web3.js";
-import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
 	CreateLiquidityTransactionInput,
 	CreateLiquidityTransactionOutput,
 } from "../../schemas/liquidity/createLiquidityTransaction.schema";
+import { createLiquidityProgram } from "../../utils/programFactory";
 import { getLPRateHandler } from "../pools/getLPRate.handler";
 
 const POOL_RESERVE_SEED = "pool_reserve";
@@ -221,15 +221,20 @@ async function createLiquidityTransaction(
 		tokenProgram: TOKEN_PROGRAM_ID,
 	};
 
-	const programTx = await program.methods
-		.addLiquidity(
-			new BN(lpTokensToMint),
-			maxAmountXBN,
-			maxAmountYBN,
-			null,
-			null,
-		)
-		.accounts(addLiquidityAccounts)
+	const addLiquidityMethod = program.methods.addLiquidity?.(
+		new BN(lpTokensToMint),
+		maxAmountXBN,
+		maxAmountYBN,
+		null,
+		null,
+	);
+
+	if (!addLiquidityMethod) {
+		throw new Error("Program methods not available for addLiquidity");
+	}
+
+	const programTx = await addLiquidityMethod
+		?.accountsPartial(addLiquidityAccounts)
 		.transaction();
 
 	const cuLimitIx = web3.ComputeBudgetProgram.setComputeUnitLimit({
@@ -281,7 +286,8 @@ export async function createLiquidityTransactionHandler(
 		commitment: "confirmed",
 	});
 
-	const program = new Program(IDL, provider);
+	// Create validated program using factory (includes IDL validation and method checking)
+	const program = createLiquidityProgram(provider);
 
 	const lpRate = await getLPRateHandler({
 		slippage,

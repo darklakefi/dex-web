@@ -16,7 +16,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
+import { getExplorerUrl } from "@dex-web/utils";
 
 export function SwapTransactionHistory() {
   const { publicKey } = useWallet();

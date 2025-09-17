@@ -1,4 +1,4 @@
-import { BN, Program, web3 } from "@coral-xyz/anchor";
+import { BN, type Program, web3 } from "@coral-xyz/anchor";
 import {
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 	createAssociatedTokenAccountInstruction,
@@ -6,11 +6,11 @@ import {
 	TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { PublicKey, type Transaction } from "@solana/web3.js";
-import IDL from "../../darklake-idl";
 import type {
 	RemoveLiquidityTransactionInput,
 	RemoveLiquidityTransactionOutput,
 } from "../../schemas/liquidity/removeLiquidityTransaction.schema";
+import { createLiquidityProgram } from "../../utils/programFactory";
 
 const POOL_RESERVE_SEED = "pool_reserve";
 const POOL_SEED = "pool";
@@ -28,9 +28,15 @@ async function removeLiquidity(
 	minAmountY: number,
 	lpTokensToBurn: number,
 ): Promise<Transaction> {
-	const [mintA, mintB] = [tokenXMint, tokenYMint].sort((a, b) =>
+	const sortedMints = [tokenXMint, tokenYMint].sort((a, b) =>
 		a.toBuffer().compare(b.toBuffer()),
 	);
+	const mintA = sortedMints[0];
+	const mintB = sortedMints[1];
+
+	if (!mintA || !mintB) {
+		throw new Error("Invalid mint addresses");
+	}
 
 	const [ammConfig] = PublicKey.findProgramAddressSync(
 		[Buffer.from(AMM_CONFIG_SEED), new BN(0).toArrayLike(Buffer, "le", 4)],
@@ -97,12 +103,19 @@ async function removeLiquidity(
 	);
 
 	console.log("Building removeLiquidity instruction...");
-	const instruction = await program.methods
-		.removeLiquidity(
-			new BN(lpTokensToBurn),
-			new BN(minAmountX),
-			new BN(minAmountY),
-		)
+
+	// Type-safe way to access the method without deep instantiation
+	const methods = program.methods as any;
+	if (!methods.removeLiquidity) {
+		throw new Error("removeLiquidity method not found on program");
+	}
+
+	const instruction = await methods.removeLiquidity(
+		new BN(lpTokensToBurn),
+		new BN(minAmountX),
+		new BN(minAmountY),
+		null,
+	)
 		.accounts({
 			user,
 			tokenMintX: tokenXMint,
@@ -182,7 +195,7 @@ export async function removeLiquidityTransactionHandler(
 		lpTokensToBurn,
 		provider,
 	} = input;
-	const program = new Program(IDL, provider);
+	const program = createLiquidityProgram(provider);
 
 	try {
 		const tx = await removeLiquidity(

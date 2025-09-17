@@ -1,7 +1,7 @@
 "use client";
 import { tanstackClient } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas";
-import { sortSolanaAddresses } from "@dex-web/orpc/utils/solana";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import { Box, Button, Text } from "@dex-web/ui";
 import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";

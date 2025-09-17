@@ -13,7 +13,7 @@ import type {
   GetPoolReservesInput,
   GetPoolReservesOutput,
 } from "../../schemas/pools/getPoolReserves.schema";
-import { getLpTokenMint } from "../../utils/getLpTokenMint";
+import { getLpTokenMint } from "@dex-web/core";
 import { getPoolOnChain, LP_TOKEN_DECIMALS } from "../../utils/solana";
 
 async function detectTokenProgram(

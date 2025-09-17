@@ -6,7 +6,7 @@ import type {
   GetTokenOwnerInput,
   GetTokenOwnerOutput,
 } from "../../schemas/tokens/getTokenOwner.schema";
-import { isSolanaAddress } from "../../utils/solana";
+import { isSolanaAddress } from "@dex-web/utils";
 
 export const getTokenOwnerHandler = async (
   input: GetTokenOwnerInput,

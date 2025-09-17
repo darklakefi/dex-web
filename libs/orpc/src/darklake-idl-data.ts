@@ -1,6 +1,5 @@
-import type { Darklake } from "../darklake";
+import { IDL_JSON } from "../darklake-json";
 
-// Import JSON data - this will be resolved by the bundler
-const idlData: Darklake = require("../darklake.json");
+const idlData = IDL_JSON;
 
 export default idlData;

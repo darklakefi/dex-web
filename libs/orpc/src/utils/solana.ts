@@ -39,19 +39,6 @@ export type PoolAccount = {
   token_lp_supply: number;
 };
 
-export function sortSolanaAddresses(
-  addrA: string,
-  addrB: string
-): { tokenXAddress: string; tokenYAddress: string } {
-  const aKey = new PublicKey(addrA);
-  const bKey = new PublicKey(addrB);
-
-  const comparison = aKey.toBuffer().compare(bKey.toBuffer());
-
-  return comparison > 0
-    ? { tokenXAddress: addrB, tokenYAddress: addrA }
-    : { tokenXAddress: addrA, tokenYAddress: addrB };
-}
 
 export async function getPoolAccount(
   connection: Connection,
@@ -141,18 +128,6 @@ export async function getTokenProgramId(
   }
 }
 
-export const isSolanaAddress = (address: string) => {
-  try {
-    if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
-      return false;
-    }
-
-    new PublicKey(address);
-    return true;
-  } catch {
-    return false;
-  }
-};
 
 export const deserializeVersionedTransaction = (base64Transaction: string) => {
   const unsignedTransactionBuffer = Buffer.from(base64Transaction, "base64");
@@ -174,34 +149,6 @@ export const deserializeVersionedTransaction = (base64Transaction: string) => {
   }
 };
 
-export const parseFormAmount = (value: string): number => {
-  return Number(value.replace(/,/g, ""));
-};
-
-export const toRawUnits = (amount: number, decimals: number) => {
-  return BigNumber(amount).multipliedBy(BigNumber(10 ** decimals));
-};
-
-export const toRawUnitsBigint = (amount: number, decimals: number): bigint => {
-  const result = BigNumber(amount).multipliedBy(BigNumber(10 ** decimals));
-
-  if (!result.isInteger()) {
-    throw new Error(
-      `Amount ${amount} with ${decimals} decimals results in non-integer: ${result.toString()}`
-    );
-  }
-
-  const MAX_U64 = BigNumber("18446744073709551615");
-  if (result.isGreaterThan(MAX_U64)) {
-    throw new Error(`Value ${result.toString()} exceeds u64 maximum`);
-  }
-
-  return BigInt(result.toString());
-};
-
-export const toDecimals = (amount: number | BigNumber, decimals: number) => {
-  return BigNumber(amount).dividedBy(BigNumber(10 ** decimals));
-};
 
 export async function getTokenBalance(
   connection: Connection,

@@ -3,11 +3,14 @@ import {
   ComputeBudgetProgram,
   type TransactionInstruction,
 } from "@solana/web3.js";
-import { isSquadsX } from "./isSquadsX";
 
 interface ComputeBudgetOptions {
   units?: number;
   microLamports?: number;
+}
+
+function isSquadsX(wallet: Wallet | null | undefined): boolean {
+  return wallet?.adapter?.name === "SquadsX";
 }
 
 export function getComputeBudgetInstructions(
