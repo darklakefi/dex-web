@@ -7,9 +7,25 @@ import type {
   Token,
 } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
-import { convertToDecimal } from "@dex-web/utils";
+import {
+  convertToDecimal,
+  parseAmount,
+  parseAmountBigNumber,
+  formatAmountInput,
+  validateHasSufficientBalance,
+} from "@dex-web/utils";
+import {
+  validateWalletForSigning,
+  TRANSACTION_STEPS,
+  TRANSACTION_DESCRIPTIONS,
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+  useTransactionState,
+  createLiquidityTracker,
+  standardizeErrorTracking,
+} from "@dex-web/core";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Transaction } from "@solana/web3.js";
+import { Transaction, VersionedTransaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -36,7 +52,6 @@ import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getLiquidityFormButtonMessage } from "../_utils/getLiquidityFormButtonMessage";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
-import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
 
 export const { fieldContext, formContext } = createFormHookContexts();
@@ -70,9 +85,8 @@ export function LiquidityForm() {
   const [initialPriceTokenOrder, setInitialPriceDirection] = useState<
     "ab" | "ba"
   >("ab");
-  const [liquidityStep, setLiquidityStep] = useState(0);
-  const [createStep, setCreateStep] = useState(0);
-  const [disableLiquidity, setDisableLiquidity] = useState(true);
+  const liquidityState = useTransactionState(0, false, true);
+  const createState = useTransactionState(0, false, false);
   const [slippage, setSlippage] = useState("0.5");
 
   const sortedTokenAddresses = sortSolanaAddresses(
@@ -127,9 +141,8 @@ export function LiquidityForm() {
   const tokenADetails = metadata[tokenXMint];
   const tokenBDetails = metadata[tokenYMint];
 
-  const resetCreateState = () => {
-    setCreateStep(0);
-  };
+  const liquidityTracker = createLiquidityTracker(trackLiquidity);
+  const trackLiquidityError = standardizeErrorTracking(trackError, "liquidity_add");
 
   const formConfig = {
     defaultValues: {
@@ -152,15 +165,15 @@ export function LiquidityForm() {
           publicKey &&
           buyTokenAccount?.tokenAccounts?.[0]
         ) {
-          const tokenANumericValue = value.tokenAAmount.replace(/,/g, "");
-          if (BigNumber(tokenANumericValue).gt(0)) {
+          const tokenANumericValue = formatAmountInput(value.tokenAAmount);
+          if (parseAmountBigNumber(tokenANumericValue).gt(0)) {
             const tokenAccount = buyTokenAccount.tokenAccounts[0];
             const maxBalance = convertToDecimal(
               tokenAccount.amount || 0,
               tokenAccount.decimals || 0
             );
 
-            if (BigNumber(tokenANumericValue).gt(maxBalance)) {
+            if (parseAmountBigNumber(tokenANumericValue).gt(maxBalance)) {
               const symbol = tokenAccount.symbol || "token";
               return { tokenAAmount: `Insufficient ${symbol} balance.` };
             }
@@ -173,29 +186,25 @@ export function LiquidityForm() {
   const form = useAppForm(formConfig);
 
   const requestCreatePoolSigning = async (
-    transaction: Transaction,
+    transaction: VersionedTransaction,
     _trackingId: string
   ) => {
     try {
-      if (!publicKey) throw new Error("Wallet not connected!");
-      if (!signTransaction)
-        throw new Error("Wallet does not support transaction signing!");
+      validateWalletForSigning({ publicKey, signTransaction });
 
-      setCreateStep(2);
+      createState.setStep(2);
       toast({
-        description:
-          "Please confirm the pool creation transaction in your wallet.",
-        title: "Confirm Pool Creation [2/3]",
+        description: TRANSACTION_DESCRIPTIONS.STEP_2.POOL_CREATION,
+        title: TRANSACTION_STEPS.STEP_2.POOL_CREATION,
         variant: "loading",
       });
 
       await signTransaction(transaction);
 
-      setCreateStep(3);
+      createState.setStep(3);
       toast({
-        description:
-          "Processing your pool creation transaction on the blockchain.",
-        title: "Creating Pool [3/3]",
+        description: TRANSACTION_DESCRIPTIONS.STEP_3.POOL_CREATION,
+        title: TRANSACTION_STEPS.STEP_3.POOL_CREATION,
         variant: "loading",
       });
 
@@ -208,10 +217,10 @@ export function LiquidityForm() {
             : `Pool created successfully! Token A: ${form.state.values.tokenAAmount}, Token B: ${form.state.values.tokenBAmount}`,
           title: squads
             ? tx("squadsX.responseStatus.confirmed.title")
-            : "Pool Created",
+            : SUCCESS_MESSAGES.POOL_CREATED,
           variant: "success",
         });
-        resetCreateState();
+        createState.reset();
         refetchBuyTokenAccount();
         refetchSellTokenAccount();
       }, 2000);
@@ -306,7 +315,7 @@ export function LiquidityForm() {
 
       if (response.success && response.transaction) {
         const transactionBuffer = Buffer.from(response.transaction, "base64");
-        const transaction = Transaction.from(transactionBuffer);
+        const transaction = VersionedTransaction.deserialize(transactionBuffer);
 
         await requestCreatePoolSigning(
           transaction,
