@@ -8,13 +8,13 @@ import type {
   GetSwapRateOutput,
 } from "../../schemas/swaps/getSwapRate.schema";
 import type { Token } from "../../schemas/tokens/token.schema";
+import { toRawUnits } from "@dex-web/utils";
 import {
   EXCHANGE_PROGRAM_ID,
   getPoolAccount,
   getTokenBalance,
   IDL_CODER,
   MAX_PERCENTAGE,
-  toRawUnits,
 } from "../../utils/solana";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 

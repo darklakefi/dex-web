@@ -10,7 +10,8 @@ import type {
 	RemoveLiquidityTransactionInput,
 	RemoveLiquidityTransactionOutput,
 } from "../../schemas/liquidity/removeLiquidityTransaction.schema";
-import { createLiquidityProgram } from "../../utils/programFactory";
+import { createLiquidityProgram } from "@dex-web/core";
+import IDL from "../../darklake-idl";
 
 const POOL_RESERVE_SEED = "pool_reserve";
 const POOL_SEED = "pool";
@@ -195,7 +196,7 @@ export async function removeLiquidityTransactionHandler(
 		lpTokensToBurn,
 		provider,
 	} = input;
-	const program = createLiquidityProgram(provider);
+	const program = createLiquidityProgram(IDL, provider);
 
 	try {
 		const tx = await removeLiquidity(

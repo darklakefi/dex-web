@@ -44,7 +44,7 @@ import {
 } from "../../../_utils/constants";
 import { isSquadsX } from "../../../_utils/isSquadsX";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
-import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getLiquidityFormButtonMessage } from "../_utils/getLiquidityFormButtonMessage";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";

@@ -11,11 +11,12 @@ import {
 } from "@solana/web3.js";
 
 import { getHelius } from "../../getHelius";
+import IDL from "../../darklake-idl";
 import type {
 	CreatePoolTransactionInput,
 	CreatePoolTransactionOutput,
 } from "../../schemas/pools/createPoolTransaction.schema";
-import { ProgramFactory } from "../../utils/programFactory";
+import { ProgramFactory } from "@dex-web/core";
 
 const POOL_SEED = "pool";
 const AMM_CONFIG_SEED = "amm_config";
@@ -70,7 +71,12 @@ async function createPool(
 		TOKEN_PROGRAM_ID,
 	);
 
-	const tx = await program.methods
+	const methods = program.methods as any;
+	if (!methods.initializePool) {
+		throw new Error("initializePool method not found on program");
+	}
+
+	const tx = await methods
 		.initializePool(new BN(depositAmountX), new BN(depositAmountY))
 		.accountsPartial({
 			createPoolFeeVault,
@@ -124,7 +130,7 @@ export async function createPoolTransactionHandler(
 		skipPreflight: true,
 	});
 
-	const program = ProgramFactory.createDarklakeProgram(provider, ["initialize_pool"]);
+	const program = ProgramFactory.createDarklakeProgram(IDL, provider, ["initialize_pool"]);
 
 	try {
 		const tx = await createPool(

@@ -20,7 +20,8 @@ import type {
 	CreateLiquidityTransactionInput,
 	CreateLiquidityTransactionOutput,
 } from "../../schemas/liquidity/createLiquidityTransaction.schema";
-import { createLiquidityProgram } from "../../utils/programFactory";
+import { createLiquidityProgram } from "@dex-web/core";
+import IDL from "../../darklake-idl";
 import { getLPRateHandler } from "../pools/getLPRate.handler";
 
 const POOL_RESERVE_SEED = "pool_reserve";
@@ -287,7 +288,7 @@ export async function createLiquidityTransactionHandler(
 	});
 
 	// Create validated program using factory (includes IDL validation and method checking)
-	const program = createLiquidityProgram(provider);
+	const program = createLiquidityProgram(IDL, provider);
 
 	const lpRate = await getLPRateHandler({
 		slippage,
