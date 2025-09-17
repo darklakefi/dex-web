@@ -5,14 +5,20 @@ import {
   TOKEN_2022_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { type Connection, PublicKey } from "@solana/web3.js";
+import {
+  type Connection,
+  PublicKey,
+  VersionedMessage,
+  VersionedTransaction,
+} from "@solana/web3.js";
 import BigNumber from "bignumber.js";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import IDL from "../darklake-idl";
 import { getHelius } from "../getHelius";
 
 export const EXCHANGE_PROGRAM_ID = new PublicKey(
   process.env.EXCHANGE_PROGRAM_ID ||
-    "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
+    "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1"
 );
 
 // 100% = 1000000, 0.0001% = 1
@@ -34,23 +40,10 @@ export type PoolAccount = {
   token_lp_supply: number;
 };
 
-export function sortSolanaAddresses(
-  addrA: string,
-  addrB: string,
-): { tokenXAddress: string; tokenYAddress: string } {
-  const aKey = new PublicKey(addrA);
-  const bKey = new PublicKey(addrB);
-
-  const comparison = aKey.toBuffer().compare(bKey.toBuffer());
-
-  return comparison > 0
-    ? { tokenXAddress: addrB, tokenYAddress: addrA }
-    : { tokenXAddress: addrA, tokenYAddress: addrB };
-}
 
 export async function getPoolAccount(
   connection: Connection,
-  poolPubkey: PublicKey,
+  poolPubkey: PublicKey
 ): Promise<PoolAccount> {
   const accountInfo = await connection.getAccountInfo(poolPubkey);
 
@@ -61,7 +54,7 @@ export async function getPoolAccount(
   try {
     const pool = IDL_CODER.accounts.decode<PoolAccount>(
       "Pool",
-      accountInfo.data,
+      accountInfo.data
     );
     return pool;
   } catch (error) {
@@ -73,12 +66,12 @@ export async function getPoolAccount(
 export async function getPoolPubkey(tokenA: string, tokenB: string) {
   const { tokenXAddress, tokenYAddress } = await sortSolanaAddresses(
     tokenA,
-    tokenB,
+    tokenB
   );
 
   const [ammConfigPubkey] = PublicKey.findProgramAddressSync(
     [Buffer.from("amm_config"), new BN(0).toArrayLike(Buffer, "le", 4)],
-    EXCHANGE_PROGRAM_ID,
+    EXCHANGE_PROGRAM_ID
   );
 
   const [poolPubkey] = PublicKey.findProgramAddressSync(
@@ -88,7 +81,7 @@ export async function getPoolPubkey(tokenA: string, tokenB: string) {
       new PublicKey(tokenXAddress).toBuffer(),
       new PublicKey(tokenYAddress).toBuffer(),
     ],
-    EXCHANGE_PROGRAM_ID,
+    EXCHANGE_PROGRAM_ID
   );
 
   return poolPubkey;
@@ -113,7 +106,7 @@ export async function getPoolOnChain(tokenXMint: string, tokenYMint: string) {
 // THIS CAN ALSO BE FETCHED FROM TOKEN HANDLER (token program never changes)
 export async function getTokenProgramId(
   connection: Connection,
-  accountPubkey: PublicKey,
+  accountPubkey: PublicKey
 ): Promise<PublicKey> {
   try {
     const accountInfo = await connection.getAccountInfo(accountPubkey);
@@ -136,49 +129,49 @@ export async function getTokenProgramId(
   }
 }
 
-export const isSolanaAddress = (address: string) => {
+
+export const deserializeVersionedTransaction = (base64Transaction: string) => {
+  const unsignedTransactionBuffer = Buffer.from(base64Transaction, "base64");
+
   try {
-    if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
-      return false;
+    return VersionedTransaction.deserialize(unsignedTransactionBuffer);
+  } catch {
+    const version = unsignedTransactionBuffer[0];
+    if (version !== 0) {
+      throw new Error("Unsupported transaction version");
     }
 
-    new PublicKey(address);
-    return true;
-  } catch {
-    return false;
+    const messageBuffer = unsignedTransactionBuffer.slice(1);
+    const message = VersionedMessage.deserialize(messageBuffer);
+    const numRequiredSignatures = message.header.numRequiredSignatures;
+    const signatures = Array(numRequiredSignatures).fill(new Uint8Array(64));
+
+    return new VersionedTransaction(message, signatures);
   }
 };
 
-export const toRawUnits = (amount: number, decimals: number) => {
-  return BigNumber(amount).multipliedBy(BigNumber(10 ** decimals));
-};
 
-export const toDecimals = (amount: number | BigNumber, decimals: number) => {
-  return BigNumber(amount).dividedBy(BigNumber(10 ** decimals));
-};
-
-// Helper function to get token balance using SPL library
 export async function getTokenBalance(
   connection: Connection,
   accountPubkey: PublicKey,
-  accountName: string,
+  accountName: string
 ): Promise<BigNumber> {
   try {
-    // Determine the correct program ID for this token account
     const programId = await getTokenProgramId(connection, accountPubkey);
 
-    // Use SPL token library to get account info with the correct program ID
     const account = await getAccount(
       connection,
       accountPubkey,
       undefined,
-      programId,
+      programId
     );
     const balance = BigNumber(account.amount);
     return balance;
   } catch (error) {
     console.error(
-      `${accountName} failed to get balance: ${error instanceof Error ? error.message : String(error)}`,
+      `${accountName} failed to get balance: ${
+        error instanceof Error ? error.message : String(error)
+      }`
     );
     return BigNumber(0);
   }

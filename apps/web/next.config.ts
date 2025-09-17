@@ -24,7 +24,12 @@ const nextConfig = {
     svgr: false,
   },
   outputFileTracingRoot: join(__dirname, "../../"),
-  serverExternalPackages: ["pg", "@grpc/grpc-js", "@grpc/proto-loader"],
+  serverExternalPackages: [
+    "pg",
+    "@grpc/grpc-js",
+    "@grpc/proto-loader",
+    "@connectrpc/connect-node",
+  ],
   turbopack: {
     rules: {
       "*.svg": {
@@ -48,7 +53,33 @@ const nextConfig = {
   },
 
   webpack(config, { isServer }) {
+    config.infrastructureLogging = {
+      level: "warn",
+      stream: process.stderr,
+      debug: false,
+    };
+
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      if (
+        args[0]?.includes?.("PackFileCacheStrategy") &&
+        args[0]?.includes?.("Serializing big strings")
+      ) {
+        return;
+      }
+      originalWarn(...args);
+    };
+
     if (!isServer) {
+      const webpack = require("webpack");
+
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /client-server$/,
+          "./client-server.browser.ts"
+        )
+      );
+
       config.resolve.fallback = {
         ...config.resolve.fallback,
         child_process: false,
@@ -62,26 +93,15 @@ const nextConfig = {
         pg: false,
         "pg-native": false,
         tls: false,
+        util: false,
+        zlib: false,
       };
     }
+
     config.module.rules.push({
       test: /\.svg$/i,
       use: ["@svgr/webpack"],
     });
-
-    if (isServer) {
-      const CopyWebpackPlugin = require("copy-webpack-plugin");
-      config.plugins.push(
-        new CopyWebpackPlugin({
-          patterns: [
-            {
-              from: join(__dirname, "../../libs/orpc/src/proto"),
-              to: join(config.output.path || "", "chunks/proto"),
-            },
-          ],
-        }),
-      );
-    }
 
     return config;
   },

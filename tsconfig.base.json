@@ -22,8 +22,7 @@
     "types": ["svg", "css", "image"],
     "verbatimModuleSyntax": true
   },
-  "exclude": ["node_modules", "tmp"],
-
+  "exclude": ["node_modules", "tmp", "libs/grpc-client/src/generated/**"],
   "include": [
     "vite.config.base.ts",
     "types/svg.d.ts",

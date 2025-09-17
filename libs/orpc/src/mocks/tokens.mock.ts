@@ -1,51 +1,53 @@
-import type { TokenMetadata } from "../dex-gateway.type";
+import { create } from "@bufbuild/protobuf";
+import type { TokenMetadata } from "@dex-web/grpc-client";
+import { TokenMetadataPB } from "@dex-web/grpc-client";
 
 export const tokensData = [
-  {
+  create(TokenMetadataPB, {
     address: "DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX",
     decimals: 6,
-    logo_uri: "",
+    logoUri: "",
     name: "DuX",
     symbol: "DuX",
-  },
-  {
+  }),
+  create(TokenMetadataPB, {
     address: "HXsKnhXPtGr2mq4uTpxbxyy7ZydYWJwx4zMuYPEDukY",
     decimals: 9,
-    logo_uri: "",
+    logoUri: "",
     name: "DukY",
     symbol: "DukY",
-  },
-] satisfies TokenMetadata[];
+  }),
+];
 
 export const tokensDataMainnet = [
-  {
+  create(TokenMetadataPB, {
     address: "DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX",
     decimals: 6,
-    logo_uri: "",
+    logoUri: "",
     name: "DuX",
     symbol: "DuX",
-  },
-  {
+  }),
+  create(TokenMetadataPB, {
     address: "HXsKnhXPtGr2mq4uTpxbxyy7ZydYWJwx4zMuYPEDukY",
     decimals: 9,
-    logo_uri: "",
+    logoUri: "",
     name: "DukY",
     symbol: "DukY",
-  },
-  {
+  }),
+  create(TokenMetadataPB, {
     address: "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
     decimals: 6,
-    logo_uri:
+    logoUri:
       "https://ipfs.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g",
     name: "Fartcoin",
     symbol: "Fartcoin",
-  },
-  {
+  }),
+  create(TokenMetadataPB, {
     address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     decimals: 6,
-    logo_uri:
+    logoUri:
       "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
     name: "USD Coin",
     symbol: "USDC",
-  },
-] satisfies TokenMetadata[];
+  }),
+];

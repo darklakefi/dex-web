@@ -5,7 +5,5 @@ export const getTokensAllowList = () => {
     process.env.NEXT_PUBLIC_NETWORK === "2" ? tokensData : tokensDataMainnet
   ).map((token) => token.address);
 
-  console.log({ list });
-
   return list;
 };

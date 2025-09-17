@@ -1,30 +1,26 @@
 "use server";
 
+import type { SendSignedTransactionRequest } from "@dex-web/grpc-client";
 import { getDexGatewayClient } from "../../dex-gateway";
-import type {
-  SignedTransactionRequest,
-  SignedTransactionResponse,
-} from "../../dex-gateway.type";
 
 export async function submitSignedTransactionHandler(
-  input: SignedTransactionRequest,
+  input: SendSignedTransactionRequest
 ) {
-  const grpcClient = getDexGatewayClient();
+  const grpcClient = await getDexGatewayClient();
 
   try {
     const requestWithTradeId = {
       ...input,
-      trade_id: input.trade_id || input.tracking_id,
+      tradeId: input.tradeId || input.trackingId,
     };
 
-    const response: SignedTransactionResponse =
-      await grpcClient.submitSignedTransaction(requestWithTradeId);
+    const response = await grpcClient.sendSignedTransaction(requestWithTradeId);
 
     if (!response.success) {
       console.error("Transaction submission failed:", {
-        errorLogs: response.error_logs,
-        trackingId: input.tracking_id,
-        tradeId: response.trade_id,
+        errorLogs: response.errorLogs,
+        trackingId: input.trackingId,
+        tradeId: response.tradeId,
       });
     }
 
@@ -32,9 +28,9 @@ export async function submitSignedTransactionHandler(
   } catch (error) {
     console.error("gRPC client error:", error);
     return {
-      error_logs: error instanceof Error ? error.message : "Unknown gRPC error",
+      errorLogs: error instanceof Error ? error.message : "Unknown gRPC error",
       success: false,
-      trade_id: input.trade_id,
+      tradeId: input.tradeId,
     };
   }
 }

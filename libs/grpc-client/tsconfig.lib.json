@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "outDir": "../../dist/libs/grpc-client",
+    "types": ["node"]
+  },
+  "exclude": ["dist", "node_modules", "src/**/*.spec.ts", "src/**/*.test.ts"],
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*.ts"]
+}

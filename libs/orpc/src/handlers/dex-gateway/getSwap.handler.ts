@@ -1,45 +1,45 @@
 "use server";
 
+import type { CreateUnsignedTransactionRequest } from "@dex-web/grpc-client";
 import { getDexGatewayClient } from "../../dex-gateway";
-import type { SwapRequest, SwapResponse } from "../../dex-gateway.type";
-import type { Token } from "../../schemas/tokens/token.schema";
-import { toRawUnits } from "../../utils/solana";
-import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
-export async function getSwapHandler(input: SwapRequest) {
+export async function getSwapHandler(input: CreateUnsignedTransactionRequest) {
   try {
     const grpcClient = getDexGatewayClient();
 
-    const { is_swap_x_to_y } = input;
+    const amountInRaw = input.amountIn;
+    const minOutRaw = input.minOut;
 
-    const tokenMetadata = (await getTokenMetadataHandler({
-      addresses: [input.token_mint_x, input.token_mint_y],
-      returnAsObject: true,
-    })) as Record<string, Token>;
+    const transactionRequest = {
+      ...input,
+      amountIn: amountInRaw,
+      minOut: minOutRaw,
+    };
 
-    const tokenX = tokenMetadata[input.token_mint_x];
-    const tokenY = tokenMetadata[input.token_mint_y];
+    console.log("Creating unsigned transaction with:", {
+      trackingId: transactionRequest.trackingId,
+      amountIn: transactionRequest.amountIn.toString(),
+      minOut: transactionRequest.minOut.toString(),
+      tokenMintX: transactionRequest.tokenMintX,
+      tokenMintY: transactionRequest.tokenMintY,
+    });
 
-    let amountInDecimals = tokenX?.decimals ?? 0;
-    let minOutDecimals = tokenY?.decimals ?? 0;
-
-    if (!is_swap_x_to_y) {
-      [amountInDecimals, minOutDecimals] = [minOutDecimals, amountInDecimals];
-    }
-
-    input.amount_in = toRawUnits(input.amount_in, amountInDecimals).toNumber();
-    input.min_out = toRawUnits(input.min_out, minOutDecimals).toNumber();
-
-    const swapResponse: SwapResponse = await grpcClient.swap(input);
+    const swapResponse = await (
+      await grpcClient
+    ).createUnsignedTransaction(transactionRequest);
 
     return {
       success: true,
-      trackingId: input.tracking_id,
-      tradeId: swapResponse.trade_id,
-      unsignedTransaction: swapResponse.unsigned_transaction,
+      trackingId: input.trackingId,
+      tradeId: swapResponse.tradeId,
+      unsignedTransaction: swapResponse.unsignedTransaction,
     };
   } catch (error) {
-    console.error("Error calling dex-gateway swap:", error);
+    console.error("Error calling dex-gateway swap:", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      trackingId: input.trackingId,
+    });
     return {
       error: error instanceof Error ? error.message : String(error),
       success: false,

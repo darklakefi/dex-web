@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isSolanaAddress } from "../../utils/solana";
+import { isSolanaAddress } from "@dex-web/utils";
 
 const numericString = z
   .string()

@@ -1,5 +1,8 @@
 "use server";
 
+import { create } from "@bufbuild/protobuf";
+import type { TokenMetadata } from "@dex-web/grpc-client";
+import { TokenMetadataPB } from "@dex-web/grpc-client";
 import {
   fetchAllDigitalAsset,
   mplTokenMetadata,
@@ -8,7 +11,6 @@ import { publicKey } from "@metaplex-foundation/umi";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { Connection } from "@solana/web3.js";
 import { getDexGatewayClient } from "../../dex-gateway";
-import type { TokenMetadata } from "../../dex-gateway.type";
 import { getHelius } from "../../getHelius";
 import type {
   GetTokenMetadataInput,
@@ -19,13 +21,13 @@ import type { Token } from "./../../schemas/tokens/token.schema";
 const parseToken = (token: TokenMetadata): Token => ({
   address: token.address,
   decimals: token.decimals,
-  imageUrl: token.logo_uri,
+  imageUrl: token.logoUri,
   name: token.name,
   symbol: token.symbol,
 });
 
 export const getTokenMetadataHandler = async (
-  input: GetTokenMetadataInput,
+  input: GetTokenMetadataInput
 ): Promise<GetTokenMetadataOutput> => {
   const { addresses, returnAsObject } = input;
 
@@ -33,18 +35,21 @@ export const getTokenMetadataHandler = async (
     return returnAsObject ? ({} as Record<string, Token>) : [];
   }
 
-  const grpcClient = getDexGatewayClient();
+  const grpcClient = await getDexGatewayClient();
   try {
     const { tokens } = await grpcClient.getTokenMetadataList({
-      addresses_list: {
-        token_addresses: addresses,
+      filterBy: {
+        case: "addressesList",
+        value: {
+          tokenAddresses: addresses,
+        },
       },
-      page_number: 1,
-      page_size: addresses.length,
+      pageNumber: 1,
+      pageSize: addresses.length,
     });
 
     const notFoundTokens = addresses.filter(
-      (address) => !tokens.some((token) => token.address === address),
+      (address) => !tokens.some((token) => token.address === address)
     );
     if (notFoundTokens.length > 0) {
       const tokensFromChain = await fetchTokenMetadataFromChain(notFoundTokens);
@@ -52,13 +57,10 @@ export const getTokenMetadataHandler = async (
     }
 
     if (returnAsObject) {
-      return tokens.reduce(
-        (acc, token) => {
-          acc[token.address] = parseToken(token);
-          return acc;
-        },
-        {} as Record<string, Token>,
-      );
+      return tokens.reduce((acc, token) => {
+        acc[token.address] = parseToken(token);
+        return acc;
+      }, {} as Record<string, Token>);
     }
 
     return tokens.map(parseToken);
@@ -69,7 +71,7 @@ export const getTokenMetadataHandler = async (
 };
 
 async function fetchTokenMetadataFromChain(
-  tokenAddress: string[],
+  tokenAddress: string[]
 ): Promise<TokenMetadata[]> {
   const helius = getHelius();
   const rpc = new Connection(helius.endpoint);
@@ -78,15 +80,17 @@ async function fetchTokenMetadataFromChain(
   try {
     const digitalAsset = await fetchAllDigitalAsset(
       umi,
-      tokenAddress.map((address) => publicKey(address)),
+      tokenAddress.map((address) => publicKey(address))
     );
-    return digitalAsset.map((asset) => ({
-      address: asset.mint.publicKey.toString(),
-      decimals: asset.mint.decimals,
-      logo_uri: "",
-      name: asset.metadata.name,
-      symbol: asset.metadata.symbol,
-    }));
+    return digitalAsset.map((asset) =>
+      create(TokenMetadataPB, {
+        address: asset.mint.publicKey.toString(),
+        decimals: asset.mint.decimals,
+        logoUri: "",
+        name: asset.metadata.name,
+        symbol: asset.metadata.symbol,
+      })
+    );
   } catch (_error) {
     return [];
   }

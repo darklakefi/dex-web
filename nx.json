@@ -32,6 +32,7 @@
   },
   "plugins": [
     {
+      "exclude": ["proto-definitions/*", "grpc-client/*"],
       "options": {
         "build": {
           "buildDepsName": "build-deps",
@@ -91,6 +92,15 @@
         "testStorybookTargetName": "test-storybook"
       },
       "plugin": "@nx/storybook/plugin"
+    },
+    {
+      "include": ["proto-definitions/*", "grpc-client/*"],
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        }
+      },
+      "plugin": "@nx/js/typescript"
     }
   ],
   "sync": {

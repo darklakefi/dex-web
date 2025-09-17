@@ -21,7 +21,8 @@
       "!**/tmp/**",
       "!**/.*/**",
       "!**/test-results/**"
-    ]
+    ],
+    "ignore": ["libs/grpc-client/src/generated/**"]
   },
   "formatter": {
     "enabled": true,

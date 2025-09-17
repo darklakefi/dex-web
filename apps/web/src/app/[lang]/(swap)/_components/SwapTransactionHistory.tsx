@@ -16,7 +16,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
+import { getExplorerUrl } from "@dex-web/utils";
 
 export function SwapTransactionHistory() {
   const { publicKey } = useWallet();
@@ -36,7 +36,11 @@ export function SwapTransactionHistory() {
     });
 
     setHasMore(response.hasMore);
-    setTrades([...trades, ...response.trades]);
+    setTrades(
+      [...trades, ...response.trades].filter(
+        (trade): trade is SwapTransaction => trade !== null
+      ) satisfies SwapTransaction[]
+    );
 
     if (response.hasMore) {
       setOffset(offset + limit);
@@ -52,7 +56,7 @@ export function SwapTransactionHistory() {
         offset: 0,
         userAddress: publicKey?.toBase58() ?? "",
       },
-    }),
+    })
   );
 
   return data?.trades.length > 0 ? (
@@ -110,7 +114,15 @@ export function SwapTransactionHistory() {
                       </div>
                       <div className="flex flex-row justify-between">
                         <Text.Body2 className="text-green-300">
-                          {`${numberFormatHelper({ decimalScale: tx.tokenIn.decimals, trimTrailingZeros: true, value: tx.displayAmountIn })} ${tx.tokenIn.symbol} FOR ${numberFormatHelper({ decimalScale: tx.tokenOut.decimals, trimTrailingZeros: true, value: tx.displayMinimalAmountOut })} ${tx.tokenOut.symbol}`}
+                          {`${numberFormatHelper({
+                            decimalScale: tx.tokenIn.decimals,
+                            trimTrailingZeros: true,
+                            value: tx.displayAmountIn,
+                          })} ${tx.tokenIn.symbol} FOR ${numberFormatHelper({
+                            decimalScale: tx.tokenOut.decimals,
+                            trimTrailingZeros: true,
+                            value: tx.displayMinimalAmountOut,
+                          })} ${tx.tokenOut.symbol}`}
                         </Text.Body2>
                         <Text.Body2 className="text-green-300">
                           {getDateString(tx.createdAt)}
@@ -118,7 +130,11 @@ export function SwapTransactionHistory() {
                       </div>
                       <div className="flex flex-row justify-between">
                         <Text.Body2 className="text-green-400">
-                          {`1 ${tx.tokenIn.symbol} ≈ ${numberFormatHelper({ decimalScale: 2, trimTrailingZeros: true, value: tx.rate })} ${tx.tokenOut.symbol}`}
+                          {`1 ${tx.tokenIn.symbol} ≈ ${numberFormatHelper({
+                            decimalScale: 2,
+                            trimTrailingZeros: true,
+                            value: tx.rate,
+                          })} ${tx.tokenOut.symbol}`}
                         </Text.Body2>
                         <Text.Body2 className="text-green-300">
                           {getTimeString(tx.createdAt)} {timezone}

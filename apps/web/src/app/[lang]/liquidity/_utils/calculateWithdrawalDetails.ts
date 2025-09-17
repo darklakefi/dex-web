@@ -3,7 +3,7 @@ import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
-import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
+import { sortSolanaAddresses } from "@dex-web/utils";
 
 interface WithdrawalCalculationParams {
   userLiquidity: {

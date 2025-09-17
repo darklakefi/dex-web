@@ -7,7 +7,7 @@ import type {
 } from "../../schemas/tokens/getTokenDetails.schema";
 
 export const getTokenDetailsHandler = async (
-  input: GetTokenDetailsInput,
+  input: GetTokenDetailsInput
 ): Promise<GetTokenDetailsOutput> => {
   const { address } = input;
 
@@ -21,18 +21,21 @@ export const getTokenDetailsHandler = async (
     };
   }
 
-  const grpcClient = getDexGatewayClient();
+  const grpcClient = await getDexGatewayClient();
   try {
-    const { token_metadata } = await grpcClient.getTokenMetadata({
-      token_address: address,
+    const { tokenMetadata } = await grpcClient.getTokenMetadata({
+      searchBy: {
+        case: "tokenAddress",
+        value: address,
+      },
     });
 
     return {
-      address: token_metadata.address,
-      decimals: token_metadata.decimals,
-      imageUrl: token_metadata.logo_uri,
-      name: token_metadata.name,
-      symbol: token_metadata.symbol,
+      address: tokenMetadata?.address || "",
+      decimals: tokenMetadata?.decimals || 0,
+      imageUrl: tokenMetadata?.logoUri || undefined,
+      name: tokenMetadata?.name || "Unknown Token",
+      symbol: tokenMetadata?.symbol || address.slice(-4),
     };
   } catch (error) {
     console.error(error, "error");

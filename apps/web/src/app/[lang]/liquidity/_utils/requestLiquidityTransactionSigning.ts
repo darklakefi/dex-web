@@ -10,7 +10,7 @@ interface RequestLiquidityTransactionSigningProps {
   publicKey: PublicKey;
   signTransaction:
     | (<T extends Transaction | VersionedTransaction>(
-        transaction: T,
+        transaction: T
       ) => Promise<T>)
     | undefined;
   setLiquidityStep: (step: number) => void;
@@ -39,15 +39,15 @@ export async function requestLiquidityTransactionSigning({
 
     const unsignedTransactionBuffer = Buffer.from(
       unsignedTransaction,
-      "base64",
+      "base64"
     );
     const transaction = VersionedTransaction.deserialize(
-      unsignedTransactionBuffer,
+      unsignedTransactionBuffer
     );
 
     const signedTransaction = await signTransaction(transaction);
     const signedTransactionBase64 = Buffer.from(
-      signedTransaction.serialize(),
+      signedTransaction.serialize()
     ).toString("base64");
 
     const signedTxRequest = {
@@ -79,7 +79,9 @@ export async function requestLiquidityTransactionSigning({
     console.error("Signing error:", error);
     dismissToast();
     toast({
-      description: `${error instanceof Error ? error.message : "Unknown error occurred"}`,
+      description: `${
+        error instanceof Error ? error.message : "Unknown error occurred"
+      }`,
       title: "Signing Error",
       variant: "error",
     });

@@ -1,18 +1,14 @@
 "use server";
 
+import type { GetTradesListByUserRequest } from "@dex-web/grpc-client";
 import { getDexGatewayClient } from "../../dex-gateway";
-import type {
-  GetTradesListByUserRequest,
-  GetTradesListByUserResponse,
-} from "../../dex-gateway.type";
 
 export async function getTradesListByUserHandler(
-  input: GetTradesListByUserRequest,
+  input: GetTradesListByUserRequest
 ) {
   try {
-    const grpcClient = getDexGatewayClient();
-    const tradesListResponse: GetTradesListByUserResponse =
-      await grpcClient.getTradesListByUser(input);
+    const grpcClient = await getDexGatewayClient();
+    const tradesListResponse = await grpcClient.getTradesListByUser(input);
     return {
       data: tradesListResponse,
       success: true,

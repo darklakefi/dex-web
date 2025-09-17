@@ -17,7 +17,7 @@ import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
-import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
+import { getExplorerUrl } from "@dex-web/utils";
 import { isSquadsX } from "../../../_utils/isSquadsX";
 import { dismissToast, toast } from "../../../_utils/toast";
 

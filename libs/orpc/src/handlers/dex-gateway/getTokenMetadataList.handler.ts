@@ -1,16 +1,20 @@
 "use server";
 
-import { getDexGatewayClient } from "../../dex-gateway";
 import type {
   GetTokenMetadataListRequest,
   GetTokenMetadataListResponse,
-} from "../../dex-gateway.type";
+} from "@dex-web/grpc-client";
+import { getDexGatewayClient } from "../../dex-gateway";
 
 export async function getTokenMetadataListHandler(
-  input: GetTokenMetadataListRequest,
-) {
-  const grpcClient = getDexGatewayClient();
-  const response: GetTokenMetadataListResponse =
-    await grpcClient.getTokenMetadataList(input);
-  return response;
+  input: GetTokenMetadataListRequest
+): Promise<GetTokenMetadataListResponse> {
+  try {
+    const grpcClient = await getDexGatewayClient();
+    const response = await grpcClient.getTokenMetadataList(input);
+    return response;
+  } catch (error) {
+    console.error("gRPC call failed:", error);
+    throw error;
+  }
 }

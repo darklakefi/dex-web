@@ -1,11 +1,30 @@
 "use client";
 
-import { client, TradeStatus, tanstackClient } from "@dex-web/orpc";
+import {
+	BUTTON_MESSAGES,
+	ERROR_MESSAGES,
+	TRANSACTION_STEPS,
+	useSwapTracking,
+	useTokenAccounts,
+	useTransactionSigning,
+	useTransactionState,
+	useTransactionStatus,
+	useTransactionToasts,
+} from "@dex-web/core";
+import { TradeStatus } from "@dex-web/grpc-client";
+import { client, tanstackClient } from "@dex-web/orpc";
 import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
+import { toRawUnitsBigint } from "@dex-web/utils";
+import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import { Box, Button, Text } from "@dex-web/ui";
-import { convertToDecimal } from "@dex-web/utils";
+import {
+	checkInsufficientBalance,
+	convertToDecimal,
+	formatAmountInput,
+	parseAmount,
+	parseAmountBigNumber,
+} from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -24,7 +43,7 @@ import { TokenTransactionDetails } from "../../../_components/TokenTransactionDe
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
 import { isSquadsX } from "../../../_utils/isSquadsX";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
-import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { SwapPageRefreshButton } from "./SwapPageRefreshButton";
 
@@ -64,17 +83,6 @@ const formConfig = {
 	},
 };
 
-const BUTTON_MESSAGE = {
-	ENTER_AMOUNT: "enter an amount",
-	HIGH_PRICE_IMPACT: "CONFIRM SWAP WITH {value}% PRICE IMPACT",
-	INSUFFICIENT_BALANCE: "insufficient",
-	LOADING: "loading",
-	STEP_1: "ENCRYPTING TRADE PARAMETERs [1/3]",
-	STEP_2: "Confirm transaction in your wallet [2/3]",
-	STEP_3: "Processing transaction [3/3]",
-	SWAP: "swap",
-};
-
 export function SwapForm() {
 	const form = useAppForm(formConfig);
 	const { wallet, signTransaction, publicKey } = useWallet();
@@ -83,9 +91,7 @@ export function SwapForm() {
 		selectedTokensParsers,
 	);
 
-	const [swapStep, setSwapStep] = useState(0);
-	const [isDisableSwap, setIsDisableSwapButton] = useState(true);
-	const [isLoadingSwapButton, setIsLoadingSwapButton] = useState(false);
+	const swapState = useTransactionState(0, false, true);
 	const [isLoadingQuote, setIsLoadingQuote] = useState(false);
 	const [_trackDetails, setTrackDetails] = useState<{
 		tradeId: string;
@@ -99,6 +105,116 @@ export function SwapForm() {
 	const [isInsufficientBalance, setIsInsufficientBalance] = useState(false);
 	const [slippage, setSlippage] = useState("0.5");
 
+	const { signTransactionWithValidation } = useTransactionSigning({
+		publicKey,
+		signTransaction,
+	});
+
+	const {
+		trackInitiated,
+		trackSigned,
+		trackSubmitted,
+		trackConfirmed,
+		trackFailed,
+		trackError: trackSwapError,
+	} = useSwapTracking({
+		trackSwap,
+		trackError: (error: unknown, context?: Record<string, any>) => {
+			trackError({
+				error: error instanceof Error ? error.message : String(error),
+				context: "swap",
+				details: context,
+			});
+		},
+	});
+
+	const toasts = useTransactionToasts({
+		toast,
+		dismissToast,
+		transactionType: "SWAP",
+		isSquadsX: isSquadsX(wallet),
+		customMessages: {
+			squadsXSuccess: {
+				title: tx("squadsX.responseStatus.confirmed.title"),
+				description: tx("squadsX.responseStatus.confirmed.description"),
+			},
+			squadsXFailure: {
+				title: tx("squadsX.responseStatus.failed.title"),
+				description: tx("squadsX.responseStatus.failed.description"),
+			},
+		},
+	});
+
+	const statusChecker = useTransactionStatus({
+		checkStatus: async (trackingId: string, tradeId?: string) => {
+			const response = await client.dexGateway.checkTradeStatus({
+				trackingId,
+				tradeId: tradeId || "",
+			});
+			return {
+				status: response.status.toString(),
+				data: response,
+			};
+		},
+		successStates: [TradeStatus.SETTLED.toString(), TradeStatus.SLASHED.toString()],
+		failStates: [TradeStatus.CANCELLED.toString(), TradeStatus.FAILED.toString()],
+		maxAttempts: 10,
+		retryDelay: 2000,
+		onStatusUpdate: (status, attempt) => {
+			toasts.showStatusToast(`TrackingId: ${_trackDetails.trackingId}`);
+		},
+		onSuccess: (result) => {
+			const sellAmount = parseAmount(form.state.values.tokenAAmount);
+			const buyAmount = parseAmount(form.state.values.tokenBAmount);
+
+			if (isSquadsX(wallet) && result.data?.status === TradeStatus.CONFIRMED) {
+				resetButtonState();
+				toasts.showSuccessToast();
+				return;
+			}
+
+			swapState.reset();
+			const successMessage = isSquadsX(wallet)
+				? undefined
+				: `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`;
+
+			toasts.showSuccessToast(successMessage);
+
+			trackConfirmed({
+				fromAmount: sellAmount,
+				fromToken: tokenAAddress || "",
+				toAmount: buyAmount,
+				toToken: tokenBAddress || "",
+				transactionHash: _trackDetails.trackingId,
+			});
+
+			refetchBuyTokenAccount();
+			refetchSellTokenAccount();
+		},
+		onFailure: (result) => {
+			swapState.reset();
+			const sellAmount = parseAmount(form.state.values.tokenAAmount);
+			const buyAmount = parseAmount(form.state.values.tokenBAmount);
+
+			toasts.showErrorToast(`Trade ${result.status}!`, {
+				trackingId: _trackDetails.trackingId,
+			});
+
+			trackFailed({
+				fromAmount: sellAmount,
+				fromToken: tokenAAddress || "",
+				toAmount: buyAmount,
+				toToken: tokenBAddress || "",
+				transactionHash: _trackDetails.trackingId,
+			});
+		},
+		onTimeout: () => {
+			toasts.showErrorToast("Failed to check trade status", {
+				trackingId: _trackDetails.trackingId,
+			});
+		},
+	});
+
 	const { data: poolDetails } = useSuspenseQuery(
 		tanstackClient.pools.getPoolDetails.queryOptions({
 			input: {
@@ -108,33 +224,24 @@ export function SwapForm() {
 		}),
 	);
 
-	const { data: buyTokenAccount, refetch: refetchBuyTokenAccount } =
-		useSuspenseQuery(
-			tanstackClient.helius.getTokenAccounts.queryOptions({
-				input: {
-					mint: tokenAAddress,
-					ownerAddress: publicKey?.toBase58() ?? "",
-				},
-			}),
-		);
-
-	const { data: sellTokenAccount, refetch: refetchSellTokenAccount } =
-		useSuspenseQuery(
-			tanstackClient.helius.getTokenAccounts.queryOptions({
-				input: {
-					mint: tokenBAddress,
-					ownerAddress: publicKey?.toBase58() ?? "",
-				},
-			}),
-		);
+	const {
+		buyTokenAccount,
+		sellTokenAccount,
+		refetchBuyTokenAccount,
+		refetchSellTokenAccount,
+	} = useTokenAccounts({
+		tokenAAddress,
+		tokenBAddress,
+		publicKey,
+		tanstackClient,
+	});
 
 	const [quote, setQuote] = useState<GetQuoteOutput | null>(null);
 
 	const isXtoY = poolDetails?.tokenXMint === tokenBAddress;
 
 	const resetButtonState = () => {
-		setSwapStep(0);
-		setIsLoadingSwapButton(false);
+		swapState.reset();
 	};
 
 	const requestSigning = async (
@@ -143,38 +250,19 @@ export function SwapForm() {
 		trackingId: string,
 	) => {
 		try {
-			if (!publicKey) throw new Error("Wallet not connected!");
-			if (!signTransaction)
-				throw new Error("Wallet does not support transaction signing!");
+			swapState.setStep(2);
+			swapState.setLoading(true);
+			toasts.showStepToast(2);
 
-			setSwapStep(2);
-			setIsLoadingSwapButton(true);
-			toast({
-				description:
-					"Tokens will be secured until slippage verification completes.",
-				title: "Confirm trade [2/3]",
-				variant: "loading",
-			});
+			const transaction = deserializeVersionedTransaction(unsignedTransaction);
+			const signedTransaction =
+				await signTransactionWithValidation(transaction);
 
-			const unsignedTransactionBuffer = Buffer.from(
-				unsignedTransaction,
-				"base64",
-			);
-			const transactionJson = unsignedTransactionBuffer;
-			const transaction = Transaction.from(transactionJson);
-
-			const signedTransaction = await signTransaction(transaction);
-
-			const sellAmount = Number(
-				form.state.values.tokenAAmount.replace(/,/g, ""),
-			);
-			const buyAmount = Number(
-				form.state.values.tokenBAmount.replace(/,/g, ""),
-			);
-			trackSwap({
+			const sellAmount = parseAmount(form.state.values.tokenAAmount);
+			const buyAmount = parseAmount(form.state.values.tokenBAmount);
+			trackSigned({
 				fromAmount: sellAmount,
 				fromToken: tokenAAddress || "",
-				status: "signed",
 				toAmount: buyAmount,
 				toToken: tokenBAddress || "",
 			});
@@ -187,34 +275,24 @@ export function SwapForm() {
 				tradeId,
 			});
 			const signedTxRequest = {
-				signed_transaction: signedTransactionBase64,
-				tracking_id: trackingId,
-				trade_id: tradeId,
+				signedTransaction: signedTransactionBase64,
+				trackingId,
+				tradeId,
 			};
 
-			setSwapStep(3);
-			setIsLoadingSwapButton(true);
-			toast({
-				description:
-					"Checking if swap stayed within your hidden slippage tolerance before finalizing trade.",
-				title: "Verify slippage requirements [3/3]",
-				variant: "loading",
-			});
+			swapState.setStep(3);
+			swapState.setLoading(true);
+			toasts.showStepToast(3);
 
 			const signedTxResponse =
 				await client.dexGateway.submitSignedTransaction(signedTxRequest);
 
 			if (signedTxResponse.success) {
-				const sellAmount = Number(
-					form.state.values.tokenAAmount.replace(/,/g, ""),
-				);
-				const buyAmount = Number(
-					form.state.values.tokenBAmount.replace(/,/g, ""),
-				);
-				trackSwap({
+				const sellAmount = parseAmount(form.state.values.tokenAAmount);
+				const buyAmount = parseAmount(form.state.values.tokenBAmount);
+				trackSubmitted({
 					fromAmount: sellAmount,
 					fromToken: tokenAAddress || "",
-					status: "submitted",
 					toAmount: buyAmount,
 					toToken: tokenBAddress || "",
 					transactionHash: trackingId,
@@ -225,191 +303,81 @@ export function SwapForm() {
 			}
 		} catch (error) {
 			console.error("Signing error:", error);
-			dismissToast();
-			toast({
-				description: `${error instanceof Error ? error.message : "Unknown error occurred"}, trackingId: ${trackingId}`,
-				title: "Signing Error",
-				variant: "error",
-			});
-
-			trackError({
-				context: "swap_signing",
-				details: {
+			toasts.dismiss();
+			toasts.showErrorToast(
+				error instanceof Error ? error.message : "Unknown error occurred",
+				{
 					trackingId,
-					tradeId,
 				},
-				error: error instanceof Error ? error.message : "Unknown error",
+			);
+
+			trackSwapError(error, {
+				trackingId,
+				tradeId,
 			});
 
-			resetButtonState();
+			swapState.reset();
 		}
 	};
 
-	const checkSwapStatus = async (
-		trackingId: string,
-		tradeId: string,
-		maxAttempts = 10,
-	) => {
-		for (let i = 0; i < maxAttempts; i++) {
-			if (!trackingId || !tradeId) return;
-			const response = await client.dexGateway.checkTradeStatus({
-				tracking_id: trackingId,
-				trade_id: tradeId,
-			});
-
-			dismissToast();
-			const squads = isSquadsX(wallet);
-
-			if (squads) {
-				if (response.status === TradeStatus.CONFIRMED) {
-					resetButtonState();
-					toast({
-						description: tx("squadsX.responseStatus.confirmed.description"),
-						title: tx("squadsX.responseStatus.confirmed.title"),
-						variant: "success",
-					});
-					return;
-				}
-			}
-
-			if (
-				response.status === TradeStatus.SETTLED ||
-				response.status === TradeStatus.SLASHED
-			) {
-				resetButtonState();
-				toast({
-					description: squads
-						? tx("swap.squadsX.responseStatus.confirmed.description")
-						: `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`,
-					title: squads
-						? tx("swap.squadsX.responseStatus.confirmed.title")
-						: "Swap complete",
-					variant: "success",
-				});
-
-				const sellAmount = Number(
-					form.state.values.tokenAAmount.replace(/,/g, ""),
-				);
-				const buyAmount = Number(
-					form.state.values.tokenBAmount.replace(/,/g, ""),
-				);
-				trackSwap({
-					fromAmount: sellAmount,
-					fromToken: tokenAAddress || "",
-					status: "confirmed",
-					toAmount: buyAmount,
-					toToken: tokenBAddress || "",
-					transactionHash: trackingId,
-				});
-
-				refetchBuyTokenAccount();
-				refetchSellTokenAccount();
-				return;
-			}
-
-			if (
-				response.status === TradeStatus.CANCELLED ||
-				response.status === TradeStatus.FAILED
-			) {
-				resetButtonState();
-				const squads = isSquadsX(wallet);
-				toast({
-					description: squads
-						? tx("squadsX.responseStatus.failed.description")
-						: `Trade ${response.status}!, trackingId: ${trackingId}`,
-					title: squads
-						? tx("squadsX.responseStatus.failed.title")
-						: `Trade ${response.status}`,
-					variant: "error",
-				});
-
-				const sellAmount = Number(
-					form.state.values.tokenAAmount.replace(/,/g, ""),
-				);
-				const buyAmount = Number(
-					form.state.values.tokenBAmount.replace(/,/g, ""),
-				);
-				trackSwap({
-					fromAmount: sellAmount,
-					fromToken: tokenAAddress || "",
-					status: "failed",
-					toAmount: buyAmount,
-					toToken: tokenBAddress || "",
-					transactionHash: trackingId,
-				});
-
-				return;
-			}
-
-			toast({
-				description: `TrackingId: ${trackingId}`,
-				title: "Checking trade status",
-				variant: "loading",
-			});
-
-			if (i < maxAttempts - 1) {
-				await new Promise((resolve) => setTimeout(resolve, 2000));
-			}
-		}
-		toast({
-			description: `TrackingId: ${trackingId}`,
-			title: "Failed to check trade status",
-			variant: "error",
-		});
+	const checkSwapStatus = async (trackingId: string, tradeId: string) => {
+		if (!trackingId || !tradeId) return;
+		setTrackDetails({ trackingId, tradeId });
+		await statusChecker.checkTransactionStatus(trackingId, tradeId);
 	};
 
 	const getSwap = async () => {
 		if (!publicKey) {
-			toast({
-				description: "Missing wallet address or token information",
-				title: "Swap Error",
-				variant: "error",
-			});
+			toasts.showErrorToast(ERROR_MESSAGES.MISSING_WALLET_INFO);
 			return;
 		}
 
-		const sellAmount = Number(form.state.values.tokenAAmount.replace(/,/g, ""));
-		const buyAmount = Number(form.state.values.tokenBAmount.replace(/,/g, ""));
-		trackSwap({
+		const sellAmount = parseAmount(form.state.values.tokenAAmount);
+		const buyAmount = parseAmount(form.state.values.tokenBAmount);
+		trackInitiated({
 			fromAmount: sellAmount,
 			fromToken: tokenAAddress || "",
-			status: "initiated",
 			toAmount: buyAmount,
 			toToken: tokenBAddress || "",
 		});
 
-		toast({
-			description:
-				"Hiding your slippage tolerance from mev bot until verification. this may take a few seconds.",
-			title: "Generating zero-knowledge proof [1/3]",
-			variant: "loading",
-		});
-		setSwapStep(1);
-		setIsLoadingSwapButton(true);
+		toasts.showStepToast(1);
+		swapState.setStep(1);
+		swapState.setLoading(true);
 
 		try {
 			const formState = form.state.values;
-			const sellAmount = Number(formState.tokenAAmount.replace(/,/g, ""));
-			const buyAmount = Number(formState.tokenBAmount.replace(/,/g, ""));
+			const sellAmount = parseAmount(formState.tokenAAmount);
+			const buyAmount = parseAmount(formState.tokenBAmount);
 
 			if (!tokenAAddress || !tokenBAddress) {
-				throw new Error("Missing token addresses");
+				throw new Error(ERROR_MESSAGES.MISSING_TOKEN_ADDRESSES);
 			}
 
 			const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
 
 			const { tokenXAddress, tokenYAddress } = sortedTokens;
 
+			const sellTokenDecimals =
+				sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
+			const buyTokenDecimals = buyTokenAccount?.tokenAccounts[0]?.decimals || 0;
+
+			const buyAmountRaw = toRawUnitsBigint(buyAmount, buyTokenDecimals);
+			const slippageFactor = BigNumber(1).minus(
+				BigNumber(slippage || 0).dividedBy(100),
+			);
+			const minOutRaw = BigNumber(buyAmountRaw.toString())
+				.multipliedBy(slippageFactor)
+				.integerValue(BigNumber.ROUND_DOWN);
+
 			const response = await client.dexGateway.getSwap({
-				amount_in: sellAmount,
-				is_swap_x_to_y: isXtoY,
-				min_out: BigNumber(buyAmount)
-					.multipliedBy(1 - Number(slippage || 0) / 100)
-					.toNumber(),
-				network: parseInt(process.env.NEXT_PUBLIC_NETWORK || "2", 10),
-				token_mint_x: tokenXAddress,
-				token_mint_y: tokenYAddress,
-				user_address: publicKey.toBase58(),
+				amountIn: toRawUnitsBigint(sellAmount, sellTokenDecimals),
+				isSwapXToY: isXtoY,
+				minOut: BigInt(minOutRaw.toString()),
+				trackingId: `swap-${Date.now()}`,
+				tokenMintX: tokenXAddress,
+				tokenMintY: tokenYAddress,
+				userAddress: publicKey.toBase58(),
 			});
 
 			if (response.success && response.unsignedTransaction) {
@@ -423,24 +391,17 @@ export function SwapForm() {
 			}
 		} catch (error) {
 			console.error("Swap error:", error);
-			toast({
-				description:
-					error instanceof Error ? error.message : "Unknown error occurred",
-				title: "Swap Error",
-				variant: "error",
+			toasts.showErrorToast(
+				error instanceof Error ? error.message : "Unknown error occurred",
+			);
+
+			trackSwapError(error, {
+				amount: form.state.values.tokenAAmount,
+				tokenA: tokenAAddress,
+				tokenB: tokenBAddress,
 			});
 
-			trackError({
-				context: "swap_initiation",
-				details: {
-					amount: form.state.values.tokenAAmount,
-					tokenA: tokenAAddress,
-					tokenB: tokenBAddress,
-				},
-				error: error instanceof Error ? error.message : "Unknown error",
-			});
-
-			resetButtonState();
+			swapState.reset();
 		}
 	};
 
@@ -464,11 +425,11 @@ export function SwapForm() {
 		isXtoY: boolean;
 		slippage: number;
 	}) => {
-		const amountInNumber = Number(amountIn.replace(/,/g, ""));
-		if (!poolDetails || BigNumber(amountInNumber).lte(0)) return;
+		const amountInNumber = parseAmount(amountIn);
+		if (!poolDetails || parseAmountBigNumber(amountIn).lte(0)) return;
 
 		setIsLoadingQuote(true);
-		setIsDisableSwapButton(true);
+		swapState.setDisabled(true);
 		const quote = await client.swap.getSwapQuote({
 			amountIn: amountInNumber,
 			isXtoY,
@@ -482,7 +443,7 @@ export function SwapForm() {
 		} else {
 			form.setFieldValue("tokenAAmount", String(quote.amountOut));
 		}
-		setIsDisableSwapButton(false);
+		swapState.setDisabled(false);
 		setIsLoadingQuote(false);
 	};
 
@@ -512,30 +473,25 @@ export function SwapForm() {
 		debouncedGetQuote,
 	]);
 
-	const checkInsufficientBalance = (input: string) => {
-		const value = input.replace(/,/g, "");
-		const accountAmount = sellTokenAccount?.tokenAccounts[0]?.amount || 0;
-		const decimal = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
-
-		if (BigNumber(value).gt(convertToDecimal(accountAmount, decimal))) {
-			setIsInsufficientBalance(true);
-			return;
-		}
-
-		setIsInsufficientBalance(false);
+	const checkInsufficientBalanceState = (input: string) => {
+		const hasInsufficientBalance = checkInsufficientBalance(
+			input,
+			sellTokenAccount?.tokenAccounts[0],
+		);
+		setIsInsufficientBalance(hasInsufficientBalance);
 	};
 
 	const handleAmountChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
 		type: "buy" | "sell",
 	) => {
-		const value = e.target.value.replace(/,/g, "");
+		const value = formatAmountInput(e.target.value);
 
 		if (type === "sell") {
-			checkInsufficientBalance(value);
+			checkInsufficientBalanceState(value);
 		}
 
-		if (BigNumber(value).gt(0)) {
+		if (parseAmountBigNumber(value).gt(0)) {
 			debouncedGetQuote({
 				amountIn: value,
 				isXtoY,
@@ -543,14 +499,14 @@ export function SwapForm() {
 				type,
 			});
 		} else {
-			setIsDisableSwapButton(true);
+			swapState.setDisabled(true);
 		}
 	};
 
 	const onClickSwapToken = () => {
-		const sellAmount = Number(form.state.values.tokenAAmount.replace(/,/g, ""));
-		checkInsufficientBalance(String(sellAmount));
-		if (!poolDetails || BigNumber(sellAmount).lte(0)) return;
+		const sellAmount = parseAmount(form.state.values.tokenAAmount);
+		checkInsufficientBalanceState(String(sellAmount));
+		if (!poolDetails || parseAmountBigNumber(String(sellAmount)).lte(0)) return;
 
 		debouncedGetQuote({
 			amountIn: form.state.values.tokenAAmount,
@@ -561,43 +517,47 @@ export function SwapForm() {
 	};
 
 	const getButtonMessage = () => {
-		const message = BUTTON_MESSAGE.SWAP;
+		const message = BUTTON_MESSAGES.SWAP;
 
-		if (swapStep === 1) {
-			return BUTTON_MESSAGE.STEP_1;
+		if (swapState.step === 1) {
+			return TRANSACTION_STEPS.STEP_1.SWAP;
 		}
 
-		if (swapStep === 2) {
-			return BUTTON_MESSAGE.STEP_2;
+		if (swapState.step === 2) {
+			return TRANSACTION_STEPS.STEP_2.SWAP;
 		}
 
-		if (swapStep === 3) {
-			return BUTTON_MESSAGE.STEP_3;
+		if (swapState.step === 3) {
+			return TRANSACTION_STEPS.STEP_3.SWAP;
 		}
 
 		if (isLoadingQuote) {
-			return BUTTON_MESSAGE.LOADING;
+			return BUTTON_MESSAGES.LOADING;
 		}
 
 		if (form.state.values.tokenAAmount) {
-			const inputClean = form.state.values.tokenAAmount.replace(/,/g, "");
-			if (BigNumber(inputClean).lte(0)) {
-				return BUTTON_MESSAGE.ENTER_AMOUNT;
+			const inputClean = formatAmountInput(form.state.values.tokenAAmount);
+			if (parseAmountBigNumber(inputClean).lte(0)) {
+				return BUTTON_MESSAGES.ENTER_AMOUNT;
 			}
 
 			const accountAmount = sellTokenAccount?.tokenAccounts[0]?.amount || 0;
 			const decimal = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
 			const symbol = sellTokenAccount?.tokenAccounts[0]?.symbol || "";
 
-			if (BigNumber(inputClean).gt(convertToDecimal(accountAmount, decimal))) {
-				return `${BUTTON_MESSAGE.INSUFFICIENT_BALANCE} ${symbol}`;
+			if (
+				parseAmountBigNumber(inputClean).gt(
+					convertToDecimal(accountAmount, decimal),
+				)
+			) {
+				return `${BUTTON_MESSAGES.INSUFFICIENT_BALANCE} ${symbol}`;
 			}
 		}
 
 		if (quote) {
 			const slippageImpact = quote.priceImpactPercentage;
 			if (slippageImpact > 0.5) {
-				return BUTTON_MESSAGE.HIGH_PRICE_IMPACT.replace(
+				return BUTTON_MESSAGES.HIGH_PRICE_IMPACT.replace(
 					"{value}",
 					slippageImpact.toString(),
 				);
@@ -704,12 +664,12 @@ export function SwapForm() {
 								<Button
 									className="w-full cursor-pointer py-3 leading-6"
 									disabled={
-										isDisableSwap ||
+										swapState.isDisabled ||
 										isInsufficientBalance ||
 										isLoadingQuote ||
-										isLoadingSwapButton
+										swapState.isLoading
 									}
-									loading={isLoadingSwapButton || isLoadingQuote}
+									loading={swapState.isLoading || isLoadingQuote}
 									onClick={handleSwap}
 								>
 									{getButtonMessage()}
@@ -720,7 +680,7 @@ export function SwapForm() {
 									className="w-full cursor-pointer py-3 leading-6"
 									href={`/liquidity/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`}
 								>
-									Create Pool
+									{BUTTON_MESSAGES.CREATE_POOL}
 								</Button>
 							)}
 						</div>

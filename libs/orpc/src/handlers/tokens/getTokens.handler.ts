@@ -1,6 +1,6 @@
 "use server";
 
-import type { GetTokenMetadataListRequest } from "../../dex-gateway.type";
+import type { GetTokenMetadataListRequest } from "@dex-web/grpc-client";
 import { tokensData, tokensDataMainnet } from "../../mocks/tokens.mock";
 import type {
   GetTokensInput,
@@ -9,7 +9,7 @@ import type {
 import { getTokenMetadataListHandler } from "../dex-gateway/getTokenMetadataList.handler";
 
 export const getTokensHandler = async (
-  input: GetTokensInput,
+  input: GetTokensInput
 ): Promise<GetTokensOutput> => {
   const { limit = 10, query, offset = 0, allowList } = input;
   const page = Math.floor(offset / limit) + 1;
@@ -17,22 +17,33 @@ export const getTokensHandler = async (
   const localTokensList =
     process.env.NEXT_PUBLIC_NETWORK === "2" ? tokensData : tokensDataMainnet;
 
-  const gatewayInput: GetTokenMetadataListRequest = {
-    addresses_list: query
-      ? {
-          token_addresses: [query],
-        }
-      : undefined,
-    page_number: page,
-    page_size: limit,
-    symbols_list: query
-      ? {
-          token_symbols: [query],
-        }
-      : undefined,
-  };
-  const { tokens: gatewayTokensList } =
-    await getTokenMetadataListHandler(gatewayInput);
+  let gatewayTokensList: any[] = [];
+
+  if (query) {
+    const gatewayInput: GetTokenMetadataListRequest = {
+      filterBy:
+        query.length > 30
+          ? {
+              case: "addressesList",
+              value: {
+                tokenAddresses: [query],
+                $typeName: "darklake.v1.TokenAddressesList",
+              },
+            }
+          : {
+              case: "symbolsList",
+              value: {
+                tokenSymbols: [query],
+                $typeName: "darklake.v1.TokenSymbolsList",
+              },
+            },
+      pageNumber: page,
+      pageSize: limit,
+      $typeName: "darklake.v1.GetTokenMetadataListRequest",
+    };
+    const response = await getTokenMetadataListHandler(gatewayInput);
+    gatewayTokensList = response.tokens;
+  }
 
   const fullTokensList = [...localTokensList, ...gatewayTokensList];
   if (!query) {
@@ -41,7 +52,7 @@ export const getTokensHandler = async (
       tokens: localTokensList.map((token) => ({
         address: token.address,
         decimals: token.decimals,
-        imageUrl: token.logo_uri,
+        imageUrl: token.logoUri,
         name: token.name,
         symbol: token.symbol,
       })),
@@ -57,7 +68,7 @@ export const getTokensHandler = async (
     .filter(
       (token) =>
         token.address.toUpperCase().includes(query.toUpperCase()) ||
-        token.symbol.toUpperCase().includes(query.toUpperCase()),
+        token.symbol.toUpperCase().includes(query.toUpperCase())
     );
 
   return {
@@ -65,7 +76,7 @@ export const getTokensHandler = async (
     tokens: filteredTokensList.map((token) => ({
       address: token.address,
       decimals: token.decimals,
-      imageUrl: token.logo_uri,
+      imageUrl: token.logoUri,
       name: token.name,
       symbol: token.symbol,
     })),

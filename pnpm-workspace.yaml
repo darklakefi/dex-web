@@ -3,9 +3,9 @@ packages:
   - libs/*
 
 onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - '@swc/core'
-  - '@tailwindcss/oxide'
+  - "@parcel/watcher"
+  - "@swc/core"
+  - "@tailwindcss/oxide"
   - bigint-buffer
   - bufferutil
   - esbuild

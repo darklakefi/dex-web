@@ -13,7 +13,7 @@ function getPoolOnLocalData(tokenXMint: string, tokenYMint: string) {
   return localDataPool.find(
     (pool) =>
       (pool.tokenXMint === tokenXMint && pool.tokenYMint === tokenYMint) ||
-      (pool.tokenXMint === tokenYMint && pool.tokenYMint === tokenXMint),
+      (pool.tokenXMint === tokenYMint && pool.tokenYMint === tokenXMint)
   );
 }
 
@@ -28,14 +28,12 @@ async function savePoolToLocalData(pool: PoolAccount) {
 }
 
 export async function getPoolDetailsHandler(
-  input: GetPoolDetailsInput,
+  input: GetPoolDetailsInput
 ): Promise<GetPoolDetailsOutput | null> {
   const { tokenXMint, tokenYMint } = input;
   let pool = getPoolOnLocalData(tokenXMint, tokenYMint);
-  console.log("Getting pool on local data", pool);
 
   if (!pool) {
-    console.log("Getting pool on chain");
     try {
       const poolOnChain = await getPoolOnChain(tokenXMint, tokenYMint);
       if (poolOnChain) {
@@ -43,7 +41,6 @@ export async function getPoolDetailsHandler(
       }
     } catch (_error) {
       console.log("Pool not found on chain, returning null");
-      // Pool doesn't exist yet, this is expected for new pools
     }
   }
 

@@ -14,7 +14,7 @@ export interface SubmitLiquidityTransactionOutput {
 }
 
 export async function submitLiquidityTransactionHandler(
-  input: SubmitLiquidityTransactionInput,
+  input: SubmitLiquidityTransactionInput
 ): Promise<SubmitLiquidityTransactionOutput> {
   const { signed_transaction } = input;
 
@@ -34,19 +34,21 @@ export async function submitLiquidityTransactionHandler(
         maxRetries: 3,
         preflightCommitment: "confirmed",
         skipPreflight: false,
-      },
+      }
     );
 
     // Wait for confirmation
     const confirmation = await connection.confirmTransaction(
       signature,
-      "confirmed",
+      "confirmed"
     );
 
     if (confirmation.value.err) {
       console.error("Transaction confirmation failed:", confirmation.value.err);
       return {
-        error_logs: `Transaction failed: ${JSON.stringify(confirmation.value.err)}`,
+        error_logs: `Transaction failed: ${JSON.stringify(
+          confirmation.value.err
+        )}`,
         success: false,
       };
     }

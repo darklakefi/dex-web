@@ -13,7 +13,8 @@ import type {
   WithdrawLiquidityInput,
   WithdrawLiquidityOutput,
 } from "../../schemas/liquidity/withdrawLiquidity.schema";
-import { LP_TOKEN_DECIMALS, sortSolanaAddresses } from "../../utils/solana";
+import { sortSolanaAddresses } from "@dex-web/utils";
+import { LP_TOKEN_DECIMALS } from "../../utils/solana";
 import { removeLiquidityTransactionHandler } from "./removeLiquidityTransaction.handler";
 
 async function detectTokenProgram(

@@ -7,6 +7,9 @@
   "include": [],
   "references": [
     {
+      "path": "../grpc-client"
+    },
+    {
       "path": "../utils"
     },
     {
