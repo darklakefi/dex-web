@@ -617,7 +617,7 @@ export function CreatePoolForm() {
                   return;
                 }}
               >
-                Pool already exists, please go to liquidity page
+                {tx("createPool.poolExists")}
               </Button>
             ) : (
               <form.Subscribe selector={(state) => state.values}>

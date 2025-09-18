@@ -84,11 +84,7 @@ export function LiquidityForm() {
 
 	const tx = useTranslations("liquidity");
 
-	const [initialPriceTokenOrder, setInitialPriceDirection] = useState<
-		"ab" | "ba"
-	>("ab");
 	const liquidityState = useTransactionState(0, false, true);
-	const createState = useTransactionState(0, false, false);
 	const [slippage, setSlippage] = useState("0.5");
 
 	const sortedTokenAddresses = sortSolanaAddresses(
@@ -118,24 +114,6 @@ export function LiquidityForm() {
 		tokenBAddress,
 		publicKey,
 		tanstackClient,
-	});
-
-	const { data: tokenMetadata } = useSuspenseQuery(
-		tanstackClient.tokens.getTokenMetadata.queryOptions({
-			input: {
-				addresses: [tokenXMint, tokenYMint],
-				returnAsObject: true,
-			},
-		}),
-	);
-
-	const metadata = tokenMetadata as Record<string, Token>;
-	const tokenADetails = metadata[tokenXMint];
-	const tokenBDetails = metadata[tokenYMint];
-
-	const { signTransactionWithValidation } = useTransactionSigning({
-		publicKey,
-		signTransaction,
 	});
 
 	const {
@@ -286,107 +264,6 @@ export function LiquidityForm() {
 
 	const form = useAppForm(formConfig);
 
-	const requestCreatePoolSigning = async (
-		transaction: VersionedTransaction,
-		_trackingId: string,
-	) => {
-		try {
-			createState.setStep(2);
-			toasts.showStepToast(2);
-
-			await signTransactionWithValidation(transaction);
-
-			createState.setStep(3);
-			toasts.showStepToast(3);
-
-			setTimeout(() => {
-				toasts.dismiss();
-				const successMessage = !isSquadsX(wallet)
-					? `Pool created successfully! Token A: ${form.state.values.tokenAAmount}, Token B: ${form.state.values.tokenBAmount}`
-					: undefined;
-				toasts.showSuccessToast(successMessage);
-				createState.reset();
-				refetchBuyTokenAccount();
-				refetchSellTokenAccount();
-			}, 2000);
-		} catch (error) {
-			console.error("Pool creation signing error:", error);
-			toasts.dismiss();
-			toasts.showErrorToast(
-				error instanceof Error ? error.message : "Unknown error occurred",
-			);
-			createState.reset();
-		}
-	};
-
-	const handleCreatePool = async () => {
-		if (!publicKey) {
-			toasts.showErrorToast(ERROR_MESSAGES.CONNECT_WALLET_TO_CREATE_POOL);
-			return;
-		}
-
-		const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
-		const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
-		const initialPrice = Number(form.state.values.initialPrice || "1");
-
-		if (tokenAAmount <= 0 || tokenBAmount <= 0) {
-			toasts.showErrorToast(ERROR_MESSAGES.INVALID_AMOUNTS);
-			return;
-		}
-
-		if (initialPrice <= 0) {
-			toasts.showErrorToast(ERROR_MESSAGES.INVALID_PRICE);
-			return;
-		}
-
-		try {
-			createState.setStep(1);
-			toasts.showStepToast(1);
-
-			if (!tokenAAddress || !tokenBAddress) {
-				throw new Error(ERROR_MESSAGES.MISSING_TOKEN_ADDRESSES);
-			}
-
-			if (!wallet) {
-				throw new Error(ERROR_MESSAGES.MISSING_WALLET);
-			}
-
-			const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
-			const { tokenXAddress, tokenYAddress } = sortedTokens;
-
-			const isTokenASellToken = tokenBAddress === tokenXAddress;
-			const depositAmountX = isTokenASellToken ? tokenAAmount : tokenBAmount;
-			const depositAmountY = isTokenASellToken ? tokenBAmount : tokenAAmount;
-
-			const response = await client.pools.createPoolTransaction({
-				depositAmountX: Math.floor(depositAmountX).toString(),
-				depositAmountY: Math.floor(depositAmountY).toString(),
-				tokenXMint: tokenXAddress,
-				tokenYMint: tokenYAddress,
-				user: publicKey.toBase58(),
-			} satisfies CreatePoolTransactionInput);
-
-			if (response.success && response.transaction) {
-				const transactionBuffer = Buffer.from(response.transaction, "base64");
-				const transaction = VersionedTransaction.deserialize(transactionBuffer);
-
-				await requestCreatePoolSigning(
-					transaction,
-					`pool-creation-${Date.now()}`,
-				);
-			} else {
-				throw new Error("Failed to create pool transaction");
-			}
-		} catch (error) {
-			console.error("Pool creation error:", error);
-			toasts.dismiss();
-			toasts.showErrorToast(
-				error instanceof Error ? error.message : "Unknown error occurred",
-			);
-			createState.reset();
-		}
-	};
-
 	const checkLiquidityTransactionStatus = async (signature: string) => {
 		await statusChecker.checkTransactionStatus(signature);
 	};
@@ -521,23 +398,6 @@ export function LiquidityForm() {
 		500,
 	);
 
-	const handleInitialPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const price = e.target.value;
-		const tokenAAmount = formatAmountInput(form.state.values.tokenAAmount);
-
-		if (
-			price &&
-			tokenAAmount &&
-			parseAmountBigNumber(price).gt(0) &&
-			parseAmountBigNumber(tokenAAmount).gt(0)
-		) {
-			const calculatedTokenB = parseAmountBigNumber(tokenAAmount)
-				.multipliedBy(price)
-				.toString();
-			form.setFieldValue("tokenBAmount", calculatedTokenB);
-		}
-	};
-
 	const handleAmountChange = (
 		e: React.ChangeEvent<HTMLInputElement>,
 		type: "buy" | "sell",
@@ -572,11 +432,6 @@ export function LiquidityForm() {
 			liquidityState.setDisabled(true);
 		}
 	};
-
-	const [initialPriceTokenX, initialPriceTokenY] =
-		initialPriceTokenOrder === "ba"
-			? [tokenADetails, tokenBDetails]
-			: [tokenBDetails, tokenADetails];
 
 	return (
 		<section className="flex w-full max-w-xl items-start gap-1">
@@ -728,51 +583,6 @@ export function LiquidityForm() {
 							tokenBAmount={form.state.values.tokenBAmount}
 							tokenBSymbol={sellTokenAccount?.tokenAccounts[0]?.symbol || ""}
 						/>
-					)}
-
-				{!poolDetails &&
-					form.state.values.tokenAAmount !== "0" &&
-					form.state.values.tokenBAmount !== "0" &&
-					form.state.values.initialPrice !== "1" && (
-						<div className="mt-4 space-y-3 border-green-600 border-t pt-4">
-							<Text.Body2 className="mb-3 text-green-300 uppercase">
-								Pool Creation Summary
-							</Text.Body2>
-
-							<div className="flex items-center justify-between">
-								<Text.Body3 className="text-green-300">
-									Initial Deposit
-								</Text.Body3>
-								<div className="text-right">
-									<Text.Body3 className="text-green-200">
-										{form.state.values.tokenAAmount}{" "}
-										{buyTokenAccount?.tokenAccounts[0]?.symbol}
-									</Text.Body3>
-									<Text.Body3 className="text-green-200">
-										{form.state.values.tokenBAmount}{" "}
-										{sellTokenAccount?.tokenAccounts[0]?.symbol}
-									</Text.Body3>
-								</div>
-							</div>
-
-							<div className="flex items-center justify-between">
-								<Text.Body3 className="text-green-300">
-									Initial Price
-								</Text.Body3>
-								<Text.Body3 className="text-green-200">
-									1 {buyTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
-									{form.state.values.initialPrice}{" "}
-									{sellTokenAccount?.tokenAccounts[0]?.symbol}
-								</Text.Body3>
-							</div>
-
-							<div className="flex items-center justify-between">
-								<Text.Body3 className="text-green-300">
-									Your Pool Share
-								</Text.Body3>
-								<Text.Body3 className="text-green-200">100%</Text.Body3>
-							</div>
-						</div>
 					)}
 			</Box>
 

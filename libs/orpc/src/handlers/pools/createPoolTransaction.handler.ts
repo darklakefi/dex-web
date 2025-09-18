@@ -154,21 +154,21 @@ async function createPool(
 		program.programId,
 	);
 
-  const initializePoolMethod = await program.methods.initializePool?.(new BN(depositAmountX), new BN(depositAmountY));
+  const initializePoolMethod = await program.methods.initializePool?.(new BN(depositAmountX), new BN(depositAmountY), null);
 
   if (!initializePoolMethod) {
     throw new Error("Program methods not available for initializePool");
   }
-try{
+
   const programTx = await initializePoolMethod
     ?.accountsPartial({
       user,
+      pool: poolPubkey,
+      authority,
+      ammConfig,
       tokenMintX: tokenXMint,
       tokenMintY: tokenYMint,
       tokenMintLp: lpMint,
-      pool: poolPubkey,
-      ammConfig: ammConfig,
-      authority,
       createPoolFeeVault,
       userTokenAccountX: userTokenAccountX,
       userTokenAccountY: userTokenAccountY,
@@ -204,10 +204,6 @@ try{
 	}).compileToV0Message(lookupTable ? [lookupTable] : []);
 
 	return new web3.VersionedTransaction(message);
-} catch (error) {
-  console.error("Error during pool creation:", error);
-  throw error;
-}
 }
 
 export async function createPoolTransactionHandler(
