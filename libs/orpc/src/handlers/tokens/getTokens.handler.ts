@@ -31,11 +31,8 @@ export const getTokensHandler = async (
               },
             }
           : {
-              case: "symbolsList",
-              value: {
-                tokenSymbols: [query],
-                $typeName: "darklake.v1.TokenSymbolsList",
-              },
+              case: "substring",
+              value: query,
             },
       pageNumber: page,
       pageSize: limit,
