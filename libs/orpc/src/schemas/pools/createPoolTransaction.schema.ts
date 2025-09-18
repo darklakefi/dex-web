@@ -1,16 +1,15 @@
 import { z } from "zod/v4";
 
 export const createPoolTransactionInputSchema = z.object({
-  depositAmountX: z.number(),
-  depositAmountY: z.number(),
+  depositAmountX: z.string(),
+  depositAmountY: z.string(),
   tokenXMint: z.string(),
-  tokenXProgramId: z.string(),
   tokenYMint: z.string(),
-  tokenYProgramId: z.string(),
   user: z.string(),
 });
 
 export const createPoolTransactionOutputSchema = z.object({
+  error: z.string().optional(),
   success: z.boolean(),
   transaction: z.string().nullable(),
 });

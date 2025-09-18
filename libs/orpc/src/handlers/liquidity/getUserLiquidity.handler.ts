@@ -29,28 +29,17 @@ export async function getUserLiquidityHandler({
     const lpTokenMint = await getLpTokenMint(tokenXMint, tokenYMint);
     const lpTokenMintString = lpTokenMint.toBase58();
 
-    console.log("Looking up LP token accounts:", {
-      lpTokenMint: lpTokenMintString,
-      ownerAddress,
-      tokenXMint,
-      tokenYMint,
-    });
-
     const lpTokenAccountsResponse = await helius.rpc.getTokenAccounts({
       mint: lpTokenMintString,
       owner: ownerAddress,
       page: 1,
     });
 
-    console.log("LP token accounts response:", lpTokenAccountsResponse);
-
     const lpTokenBalance =
       lpTokenAccountsResponse?.token_accounts?.reduce(
         (total, account) => total + (account.amount || 0),
         0,
       ) || 0;
-
-    console.log("Calculated LP token balance:", lpTokenBalance);
 
     return {
       decimals: LP_TOKEN_DECIMALS,

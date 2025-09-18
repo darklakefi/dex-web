@@ -7,16 +7,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useQueryStates } from "nuqs";
+import { EMPTY_TOKEN } from "../_utils/constants";
 import { selectedTokensParsers } from "../_utils/searchParams";
 
 interface SelectTokenButtonProps {
   type: "buy" | "sell";
   returnUrl?: string;
+  additionalParams?: Record<string, string>;
 }
 
 export function SelectTokenButton({
   type,
   returnUrl = "",
+  additionalParams = {},
 }: SelectTokenButtonProps) {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
@@ -24,17 +27,14 @@ export function SelectTokenButton({
 
   const tokenAddress = type === "buy" ? tokenAAddress : tokenBAddress;
 
-  const validAddress =
-    tokenAddress || (type === "buy" ? tokenAAddress : tokenBAddress);
-
   const { data: tokenMetadata } = useSuspenseQuery(
     tanstackClient.tokens.getTokenMetadata.queryOptions({
-      input: { addresses: [validAddress || ""], returnAsObject: true },
+      input: { addresses: [tokenAddress || ""], returnAsObject: true },
     }),
   );
 
   const metadata = tokenMetadata as Record<string, Token>;
-  const tokenDetails = metadata[validAddress]!;
+  const tokenDetails = metadata[tokenAddress]!;
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -45,21 +45,32 @@ export function SelectTokenButton({
     tokenB: string,
     returnUrl?: string,
   ) {
+    const additionalParamsString = "";
     const from = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ""}`;
     const basePath = `select-token/${type}?tokenAAddress=${tokenA}&tokenBAddress=${tokenB}&from=${encodeURIComponent(
       from,
-    )}`;
+    )}${additionalParamsString ? `&${additionalParamsString}` : ""}`;
     return returnUrl ? `${returnUrl}/${basePath}` : `/${basePath}`;
   }
+
   return (
     <Button
       as={Link}
-      className="mt-1 w-full items-center justify-between bg-green-700 p-2"
+      className="mt-1 w-fit items-center justify-between bg-green-700 p-2"
       href={buildHref(type, tokenAAddress, tokenBAddress, returnUrl)}
       prefetch={true}
       variant="secondary"
     >
-      {tokenDetails?.imageUrl ? (
+      {tokenAAddress === EMPTY_TOKEN ? (
+        <Image
+          alt="token-placeholder"
+          className="size-8 overflow-hidden rounded-full"
+          height={24}
+          priority
+          src={"/images/token-placeholder.png"}
+          width={24}
+        />
+      ) : tokenDetails?.imageUrl ? (
         <Image
           alt={tokenDetails.symbol}
           className="size-8 overflow-hidden rounded-full"
@@ -72,9 +83,11 @@ export function SelectTokenButton({
       ) : (
         <Icon name="seedlings" />
       )}
-      <span className="flex items-center justify-center text-lg leading-6!">
-        {tokenDetails?.symbol}
-      </span>
+      {tokenDetails?.symbol && (
+        <span className="flex items-center justify-center text-lg leading-6!">
+          {tokenDetails.symbol}
+        </span>
+      )}
       <Icon className="size-4 fill-green-300" name="chevron-down" />
     </Button>
   );

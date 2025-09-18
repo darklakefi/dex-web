@@ -18,6 +18,7 @@ import LogoSmIcon from "./icons/logo-sm.svg";
 import PhantomWalletIcon from "./icons/phantom-icon.svg";
 import PlayIcon from "./icons/play.svg";
 import PlusIcon from "./icons/plus.svg";
+import PlusCircleIcon from "./icons/plus-circle.svg";
 import RefreshIcon from "./icons/refresh.svg";
 import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
@@ -57,7 +58,8 @@ export type IconName =
   | "solflare"
   | "backpack"
   | "swap"
-  | "plus";
+  | "plus"
+  | "plus-circle";
 
 const iconComponents = {
   analytics: AnalyticsIcon,
@@ -78,6 +80,7 @@ const iconComponents = {
   phantom: PhantomWalletIcon,
   play: PlayIcon,
   plus: PlusIcon,
+  "plus-circle": PlusCircleIcon,
   refresh: RefreshIcon,
   search: SearchIcon,
   seedlings: SeedlingsIcon,

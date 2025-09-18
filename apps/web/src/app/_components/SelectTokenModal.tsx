@@ -17,6 +17,7 @@ import { createSerializer, useQueryStates } from "nuqs";
 import { Suspense } from "react";
 import useLocalStorageState from "use-local-storage-state";
 import { selectedTokensParsers } from "../_utils/searchParams";
+import type { RouteString } from "../_utils/types";
 import { TokenList } from "../[lang]/(swap)/_components/TokenList";
 import { NoResultFound } from "./NoResultFound";
 
@@ -75,7 +76,7 @@ export function SelectTokenModal({
   const handleClose = () => {
     const from = searchParams.get("from");
     if (from) {
-      router.push(from);
+      router.push(from as RouteString);
       return;
     }
     router.back();
@@ -103,7 +104,7 @@ export function SelectTokenModal({
     }
   };
 
-  const handleSelect = (
+  const handleSelectToken = (
     selectedToken: Token,
     e: React.MouseEvent<HTMLButtonElement>,
   ) => {
@@ -120,7 +121,7 @@ export function SelectTokenModal({
         tokenAAddress: selectedTokenAddress,
         tokenBAddress: sellAddress,
       });
-      router.push(urlWithParams);
+      router.push(urlWithParams as RouteString);
     } else {
       const buyAddress =
         selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
@@ -128,7 +129,7 @@ export function SelectTokenModal({
         tokenAAddress: buyAddress,
         tokenBAddress: selectedTokenAddress,
       });
-      router.push(urlWithParams);
+      router.push(urlWithParams as RouteString);
     }
   };
 
@@ -197,13 +198,13 @@ export function SelectTokenModal({
             <>
               {walletRecentSearches.length > 0 && (
                 <TokenList
-                  onSelect={handleSelect}
+                  onSelect={handleSelectToken}
                   title="Recently Searches"
                   tokens={walletRecentSearches}
                 />
               )}
               <TokenList
-                onSelect={handleSelect}
+                onSelect={handleSelectToken}
                 title="tokens by 24h volume"
                 tokens={data.tokens}
               />
@@ -212,14 +213,14 @@ export function SelectTokenModal({
 
           {!isInitialLoad ? (
             data.tokens.length > 0 ? (
-              <TokenList onSelect={handleSelect} tokens={data.tokens} />
+              <TokenList onSelect={handleSelectToken} tokens={data.tokens} />
             ) : (
               <NoResultFound
                 allowUnknownTokens={allowUnknownTokenReturnUrls.includes(
                   returnUrl,
                 )}
                 className="py-20"
-                handleSelect={handleSelect}
+                handleSelect={handleSelectToken}
                 search={debouncedQuery}
               />
             )

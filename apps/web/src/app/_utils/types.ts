@@ -1,0 +1,1 @@
+export type RouteString = `/${string}`;

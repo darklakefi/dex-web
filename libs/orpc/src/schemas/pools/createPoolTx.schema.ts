@@ -4,9 +4,7 @@ export const createPoolTransactionInputSchema = z.object({
   depositAmountX: z.number(),
   depositAmountY: z.number(),
   tokenXMint: z.string(),
-  tokenXProgramId: z.string(),
   tokenYMint: z.string(),
-  tokenYProgramId: z.string(),
   user: z.string(),
 });
 
