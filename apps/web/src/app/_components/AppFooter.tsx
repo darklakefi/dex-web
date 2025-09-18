@@ -1,4 +1,5 @@
 import { Footer, Icon, type IconName, Text } from "@dex-web/ui";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 const SOCIAL_MEDIA_LINKS = [
@@ -20,6 +21,7 @@ const SOCIAL_MEDIA_LINKS = [
 ];
 
 export const AppFooter = () => {
+  const tx = useTranslations("common");
   return (
     <Footer
       logo={<Icon className="h-6 w-auto stroke-none" name="logo-lg" />}
@@ -39,7 +41,7 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          [Learn more]
+          [{tx("learnMore")}]
         </Text>
       </div>
       <div className="flex flex-col items-start gap-5">
@@ -58,13 +60,13 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          MEV Checker{" "}
+          {tx("mevChecker")}
           <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
       </div>
       <div className="flex flex-col items-start gap-5">
         <Text.Link className="inline-flex items-baseline justify-center no-underline">
-          Resources
+          {tx("resources")}
         </Text.Link>
         <Text
           as={Link}
@@ -73,7 +75,17 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          Docs <Icon className="size-4 fill-green-300" name="external-link" />
+          {tx("docs")} <Icon className="size-4 fill-green-300" name="external-link" />
+        </Text>
+        <Text
+          as={Link}
+          className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"
+          href="https://blog.darklake.fi"
+          target="_blank"
+          variant="link"
+        >
+          {tx("blog")}
+          <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
         <Text
           as={Link}
@@ -82,7 +94,7 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          Support{" "}
+          {tx("support")}
           <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
         <Text
@@ -92,7 +104,7 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          Cookies Policy{" "}
+          {tx("cookiesPolicy")}
           <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
       </div>

@@ -1,6 +1,13 @@
 {
   "common": {
-    "welcome": "welcome"
+    "welcome": "welcome",
+    "learnMore": "Learn more",
+    "mevChecker": "MEV Checker",
+    "blog": "Blog",
+    "support": "Support",
+    "cookiesPolicy": "Cookies Policy",
+    "resources": "Resources",
+    "docs": "Docs"
   },
   "liquidity": {
     "squadsX": {
