@@ -9,6 +9,7 @@ export const createPoolTransactionInputSchema = z.object({
 });
 
 export const createPoolTransactionOutputSchema = z.object({
+  error: z.string().optional(),
   success: z.boolean(),
   transaction: z.string().nullable(),
 });

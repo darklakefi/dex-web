@@ -22,8 +22,6 @@ export default async function Page({
     tanstackClient.pools.getPinedPool.queryOptions({}),
   );
 
-  console.log("parsedSearchParams", parsedSearchParams);
-
   return (
     <div className="flex justify-center gap-12">
       <div className="flex w-full max-w-xl flex-col items-center justify-center">

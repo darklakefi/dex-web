@@ -29,7 +29,7 @@ import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useQueryStates } from "nuqs";
+import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
@@ -41,14 +41,17 @@ import { TokenTransactionSettingsButton } from "../../../_components/TokenTransa
 import {
 	DEFAULT_BUY_TOKEN,
 	DEFAULT_SELL_TOKEN,
+  EMPTY_TOKEN,
+  LIQUIDITY_PAGE_TYPE,
 } from "../../../_utils/constants";
 import { isSquadsX } from "../../../_utils/isSquadsX";
-import { selectedTokensParsers } from "../../../_utils/searchParams";
+import { liquidityPageParsers, selectedTokensParsers } from "../../../_utils/searchParams";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getLiquidityFormButtonMessage } from "../_utils/getLiquidityFormButtonMessage";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
+import { useRouter } from "next/navigation";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -69,7 +72,10 @@ const { useAppForm } = createFormHook({
 	formContext,
 });
 
+const serialize = createSerializer(liquidityPageParsers);
+
 export function LiquidityForm() {
+  const router = useRouter();
 	const { publicKey, wallet, signTransaction } = useWallet();
 	const { trackLiquidity, trackError } = useAnalytics();
 	const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -353,12 +359,10 @@ export function LiquidityForm() {
 			const depositAmountY = isTokenASellToken ? tokenBAmount : tokenAAmount;
 
 			const response = await client.pools.createPoolTransaction({
-				depositAmountX: Math.floor(depositAmountX),
-				depositAmountY: Math.floor(depositAmountY),
+				depositAmountX: Math.floor(depositAmountX).toString(),
+				depositAmountY: Math.floor(depositAmountY).toString(),
 				tokenXMint: tokenXAddress,
-				tokenXProgramId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
 				tokenYMint: tokenYAddress,
-				tokenYProgramId: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
 				user: publicKey.toBase58(),
 			} satisfies CreatePoolTransactionInput);
 
@@ -660,72 +664,7 @@ export function LiquidityForm() {
 							)}
 						</form.Field>
 					</Box>
-					{!poolDetails && (
-						<div>
-							<Text.Body2 className="mb-2 text-green-100">
-								Your selection will create a new liquidity pool
-							</Text.Body2>
-							<Box className="mb-3 flex-row border border-green-400 bg-green-600 px-5 py-3 hover:border-green-300">
-								<div>
-									<Text.Body2
-										as="label"
-										className="mb-7 block text-green-300 uppercase"
-									>
-										Set initial price
-									</Text.Body2>
-									<div className="flex items-center">
-										{initialPriceTokenX?.imageUrl ? (
-											<Image
-												alt={initialPriceTokenX?.symbol}
-												className="mr-2 size-6 overflow-hidden rounded-full"
-												height={24}
-												priority
-												src={initialPriceTokenX?.imageUrl}
-												unoptimized
-												width={24}
-											/>
-										) : (
-											<Icon className="mr-2 fill-green-200" name="seedlings" />
-										)}
-										<Text.Body2 className="text-green-200 text-lg">
-											1 {initialPriceTokenX?.symbol} =
-										</Text.Body2>
-									</div>
-								</div>
-								<form.Field name="initialPrice">
-									{(field) => (
-										<FormFieldset
-											controls={
-												<button
-													onClick={() =>
-														setInitialPriceDirection(
-															initialPriceTokenOrder === "ab" ? "ba" : "ab",
-														)
-													}
-													type="button"
-												>
-													<Icon className="rotate-90" name="swap" />
-												</button>
-											}
-											currencyCode={initialPriceTokenY?.symbol}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-												handleInitialPriceChange(e);
-												field.handleChange(e.target.value);
-											}}
-											value={field.state.value}
-										/>
-									)}
-								</form.Field>
-							</Box>
-							<Text.Body2 className="text-green-300">
-								<span className="text-green-100">Warning:</span> Bots will
-								arbitrage any mispricing. you'll lose tokens if your rate is
-								off-market.
-							</Text.Body2>
-						</div>
-					)}
+
 					<div className="w-full">
 						{!publicKey ? (
 							<ConnectWalletButton className="w-full py-3" />
@@ -748,7 +687,6 @@ export function LiquidityForm() {
 									>
 										{getLiquidityFormButtonMessage({
 											buyTokenAccount,
-											createStep: createState.step,
 											initialPrice: form.state.values.initialPrice,
 											liquidityStep: liquidityState.step,
 											poolDetails,
@@ -763,26 +701,20 @@ export function LiquidityForm() {
 								)}
 							</form.Subscribe>
 						) : (
-							<Button
-								className="w-full cursor-pointer py-3 leading-6"
-								disabled={!form.state.canSubmit || createState.step !== 0}
-								loading={createState.step !== 0}
-								onClick={handleCreatePool}
-							>
-								{getLiquidityFormButtonMessage({
-									buyTokenAccount,
-									createStep: createState.step,
-									initialPrice: form.state.values.initialPrice,
-									liquidityStep: liquidityState.step,
-									poolDetails,
-									publicKey,
-									sellTokenAccount,
-									tokenAAddress,
-									tokenAAmount: form.state.values.tokenAAmount,
-									tokenBAddress,
-									tokenBAmount: form.state.values.tokenBAmount,
-								})}
-							</Button>
+              <Button
+              className="w-full cursor-pointer py-3 leading-6"
+              onClick={() => {
+                const urlWithParams = serialize("liquidity", {
+                  tokenAAddress,
+                  tokenBAddress,
+                  type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
+                });
+                router.push(`/${urlWithParams}`);
+                return;
+              }}
+            >
+              Create Pool
+            </Button>
 						)}
 					</div>
 				</div>
@@ -858,6 +790,22 @@ export function LiquidityForm() {
 						}
 					}}
 				/>
+
+<button
+          aria-label="change mode"
+          className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
+          onClick={() => {
+            const urlWithParams = serialize("liquidity", {
+              tokenAAddress: EMPTY_TOKEN,
+              tokenBAddress: EMPTY_TOKEN,
+              type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
+            });
+            router.push(`/${urlWithParams}`);
+          }}
+          type="button"
+        >
+          <Icon className={`size-5`} name="plus-circle" />
+        </button>
 			</div>
 		</section>
 	);

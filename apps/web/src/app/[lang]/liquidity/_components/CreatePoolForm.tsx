@@ -3,7 +3,7 @@
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { CreatePoolTransactionInput, Token } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
-import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
+import { convertToDecimal, numberFormatHelper, parseAmount } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { VersionedTransaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
@@ -20,15 +20,20 @@ import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { EMPTY_TOKEN, LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
-import { getExplorerUrl } from "../../../_utils/getExplorerUrl";
+import { getExplorerUrl } from "@dex-web/utils";
 import {
   liquidityPageParsers,
   selectedTokensParsers,
 } from "../../../_utils/searchParams";
-import { sortSolanaAddresses } from "../../../_utils/sortSolanaAddresses";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getCreatePoolFormButtonMessage } from "../_utils/getCreatePoolFormButtonMessage";
 import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
+import { ERROR_MESSAGES, useLiquidityTracking, useTokenAccounts, useTransactionSigning, useTransactionState, useTransactionStatus, useTransactionToasts } from "@dex-web/core";
+import { isSquadsX } from "../../../_utils/isSquadsX";
+import { useTranslations } from "next-intl";
+import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
+import { requestCreatePoolTransactionSigning } from "../_utils/requestCreatePoolTransactionSigning";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -49,18 +54,22 @@ const { useAppForm } = createFormHook({
   formContext,
 });
 
+const serialize = createSerializer(liquidityPageParsers);
+
 export function CreatePoolForm() {
-  const { publicKey, wallet, signTransaction } = useWallet();
   const router = useRouter();
-  const { trackLiquidity } = useAnalytics();
+  const { publicKey, wallet, signTransaction } = useWallet();
+  const { trackLiquidity, trackError } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
+  const createState = useTransactionState(0, false, false);
+
+	const tx = useTranslations("liquidity");
 
   const [initialPriceTokenOrder, setInitialPriceDirection] = useState<
     "ab" | "ba"
   >("ab");
-  const [createStep, setCreateStep] = useState(0);
 
   const isMissingTokens =
     tokenAAddress === EMPTY_TOKEN || tokenBAddress === EMPTY_TOKEN;
@@ -81,27 +90,17 @@ export function CreatePoolForm() {
     }),
   );
 
-  const { data: buyTokenAccount, refetch: refetchBuyTokenAccount } = useQuery({
-    ...tanstackClient.helius.getTokenAccounts.queryOptions({
-      input: {
-        mint: tokenAAddress,
-        ownerAddress: publicKey?.toBase58() ?? "",
-      },
-    }),
-    enabled: !!publicKey,
-  });
-
-  const { data: sellTokenAccount, refetch: refetchSellTokenAccount } = useQuery(
-    {
-      ...tanstackClient.helius.getTokenAccounts.queryOptions({
-        input: {
-          mint: tokenBAddress,
-          ownerAddress: publicKey?.toBase58() ?? "",
-        },
-      }),
-      enabled: !!publicKey,
-    },
-  );
+	const {
+		buyTokenAccount,
+		sellTokenAccount,
+		refetchBuyTokenAccount,
+		refetchSellTokenAccount,
+	} = useTokenAccounts({
+		tokenAAddress,
+		tokenBAddress,
+		publicKey,
+		tanstackClient,
+	});
 
   const { data: tokenMetadata } = useSuspenseQuery(
     tanstackClient.tokens.getTokenMetadata.queryOptions({
@@ -116,9 +115,112 @@ export function CreatePoolForm() {
   const tokenADetails = metadata[tokenXMint];
   const tokenBDetails = metadata[tokenYMint];
 
-  const resetCreateState = () => {
-    setCreateStep(0);
-  };
+  const {
+		trackInitiated,
+		trackSigned,
+		trackConfirmed,
+		trackFailed,
+		trackError: trackLiquidityError,
+	} = useLiquidityTracking({
+		trackLiquidity,
+		trackError: (error: unknown, context?: Record<string, any>) => {
+			trackError({
+				error: error instanceof Error ? error.message : String(error),
+				context: "liquidity",
+				details: context,
+			});
+		},
+	});
+
+  const toasts = useTransactionToasts({
+		toast,
+		dismissToast,
+		transactionType: "POOL_CREATION",
+		isSquadsX: isSquadsX(wallet),
+		customMessages: {
+			squadsXSuccess: {
+				title: tx("squadsX.responseStatus.confirmed.title"),
+				description: tx("squadsX.responseStatus.confirmed.description"),
+			},
+			squadsXFailure: {
+				title: tx("squadsX.responseStatus.failed.title"),
+				description: tx("squadsX.responseStatus.failed.description"),
+			},
+		},
+	});
+
+  const statusChecker = useTransactionStatus({
+		checkStatus: async (signature: string) => {
+			const response = await client.liquidity.checkLiquidityTransactionStatus({
+				signature,
+			});
+			return {
+				status: response.status,
+				data: response,
+				error: response.error,
+			};
+		},
+		successStates: ["finalized"],
+		failStates: ["failed"],
+		maxAttempts: 15,
+		retryDelay: 2000,
+		onStatusUpdate: (status, attempt) => {
+			toasts.showStatusToast(
+				`Finalizing transaction... (${attempt}/15) - ${status}`,
+			);
+		},
+		onSuccess: (result) => {
+			if (result.error) {
+				createState.reset();
+				toasts.showErrorToast(`Transaction failed: ${result.error}`);
+
+				const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
+				const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
+				trackFailed({
+					action: "add",
+					amountA: tokenAAmount,
+					amountB: tokenBAmount,
+					tokenA: tokenAAddress || "",
+					tokenB: tokenBAddress || "",
+					transactionHash: "",
+				});
+				return;
+			}
+
+			createState.reset();
+			const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
+			const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
+
+			trackConfirmed({
+				action: "add",
+				amountA: tokenAAmount,
+				amountB: tokenBAmount,
+				tokenA: tokenAAddress || "",
+				tokenB: tokenBAddress || "",
+				transactionHash: "",
+			});
+
+			const successMessage = !isSquadsX(wallet)
+				? `CREATED POOL: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
+				: undefined;
+
+			toasts.showSuccessToast(successMessage);
+			refetchBuyTokenAccount();
+			refetchSellTokenAccount();
+		},
+		onFailure: (result) => {
+			createState.reset();
+			toasts.showErrorToast(
+				`Transaction failed: ${result.error || "Unknown error"}`,
+			);
+		},
+		onTimeout: () => {
+			createState.reset();
+			toasts.showErrorToast(
+				"Transaction may still be processing. Check explorer for status.",
+			);
+		},
+	});
 
   const formConfig = {
     defaultValues: {
@@ -161,66 +263,8 @@ export function CreatePoolForm() {
 
   const form = useAppForm(formConfig);
 
-  const requestCreatePoolSigning = async (
-    unsignedTransaction: string,
-    _trackingId: string,
-  ) => {
-    try {
-      if (!publicKey) throw new Error("Wallet not connected!");
-      if (!signTransaction)
-        throw new Error("Wallet does not support transaction signing!");
-
-      setCreateStep(2);
-      toast({
-        description:
-          "Please confirm the pool creation transaction in your wallet.",
-        title: "Confirm Pool Creation [2/3]",
-        variant: "loading",
-      });
-
-      const transactionBuffer = Buffer.from(unsignedTransaction, "base64");
-      const transaction = VersionedTransaction.deserialize(transactionBuffer);
-      const signedTransaction = await signTransaction(transaction);
-      const signedTransactionBase64 = Buffer.from(
-        signedTransaction.serialize(),
-      ).toString("base64");
-
-      const signedTxRequest = {
-        signed_transaction: signedTransactionBase64,
-      };
-
-      setCreateStep(3);
-      toast({
-        description:
-          "Processing your pool creation transaction on the blockchain.",
-        title: "Creating Pool [3/3]",
-        variant: "loading",
-      });
-
-      const poolTxResponse =
-        await client.liquidity.submitLiquidityTransaction(signedTxRequest);
-
-      if (poolTxResponse.success && poolTxResponse.signature) {
-        checkLiquidityTransactionStatus(poolTxResponse.signature);
-      } else {
-        const errorMessage =
-          poolTxResponse.error_logs || "Unknown error occurred";
-        console.error("Pool transaction submission failed:", {
-          error_logs: poolTxResponse.error_logs,
-          success: poolTxResponse.success,
-        });
-        throw new Error(`Failed to create pool transaction: ${errorMessage}`);
-      }
-    } catch (error) {
-      console.error("Pool creation signing error:", error);
-      dismissToast();
-      toast({
-        description: `${error instanceof Error ? error.message : "Unknown error occurred"}`,
-        title: "Pool Creation Error",
-        variant: "error",
-      });
-      resetCreateState();
-    }
+  const showCreatePoolStepToast = (step: number) => {
+    toasts.showStepToast(step);
   };
 
   const handleCreatePool = async (
@@ -229,71 +273,43 @@ export function CreatePoolForm() {
     exchangeRate: string,
   ) => {
     if (!publicKey) {
-      toast({
-        description: "Please connect your wallet to create a pool",
-        title: "Wallet Not Connected",
-        variant: "error",
-      });
-      return;
-    }
+			toasts.showErrorToast(ERROR_MESSAGES.MISSING_WALLET_INFO);
+			return;
+		}
 
     if (isMissingTokens) {
-      toast({
-        description: "Please select both tokens",
-        title: "Missing Tokens",
-        variant: "error",
-      });
-      return;
-    }
+			toasts.showErrorToast(ERROR_MESSAGES.MISSING_TOKEN_ADDRESSES);
+			return;
+		}
 
-    const tokenAAmount = Number(tokenAmountA.replace(/,/g, ""));
-    const tokenBAmount = Number(tokenAmountB.replace(/,/g, ""));
+    const tokenAAmount = parseAmount(tokenAmountA);
+		const tokenBAmount = parseAmount(tokenAmountB);
     const initialPrice = Number(exchangeRate || "1");
 
     if (tokenAAmount <= 0 || tokenBAmount <= 0) {
-      toast({
-        description: "Please enter valid amounts for both tokens",
-        title: "Invalid Amounts",
-        variant: "error",
-      });
+			toasts.showErrorToast(ERROR_MESSAGES.INVALID_AMOUNTS);
       return;
     }
 
     if (initialPrice <= 0) {
-      toast({
-        description: "Please enter a valid initial price",
-        title: "Invalid Price",
-        variant: "error",
-      });
+			toasts.showErrorToast(ERROR_MESSAGES.INVALID_PRICE);
       return;
     }
 
     try {
-      setCreateStep(1);
-      toast({
-        description:
-          "Preparing pool creation transaction. This may take a few seconds.",
-        title: "Preparing Pool Creation [1/3]",
-        variant: "loading",
-      });
+      createState.setStep(1);
+			toasts.showStepToast(1);
 
-      if (!tokenAAddress || !tokenBAddress) {
-        throw new Error("Missing token addresses");
-      }
+			if (!tokenAAddress || !tokenBAddress) {
+				throw new Error(ERROR_MESSAGES.MISSING_TOKEN_ADDRESSES);
+			}
 
-      if (!wallet) {
-        throw new Error("Missing wallet");
-      }
+			if (!wallet) {
+				throw new Error(ERROR_MESSAGES.MISSING_WALLET);
+			}
 
       const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
       const { tokenXAddress, tokenYAddress } = sortedTokens;
-
-      console.log("sortedTokens", {
-        tokenAAddress,
-        tokenAAmount,
-        tokenBAddress,
-        tokenBAmount,
-      });
 
       const depositAmountX =
         tokenXAddress === tokenAAddress ? tokenAAmount : tokenBAmount;
@@ -301,22 +317,12 @@ export function CreatePoolForm() {
         tokenXAddress === tokenAAddress
           ? tokenADetails?.decimals || 0
           : tokenBDetails?.decimals || 0;
-      console.log("tokenXDecimals", {
-        depositAmountX,
-        tokenXAddress,
-        tokenXDecimals,
-      });
       const depositAmountY =
         tokenYAddress === tokenAAddress ? tokenAAmount : tokenBAmount;
       const tokenYDecimals =
         tokenYAddress === tokenAAddress
           ? tokenADetails?.decimals || 0
           : tokenBDetails?.decimals || 0;
-      console.log("tokenYDecimals", {
-        depositAmountY,
-        tokenYAddress,
-        tokenYDecimals,
-      });
 
       const response = await client.pools.createPoolTransaction({
         depositAmountX: BigNumber(depositAmountX)
@@ -325,167 +331,45 @@ export function CreatePoolForm() {
         depositAmountY: BigNumber(depositAmountY)
           .multipliedBy(10 ** tokenYDecimals)
           .toFixed(0),
-        // depositAmountX: depositAmountX.toString(),
-        // depositAmountY: depositAmountY.toString(),
         tokenXMint: tokenXAddress,
         tokenYMint: tokenYAddress,
         user: publicKey.toBase58(),
       } satisfies CreatePoolTransactionInput);
 
       if (response.success && response.transaction) {
-        await requestCreatePoolSigning(
-          response.transaction,
-          `pool-creation-${Date.now()}`,
-        );
-      } else {
-        throw new Error("Failed to create pool transaction");
-      }
+        trackSigned({
+					action: "add",
+					amountA: tokenAAmount,
+					amountB: tokenBAmount,
+					tokenA: tokenAAddress || "",
+					tokenB: tokenBAddress || "",
+				});
+
+				requestCreatePoolTransactionSigning({
+					checkTransactionStatus,
+					publicKey,
+					setCreateStep: createState.setStep,
+					signTransaction,
+					unsignedTransaction: response.transaction,
+					showCreatePoolStepToast,
+				});
+			} else {
+				throw new Error("Failed to create pool transaction");
+			}
     } catch (error) {
       console.error("Pool creation error:", error);
-      dismissToast();
-      toast({
-        description:
-          error instanceof Error ? error.message : "Unknown error occurred",
-        title: "Pool Creation Error",
-        variant: "error",
-      });
-      resetCreateState();
+      toasts.dismiss();
+      toasts.showErrorToast(
+        error instanceof Error ? error.message : "Unknown error occurred",
+      );
+      createState.reset();
     }
   };
 
-  const checkLiquidityTransactionStatus = async (
+  const checkTransactionStatus = async (
     signature: string,
-    maxAttempts = 15,
   ) => {
-    for (let i = 0; i < maxAttempts; i++) {
-      try {
-        const response = await client.liquidity.checkLiquidityTransactionStatus(
-          {
-            signature,
-          },
-        );
-
-        if (response.status === "finalized") {
-          if (response.error) {
-            dismissToast();
-            setCreateStep(0);
-            toast({
-              description: `Transaction failed: ${response.error}`,
-              title: "Liquidity Transaction Failed",
-              variant: "error",
-            });
-
-            // Track liquidity failed
-            const tokenAAmount = Number(
-              form.state.values.tokenAAmount.replace(/,/g, ""),
-            );
-            const tokenBAmount = Number(
-              form.state.values.tokenBAmount.replace(/,/g, ""),
-            );
-            trackLiquidity({
-              action: "add",
-              amountA: tokenAAmount,
-              amountB: tokenBAmount,
-              status: "failed",
-              tokenA: tokenAAddress || "",
-              tokenB: tokenBAddress || "",
-              transactionHash: signature,
-            });
-
-            return;
-          } else {
-            dismissToast();
-            setCreateStep(0);
-
-            // Track liquidity confirmed
-            const tokenAAmount = Number(
-              form.state.values.tokenAAmount.replace(/,/g, ""),
-            );
-            const tokenBAmount = Number(
-              form.state.values.tokenBAmount.replace(/,/g, ""),
-            );
-            trackLiquidity({
-              action: "add",
-              amountA: tokenAAmount,
-              amountB: tokenBAmount,
-              status: "confirmed",
-              tokenA: tokenAAddress || "",
-              tokenB: tokenBAddress || "",
-              transactionHash: signature,
-            });
-
-            toast({
-              customAction: (
-                <Text
-                  as={Link}
-                  className="inline-flex items-center gap-2 text-green-300 leading-none no-underline hover:text-green-200"
-                  href={getExplorerUrl({ tx: signature })}
-                  target="_blank"
-                  variant="link"
-                >
-                  View Transaction{" "}
-                  <Icon className="size-4" name="external-link" />
-                </Text>
-              ),
-              description: (
-                <div className="flex flex-col gap-1">
-                  <Text.Body2>
-                    ADDED LIQUIDITY: {form.state.values.tokenAAmount}{" "}
-                    {tokenADetails?.symbol} + {form.state.values.tokenBAmount}{" "}
-                    {tokenBDetails?.symbol}
-                  </Text.Body2>
-                </div>
-              ),
-              title: "Liquidity Added Successfully",
-              variant: "success",
-            });
-            refetchBuyTokenAccount();
-            refetchSellTokenAccount();
-            return;
-          }
-        }
-
-        if (response.status === "failed") {
-          dismissToast();
-          setCreateStep(0);
-          toast({
-            description: `Transaction failed: ${response.error || "Unknown error"}`,
-            title: "Liquidity Transaction Failed",
-            variant: "error",
-          });
-          return;
-        }
-
-        toast({
-          description: `Finalizing transaction... (${i + 1}/${maxAttempts}) - ${response.status}`,
-          title: "Confirming liquidity transaction",
-          variant: "loading",
-        });
-
-        if (i < maxAttempts - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        }
-      } catch (error) {
-        console.error("Error checking transaction status:", error);
-        if (i === maxAttempts - 1) {
-          dismissToast();
-          setCreateStep(0);
-          toast({
-            description: `Unable to confirm transaction status. Check your wallet or explorer with signature: ${signature}`,
-            title: "Transaction Status Unknown",
-            variant: "error",
-          });
-        }
-      }
-    }
-
-    dismissToast();
-    setCreateStep(0);
-    toast({
-      description: `Transaction may still be processing. Check explorer with signature: ${signature}`,
-      title: "Transaction Status Timeout",
-      variant: "error",
-    });
+    await statusChecker.checkTransactionStatus(signature);
   };
 
   const handleInitialPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -557,7 +441,7 @@ export function CreatePoolForm() {
       ? [tokenADetails, tokenBDetails]
       : [tokenBDetails, tokenADetails];
 
-  const serialize = createSerializer(liquidityPageParsers);
+
   return (
     <section className="flex w-full max-w-xl items-start gap-1">
       <div className="size-9" />
@@ -743,9 +627,9 @@ export function CreatePoolForm() {
                     disabled={
                       isMissingTokens ||
                       !form.state.canSubmit ||
-                      createStep !== 0
+                      createState.step !== 0
                     }
-                    loading={createStep !== 0}
+                    loading={createState.step !== 0}
                     onClick={() =>
                       handleCreatePool(
                         values.tokenAAmount,
@@ -756,7 +640,7 @@ export function CreatePoolForm() {
                   >
                     {getCreatePoolFormButtonMessage({
                       buyTokenAccount,
-                      createStep,
+                      createStep: createState.step,
                       initialPrice: values.initialPrice,
                       publicKey,
                       sellTokenAccount,

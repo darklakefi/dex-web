@@ -1,5 +1,6 @@
 import { AnchorProvider, BN, type Program, web3 } from "@coral-xyz/anchor";
 import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
   getAccount,
 	getAssociatedTokenAddressSync,
@@ -22,6 +23,7 @@ import type {
 import { getTokenProgramId } from "../../utils/solana";
 import { createLiquidityProgram, ProgramFactory } from "@dex-web/core";
 
+const POOL_RESERVE_SEED = "pool_reserve";
 const POOL_SEED = "pool";
 const AMM_CONFIG_SEED = "amm_config";
 const LIQUIDITY_SEED = "lp";
@@ -90,11 +92,43 @@ async function createPool(
 		program.programId,
 	);
 
+  const userTokenAccountX = getAssociatedTokenAddressSync(
+		tokenXMint,
+		user,
+		true,
+		tokenXProgramId,
+	);
+
+	const userTokenAccountY = getAssociatedTokenAddressSync(
+		tokenYMint,
+		user,
+		true,
+		tokenYProgramId,
+	);
+
 	const userTokenAccountLp = getAssociatedTokenAddressSync(
 		lpMint,
 		user,
 		true,
 		TOKEN_PROGRAM_ID,
+	);
+
+  const [poolTokenAccountX] = PublicKey.findProgramAddressSync(
+		[
+			Buffer.from(POOL_RESERVE_SEED),
+			poolPubkey.toBuffer(),
+			tokenXMint.toBuffer(),
+		],
+		program.programId,
+	);
+
+	const [poolTokenAccountY] = PublicKey.findProgramAddressSync(
+		[
+			Buffer.from(POOL_RESERVE_SEED),
+			poolPubkey.toBuffer(),
+			tokenYMint.toBuffer(),
+		],
+		program.programId,
 	);
 
   const ataInstructions: TransactionInstruction[] = [];
@@ -115,21 +149,37 @@ async function createPool(
 	);
 	if (ataYIx) ataInstructions.push(ataYIx);
 
+  const [authority] = PublicKey.findProgramAddressSync(
+		[Buffer.from("authority")],
+		program.programId,
+	);
+
   const initializePoolMethod = await program.methods.initializePool?.(new BN(depositAmountX), new BN(depositAmountY));
 
   if (!initializePoolMethod) {
     throw new Error("Program methods not available for initializePool");
   }
-
+try{
   const programTx = await initializePoolMethod
     ?.accountsPartial({
-      createPoolFeeVault,
-      tokenMintX: tokenXMint,
-      tokenMintXProgram: tokenXProgramId,
-      tokenMintY: tokenYMint,
-      tokenMintYProgram: tokenYProgramId,
       user,
+      tokenMintX: tokenXMint,
+      tokenMintY: tokenYMint,
+      tokenMintLp: lpMint,
+      pool: poolPubkey,
+      ammConfig: ammConfig,
+      authority,
+      createPoolFeeVault,
+      userTokenAccountX: userTokenAccountX,
+      userTokenAccountY: userTokenAccountY,
       userTokenAccountLp: userTokenAccountLp,
+      poolTokenReserveX: poolTokenAccountX,
+      poolTokenReserveY: poolTokenAccountY,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      systemProgram: web3.SystemProgram.programId,
+      tokenMintXProgram: tokenXProgramId,
+      tokenMintYProgram: tokenYProgramId,
+      tokenProgram: TOKEN_PROGRAM_ID,
     })
     .transaction();
 
@@ -154,6 +204,10 @@ async function createPool(
 	}).compileToV0Message(lookupTable ? [lookupTable] : []);
 
 	return new web3.VersionedTransaction(message);
+} catch (error) {
+  console.error("Error during pool creation:", error);
+  throw error;
+}
 }
 
 export async function createPoolTransactionHandler(
@@ -212,8 +266,21 @@ export async function createPoolTransactionHandler(
 			transaction: serializedTx,
 		};
 	} catch (error) {
-		console.error("Error during liquidity addition:", error);
+		console.error("Error during pool creation:", error);
+
+		let errorMessage = "Unknown error occurred";
+		if (error instanceof Error) {
+			errorMessage = error.message;
+
+			if (errorMessage.includes("maximum depth")) {
+				errorMessage = `Account resolution failed: ${errorMessage}. This may be due to circular account dependencies or incorrect PDA derivation.`;
+			}
+		} else if (typeof error === "string") {
+			errorMessage = error;
+		}
+
 		return {
+			error: errorMessage,
 			success: false,
 			transaction: null,
 		};
