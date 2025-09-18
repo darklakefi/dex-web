@@ -5,12 +5,10 @@ import type { CreatePoolTransactionInput, Token } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import { convertToDecimal, numberFormatHelper, parseAmount } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { VersionedTransaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
@@ -20,7 +18,6 @@ import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { EMPTY_TOKEN, LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
-import { getExplorerUrl } from "@dex-web/utils";
 import {
   liquidityPageParsers,
   selectedTokensParsers,
@@ -29,10 +26,9 @@ import { sortSolanaAddresses } from "@dex-web/utils";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getCreatePoolFormButtonMessage } from "../_utils/getCreatePoolFormButtonMessage";
 import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
-import { ERROR_MESSAGES, useLiquidityTracking, useTokenAccounts, useTransactionSigning, useTransactionState, useTransactionStatus, useTransactionToasts } from "@dex-web/core";
+import { ERROR_MESSAGES, useLiquidityTracking, useTokenAccounts, useTransactionState, useTransactionStatus, useTransactionToasts } from "@dex-web/core";
 import { isSquadsX } from "../../../_utils/isSquadsX";
 import { useTranslations } from "next-intl";
-import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
 import { requestCreatePoolTransactionSigning } from "../_utils/requestCreatePoolTransactionSigning";
 
 export const { fieldContext, formContext } = createFormHookContexts();
@@ -207,6 +203,12 @@ export function CreatePoolForm() {
 			toasts.showSuccessToast(successMessage);
 			refetchBuyTokenAccount();
 			refetchSellTokenAccount();
+      const urlWithParams = serialize("liquidity", {
+        tokenAAddress,
+        tokenBAddress,
+        type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
+      });
+      router.push(`/${urlWithParams}`);
 		},
 		onFailure: (result) => {
 			createState.reset();
@@ -457,7 +459,6 @@ export function CreatePoolForm() {
                 {tokenBAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
               </Text.Body2>
               <SelectTokenButton
-                // additionalParams={{ type: LIQUIDITY_PAGE_TYPE.CREATE_POOL }}
                 returnUrl="liquidity"
                 type="sell"
               />
