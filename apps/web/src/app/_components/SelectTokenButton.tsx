@@ -46,16 +46,10 @@ export function SelectTokenButton({
     returnUrl?: string,
   ) {
     const additionalParamsString = "";
-    // Object.entries(additionalParams)
-    //   .map(([key, value]) => `${key}=${value}`)
-    //   .join("&");
     const from = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ""}`;
-    // console.log("From:", from);
     const basePath = `select-token/${type}?tokenAAddress=${tokenA}&tokenBAddress=${tokenB}&from=${encodeURIComponent(
       from,
     )}${additionalParamsString ? `&${additionalParamsString}` : ""}`;
-    // console.log("Base path:", basePath);
-    // console.log("Return url:", returnUrl);
     return returnUrl ? `${returnUrl}/${basePath}` : `/${basePath}`;
   }
 
