@@ -1,21 +1,19 @@
-import type { GetPoolDetailsOutput } from "@dex-web/orpc/schemas/pools/getPoolDetails.schema";
 import { convertToDecimal } from "@dex-web/utils";
 import type { PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
+import { EMPTY_TOKEN } from "../../../_utils/constants";
 
 const BUTTON_MESSAGE = {
-  ADD_LIQUIDITY: "Add Liquidity",
-  CALCULATING: "calculating amounts...",
   CREATE_POOL: "Create Pool",
-  ENTER_AMOUNT: "enter an amount",
+  CREATE_STEP_1: "Preparing pool creation [1/3]",
+  CREATE_STEP_2: "Confirm transaction in your wallet [2/3]",
+  CREATE_STEP_3: "Processing pool creation [3/3]",
   ENTER_AMOUNTS: "Enter token amounts",
   INSUFFICIENT_BALANCE: "Insufficient balance",
   INVALID_PRICE: "Invalid price",
   LOADING: "loading",
+  MISSING_TOKENS: "Select both tokens",
   SAME_TOKENS: "Select different tokens",
-  STEP_1: "protecting liquidity transaction [1/3]",
-  STEP_2: "confirm liquidity in your wallet [2/3]",
-  STEP_3: "verifying liquidity transaction [3/3]",
 };
 
 interface TokenAccountData {
@@ -26,12 +24,11 @@ interface TokenAccountData {
   }>;
 }
 
-interface LiquidityFormButtonMessageProps {
+interface CreatePoolFormButtonMessageProps {
   tokenAAmount: string;
   tokenBAmount: string;
   initialPrice: string;
-  liquidityStep: number;
-  poolDetails: GetPoolDetailsOutput | null;
+  createStep: number;
   tokenBAddress: string;
   tokenAAddress: string;
   buyTokenAccount?: TokenAccountData | null;
@@ -39,25 +36,27 @@ interface LiquidityFormButtonMessageProps {
   publicKey: PublicKey;
 }
 
-export function getLiquidityFormButtonMessage({
+export function getCreatePoolFormButtonMessage({
   tokenAAmount,
   tokenBAmount,
   initialPrice,
-  liquidityStep,
-  poolDetails,
+  createStep,
   tokenBAddress,
   tokenAAddress,
   buyTokenAccount,
   sellTokenAccount,
   publicKey,
-}: LiquidityFormButtonMessageProps) {
+}: CreatePoolFormButtonMessageProps) {
+  if (tokenAAddress === EMPTY_TOKEN || tokenBAddress === EMPTY_TOKEN) {
+    return BUTTON_MESSAGE.MISSING_TOKENS;
+  }
+
   const sellAmount = tokenBAmount.replace(/,/g, "");
   const buyAmount = tokenAAmount.replace(/,/g, "");
 
-  if (liquidityStep === 1) return BUTTON_MESSAGE.STEP_1;
-  if (liquidityStep === 2) return BUTTON_MESSAGE.STEP_2;
-  if (liquidityStep === 3) return BUTTON_MESSAGE.STEP_3;
-  if (liquidityStep === 10) return BUTTON_MESSAGE.CALCULATING;
+  if (createStep === 1) return BUTTON_MESSAGE.CREATE_STEP_1;
+  if (createStep === 2) return BUTTON_MESSAGE.CREATE_STEP_2;
+  if (createStep === 3) return BUTTON_MESSAGE.CREATE_STEP_3;
 
   if (tokenBAddress === tokenAAddress) {
     return BUTTON_MESSAGE.SAME_TOKENS;
@@ -89,31 +88,18 @@ export function getLiquidityFormButtonMessage({
     }
   }
 
-  if (!poolDetails) {
-    if (
-      !sellAmount ||
-      new BigNumber(sellAmount).lte(0) ||
-      !buyAmount ||
-      new BigNumber(buyAmount).lte(0)
-    ) {
-      return BUTTON_MESSAGE.ENTER_AMOUNTS;
-    }
-
-    if (!initialPrice || new BigNumber(initialPrice).lte(0)) {
-      return BUTTON_MESSAGE.INVALID_PRICE;
-    }
-
-    return BUTTON_MESSAGE.CREATE_POOL;
-  }
-
   if (
     !sellAmount ||
     new BigNumber(sellAmount).lte(0) ||
     !buyAmount ||
     new BigNumber(buyAmount).lte(0)
   ) {
-    return BUTTON_MESSAGE.ENTER_AMOUNT;
+    return BUTTON_MESSAGE.ENTER_AMOUNTS;
   }
 
-  return BUTTON_MESSAGE.ADD_LIQUIDITY;
+  if (!initialPrice || new BigNumber(initialPrice).lte(0)) {
+    return BUTTON_MESSAGE.INVALID_PRICE;
+  }
+
+  return BUTTON_MESSAGE.CREATE_POOL;
 }

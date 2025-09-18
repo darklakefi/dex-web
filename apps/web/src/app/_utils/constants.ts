@@ -7,3 +7,10 @@ export const DEFAULT_BUY_TOKEN =
 export const MOCK_OWNER_ADDRESS =
   "CWEFmasA42838A3b5aW5GLg23gn5i1F1hD1YB1T1W92a";
 export const MOCK_SWAP_ID = "1";
+
+export const EMPTY_TOKEN = "empty";
+
+export const LIQUIDITY_PAGE_TYPE = {
+  ADD_LIQUIDITY: "add-liquidity",
+  CREATE_POOL: "create-pool",
+};

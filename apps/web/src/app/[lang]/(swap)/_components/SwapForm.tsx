@@ -42,6 +42,7 @@ import { TokenTransactionButton } from "../../../_components/TokenTransactionBut
 import { TokenTransactionDetails } from "../../../_components/TokenTransactionDetails";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
 import { isSquadsX } from "../../../_utils/isSquadsX";
+import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import { dismissToast, toast } from "../../../_utils/toast";
@@ -678,7 +679,7 @@ export function SwapForm() {
 								<Button
 									as={Link}
 									className="w-full cursor-pointer py-3 leading-6"
-									href={`/liquidity/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}`}
+									href={`/liquidity/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}&type=${LIQUIDITY_PAGE_TYPE.CREATE_POOL}`}
 								>
 									{BUTTON_MESSAGES.CREATE_POOL}
 								</Button>

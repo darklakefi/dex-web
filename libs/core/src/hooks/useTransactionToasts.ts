@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback } from "react";
-import { 
-  TRANSACTION_STEPS, 
-  TRANSACTION_DESCRIPTIONS, 
-  SUCCESS_MESSAGES, 
-  type TransactionType 
+import {
+  TRANSACTION_STEPS,
+  TRANSACTION_DESCRIPTIONS,
+  SUCCESS_MESSAGES,
+  type TransactionType
 } from "../constants/toastMessages";
 
 export interface ToastFunction {
@@ -101,7 +101,7 @@ export const useTransactionToasts = ({
   const showErrorToast = useCallback(
     (error: string | Error, context?: Record<string, any>) => {
       const errorMessage = error instanceof Error ? error.message : error;
-      const contextString = context 
+      const contextString = context
         ? Object.entries(context).map(([key, value]) => `${key}: ${value}`).join(", ")
         : "";
 
@@ -113,8 +113,8 @@ export const useTransactionToasts = ({
         });
       } else {
         toast({
-          title: `${transactionType} Error`,
-          description: contextString 
+          title: `${transactionType.replace("_", " ")} Error`,
+          description: contextString
             ? `${errorMessage}${contextString ? `, ${contextString}` : ""}`
             : errorMessage,
           variant: "error",

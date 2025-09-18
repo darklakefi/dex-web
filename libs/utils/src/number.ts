@@ -64,7 +64,10 @@ export function numberFormatHelper({
   return formattedNumber;
 }
 
-export function formatValueWithThousandSeparator(value: string) {
+export function formatValueWithThousandSeparator(
+  value: string,
+  maxDecimals?: number,
+) {
   const cleanValue = value.replace(/,/g, "");
   const regex = /^[0-9]*\.?[0-9]*$/;
   if (!regex.test(cleanValue)) {
@@ -80,6 +83,9 @@ export function formatValueWithThousandSeparator(value: string) {
 
   // If there's a decimal part, keep it as is without adding commas
   if (parts.length > 1) {
+    if (maxDecimals) {
+      return `${integerPart}.${parts[1]?.slice(0, maxDecimals) ?? ""}`;
+    }
     return `${integerPart}.${parts[1]}`;
   }
 

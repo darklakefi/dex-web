@@ -175,7 +175,10 @@ export function FormFieldset({
             placeholder="0.00"
             ref={inputRef}
             type="text"
-            value={formatValueWithThousandSeparator(String(value) ?? "0")}
+            value={formatValueWithThousandSeparator(
+              String(value) ?? "0",
+              maxDecimals,
+            )}
             {...rest}
           />
           {currencyCode && (

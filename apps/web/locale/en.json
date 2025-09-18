@@ -14,6 +14,9 @@
           "title": "Proposal created"
         }
       }
+    },
+    "createPool": {
+      "poolExists": "Pool already exists, switch to add liquidity"
     }
   },
   "pages": {

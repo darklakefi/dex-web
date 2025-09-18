@@ -17,6 +17,7 @@ import type {
   GetTokenMetadataOutput,
 } from "../../schemas/tokens/getTokenMetadata.schema";
 import type { Token } from "./../../schemas/tokens/token.schema";
+import { isSolanaAddress } from "@dex-web/utils";
 
 const parseToken = (token: TokenMetadata): Token => ({
   address: token.address,
@@ -35,6 +36,12 @@ export const getTokenMetadataHandler = async (
     return returnAsObject ? ({} as Record<string, Token>) : [];
   }
 
+  const solanaAddresses = addresses.filter(isSolanaAddress);
+
+  if (solanaAddresses.length === 0) {
+    return returnAsObject ? ({} as Record<string, Token>) : [];
+  }
+
   const grpcClient = await getDexGatewayClient();
   try {
     const { tokens } = await grpcClient.getTokenMetadataList({
@@ -46,11 +53,14 @@ export const getTokenMetadataHandler = async (
       },
       pageNumber: 1,
       pageSize: addresses.length,
-    });
+    }).catch(() => {
+      return { tokens: [] as TokenMetadata[] };
+    });;
 
     const notFoundTokens = addresses.filter(
       (address) => !tokens.some((token) => token.address === address)
     );
+
     if (notFoundTokens.length > 0) {
       const tokensFromChain = await fetchTokenMetadataFromChain(notFoundTokens);
       tokens.push(...tokensFromChain);
