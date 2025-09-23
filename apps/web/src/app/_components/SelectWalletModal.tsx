@@ -53,6 +53,17 @@ export function SelectWalletModal() {
     }
   }, [connected, wallet, publicKey]);
 
+  useEffect(() => {
+    if (connected && wallet && publicKey) {
+      trackWalletConnection({
+        address: publicKey.toBase58(),
+        success: true,
+        wallet: wallet.adapter.name,
+      });
+      handleClose();
+    }
+  }, [connected, wallet, publicKey]);
+
   return (
     <Modal onClose={handleClose}>
       <Box className="fixed right-0 flex h-full max-h-full w-full max-w-sm drop-shadow-xl">
