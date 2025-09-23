@@ -104,7 +104,7 @@ export function SwapForm() {
     tradeId: "",
   });
 
-  const tx = useTranslations("swap");
+  const i18n = useTranslations("swap");
   const [isInsufficientBalance, setIsInsufficientBalance] = useState(false);
   const [slippage, setSlippage] = useState("0.5");
 
@@ -134,12 +134,12 @@ export function SwapForm() {
   const toasts = useTransactionToasts({
     customMessages: {
       squadsXFailure: {
-        description: tx("squadsX.responseStatus.failed.description"),
-        title: tx("squadsX.responseStatus.failed.title"),
+        description: i18n("squadsX.responseStatus.failed.description"),
+        title: i18n("squadsX.responseStatus.failed.title"),
       },
       squadsXSuccess: {
-        description: tx("squadsX.responseStatus.confirmed.description"),
-        title: tx("squadsX.responseStatus.confirmed.title"),
+        description: i18n("squadsX.responseStatus.confirmed.description"),
+        title: i18n("squadsX.responseStatus.confirmed.title"),
       },
     },
     dismissToast,
@@ -577,21 +577,23 @@ export function SwapForm() {
     return message;
   };
 
+  const onChangeSlippage = (slippage: string) => {
+    setSlippage(slippage);
+    debouncedGetQuote({
+      amountIn: form.state.values.tokenAAmount,
+      isXtoY,
+      slippage: parseFloat(slippage),
+      type: "sell",
+    });
+  };
+
   return (
     <div className="w-full">
       <div className="mb-4 flex items-center justify-between md:hidden">
         <Text.Heading className="text-green-200">Swap</Text.Heading>
         <div className="flex gap-3">
           <TokenTransactionSettingsButton
-            onChange={(slippage) => {
-              setSlippage(slippage);
-              debouncedGetQuote({
-                amountIn: form.state.values.tokenAAmount,
-                isXtoY,
-                slippage: parseFloat(slippage),
-                type: "sell",
-              });
-            }}
+            onChange={onChangeSlippage}
           />
           <SwapPageRefreshButton
             onClick={() => {
@@ -701,20 +703,13 @@ export function SwapForm() {
               slippage={slippage}
               tokenBuyMint={tokenAAddress}
               tokenSellMint={tokenBAddress}
+              onChangeSlippage={onChangeSlippage}
             />
           )}
         </Box>
         <div className="hidden flex-col gap-1 md:flex">
           <TokenTransactionSettingsButton
-            onChange={(slippage) => {
-              setSlippage(slippage);
-              debouncedGetQuote({
-                amountIn: form.state.values.tokenAAmount,
-                isXtoY,
-                slippage: parseFloat(slippage),
-                type: "sell",
-              });
-            }}
+              onChange={onChangeSlippage}
           />
           <SwapPageRefreshButton
             isLoading={isLoadingQuote}
