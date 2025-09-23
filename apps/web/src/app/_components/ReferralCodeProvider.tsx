@@ -61,9 +61,7 @@ export function ReferralCodeProvider({ children }: ReferralCodeProviderProps) {
 		return ReferralStorage.getIncomingReferralCode();
 	}, [urlReferralCode]);
 
-	const metadata = useMemo(() => {
-		return ReferralStorage.getReferralMetadata();
-	}, [storedReferralCode]);
+	const metadata = ReferralStorage.getReferralMetadata();
 
 	const isLoading = isUserReferralLoading;
 
@@ -109,7 +107,7 @@ export function ReferralCodeProvider({ children }: ReferralCodeProviderProps) {
 				});
 			}
 		},
-		[publicKey, userReferralCode],
+		[userReferralCode],
 	);
 
 	useEffect(() => {

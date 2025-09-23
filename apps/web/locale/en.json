@@ -1,15 +1,18 @@
 {
   "common": {
-    "welcome": "welcome",
+    "blog": "Blog",
+    "cookiesPolicy": "Cookies Policy",
+    "docs": "Docs",
     "learnMore": "Learn more",
     "mevChecker": "MEV Checker",
-    "blog": "Blog",
-    "support": "Support",
-    "cookiesPolicy": "Cookies Policy",
     "resources": "Resources",
-    "docs": "Docs"
+    "support": "Support",
+    "welcome": "welcome"
   },
   "liquidity": {
+    "createPool": {
+      "poolExists": "Pool already exists, switch to add liquidity"
+    },
     "squadsX": {
       "responseStatus": {
         "confirmed": {
@@ -21,9 +24,6 @@
           "title": "Proposal created"
         }
       }
-    },
-    "createPool": {
-      "poolExists": "Pool already exists, switch to add liquidity"
     }
   },
   "pages": {

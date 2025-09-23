@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { VersionedTransaction } from "@solana/web3.js";
+import type { VersionedTransaction } from "@solana/web3.js";
 import { validateWalletForSigning } from "../utils/walletValidation";
 import type { WalletContextState } from "@solana/wallet-adapter-react";
 

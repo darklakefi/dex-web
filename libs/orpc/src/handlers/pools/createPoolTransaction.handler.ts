@@ -7,9 +7,8 @@ import {
 	TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
-	Keypair,
 	PublicKey,
-	TransactionInstruction,
+	type TransactionInstruction,
 	TransactionMessage,
 	type Transaction,
 	type VersionedTransaction,
@@ -21,7 +20,7 @@ import type {
   CreatePoolTransactionOutput,
 } from "../../schemas/pools/createPoolTransaction.schema";
 import { getTokenProgramId } from "../../utils/solana";
-import { createLiquidityProgram, ProgramFactory } from "@dex-web/core";
+import { createLiquidityProgram, } from "@dex-web/core";
 
 const POOL_RESERVE_SEED = "pool_reserve";
 const POOL_SEED = "pool";

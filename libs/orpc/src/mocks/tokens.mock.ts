@@ -1,5 +1,4 @@
 import { create } from "@bufbuild/protobuf";
-import type { TokenMetadata } from "@dex-web/grpc-client";
 import { TokenMetadataPB } from "@dex-web/grpc-client";
 
 export const tokensData = [

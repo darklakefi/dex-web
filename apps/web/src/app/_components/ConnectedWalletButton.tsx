@@ -109,22 +109,23 @@ function ConnectedWalletContent() {
 							<Box className="bg-green-600" padding="sm" shadow="sm">
 								<Link
 									href="/referrals"
-									className="cursor-pointer uppercase min-w-48 inline-flex items-center gap-2 px-1"
+									className="inline-flex min-w-48 cursor-pointer items-center gap-2 px-1 uppercase"
 								>
 									<Icon name="share" className="size-4" />
 									Referrals
 								</Link>
 								<hr className="border-green-500 px-1" />
-								<a
-									className="cursor-pointer uppercase min-w-48 inline-flex items-center gap-2 px-1"
+								<button
+									className="inline-flex min-w-48 cursor-pointer items-center gap-2 px-1 uppercase"
 									onClick={() => {
 										close();
 										disconnect();
 									}}
+									type="button"
 								>
 									<Icon name="logout" className="size-4" />
 									Disconnect
-								</a>
+								</button>
 							</Box>
 						)}
 					</PopoverPanel>

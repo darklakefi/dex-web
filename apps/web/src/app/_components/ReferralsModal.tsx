@@ -83,7 +83,7 @@ export function ReferralsModal() {
 							<Text.Body2 className="text-green-300">
 								Share your referral link:
 							</Text.Body2>
-							<Text.Body2 className="flex justify-between items-center gap-2">
+							<Text.Body2 className="flex items-center justify-between gap-2">
 								{`${process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, "")}/referral/${currentUserReferralCode || ""}`}
 								<Button
 									variant="secondary"
@@ -96,7 +96,7 @@ export function ReferralsModal() {
 						</Box>
 
 						{incomingReferralCode && (
-							<Text.Body2 className="text-green-300 flex items-center gap-2 justify-between">
+							<Text.Body2 className="flex items-center justify-between gap-2 text-green-300">
 								Referred by:
 								<span className="text-green-200">{incomingReferralCode}</span>
 							</Text.Body2>
