@@ -4,30 +4,25 @@ import {
 	ERROR_MESSAGES,
 	useLiquidityTracking,
 	useTokenAccounts,
-	useTransactionSigning,
 	useTransactionState,
 	useTransactionStatus,
 	useTransactionToasts,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
-import type {
-	CreateLiquidityTransactionInput,
-	CreatePoolTransactionInput,
-	Token,
-} from "@dex-web/orpc/schemas";
+import type { CreateLiquidityTransactionInput } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import {
 	convertToDecimal,
 	formatAmountInput,
 	parseAmount,
 	parseAmountBigNumber,
+	sortSolanaAddresses,
 	validateHasSufficientBalance,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { VersionedTransaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
@@ -41,17 +36,18 @@ import { TokenTransactionSettingsButton } from "../../../_components/TokenTransa
 import {
 	DEFAULT_BUY_TOKEN,
 	DEFAULT_SELL_TOKEN,
-  EMPTY_TOKEN,
-  LIQUIDITY_PAGE_TYPE,
+	EMPTY_TOKEN,
+	LIQUIDITY_PAGE_TYPE,
 } from "../../../_utils/constants";
 import { isSquadsX } from "../../../_utils/isSquadsX";
-import { liquidityPageParsers, selectedTokensParsers } from "../../../_utils/searchParams";
-import { sortSolanaAddresses } from "@dex-web/utils";
+import {
+	liquidityPageParsers,
+	selectedTokensParsers,
+} from "../../../_utils/searchParams";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getLiquidityFormButtonMessage } from "../_utils/getLiquidityFormButtonMessage";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
-import { useRouter } from "next/navigation";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -75,7 +71,7 @@ const { useAppForm } = createFormHook({
 const serialize = createSerializer(liquidityPageParsers);
 
 export function LiquidityForm() {
-  const router = useRouter();
+	const router = useRouter();
 	const { publicKey, wallet, signTransaction } = useWallet();
 	const { trackLiquidity, trackError } = useAnalytics();
 	const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -556,20 +552,20 @@ export function LiquidityForm() {
 								)}
 							</form.Subscribe>
 						) : (
-              <Button
-              className="w-full cursor-pointer py-3 leading-6"
-              onClick={() => {
-                const urlWithParams = serialize("liquidity", {
-                  tokenAAddress,
-                  tokenBAddress,
-                  type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
-                });
-                router.push(`/${urlWithParams}`);
-                return;
-              }}
-            >
-              Create Pool
-            </Button>
+							<Button
+								className="w-full cursor-pointer py-3 leading-6"
+								onClick={() => {
+									const urlWithParams = serialize("liquidity", {
+										tokenAAddress,
+										tokenBAddress,
+										type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
+									});
+									router.push(`/${urlWithParams}`);
+									return;
+								}}
+							>
+								Create Pool
+							</Button>
 						)}
 					</div>
 				</div>
@@ -601,21 +597,21 @@ export function LiquidityForm() {
 					}}
 				/>
 
-<button
-          aria-label="change mode"
-          className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
-          onClick={() => {
-            const urlWithParams = serialize("liquidity", {
-              tokenAAddress: EMPTY_TOKEN,
-              tokenBAddress: EMPTY_TOKEN,
-              type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
-            });
-            router.push(`/${urlWithParams}`);
-          }}
-          type="button"
-        >
-          <Icon className={`size-5`} name="plus-circle" />
-        </button>
+				<button
+					aria-label="change mode"
+					className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
+					onClick={() => {
+						const urlWithParams = serialize("liquidity", {
+							tokenAAddress: EMPTY_TOKEN,
+							tokenBAddress: EMPTY_TOKEN,
+							type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
+						});
+						router.push(`/${urlWithParams}`);
+					}}
+					type="button"
+				>
+					<Icon className={`size-5`} name="plus-circle" />
+				</button>
 			</div>
 		</section>
 	);

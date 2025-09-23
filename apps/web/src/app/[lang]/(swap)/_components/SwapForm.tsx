@@ -14,7 +14,6 @@ import {
 import { TradeStatus } from "@dex-web/grpc-client";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
-import { toRawUnitsBigint } from "@dex-web/utils";
 import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import { Box, Button, Text } from "@dex-web/ui";
 import {
@@ -23,6 +22,8 @@ import {
 	formatAmountInput,
 	parseAmount,
 	parseAmountBigNumber,
+	sortSolanaAddresses,
+	toRawUnitsBigint,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
@@ -37,14 +38,14 @@ import { z } from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { FormFieldset } from "../../../_components/FormFieldset";
+import { useReferralCode } from "../../../_components/ReferralCodeProvider";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { TokenTransactionButton } from "../../../_components/TokenTransactionButton";
 import { TokenTransactionDetails } from "../../../_components/TokenTransactionDetails";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
-import { isSquadsX } from "../../../_utils/isSquadsX";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
+import { isSquadsX } from "../../../_utils/isSquadsX";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
-import { sortSolanaAddresses } from "@dex-web/utils";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { SwapPageRefreshButton } from "./SwapPageRefreshButton";
 
@@ -91,6 +92,7 @@ export function SwapForm() {
 	const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
 		selectedTokensParsers,
 	);
+	const { incomingReferralCode } = useReferralCode();
 
 	const swapState = useTransactionState(0, false, true);
 	const [isLoadingQuote, setIsLoadingQuote] = useState(false);
@@ -157,8 +159,14 @@ export function SwapForm() {
 				data: response,
 			};
 		},
-		successStates: [TradeStatus.SETTLED.toString(), TradeStatus.SLASHED.toString()],
-		failStates: [TradeStatus.CANCELLED.toString(), TradeStatus.FAILED.toString()],
+		successStates: [
+			TradeStatus.SETTLED.toString(),
+			TradeStatus.SLASHED.toString(),
+		],
+		failStates: [
+			TradeStatus.CANCELLED.toString(),
+			TradeStatus.FAILED.toString(),
+		],
 		maxAttempts: 10,
 		retryDelay: 2000,
 		onStatusUpdate: (status, attempt) => {
@@ -379,6 +387,7 @@ export function SwapForm() {
 				tokenMintX: tokenXAddress,
 				tokenMintY: tokenYAddress,
 				userAddress: publicKey.toBase58(),
+				refCode: incomingReferralCode || "",
 			});
 
 			if (response.success && response.unsignedTransaction) {
