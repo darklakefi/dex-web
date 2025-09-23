@@ -1,35 +1,46 @@
 "use client";
 
+import {
+  ERROR_MESSAGES,
+  useLiquidityTracking,
+  useTokenAccounts,
+  useTransactionState,
+  useTransactionStatus,
+  useTransactionToasts,
+} from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { CreatePoolTransactionInput, Token } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
-import { convertToDecimal, numberFormatHelper, parseAmount } from "@dex-web/utils";
+import {
+  convertToDecimal,
+  numberFormatHelper,
+  parseAmount,
+  sortSolanaAddresses,
+} from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { z } from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
-import { ConnectWalletButton } from "../../../_components/ConnectWalletButton";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
+import { WalletButton } from "../../../_components/WalletButton";
 import { EMPTY_TOKEN, LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
+import { isSquadsX } from "../../../_utils/isSquadsX";
 import {
   liquidityPageParsers,
   selectedTokensParsers,
 } from "../../../_utils/searchParams";
-import { sortSolanaAddresses } from "@dex-web/utils";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getCreatePoolFormButtonMessage } from "../_utils/getCreatePoolFormButtonMessage";
-import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
-import { ERROR_MESSAGES, useLiquidityTracking, useTokenAccounts, useTransactionState, useTransactionStatus, useTransactionToasts } from "@dex-web/core";
-import { isSquadsX } from "../../../_utils/isSquadsX";
-import { useTranslations } from "next-intl";
 import { requestCreatePoolTransactionSigning } from "../_utils/requestCreatePoolTransactionSigning";
+import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -61,7 +72,7 @@ export function CreatePoolForm() {
   );
   const createState = useTransactionState(0, false, false);
 
-	const tx = useTranslations("liquidity");
+  const tx = useTranslations("liquidity");
 
   const [initialPriceTokenOrder, setInitialPriceDirection] = useState<
     "ab" | "ba"
@@ -86,17 +97,17 @@ export function CreatePoolForm() {
     }),
   );
 
-	const {
-		buyTokenAccount,
-		sellTokenAccount,
-		refetchBuyTokenAccount,
-		refetchSellTokenAccount,
-	} = useTokenAccounts({
-		tokenAAddress,
-		tokenBAddress,
-		publicKey,
-		tanstackClient,
-	});
+  const {
+    buyTokenAccount,
+    sellTokenAccount,
+    refetchBuyTokenAccount,
+    refetchSellTokenAccount,
+  } = useTokenAccounts({
+    publicKey,
+    tanstackClient,
+    tokenAAddress,
+    tokenBAddress,
+  });
 
   const { data: tokenMetadata } = useSuspenseQuery(
     tanstackClient.tokens.getTokenMetadata.queryOptions({
@@ -112,117 +123,117 @@ export function CreatePoolForm() {
   const tokenBDetails = metadata[tokenYMint];
 
   const {
-		trackInitiated,
-		trackSigned,
-		trackConfirmed,
-		trackFailed,
-		trackError: trackLiquidityError,
-	} = useLiquidityTracking({
-		trackLiquidity,
-		trackError: (error: unknown, context?: Record<string, any>) => {
-			trackError({
-				error: error instanceof Error ? error.message : String(error),
-				context: "liquidity",
-				details: context,
-			});
-		},
-	});
+    trackInitiated,
+    trackSigned,
+    trackConfirmed,
+    trackFailed,
+    trackError: trackLiquidityError,
+  } = useLiquidityTracking({
+    trackError: (error: unknown, context?: Record<string, any>) => {
+      trackError({
+        context: "liquidity",
+        details: context,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    },
+    trackLiquidity,
+  });
 
   const toasts = useTransactionToasts({
-		toast,
-		dismissToast,
-		transactionType: "POOL_CREATION",
-		isSquadsX: isSquadsX(wallet),
-		customMessages: {
-			squadsXSuccess: {
-				title: tx("squadsX.responseStatus.confirmed.title"),
-				description: tx("squadsX.responseStatus.confirmed.description"),
-			},
-			squadsXFailure: {
-				title: tx("squadsX.responseStatus.failed.title"),
-				description: tx("squadsX.responseStatus.failed.description"),
-			},
-		},
-	});
+    customMessages: {
+      squadsXFailure: {
+        description: tx("squadsX.responseStatus.failed.description"),
+        title: tx("squadsX.responseStatus.failed.title"),
+      },
+      squadsXSuccess: {
+        description: tx("squadsX.responseStatus.confirmed.description"),
+        title: tx("squadsX.responseStatus.confirmed.title"),
+      },
+    },
+    dismissToast,
+    isSquadsX: isSquadsX(wallet),
+    toast,
+    transactionType: "POOL_CREATION",
+  });
 
   const statusChecker = useTransactionStatus({
-		checkStatus: async (signature: string) => {
-			const response = await client.liquidity.checkLiquidityTransactionStatus({
-				signature,
-			});
-			return {
-				status: response.status,
-				data: response,
-				error: response.error,
-			};
-		},
-		successStates: ["finalized"],
-		failStates: ["failed"],
-		maxAttempts: 15,
-		retryDelay: 2000,
-		onStatusUpdate: (status, attempt) => {
-			toasts.showStatusToast(
-				`Finalizing transaction... (${attempt}/15) - ${status}`,
-			);
-		},
-		onSuccess: (result) => {
-			if (result.error) {
-				createState.reset();
-				toasts.showErrorToast(`Transaction failed: ${result.error}`);
+    checkStatus: async (signature: string) => {
+      const response = await client.liquidity.checkLiquidityTransactionStatus({
+        signature,
+      });
+      return {
+        data: response,
+        error: response.error,
+        status: response.status,
+      };
+    },
+    failStates: ["failed"],
+    maxAttempts: 15,
+    onFailure: (result) => {
+      createState.reset();
+      toasts.showErrorToast(
+        `Transaction failed: ${result.error || "Unknown error"}`,
+      );
+    },
+    onStatusUpdate: (status, attempt) => {
+      toasts.showStatusToast(
+        `Finalizing transaction... (${attempt}/15) - ${status}`,
+      );
+    },
+    onSuccess: (result) => {
+      if (result.error) {
+        createState.reset();
+        toasts.showErrorToast(`Transaction failed: ${result.error}`);
 
-				const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
-				const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
-				trackFailed({
-					action: "add",
-					amountA: tokenAAmount,
-					amountB: tokenBAmount,
-					tokenA: tokenAAddress || "",
-					tokenB: tokenBAddress || "",
-					transactionHash: "",
-				});
-				return;
-			}
+        const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
+        const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
+        trackFailed({
+          action: "add",
+          amountA: tokenAAmount,
+          amountB: tokenBAmount,
+          tokenA: tokenAAddress || "",
+          tokenB: tokenBAddress || "",
+          transactionHash: "",
+        });
+        return;
+      }
 
-			createState.reset();
-			const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
-			const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
+      createState.reset();
+      const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
+      const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
 
-			trackConfirmed({
-				action: "add",
-				amountA: tokenAAmount,
-				amountB: tokenBAmount,
-				tokenA: tokenAAddress || "",
-				tokenB: tokenBAddress || "",
-				transactionHash: "",
-			});
+      trackConfirmed({
+        action: "add",
+        amountA: tokenAAmount,
+        amountB: tokenBAmount,
+        tokenA: tokenAAddress || "",
+        tokenB: tokenBAddress || "",
+        transactionHash: "",
+      });
 
-			const successMessage = !isSquadsX(wallet)
-				? `CREATED POOL: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
-				: undefined;
+      const successMessage = !isSquadsX(wallet)
+        ? `CREATED POOL: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
+        : undefined;
 
-			toasts.showSuccessToast(successMessage);
-			refetchBuyTokenAccount();
-			refetchSellTokenAccount();
+      toasts.showSuccessToast(successMessage);
+      refetchBuyTokenAccount();
+      refetchSellTokenAccount();
       const urlWithParams = serialize("liquidity", {
         tokenAAddress,
         tokenBAddress,
         type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
       });
       router.push(`/${urlWithParams}`);
-		},
-		onFailure: (result) => {
-			createState.reset();
-			toasts.showErrorToast(
-				`Transaction failed: ${result.error || "Unknown error"}`,
-			);
-		},
-		onTimeout: () => {
-			createState.reset();
-			toasts.showErrorToast(
-				"Transaction may still be processing. Check explorer for status.",
-			);
-		},
-	});
+    },
+    onTimeout: () => {
+      createState.reset();
+      toasts.showErrorToast(
+        "Transaction may still be processing. Check explorer for status.",
+      );
+    },
+    retryDelay: 2000,
+    successStates: ["finalized"],
+  });
 
   const formConfig = {
     defaultValues: {
@@ -275,40 +286,40 @@ export function CreatePoolForm() {
     exchangeRate: string,
   ) => {
     if (!publicKey) {
-			toasts.showErrorToast(ERROR_MESSAGES.MISSING_WALLET_INFO);
-			return;
-		}
+      toasts.showErrorToast(ERROR_MESSAGES.MISSING_WALLET_INFO);
+      return;
+    }
 
     if (isMissingTokens) {
-			toasts.showErrorToast(ERROR_MESSAGES.MISSING_TOKEN_ADDRESSES);
-			return;
-		}
+      toasts.showErrorToast(ERROR_MESSAGES.MISSING_TOKEN_ADDRESSES);
+      return;
+    }
 
     const tokenAAmount = parseAmount(tokenAmountA);
-		const tokenBAmount = parseAmount(tokenAmountB);
+    const tokenBAmount = parseAmount(tokenAmountB);
     const initialPrice = Number(exchangeRate || "1");
 
     if (tokenAAmount <= 0 || tokenBAmount <= 0) {
-			toasts.showErrorToast(ERROR_MESSAGES.INVALID_AMOUNTS);
+      toasts.showErrorToast(ERROR_MESSAGES.INVALID_AMOUNTS);
       return;
     }
 
     if (initialPrice <= 0) {
-			toasts.showErrorToast(ERROR_MESSAGES.INVALID_PRICE);
+      toasts.showErrorToast(ERROR_MESSAGES.INVALID_PRICE);
       return;
     }
 
     try {
       createState.setStep(1);
-			toasts.showStepToast(1);
+      toasts.showStepToast(1);
 
-			if (!tokenAAddress || !tokenBAddress) {
-				throw new Error(ERROR_MESSAGES.MISSING_TOKEN_ADDRESSES);
-			}
+      if (!tokenAAddress || !tokenBAddress) {
+        throw new Error(ERROR_MESSAGES.MISSING_TOKEN_ADDRESSES);
+      }
 
-			if (!wallet) {
-				throw new Error(ERROR_MESSAGES.MISSING_WALLET);
-			}
+      if (!wallet) {
+        throw new Error(ERROR_MESSAGES.MISSING_WALLET);
+      }
 
       const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
       const { tokenXAddress, tokenYAddress } = sortedTokens;
@@ -340,24 +351,24 @@ export function CreatePoolForm() {
 
       if (response.success && response.transaction) {
         trackSigned({
-					action: "add",
-					amountA: tokenAAmount,
-					amountB: tokenBAmount,
-					tokenA: tokenAAddress || "",
-					tokenB: tokenBAddress || "",
-				});
+          action: "add",
+          amountA: tokenAAmount,
+          amountB: tokenBAmount,
+          tokenA: tokenAAddress || "",
+          tokenB: tokenBAddress || "",
+        });
 
-				requestCreatePoolTransactionSigning({
-					checkTransactionStatus,
-					publicKey,
-					setCreateStep: createState.setStep,
-					signTransaction,
-					unsignedTransaction: response.transaction,
-					showCreatePoolStepToast,
-				});
-			} else {
-				throw new Error("Failed to create pool transaction");
-			}
+        requestCreatePoolTransactionSigning({
+          checkTransactionStatus,
+          publicKey,
+          setCreateStep: createState.setStep,
+          showCreatePoolStepToast,
+          signTransaction,
+          unsignedTransaction: response.transaction,
+        });
+      } else {
+        throw new Error("Failed to create pool transaction");
+      }
     } catch (error) {
       console.error("Pool creation error:", error);
       toasts.dismiss();
@@ -368,9 +379,7 @@ export function CreatePoolForm() {
     }
   };
 
-  const checkTransactionStatus = async (
-    signature: string,
-  ) => {
+  const checkTransactionStatus = async (signature: string) => {
     await statusChecker.checkTransactionStatus(signature);
   };
 
@@ -443,7 +452,6 @@ export function CreatePoolForm() {
       ? [tokenADetails, tokenBDetails]
       : [tokenBDetails, tokenADetails];
 
-
   return (
     <section className="flex w-full max-w-xl items-start gap-1">
       <div className="size-9" />
@@ -458,10 +466,7 @@ export function CreatePoolForm() {
               >
                 {tokenBAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
               </Text.Body2>
-              <SelectTokenButton
-                returnUrl="liquidity"
-                type="sell"
-              />
+              <SelectTokenButton returnUrl="liquidity" type="sell" />
             </div>
             <form.Field
               name="tokenBAmount"
@@ -604,7 +609,7 @@ export function CreatePoolForm() {
 
           <div className="w-full">
             {!publicKey ? (
-              <ConnectWalletButton className="w-full py-3" />
+              <WalletButton className="w-full py-3" />
             ) : poolDetails ? (
               <Button
                 className="w-full cursor-pointer py-3 leading-6"

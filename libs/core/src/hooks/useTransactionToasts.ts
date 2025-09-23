@@ -8,18 +8,14 @@ import {
   type TransactionType
 } from "../constants/toastMessages";
 
-export interface ToastFunction {
-  (options: {
+export type ToastFunction = (options: {
     title: string;
     description: string;
     variant: "loading" | "success" | "error";
     customAction?: React.ReactNode;
-  }): void;
-}
+  }) => void
 
-export interface DismissToastFunction {
-  (): void;
-}
+export type DismissToastFunction = () => void
 
 export interface UseTransactionToastsParams {
   toast: ToastFunction;
