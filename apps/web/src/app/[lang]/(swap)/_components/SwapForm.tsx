@@ -10,6 +10,7 @@ import {
   useTransactionState,
   useTransactionStatus,
   useTransactionToasts,
+  type Token,
 } from "@dex-web/core";
 import { TradeStatus } from "@dex-web/grpc-client";
 import { client, tanstackClient } from "@dex-web/orpc";
@@ -20,6 +21,7 @@ import {
   checkInsufficientBalance,
   convertToDecimal,
   formatAmountInput,
+  numberFormatHelper,
   parseAmount,
   parseAmountBigNumber,
   sortSolanaAddresses,
@@ -92,6 +94,19 @@ export function SwapForm() {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
+  const { data: tokenMetadata } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenMetadata.queryOptions({
+      input: {
+        addresses: [tokenAAddress, tokenBAddress],
+        returnAsObject: true,
+      },
+    }),
+  );
+
+  const metadata = tokenMetadata as Record<string, Token>;
+  const tokenADetails = metadata[tokenAAddress];
+  const tokenBDetails = metadata[tokenBAddress];
+
   const { incomingReferralCode } = useReferralCode();
 
   const swapState = useTransactionState(0, false, true);
@@ -197,8 +212,15 @@ export function SwapForm() {
       swapState.reset();
       const successMessage = isSquadsX(wallet)
         ? undefined
-        : `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`;
-
+        : `SWAPPED ${numberFormatHelper({
+          decimalScale: 5,
+          trimTrailingZeros: true,
+          value: form.state.values.tokenAAmount,
+        })} ${tokenBDetails?.symbol} FOR ${numberFormatHelper({
+          decimalScale: 5,
+          trimTrailingZeros: true,
+          value: form.state.values.tokenBAmount,
+        })} ${tokenADetails?.symbol}. protected from MEV attacks.`;
       toasts.showSuccessToast(successMessage);
 
       trackConfirmed({
