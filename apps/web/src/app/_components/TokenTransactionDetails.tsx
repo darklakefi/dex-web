@@ -20,8 +20,8 @@ function getSwapDetailsIcon(impact: "LOW" | "MEDIUM" | "HIGH") {
 }
 
 function getImpact(priceImpactPercentage: number): "LOW" | "MEDIUM" | "HIGH" {
-  if (priceImpactPercentage < 2) return "LOW";
-  if (priceImpactPercentage < 5) return "MEDIUM";
+  if (priceImpactPercentage < 1) return "LOW";
+  if (priceImpactPercentage < 3) return "MEDIUM";
   return "HIGH";
 }
 
