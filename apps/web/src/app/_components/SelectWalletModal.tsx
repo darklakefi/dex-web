@@ -7,9 +7,11 @@ import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import { useAnalytics } from "../../hooks/useAnalytics";
 import { selectedTokensParsers } from "../_utils/searchParams";
+import { twMerge } from "tailwind-merge";
+import { useEffect } from "react";
 
 export function SelectWalletModal() {
-  const { wallets, wallet, select, publicKey } = useWallet();
+  const { wallets, wallet, select, publicKey, connecting, connected } = useWallet();
   const router = useRouter();
   const { trackWalletConnection } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -24,16 +26,8 @@ export function SelectWalletModal() {
 
     try {
       select(wallet.adapter.name);
-
-      setTimeout(() => {
-        trackWalletConnection({
-          address: publicKey?.toBase58(),
-          success: true,
-          wallet: wallet.adapter.name,
-        });
-        handleClose();
-      }, 2000);
     } catch (error) {
+      // Track wallet connection failure
       trackWalletConnection({
         success: false,
         wallet: wallet.adapter.name,
@@ -47,6 +41,17 @@ export function SelectWalletModal() {
       `/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}&wallet=${wallet?.adapter.name}`,
     );
   };
+
+  useEffect(() => {
+    if (connected && wallet && publicKey) {
+      trackWalletConnection({
+        address: publicKey.toBase58(),
+        success: true,
+        wallet: wallet.adapter.name,
+      });
+      handleClose();
+    }
+  }, [connected, wallet, publicKey]);
 
   return (
     <Modal onClose={handleClose}>
@@ -64,25 +69,37 @@ export function SelectWalletModal() {
           </button>
         </div>
         <div className="flex flex-col gap-4">
-          {wallets.map((wallet) => (
-            <Button
-              className="inline-flex cursor-pointer justify-start gap-4"
-              key={wallet.adapter.name}
-              onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-                handleSelect(wallet, e)
-              }
-              type="button"
-              variant="secondary"
-            >
-              <Image
-                alt={wallet.adapter.name}
-                height={24}
-                src={wallet.adapter.icon}
-                width={24}
-              />
-              {wallet.adapter.name}
-            </Button>
-          ))}
+          {wallets.map((installedWallet) => {
+            const isConnecting = connecting && installedWallet.adapter.name === wallet?.adapter.name;
+            return (
+              <Button
+                className="inline-flex cursor-pointer justify-start gap-4"
+                key={installedWallet.adapter.name}
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                  handleSelect(installedWallet, e)
+                }
+                type="button"
+                variant="secondary"
+                disabled={isConnecting}
+              >
+                <div className="flex justify-between w-full items-center">
+                  <div className="flex items-center gap-2">
+                    <Image
+                      alt={installedWallet.adapter.name}
+                      height={24}
+                      src={installedWallet.adapter.icon}
+                      width={24}
+                    />
+                    {installedWallet.adapter.name}
+                  </div>
+                  <Icon
+                    className={twMerge("size-4 animate-spin-pause text-inherit", isConnecting ? "block" : "hidden")}
+                    name="loading-stripe"
+                  />
+                </div>
+              </Button>
+            )
+          })}
         </div>
       </Box>
     </Modal>
