@@ -1,10 +1,11 @@
 "use client";
 
-import { Header, Icon, Text } from "@dex-web/ui";
+import { Button, Header, Icon, Text } from "@dex-web/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { AppHeaderButton } from "./AppHeaderButton";
+import { Suspense } from "react";
+import { WalletButton } from "./WalletButton";
 
 export const AppHeader = () => {
 	const tx = useTranslations("pages");
@@ -12,7 +13,17 @@ export const AppHeader = () => {
 
 	return (
 		<Header
-			button={<AppHeaderButton />}
+			button={
+				<Suspense
+					fallback={
+						<Button variant="secondary" loading>
+							Loading...
+						</Button>
+					}
+				>
+					<WalletButton suppressHydrationWarning={true} />
+				</Suspense>
+			}
 			logoLg={<Icon className="h-6 w-auto stroke-none" name="logo-lg" />}
 			logoSm={<Icon className="h-6 w-auto stroke-none" name="logo-sm" />}
 		>

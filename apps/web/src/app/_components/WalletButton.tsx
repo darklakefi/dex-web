@@ -1,95 +1,56 @@
 "use client";
-import { client } from "@dex-web/orpc";
 import { Box, Button, Icon } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import { getFirstConnectedWalletAddress } from "../_utils/getFirstConnectedWalletAddress";
-import { ClientOnly } from "./ClientOnly";
 
-export function ConnectedWalletButton() {
-	return (
-		<ClientOnly
-			fallback={
-				<Button
-					as="div"
-					className="cursor-pointer leading-6"
-					loading={true}
-					variant="secondary"
-				>
-					Loading...
-				</Button>
-			}
-		>
-			<ConnectedWalletContent />
-		</ClientOnly>
-	);
-}
+interface WalletButtonProps extends React.ComponentProps<typeof Button> {}
 
-function ConnectedWalletContent() {
+export function WalletButton({ ...props }: WalletButtonProps) {
+	const router = useRouter();
 	const { wallet, disconnect } = useWallet();
+	const [hasMounted, setHasMounted] = useState(false);
 
-	const createTorqueReferralMutation = useMutation({
-		mutationFn: (input: { userId: string; referralCode: string }) => {
-			return client.integrations.createTorqueReferral(input);
-		},
-		onSuccess: (data) => {
-			if (data.success) {
-				console.log("Torque referral created successfully:", {
-					referralCode: data.referralCode,
-					publicKey: data.publicKey,
-					vanity: data.vanity,
-				});
-			} else {
-				console.error("Torque API returned error:", data.error);
-			}
-		},
-		onError: (error) => {
-			console.error("Network/client error creating Torque referral:", error);
-		},
-	});
+	useEffect(() => {
+		setHasMounted(true);
+	}, []);
 
-	if (!wallet || !wallet.adapter) {
+	function handleClick() {
+		router.push("/select-wallet");
+	}
+
+	if (!hasMounted || !wallet || !wallet.adapter) {
 		return (
 			<Button
-				as="div"
-				className="cursor-pointer leading-6"
-				loading={true}
-				variant="secondary"
+				className={twMerge(props.className, "cursor-pointer leading-6")}
+				onClick={handleClick}
+				variant="primary"
 			>
-				Loading...
+				Connect Wallet
 			</Button>
 		);
 	}
 
 	const currentWalletAdapter = wallet.adapter;
-	const walletAddress = getFirstConnectedWalletAddress(currentWalletAdapter);
-
-	const handleCreateTorqueReferral = () => {
-		if (!walletAddress) {
-			console.error("No wallet address found");
-			return;
-		}
-
-		createTorqueReferralMutation.mutate({
-			userId: walletAddress,
-			referralCode: "default-referral",
-		});
-	};
 
 	return (
 		<Popover className="">
 			{({ open }) => (
 				<>
 					<PopoverButton
-						as="div"
-						className={open ? "opacity-70" : "opacity-100"}
+						className={twMerge(
+							"cursor-pointer normal-case leading-6",
+							open ? "opacity-70" : "opacity-100",
+						)}
 					>
 						<Button
-							as="div"
+							as="span"
 							className="cursor-pointer normal-case leading-6"
 							variant="secondary"
 						>
