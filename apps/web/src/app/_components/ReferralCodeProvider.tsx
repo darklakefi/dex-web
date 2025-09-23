@@ -99,12 +99,6 @@ export function ReferralCodeProvider({ children }: ReferralCodeProviderProps) {
 					description: `YOU GOT REFERRED BY ${code}`,
 					variant: "success",
 				});
-			} else {
-				toast({
-					title: "REFERRAL ALREADY USED",
-					description: "TRY ANOTHER LINK",
-					variant: "error",
-				});
 			}
 		},
 		[userReferralCode],

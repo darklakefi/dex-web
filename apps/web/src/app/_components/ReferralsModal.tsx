@@ -5,50 +5,27 @@ import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useQueryStates } from "nuqs";
-import { selectedTokensParsers } from "../_utils/searchParams";
-import { toast } from "../_utils/toast";
+import { useState } from "react";
 import { useReferralCode } from "./ReferralCodeProvider";
 
 export function ReferralsModal() {
 	const router = useRouter();
-	const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
-		selectedTokensParsers,
-	);
-	const {
-		incomingReferralCode,
-		userReferralCode,
-		setUserReferralCode,
-		processUrlReferral,
-	} = useReferralCode();
 
-	const { data: referrerData } = useSuspenseQuery(
-		tanstackClient.integrations.resolveTorqueReferral.queryOptions({
-			input: {
-				referralCode: incomingReferralCode || "",
-			},
-		}),
-	);
+	const { incomingReferralCode, userReferralCode } = useReferralCode();
+	const [isCopied, setIsCopied] = useState(false);
 
 	const handleClose = () => {
-		const params = new URLSearchParams();
-		params.set("tokenAAddress", tokenAAddress);
-		params.set("tokenBAddress", tokenBAddress);
-		if (incomingReferralCode) {
-			params.set("ref", incomingReferralCode);
-		}
-		router.push(`/?${params.toString()}`);
+		router.back();
 	};
 
 	const handleCopy = () => {
 		navigator.clipboard.writeText(
 			`${process.env.NEXT_PUBLIC_APP_URL}/referral/${currentUserReferralCode}`,
 		);
-		toast({
-			title: "Referral link copied to clipboard",
-			variant: "success",
-			description: `${process.env.NEXT_PUBLIC_APP_URL}/referral/${currentUserReferralCode}`,
-		});
+		setIsCopied(true);
+		setTimeout(() => {
+			setIsCopied(false);
+		}, 2000);
 	};
 
 	const { publicKey } = useWallet();
@@ -83,6 +60,7 @@ export function ReferralsModal() {
 							<Text.Body2 className="text-green-300">
 								Share your referral link:
 							</Text.Body2>
+							``
 							<Text.Body2 className="flex items-center justify-between gap-2">
 								{`${process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, "")}/referral/${currentUserReferralCode || ""}`}
 								<Button
@@ -90,7 +68,7 @@ export function ReferralsModal() {
 									onClick={handleCopy}
 									disabled={!currentUserReferralCode}
 								>
-									Copy
+									{isCopied ? "Copied" : "Copy"}
 								</Button>
 							</Text.Body2>
 						</Box>
