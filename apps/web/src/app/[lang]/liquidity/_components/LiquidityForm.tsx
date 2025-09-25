@@ -7,6 +7,7 @@ import {
   useTransactionState,
   useTransactionStatus,
   useTransactionToasts,
+  type Token,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { CreateLiquidityTransactionInput } from "@dex-web/orpc/schemas";
@@ -100,17 +101,30 @@ export function LiquidityForm() {
     }),
   );
 
-  const {
-    buyTokenAccount,
-    sellTokenAccount,
-    refetchBuyTokenAccount,
-    refetchSellTokenAccount,
-  } = useTokenAccounts({
-    publicKey,
-    tanstackClient,
-    tokenAAddress,
-    tokenBAddress,
-  });
+  const { data: tokenMetadata } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenMetadata.queryOptions({
+      input: {
+        addresses: [tokenAAddress, tokenBAddress],
+        returnAsObject: true,
+      },
+    }),
+  );
+
+  const metadata = tokenMetadata as Record<string, Token>;
+  const tokenADetails = metadata[tokenAAddress];
+  const tokenBDetails = metadata[tokenBAddress];
+
+	const {
+		buyTokenAccount,
+		sellTokenAccount,
+		refetchBuyTokenAccount,
+		refetchSellTokenAccount,
+	} = useTokenAccounts({
+		tokenAAddress,
+		tokenBAddress,
+		publicKey,
+		tanstackClient,
+	});
 
   const {
     trackInitiated,
@@ -201,9 +215,9 @@ export function LiquidityForm() {
         transactionHash: "",
       });
 
-      const successMessage = !isSquadsX(wallet)
-        ? `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
-        : undefined;
+			const successMessage = !isSquadsX(wallet)
+				? `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenADetails?.symbol} + ${form.state.values.tokenBAmount} ${tokenBDetails?.symbol}`
+				: undefined;
 
       toasts.showSuccessToast(successMessage);
       refetchBuyTokenAccount();

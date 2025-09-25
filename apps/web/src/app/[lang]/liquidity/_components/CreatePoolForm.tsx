@@ -211,9 +211,9 @@ export function CreatePoolForm() {
         transactionHash: "",
       });
 
-      const successMessage = !isSquadsX(wallet)
-        ? `CREATED POOL: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
-        : undefined;
+			const successMessage = !isSquadsX(wallet)
+				? `CREATED POOL: ${form.state.values.tokenAAmount} ${tokenADetails?.symbol} + ${form.state.values.tokenBAmount} ${tokenBDetails?.symbol}`
+				: undefined;
 
       toasts.showSuccessToast(successMessage);
       refetchBuyTokenAccount();
