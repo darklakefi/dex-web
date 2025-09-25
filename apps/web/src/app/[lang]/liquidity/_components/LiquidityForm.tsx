@@ -2,24 +2,24 @@
 
 import {
   ERROR_MESSAGES,
+  type Token,
   useLiquidityTracking,
   useTokenAccounts,
   useTransactionState,
   useTransactionStatus,
   useTransactionToasts,
-  type Token,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { CreateLiquidityTransactionInput } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import {
-	convertToDecimal,
-	formatAmountInput,
-	numberFormatHelper,
-	parseAmount,
-	parseAmountBigNumber,
-	sortSolanaAddresses,
-	validateHasSufficientBalance,
+  convertToDecimal,
+  formatAmountInput,
+  numberFormatHelper,
+  parseAmount,
+  parseAmountBigNumber,
+  sortSolanaAddresses,
+  validateHasSufficientBalance,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
@@ -115,17 +115,17 @@ export function LiquidityForm() {
   const tokenADetails = metadata[tokenAAddress];
   const tokenBDetails = metadata[tokenBAddress];
 
-	const {
-		buyTokenAccount,
-		sellTokenAccount,
-		refetchBuyTokenAccount,
-		refetchSellTokenAccount,
-	} = useTokenAccounts({
-		tokenAAddress,
-		tokenBAddress,
-		publicKey,
-		tanstackClient,
-	});
+  const {
+    buyTokenAccount,
+    sellTokenAccount,
+    refetchBuyTokenAccount,
+    refetchSellTokenAccount,
+  } = useTokenAccounts({
+    publicKey,
+    tanstackClient,
+    tokenAAddress,
+    tokenBAddress,
+  });
 
   const {
     trackInitiated,
@@ -216,17 +216,17 @@ export function LiquidityForm() {
         transactionHash: "",
       });
 
-			const successMessage = !isSquadsX(wallet)
-				? `ADDED LIQUIDITY: ${numberFormatHelper({
-          decimalScale: 5,
-          trimTrailingZeros: true,
-          value: form.state.values.tokenAAmount,
-        })} ${tokenADetails?.symbol} + ${numberFormatHelper({
-          decimalScale: 5,
-          trimTrailingZeros: true,
-          value: form.state.values.tokenBAmount,
-        })} ${tokenBDetails?.symbol}`
-				: undefined;
+      const successMessage = !isSquadsX(wallet)
+        ? `ADDED LIQUIDITY: ${numberFormatHelper({
+            decimalScale: 5,
+            trimTrailingZeros: true,
+            value: form.state.values.tokenAAmount,
+          })} ${tokenADetails?.symbol} + ${numberFormatHelper({
+            decimalScale: 5,
+            trimTrailingZeros: true,
+            value: form.state.values.tokenBAmount,
+          })} ${tokenBDetails?.symbol}`
+        : undefined;
 
       toasts.showSuccessToast(successMessage);
       refetchBuyTokenAccount();
@@ -453,189 +453,193 @@ export function LiquidityForm() {
   };
 
   return (
-    <section className="flex w-full max-w-xl items-start gap-1">
-      <div className="size-9" />
+    <div className="w-full">
+      <section className="flex gap-1">
+        <div className="hidden size-9 md:block" />
 
-      <Box padding="lg">
-        <div className="flex flex-col gap-4">
-          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
-            <div>
-              <Text.Body2
-                as="label"
-                className="mb-3 block text-green-300 uppercase"
-              >
-                AMOUNT
-              </Text.Body2>
-              <SelectTokenButton returnUrl="liquidity" type="sell" />
-            </div>
-            <form.Field
-              name="tokenBAmount"
-              validators={{
-                onChange: ({ value }) => {
-                  return validateHasSufficientBalance({
-                    amount: value,
-                    tokenAccount: sellTokenAccount?.tokenAccounts[0],
-                  });
-                },
-                onChangeListenTo: ["tokenAAmount"],
-              }}
-            >
-              {(field) => (
-                <FormFieldset
-                  maxDecimals={5}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "sell");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </Box>
-
-          <div className="flex items-center justify-center">
-            <div className="inline-flex size-8 items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300">
-              <Icon className="size-5" name="plus" />
-            </div>
-          </div>
-          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
-            <div>
-              <Text.Body2
-                as="label"
-                className="mb-3 block text-green-300 uppercase"
-              >
-                AMOUNT
-              </Text.Body2>
-              <SelectTokenButton returnUrl="liquidity" type="buy" />
-            </div>
-            <form.Field
-              name="tokenAAmount"
-              validators={{
-                onChange: ({ value }) => {
-                  return validateHasSufficientBalance({
-                    amount: value,
-                    tokenAccount: buyTokenAccount?.tokenAccounts[0],
-                  });
-                },
-                onChangeListenTo: ["tokenBAmount"],
-              }}
-            >
-              {(field) => (
-                <FormFieldset
-                  maxDecimals={5}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "buy");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={buyTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </Box>
-
-          <div className="w-full">
-            {!publicKey ? (
-              <WalletButton className="w-full py-3" />
-            ) : poolDetails ? (
-              <form.Subscribe
-                selector={(state) => [state.canSubmit, state.isSubmitting]}
-              >
-                {([canSubmit, isSubmitting]) => (
-                  <Button
-                    className="w-full cursor-pointer py-3 leading-6"
-                    disabled={
-                      liquidityState.step !== 0 ||
-                      liquidityState.isDisabled ||
-                      !form.state.canSubmit ||
-                      isSubmitting ||
-                      !canSubmit
-                    }
-                    loading={liquidityState.step !== 0}
-                    onClick={handleDeposit}
-                  >
-                    {getLiquidityFormButtonMessage({
-                      buyTokenAccount,
-                      initialPrice: form.state.values.initialPrice,
-                      liquidityStep: liquidityState.step,
-                      poolDetails,
-                      publicKey,
-                      sellTokenAccount,
-                      tokenAAddress,
-                      tokenAAmount: form.state.values.tokenAAmount,
-                      tokenBAddress,
-                      tokenBAmount: form.state.values.tokenBAmount,
-                    })}
-                  </Button>
-                )}
-              </form.Subscribe>
-            ) : (
-              <Button
-                className="w-full cursor-pointer py-3 leading-6"
-                onClick={() => {
-                  const urlWithParams = serialize("liquidity", {
-                    tokenAAddress,
-                    tokenBAddress,
-                    type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
-                  });
-                  router.push(`/${urlWithParams}`);
-                  return;
+        <Box className="bg-transparent md:bg-green-700 md:p-6" padding="none">
+          <div className="flex flex-col gap-4">
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  AMOUNT
+                </Text.Body2>
+                <SelectTokenButton returnUrl="liquidity" type="sell" />
+              </div>
+              <form.Field
+                name="tokenBAmount"
+                validators={{
+                  onChange: ({ value }) => {
+                    return validateHasSufficientBalance({
+                      amount: value,
+                      tokenAccount: sellTokenAccount?.tokenAccounts[0],
+                    });
+                  },
+                  onChangeListenTo: ["tokenAAmount"],
                 }}
               >
-                Create Pool
-              </Button>
-            )}
+                {(field) => (
+                  <FormFieldset
+                    maxDecimals={5}
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "sell");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                )}
+              </form.Field>
+            </Box>
+
+            <div className="flex items-center justify-center">
+              <div className="inline-flex size-8 items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300">
+                <Icon className="size-5" name="plus" />
+              </div>
+            </div>
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  AMOUNT
+                </Text.Body2>
+                <SelectTokenButton returnUrl="liquidity" type="buy" />
+              </div>
+              <form.Field
+                name="tokenAAmount"
+                validators={{
+                  onChange: ({ value }) => {
+                    return validateHasSufficientBalance({
+                      amount: value,
+                      tokenAccount: buyTokenAccount?.tokenAccounts[0],
+                    });
+                  },
+                  onChangeListenTo: ["tokenBAmount"],
+                }}
+              >
+                {(field) => (
+                  <FormFieldset
+                    maxDecimals={5}
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "buy");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                )}
+              </form.Field>
+            </Box>
+
+            <div className="w-full">
+              {!publicKey ? (
+                <WalletButton className="w-full py-3" />
+              ) : poolDetails ? (
+                <form.Subscribe
+                  selector={(state) => [state.canSubmit, state.isSubmitting]}
+                >
+                  {([canSubmit, isSubmitting]) => (
+                    <Button
+                      className="w-full cursor-pointer py-3 leading-6"
+                      disabled={
+                        liquidityState.step !== 0 ||
+                        liquidityState.isDisabled ||
+                        !form.state.canSubmit ||
+                        isSubmitting ||
+                        !canSubmit
+                      }
+                      loading={liquidityState.step !== 0}
+                      onClick={handleDeposit}
+                    >
+                      {getLiquidityFormButtonMessage({
+                        buyTokenAccount,
+                        initialPrice: form.state.values.initialPrice,
+                        liquidityStep: liquidityState.step,
+                        poolDetails,
+                        publicKey,
+                        sellTokenAccount,
+                        tokenAAddress,
+                        tokenAAmount: form.state.values.tokenAAmount,
+                        tokenBAddress,
+                        tokenBAmount: form.state.values.tokenBAmount,
+                      })}
+                    </Button>
+                  )}
+                </form.Subscribe>
+              ) : (
+                <Button
+                  className="w-full cursor-pointer py-3 leading-6"
+                  onClick={() => {
+                    const urlWithParams = serialize("liquidity", {
+                      tokenAAddress,
+                      tokenBAddress,
+                      type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
+                    });
+                    router.push(`/${urlWithParams}`);
+                    return;
+                  }}
+                >
+                  Create Pool
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-        {poolDetails &&
-          form.state.values.tokenBAmount !== "0" &&
-          form.state.values.tokenAAmount !== "0" && (
-            <AddLiquidityDetails
-              slippage={slippage}
-              tokenAAmount={form.state.values.tokenAAmount}
-              tokenASymbol={buyTokenAccount?.tokenAccounts[0]?.symbol || ""}
-              tokenBAmount={form.state.values.tokenBAmount}
-              tokenBSymbol={sellTokenAccount?.tokenAccounts[0]?.symbol || ""}
-            />
-          )}
-      </Box>
+          {poolDetails &&
+            form.state.values.tokenBAmount !== "0" &&
+            form.state.values.tokenAAmount !== "0" && (
+              <AddLiquidityDetails
+                slippage={slippage}
+                tokenAAmount={form.state.values.tokenAAmount}
+                tokenASymbol={buyTokenAccount?.tokenAccounts[0]?.symbol || ""}
+                tokenBAmount={form.state.values.tokenBAmount}
+                tokenBSymbol={sellTokenAccount?.tokenAccounts[0]?.symbol || ""}
+              />
+            )}
+        </Box>
 
-      <div className="flex flex-col gap-1">
-        <TokenTransactionSettingsButton
-          onChange={(slippage) => {
-            setSlippage(slippage);
-            if (form.state.values.tokenBAmount !== "0") {
-              const inputType =
-                poolDetails?.tokenXMint === tokenBAddress ? "tokenX" : "tokenY";
-              debouncedCalculateTokenAmounts({
-                inputAmount: form.state.values.tokenBAmount,
-                inputType,
+        <div className="hidden flex-col gap-1 md:flex">
+          <TokenTransactionSettingsButton
+            onChange={(slippage) => {
+              setSlippage(slippage);
+              if (form.state.values.tokenBAmount !== "0") {
+                const inputType =
+                  poolDetails?.tokenXMint === tokenBAddress
+                    ? "tokenX"
+                    : "tokenY";
+                debouncedCalculateTokenAmounts({
+                  inputAmount: form.state.values.tokenBAmount,
+                  inputType,
+                });
+              }
+            }}
+          />
+
+          <button
+            aria-label="change mode"
+            className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
+            onClick={() => {
+              const urlWithParams = serialize("liquidity", {
+                tokenAAddress: EMPTY_TOKEN,
+                tokenBAddress: EMPTY_TOKEN,
+                type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
               });
-            }
-          }}
-        />
-
-        <button
-          aria-label="change mode"
-          className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
-          onClick={() => {
-            const urlWithParams = serialize("liquidity", {
-              tokenAAddress: EMPTY_TOKEN,
-              tokenBAddress: EMPTY_TOKEN,
-              type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
-            });
-            router.push(`/${urlWithParams}`);
-          }}
-          type="button"
-        >
-          <Icon className={`size-5`} name="plus-circle" />
-        </button>
-      </div>
-    </section>
+              router.push(`/${urlWithParams}`);
+            }}
+            type="button"
+          >
+            <Icon className={`size-5`} name="plus-circle" />
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }

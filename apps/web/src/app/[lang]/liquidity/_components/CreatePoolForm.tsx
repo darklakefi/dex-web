@@ -211,17 +211,17 @@ export function CreatePoolForm() {
         transactionHash: "",
       });
 
-			const successMessage = !isSquadsX(wallet)
-				? `CREATED POOL: ${numberFormatHelper({
-          decimalScale: 5,
-          trimTrailingZeros: true,
-          value: form.state.values.tokenAAmount,
-        })} ${tokenADetails?.symbol} + ${numberFormatHelper({
-          decimalScale: 5,
-          trimTrailingZeros: true,
-          value: form.state.values.tokenBAmount,
-        })} ${tokenBDetails?.symbol}`
-				: undefined;
+      const successMessage = !isSquadsX(wallet)
+        ? `CREATED POOL: ${numberFormatHelper({
+            decimalScale: 5,
+            trimTrailingZeros: true,
+            value: form.state.values.tokenAAmount,
+          })} ${tokenADetails?.symbol} + ${numberFormatHelper({
+            decimalScale: 5,
+            trimTrailingZeros: true,
+            value: form.state.values.tokenBAmount,
+          })} ${tokenBDetails?.symbol}`
+        : undefined;
 
       toasts.showSuccessToast(successMessage);
       refetchBuyTokenAccount();
@@ -461,274 +461,281 @@ export function CreatePoolForm() {
       : [tokenBDetails, tokenADetails];
 
   return (
-    <section className="flex w-full max-w-xl items-start gap-1">
-      <div className="size-9" />
+    <div className="w-full">
+      <section className="flex gap-1">
+        <div className="hidden size-9 md:block" />
 
-      <Box padding="lg">
-        <div className="flex flex-col gap-4">
-          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
-            <div>
-              <Text.Body2
-                as="label"
-                className="mb-3 block text-green-300 uppercase"
-              >
-                {tokenBAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
-              </Text.Body2>
-              <SelectTokenButton returnUrl="liquidity" type="sell" />
-            </div>
-            <form.Field
-              name="tokenBAmount"
-              validators={{
-                onChange: ({ value }) => {
-                  return validateHasSufficientBalance({
-                    amount: value,
-                    tokenAccount: sellTokenAccount?.tokenAccounts[0],
-                  });
-                },
-                onChangeListenTo: ["tokenAAmount"],
-              }}
-            >
-              {(field) => (
-                <FormFieldset
-                  maxDecimals={5}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "sell");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </Box>
-
-          <div className="flex items-center justify-center">
-            <div className="inline-flex size-8 items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300">
-              <Icon className="size-5" name="plus" />
-            </div>
-          </div>
-
-          <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
-            <div>
-              <Text.Body2
-                as="label"
-                className="mb-3 block text-green-300 uppercase"
-              >
-                {tokenAAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
-              </Text.Body2>
-              <SelectTokenButton
-                // additionalParams={{ type: LIQUIDITY_PAGE_TYPE.CREATE_POOL }}
-                returnUrl="liquidity"
-                type="buy"
-              />
-            </div>
-            <form.Field
-              name="tokenAAmount"
-              validators={{
-                onChange: ({ value }) => {
-                  return validateHasSufficientBalance({
-                    amount: value,
-                    tokenAccount: buyTokenAccount?.tokenAccounts[0],
-                  });
-                },
-                onChangeListenTo: ["tokenBAmount"],
-              }}
-            >
-              {(field) => (
-                <FormFieldset
-                  maxDecimals={5}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "buy");
-                    field.handleChange(e.target.value);
-                  }}
-                  tokenAccount={buyTokenAccount?.tokenAccounts[0]}
-                  value={field.state.value}
-                />
-              )}
-            </form.Field>
-          </Box>
-          <Text.Body2 className="mb-2 text-green-100">
-            Your selection will create a new liquidity pool
-          </Text.Body2>
-          {!poolDetails && !isMissingTokens && (
-            <div>
-              <Box className="mb-3 flex-row border border-green-400 bg-green-600 px-5 py-3 hover:border-green-300">
-                <div>
-                  <Text.Body2
-                    as="label"
-                    className="mb-7 block text-green-300 uppercase"
-                  >
-                    Set initial price
-                  </Text.Body2>
-                  <div className="flex items-center">
-                    {initialPriceTokenX?.imageUrl ? (
-                      <Image
-                        alt={initialPriceTokenX?.symbol}
-                        className="mr-2 size-6 overflow-hidden rounded-full"
-                        height={24}
-                        priority
-                        src={initialPriceTokenX?.imageUrl}
-                        unoptimized
-                        width={24}
-                      />
-                    ) : (
-                      <Icon className="mr-2 fill-green-200" name="seedlings" />
-                    )}
-                    <Text.Body2 className="text-green-200 text-lg">
-                      1 {initialPriceTokenX?.symbol} =
-                    </Text.Body2>
-                  </div>
-                </div>
-                <form.Field name="initialPrice">
-                  {(field) => (
-                    <FormFieldset
-                      controls={
-                        <button
-                          className="cursor-pointer"
-                          onClick={handleChangeInitialPriceDirection}
-                          type="button"
-                        >
-                          <Icon className="rotate-90" name="swap" />
-                        </button>
-                      }
-                      currencyCode={initialPriceTokenY?.symbol}
-                      name={field.name}
-                      onBlur={field.handleBlur}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        handleInitialPriceChange(e);
-                        field.handleChange(e.target.value);
-                      }}
-                      value={field.state.value}
-                    />
-                  )}
-                </form.Field>
-              </Box>
-              <Text.Body2 className="text-green-300">
-                <span className="text-green-100">Warning:</span> Bots will
-                arbitrage any mispricing. you'll lose tokens if your rate is
-                off-market.
-              </Text.Body2>
-            </div>
-          )}
-
-          <div className="w-full">
-            {!publicKey ? (
-              <WalletButton className="w-full py-3" />
-            ) : poolDetails ? (
-              <Button
-                className="w-full cursor-pointer py-3 leading-6"
-                onClick={() => {
-                  const urlWithParams = serialize("liquidity", {
-                    tokenAAddress,
-                    tokenBAddress,
-                    type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
-                  });
-                  router.push(`/${urlWithParams}`);
-                  return;
+        <Box className="bg-transparent md:bg-green-700 md:p-6" padding="none">
+          <div className="flex flex-col gap-4">
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  {tokenBAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
+                </Text.Body2>
+                <SelectTokenButton returnUrl="liquidity" type="sell" />
+              </div>
+              <form.Field
+                name="tokenBAmount"
+                validators={{
+                  onChange: ({ value }) => {
+                    return validateHasSufficientBalance({
+                      amount: value,
+                      tokenAccount: sellTokenAccount?.tokenAccounts[0],
+                    });
+                  },
+                  onChangeListenTo: ["tokenAAmount"],
                 }}
               >
-                {tx("createPool.poolExists")}
-              </Button>
-            ) : (
-              <form.Subscribe selector={(state) => state.values}>
-                {(values) => (
-                  <Button
-                    className="w-full cursor-pointer py-3 leading-6"
-                    disabled={
-                      isMissingTokens ||
-                      !form.state.canSubmit ||
-                      createState.step !== 0
-                    }
-                    loading={createState.step !== 0}
-                    onClick={() =>
-                      handleCreatePool(
-                        values.tokenAAmount,
-                        values.tokenBAmount,
-                        values.initialPrice,
-                      )
-                    }
-                  >
-                    {getCreatePoolFormButtonMessage({
-                      buyTokenAccount,
-                      createStep: createState.step,
-                      initialPrice: values.initialPrice,
-                      publicKey,
-                      sellTokenAccount,
-                      tokenAAddress,
-                      tokenAAmount: values.tokenAAmount,
-                      tokenBAddress,
-                      tokenBAmount: values.tokenBAmount,
-                    })}
-                  </Button>
+                {(field) => (
+                  <FormFieldset
+                    maxDecimals={5}
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "sell");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
                 )}
-              </form.Subscribe>
-            )}
-          </div>
-        </div>
+              </form.Field>
+            </Box>
 
-        <form.Subscribe selector={(state) => state.values}>
-          {(values) => {
-            const tokenAAmount = values.tokenAAmount.replace(/,/g, "");
-            const tokenBAmount = values.tokenBAmount.replace(/,/g, "");
-            return (
-              <>
-                {!poolDetails &&
-                  BigNumber(tokenAAmount).gt(0) &&
-                  BigNumber(tokenBAmount).gt(0) && (
-                    <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
-                      <div className="flex items-center justify-between">
-                        <Text.Body2 className="text-green-300">
-                          Initial Deposit
-                        </Text.Body2>
-                        <div className="text-right">
-                          <Text.Body2 className="text-green-200">
-                            {numberFormatHelper({
-                              decimalScale: 5,
-                              trimTrailingZeros: true,
-                              value: tokenAAmount,
-                            })}{" "}
-                            {buyTokenAccount?.tokenAccounts[0]?.symbol}
+            <div className="flex items-center justify-center">
+              <div className="inline-flex size-8 items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300">
+                <Icon className="size-5" name="plus" />
+              </div>
+            </div>
+
+            <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+              <div>
+                <Text.Body2
+                  as="label"
+                  className="mb-3 block text-green-300 uppercase"
+                >
+                  {tokenAAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
+                </Text.Body2>
+                <SelectTokenButton
+                  // additionalParams={{ type: LIQUIDITY_PAGE_TYPE.CREATE_POOL }}
+                  returnUrl="liquidity"
+                  type="buy"
+                />
+              </div>
+              <form.Field
+                name="tokenAAmount"
+                validators={{
+                  onChange: ({ value }) => {
+                    return validateHasSufficientBalance({
+                      amount: value,
+                      tokenAccount: buyTokenAccount?.tokenAccounts[0],
+                    });
+                  },
+                  onChangeListenTo: ["tokenBAmount"],
+                }}
+              >
+                {(field) => (
+                  <FormFieldset
+                    maxDecimals={5}
+                    name={field.name}
+                    onBlur={field.handleBlur}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleAmountChange(e, "buy");
+                      field.handleChange(e.target.value);
+                    }}
+                    tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                    value={field.state.value}
+                  />
+                )}
+              </form.Field>
+            </Box>
+            <Text.Body2 className="mb-2 text-green-100">
+              Your selection will create a new liquidity pool
+            </Text.Body2>
+            {!poolDetails && !isMissingTokens && (
+              <div>
+                <Box className="mb-3 flex-row border border-green-400 bg-green-600 px-5 py-3 hover:border-green-300">
+                  <div>
+                    <Text.Body2
+                      as="label"
+                      className="mb-7 block text-green-300 uppercase"
+                    >
+                      Set initial price
+                    </Text.Body2>
+                    <div className="flex items-center">
+                      {initialPriceTokenX?.imageUrl ? (
+                        <Image
+                          alt={initialPriceTokenX?.symbol}
+                          className="mr-2 size-6 overflow-hidden rounded-full"
+                          height={24}
+                          priority
+                          src={initialPriceTokenX?.imageUrl}
+                          unoptimized
+                          width={24}
+                        />
+                      ) : (
+                        <Icon
+                          className="mr-2 fill-green-200"
+                          name="seedlings"
+                        />
+                      )}
+                      <Text.Body2 className="text-green-200 text-lg">
+                        1 {initialPriceTokenX?.symbol} =
+                      </Text.Body2>
+                    </div>
+                  </div>
+                  <form.Field name="initialPrice">
+                    {(field) => (
+                      <FormFieldset
+                        controls={
+                          <button
+                            className="cursor-pointer"
+                            onClick={handleChangeInitialPriceDirection}
+                            type="button"
+                          >
+                            <Icon className="rotate-90" name="swap" />
+                          </button>
+                        }
+                        currencyCode={initialPriceTokenY?.symbol}
+                        name={field.name}
+                        onBlur={field.handleBlur}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          handleInitialPriceChange(e);
+                          field.handleChange(e.target.value);
+                        }}
+                        value={field.state.value}
+                      />
+                    )}
+                  </form.Field>
+                </Box>
+                <Text.Body2 className="text-green-300">
+                  <span className="text-green-100">Warning:</span> Bots will
+                  arbitrage any mispricing. you'll lose tokens if your rate is
+                  off-market.
+                </Text.Body2>
+              </div>
+            )}
+
+            <div className="w-full">
+              {!publicKey ? (
+                <WalletButton className="w-full py-3" />
+              ) : poolDetails ? (
+                <Button
+                  className="w-full cursor-pointer py-3 leading-6"
+                  onClick={() => {
+                    const urlWithParams = serialize("liquidity", {
+                      tokenAAddress,
+                      tokenBAddress,
+                      type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
+                    });
+                    router.push(`/${urlWithParams}`);
+                    return;
+                  }}
+                >
+                  {tx("createPool.poolExists")}
+                </Button>
+              ) : (
+                <form.Subscribe selector={(state) => state.values}>
+                  {(values) => (
+                    <Button
+                      className="w-full cursor-pointer py-3 leading-6"
+                      disabled={
+                        isMissingTokens ||
+                        !form.state.canSubmit ||
+                        createState.step !== 0
+                      }
+                      loading={createState.step !== 0}
+                      onClick={() =>
+                        handleCreatePool(
+                          values.tokenAAmount,
+                          values.tokenBAmount,
+                          values.initialPrice,
+                        )
+                      }
+                    >
+                      {getCreatePoolFormButtonMessage({
+                        buyTokenAccount,
+                        createStep: createState.step,
+                        initialPrice: values.initialPrice,
+                        publicKey,
+                        sellTokenAccount,
+                        tokenAAddress,
+                        tokenAAmount: values.tokenAAmount,
+                        tokenBAddress,
+                        tokenBAmount: values.tokenBAmount,
+                      })}
+                    </Button>
+                  )}
+                </form.Subscribe>
+              )}
+            </div>
+          </div>
+
+          <form.Subscribe selector={(state) => state.values}>
+            {(values) => {
+              const tokenAAmount = values.tokenAAmount.replace(/,/g, "");
+              const tokenBAmount = values.tokenBAmount.replace(/,/g, "");
+              return (
+                <>
+                  {!poolDetails &&
+                    BigNumber(tokenAAmount).gt(0) &&
+                    BigNumber(tokenBAmount).gt(0) && (
+                      <div className="mt-4 space-y-3 border-green-600 border-t pt-4">
+                        <div className="flex items-center justify-between">
+                          <Text.Body2 className="text-green-300">
+                            Initial Deposit
+                          </Text.Body2>
+                          <div className="text-right">
+                            <Text.Body2 className="text-green-200">
+                              {numberFormatHelper({
+                                decimalScale: 5,
+                                trimTrailingZeros: true,
+                                value: tokenAAmount,
+                              })}{" "}
+                              {buyTokenAccount?.tokenAccounts[0]?.symbol}
+                            </Text.Body2>
+                            <Text.Body2 className="text-green-200">
+                              {numberFormatHelper({
+                                decimalScale: 5,
+                                trimTrailingZeros: true,
+                                value: tokenBAmount,
+                              })}{" "}
+                              {sellTokenAccount?.tokenAccounts[0]?.symbol}
+                            </Text.Body2>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <Text.Body2 className="text-green-300">
+                            Initial Price
                           </Text.Body2>
                           <Text.Body2 className="text-green-200">
-                            {numberFormatHelper({
-                              decimalScale: 5,
-                              trimTrailingZeros: true,
-                              value: tokenBAmount,
-                            })}{" "}
+                            1 {buyTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
+                            {values.initialPrice}{" "}
                             {sellTokenAccount?.tokenAccounts[0]?.symbol}
                           </Text.Body2>
                         </div>
-                      </div>
 
-                      <div className="flex items-center justify-between">
-                        <Text.Body2 className="text-green-300">
-                          Initial Price
-                        </Text.Body2>
-                        <Text.Body2 className="text-green-200">
-                          1 {buyTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
-                          {values.initialPrice}{" "}
-                          {sellTokenAccount?.tokenAccounts[0]?.symbol}
-                        </Text.Body2>
+                        <div className="flex items-center justify-between">
+                          <Text.Body2 className="text-green-300">
+                            Your Pool Share
+                          </Text.Body2>
+                          <Text.Body2 className="text-green-200">
+                            100%
+                          </Text.Body2>
+                        </div>
                       </div>
-
-                      <div className="flex items-center justify-between">
-                        <Text.Body2 className="text-green-300">
-                          Your Pool Share
-                        </Text.Body2>
-                        <Text.Body2 className="text-green-200">100%</Text.Body2>
-                      </div>
-                    </div>
-                  )}
-              </>
-            );
-          }}
-        </form.Subscribe>
-      </Box>
-      <div className="size-9" />
-    </section>
+                    )}
+                </>
+              );
+            }}
+          </form.Subscribe>
+        </Box>
+        <div className="hidden size-9 md:block" />
+      </section>
+    </div>
   );
 }

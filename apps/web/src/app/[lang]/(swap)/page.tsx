@@ -50,7 +50,7 @@ export default async function Page({
         <SwapForm />
         <SwapTransactionHistory />
       </div>
-      <div className="hidden max-w-2xs md:block">
+      <div className="hidden w-2xs md:block">
         <FeaturesAndTrendingPoolPanel />
       </div>
     </div>
