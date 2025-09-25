@@ -13,11 +13,16 @@ export type Slippage = {
 export function slippageIsWithinRange(slippage: string) {
   return Number(slippage) > 0 && Number(slippage) <= 99;
 }
+
+export interface TokenTransactionSettingsButtonProps {
+  onChange: (slippage: string) => void;
+  trigger?: React.ReactNode;
+}
+
 export function TokenTransactionSettingsButton({
   onChange,
-}: {
-  onChange: (slippage: string) => void;
-}) {
+  trigger,
+}: TokenTransactionSettingsButtonProps) {
   const [slippage, setSlippage] = useState<Slippage>({
     type: "0.5",
     value: "0.5",
@@ -34,13 +39,15 @@ export function TokenTransactionSettingsButton({
       {() => (
         <>
           <PopoverButton as="div" className={"cursor-pointer"}>
-            <button
-              aria-label="settings"
-              className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
-              type="button"
-            >
-              <Icon className="size-5" name="cog" />
-            </button>
+            {trigger ? trigger : (
+              <button
+                aria-label="settings"
+                className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
+                type="button"
+              >
+                <Icon className="size-5" name="cog" />
+              </button>
+            )}
           </PopoverButton>
           <PopoverPanel anchor={"bottom end"} className="z-30 mt-1">
             {({ close }) => (

@@ -5,6 +5,8 @@ import { Box, Icon, Text, Tooltip } from "@dex-web/ui";
 import BigNumber from "bignumber.js";
 import { cva, type VariantProps } from "class-variance-authority";
 import { SwapRate } from "../[lang]/(swap)/_components/SwapRate";
+import { useTranslations } from "next-intl";
+import { TokenTransactionSettingsButton } from "./TokenTransactionSettingsButton";
 
 function getSwapDetailsIcon(impact: "LOW" | "MEDIUM" | "HIGH") {
   switch (impact) {
@@ -18,8 +20,8 @@ function getSwapDetailsIcon(impact: "LOW" | "MEDIUM" | "HIGH") {
 }
 
 function getImpact(priceImpactPercentage: number): "LOW" | "MEDIUM" | "HIGH" {
-  if (priceImpactPercentage < 2) return "LOW";
-  if (priceImpactPercentage < 5) return "MEDIUM";
+  if (priceImpactPercentage < 1) return "LOW";
+  if (priceImpactPercentage < 3) return "MEDIUM";
   return "HIGH";
 }
 
@@ -41,7 +43,7 @@ const swapDetailsItemVariants = cva(
 
 interface SwapDetailsItemProps
   extends VariantProps<typeof swapDetailsItemVariants> {
-  label: string;
+  label: string | React.ReactNode;
   value: string | React.ReactNode;
   tooltip?: React.ReactNode | string;
   tooltipId?: string;
@@ -76,6 +78,7 @@ export interface TokenTransactionDetailsProps {
   tokenSellMint: string;
   tokenBuyMint: string;
   slippage: string;
+  onChangeSlippage: (slippage: string) => void;
 }
 
 export function TokenTransactionDetails({
@@ -83,7 +86,10 @@ export function TokenTransactionDetails({
   tokenSellMint,
   tokenBuyMint,
   slippage,
+  onChangeSlippage,
 }: TokenTransactionDetailsProps) {
+  const i18n = useTranslations("swap");
+
   const tokenSell =
     quote.tokenX.address === tokenSellMint ? quote.tokenX : quote.tokenY;
   const tokenBuy =
@@ -105,13 +111,21 @@ export function TokenTransactionDetails({
         <SwapDetailsItem label="Price" value={<SwapRate quote={quote} />} />
         <SwapDetailsItem
           impact={impact}
-          label="Price Impact"
+          label={i18n("priceImpact")}
           value={`${quote.priceImpactPercentage}%`}
         />
-        <SwapDetailsItem label="Max Slippage" value={`${slippage}%`} />
-        <SwapDetailsItem label="Min. Output" value={minOutputValue} />
+        <SwapDetailsItem label={
+          <div className="flex items-center gap-1">
+            {i18n("maxSlippage")}
+            <TokenTransactionSettingsButton
+              onChange={onChangeSlippage}
+              trigger={<span className="cursor-pointer hover:opacity-50">[{i18n("edit")}]</span>}
+            />
+          </div>
+        } value={`${slippage}%`} />
+        <SwapDetailsItem label={i18n("receiveAtLeast")} value={minOutputValue} />
         <SwapDetailsItem
-          label="MEV Protection"
+          label={i18n("mevProtection")}
           tooltip={
             <Text.Body2 className="max-w-xs text-green-300">
               Your trade details are cryptographically hidden from MEV bots,
@@ -123,7 +137,7 @@ export function TokenTransactionDetails({
           value="Active"
         />
         <SwapDetailsItem
-          label="Est. Fees"
+          label={i18n("estimatedFees")}
           tooltip={
             <div className="flex flex-col gap-4">
               <div className="flex gap-10">
