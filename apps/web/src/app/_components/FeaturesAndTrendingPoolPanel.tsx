@@ -23,7 +23,7 @@ export function FeaturesAndTrendingPoolPanel() {
   };
 
   return (
-    <div className="flex w-full min-w-xs flex-col items-center gap-10 bg-transparent">
+    <div className="flex w-full min-w-2xs flex-col items-center gap-10 bg-transparent">
       {data.featuredPools.length > 0 && (
         <ShortPoolPanel
           icon="crown"

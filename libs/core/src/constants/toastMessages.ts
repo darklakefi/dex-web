@@ -1,17 +1,17 @@
 export const TRANSACTION_STEPS = {
   STEP_1: {
     SWAP: "Generating zero-knowledge proof [1/3]",
-    LIQUIDITY: "Generating zero-knowledge proof [1/3]",
-    POOL_CREATION: "Preparing Pool Creation [1/3]",
+    LIQUIDITY: "Generating zero-knowledge proof [2/3]",
+    POOL_CREATION: "Preparing Pool Creation [3/3]",
   },
   STEP_2: {
     SWAP: "Confirm trade [2/3]",
-    LIQUIDITY: "Confirm liquidity transaction [2/3]", 
-    POOL_CREATION: "Confirm Pool Creation [2/3]",
+    LIQUIDITY: "Confirm liquidity transaction [2/3]",
+    POOL_CREATION: "Confirm Pool Creation [3/3]",
   },
   STEP_3: {
-    SWAP: "Verify slippage requirements [3/3]",
-    LIQUIDITY: "Processing liquidity transaction [3/3]",
+    SWAP: "Verify slippage requirements [1/3]",
+    LIQUIDITY: "Processing liquidity transaction [1/3]",
     POOL_CREATION: "Creating Pool [3/3]",
   },
 } as const;
@@ -47,7 +47,7 @@ export const ERROR_MESSAGES = {
 
 export const SUCCESS_MESSAGES = {
   SWAP_COMPLETE: "Swap complete",
-  LIQUIDITY_ADDED: "Liquidity Added Successfully", 
+  LIQUIDITY_ADDED: "Liquidity Added Successfully",
   POOL_CREATED: "Pool Created",
   PROPOSAL_CREATED: "Proposal created",
 } as const;

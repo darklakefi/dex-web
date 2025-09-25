@@ -76,6 +76,8 @@
   --shadow-sm: 4px 4px 0px 0px;
   --shadow-md: 8px 8px 0px 0px;
   --shadow-xl: 12px 12px 0px 0px;
+  --spacing-2xs: 348px;
+    --spacing-2xl: 624px;
 }
 
 @layer base {

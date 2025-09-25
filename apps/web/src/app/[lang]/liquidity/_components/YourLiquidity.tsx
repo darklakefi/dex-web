@@ -1,9 +1,12 @@
 "use client";
 import { tanstackClient } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas";
-import { sortSolanaAddresses } from "@dex-web/utils";
 import { Box, Button, Text } from "@dex-web/ui";
-import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
+import {
+  convertToDecimal,
+  numberFormatHelper,
+  sortSolanaAddresses,
+} from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -149,78 +152,87 @@ export function YourLiquidity({
   const pendingYield = "0.00";
 
   return (
-    <div className="mt-4 w-full max-w-md">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <Text.Heading className="text-green-200">Your Liquidity</Text.Heading>
-          <Text.Body2 className="text-green-300 uppercase">
-            All Positions (1)
-          </Text.Body2>
+    <div className="mt-4 flex w-full gap-1">
+      <div className="hidden size-9 md:block" />
+
+      <div className="flex w-full flex-col gap-1">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <Text.Heading className="text-green-200">
+              Your Liquidity
+            </Text.Heading>
+            <Text.Body2 className="text-green-300 uppercase">
+              All Positions (1)
+            </Text.Body2>
+          </div>
+
+          <Box className="flex flex-row">
+            <div className="flex flex-1 flex-col justify-between gap-2 border-green-500 border-r pr-2 only:border-r-0 only:pr-0">
+              <Text.Body2 className="text-green-200">
+                {numberFormatHelper({
+                  decimalScale: 5,
+                  trimTrailingZeros: true,
+                  value: liquidityCalculations.userTokenXAmount,
+                })}{" "}
+                {tokenXDetails?.symbol}
+              </Text.Body2>
+              <Text.Body2 className="text-green-200">
+                {numberFormatHelper({
+                  decimalScale: 5,
+                  trimTrailingZeros: true,
+                  value: liquidityCalculations.userTokenYAmount,
+                })}{" "}
+                {tokenYDetails?.symbol}
+              </Text.Body2>
+              <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
+              <Button
+                className="max-w-fit cursor-pointer"
+                onClick={() => {
+                  setIsWithdrawModalOpen(true);
+                  onWithdraw?.();
+                }}
+                variant="secondary"
+              >
+                WITHDRAW
+              </Button>
+            </div>
+
+            <div className="hidden flex-1 flex-col justify-between pl-2">
+              <Text.Body2 className="text-green-200">
+                ${pendingYield}
+              </Text.Body2>
+              <Text.Body2 className="mb-4 text-green-300">
+                PENDING YIELD
+              </Text.Body2>
+              <Button
+                className="max-w-fit cursor-pointer"
+                onClick={onClaim}
+                variant="secondary"
+              >
+                CLAIM
+              </Button>
+            </div>
+          </Box>
         </div>
 
-        <Box className="flex flex-row">
-          <div className="flex flex-1 flex-col justify-between gap-2 border-green-500 border-r pr-2 only:border-r-0 only:pr-0">
-            <Text.Body2 className="text-green-200">
-              {numberFormatHelper({
-                decimalScale: 5,
-                trimTrailingZeros: true,
-                value: liquidityCalculations.userTokenXAmount,
-              })}{" "}
-              {tokenXDetails?.symbol}
-            </Text.Body2>
-            <Text.Body2 className="text-green-200">
-              {numberFormatHelper({
-                decimalScale: 5,
-                trimTrailingZeros: true,
-                value: liquidityCalculations.userTokenYAmount,
-              })}{" "}
-              {tokenYDetails?.symbol}
-            </Text.Body2>
-            <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
-            <Button
-              className="max-w-fit cursor-pointer"
-              onClick={() => {
-                setIsWithdrawModalOpen(true);
-                onWithdraw?.();
-              }}
-              variant="secondary"
-            >
-              WITHDRAW
-            </Button>
-          </div>
-
-          <div className="hidden flex-1 flex-col justify-between pl-2">
-            <Text.Body2 className="text-green-200">${pendingYield}</Text.Body2>
-            <Text.Body2 className="mb-4 text-green-300">
-              PENDING YIELD
-            </Text.Body2>
-            <Button
-              className="max-w-fit cursor-pointer"
-              onClick={onClaim}
-              variant="secondary"
-            >
-              CLAIM
-            </Button>
-          </div>
-        </Box>
+        <WithdrawLiquidityModal
+          isOpen={isWithdrawModalOpen}
+          liquidityCalculations={{
+            totalUsdValue: liquidityCalculations.totalUsdValue,
+            userLpShare: liquidityCalculations.userLpShare,
+            userTokenXAmount: liquidityCalculations.userTokenXAmount,
+            userTokenYAmount: liquidityCalculations.userTokenYAmount,
+          }}
+          onClose={() => setIsWithdrawModalOpen(false)}
+          poolReserves={poolReserves}
+          tokenXAddress={tokenXAddress}
+          tokenXDetails={tokenXDetails}
+          tokenYAddress={tokenYAddress}
+          tokenYDetails={tokenYDetails}
+          userLiquidity={userLiquidity}
+        />
       </div>
-
-      <WithdrawLiquidityModal
-        isOpen={isWithdrawModalOpen}
-        liquidityCalculations={{
-          totalUsdValue: liquidityCalculations.totalUsdValue,
-          userLpShare: liquidityCalculations.userLpShare,
-          userTokenXAmount: liquidityCalculations.userTokenXAmount,
-          userTokenYAmount: liquidityCalculations.userTokenYAmount,
-        }}
-        onClose={() => setIsWithdrawModalOpen(false)}
-        poolReserves={poolReserves}
-        tokenXAddress={tokenXAddress}
-        tokenXDetails={tokenXDetails}
-        tokenYAddress={tokenYAddress}
-        tokenYDetails={tokenYDetails}
-        userLiquidity={userLiquidity}
-      />
+      <div className="hidden size-9 md:block" />
     </div>
   );
 }
