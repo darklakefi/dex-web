@@ -1,6 +1,6 @@
 "use server";
 
-import type { GetTokenMetadataListRequest } from "@dex-web/grpc-client";
+import type { GetTokenMetadataListRequest, TokenMetadata } from "@dex-web/grpc-client";
 import { tokensData, tokensDataMainnet } from "../../mocks/tokens.mock";
 import type {
   GetTokensInput,
@@ -17,7 +17,7 @@ export const getTokensHandler = async (
   const localTokensList =
     process.env.NEXT_PUBLIC_NETWORK === "2" ? tokensData : tokensDataMainnet;
 
-  let gatewayTokensList: any[] = [];
+  let gatewayTokensList: TokenMetadata[] = [];
 
   if (query) {
     const gatewayInput: GetTokenMetadataListRequest = {
@@ -31,11 +31,8 @@ export const getTokensHandler = async (
               },
             }
           : {
-              case: "symbolsList",
-              value: {
-                tokenSymbols: [query],
-                $typeName: "darklake.v1.TokenSymbolsList",
-              },
+              case: "substring",
+              value: query,
             },
       pageNumber: page,
       pageSize: limit,

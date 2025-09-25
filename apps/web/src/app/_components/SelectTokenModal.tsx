@@ -138,7 +138,7 @@ export function SelectTokenModal({
   const rawQuery = useStore(form.store, (state) => state.values.query);
   const isInitialLoad = rawQuery === "";
 
-  const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 300);
+  const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 500);
 
   const { data } = useSuspenseQuery(
     tanstackClient.tokens.getTokens.queryOptions({
