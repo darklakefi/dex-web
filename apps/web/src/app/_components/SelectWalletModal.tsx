@@ -5,24 +5,25 @@ import { useWallet, type Wallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
+import { useCallback, useEffect } from "react";
+import { twMerge } from "tailwind-merge";
 import { useAnalytics } from "../../hooks/useAnalytics";
 import { selectedTokensParsers } from "../_utils/searchParams";
-import { twMerge } from "tailwind-merge";
-import { useEffect } from "react";
 
 export function SelectWalletModal() {
-  const { wallets, wallet, select, publicKey, connecting, connected } = useWallet();
+  const { wallets, wallet, select, publicKey, connecting, connected } =
+    useWallet();
   const router = useRouter();
   const { trackWalletConnection } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
-	const handleSelect = async (
-		wallet: Wallet,
-		e: React.MouseEvent<HTMLButtonElement>,
-	) => {
-		e.preventDefault();
+  const handleSelect = async (
+    wallet: Wallet,
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    e.preventDefault();
 
     try {
       select(wallet.adapter.name);
@@ -36,11 +37,11 @@ export function SelectWalletModal() {
     }
   };
 
-	const handleClose = () => {
-		router.push(
-			`/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}&wallet=${wallet?.adapter.name}`,
-		);
-	};
+  const handleClose = useCallback(() => {
+    router.push(
+      `/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}&wallet=${wallet?.adapter.name}`,
+    );
+  }, [tokenAAddress, tokenBAddress, wallet, router]);
 
   useEffect(() => {
     if (connected && wallet && publicKey) {
@@ -51,18 +52,7 @@ export function SelectWalletModal() {
       });
       handleClose();
     }
-  }, [connected, wallet, publicKey]);
-
-  useEffect(() => {
-    if (connected && wallet && publicKey) {
-      trackWalletConnection({
-        address: publicKey.toBase58(),
-        success: true,
-        wallet: wallet.adapter.name,
-      });
-      handleClose();
-    }
-  }, [connected, wallet, publicKey]);
+  }, [connected, wallet, publicKey, trackWalletConnection, handleClose]);
 
   return (
     <Modal onClose={handleClose}>
@@ -81,19 +71,21 @@ export function SelectWalletModal() {
         </div>
         <div className="flex flex-col gap-4">
           {wallets.map((installedWallet) => {
-            const isConnecting = connecting && installedWallet.adapter.name === wallet?.adapter.name;
+            const isConnecting =
+              connecting &&
+              installedWallet.adapter.name === wallet?.adapter.name;
             return (
               <Button
                 className="inline-flex cursor-pointer justify-start gap-4"
+                disabled={isConnecting}
                 key={installedWallet.adapter.name}
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
                   handleSelect(installedWallet, e)
                 }
                 type="button"
                 variant="secondary"
-                disabled={isConnecting}
               >
-                <div className="flex justify-between w-full items-center">
+                <div className="flex w-full items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Image
                       alt={installedWallet.adapter.name}
@@ -104,12 +96,15 @@ export function SelectWalletModal() {
                     {installedWallet.adapter.name}
                   </div>
                   <Icon
-                    className={twMerge("size-4 animate-spin-pause text-inherit", isConnecting ? "block" : "hidden")}
+                    className={twMerge(
+                      "size-4 animate-spin-pause text-inherit",
+                      isConnecting ? "block" : "hidden",
+                    )}
                     name="loading-stripe"
                   />
                 </div>
               </Button>
-            )
+            );
           })}
         </div>
       </Box>
