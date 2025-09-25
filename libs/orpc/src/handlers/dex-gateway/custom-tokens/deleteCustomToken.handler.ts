@@ -10,7 +10,7 @@ export async function deleteCustomTokenHandler(
   input: DeleteCustomTokenInput,
 ): Promise<DeleteCustomTokenOutput> {
   try {
-    const client = getDexGatewayClient();
+    const client = await getDexGatewayClient();
     const res = await client.deleteCustomToken(input);
     return res as DeleteCustomTokenOutput;
   } catch (error) {

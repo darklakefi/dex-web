@@ -10,7 +10,7 @@ export async function editCustomTokenHandler(
   input: EditCustomTokenInput,
 ): Promise<EditCustomTokenOutput> {
   try {
-    const client = getDexGatewayClient();
+    const client = await getDexGatewayClient();
     const res = await client.editCustomToken(input);
     return res as EditCustomTokenOutput;
   } catch (error) {

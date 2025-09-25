@@ -10,7 +10,7 @@ export async function getCustomTokenHandler(
   input: GetCustomTokenInput,
 ): Promise<GetCustomTokenOutput> {
   try {
-    const client = getDexGatewayClient();
+    const client = await getDexGatewayClient();
     const res = await client.getCustomToken(input);
     return res as GetCustomTokenOutput;
   } catch (error) {
