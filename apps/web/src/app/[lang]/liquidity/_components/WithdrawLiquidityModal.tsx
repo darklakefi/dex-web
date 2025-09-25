@@ -404,17 +404,17 @@ export function WithdrawLiquidityModal({
 
 	if (!isOpen) return null;
 
-	return (
-		<Modal onClose={onClose}>
-			<Box className="fixed right-0 flex h-full max-h-full w-full max-w-sm drop-shadow-xl">
-				<div className="mb-6 flex justify-between border-green-600 border-b pb-3">
-					<Text className="font-bold text-2xl" variant="heading">
-						WITHDRAW LIQUIDITY
-					</Text>
-					<button className="cursor-pointer" onClick={onClose} type="button">
-						<Icon className="size-6" name="times" />
-					</button>
-				</div>
+  return (
+    <Modal onClose={onClose}>
+      <Box className="fixed right-0 flex h-full max-h-full w-full max-w-md drop-shadow-xl">
+        <div className="mb-6 flex justify-between border-green-600 border-b pb-3">
+          <Text className="font-bold text-2xl" variant="heading">
+            WITHDRAW LIQUIDITY
+          </Text>
+          <button className="cursor-pointer" onClick={onClose} type="button">
+            <Icon className="size-6" name="times" />
+          </button>
+        </div>
 
 				<div className="flex flex-col gap-6">
 					<div>

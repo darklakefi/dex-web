@@ -13,12 +13,13 @@ import { client, tanstackClient } from "@dex-web/orpc";
 import type { CreateLiquidityTransactionInput } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import {
-  convertToDecimal,
-  formatAmountInput,
-  parseAmount,
-  parseAmountBigNumber,
-  sortSolanaAddresses,
-  validateHasSufficientBalance,
+	convertToDecimal,
+	formatAmountInput,
+	numberFormatHelper,
+	parseAmount,
+	parseAmountBigNumber,
+	sortSolanaAddresses,
+	validateHasSufficientBalance,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
@@ -216,7 +217,15 @@ export function LiquidityForm() {
       });
 
 			const successMessage = !isSquadsX(wallet)
-				? `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenADetails?.symbol} + ${form.state.values.tokenBAmount} ${tokenBDetails?.symbol}`
+				? `ADDED LIQUIDITY: ${numberFormatHelper({
+          decimalScale: 5,
+          trimTrailingZeros: true,
+          value: form.state.values.tokenAAmount,
+        })} ${tokenADetails?.symbol} + ${numberFormatHelper({
+          decimalScale: 5,
+          trimTrailingZeros: true,
+          value: form.state.values.tokenBAmount,
+        })} ${tokenBDetails?.symbol}`
 				: undefined;
 
       toasts.showSuccessToast(successMessage);

@@ -212,7 +212,15 @@ export function CreatePoolForm() {
       });
 
 			const successMessage = !isSquadsX(wallet)
-				? `CREATED POOL: ${form.state.values.tokenAAmount} ${tokenADetails?.symbol} + ${form.state.values.tokenBAmount} ${tokenBDetails?.symbol}`
+				? `CREATED POOL: ${numberFormatHelper({
+          decimalScale: 5,
+          trimTrailingZeros: true,
+          value: form.state.values.tokenAAmount,
+        })} ${tokenADetails?.symbol} + ${numberFormatHelper({
+          decimalScale: 5,
+          trimTrailingZeros: true,
+          value: form.state.values.tokenBAmount,
+        })} ${tokenBDetails?.symbol}`
 				: undefined;
 
       toasts.showSuccessToast(successMessage);

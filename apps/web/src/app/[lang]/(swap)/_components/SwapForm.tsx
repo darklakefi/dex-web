@@ -187,6 +187,18 @@ export function SwapForm() {
       toasts.showErrorToast(`Trade ${result.status}!`, {
         trackingId: _trackDetails.trackingId,
       });
+			swapState.reset();
+			const successMessage = isSquadsX(wallet)
+				? undefined
+				: `SWAPPED ${numberFormatHelper({
+          decimalScale: 5,
+          trimTrailingZeros: true,
+          value: form.state.values.tokenAAmount,
+        })} ${tokenBDetails?.symbol} FOR ${numberFormatHelper({
+          decimalScale: 5,
+          trimTrailingZeros: true,
+          value: form.state.values.tokenBAmount,
+        })} ${tokenADetails?.symbol}. protected from MEV attacks.`;
 
       trackFailed({
         fromAmount: sellAmount,
