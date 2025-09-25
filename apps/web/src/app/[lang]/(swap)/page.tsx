@@ -22,7 +22,7 @@ export default async function Page({
 
   return (
     <div className="flex justify-center gap-12">
-      <div className="flex w-full max-w-xl flex-col items-center justify-center">
+      <div className="flex w-full max-w-2xl flex-col items-center justify-center">
         <section className="hidden w-full items-start gap-1 md:flex">
           <div className="size-9" />
           <Box className="mb-0 bg-green-800 pb-0">
@@ -50,7 +50,7 @@ export default async function Page({
         <SwapForm />
         <SwapTransactionHistory />
       </div>
-      <div className="hidden max-w-xs md:block">
+      <div className="hidden max-w-2xs md:block">
         <FeaturesAndTrendingPoolPanel />
       </div>
     </div>
