@@ -1,4 +1,4 @@
-import BigNumber from "bignumber.js";
+
 import { convertToDecimal } from "../number";
 import { formatAmountInput, parseAmountBigNumber } from "./amountUtils";
 

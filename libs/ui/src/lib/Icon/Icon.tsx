@@ -15,6 +15,7 @@ import InfoFilledIcon from "./icons/info-circle-solid.svg";
 import LoadingStripeIcon from "./icons/loading-stripe.svg";
 import LogoLgIcon from "./icons/logo-lg.svg";
 import LogoSmIcon from "./icons/logo-sm.svg";
+import LogoutIcon from "./icons/logout.svg";
 import PhantomWalletIcon from "./icons/phantom-icon.svg";
 import PlayIcon from "./icons/play.svg";
 import PlusIcon from "./icons/plus.svg";
@@ -22,6 +23,7 @@ import PlusCircleIcon from "./icons/plus-circle.svg";
 import RefreshIcon from "./icons/refresh.svg";
 import SearchIcon from "./icons/search.svg";
 import SeedlingsIcon from "./icons/seedlings.svg";
+import ShareIcon from "./icons/share.svg";
 import SolflareWalletIcon from "./icons/solflare-icon.svg";
 import SwapIcon from "./icons/swap.svg";
 import TelegramIcon from "./icons/telegram.svg";
@@ -29,76 +31,79 @@ import TimesIcon from "./icons/times.svg";
 import TimesFilledIcon from "./icons/times-filled.svg";
 import TrendingIcon from "./icons/trending.svg";
 import XIcon from "./icons/x.svg";
-
 export type IconName =
-  | "analytics"
-  | "refresh"
-  | "cog"
-  | "chevron-down"
-  | "check-filled"
-  | "external-link"
-  | "exclamation"
-  | "github"
-  | "crown"
-  | "fire"
-  | "info"
-  | "info-filled"
-  | "logo-sm"
-  | "logo-lg"
-  | "play"
-  | "seedlings"
-  | "telegram"
-  | "times"
-  | "times-filled"
-  | "trending"
-  | "loading-stripe"
-  | "search"
-  | "x"
-  | "phantom"
-  | "solflare"
-  | "backpack"
-  | "swap"
-  | "plus"
-  | "plus-circle";
+	| "analytics"
+	| "backpack"
+	| "check-filled"
+	| "chevron-down"
+	| "cog"
+	| "crown"
+	| "exclamation"
+	| "external-link"
+	| "fire"
+	| "github"
+	| "info-filled"
+	| "info"
+	| "logout"
+	| "loading-stripe"
+	| "logo-lg"
+	| "logo-sm"
+	| "phantom"
+	| "play"
+	| "plus-circle"
+	| "plus"
+	| "refresh"
+	| "search"
+	| "seedlings"
+	| "share"
+	| "solflare"
+	| "swap"
+	| "telegram"
+	| "times-filled"
+	| "times"
+	| "trending"
+	| "x";
 
 const iconComponents = {
-  analytics: AnalyticsIcon,
-  backpack: BackpackWalletIcon,
-  "check-filled": CheckFilledIcon,
-  "chevron-down": ChevronDownIcon,
-  cog: CogIcon,
-  crown: CrownIcon,
-  exclamation: ExclamationIcon,
-  "external-link": ExternalLinkIcon,
-  fire: FireIcon,
-  github: GithubIcon,
-  info: InfoIcon,
-  "info-filled": InfoFilledIcon,
-  "loading-stripe": LoadingStripeIcon,
-  "logo-lg": LogoLgIcon,
-  "logo-sm": LogoSmIcon,
-  phantom: PhantomWalletIcon,
-  play: PlayIcon,
-  plus: PlusIcon,
-  "plus-circle": PlusCircleIcon,
-  refresh: RefreshIcon,
-  search: SearchIcon,
-  seedlings: SeedlingsIcon,
-  solflare: SolflareWalletIcon,
-  swap: SwapIcon,
-  telegram: TelegramIcon,
-  times: TimesIcon,
-  "times-filled": TimesFilledIcon,
-  trending: TrendingIcon,
-  x: XIcon,
+	"check-filled": CheckFilledIcon,
+	"chevron-down": ChevronDownIcon,
+	"external-link": ExternalLinkIcon,
+	"info-filled": InfoFilledIcon,
+	"loading-stripe": LoadingStripeIcon,
+	"logo-lg": LogoLgIcon,
+	"logo-sm": LogoSmIcon,
+	"plus-circle": PlusCircleIcon,
+	"times-filled": TimesFilledIcon,
+	analytics: AnalyticsIcon,
+	backpack: BackpackWalletIcon,
+	cog: CogIcon,
+	crown: CrownIcon,
+	exclamation: ExclamationIcon,
+	fire: FireIcon,
+	github: GithubIcon,
+	info: InfoIcon,
+	logout: LogoutIcon,
+	phantom: PhantomWalletIcon,
+	play: PlayIcon,
+	plus: PlusIcon,
+	refresh: RefreshIcon,
+	search: SearchIcon,
+	seedlings: SeedlingsIcon,
+	share: ShareIcon,
+	solflare: SolflareWalletIcon,
+	swap: SwapIcon,
+	telegram: TelegramIcon,
+	times: TimesIcon,
+	trending: TrendingIcon,
+	x: XIcon,
 } as const satisfies Record<
-  IconName,
-  React.ComponentType<React.SVGProps<SVGSVGElement>>
+	IconName,
+	React.ComponentType<React.SVGProps<SVGSVGElement>>
 >;
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
-  name: IconName;
-  title?: string;
+	name: IconName;
+	title?: string;
 }
 
 /**
@@ -107,10 +112,10 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
  * This is a server component that supports tree shaking.
  */
 export function Icon({ name, title, className, ...props }: IconProps) {
-  const IconComponent = iconComponents[name];
-  if (!IconComponent) return null;
+	const IconComponent = iconComponents[name];
+	if (!IconComponent) return null;
 
-  const classNames = twMerge("size-6 text-current fill-current", className);
+	const classNames = twMerge("size-6 text-current fill-current", className);
 
-  return <IconComponent className={classNames} role="img" {...props} />;
+	return <IconComponent className={classNames} role="img" {...props} />;
 }

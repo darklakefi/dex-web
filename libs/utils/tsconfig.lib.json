@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "outDir": "../../dist/libs/utils",
-    "types": ["node"],
-    "jsx": "react-jsx"
+    "types": ["node"]
   },
   "exclude": [
     "node_modules",

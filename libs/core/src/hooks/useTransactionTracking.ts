@@ -9,7 +9,6 @@ import {
   type LiquidityTrackingParams,
   type TransactionTracker,
   type TransactionStatus,
-  type ErrorTrackingParams
 } from "../utils/analyticsHelpers";
 
 export interface UseSwapTrackingParams {

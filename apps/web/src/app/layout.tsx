@@ -8,6 +8,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { AppFooter } from "./_components/AppFooter";
 import { AppHeader } from "./_components/AppHeader";
 import { GeolocationAwareDisclaimerProvider } from "./_components/GeolocationAware";
+import { ReferralCodeProvider } from "./_components/ReferralCodeProvider";
 
 const bitsumishiRegular = localFont({
   src: "./_fonts/bitsumishi-regular.woff2",
@@ -39,6 +40,7 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+
   return (
     <html
       className={`${bitsumishiRegular.variable} ${classicConsoleNeue.variable} font-sans antialiased`}
@@ -47,30 +49,32 @@ export default async function RootLayout({
       <body className="bg-green-900">
         <NextIntlClientProvider>
           <Providers>
-            <GeolocationAwareDisclaimerProvider />
-            <Toaster expand={true} position="top-right" visibleToasts={5} />
-            <PageLayout
-              backgroundImageUrl={backgroundImage.src}
-              footer={<AppFooter />}
-              header={<AppHeader />}
-            >
-              <Box className="flex w-full flex-col items-center justify-center gap-5 px-5 py-10 text-center md:hidden">
-                <Text.Heading className="text-3xl text-green-300">
-                  Thanks for joining our early access!
-                </Text.Heading>
-                <div className="flex flex-col">
-                  <Text.Body2 className="text-green-300 text-lg">
-                    We're optimizing mobile and it's coming soon.In the
-                    meantime,
-                  </Text.Body2>
-                  <Text.Body2 className="text-green-200 text-lg">
-                    please visit us on desktop.
-                  </Text.Body2>
-                </div>
-              </Box>
-              <div className="hidden md:block">{children}</div>
-            </PageLayout>
-            {modal}
+            <ReferralCodeProvider>
+              <GeolocationAwareDisclaimerProvider />
+              <Toaster expand={true} position="top-right" visibleToasts={5} />
+              <PageLayout
+                backgroundImageUrl={backgroundImage.src}
+                footer={<AppFooter />}
+                header={<AppHeader />}
+              >
+                <Box className="flex w-full flex-col items-center justify-center gap-5 px-5 py-10 text-center md:hidden">
+                  <Text.Heading className="text-3xl text-green-300">
+                    Thanks for joining our early access!
+                  </Text.Heading>
+                  <div className="flex flex-col">
+                    <Text.Body2 className="text-green-300 text-lg">
+                      We're optimizing mobile and it's coming soon.In the
+                      meantime,
+                    </Text.Body2>
+                    <Text.Body2 className="text-green-200 text-lg">
+                      please visit us on desktop.
+                    </Text.Body2>
+                  </div>
+                </Box>
+                <div className="hidden md:block">{children}</div>
+              </PageLayout>
+              {modal}
+            </ReferralCodeProvider>
           </Providers>
         </NextIntlClientProvider>
       </body>
