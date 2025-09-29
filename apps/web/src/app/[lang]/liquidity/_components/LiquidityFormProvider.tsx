@@ -617,7 +617,16 @@ export function LiquidityFormProvider({
 
   const dataValue = useMemo(
     () => ({
-      poolDetails: poolDataResult.data,
+      poolDetails: poolDataResult.data ? {
+        poolAddress: undefined,
+        tokenXMint: poolDataResult.data.tokenXMint,
+        tokenYMint: poolDataResult.data.tokenYMint,
+        tokenXReserve: poolDataResult.data.tokenXReserve ? parseFloat(poolDataResult.data.tokenXReserve) : undefined,
+        tokenYReserve: poolDataResult.data.tokenYReserve ? parseFloat(poolDataResult.data.tokenYReserve) : undefined,
+        totalSupply: poolDataResult.data.lpSupply ? parseFloat(poolDataResult.data.lpSupply) : undefined,
+        fee: poolDataResult.data.fee ? parseFloat(poolDataResult.data.fee) : undefined,
+        price: undefined,
+      } : null,
       tokenAAddress: finalTokenAAddress,
       tokenAccountsData,
       tokenBAddress: finalTokenBAddress,

@@ -50,7 +50,7 @@ export function PoolDataProvider({
   });
 
   const value: PoolDataContextValue = {
-    poolDetails: poolDataResult.data || null,
+    poolDetails: poolDataResult.data as any,
     tokenAccountsData,
     tokenXMint,
     tokenYMint,
