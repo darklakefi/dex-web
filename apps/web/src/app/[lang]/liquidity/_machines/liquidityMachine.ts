@@ -67,10 +67,17 @@ export const liquidityMachine = setup({
             sellTokenAccount: ({ event }) => event.sellAccount,
           }),
         },
+        START_CALCULATION: {
+          target: "calculating",
+          actions: assign({
+            isCalculating: true,
+          }),
+        },
         CALCULATE: {
           target: "calculating",
           actions: assign({
             formData: ({ event }) => event.data,
+            isCalculating: true,
           }),
         },
         SUBMIT: {
@@ -90,16 +97,24 @@ export const liquidityMachine = setup({
           target: 'idle',
           actions: assign({
             error: null,
+            isCalculating: false,
           }),
         },
         onError: {
           target: 'error',
           actions: assign({
             error: ({ event }) => String(event.error),
+            isCalculating: false,
           }),
         },
       },
       on: {
+        FINISH_CALCULATION: {
+          target: "idle",
+          actions: assign({
+            isCalculating: false,
+          }),
+        },
         SUBMIT: {
           target: "submitting",
         },
@@ -156,6 +171,7 @@ export const liquidityMachine = setup({
             error: null,
             transactionSignature: null,
             liquidityStep: 0,
+            isCalculating: false,
           }),
         },
       },
@@ -171,6 +187,7 @@ export const liquidityMachine = setup({
             error: null,
             transactionSignature: null,
             liquidityStep: 0,
+            isCalculating: false,
           }),
         },
       },
