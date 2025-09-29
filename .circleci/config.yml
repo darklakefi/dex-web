@@ -93,6 +93,9 @@ jobs:
     resource_class: large
     steps:
       - checkout
+      - run:
+          name: Start Nx Cloud CI run with task distribution
+          command: npx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
       - setup
       - setup-nx
       - restore-nx-cache
@@ -104,8 +107,12 @@ jobs:
               echo "✅ No affected projects found, skipping lint and typecheck"
               exit 0
             fi
-            NODE_OPTIONS="--max-old-space-size=6144" pnpm exec nx affected --base=${NX_BASE:-origin/develop} -t lint:ci,typecheck
+            NODE_OPTIONS="--max-old-space-size=6144" npx nx-cloud record -- pnpm exec nx affected --base=${NX_BASE:-origin/develop} -t lint:ci,typecheck
       - save-nx-cache
+      - run:
+          name: Fix CI failures
+          command: npx nx-cloud fix-ci
+          when: always
 
   test:
     docker:
@@ -128,8 +135,12 @@ jobs:
             fi
 
             echo "$AFFECTED_PROJECTS" | circleci tests split --split-by=timings | \
-            pnpm exec nx run-many --target=test --parallel --projects=$(xargs)
+            npx nx-cloud record -- pnpm exec nx run-many --target=test --parallel --projects=$(xargs)
       - save-nx-cache
+      - run:
+          name: Fix CI failures
+          command: npx nx-cloud fix-ci
+          when: always
       - store_test_results:
           path: test-results
       - store_artifacts:
@@ -153,8 +164,12 @@ jobs:
               echo "✅ No affected projects with e2e tests found, skipping"
               exit 0
             fi
-            pnpm exec nx affected --base=${NX_BASE:-origin/develop} --target=e2e --parallel
+            npx nx-cloud record -- pnpm exec nx affected --base=${NX_BASE:-origin/develop} --target=e2e --parallel
       - save-nx-cache
+      - run:
+          name: Fix CI failures
+          command: npx nx-cloud fix-ci
+          when: always
       - store_test_results:
           path: dist/apps/web-e2e/junit.xml
       - store_artifacts:

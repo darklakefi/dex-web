@@ -1,7 +1,7 @@
 import type { TokenAccountsData } from "@dex-web/core";
-import type { ReactNode } from "react";
 import type { FormApi } from "@tanstack/react-form";
-import type { PoolDetails, LiquidityFormValues } from "./liquidity.types";
+import type { ReactNode } from "react";
+import type { LiquidityFormValues, PoolDetails } from "./liquidity.types";
 
 export interface LiquidityProviderProps {
   children: ReactNode;
