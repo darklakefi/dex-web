@@ -1,7 +1,8 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import type { QueryFunctionContext } from "@tanstack/react-query";
+import type { QueryFunctionContext, } from "@tanstack/react-query";
+import { QueryClient as QueryClientClass } from "@tanstack/react-query";
 import { tanstackClient } from "@dex-web/orpc";
 import { useStreamingQuery } from "./useStreamingQuery";
 import { useServerSentEvents } from "./useServerSentEvents";
@@ -96,7 +97,7 @@ function useTokenAccountStream({
     if (!mint || !ownerAddress) return null;
 
     const context: QueryFunctionContext = {
-      client: {} as any, 
+      client: new QueryClientClass(), 
       queryKey,
       signal: new AbortController().signal,
       meta: undefined,

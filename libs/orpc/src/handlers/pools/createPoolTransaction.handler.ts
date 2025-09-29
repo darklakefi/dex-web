@@ -210,7 +210,6 @@ export async function createPoolTransactionHandler(
 ): Promise<CreatePoolTransactionOutput> {
   const { user, tokenXMint, tokenYMint, depositAmountX, depositAmountY } =
     input;
-  console.log("input", input);
 
 	const helius = getHelius();
 	const connection = helius.connection;

@@ -24,10 +24,10 @@ class SSEManager {
 	private connections = new Map<string, SSEConnection>();
 	private subscribers = new Map<string, Set<QueryKey>>();
 
-	createConnection(
+	createConnection<TData>(
 		endpoint: string,
 		queryKey: QueryKey,
-		onMessage: (data: any) => void,
+		onMessage: (data: TData) => void,
 		options: SSEOptions = {},
 	): () => void {
 		const {
@@ -37,7 +37,7 @@ class SSEManager {
 		} = options;
 
 		const connectionKey = this.getConnectionKey(endpoint, priority);
-		const queryKeyString = JSON.stringify(queryKey);
+		const _queryKeyString = JSON.stringify(queryKey);
 
 		if (!this.subscribers.has(connectionKey)) {
 			this.subscribers.set(connectionKey, new Set());
@@ -179,7 +179,7 @@ export function useServerSentEvents<TData>(
 		queryKey: [...queryKey, "sse"],
 		queryFn: async (): Promise<TData | null> => {
 			return new Promise((resolve) => {
-				const cleanup = sseManager.createConnection(
+				const cleanup = sseManager.createConnection<TData>(
 					endpoint,
 					queryKey,
 					(data: TData) => {

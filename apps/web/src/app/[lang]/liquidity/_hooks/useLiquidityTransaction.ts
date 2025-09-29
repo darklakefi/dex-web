@@ -95,7 +95,7 @@ export function useLiquidityTransaction({
       });
       throw contextualError;
     }
-  }, []);
+  }, [_onError]);
 
   return {
     executeTransaction,

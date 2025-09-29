@@ -192,7 +192,7 @@ export function LiquidityTokenInputs({
               onChangeListenTo: [FORM_FIELD_NAMES.TOKEN_A_AMOUNT],
             }}
           >
-            {(field: any) => (
+            {(field) => (
               <FormFieldset
                 aria-describedby={
                   field.state.meta.errors.length > 0
@@ -271,7 +271,7 @@ export function LiquidityTokenInputs({
               onChangeListenTo: [FORM_FIELD_NAMES.TOKEN_B_AMOUNT],
             }}
           >
-            {(field: any) => (
+            {(field) => (
               <FormFieldset
                 aria-describedby={
                   field.state.meta.errors.length > 0

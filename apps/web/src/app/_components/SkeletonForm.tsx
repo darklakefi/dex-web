@@ -11,8 +11,8 @@ interface SkeletonFormProps {
 }
 
 export function SkeletonForm({
-  testId = "skeleton-form",
-  "aria-label": ariaLabel = "Loading form",
+  testId: _testId = "skeleton-form",
+  "aria-label": _ariaLabel = "Loading form",
   type = "liquidity"
 }: SkeletonFormProps = {}) {
   return (

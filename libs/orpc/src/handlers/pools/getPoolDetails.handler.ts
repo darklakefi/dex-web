@@ -40,7 +40,6 @@ export async function getPoolDetailsHandler(
         pool = await savePoolToLocalData(poolOnChain);
       }
     } catch (_error) {
-      console.log("Pool not found on chain, returning null");
     }
   }
 

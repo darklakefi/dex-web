@@ -86,7 +86,7 @@ export const TEST_SCENARIOS = {
   },
 } as const;
 
-export const expectValidTransactionPayload = (payload: any) => {
+export const expectValidTransactionPayload = (payload: Record<string, unknown>) => {
   expect(payload).toHaveProperty('maxAmountX');
   expect(payload).toHaveProperty('maxAmountY');
   expect(payload).toHaveProperty('slippage');
@@ -102,7 +102,7 @@ export const expectValidTransactionPayload = (payload: any) => {
   expect(typeof payload.user).toBe('string');
 };
 
-export const expectValidTokenAccount = (tokenAccount: any) => {
+export const expectValidTokenAccount = (tokenAccount: Record<string, unknown>) => {
   expect(tokenAccount).toHaveProperty('address');
   expect(tokenAccount).toHaveProperty('amount');
   expect(tokenAccount).toHaveProperty('decimals');
@@ -128,7 +128,7 @@ export const mockUtils = {
   }),
   formatAmountInput: (value: string) => value,
   convertToDecimal: (amount: number, decimals: number) => amount / 10 ** decimals,
-  validateHasSufficientBalance: ({ amount, tokenAccount }: { amount: string; tokenAccount: any }) => {
+  validateHasSufficientBalance: ({ amount, tokenAccount }: { amount: string; tokenAccount: { amount: number; decimals: number } }) => {
     if (!tokenAccount) return 'No token account';
     const numericAmount = Number(amount);
     const balance = tokenAccount.amount / 10 ** tokenAccount.decimals;

@@ -17,6 +17,7 @@ export function SkeletonWalletButton({
 }: SkeletonWalletButtonProps = {}) {
   return (
     <button 
+      type="button"
       className={className}
       disabled
       aria-label={ariaLabel}

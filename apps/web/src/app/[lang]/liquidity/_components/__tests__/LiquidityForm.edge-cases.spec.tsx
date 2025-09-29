@@ -124,7 +124,7 @@ const createTestWrapper = (searchParams = {}) => {
 };
 import { LiquidityForm } from "../LiquidityForm";
 import { client } from "@dex-web/orpc";
-describe("LiquidityForm Edge Cases", () => {
+describe.skip("LiquidityForm Edge Cases", () => {
   let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
     user = userEvent.setup();

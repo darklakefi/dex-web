@@ -10,8 +10,8 @@ interface SkeletonTokenInputProps {
 }
 
 export function SkeletonTokenInput({
-  testId = "skeleton-token-input",
-  "aria-label": ariaLabel = "Loading token input",
+  testId: _testId = "skeleton-token-input",
+  "aria-label": _ariaLabel = "Loading token input",
   label = "LOADING"
 }: SkeletonTokenInputProps = {}) {
   return (

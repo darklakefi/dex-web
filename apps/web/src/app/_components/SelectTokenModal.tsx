@@ -115,22 +115,41 @@ export function SelectTokenModal({
     const baseReturn = currentFrom || `/${returnUrl}`;
     const selectedTokenAddress = selectedToken.address;
     setRecentSearches(selectedToken);
+    
     if (type === "buy") {
       const sellAddress =
         selectedTokenAddress === tokenBAddress ? tokenAAddress : tokenBAddress;
-      const urlWithParams = serialize(baseReturn, {
-        tokenAAddress: selectedTokenAddress,
-        tokenBAddress: sellAddress,
-      });
-      router.push(urlWithParams as RouteString);
+      
+      if (currentFrom) {
+        const urlWithParams = serialize(currentFrom, {
+          tokenAAddress: selectedTokenAddress,
+          tokenBAddress: sellAddress,
+        });
+        router.push(urlWithParams as RouteString);
+      } else {
+        const urlWithParams = serialize(baseReturn, {
+          tokenAAddress: selectedTokenAddress,
+          tokenBAddress: sellAddress,
+        });
+        router.push(urlWithParams as RouteString);
+      }
     } else {
       const buyAddress =
         selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
-      const urlWithParams = serialize(baseReturn, {
-        tokenAAddress: buyAddress,
-        tokenBAddress: selectedTokenAddress,
-      });
-      router.push(urlWithParams as RouteString);
+      
+      if (currentFrom) {
+        const urlWithParams = serialize(currentFrom, {
+          tokenAAddress: buyAddress,
+          tokenBAddress: selectedTokenAddress,
+        });
+        router.push(urlWithParams as RouteString);
+      } else {
+        const urlWithParams = serialize(baseReturn, {
+          tokenAAddress: buyAddress,
+          tokenBAddress: selectedTokenAddress,
+        });
+        router.push(urlWithParams as RouteString);
+      }
     }
   };
 

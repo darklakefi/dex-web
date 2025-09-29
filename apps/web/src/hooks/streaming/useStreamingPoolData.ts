@@ -38,7 +38,7 @@ export function useStreamingPoolData({
       meta: undefined 
     });
 
-    return transformToStreamData(result);
+    return result ? transformToStreamData(result) : null;
   };
 
   const sseQuery = useServerSentEvents<PoolStreamData>(
@@ -59,7 +59,7 @@ export function useStreamingPoolData({
     }
   );
 
-  const webSocketQuery = useWebSocketPoolData({
+  const _webSocketQuery = useWebSocketPoolData({
     poolKey,
     queryKey,
     tokenXMint,
@@ -86,10 +86,10 @@ export function useStreamingPoolData({
 
 
 function useWebSocketPoolData({
-  poolKey,
+  poolKey: _poolKey,
   queryKey,
-  tokenXMint,
-  tokenYMint,
+  tokenXMint: _tokenXMint,
+  tokenYMint: _tokenYMint,
   enabled,
   priority,
 }: {
@@ -100,7 +100,7 @@ function useWebSocketPoolData({
   enabled: boolean;
   priority: DeFiStreamConfig["priority"];
 }) {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   return useStreamingQuery(
     [...queryKey, "websocket"],
@@ -120,12 +120,12 @@ function useWebSocketPoolData({
 }
 
 
-function transformToStreamData(poolDetails: any): PoolStreamData {
+function transformToStreamData(poolDetails: Record<string, unknown>): PoolStreamData {
   return {
-    tokenXReserve: poolDetails?.tokenXReserve || "0",
-    tokenYReserve: poolDetails?.tokenYReserve || "0",
-    lpSupply: poolDetails?.lpSupply || "0",
-    fee: poolDetails?.fee || "0",
+    tokenXReserve: String(poolDetails?.tokenXReserve || "0"),
+    tokenYReserve: String(poolDetails?.tokenYReserve || "0"),
+    lpSupply: String(poolDetails?.lpSupply || "0"),
+    fee: String(poolDetails?.fee || "0"),
     lastUpdate: Date.now(),
   };
 }

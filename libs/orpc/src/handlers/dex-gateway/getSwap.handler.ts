@@ -16,14 +16,6 @@ export async function getSwapHandler(input: CreateUnsignedTransactionRequest) {
 			minOut: minOutRaw,
 		};
 
-		console.log("Creating unsigned transaction with:", {
-			trackingId: transactionRequest.trackingId,
-			amountIn: transactionRequest.amountIn.toString(),
-			minOut: transactionRequest.minOut.toString(),
-			tokenMintX: transactionRequest.tokenMintX,
-			tokenMintY: transactionRequest.tokenMintY,
-		});
-
 		const swapResponse = await (await grpcClient).createUnsignedTransaction(
 			transactionRequest,
 		);

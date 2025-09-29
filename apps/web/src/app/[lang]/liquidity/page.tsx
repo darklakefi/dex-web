@@ -33,21 +33,25 @@ export default async function Page({
   ];
 
   if (parsedSearchParams.tokenAAddress && parsedSearchParams.tokenBAddress) {
-    const sortedTokens = sortSolanaAddresses(
-      parsedSearchParams.tokenAAddress,
-      parsedSearchParams.tokenBAddress,
-    );
+    try {
+      const sortedTokens = sortSolanaAddresses(
+        parsedSearchParams.tokenAAddress,
+        parsedSearchParams.tokenBAddress,
+      );
 
-    prefetchPromises.push(
-      queryClient.prefetchQuery(
-        tanstackClient.pools.getPoolDetails.queryOptions({
-          input: {
-            tokenXMint: sortedTokens.tokenXAddress,
-            tokenYMint: sortedTokens.tokenYAddress,
-          },
-        }),
-      ),
-    );
+      prefetchPromises.push(
+        queryClient.prefetchQuery(
+          tanstackClient.pools.getPoolDetails.queryOptions({
+            input: {
+              tokenXMint: sortedTokens.tokenXAddress,
+              tokenYMint: sortedTokens.tokenYAddress,
+            },
+          }),
+        ),
+      );
+    } catch (error) {
+      console.warn('Invalid token addresses for prefetch:', error);
+    }
   }
 
   await Promise.all(prefetchPromises);

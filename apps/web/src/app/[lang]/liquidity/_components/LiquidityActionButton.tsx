@@ -46,7 +46,7 @@ export function LiquidityActionButton({
   onSubmit,
 }: LiquidityActionButtonProps) {
   const router = useRouter();
-  const { state, isCalculating, form } = useLiquidityFormState();
+  const { isCalculating, form } = useLiquidityFormState();
 
   const formValues = useStore(
     form.store,

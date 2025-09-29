@@ -45,5 +45,5 @@ export function validateWalletConnection(
   walletAdapter: unknown
 ): void {
   validateRequired(publicKey, "Wallet public key");
-  validateRequired((walletAdapter as any)?.wallet, "Wallet adapter");
+  validateRequired((walletAdapter as { wallet?: unknown })?.wallet, "Wallet adapter");
 }

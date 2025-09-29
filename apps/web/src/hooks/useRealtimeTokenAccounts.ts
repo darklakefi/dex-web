@@ -2,7 +2,7 @@
 
 import { useTokenAccounts, type UseTokenAccountsReturn, type TokenAccountsData } from "@dex-web/core";
 import type { PublicKey } from "@solana/web3.js";
-import type { QueryFunctionContext } from "@tanstack/react-query";
+import { QueryClient as QueryClientClass } from "@tanstack/react-query";
 import { tanstackClient } from "@dex-web/orpc";
 import { usePollingQuery } from "./usePollingQuery";
 
@@ -42,7 +42,7 @@ export function useRealtimeTokenAccounts({
         },
       });
       return queryOptions.queryFn({
-        client: {} as any,
+        client: new QueryClientClass(),
         queryKey: queryOptions.queryKey,
         signal: new AbortController().signal,
         meta: undefined,
@@ -66,7 +66,7 @@ export function useRealtimeTokenAccounts({
         },
       });
       return queryOptions.queryFn({
-        client: {} as any,
+        client: new QueryClientClass(),
         queryKey: queryOptions.queryKey,
         signal: new AbortController().signal,
         meta: undefined,

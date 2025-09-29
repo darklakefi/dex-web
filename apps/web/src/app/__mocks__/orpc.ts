@@ -85,7 +85,7 @@ vi.mock('@dex-web/utils', () => ({
   }),
   convertToDecimal: vi.fn((amount, decimals) => {
     if (typeof amount === 'number' && typeof decimals === 'number') {
-      return amount / Math.pow(10, decimals);
+      return amount / 10 ** decimals;
     }
     return 0;
   }),

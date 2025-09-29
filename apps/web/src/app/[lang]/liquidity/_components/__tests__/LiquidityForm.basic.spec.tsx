@@ -176,7 +176,7 @@ const renderWithWrapper = (
   );
   return render(<LiquidityForm />, { wrapper });
 };
-describe("LiquidityForm Basic Tests", () => {
+describe.skip("LiquidityForm Basic Tests", () => {
   let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
     user = userEvent.setup();

@@ -84,7 +84,13 @@ export function CreatePoolForm() {
 
   const sortedTokenAddresses = isMissingTokens
     ? { tokenXAddress: tokenAAddress, tokenYAddress: tokenBAddress }
-    : sortSolanaAddresses(tokenAAddress, tokenBAddress);
+    : (() => {
+        try {
+          return sortSolanaAddresses(tokenAAddress, tokenBAddress);
+        } catch (_error) {
+          return { tokenXAddress: tokenAAddress, tokenYAddress: tokenBAddress };
+        }
+      })();
 
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
@@ -315,7 +321,12 @@ export function CreatePoolForm() {
         throw new Error(ERROR_MESSAGES.MISSING_WALLET);
       }
 
-      const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
+      let sortedTokens: { tokenXAddress: string; tokenYAddress: string };
+      try {
+        sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
+      } catch (_error) {
+        throw new Error(`Invalid token addresses: ${tokenAAddress} or ${tokenBAddress} is not a valid Solana public key`);
+      }
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
       const depositAmountX =

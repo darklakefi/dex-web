@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon } from "@dex-web/ui";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface CalculationProgressIndicatorProps {
   isCalculating: boolean;
