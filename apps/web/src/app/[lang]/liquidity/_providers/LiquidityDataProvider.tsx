@@ -5,7 +5,7 @@ import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
 import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import { sortSolanaAddresses } from "@dex-web/utils";
-import type { UseRealtimeTokenAccountsReturn } from "../_types/liquidity.types";
+import type { PoolDetails, UseRealtimeTokenAccountsReturn } from "../_types/liquidity.types";
 
 interface PoolDataContextValue {
   poolDetails: PoolDetails | null;

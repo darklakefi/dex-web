@@ -569,7 +569,7 @@ export function LiquidityFormProvider({
       finalTokenAAddress,
       finalTokenBAddress,
       walletAdapter?.wallet,
-      poolDataResult.data,
+      poolDataResult.data?.tokenXMint,
       slippage,
       trackSigned,
       checkLiquidityTransactionStatus,
@@ -617,7 +617,7 @@ export function LiquidityFormProvider({
 
   const dataValue = useMemo(
     () => ({
-      poolDetails: poolDataResult.data || null,
+      poolDetails: poolDataResult.data,
       tokenAAddress: finalTokenAAddress,
       tokenAccountsData,
       tokenBAddress: finalTokenBAddress,
