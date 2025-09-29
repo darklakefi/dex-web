@@ -102,7 +102,6 @@ class SSEManager {
 			eventSource.onopen = () => {
 				connection.isConnected = true;
 				connection.reconnectAttempts = 0;
-				console.log(`SSE connected: ${connectionKey}`);
 			};
 
 			eventSource.onerror = () => {

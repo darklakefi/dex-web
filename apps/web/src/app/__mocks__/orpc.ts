@@ -17,7 +17,7 @@ export const mockTanstackClient = {
           "mock-token": {
             symbol: "MOCK",
             name: "Mock Token",
-            imageUrl: "https:
+            imageUrl: "https://example.com/mock-token.png",
           },
         }),
         staleTime: 5000,
@@ -98,7 +98,7 @@ vi.mock('@solana/web3.js', () => ({
     toBuffer: () => {
       const buffer = Buffer.from(key || 'mock-public-key', 'utf8');
       return {
-        compare: (other) => buffer.compare(other),
+        compare: (other: Buffer) => buffer.compare(other),
       };
     },
   })),

@@ -144,7 +144,10 @@ export async function getSwapRateHandler(
 
     const connection = helius.connection;
 
-    const pool = await getPoolAccount(connection, poolPubkey);
+    const pool = await getPoolAccount(connection, poolPubkey).catch((error) => {
+      console.error("Failed to get pool account:", error);
+      throw new Error("Pool not found");
+    });
     const ammConfig = await getAmmConfigAccount(connection, ammConfigPubkey);
 
     const reserveXBalance = await getTokenBalance(

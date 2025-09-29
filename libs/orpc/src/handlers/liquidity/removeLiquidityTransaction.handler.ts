@@ -103,8 +103,6 @@ async function removeLiquidity(
 		program.programId,
 	);
 
-	console.log("Building removeLiquidity instruction...");
-
 	if (!program.methods.removeLiquidity) {
 		throw new Error("removeLiquidity method not found on program");
 	}

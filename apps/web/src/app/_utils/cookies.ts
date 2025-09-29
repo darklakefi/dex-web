@@ -81,16 +81,3 @@ export function getCookie(name: string): string | null {
   return null;
 }
 
-/**
- * Delete a cookie by name
- */
-export function deleteCookie(name: string, path = "/"): void {
-  setCookie(name, "", { expires: new Date(0), path });
-}
-
-/**
- * Check if a cookie exists
- */
-export function hasCookie(name: string): boolean {
-  return getCookie(name) !== null;
-}

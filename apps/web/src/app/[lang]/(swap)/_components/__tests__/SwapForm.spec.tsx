@@ -17,6 +17,7 @@ vi.mock("next/navigation", () => ({
       tokenAAddress: DEFAULT_BUY_TOKEN,
       tokenBAddress: DEFAULT_SELL_TOKEN,
     }),
+  usePathname: () => "/swap",
 }));
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();

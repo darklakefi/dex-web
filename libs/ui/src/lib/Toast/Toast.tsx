@@ -81,7 +81,7 @@ export function Toast({
           )}
           name={IconMap[variant || "success"] as IconName}
         />
-        <Text.Body2 className="flex-1 text-white">{title}</Text.Body2>
+        <Text.Body2 as="div" className="flex-1 text-white">{title}</Text.Body2>
         <Icon
           className="ml-auto size-4 cursor-pointer text-white"
           name="times"
@@ -89,7 +89,7 @@ export function Toast({
         />
       </div>
       <div className="flex flex-col gap-4 pr-6 pl-9">
-        <Text.Body3 className="text-white opacity-75">{description}</Text.Body3>
+        <Text.Body3 as="div" className="text-white opacity-75">{description}</Text.Body3>
         {actions && (
           <div className="flex gap-2">
             {actions.map((action) => (

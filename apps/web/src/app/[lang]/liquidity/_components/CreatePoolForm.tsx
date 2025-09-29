@@ -43,7 +43,7 @@ import { getCreatePoolFormButtonMessage } from "../_utils/getCreatePoolFormButto
 import { requestCreatePoolTransactionSigning } from "../_utils/requestCreatePoolTransactionSigning";
 import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
 
-export const { fieldContext, formContext } = createFormHookContexts();
+const { fieldContext, formContext } = createFormHookContexts();
 
 const liquidityFormSchema = z.object({
   initialPrice: z.string(),

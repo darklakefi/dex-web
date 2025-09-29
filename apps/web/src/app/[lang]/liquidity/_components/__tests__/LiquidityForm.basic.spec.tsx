@@ -11,6 +11,8 @@ import {
 } from "../../../../_utils/constants";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => "/liquidity",
+  useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("../../../../hooks/useAnalytics", () => ({
   useAnalytics: () => ({

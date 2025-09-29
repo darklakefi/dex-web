@@ -57,7 +57,7 @@ export function useLiquidityForm({
       [FORM_FIELD_NAMES.INITIAL_PRICE]: LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE,
       [FORM_FIELD_NAMES.TOKEN_A_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
       [FORM_FIELD_NAMES.TOKEN_B_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
-    } satisfies LiquidityFormValues,
+    } as LiquidityFormValues,
     onSubmit: async ({ value }: { value: LiquidityFormValues }) => {
       await onSubmit(value);
     },

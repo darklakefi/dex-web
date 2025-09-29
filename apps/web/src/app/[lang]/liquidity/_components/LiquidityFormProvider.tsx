@@ -21,7 +21,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMachine } from "@xstate/react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
-import { startTransition, useCallback, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
@@ -60,8 +60,9 @@ import {
   LiquidityWalletProvider,
   useLiquidityForm as useCompositeContext,
 } from "./LiquidityContexts";
+import type { LiquidityFormStateContextValue } from "./LiquidityContexts";
 
-export const { fieldContext, formContext } = createFormHookContexts();
+const { fieldContext, formContext } = createFormHookContexts();
 
 const { useAppForm } = createFormHook({
   fieldComponents: {
@@ -140,19 +141,30 @@ export function LiquidityFormProvider({
     tokenYMint,
   });
 
+  const [state, send] = useMachine(liquidityMachine, {
+    input: {
+      buyTokenAccount: null,
+      poolDetails: poolDataResult.poolDetails,
+      sellTokenAccount: null,
+    },
+  });
+
+  const hasRecentTransaction = state.matches("success");
+
   const tokenAccountsData = useRealtimeTokenAccounts({
     publicKey: publicKey || null,
     tokenAAddress: finalTokenAAddress,
     tokenBAddress: finalTokenBAddress,
+    hasRecentTransaction,
   });
 
-  const [state, send] = useMachine(liquidityMachine, {
-    input: {
-      buyTokenAccount: tokenAccountsData.buyTokenAccount,
-      poolDetails: poolDataResult.poolDetails,
-      sellTokenAccount: tokenAccountsData.sellTokenAccount,
-    },
-  });
+  useEffect(() => {
+    send({
+      type: "UPDATE_TOKEN_ACCOUNTS",
+      buyAccount: tokenAccountsData.buyTokenAccount ?? null,
+      sellAccount: tokenAccountsData.sellTokenAccount ?? null,
+    });
+  }, [send, tokenAccountsData.buyTokenAccount, tokenAccountsData.sellTokenAccount]);
 
   const {
     trackInitiated,
@@ -660,7 +672,7 @@ export function LiquidityFormProvider({
       <LiquiditySettingsProvider value={settingsValue}>
         <LiquidityDataProvider value={dataValue}>
           <LiquidityActionsProvider value={actionsValue}>
-            <LiquidityFormStateProvider value={formStateValue}>
+            <LiquidityFormStateProvider value={formStateValue as unknown as LiquidityFormStateContextValue}>
               {children}
             </LiquidityFormStateProvider>
           </LiquidityActionsProvider>

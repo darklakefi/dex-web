@@ -13,6 +13,8 @@ import {
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
+  usePathname: () => "/liquidity",
+  useSearchParams: () => new URLSearchParams(),
 }));
 const mockAnalytics = {
   trackLiquidity: vi.fn(),
@@ -401,7 +403,7 @@ describe("LiquidityForm Edge Cases", () => {
           isRealtime: true,
         }),
       }));
-      vi.mocked(client.liquidity.getAddLiquidityReview).mockResolvedValue({ tokenAmount: 50 });
+      vi.mocked(client.liquidity.getAddLiquidityReview).mockResolvedValue({ tokenAmount: 50, tokenAmountRaw: "50" });
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();

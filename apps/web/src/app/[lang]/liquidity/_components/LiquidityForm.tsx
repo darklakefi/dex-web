@@ -68,7 +68,6 @@ function LiquidityFormContent() {
         <div className="flex flex-col gap-4">
           <LiquidityTokenInputs
             buyTokenAccount={tokenAccountsData.buyTokenAccount}
-            form={form}
             isLoadingBuy={tokenAccountsData.isLoadingBuy}
             isLoadingSell={tokenAccountsData.isLoadingSell}
             isRefreshingBuy={tokenAccountsData.isRefreshingBuy}

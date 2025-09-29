@@ -87,7 +87,7 @@ export function useLiquidityTransaction({
       return response.transaction;
     } catch (error) {
       const contextualError = error instanceof Error ? error : new Error(String(error));
-      onError(contextualError, {
+      _onError(contextualError, {
         amountA: tokenAAmount,
         amountB: tokenBAmount,
         tokenA: tokenAAddress,

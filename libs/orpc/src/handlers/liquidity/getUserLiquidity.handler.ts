@@ -16,7 +16,7 @@ export async function getUserLiquidityHandler({
   const helius = getHelius();
 
   try {
-    if (!ownerAddress) {
+    if (!ownerAddress || ownerAddress.trim() === "") {
       console.warn("No owner address provided for liquidity lookup");
       return {
         decimals: LP_TOKEN_DECIMALS,

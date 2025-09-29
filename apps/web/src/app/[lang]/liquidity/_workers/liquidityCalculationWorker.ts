@@ -61,7 +61,7 @@ function validateBalance(
     }
 
     const maxBalanceDecimal = parseAmountBigNumber(maxBalance.toString()).div(
-      parseAmountBigNumber(10).pow(decimals.toString())
+      parseAmountBigNumber(Math.pow(10, decimals).toString())
     );
 
     if (amount.gt(maxBalanceDecimal)) {

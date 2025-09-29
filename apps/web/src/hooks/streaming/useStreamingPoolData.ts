@@ -31,7 +31,12 @@ export function useStreamingPoolData({
     const queryOptions = tanstackClient.pools.getPoolDetails.queryOptions({
       input: { tokenXMint, tokenYMint }
     });
-    const result = await queryOptions.queryFn({ queryKey: queryOptions.queryKey, signal: new AbortController().signal, meta: undefined });
+    const result = await queryOptions.queryFn({ 
+      client: queryClient,
+      queryKey: queryOptions.queryKey, 
+      signal: new AbortController().signal, 
+      meta: undefined 
+    });
 
     return transformToStreamData(result);
   };

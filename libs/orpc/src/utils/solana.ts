@@ -93,13 +93,12 @@ export async function getPoolOnChain(tokenXMint: string, tokenYMint: string) {
 
   const poolPubkey = await getPoolPubkey(tokenXMint, tokenYMint);
 
-  // Fetch and parse both Pool and AmmConfig accounts
-  const pool = await getPoolAccount(connection, poolPubkey).catch((error) => {
-    console.error("Failed to get pool account:", error);
+  try {
+    const pool = await getPoolAccount(connection, poolPubkey);
+    return pool;
+  } catch (error) {
     return null;
-  });
-
-  return pool;
+  }
 }
 
 // Helper function to determine token program ID

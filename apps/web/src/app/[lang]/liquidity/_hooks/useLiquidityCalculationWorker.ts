@@ -124,14 +124,14 @@ export function useLiquidityCalculationWorker() {
 
         pendingCalculations.current.set(calculationKey, {
           reject,
-          resolve,
+          resolve: resolve as (result: unknown) => void,
           timeout,
         });
 
         setState((prev) => ({ ...prev, isCalculating: true }));
 
         workerRef.current.postMessage({
-          payload: { ...payload, timestamp },
+          payload,
           type,
         } as CalculationInput);
       });

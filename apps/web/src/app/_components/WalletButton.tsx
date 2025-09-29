@@ -9,22 +9,33 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import { SkeletonWalletButton } from "./SkeletonWalletButton";
+import { useEffect, useState } from "react";
 
-interface WalletButtonProps extends React.ComponentProps<typeof Button> {}
+export interface WalletButtonProps extends React.ComponentProps<typeof Button> {}
 
-export function WalletButton({ ...props }: WalletButtonProps) {
+export function WalletButton({ suppressHydrationWarning = true, ...props }: WalletButtonProps) {
 	const router = useRouter();
 	const { disconnect } = useWallet();
 	const { data: adapter, isLoading: adapterLoading, isPlaceholderData: adapterIsPlaceholder } = useWalletAdapter();
 	const { data: address, isLoading: addressLoading, isPlaceholderData: addressIsPlaceholder } = useWalletAddress();
+	const [isHydrated, setIsHydrated] = useState(false);
+
+	// Ensure consistent rendering between server and client
+	useEffect(() => {
+		setIsHydrated(true);
+	}, []);
 
 	function handleClick() {
 		router.push("/select-wallet");
 	}
 
-	if (adapterLoading || addressLoading || adapterIsPlaceholder || addressIsPlaceholder) {
+	// Always show skeleton during SSR and initial hydration
+	if (!isHydrated || adapterLoading || addressLoading || adapterIsPlaceholder || addressIsPlaceholder) {
 		return (
-			<SkeletonWalletButton className={twMerge("h-10 w-32", props.className)} />
+			<SkeletonWalletButton 
+				className={twMerge("h-10 w-32", props.className)}
+				suppressHydrationWarning={suppressHydrationWarning}
+			/>
 		);
 	}
 

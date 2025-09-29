@@ -15,6 +15,7 @@ export const createMockPublicKey = (base58?: string): PublicKey => {
 
 export const createMockTokenAccount = (overrides?: Partial<TokenAccount>): TokenAccount => ({
   address: 'token123',
+  mint: 'mint123',
   amount: 1000000,
   decimals: 6,
   symbol: 'TEST',

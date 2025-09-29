@@ -1,7 +1,6 @@
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
-import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 const skeletonVariants = cva(
@@ -60,6 +59,7 @@ interface SkeletonLoaderProps extends Omit<VariantProps<typeof skeletonVariants>
   height?: string | number;
   "aria-label"?: string;
   testId?: string;
+  suppressHydrationWarning?: boolean;
 }
 
 export function SkeletonLoader({
@@ -72,22 +72,12 @@ export function SkeletonLoader({
   width: customWidth,
   "aria-label": ariaLabel,
   testId,
+  suppressHydrationWarning = true,
   ...props
 }: SkeletonLoaderProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const customStyle = {
     width: customWidth || undefined,
     height: customHeight || undefined,
-    background: mounted 
-      ? `linear-gradient(90deg, rgba(34, 197, 94, 0.2) 25%, rgba(34, 197, 94, 0.4) 50%, rgba(34, 197, 94, 0.2) 75%)`
-      : 'rgba(34, 197, 94, 0.2)',
-    backgroundSize: mounted ? '200% 100%' : '100% 100%',
-    animation: mounted ? 'shimmer 2s infinite ease-in-out' : 'none',
     ...style,
   };
 
@@ -102,6 +92,7 @@ export function SkeletonLoader({
       aria-label={ariaLabel || "Loading content"}
       role="img"
       data-testid={testId}
+      suppressHydrationWarning={suppressHydrationWarning}
       {...props}
     />
   );

@@ -10,11 +10,11 @@ export function useHeliusConnection() {
   if (!apiKey) {
     logger.warn("NEXT_PUBLIC_HELIUS_API_KEY not found, falling back to public RPC");
     const fallbackUrl = network === "devnet"
-      ? "https:
-      : "https:
+      ? "https://api.devnet.solana.com"
+      : "https://api.mainnet-beta.solana.com";
     return new Connection(fallbackUrl, "confirmed");
   }
 
-  const heliusUrl = `https:
+  const heliusUrl = `https://rpc.helius.xyz/?api-key=${apiKey}`;
   return new Connection(heliusUrl, "confirmed");
 }

@@ -16,13 +16,17 @@ vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
+  usePathname: () => "/liquidity",
+  useSearchParams: () => new URLSearchParams(),
 }));
+const mockWallet = {
+  publicKey: null,
+  wallet: null,
+  signTransaction: vi.fn(),
+};
+
 vi.mock("@solana/wallet-adapter-react", () => ({
-  useWallet: () => ({
-    publicKey: null,
-    wallet: null,
-    signTransaction: vi.fn(),
-  }),
+  useWallet: () => mockWallet,
 }));
 vi.mock("../../../../hooks/useAnalytics", () => ({
   useAnalytics: () => ({
@@ -159,12 +163,8 @@ const renderWithWrapper = (
     queryClient,
   };
 };
-const mockWalletContext = (wallet: unknown) => {
-  vi.mocked(
-    vi.doMock("@solana/wallet-adapter-react", () => ({
-      useWallet: () => wallet,
-    }))
-  );
+const setWalletState = (wallet: typeof mockWallet) => {
+  Object.assign(mockWallet, wallet);
 };
 describe("LiquidityForm - Critical Path User Stories", () => {
   let user: ReturnType<typeof userEvent.setup>;

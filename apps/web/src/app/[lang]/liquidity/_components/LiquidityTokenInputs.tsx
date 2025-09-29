@@ -8,16 +8,16 @@ import {
   validateHasSufficientBalance,
 } from "@dex-web/utils";
 import { useDebouncedCallback } from "use-debounce";
+import { Field } from "@tanstack/react-form";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { SkeletonTokenInput } from "../../../_components/SkeletonTokenInput";
 import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
 import { useLiquidityCalculations } from "../_hooks/useLiquidityCalculations";
 import type { PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
-import type { useLiquidityForm } from "./LiquidityContexts";
+import { useLiquidityForm } from "./LiquidityContexts";
 
 interface LiquidityTokenInputsProps {
-  form: ReturnType<typeof useLiquidityForm>;
   buyTokenAccount?: TokenAccountsData | null;
   sellTokenAccount?: TokenAccountsData | null;
   isLoadingBuy: boolean;
@@ -30,7 +30,6 @@ interface LiquidityTokenInputsProps {
 }
 
 export function LiquidityTokenInputs({
-  form,
   buyTokenAccount,
   sellTokenAccount,
   isLoadingBuy,
@@ -41,6 +40,7 @@ export function LiquidityTokenInputs({
   tokenBAddress,
   poolDetails,
 }: LiquidityTokenInputsProps) {
+  const { form } = useLiquidityForm();
   const { calculate, clearCalculations, isCalculating } =
     useLiquidityCalculations();
 
@@ -171,10 +171,11 @@ export function LiquidityTokenInputs({
               type="sell"
             />
           </div>
-          <form.Field
+          <Field
+            form={form}
             name={FORM_FIELD_NAMES.TOKEN_B_AMOUNT}
             validators={{
-              onChange: ({ value }) => {
+              onChange: ({ value }: { value: string }) => {
                 const balanceValidation = validateHasSufficientBalance({
                   amount: value,
                   tokenAccount: sellTokenAccount?.tokenAccounts?.[0],
@@ -191,7 +192,7 @@ export function LiquidityTokenInputs({
               onChangeListenTo: [FORM_FIELD_NAMES.TOKEN_A_AMOUNT],
             }}
           >
-            {(field) => (
+            {(field: any) => (
               <FormFieldset
                 aria-describedby={
                   field.state.meta.errors.length > 0
@@ -210,11 +211,14 @@ export function LiquidityTokenInputs({
                 }}
                 onClearPendingCalculations={clearPendingCalculations}
                 onHalfMaxClick={(type) => handleHalfMaxClick(type, "sell")}
-                tokenAccount={sellTokenAccount?.tokenAccounts?.[0]}
+                tokenAccount={sellTokenAccount?.tokenAccounts?.[0] ? {
+                  ...sellTokenAccount.tokenAccounts[0],
+                  address: sellTokenAccount.tokenAccounts[0].address || ''
+                } : undefined}
                 value={field.state.value}
               />
             )}
-          </form.Field>
+          </Field>
         </Box>
       )}
 
@@ -246,10 +250,11 @@ export function LiquidityTokenInputs({
               type="buy"
             />
           </div>
-          <form.Field
+          <Field
+            form={form}
             name={FORM_FIELD_NAMES.TOKEN_A_AMOUNT}
             validators={{
-              onChange: ({ value }) => {
+              onChange: ({ value }: { value: string }) => {
                 const balanceValidation = validateHasSufficientBalance({
                   amount: value,
                   tokenAccount: buyTokenAccount?.tokenAccounts?.[0],
@@ -266,7 +271,7 @@ export function LiquidityTokenInputs({
               onChangeListenTo: [FORM_FIELD_NAMES.TOKEN_B_AMOUNT],
             }}
           >
-            {(field) => (
+            {(field: any) => (
               <FormFieldset
                 aria-describedby={
                   field.state.meta.errors.length > 0
@@ -285,11 +290,14 @@ export function LiquidityTokenInputs({
                 }}
                 onClearPendingCalculations={clearPendingCalculations}
                 onHalfMaxClick={(type) => handleHalfMaxClick(type, "buy")}
-                tokenAccount={buyTokenAccount?.tokenAccounts?.[0]}
+                tokenAccount={buyTokenAccount?.tokenAccounts?.[0] ? {
+                  ...buyTokenAccount.tokenAccounts[0],
+                  address: buyTokenAccount.tokenAccounts[0].address || ''
+                } : undefined}
                 value={field.state.value}
               />
             )}
-          </form.Field>
+          </Field>
         </Box>
       )}
     </fieldset>

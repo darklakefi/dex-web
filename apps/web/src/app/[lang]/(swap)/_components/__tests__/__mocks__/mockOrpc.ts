@@ -43,7 +43,7 @@ export function mockOrpc() {
       getTokenDetails: vi.fn().mockResolvedValue({
         address: DEFAULT_BUY_TOKEN,
         decimals: 9,
-        imageUrl: "https:
+        imageUrl: "https://example.com/solana.png",
         name: "Solana",
         symbol: "SOL",
       }),
@@ -87,7 +87,7 @@ export function mockOrpc() {
             Promise.resolve({
               address: DEFAULT_BUY_TOKEN,
               decimals: 9,
-              imageUrl: "https:
+              imageUrl: "https://example.com/solana.png",
               name: "Solana",
               symbol: "SOL",
             } satisfies GetTokenDetailsOutput),
@@ -103,7 +103,7 @@ export function mockOrpc() {
                 {
                   address: DEFAULT_BUY_TOKEN,
                   decimals: 9,
-                  imageUrl: "https:
+                  imageUrl: "https://example.com/solana.png",
                   name: "Solana",
                   symbol: "SOL",
                 },
@@ -121,21 +121,21 @@ export function mockOrpc() {
                 [DEFAULT_BUY_TOKEN]: {
                   address: DEFAULT_BUY_TOKEN,
                   decimals: 9,
-                  imageUrl: "https:
+                  imageUrl: "https://example.com/solana.png",
                   name: "Solana",
                   symbol: "SOL",
                 },
                 [DEFAULT_SELL_TOKEN]: {
                   address: DEFAULT_SELL_TOKEN,
                   decimals: 6,
-                  imageUrl: "https:
+                  imageUrl: "https://example.com/usdc.png",
                   name: "USD Coin",
                   symbol: "USDC",
                 },
                 "": {
                   address: DEFAULT_BUY_TOKEN,
                   decimals: 9,
-                  imageUrl: "https:
+                  imageUrl: "https://example.com/solana.png",
                   name: "Solana",
                   symbol: "SOL",
                 },
@@ -180,7 +180,7 @@ export function mockOrpc() {
                 {
                   description: "Solana",
                   id: "1",
-                  image: { url: "https:
+                  image: { url: "https://example.com/solana.png" },
                   name: "Solana",
                   symbol: "SOL",
                 },

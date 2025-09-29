@@ -51,7 +51,7 @@ import { dismissToast, toast } from "../../../_utils/toast";
 import { SwapPageRefreshButton } from "./SwapPageRefreshButton";
 import { logger } from "../../../../utils/logger";
 
-export const { fieldContext, formContext } = createFormHookContexts();
+const { fieldContext, formContext } = createFormHookContexts();
 
 const swapFormSchema = z.object({
   tokenAAmount: z.string(),

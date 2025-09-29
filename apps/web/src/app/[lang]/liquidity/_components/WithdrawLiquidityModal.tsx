@@ -29,7 +29,7 @@ type WithdrawLiquidityFormSchema = z.infer<typeof withdrawLiquidityFormSchema>;
 const withdrawLiquidityFormSchema = z.object({
 	withdrawalAmount: z.string().min(1, "Amount is required"),
 });
-export const { fieldContext, formContext } = createFormHookContexts();
+const { fieldContext, formContext } = createFormHookContexts();
 
 const { useAppForm } = createFormHook({
 	fieldComponents: {

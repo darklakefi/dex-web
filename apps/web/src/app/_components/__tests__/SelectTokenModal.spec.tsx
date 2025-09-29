@@ -15,6 +15,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => ({
     get: vi.fn().mockReturnValue(""),
   }),
+  usePathname: () => "/swap",
 }));
 vi.mock("@dex-web/orpc", () => ({
   getTokensInputSchema: {
@@ -34,7 +35,7 @@ vi.mock("@dex-web/orpc", () => ({
             tokens: [
               {
                 address: DEFAULT_BUY_TOKEN,
-                imageUrl: "https:
+                imageUrl: "https://example.com/solana.png",
                 name: "Solana",
                 symbol: "SOL",
                 value: "1000",
