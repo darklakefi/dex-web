@@ -36,66 +36,71 @@ export function useLiquidityTransaction({
   onError: _onError,
   checkTransactionStatus: _checkTransactionStatus,
 }: UseLiquidityTransactionProps) {
-  const executeTransaction = useCallback(async (params: TransactionParams) => {
-    const {
-      tokenAAmount,
-      tokenBAmount,
-      tokenAAddress,
-      tokenBAddress,
-      slippage,
-      publicKey,
-      poolDetails,
-    } = params;
+  const executeTransaction = useCallback(
+    async (params: TransactionParams) => {
+      const {
+        tokenAAmount,
+        tokenBAmount,
+        tokenAAddress,
+        tokenBAddress,
+        slippage,
+        publicKey,
+        poolDetails,
+      } = params;
 
-    try {
-      const finalTokenAAddress = tokenAAddress?.trim() || DEFAULT_BUY_TOKEN;
-      const finalTokenBAddress = tokenBAddress?.trim() || DEFAULT_SELL_TOKEN;
+      try {
+        const finalTokenAAddress = tokenAAddress?.trim() || DEFAULT_BUY_TOKEN;
+        const finalTokenBAddress = tokenBAddress?.trim() || DEFAULT_SELL_TOKEN;
 
-      const sortedTokens = sortSolanaAddresses(
-        finalTokenAAddress,
-        finalTokenBAddress,
-      );
+        const sortedTokens = sortSolanaAddresses(
+          finalTokenAAddress,
+          finalTokenBAddress,
+        );
 
-      const { tokenXAddress, tokenYAddress } = sortedTokens;
+        const { tokenXAddress, tokenYAddress } = sortedTokens;
 
-      if (!tokenXAddress || !tokenYAddress) {
-        throw new Error("Invalid token addresses after sorting");
+        if (!tokenXAddress || !tokenYAddress) {
+          throw new Error("Invalid token addresses after sorting");
+        }
+
+        const sellAmount = parseAmount(tokenBAmount);
+        const buyAmount = parseAmount(tokenAAmount);
+
+        const isTokenXSell = poolDetails?.tokenXMint === tokenBAddress;
+        const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
+        const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
+
+        const requestPayload: CreateLiquidityTransactionInput = {
+          maxAmountX,
+          maxAmountY,
+          slippage: Number(slippage || DEFAULT_SLIPPAGE),
+          tokenXMint: tokenXAddress,
+          tokenYMint: tokenYAddress,
+          user: publicKey.toBase58(),
+        };
+
+        const response =
+          await client.liquidity.createLiquidityTransaction(requestPayload);
+
+        if (!response.success || !response.transaction) {
+          throw new Error("Failed to create liquidity transaction");
+        }
+
+        return response.transaction;
+      } catch (error) {
+        const contextualError =
+          error instanceof Error ? error : new Error(String(error));
+        _onError(contextualError, {
+          amountA: tokenAAmount,
+          amountB: tokenBAmount,
+          tokenA: tokenAAddress,
+          tokenB: tokenBAddress,
+        });
+        throw contextualError;
       }
-
-      const sellAmount = parseAmount(tokenBAmount);
-      const buyAmount = parseAmount(tokenAAmount);
-
-      const isTokenXSell = poolDetails?.tokenXMint === tokenBAddress;
-      const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
-      const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
-
-      const requestPayload: CreateLiquidityTransactionInput = {
-        maxAmountX,
-        maxAmountY,
-        slippage: Number(slippage || DEFAULT_SLIPPAGE),
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
-        user: publicKey.toBase58(),
-      };
-
-      const response = await client.liquidity.createLiquidityTransaction(requestPayload);
-
-      if (!response.success || !response.transaction) {
-        throw new Error("Failed to create liquidity transaction");
-      }
-
-      return response.transaction;
-    } catch (error) {
-      const contextualError = error instanceof Error ? error : new Error(String(error));
-      _onError(contextualError, {
-        amountA: tokenAAmount,
-        amountB: tokenBAmount,
-        tokenA: tokenAAddress,
-        tokenB: tokenBAddress,
-      });
-      throw contextualError;
-    }
-  }, [_onError]);
+    },
+    [_onError],
+  );
 
   return {
     executeTransaction,

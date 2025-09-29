@@ -5,7 +5,10 @@ import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
 import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import { sortSolanaAddresses } from "@dex-web/utils";
-import type { PoolDetails, UseRealtimeTokenAccountsReturn } from "../_types/liquidity.types";
+import type {
+  PoolDetails,
+  UseRealtimeTokenAccountsReturn,
+} from "../_types/liquidity.types";
 
 interface PoolDataContextValue {
   poolDetails: PoolDetails | null;
@@ -32,8 +35,11 @@ export function PoolDataProvider({
   hasRecentTransaction = false,
 }: PoolDataProviderProps) {
   const { data: publicKey } = useWalletPublicKey();
-  
-  const sortedTokenAddresses = sortSolanaAddresses(tokenAAddress, tokenBAddress);
+
+  const sortedTokenAddresses = sortSolanaAddresses(
+    tokenAAddress,
+    tokenBAddress,
+  );
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
 
@@ -54,7 +60,10 @@ export function PoolDataProvider({
     tokenAccountsData,
     tokenXMint,
     tokenYMint,
-    isLoading: poolDataResult.isLoading || tokenAccountsData.isLoadingBuy || tokenAccountsData.isLoadingSell,
+    isLoading:
+      poolDataResult.isLoading ||
+      tokenAccountsData.isLoadingBuy ||
+      tokenAccountsData.isLoadingSell,
     error: poolDataResult.error || null,
   };
 

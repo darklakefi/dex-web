@@ -42,7 +42,7 @@ export function usePoolData({
   priority = "normal",
 }: UsePoolDataParams) {
   const poolKey = createSortedPoolKey(tokenXMint, tokenYMint);
-  
+
   return useQuery({
     queryKey: ["pool", poolKey, tokenXMint, tokenYMint],
     queryFn: async (): Promise<PoolData | null> => {
@@ -51,9 +51,9 @@ export function usePoolData({
           tokenXMint,
           tokenYMint,
         });
-        
+
         if (!result) return null;
-        
+
         return {
           ...result,
           lastUpdate: Date.now(),
@@ -69,7 +69,8 @@ export function usePoolData({
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: priority === "critical" || priority === "high",
     retry: (failureCount, _error) => {
-      const maxRetries = priority === "critical" ? 3 : priority === "high" ? 2 : 1;
+      const maxRetries =
+        priority === "critical" ? 3 : priority === "high" ? 2 : 1;
       return failureCount < maxRetries;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),

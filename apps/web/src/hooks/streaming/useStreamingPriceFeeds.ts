@@ -20,12 +20,11 @@ interface PriceFeedData {
   };
 }
 
-
 export function useStreamingPriceFeeds({
   symbols,
   priority = "high",
   enableStreaming = true,
-  enableSSE = true, 
+  enableSSE = true,
 }: UseStreamingPriceFeedsParams) {
   const symbolsKey = symbols.sort().join(",");
   const queryKey = ["price-feeds-stream", symbolsKey];
@@ -35,7 +34,7 @@ export function useStreamingPriceFeeds({
 
     for (const symbol of symbols) {
       priceData[symbol] = {
-        price: Math.random() * 100, 
+        price: Math.random() * 100,
         change24h: (Math.random() - 0.5) * 10,
         volume24h: Math.random() * 1000000,
         lastUpdate: Date.now(),
@@ -51,26 +50,23 @@ export function useStreamingPriceFeeds({
     {
       priority,
       enableFallback: true,
-    }
+    },
   );
 
-
-  const streamingQuery = useStreamingQuery(
-    queryKey,
-    fetchPriceData,
-    {
-      priority,
-      enableStreaming: enableStreaming && !enableSSE,
-    }
-  );
+  const streamingQuery = useStreamingQuery(queryKey, fetchPriceData, {
+    priority,
+    enableStreaming: enableStreaming && !enableSSE,
+  });
 
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
 
   const pricesBySymbol = activeQuery.data || {};
-  const pricesArray = symbols.map(symbol => ({
-    symbol,
-    ...pricesBySymbol[symbol],
-  })).filter(Boolean);
+  const pricesArray = symbols
+    .map((symbol) => ({
+      symbol,
+      ...pricesBySymbol[symbol],
+    }))
+    .filter(Boolean);
 
   return {
     prices: pricesArray,
@@ -80,10 +76,9 @@ export function useStreamingPriceFeeds({
     isStreaming: enableSSE ? sseQuery.isStreaming : streamingQuery.isStreaming,
     isFallback: enableSSE ? sseQuery.isFallback : false,
     refetch: activeQuery.refetch,
-    lastUpdate: Math.max(...pricesArray.map(p => p.lastUpdate || 0)),
+    lastUpdate: Math.max(...pricesArray.map((p) => p.lastUpdate || 0)),
   };
 }
-
 
 export function useStreamingTokenPrice({
   symbol,
@@ -119,7 +114,6 @@ export function useStreamingTokenPrice({
   };
 }
 
-
 export function useStreamingTradingPair({
   tokenA,
   tokenB,
@@ -144,9 +138,10 @@ export function useStreamingTradingPair({
   const tokenAPrice = pricesBySymbol[tokenA];
   const tokenBPrice = pricesBySymbol[tokenB];
 
-  const ratio = tokenAPrice && tokenBPrice && tokenBPrice.price > 0
-    ? tokenAPrice.price / tokenBPrice.price
-    : 0;
+  const ratio =
+    tokenAPrice && tokenBPrice && tokenBPrice.price > 0
+      ? tokenAPrice.price / tokenBPrice.price
+      : 0;
 
   return {
     tokenA: {
@@ -165,7 +160,7 @@ export function useStreamingTradingPair({
     refetch,
     lastUpdate: Math.max(
       tokenAPrice?.lastUpdate || 0,
-      tokenBPrice?.lastUpdate || 0
+      tokenBPrice?.lastUpdate || 0,
     ),
   };
 }

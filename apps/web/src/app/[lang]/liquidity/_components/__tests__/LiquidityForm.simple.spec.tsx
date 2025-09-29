@@ -76,11 +76,18 @@ function TestLiquidityButton({ publicKey }: { publicKey: PublicKey | null }) {
 
 describe("LiquidityForm - Simplified Tests", () => {
   const queryClient = new QueryClient();
-  
+
   const renderWithWrapper = (children: React.ReactNode) => {
-    const wrapper = ({ children: wrapperChildren }: { children: React.ReactNode }) => (
+    const wrapper = ({
+      children: wrapperChildren,
+    }: {
+      children: React.ReactNode;
+    }) => (
       <NextIntlClientProvider locale="en" messages={{}}>
-        <NuqsTestingAdapter onUrlUpdate={vi.fn()} searchParams={new URLSearchParams()}>
+        <NuqsTestingAdapter
+          onUrlUpdate={vi.fn()}
+          searchParams={new URLSearchParams()}
+        >
           <QueryClientProvider client={queryClient}>
             {wrapperChildren}
           </QueryClientProvider>

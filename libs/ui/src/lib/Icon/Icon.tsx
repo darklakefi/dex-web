@@ -32,78 +32,78 @@ import TimesFilledIcon from "./icons/times-filled.svg";
 import TrendingIcon from "./icons/trending.svg";
 import XIcon from "./icons/x.svg";
 export type IconName =
-	| "analytics"
-	| "backpack"
-	| "check-filled"
-	| "chevron-down"
-	| "cog"
-	| "crown"
-	| "exclamation"
-	| "external-link"
-	| "fire"
-	| "github"
-	| "info-filled"
-	| "info"
-	| "logout"
-	| "loading-stripe"
-	| "logo-lg"
-	| "logo-sm"
-	| "phantom"
-	| "play"
-	| "plus-circle"
-	| "plus"
-	| "refresh"
-	| "search"
-	| "seedlings"
-	| "share"
-	| "solflare"
-	| "swap"
-	| "telegram"
-	| "times-filled"
-	| "times"
-	| "trending"
-	| "x";
+  | "analytics"
+  | "backpack"
+  | "check-filled"
+  | "chevron-down"
+  | "cog"
+  | "crown"
+  | "exclamation"
+  | "external-link"
+  | "fire"
+  | "github"
+  | "info-filled"
+  | "info"
+  | "logout"
+  | "loading-stripe"
+  | "logo-lg"
+  | "logo-sm"
+  | "phantom"
+  | "play"
+  | "plus-circle"
+  | "plus"
+  | "refresh"
+  | "search"
+  | "seedlings"
+  | "share"
+  | "solflare"
+  | "swap"
+  | "telegram"
+  | "times-filled"
+  | "times"
+  | "trending"
+  | "x";
 
 const iconComponents = {
-	"check-filled": CheckFilledIcon,
-	"chevron-down": ChevronDownIcon,
-	"external-link": ExternalLinkIcon,
-	"info-filled": InfoFilledIcon,
-	"loading-stripe": LoadingStripeIcon,
-	"logo-lg": LogoLgIcon,
-	"logo-sm": LogoSmIcon,
-	"plus-circle": PlusCircleIcon,
-	"times-filled": TimesFilledIcon,
-	analytics: AnalyticsIcon,
-	backpack: BackpackWalletIcon,
-	cog: CogIcon,
-	crown: CrownIcon,
-	exclamation: ExclamationIcon,
-	fire: FireIcon,
-	github: GithubIcon,
-	info: InfoIcon,
-	logout: LogoutIcon,
-	phantom: PhantomWalletIcon,
-	play: PlayIcon,
-	plus: PlusIcon,
-	refresh: RefreshIcon,
-	search: SearchIcon,
-	seedlings: SeedlingsIcon,
-	share: ShareIcon,
-	solflare: SolflareWalletIcon,
-	swap: SwapIcon,
-	telegram: TelegramIcon,
-	times: TimesIcon,
-	trending: TrendingIcon,
-	x: XIcon,
+  "check-filled": CheckFilledIcon,
+  "chevron-down": ChevronDownIcon,
+  "external-link": ExternalLinkIcon,
+  "info-filled": InfoFilledIcon,
+  "loading-stripe": LoadingStripeIcon,
+  "logo-lg": LogoLgIcon,
+  "logo-sm": LogoSmIcon,
+  "plus-circle": PlusCircleIcon,
+  "times-filled": TimesFilledIcon,
+  analytics: AnalyticsIcon,
+  backpack: BackpackWalletIcon,
+  cog: CogIcon,
+  crown: CrownIcon,
+  exclamation: ExclamationIcon,
+  fire: FireIcon,
+  github: GithubIcon,
+  info: InfoIcon,
+  logout: LogoutIcon,
+  phantom: PhantomWalletIcon,
+  play: PlayIcon,
+  plus: PlusIcon,
+  refresh: RefreshIcon,
+  search: SearchIcon,
+  seedlings: SeedlingsIcon,
+  share: ShareIcon,
+  solflare: SolflareWalletIcon,
+  swap: SwapIcon,
+  telegram: TelegramIcon,
+  times: TimesIcon,
+  trending: TrendingIcon,
+  x: XIcon,
 } as const satisfies Record<
-	IconName,
-	React.ComponentType<React.SVGProps<SVGSVGElement>>
+  IconName,
+  React.ComponentType<React.SVGProps<SVGSVGElement>>
 >;
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
-	name: IconName;
-	title?: string;
+  name: IconName;
+  title?: string;
 }
 
 /**
@@ -112,10 +112,10 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
  * This is a server component that supports tree shaking.
  */
 export function Icon({ name, title, className, ...props }: IconProps) {
-	const IconComponent = iconComponents[name];
-	if (!IconComponent) return null;
+  const IconComponent = iconComponents[name];
+  if (!IconComponent) return null;
 
-	const classNames = twMerge("size-6 text-current fill-current", className);
+  const classNames = twMerge("size-6 text-current fill-current", className);
 
-	return <IconComponent className={classNames} role="img" {...props} />;
+  return <IconComponent className={classNames} role="img" {...props} />;
 }

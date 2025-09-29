@@ -61,7 +61,7 @@ const nextConfig = {
 
   webpack(config, { isServer }) {
     config.cache = {
-      type: 'memory',
+      type: "memory",
       maxGenerations: 1,
     };
 

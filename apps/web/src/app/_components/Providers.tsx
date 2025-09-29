@@ -17,12 +17,12 @@ function makeQueryClient() {
         refetchOnWindowFocus: false,
         refetchOnReconnect: true,
         retry: (failureCount, error) => {
-          if (error && 'status' in error && typeof error.status === 'number') {
+          if (error && "status" in error && typeof error.status === "number") {
             return error.status >= 500 && failureCount < 2;
           }
           return failureCount < 2;
         },
-        retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 15000),
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 15000),
         gcTime: 5 * 60 * 1000,
       },
     },

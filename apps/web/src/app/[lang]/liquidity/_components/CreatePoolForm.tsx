@@ -325,7 +325,9 @@ export function CreatePoolForm() {
       try {
         sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
       } catch (_error) {
-        throw new Error(`Invalid token addresses: ${tokenAAddress} or ${tokenBAddress} is not a valid Solana public key`);
+        throw new Error(
+          `Invalid token addresses: ${tokenAAddress} or ${tokenBAddress} is not a valid Solana public key`,
+        );
       }
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 

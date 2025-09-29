@@ -18,7 +18,7 @@ import { getHelius } from "../getHelius";
 
 export const EXCHANGE_PROGRAM_ID = new PublicKey(
   process.env.EXCHANGE_PROGRAM_ID ||
-    "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1"
+    "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
 );
 
 // 100% = 1000000, 0.0001% = 1
@@ -40,10 +40,9 @@ export type PoolAccount = {
   token_lp_supply: number;
 };
 
-
 export async function getPoolAccount(
   connection: Connection,
-  poolPubkey: PublicKey
+  poolPubkey: PublicKey,
 ): Promise<PoolAccount> {
   const accountInfo = await connection.getAccountInfo(poolPubkey);
 
@@ -54,7 +53,7 @@ export async function getPoolAccount(
   try {
     const pool = IDL_CODER.accounts.decode<PoolAccount>(
       "Pool",
-      accountInfo.data
+      accountInfo.data,
     );
     return pool;
   } catch (error) {
@@ -66,12 +65,12 @@ export async function getPoolAccount(
 export async function getPoolPubkey(tokenA: string, tokenB: string) {
   const { tokenXAddress, tokenYAddress } = await sortSolanaAddresses(
     tokenA,
-    tokenB
+    tokenB,
   );
 
   const [ammConfigPubkey] = PublicKey.findProgramAddressSync(
     [Buffer.from("amm_config"), new BN(0).toArrayLike(Buffer, "le", 4)],
-    EXCHANGE_PROGRAM_ID
+    EXCHANGE_PROGRAM_ID,
   );
 
   const [poolPubkey] = PublicKey.findProgramAddressSync(
@@ -81,7 +80,7 @@ export async function getPoolPubkey(tokenA: string, tokenB: string) {
       new PublicKey(tokenXAddress).toBuffer(),
       new PublicKey(tokenYAddress).toBuffer(),
     ],
-    EXCHANGE_PROGRAM_ID
+    EXCHANGE_PROGRAM_ID,
   );
 
   return poolPubkey;
@@ -105,7 +104,7 @@ export async function getPoolOnChain(tokenXMint: string, tokenYMint: string) {
 // THIS CAN ALSO BE FETCHED FROM TOKEN HANDLER (token program never changes)
 export async function getTokenProgramId(
   connection: Connection,
-  accountPubkey: PublicKey
+  accountPubkey: PublicKey,
 ): Promise<PublicKey> {
   try {
     const accountInfo = await connection.getAccountInfo(accountPubkey);
@@ -128,7 +127,6 @@ export async function getTokenProgramId(
   }
 }
 
-
 export const deserializeVersionedTransaction = (base64Transaction: string) => {
   const unsignedTransactionBuffer = Buffer.from(base64Transaction, "base64");
 
@@ -149,11 +147,10 @@ export const deserializeVersionedTransaction = (base64Transaction: string) => {
   }
 };
 
-
 export async function getTokenBalance(
   connection: Connection,
   accountPubkey: PublicKey,
-  accountName: string
+  accountName: string,
 ): Promise<BigNumber> {
   try {
     const programId = await getTokenProgramId(connection, accountPubkey);
@@ -162,7 +159,7 @@ export async function getTokenBalance(
       connection,
       accountPubkey,
       undefined,
-      programId
+      programId,
     );
     const balance = BigNumber(account.amount);
     return balance;
@@ -170,7 +167,7 @@ export async function getTokenBalance(
     console.error(
       `${accountName} failed to get balance: ${
         error instanceof Error ? error.message : String(error)
-      }`
+      }`,
     );
     return BigNumber(0);
   }

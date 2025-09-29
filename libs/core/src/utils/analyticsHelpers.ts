@@ -21,7 +21,12 @@ export interface ErrorTrackingParams {
   details?: Record<string, unknown>;
 }
 
-export type TransactionStatus = "initiated" | "signed" | "submitted" | "confirmed" | "failed";
+export type TransactionStatus =
+  | "initiated"
+  | "signed"
+  | "submitted"
+  | "confirmed"
+  | "failed";
 
 export interface TransactionTracker<T> {
   trackInitiated: (params: T) => void;
@@ -32,7 +37,9 @@ export interface TransactionTracker<T> {
 }
 
 export const createSwapTracker = (
-  trackSwap: (params: SwapTrackingParams & { status: TransactionStatus }) => void
+  trackSwap: (
+    params: SwapTrackingParams & { status: TransactionStatus },
+  ) => void,
 ): TransactionTracker<SwapTrackingParams> => ({
   trackInitiated: (params) => trackSwap({ ...params, status: "initiated" }),
   trackSigned: (params) => trackSwap({ ...params, status: "signed" }),
@@ -42,22 +49,26 @@ export const createSwapTracker = (
 });
 
 export const createLiquidityTracker = (
-  trackLiquidity: (params: LiquidityTrackingParams & { status: TransactionStatus }) => void
+  trackLiquidity: (
+    params: LiquidityTrackingParams & { status: TransactionStatus },
+  ) => void,
 ): TransactionTracker<LiquidityTrackingParams> => ({
-  trackInitiated: (params) => trackLiquidity({ ...params, status: "initiated" }),
+  trackInitiated: (params) =>
+    trackLiquidity({ ...params, status: "initiated" }),
   trackSigned: (params) => trackLiquidity({ ...params, status: "signed" }),
-  trackSubmitted: (params) => trackLiquidity({ ...params, status: "submitted" }),
-  trackConfirmed: (params) => trackLiquidity({ ...params, status: "confirmed" }),
+  trackSubmitted: (params) =>
+    trackLiquidity({ ...params, status: "submitted" }),
+  trackConfirmed: (params) =>
+    trackLiquidity({ ...params, status: "confirmed" }),
   trackFailed: (params) => trackLiquidity({ ...params, status: "failed" }),
 });
 
-export const standardizeErrorTracking = (
-  trackError: (params: ErrorTrackingParams) => void,
-  context: string
-) => (error: unknown, details?: Record<string, unknown>) => {
-  trackError({
-    context,
-    error: error instanceof Error ? error.message : "Unknown error",
-    details,
-  });
-};
+export const standardizeErrorTracking =
+  (trackError: (params: ErrorTrackingParams) => void, context: string) =>
+  (error: unknown, details?: Record<string, unknown>) => {
+    trackError({
+      context,
+      error: error instanceof Error ? error.message : "Unknown error",
+      details,
+    });
+  };

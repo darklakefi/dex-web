@@ -23,27 +23,30 @@ export function usePoolSubscription({
   tokenYMint,
   enabled = true,
 }: UsePoolSubscriptionParams) {
-  const parsePoolAccountData = useCallback((data: Buffer): Partial<PoolData> => {
-    try {
-      if (data.length < 64) return {};
+  const parsePoolAccountData = useCallback(
+    (data: Buffer): Partial<PoolData> => {
+      try {
+        if (data.length < 64) return {};
 
-      const dataView = new DataView(data.buffer);
+        const dataView = new DataView(data.buffer);
 
-      const tokenXReserve = dataView.getBigUint64(8, true).toString();
-      const tokenYReserve = dataView.getBigUint64(16, true).toString();
-      const lpSupply = dataView.getBigUint64(24, true).toString();
+        const tokenXReserve = dataView.getBigUint64(8, true).toString();
+        const tokenYReserve = dataView.getBigUint64(16, true).toString();
+        const lpSupply = dataView.getBigUint64(24, true).toString();
 
-      return {
-        tokenXReserve,
-        tokenYReserve,
-        lpSupply,
-        lastUpdate: Date.now(),
-      };
-    } catch (error) {
-      console.error("Failed to parse pool account data:", error);
-      return {};
-    }
-  }, []);
+        return {
+          tokenXReserve,
+          tokenYReserve,
+          lpSupply,
+          lastUpdate: Date.now(),
+        };
+      } catch (error) {
+        console.error("Failed to parse pool account data:", error);
+        return {};
+      }
+    },
+    [],
+  );
 
   return useSolanaSubscription({
     accountAddress: poolAddress,

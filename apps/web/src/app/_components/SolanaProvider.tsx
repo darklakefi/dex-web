@@ -22,14 +22,14 @@ interface SolanaProviderProps {
 export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
   const network = getSolanaWalletAdapterNetwork();
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  
+
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
       new CoinbaseWalletAdapter(),
       new TrustWalletAdapter(),
     ],
-    []
+    [],
   );
 
   return (

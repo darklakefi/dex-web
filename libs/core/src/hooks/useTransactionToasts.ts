@@ -5,17 +5,17 @@ import {
   TRANSACTION_STEPS,
   TRANSACTION_DESCRIPTIONS,
   SUCCESS_MESSAGES,
-  type TransactionType
+  type TransactionType,
 } from "../constants/toastMessages";
 
 export type ToastFunction = (options: {
-    title: string;
-    description: string;
-    variant: "loading" | "success" | "error";
-    customAction?: React.ReactNode;
-  }) => void
+  title: string;
+  description: string;
+  variant: "loading" | "success" | "error";
+  customAction?: React.ReactNode;
+}) => void;
 
-export type DismissToastFunction = () => void
+export type DismissToastFunction = () => void;
 
 export interface UseTransactionToastsParams {
   toast: ToastFunction;
@@ -37,7 +37,10 @@ export interface UseTransactionToastsParams {
 export interface UseTransactionToastsReturn {
   showStepToast: (step: number) => void;
   showSuccessToast: (message?: string, customAction?: React.ReactNode) => void;
-  showErrorToast: (error: string | Error, context?: Record<string, unknown>) => void;
+  showErrorToast: (
+    error: string | Error,
+    context?: Record<string, unknown>,
+  ) => void;
   showStatusToast: (message: string) => void;
   dismiss: () => void;
 }
@@ -63,7 +66,7 @@ export const useTransactionToasts = ({
         });
       }
     },
-    [toast, transactionType]
+    [toast, transactionType],
   );
 
   const showSuccessToast = useCallback(
@@ -76,12 +79,16 @@ export const useTransactionToasts = ({
           customAction,
         });
       } else {
-        const defaultMessage = SUCCESS_MESSAGES[
-          transactionType === "SWAP" ? "SWAP_COMPLETE" :
-          transactionType === "LIQUIDITY" ? "LIQUIDITY_ADDED" :
-          transactionType === "POOL_CREATION" ? "POOL_CREATED" :
-          "SWAP_COMPLETE"
-        ];
+        const defaultMessage =
+          SUCCESS_MESSAGES[
+            transactionType === "SWAP"
+              ? "SWAP_COMPLETE"
+              : transactionType === "LIQUIDITY"
+                ? "LIQUIDITY_ADDED"
+                : transactionType === "POOL_CREATION"
+                  ? "POOL_CREATED"
+                  : "SWAP_COMPLETE"
+          ];
 
         toast({
           title: defaultMessage,
@@ -91,14 +98,16 @@ export const useTransactionToasts = ({
         });
       }
     },
-    [toast, transactionType, isSquadsX, customMessages]
+    [toast, transactionType, isSquadsX, customMessages],
   );
 
   const showErrorToast = useCallback(
     (error: string | Error, context?: Record<string, unknown>) => {
       const errorMessage = error instanceof Error ? error.message : error;
       const contextString = context
-        ? Object.entries(context).map(([key, value]) => `${key}: ${value}`).join(", ")
+        ? Object.entries(context)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(", ")
         : "";
 
       if (isSquadsX && customMessages?.squadsXFailure) {
@@ -117,7 +126,7 @@ export const useTransactionToasts = ({
         });
       }
     },
-    [toast, transactionType, isSquadsX, customMessages]
+    [toast, transactionType, isSquadsX, customMessages],
   );
 
   const showStatusToast = useCallback(
@@ -128,7 +137,7 @@ export const useTransactionToasts = ({
         variant: "loading",
       });
     },
-    [toast, transactionType]
+    [toast, transactionType],
   );
 
   const dismiss = useCallback(() => {

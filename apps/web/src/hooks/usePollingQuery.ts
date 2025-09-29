@@ -2,7 +2,8 @@
 
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 
-interface PollingQueryOptions<TData, TError = Error> extends Omit<UseQueryOptions<TData, TError>, "refetchInterval" | "queryKey"> {
+interface PollingQueryOptions<TData, TError = Error>
+  extends Omit<UseQueryOptions<TData, TError>, "refetchInterval" | "queryKey"> {
   pollingInterval?: number;
   enablePolling?: boolean;
 }
@@ -10,7 +11,7 @@ interface PollingQueryOptions<TData, TError = Error> extends Omit<UseQueryOption
 export function usePollingQuery<TData, TError = Error>(
   queryKey: (string | number | boolean | null | undefined)[],
   queryFn: () => Promise<TData>,
-  options: PollingQueryOptions<TData, TError> = {}
+  options: PollingQueryOptions<TData, TError> = {},
 ) {
   const {
     pollingInterval = 5000,

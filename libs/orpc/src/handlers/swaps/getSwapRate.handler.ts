@@ -29,7 +29,6 @@ export type AmmConfig = {
   padding: number[];
 };
 
-
 function gateFee(sourceAmount: BigNumber, tradeFeeRate: BigNumber): BigNumber {
   return sourceAmount
     .multipliedBy(tradeFeeRate)
@@ -96,16 +95,27 @@ async function getAmmConfigAccount(
   }
 
   try {
-    const decodedData = IDL_CODER.accounts.decode("AmmConfig", accountInfo.data);
+    const decodedData = IDL_CODER.accounts.decode(
+      "AmmConfig",
+      accountInfo.data,
+    );
 
     const ammConfig: AmmConfig = {
       trade_fee_rate: decodedData.trade_fee_rate || 0,
       protocol_fee_rate: decodedData.protocol_fee_rate || 0,
       index: decodedData.index || 0,
-      creator: decodedData.creator || new PublicKey("11111111111111111111111111111112"),
-      protocol_fee_collector: decodedData.protocol_fee_collector || new PublicKey("11111111111111111111111111111112"),
-      fund_fee_collector: decodedData.fund_fee_collector || new PublicKey("11111111111111111111111111111112"),
-      protocol_owner: decodedData.protocol_owner || new PublicKey("11111111111111111111111111111112"),
+      creator:
+        decodedData.creator ||
+        new PublicKey("11111111111111111111111111111112"),
+      protocol_fee_collector:
+        decodedData.protocol_fee_collector ||
+        new PublicKey("11111111111111111111111111111112"),
+      fund_fee_collector:
+        decodedData.fund_fee_collector ||
+        new PublicKey("11111111111111111111111111111112"),
+      protocol_owner:
+        decodedData.protocol_owner ||
+        new PublicKey("11111111111111111111111111111112"),
       padding: decodedData.padding || [],
     };
 

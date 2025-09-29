@@ -3,5 +3,5 @@
 import { WalletButton } from "./WalletButton";
 
 export function AppHeaderButton() {
-	return WalletButton;
+  return WalletButton;
 }

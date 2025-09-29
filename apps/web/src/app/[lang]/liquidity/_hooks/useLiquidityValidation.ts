@@ -1,7 +1,11 @@
 "use client";
 
-import { convertToDecimal, } from "@dex-web/utils";
-import type { LiquidityFormValues, PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
+import { convertToDecimal } from "@dex-web/utils";
+import type {
+  LiquidityFormValues,
+  PoolDetails,
+  TokenAccountsData,
+} from "../_types/liquidity.types";
 import { useMemo } from "react";
 import BigNumber from "bignumber.js";
 
@@ -50,9 +54,9 @@ export function useLiquidityValidation({
 
     const hasAmounts = Boolean(
       sellAmount &&
-      BigNumber(sellAmount).gt(0) &&
-      buyAmount &&
-      BigNumber(buyAmount).gt(0)
+        BigNumber(sellAmount).gt(0) &&
+        buyAmount &&
+        BigNumber(buyAmount).gt(0),
     );
 
     let hasInsufficientBalance = false;
@@ -90,7 +94,8 @@ export function useLiquidityValidation({
     }
 
     const isValid = Object.keys(errors).length === 0;
-    const canSubmit = isValid && hasAmounts && hasWallet && !hasInsufficientBalance;
+    const canSubmit =
+      isValid && hasAmounts && hasWallet && !hasInsufficientBalance;
 
     return {
       errors,

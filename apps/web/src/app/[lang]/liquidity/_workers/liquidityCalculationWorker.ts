@@ -1,8 +1,11 @@
 import { parseAmountBigNumber } from "@dex-web/utils";
 
 export interface CalculationInput {
-  type: 'PRICE_CALCULATION' | 'BALANCE_VALIDATION' | 'TOKEN_AMOUNT_CALCULATION';
-  payload: PriceCalculationPayload | BalanceValidationPayload | TokenAmountCalculationPayload;
+  type: "PRICE_CALCULATION" | "BALANCE_VALIDATION" | "TOKEN_AMOUNT_CALCULATION";
+  payload:
+    | PriceCalculationPayload
+    | BalanceValidationPayload
+    | TokenAmountCalculationPayload;
 }
 
 export interface PriceCalculationPayload {
@@ -21,7 +24,7 @@ export interface TokenAmountCalculationPayload {
   inputAmount: string;
   poolReserveX: number;
   poolReserveY: number;
-  inputType: 'tokenX' | 'tokenY';
+  inputType: "tokenX" | "tokenY";
 }
 
 export interface CalculationResult {
@@ -32,7 +35,10 @@ export interface CalculationResult {
   timestamp: number;
 }
 
-function calculateTokenAmountByPrice(inputAmount: string, price: string): string {
+function calculateTokenAmountByPrice(
+  inputAmount: string,
+  price: string,
+): string {
   try {
     if (
       parseAmountBigNumber(inputAmount).gt(0) &&
@@ -52,7 +58,7 @@ function validateBalance(
   inputAmount: string,
   maxBalance: number,
   decimals: number,
-  symbol: string
+  symbol: string,
 ): { isValid: boolean; error?: string } {
   try {
     const amount = parseAmountBigNumber(inputAmount);
@@ -61,13 +67,13 @@ function validateBalance(
     }
 
     const maxBalanceDecimal = parseAmountBigNumber(maxBalance.toString()).div(
-      parseAmountBigNumber((10 ** decimals).toString())
+      parseAmountBigNumber((10 ** decimals).toString()),
     );
 
     if (amount.gt(maxBalanceDecimal)) {
       return {
         isValid: false,
-        error: `Insufficient ${symbol} balance.`
+        error: `Insufficient ${symbol} balance.`,
       };
     }
 
@@ -75,7 +81,7 @@ function validateBalance(
   } catch (error) {
     return {
       isValid: false,
-      error: `Balance validation failed: ${error}`
+      error: `Balance validation failed: ${error}`,
     };
   }
 }
@@ -84,7 +90,7 @@ function calculateApproximateTokenAmount(
   inputAmount: string,
   poolReserveX: number,
   poolReserveY: number,
-  inputType: 'tokenX' | 'tokenY'
+  inputType: "tokenX" | "tokenY",
 ): string {
   try {
     const amount = parseAmountBigNumber(inputAmount);
@@ -95,7 +101,7 @@ function calculateApproximateTokenAmount(
     const reserveX = parseAmountBigNumber(poolReserveX.toString());
     const reserveY = parseAmountBigNumber(poolReserveY.toString());
 
-    if (inputType === 'tokenX') {
+    if (inputType === "tokenX") {
       return amount.multipliedBy(reserveY).dividedBy(reserveX).toString();
     } else {
       return amount.multipliedBy(reserveX).dividedBy(reserveY).toString();
@@ -112,21 +118,28 @@ self.onmessage = (event: MessageEvent<CalculationInput>) => {
     let result: unknown;
 
     switch (type) {
-      case 'PRICE_CALCULATION': {
+      case "PRICE_CALCULATION": {
         const { inputAmount, price } = payload as PriceCalculationPayload;
         result = calculateTokenAmountByPrice(inputAmount, price);
         break;
       }
 
-      case 'BALANCE_VALIDATION': {
-        const { inputAmount, maxBalance, decimals, symbol } = payload as BalanceValidationPayload;
+      case "BALANCE_VALIDATION": {
+        const { inputAmount, maxBalance, decimals, symbol } =
+          payload as BalanceValidationPayload;
         result = validateBalance(inputAmount, maxBalance, decimals, symbol);
         break;
       }
 
-      case 'TOKEN_AMOUNT_CALCULATION': {
-        const { inputAmount, poolReserveX, poolReserveY, inputType } = payload as TokenAmountCalculationPayload;
-        result = calculateApproximateTokenAmount(inputAmount, poolReserveX, poolReserveY, inputType);
+      case "TOKEN_AMOUNT_CALCULATION": {
+        const { inputAmount, poolReserveX, poolReserveY, inputType } =
+          payload as TokenAmountCalculationPayload;
+        result = calculateApproximateTokenAmount(
+          inputAmount,
+          poolReserveX,
+          poolReserveY,
+          inputType,
+        );
         break;
       }
 
@@ -138,7 +151,7 @@ self.onmessage = (event: MessageEvent<CalculationInput>) => {
       type,
       success: true,
       result,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     self.postMessage(response);
@@ -147,7 +160,7 @@ self.onmessage = (event: MessageEvent<CalculationInput>) => {
       type,
       success: false,
       error: error instanceof Error ? error.message : String(error),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     self.postMessage(errorResponse);
@@ -155,7 +168,7 @@ self.onmessage = (event: MessageEvent<CalculationInput>) => {
 };
 
 self.postMessage({
-  type: 'WORKER_READY',
+  type: "WORKER_READY",
   success: true,
-  timestamp: Date.now()
+  timestamp: Date.now(),
 });

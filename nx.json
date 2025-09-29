@@ -10,10 +10,7 @@
     }
   },
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
@@ -35,10 +32,7 @@
   },
   "plugins": [
     {
-      "exclude": [
-        "proto-definitions/*",
-        "grpc-client/*"
-      ],
+      "exclude": ["proto-definitions/*", "grpc-client/*"],
       "options": {
         "build": {
           "buildDepsName": "build-deps",
@@ -100,10 +94,7 @@
       "plugin": "@nx/storybook/plugin"
     },
     {
-      "include": [
-        "proto-definitions/*",
-        "grpc-client/*"
-      ],
+      "include": ["proto-definitions/*", "grpc-client/*"],
       "options": {
         "typecheck": {
           "targetName": "typecheck"
@@ -118,13 +109,8 @@
   "targetDefaults": {
     "@nx/esbuild:esbuild": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     },
     "@nx/vite:build": {
       "cache": true,
@@ -132,14 +118,10 @@
         "production",
         "^production",
         {
-          "externalDependencies": [
-            "vite"
-          ]
+          "externalDependencies": ["vite"]
         }
       ],
-      "outputs": [
-        "{options.outputPath}"
-      ]
+      "outputs": ["{options.outputPath}"]
     },
     "@nx/vite:test": {
       "cache": true,
@@ -147,29 +129,21 @@
         "default",
         "^production",
         {
-          "externalDependencies": [
-            "vitest"
-          ]
+          "externalDependencies": ["vitest"]
         }
       ],
       "options": {
         "coverage": true
       },
-      "outputs": [
-        "{options.reportsDirectory}"
-      ]
+      "outputs": ["{options.reportsDirectory}"]
     },
     "build": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "e2e": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "lint": {
       "cache": true,
@@ -180,32 +154,18 @@
     },
     "lint:ci": {
       "cache": true,
-      "inputs": [
-        "default",
-        "^default"
-      ],
-      "outputs": [
-        "{options.reportsDirectory}"
-      ]
+      "inputs": ["default", "^default"],
+      "outputs": ["{options.reportsDirectory}"]
     },
     "test": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "default",
-        "^default"
-      ],
-      "outputs": [
-        "{options.reportsDirectory}"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default"],
+      "outputs": ["{options.reportsDirectory}"]
     },
     "typecheck": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     }
   },
   "nxCloudId": "68d3b92a7aa7718fac7def74"

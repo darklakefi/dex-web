@@ -13,7 +13,7 @@ function getPoolOnLocalData(tokenXMint: string, tokenYMint: string) {
   return localDataPool.find(
     (pool) =>
       (pool.tokenXMint === tokenXMint && pool.tokenYMint === tokenYMint) ||
-      (pool.tokenXMint === tokenYMint && pool.tokenYMint === tokenXMint)
+      (pool.tokenXMint === tokenYMint && pool.tokenYMint === tokenXMint),
   );
 }
 
@@ -28,7 +28,7 @@ async function savePoolToLocalData(pool: PoolAccount) {
 }
 
 export async function getPoolDetailsHandler(
-  input: GetPoolDetailsInput
+  input: GetPoolDetailsInput,
 ): Promise<GetPoolDetailsOutput | null> {
   const { tokenXMint, tokenYMint } = input;
   let pool = getPoolOnLocalData(tokenXMint, tokenYMint);
@@ -39,8 +39,7 @@ export async function getPoolDetailsHandler(
       if (poolOnChain) {
         pool = await savePoolToLocalData(poolOnChain);
       }
-    } catch (_error) {
-    }
+    } catch (_error) {}
   }
 
   return pool ?? null;

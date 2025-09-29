@@ -24,7 +24,9 @@ vi.mock("../../../../hooks/useAnalytics", () => ({
   useAnalytics: () => mockAnalytics,
 }));
 vi.mock("../../../_components/SkeletonTokenInput", () => ({
-  SkeletonTokenInput: () => <div data-testid="skeleton-token-input">Loading...</div>,
+  SkeletonTokenInput: () => (
+    <div data-testid="skeleton-token-input">Loading...</div>
+  ),
 }));
 vi.mock("@dex-web/orpc", () => ({
   client: {
@@ -183,7 +185,7 @@ describe.skip("LiquidityForm Edge Cases", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"<script>alert('xss')</script>");
+      await user.type(amountInputs[0]!, "<script>alert('xss')</script>");
       expect(amountInputs[0]).not.toHaveValue("<script>alert('xss')</script>");
     });
   });
@@ -193,9 +195,11 @@ describe.skip("LiquidityForm Edge Cases", () => {
         useWallet: () => ({
           publicKey: new PublicKey("11111111111111111111111111111112"),
           wallet: { adapter: { name: "Phantom" } },
-          signTransaction: vi.fn().mockImplementation(
-            () => new Promise((resolve) => setTimeout(resolve, 3000))
-          ),
+          signTransaction: vi
+            .fn()
+            .mockImplementation(
+              () => new Promise((resolve) => setTimeout(resolve, 3000)),
+            ),
         }),
       }));
       vi.mock("../../../../hooks/useRealtimePoolData", () => ({
@@ -230,8 +234,8 @@ describe.skip("LiquidityForm Edge Cases", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"0.1");
-      await user.type(amountInputs[1]!,"100");
+      await user.type(amountInputs[0]!, "0.1");
+      await user.type(amountInputs[1]!, "100");
       const submitButton = screen.getByText("Add Liquidity");
       await user.click(submitButton);
       expect(screen.getByText("Processing Transaction...")).toBeInTheDocument();
@@ -268,30 +272,36 @@ describe.skip("LiquidityForm Edge Cases", () => {
         }),
       }));
       let callCount = 0;
-      vi.mocked(client.liquidity.createLiquidityTransaction).mockImplementation(() => {
-        callCount++;
-        return Promise.resolve({
-          success: true,
-          transaction: `mock-transaction-${callCount}`,
-        });
-      });
+      vi.mocked(client.liquidity.createLiquidityTransaction).mockImplementation(
+        () => {
+          callCount++;
+          return Promise.resolve({
+            success: true,
+            transaction: `mock-transaction-${callCount}`,
+          });
+        },
+      );
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"0.1");
-      await user.type(amountInputs[1]!,"100");
+      await user.type(amountInputs[0]!, "0.1");
+      await user.type(amountInputs[1]!, "100");
       const submitButton = screen.getByText("Add Liquidity");
       await user.click(submitButton);
       await user.click(submitButton);
       await user.click(submitButton);
-      expect(client.liquidity.createLiquidityTransaction).toHaveBeenCalledTimes(1);
+      expect(client.liquidity.createLiquidityTransaction).toHaveBeenCalledTimes(
+        1,
+      );
     });
   });
   describe("Memory Management", () => {
     it("should cleanup subscriptions on unmount", () => {
-      const { unmount } = render(<LiquidityForm />, { wrapper: createTestWrapper() });
+      const { unmount } = render(<LiquidityForm />, {
+        wrapper: createTestWrapper(),
+      });
       const mockCleanup = vi.fn();
       vi.spyOn(React, "useEffect").mockImplementation((effect, _deps) => {
         const cleanup = effect();
@@ -310,9 +320,11 @@ describe.skip("LiquidityForm Edge Cases", () => {
         useWallet: () => ({
           publicKey: new PublicKey("11111111111111111111111111111112"),
           wallet: { adapter: { name: "Phantom" } },
-          signTransaction: vi.fn().mockImplementation(
-            () => new Promise((resolve) => setTimeout(resolve, 1000))
-          ),
+          signTransaction: vi
+            .fn()
+            .mockImplementation(
+              () => new Promise((resolve) => setTimeout(resolve, 1000)),
+            ),
         }),
       }));
       vi.mock("../../../../hooks/useRealtimePoolData", () => ({
@@ -343,12 +355,15 @@ describe.skip("LiquidityForm Edge Cases", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"0.1");
-      await user.type(amountInputs[1]!,"100");
+      await user.type(amountInputs[0]!, "0.1");
+      await user.type(amountInputs[1]!, "100");
       const submitButton = screen.getByText("Add Liquidity");
       await user.click(submitButton);
       expect(submitButton.closest("button")).toHaveAttribute("disabled");
-      expect(submitButton.closest("button")).toHaveAttribute("aria-disabled", "true");
+      expect(submitButton.closest("button")).toHaveAttribute(
+        "aria-disabled",
+        "true",
+      );
     });
     it("should provide appropriate screen reader announcements", async () => {
       vi.mock("@solana/wallet-adapter-react", () => ({
@@ -376,7 +391,7 @@ describe.skip("LiquidityForm Edge Cases", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"1000");
+      await user.type(amountInputs[0]!, "1000");
       await waitFor(() => {
         expect(screen.getByText(/Insufficient.*balance/)).toBeInTheDocument();
       });
@@ -403,7 +418,10 @@ describe.skip("LiquidityForm Edge Cases", () => {
           isRealtime: true,
         }),
       }));
-      vi.mocked(client.liquidity.getAddLiquidityReview).mockResolvedValue({ tokenAmount: 50, tokenAmountRaw: "50" });
+      vi.mocked(client.liquidity.getAddLiquidityReview).mockResolvedValue({
+        tokenAmount: 50,
+        tokenAmountRaw: "50",
+      });
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
@@ -411,11 +429,16 @@ describe.skip("LiquidityForm Edge Cases", () => {
       const amountInputs = screen.getAllByRole("textbox");
       for (let i = 1; i <= 10; i++) {
         await user.clear(amountInputs[0]!);
-        await user.type(amountInputs[0]!,i.toString());
+        await user.type(amountInputs[0]!, i.toString());
       }
-      await waitFor(() => {
-        expect(client.liquidity.getAddLiquidityReview).toHaveBeenCalledTimes(1);
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(client.liquidity.getAddLiquidityReview).toHaveBeenCalledTimes(
+            1,
+          );
+        },
+        { timeout: 1000 },
+      );
     });
     it("should handle very large numbers appropriately", async () => {
       vi.mock("@solana/wallet-adapter-react", () => ({
@@ -428,18 +451,22 @@ describe.skip("LiquidityForm Edge Cases", () => {
       vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
         useRealtimeTokenAccounts: () => ({
           buyTokenAccount: {
-            tokenAccounts: [{
-              amount: Number.MAX_SAFE_INTEGER,
-              decimals: 9,
-              symbol: "SOL"
-            }],
+            tokenAccounts: [
+              {
+                amount: Number.MAX_SAFE_INTEGER,
+                decimals: 9,
+                symbol: "SOL",
+              },
+            ],
           },
           sellTokenAccount: {
-            tokenAccounts: [{
-              amount: Number.MAX_SAFE_INTEGER,
-              decimals: 6,
-              symbol: "USDC"
-            }],
+            tokenAccounts: [
+              {
+                amount: Number.MAX_SAFE_INTEGER,
+                decimals: 6,
+                symbol: "USDC",
+              },
+            ],
           },
           refetchBuyTokenAccount: vi.fn(),
           refetchSellTokenAccount: vi.fn(),
@@ -451,7 +478,7 @@ describe.skip("LiquidityForm Edge Cases", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"999999999999999999999");
+      await user.type(amountInputs[0]!, "999999999999999999999");
       expect(amountInputs[0]).toHaveValue();
     });
   });

@@ -50,7 +50,7 @@ export default async function Page({
         ),
       );
     } catch (error) {
-      console.warn('Invalid token addresses for prefetch:', error);
+      console.warn("Invalid token addresses for prefetch:", error);
     }
   }
 

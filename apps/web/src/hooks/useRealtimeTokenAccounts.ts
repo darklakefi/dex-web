@@ -1,6 +1,10 @@
 "use client";
 
-import { useTokenAccounts, type UseTokenAccountsReturn, type TokenAccountsData } from "@dex-web/core";
+import {
+  useTokenAccounts,
+  type UseTokenAccountsReturn,
+  type TokenAccountsData,
+} from "@dex-web/core";
 import type { PublicKey } from "@solana/web3.js";
 import { QueryClient as QueryClientClass } from "@tanstack/react-query";
 import { tanstackClient } from "@dex-web/orpc";
@@ -53,7 +57,7 @@ export function useRealtimeTokenAccounts({
       enabled: !!publicKey && !!tokenAAddress,
       staleTime: hasRecentTransaction ? 2000 : 30000,
       placeholderData: (previousData) => previousData,
-    }
+    },
   );
 
   const { data: liveSellTokenAccount } = usePollingQuery<TokenAccountsData>(
@@ -77,15 +81,18 @@ export function useRealtimeTokenAccounts({
       enabled: !!publicKey && !!tokenBAddress,
       staleTime: hasRecentTransaction ? 2000 : 30000,
       placeholderData: (previousData) => previousData,
-    }
+    },
   );
 
-  const isRefreshingBuy = tokenAccountsResult.isLoadingBuy && !!tokenAccountsResult.buyTokenAccount;
-  const isRefreshingSell = tokenAccountsResult.isLoadingSell && !!tokenAccountsResult.sellTokenAccount;
+  const isRefreshingBuy =
+    tokenAccountsResult.isLoadingBuy && !!tokenAccountsResult.buyTokenAccount;
+  const isRefreshingSell =
+    tokenAccountsResult.isLoadingSell && !!tokenAccountsResult.sellTokenAccount;
 
   return {
     buyTokenAccount: liveBuyTokenAccount || tokenAccountsResult.buyTokenAccount,
-    sellTokenAccount: liveSellTokenAccount || tokenAccountsResult.sellTokenAccount,
+    sellTokenAccount:
+      liveSellTokenAccount || tokenAccountsResult.sellTokenAccount,
     refetchBuyTokenAccount: tokenAccountsResult.refetchBuyTokenAccount,
     refetchSellTokenAccount: tokenAccountsResult.refetchSellTokenAccount,
     isLoadingBuy: tokenAccountsResult.isLoadingBuy,

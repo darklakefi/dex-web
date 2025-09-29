@@ -1,7 +1,7 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import type { QueryFunctionContext, } from "@tanstack/react-query";
+import type { QueryFunctionContext } from "@tanstack/react-query";
 import { QueryClient as QueryClientClass } from "@tanstack/react-query";
 import { tanstackClient } from "@dex-web/orpc";
 import { useStreamingQuery } from "./useStreamingQuery";
@@ -17,7 +17,6 @@ interface UseStreamingTokenAccountsParams {
   enableStreaming?: boolean;
   enableSSE?: boolean;
 }
-
 
 export function useStreamingTokenAccounts({
   publicKey,
@@ -37,7 +36,9 @@ export function useStreamingTokenAccounts({
 } {
   const ownerAddress = publicKey?.toBase58();
 
-  const priority: DeFiStreamConfig["priority"] = hasRecentTransaction ? "high" : "normal";
+  const priority: DeFiStreamConfig["priority"] = hasRecentTransaction
+    ? "high"
+    : "normal";
 
   const buyTokenQuery = useTokenAccountStream({
     mint: tokenAAddress,
@@ -77,7 +78,6 @@ export function useStreamingTokenAccounts({
   };
 }
 
-
 function useTokenAccountStream({
   mint,
   ownerAddress,
@@ -97,18 +97,20 @@ function useTokenAccountStream({
     if (!mint || !ownerAddress) return null;
 
     const context: QueryFunctionContext = {
-      client: new QueryClientClass(), 
+      client: new QueryClientClass(),
       queryKey,
       signal: new AbortController().signal,
       meta: undefined,
     };
 
-    return tanstackClient.helius.getTokenAccounts.queryOptions({
-      input: {
-        mint,
-        ownerAddress,
-      },
-    }).queryFn(context);
+    return tanstackClient.helius.getTokenAccounts
+      .queryOptions({
+        input: {
+          mint,
+          ownerAddress,
+        },
+      })
+      .queryFn(context);
   };
 
   const sseQuery = useServerSentEvents<TokenAccountsData>(
@@ -117,18 +119,14 @@ function useTokenAccountStream({
     {
       priority,
       enableFallback: true,
-    }
+    },
   );
 
-  const streamingQuery = useStreamingQuery(
-    queryKey,
-    fetchTokenAccount,
-    {
-      priority,
-      enableStreaming: enableStreaming && !enableSSE,
-      enabled: !!mint && !!ownerAddress,
-    }
-  );
+  const streamingQuery = useStreamingQuery(queryKey, fetchTokenAccount, {
+    priority,
+    enableStreaming: enableStreaming && !enableSSE,
+    enabled: !!mint && !!ownerAddress,
+  });
 
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
 
@@ -140,7 +138,6 @@ function useTokenAccountStream({
     isStreaming: enableSSE ? sseQuery.isStreaming : streamingQuery.isStreaming,
   };
 }
-
 
 export function useEnhancedRealtimeTokenAccounts({
   publicKey,
@@ -159,6 +156,6 @@ export function useEnhancedRealtimeTokenAccounts({
     tokenBAddress,
     hasRecentTransaction,
     enableStreaming: true,
-    enableSSE: false, 
+    enableSSE: false,
   });
 }

@@ -39,10 +39,10 @@ export const getTradesListByUser = baseProcedure
       }
 
       const displayAmountIn = BigNumber(trade.amountIn).div(
-        10 ** tokenIn.decimals
+        10 ** tokenIn.decimals,
       );
       const displayMinimalAmountOut = BigNumber(trade.minimalAmountOut).div(
-        10 ** tokenOut.decimals
+        10 ** tokenOut.decimals,
       );
 
       return {

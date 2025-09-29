@@ -21,7 +21,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMachine } from "@xstate/react";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
@@ -164,7 +171,11 @@ export function LiquidityFormProvider({
       buyAccount: tokenAccountsData.buyTokenAccount ?? null,
       sellAccount: tokenAccountsData.sellTokenAccount ?? null,
     });
-  }, [send, tokenAccountsData.buyTokenAccount, tokenAccountsData.sellTokenAccount]);
+  }, [
+    send,
+    tokenAccountsData.buyTokenAccount,
+    tokenAccountsData.sellTokenAccount,
+  ]);
 
   const {
     trackInitiated,
@@ -380,10 +391,7 @@ export function LiquidityFormProvider({
       inputType: "tokenX" | "tokenY";
     }) => {
       const amountNumber = parseAmount(inputAmount);
-      if (
-        !poolDataResult.data ||
-        parseAmountBigNumber(inputAmount).lte(0)
-      )
+      if (!poolDataResult.data || parseAmountBigNumber(inputAmount).lte(0))
         return;
 
       const response = await client.liquidity.getAddLiquidityReview({
@@ -581,8 +589,7 @@ export function LiquidityFormProvider({
   const isSubmitting = state.matches("submitting") || state.matches("signing");
   const isSuccess = state.matches("success");
   const isError = state.matches("error");
-  const isCalculating =
-    state.matches("calculating");
+  const isCalculating = state.matches("calculating");
   const hasError = isError && !!state.context.error;
 
   const trackLiquidityAction = useCallback(
@@ -617,16 +624,26 @@ export function LiquidityFormProvider({
 
   const dataValue = useMemo(
     () => ({
-      poolDetails: poolDataResult.data ? {
-        poolAddress: undefined,
-        tokenXMint: poolDataResult.data.tokenXMint,
-        tokenYMint: poolDataResult.data.tokenYMint,
-        tokenXReserve: poolDataResult.data.tokenXReserve ? parseFloat(poolDataResult.data.tokenXReserve) : undefined,
-        tokenYReserve: poolDataResult.data.tokenYReserve ? parseFloat(poolDataResult.data.tokenYReserve) : undefined,
-        totalSupply: poolDataResult.data.lpSupply ? parseFloat(poolDataResult.data.lpSupply) : undefined,
-        fee: poolDataResult.data.fee ? parseFloat(poolDataResult.data.fee) : undefined,
-        price: undefined,
-      } : null,
+      poolDetails: poolDataResult.data
+        ? {
+            poolAddress: undefined,
+            tokenXMint: poolDataResult.data.tokenXMint,
+            tokenYMint: poolDataResult.data.tokenYMint,
+            tokenXReserve: poolDataResult.data.tokenXReserve
+              ? parseFloat(poolDataResult.data.tokenXReserve)
+              : undefined,
+            tokenYReserve: poolDataResult.data.tokenYReserve
+              ? parseFloat(poolDataResult.data.tokenYReserve)
+              : undefined,
+            totalSupply: poolDataResult.data.lpSupply
+              ? parseFloat(poolDataResult.data.lpSupply)
+              : undefined,
+            fee: poolDataResult.data.fee
+              ? parseFloat(poolDataResult.data.fee)
+              : undefined,
+            price: undefined,
+          }
+        : null,
       tokenAAddress: finalTokenAAddress,
       tokenAccountsData,
       tokenBAddress: finalTokenBAddress,
@@ -681,7 +698,11 @@ export function LiquidityFormProvider({
       <LiquiditySettingsProvider value={settingsValue}>
         <LiquidityDataProvider value={dataValue}>
           <LiquidityActionsProvider value={actionsValue}>
-            <LiquidityFormStateProvider value={formStateValue as unknown as LiquidityFormStateContextValue}>
+            <LiquidityFormStateProvider
+              value={
+                formStateValue as unknown as LiquidityFormStateContextValue
+              }
+            >
               {children}
             </LiquidityFormStateProvider>
           </LiquidityActionsProvider>

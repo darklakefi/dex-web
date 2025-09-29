@@ -1,7 +1,6 @@
 import type { ValidationState } from "../_hooks/useLiquidityValidation";
 import type { PoolDetails } from "../_types/liquidity.types";
 
-
 export type ButtonState =
   | "SUBMITTING"
   | "CALCULATING"
@@ -104,7 +103,7 @@ export function getButtonMessage(state: ButtonState): string {
     SAME_TOKENS: "Select different tokens",
     INVALID_PRICE: "Invalid price",
     LOADING: "Loading...",
-    DISABLED: "Connect Wallet"
+    DISABLED: "Connect Wallet",
   };
 
   return messages[state];
@@ -119,7 +118,7 @@ export function isButtonDisabled(state: ButtonState): boolean {
     "INVALID_PRICE",
     "DISABLED",
     "ENTER_AMOUNTS",
-    "ENTER_AMOUNT"
+    "ENTER_AMOUNT",
   ];
 
   return disabledStates.includes(state);
@@ -129,21 +128,23 @@ export function isButtonLoading(state: ButtonState): boolean {
   return state === "SUBMITTING" || state === "CALCULATING";
 }
 
-export function getButtonSeverity(state: ButtonState): 'info' | 'warning' | 'error' | 'success' {
+export function getButtonSeverity(
+  state: ButtonState,
+): "info" | "warning" | "error" | "success" {
   switch (state) {
     case "INSUFFICIENT_BALANCE":
     case "SAME_TOKENS":
     case "INVALID_PRICE":
-      return 'error';
+      return "error";
     case "ENTER_AMOUNTS":
     case "ENTER_AMOUNT":
     case "LOADING":
     case "CALCULATING":
-      return 'info';
+      return "info";
     case "CREATE_POOL":
     case "ADD_LIQUIDITY":
-      return 'success';
+      return "success";
     default:
-      return 'info';
+      return "info";
   }
 }

@@ -14,13 +14,12 @@ interface UseStreamingPoolDataParams {
   enableSSE?: boolean;
 }
 
-
 export function useStreamingPoolData({
   tokenXMint,
   tokenYMint,
   priority = "high",
   enableStreaming = true,
-  enableSSE = false, 
+  enableSSE = false,
 }: UseStreamingPoolDataParams) {
   const queryClient = useQueryClient();
 
@@ -29,13 +28,13 @@ export function useStreamingPoolData({
 
   const fetchPoolData = async () => {
     const queryOptions = tanstackClient.pools.getPoolDetails.queryOptions({
-      input: { tokenXMint, tokenYMint }
+      input: { tokenXMint, tokenYMint },
     });
-    const result = await queryOptions.queryFn({ 
+    const result = await queryOptions.queryFn({
       client: queryClient,
-      queryKey: queryOptions.queryKey, 
-      signal: new AbortController().signal, 
-      meta: undefined 
+      queryKey: queryOptions.queryKey,
+      signal: new AbortController().signal,
+      meta: undefined,
     });
 
     return result ? transformPoolDataToStream(result) : null;
@@ -47,17 +46,13 @@ export function useStreamingPoolData({
     {
       priority,
       enableFallback: true,
-    }
+    },
   );
 
-  const streamingQuery = useStreamingQuery(
-    queryKey,
-    fetchPoolData,
-    {
-      priority,
-      enableStreaming: enableStreaming && !enableSSE,
-    }
-  );
+  const streamingQuery = useStreamingQuery(queryKey, fetchPoolData, {
+    priority,
+    enableStreaming: enableStreaming && !enableSSE,
+  });
 
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
 
@@ -67,7 +62,9 @@ export function useStreamingPoolData({
     error: activeQuery.error,
     isStreaming: enableSSE ? sseQuery.isStreaming : streamingQuery.isStreaming,
     isRealtime: true,
-    isSubscribed: enableSSE ? sseQuery.isStreaming : streamingQuery.isSubscribed,
+    isSubscribed: enableSSE
+      ? sseQuery.isStreaming
+      : streamingQuery.isSubscribed,
     priority,
     refetch: activeQuery.refetch,
     streamType: enableSSE ? "sse" : "polling",
@@ -75,10 +72,9 @@ export function useStreamingPoolData({
   };
 }
 
-
-
-
-function transformPoolDataToStream(poolDetails: Record<string, unknown>): PoolStreamData {
+function transformPoolDataToStream(
+  poolDetails: Record<string, unknown>,
+): PoolStreamData {
   return {
     tokenXReserve: String(poolDetails?.tokenXReserve || "0"),
     tokenYReserve: String(poolDetails?.tokenYReserve || "0"),
@@ -88,12 +84,10 @@ function transformPoolDataToStream(poolDetails: Record<string, unknown>): PoolSt
   };
 }
 
-
 function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {
   const [tokenA, tokenB] = [tokenXMint, tokenYMint].sort();
   return `${tokenA}-${tokenB}`;
 }
-
 
 export function useHighFrequencyPoolData({
   tokenXMint,

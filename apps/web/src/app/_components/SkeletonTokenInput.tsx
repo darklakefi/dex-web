@@ -12,15 +12,12 @@ interface SkeletonTokenInputProps {
 export function SkeletonTokenInput({
   testId: _testId = "skeleton-token-input",
   "aria-label": _ariaLabel = "Loading token input",
-  label = "LOADING"
+  label = "LOADING",
 }: SkeletonTokenInputProps = {}) {
   return (
     <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3">
       <div className="flex flex-col gap-3">
-        <Text.Body2
-          as="label"
-          className="mb-3 block text-green-300 uppercase"
-        >
+        <Text.Body2 as="label" className="mb-3 block text-green-300 uppercase">
           {label}
         </Text.Body2>
         <div className="flex items-center gap-2">

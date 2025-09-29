@@ -22,27 +22,32 @@ export function useTokenAccountSubscription({
   tokenMint,
   enabled = true,
 }: UseTokenAccountSubscriptionParams) {
-  const parseTokenAccountData = useCallback((data: Buffer): Partial<TokenAccountData> => {
-    try {
-      if (data.length < 165) return {};
+  const parseTokenAccountData = useCallback(
+    (data: Buffer): Partial<TokenAccountData> => {
+      try {
+        if (data.length < 165) return {};
 
-      const dataView = new DataView(data.buffer);
+        const dataView = new DataView(data.buffer);
 
-      const amount = dataView.getBigUint64(64, true).toString();
+        const amount = dataView.getBigUint64(64, true).toString();
 
-      return {
-        amount,
-        lastUpdate: Date.now(),
-      };
-    } catch (error) {
-      console.error("Failed to parse token account data:", error);
-      return {};
-    }
-  }, []);
+        return {
+          amount,
+          lastUpdate: Date.now(),
+        };
+      } catch (error) {
+        console.error("Failed to parse token account data:", error);
+        return {};
+      }
+    },
+    [],
+  );
 
   return useSolanaSubscription({
     accountAddress: tokenAccountAddress,
-    queryKey: ["token-accounts", publicKey, tokenMint].filter((item): item is string => item !== null),
+    queryKey: ["token-accounts", publicKey, tokenMint].filter(
+      (item): item is string => item !== null,
+    ),
     parseAccountData: parseTokenAccountData,
     enabled: enabled && !!tokenAccountAddress && !!publicKey,
   });

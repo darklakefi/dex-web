@@ -12,7 +12,7 @@ export class LiquidityError extends Error {
 
 export function createTransactionError(
   error: unknown,
-  context?: Record<string, unknown>
+  context?: Record<string, unknown>,
 ): TransactionError {
   const message = error instanceof Error ? error.message : String(error);
   return { message, context };
@@ -21,19 +21,19 @@ export function createTransactionError(
 export function handleAsyncError<T>(
   operation: () => Promise<T>,
   errorMessage: string,
-  context?: Record<string, unknown>
+  context?: Record<string, unknown>,
 ): Promise<T> {
   return operation().catch((error) => {
     throw new LiquidityError(
       `${errorMessage}: ${error instanceof Error ? error.message : String(error)}`,
-      context
+      context,
     );
   });
 }
 
 export function validateRequired<T>(
   value: T | null | undefined,
-  fieldName: string
+  fieldName: string,
 ): asserts value is T {
   if (value === null || value === undefined) {
     throw new LiquidityError(`${fieldName} is required`);
@@ -42,8 +42,11 @@ export function validateRequired<T>(
 
 export function validateWalletConnection(
   publicKey: unknown,
-  walletAdapter: unknown
+  walletAdapter: unknown,
 ): void {
   validateRequired(publicKey, "Wallet public key");
-  validateRequired((walletAdapter as { wallet?: unknown })?.wallet, "Wallet adapter");
+  validateRequired(
+    (walletAdapter as { wallet?: unknown })?.wallet,
+    "Wallet adapter",
+  );
 }

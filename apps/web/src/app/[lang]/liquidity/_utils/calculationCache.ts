@@ -19,7 +19,7 @@ class LRUCache<T> {
   constructor(config: Partial<CacheConfig> = {}) {
     this.config = {
       maxSize: config.maxSize ?? 100,
-      ttlMs: config.ttlMs ?? 30000, 
+      ttlMs: config.ttlMs ?? 30000,
       enableHitTracking: config.enableHitTracking ?? true,
     };
   }
@@ -113,7 +113,7 @@ class LRUCache<T> {
       }
     }
 
-    keysToDelete.forEach(key => {
+    keysToDelete.forEach((key) => {
       this.cache.delete(key);
       this.accessOrder.delete(key);
     });
@@ -133,7 +133,7 @@ class LRUCache<T> {
 
     const totalHits = Array.from(this.cache.values()).reduce(
       (sum, entry) => sum + entry.hits,
-      0
+      0,
     );
     return this.cache.size > 0 ? totalHits / this.cache.size : 0;
   }
@@ -155,7 +155,7 @@ class LRUCache<T> {
 
 export const priceCalculationCache = new LRUCache<string>({
   maxSize: 50,
-  ttlMs: 10000, 
+  ttlMs: 10000,
 });
 
 export const balanceValidationCache = new LRUCache<{
@@ -163,12 +163,12 @@ export const balanceValidationCache = new LRUCache<{
   error?: string;
 }>({
   maxSize: 30,
-  ttlMs: 5000, 
+  ttlMs: 5000,
 });
 
 export const tokenAmountCache = new LRUCache<string>({
   maxSize: 100,
-  ttlMs: 15000, 
+  ttlMs: 15000,
 });
 
 export const poolRatioCache = new LRUCache<{
@@ -176,12 +176,12 @@ export const poolRatioCache = new LRUCache<{
   tokenYToX: string;
 }>({
   maxSize: 20,
-  ttlMs: 30000, 
+  ttlMs: 30000,
 });
 
 export function createPriceCalculationKey(
   inputAmount: string,
-  price: string
+  price: string,
 ): string {
   return `price:${inputAmount}:${price}`;
 }
@@ -190,7 +190,7 @@ export function createBalanceValidationKey(
   inputAmount: string,
   maxBalance: number,
   decimals: number,
-  symbol: string
+  symbol: string,
 ): string {
   return `balance:${inputAmount}:${maxBalance}:${decimals}:${symbol}`;
 }
@@ -199,14 +199,14 @@ export function createTokenAmountKey(
   inputAmount: string,
   poolReserveX: number,
   poolReserveY: number,
-  inputType: 'tokenX' | 'tokenY'
+  inputType: "tokenX" | "tokenY",
 ): string {
   return `amount:${inputAmount}:${poolReserveX}:${poolReserveY}:${inputType}`;
 }
 
 export function createPoolRatioKey(
   tokenXMint: string,
-  tokenYMint: string
+  tokenYMint: string,
 ): string {
   return `ratio:${tokenXMint}:${tokenYMint}`;
 }

@@ -15,19 +15,21 @@ export function useBasicPoolData({
   refetchInterval = 5000,
 }: UseBasicPoolDataParams) {
   const poolKey = [tokenXMint, tokenYMint].sort().join("-");
-  
+
   return useQuery({
     queryKey: ["pool", poolKey],
     queryFn: async () => {
-        const result = await client.pools.getPoolDetails({
+      const result = await client.pools.getPoolDetails({
         tokenXMint,
         tokenYMint,
       });
-      
-      return result ? {
-        ...result,
-        lastUpdate: Date.now(),
-      } : null;
+
+      return result
+        ? {
+            ...result,
+            lastUpdate: Date.now(),
+          }
+        : null;
     },
     staleTime: 1000,
     refetchInterval,

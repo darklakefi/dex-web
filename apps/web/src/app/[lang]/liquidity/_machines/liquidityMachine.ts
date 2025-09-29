@@ -1,5 +1,9 @@
-import { assign, setup, fromPromise } from 'xstate';
-import type { LiquidityFormValues, PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
+import { assign, setup, fromPromise } from "xstate";
+import type {
+  LiquidityFormValues,
+  PoolDetails,
+  TokenAccountsData,
+} from "../_types/liquidity.types";
 
 export interface LiquidityMachineContext {
   poolDetails: PoolDetails | null;
@@ -14,7 +18,11 @@ export interface LiquidityMachineContext {
 
 export type LiquidityMachineEvent =
   | { type: "UPDATE_POOL_DETAILS"; data: PoolDetails | null }
-  | { type: "UPDATE_TOKEN_ACCOUNTS"; buyAccount: TokenAccountsData | null; sellAccount: TokenAccountsData | null }
+  | {
+      type: "UPDATE_TOKEN_ACCOUNTS";
+      buyAccount: TokenAccountsData | null;
+      sellAccount: TokenAccountsData | null;
+    }
   | { type: "START_CALCULATION" }
   | { type: "FINISH_CALCULATION" }
   | { type: "CALCULATE"; data: LiquidityFormValues }
@@ -31,14 +39,18 @@ export const liquidityMachine = setup({
     events: LiquidityMachineEvent;
   },
   actors: {
-    calculateLiquidity: fromPromise(async ({ input: _input }: { input: LiquidityFormValues }) => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { result: "calculated" };
-    }),
-    submitTransaction: fromPromise(async ({ input: _input }: { input: LiquidityFormValues }) => {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      return { signature: "mock-signature" };
-    }),
+    calculateLiquidity: fromPromise(
+      async ({ input: _input }: { input: LiquidityFormValues }) => {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        return { result: "calculated" };
+      },
+    ),
+    submitTransaction: fromPromise(
+      async ({ input: _input }: { input: LiquidityFormValues }) => {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        return { signature: "mock-signature" };
+      },
+    ),
   },
 }).createMachine({
   id: "liquidity",
@@ -87,21 +99,22 @@ export const liquidityMachine = setup({
     },
     calculating: {
       invoke: {
-        src: 'calculateLiquidity',
-        input: ({ context }) => context.formData || {
-          tokenAAmount: "0",
-          tokenBAmount: "0", 
-          initialPrice: "0"
-        },
+        src: "calculateLiquidity",
+        input: ({ context }) =>
+          context.formData || {
+            tokenAAmount: "0",
+            tokenBAmount: "0",
+            initialPrice: "0",
+          },
         onDone: {
-          target: 'idle',
+          target: "idle",
           actions: assign({
             error: null,
             isCalculating: false,
           }),
         },
         onError: {
-          target: 'error',
+          target: "error",
           actions: assign({
             error: ({ event }) => String(event.error),
             isCalculating: false,
@@ -197,8 +210,21 @@ export const liquidityMachine = setup({
 
 export type LiquidityMachine = typeof liquidityMachine;
 
-export type LiquidityState = 'idle' | 'calculating' | 'submitting' | 'signing' | 'success' | 'error';
+export type LiquidityState =
+  | "idle"
+  | "calculating"
+  | "submitting"
+  | "signing"
+  | "success"
+  | "error";
 
 export const isLiquidityState = (state: string): state is LiquidityState => {
-  return ['idle', 'calculating', 'submitting', 'signing', 'success', 'error'].includes(state);
+  return [
+    "idle",
+    "calculating",
+    "submitting",
+    "signing",
+    "success",
+    "error",
+  ].includes(state);
 };

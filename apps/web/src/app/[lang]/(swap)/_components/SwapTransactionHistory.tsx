@@ -38,8 +38,8 @@ export function SwapTransactionHistory() {
     setHasMore(response.hasMore);
     setTrades(
       [...trades, ...response.trades].filter(
-        (trade): trade is SwapTransaction => trade !== null
-      ) satisfies SwapTransaction[]
+        (trade): trade is SwapTransaction => trade !== null,
+      ) satisfies SwapTransaction[],
     );
 
     if (response.hasMore) {
@@ -56,7 +56,7 @@ export function SwapTransactionHistory() {
         offset: 0,
         userAddress: publicKey?.toBase58() ?? "",
       },
-    })
+    }),
   );
 
   return data?.trades.length > 0 ? (

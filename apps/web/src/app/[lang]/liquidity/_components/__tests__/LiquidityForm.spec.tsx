@@ -67,7 +67,9 @@ vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
   }),
 }));
 vi.mock("../../../_components/SkeletonTokenInput", () => ({
-  SkeletonTokenInput: () => <div data-testid="skeleton-token-input">Loading...</div>,
+  SkeletonTokenInput: () => (
+    <div data-testid="skeleton-token-input">Loading...</div>
+  ),
 }));
 
 vi.mock("@dex-web/orpc", () => ({
@@ -142,7 +144,7 @@ const renderWithWrapper = (
   searchParams = {
     tokenAAddress: DEFAULT_BUY_TOKEN,
     tokenBAddress: DEFAULT_SELL_TOKEN,
-  }
+  },
 ) => {
   const queryClient = createQueryClient();
   const onUrlUpdate = vi.fn();
@@ -192,39 +194,53 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
   describe("Story 1: Default state — wallet disconnected", () => {
     it("should render safely with no wallet and guide user to connect", async () => {
       // Ensure wallet is disconnected
-      setWalletState({ publicKey: null, wallet: null, signTransaction: vi.fn() });
-      
+      setWalletState({
+        publicKey: null,
+        wallet: null,
+        signTransaction: vi.fn(),
+      });
+
       renderWithWrapper();
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
-      
+
       // Look for the Connect Wallet button
       const connectButton = screen.getByText("Connect Wallet");
       expect(connectButton).toBeInTheDocument();
       expect(connectButton.closest("button")).not.toHaveAttribute("disabled");
-      
+
       // Check that amount inputs are present
       const amountInputs = screen.getAllByRole("textbox");
       expect(amountInputs).toHaveLength(2);
     });
     it("should not trigger submission when wallet disconnected", async () => {
       // Ensure wallet is disconnected
-      setWalletState({ publicKey: null, wallet: null, signTransaction: vi.fn() });
-      
+      setWalletState({
+        publicKey: null,
+        wallet: null,
+        signTransaction: vi.fn(),
+      });
+
       renderWithWrapper();
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"100");
+      await user.type(amountInputs[0]!, "100");
       fireEvent.keyDown(amountInputs[0]!, { key: "Enter" });
-      expect(screen.queryByText("Processing Transaction...")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Processing Transaction..."),
+      ).not.toBeInTheDocument();
     });
     it("should preserve disconnected state on refresh", async () => {
       // Ensure wallet is disconnected
-      setWalletState({ publicKey: null, wallet: null, signTransaction: vi.fn() });
-      
+      setWalletState({
+        publicKey: null,
+        wallet: null,
+        signTransaction: vi.fn(),
+      });
+
       const { rerender } = renderWithWrapper();
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
@@ -288,10 +304,10 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       expect(onUrlUpdate).toHaveBeenCalledWith(
-        expect.stringContaining(customTokenA)
+        expect.stringContaining(customTokenA),
       );
       expect(onUrlUpdate).toHaveBeenCalledWith(
-        expect.stringContaining(customTokenB)
+        expect.stringContaining(customTokenB),
       );
     });
     it("should handle invalid token addresses gracefully", async () => {
@@ -348,14 +364,10 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
         useRealtimeTokenAccounts: () => ({
           buyTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000000, decimals: 9, symbol: "SOL" },
-            ],
+            tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
           sellTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000, decimals: 6, symbol: "USDC" },
-            ],
+            tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
           refetchBuyTokenAccount: vi.fn(),
           refetchSellTokenAccount: vi.fn(),
@@ -369,8 +381,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"0.1");
-      await user.type(amountInputs[1]!,"0.1");
+      await user.type(amountInputs[0]!, "0.1");
+      await user.type(amountInputs[1]!, "0.1");
       await waitFor(() => {
         const button = screen.queryByText("Add Liquidity");
         expect(button?.closest("button")).not.toHaveAttribute("disabled");
@@ -394,14 +406,10 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
         useRealtimeTokenAccounts: () => ({
           buyTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000000, decimals: 9, symbol: "SOL" },
-            ],
+            tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
           sellTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000, decimals: 6, symbol: "USDC" },
-            ],
+            tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
           refetchBuyTokenAccount: vi.fn(),
           refetchSellTokenAccount: vi.fn(),
@@ -415,7 +423,7 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"2000");
+      await user.type(amountInputs[0]!, "2000");
       await waitFor(() => {
         expect(screen.getByText(/Insufficient.*balance/)).toBeInTheDocument();
       });
@@ -428,14 +436,16 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"2000");
+      await user.type(amountInputs[0]!, "2000");
       await waitFor(() => {
         expect(screen.getByText(/Insufficient.*balance/)).toBeInTheDocument();
       });
       await user.clear(amountInputs[0]!);
-      await user.type(amountInputs[0]!,"0.1");
+      await user.type(amountInputs[0]!, "0.1");
       await waitFor(() => {
-        expect(screen.queryByText(/Insufficient.*balance/)).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/Insufficient.*balance/),
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -471,8 +481,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"0");
-      await user.type(amountInputs[1]!,"0");
+      await user.type(amountInputs[0]!, "0");
+      await user.type(amountInputs[1]!, "0");
       const submitButton = screen.queryByText("enter an amount");
       expect(submitButton?.closest("button")).toHaveAttribute("disabled");
     });
@@ -482,7 +492,7 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"   ");
+      await user.type(amountInputs[0]!, "   ");
       const submitButton = screen.queryByText("enter an amount");
       expect(submitButton?.closest("button")).toHaveAttribute("disabled");
     });
@@ -521,12 +531,12 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"100");
+      await user.type(amountInputs[0]!, "100");
       await waitFor(
         () => {
           expect(amountInputs[1]).toHaveValue("50");
         },
-        { timeout: 1000 }
+        { timeout: 1000 },
       );
     });
   });
@@ -575,14 +585,10 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
         useRealtimeTokenAccounts: () => ({
           buyTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000000, decimals: 9, symbol: "SOL" },
-            ],
+            tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
           sellTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000, decimals: 6, symbol: "USDC" },
-            ],
+            tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
           refetchBuyTokenAccount: vi.fn(),
           refetchSellTokenAccount: vi.fn(),
@@ -594,8 +600,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"0.1");
-      await user.type(amountInputs[1]!,"0.1");
+      await user.type(amountInputs[0]!, "0.1");
+      await user.type(amountInputs[1]!, "0.1");
       await waitFor(() => {
         expect(screen.getByText("Add Liquidity")).toBeInTheDocument();
       });
@@ -621,14 +627,10 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
         useRealtimeTokenAccounts: () => ({
           buyTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000000, decimals: 9, symbol: "SOL" },
-            ],
+            tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
           sellTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000, decimals: 6, symbol: "USDC" },
-            ],
+            tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
           refetchBuyTokenAccount: vi.fn(),
           refetchSellTokenAccount: vi.fn(),
@@ -654,8 +656,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"0.1");
-      await user.type(amountInputs[1]!,"0.1");
+      await user.type(amountInputs[0]!, "0.1");
+      await user.type(amountInputs[1]!, "0.1");
       const submitButton = screen.getByText("Add Liquidity");
       await user.click(submitButton);
       await waitFor(() => {
@@ -667,7 +669,7 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
             maxAmountY: expect.any(Number),
             slippage: 0.5,
             user: expect.any(String),
-          })
+          }),
         );
       });
     });
@@ -692,14 +694,10 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
         useRealtimeTokenAccounts: () => ({
           buyTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000000, decimals: 9, symbol: "SOL" },
-            ],
+            tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
           sellTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000, decimals: 6, symbol: "USDC" },
-            ],
+            tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
           refetchBuyTokenAccount: vi.fn(),
           refetchSellTokenAccount: vi.fn(),
@@ -726,17 +724,17 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"0.1");
-      await user.type(amountInputs[1]!,"0.1");
+      await user.type(amountInputs[0]!, "0.1");
+      await user.type(amountInputs[1]!, "0.1");
       const submitButton = screen.getByText("Add Liquidity");
       await user.click(submitButton);
       await waitFor(
         () => {
           expect(
-            screen.getByText("Liquidity added successfully! 🎉")
+            screen.getByText("Liquidity added successfully! 🎉"),
           ).toBeInTheDocument();
         },
-        { timeout: 5000 }
+        { timeout: 5000 },
       );
     });
   });
@@ -760,14 +758,10 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
         useRealtimeTokenAccounts: () => ({
           buyTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000000, decimals: 9, symbol: "SOL" },
-            ],
+            tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
           sellTokenAccount: {
-            tokenAccounts: [
-              { amount: 1000000, decimals: 6, symbol: "USDC" },
-            ],
+            tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
           refetchBuyTokenAccount: vi.fn(),
           refetchSellTokenAccount: vi.fn(),
@@ -785,7 +779,10 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
             }),
             checkLiquidityTransactionStatus: vi
               .fn()
-              .mockResolvedValue({ status: "failed", error: "Transaction failed" }),
+              .mockResolvedValue({
+                status: "failed",
+                error: "Transaction failed",
+              }),
           },
         },
       }));
@@ -794,8 +791,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"0.1");
-      await user.type(amountInputs[1]!,"0.1");
+      await user.type(amountInputs[0]!, "0.1");
+      await user.type(amountInputs[1]!, "0.1");
       const submitButton = screen.getByText("Add Liquidity");
       await user.click(submitButton);
       await waitFor(
@@ -804,14 +801,16 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
           expect(screen.getByText("Retry")).toBeInTheDocument();
           expect(screen.getByText("Reset")).toBeInTheDocument();
         },
-        { timeout: 5000 }
+        { timeout: 5000 },
       );
     });
     it("should reset to actionable state after error", async () => {
       vi.doMock("@dex-web/orpc", () => ({
         client: {
           liquidity: {
-            createLiquidityTransaction: vi.fn().mockRejectedValue(new Error("Network error")),
+            createLiquidityTransaction: vi
+              .fn()
+              .mockRejectedValue(new Error("Network error")),
             checkLiquidityTransactionStatus: vi.fn(),
           },
         },
@@ -821,8 +820,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
-      await user.type(amountInputs[0]!,"0.1");
-      await user.type(amountInputs[1]!,"0.1");
+      await user.type(amountInputs[0]!, "0.1");
+      await user.type(amountInputs[1]!, "0.1");
       const submitButton = screen.getByText("Add Liquidity");
       await user.click(submitButton);
       await waitFor(() => {
@@ -856,7 +855,9 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("@dex-web/orpc", () => ({
         client: {
           liquidity: {
-            createLiquidityTransaction: vi.fn().mockRejectedValue(new Error("Network error")),
+            createLiquidityTransaction: vi
+              .fn()
+              .mockRejectedValue(new Error("Network error")),
             checkLiquidityTransactionStatus: vi.fn(),
           },
         },
@@ -868,7 +869,7 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       const createPoolButton = screen.getByText("Create Pool");
       await user.click(createPoolButton);
       expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining("liquidity")
+        expect.stringContaining("liquidity"),
       );
     });
   });

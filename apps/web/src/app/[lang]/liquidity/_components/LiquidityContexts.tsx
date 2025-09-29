@@ -1,7 +1,11 @@
 "use client";
 
 import type { PublicKey } from "@solana/web3.js";
-import type { FormApi, FormValidateOrFn, FormAsyncValidateOrFn } from "@tanstack/react-form";
+import type {
+  FormApi,
+  FormValidateOrFn,
+  FormAsyncValidateOrFn,
+} from "@tanstack/react-form";
 import type { ZodObject, ZodEffects, ZodString, ZodTypeAny } from "zod";
 import { createContext, useContext } from "react";
 import type { ActorRefFrom } from "xstate";
@@ -22,7 +26,21 @@ export interface LiquidityFormStateContextValue {
   readonly form: FormApi<
     LiquidityFormValues,
     FormValidateOrFn<LiquidityFormValues> | undefined,
-    ZodObject<{ tokenAAmount: ZodEffects<ZodString, string, string>; tokenBAmount: ZodEffects<ZodString, string, string>; initialPrice: ZodEffects<ZodEffects<ZodString, string, string>, string, string>; }, "strip", ZodTypeAny, { tokenAAmount: string; tokenBAmount: string; initialPrice: string; }, { tokenAAmount: string; tokenBAmount: string; initialPrice: string; }>,
+    ZodObject<
+      {
+        tokenAAmount: ZodEffects<ZodString, string, string>;
+        tokenBAmount: ZodEffects<ZodString, string, string>;
+        initialPrice: ZodEffects<
+          ZodEffects<ZodString, string, string>,
+          string,
+          string
+        >;
+      },
+      "strip",
+      ZodTypeAny,
+      { tokenAAmount: string; tokenBAmount: string; initialPrice: string },
+      { tokenAAmount: string; tokenBAmount: string; initialPrice: string }
+    >,
     undefined,
     undefined,
     undefined,

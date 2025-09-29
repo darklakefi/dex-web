@@ -6,7 +6,6 @@ import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { FormFieldset } from "../FormFieldset";
 
-
 vi.mock("@dex-web/orpc", () => ({
   tanstackClient: {
     tokens: {
@@ -35,14 +34,14 @@ const createQueryClient = () =>
 
 const mockTokenAccount = {
   address: "test-address",
-  amount: 1000000000, 
+  amount: 1000000000,
   decimals: 9,
   symbol: "SOL",
 };
 
 const mockTokenAccountSmall = {
   address: "test-address-small",
-  amount: 1000000, 
+  amount: 1000000,
   decimals: 6,
   symbol: "USDC",
 };
@@ -125,7 +124,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       await user.click(halfButton);
 
       expect(mockOnChange).toHaveBeenCalledWith({
-        target: { value: "0.50000" }, 
+        target: { value: "0.50000" },
       });
     });
 
@@ -133,7 +132,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const mockOnChange = vi.fn();
       renderWithWrapper({
         onChange: mockOnChange,
-        tokenAccount: mockTokenAccountSmall
+        tokenAccount: mockTokenAccountSmall,
       });
 
       await waitFor(() => {
@@ -144,7 +143,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       await user.click(halfButton);
 
       expect(mockOnChange).toHaveBeenCalledWith({
-        target: { value: "0.50000" }, 
+        target: { value: "0.50000" },
       });
     });
 
@@ -173,7 +172,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const zeroTokenAccount = { ...mockTokenAccount, amount: 0 };
       renderWithWrapper({
         onChange: mockOnChange,
-        tokenAccount: zeroTokenAccount
+        tokenAccount: zeroTokenAccount,
       });
 
       await waitFor(() => {
@@ -182,7 +181,6 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
 
       const halfButton = screen.getByText("Half");
       await user.click(halfButton);
-
 
       expect(mockOnChange).not.toHaveBeenCalled();
     });
@@ -212,7 +210,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const halfButton = screen.getByText("Half");
       await user.click(halfButton);
 
-      expect(mockHalfMaxClick).toHaveBeenCalledWith('half');
+      expect(mockHalfMaxClick).toHaveBeenCalledWith("half");
     });
 
     it("should trigger DOM input change event", async () => {
@@ -262,7 +260,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       await user.click(maxButton);
 
       expect(mockOnChange).toHaveBeenCalledWith({
-        target: { value: "1.00000" }, 
+        target: { value: "1.00000" },
       });
     });
 
@@ -270,7 +268,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const mockOnChange = vi.fn();
       renderWithWrapper({
         onChange: mockOnChange,
-        tokenAccount: mockTokenAccountSmall
+        tokenAccount: mockTokenAccountSmall,
       });
 
       await waitFor(() => {
@@ -281,7 +279,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       await user.click(maxButton);
 
       expect(mockOnChange).toHaveBeenCalledWith({
-        target: { value: "1.00000" }, 
+        target: { value: "1.00000" },
       });
     });
 
@@ -310,7 +308,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const zeroTokenAccount = { ...mockTokenAccount, amount: 0 };
       renderWithWrapper({
         onChange: mockOnChange,
-        tokenAccount: zeroTokenAccount
+        tokenAccount: zeroTokenAccount,
       });
 
       await waitFor(() => {
@@ -319,7 +317,6 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
 
       const maxButton = screen.getByText("Max");
       await user.click(maxButton);
-
 
       expect(mockOnChange).not.toHaveBeenCalled();
     });
@@ -349,7 +346,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const maxButton = screen.getByText("Max");
       await user.click(maxButton);
 
-      expect(mockHalfMaxClick).toHaveBeenCalledWith('max');
+      expect(mockHalfMaxClick).toHaveBeenCalledWith("max");
     });
 
     it("should trigger DOM input change event", async () => {
@@ -375,11 +372,11 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const mockOnChange = vi.fn();
       const smallTokenAccount = {
         ...mockTokenAccount,
-        amount: 1, 
+        amount: 1,
       };
       renderWithWrapper({
         onChange: mockOnChange,
-        tokenAccount: smallTokenAccount
+        tokenAccount: smallTokenAccount,
       });
 
       await waitFor(() => {
@@ -388,7 +385,6 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
 
       const halfButton = screen.getByText("Half");
       await user.click(halfButton);
-
 
       expect(mockOnChange).toHaveBeenCalledWith({
         target: { value: "0.00000" },
@@ -399,12 +395,12 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const mockOnChange = vi.fn();
       const largeTokenAccount = {
         ...mockTokenAccount,
-        amount: 1000000000000000, 
+        amount: 1000000000000000,
         decimals: 9,
       };
       renderWithWrapper({
         onChange: mockOnChange,
-        tokenAccount: largeTokenAccount
+        tokenAccount: largeTokenAccount,
       });
 
       await waitFor(() => {
@@ -429,7 +425,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       };
       renderWithWrapper({
         onChange: mockOnChange,
-        tokenAccount: noDecimalToken
+        tokenAccount: noDecimalToken,
       });
 
       await waitFor(() => {
@@ -454,11 +450,9 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
 
       const halfButton = screen.getByText("Half");
 
-
       await user.click(halfButton);
       await user.click(halfButton);
       await user.click(halfButton);
-
 
       expect(mockOnChange).toHaveBeenCalledTimes(3);
       expect(mockOnChange).toHaveBeenNthCalledWith(1, {
@@ -480,14 +474,12 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
         expect(screen.getByText("Half")).toBeInTheDocument();
       });
 
-
       const halfButton = screen.getByText("Half");
       await user.click(halfButton);
 
       expect(mockOnChange).toHaveBeenCalledWith({
         target: { value: "0.50000" },
       });
-
 
       mockOnChange.mockClear();
 
@@ -507,7 +499,6 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
         expect(screen.getByText("Half")).toBeInTheDocument();
       });
 
-
       const newHalfButton = screen.getByText("Half");
       await user.click(newHalfButton);
 
@@ -523,7 +514,6 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
         const halfButton = screen.getByText("Half");
         expect(halfButton).not.toHaveAttribute("disabled");
       });
-
 
       const loadingProps = {
         name: "tokenAAmount",
@@ -549,7 +539,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const mockOnChange = vi.fn();
       renderWithWrapper({
         onChange: mockOnChange,
-        onClearPendingCalculations: undefined
+        onClearPendingCalculations: undefined,
       });
 
       await waitFor(() => {
@@ -557,7 +547,6 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       });
 
       const halfButton = screen.getByText("Half");
-
 
       expect(() => user.click(halfButton)).not.toThrow();
 
@@ -569,7 +558,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const mockOnChange = vi.fn();
       renderWithWrapper({
         onChange: mockOnChange,
-        onHalfMaxClick: undefined
+        onHalfMaxClick: undefined,
       });
 
       await waitFor(() => {
@@ -577,7 +566,6 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       });
 
       const halfButton = screen.getByText("Half");
-
 
       expect(() => user.click(halfButton)).not.toThrow();
 
@@ -591,7 +579,7 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
 
       renderWithWrapper({
         onChange: mockOnChange,
-        onHalfMaxClick: mockHalfMaxClick
+        onHalfMaxClick: mockHalfMaxClick,
       });
 
       await waitFor(() => {
@@ -599,24 +587,21 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
         expect(screen.getByText("Max")).toBeInTheDocument();
       });
 
-
       const halfButton = screen.getByText("Half");
       await user.click(halfButton);
 
-      expect(mockHalfMaxClick).toHaveBeenCalledWith('half');
+      expect(mockHalfMaxClick).toHaveBeenCalledWith("half");
       expect(mockOnChange).toHaveBeenCalledWith({
         target: { value: "0.50000" },
       });
 
-
       mockHalfMaxClick.mockClear();
       mockOnChange.mockClear();
-
 
       const maxButton = screen.getByText("Max");
       await user.click(maxButton);
 
-      expect(mockHalfMaxClick).toHaveBeenCalledWith('max');
+      expect(mockHalfMaxClick).toHaveBeenCalledWith("max");
       expect(mockOnChange).toHaveBeenCalledWith({
         target: { value: "1.00000" },
       });
@@ -626,14 +611,14 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       const mockOnChange = vi.fn();
       const precisionTokenAccount = {
         address: "test-address",
-        amount: 333333333, 
+        amount: 333333333,
         decimals: 9,
         symbol: "TEST",
       };
 
       renderWithWrapper({
         onChange: mockOnChange,
-        tokenAccount: precisionTokenAccount
+        tokenAccount: precisionTokenAccount,
       });
 
       await waitFor(() => {
@@ -642,7 +627,6 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
 
       const halfButton = screen.getByText("Half");
       await user.click(halfButton);
-
 
       expect(mockOnChange).toHaveBeenCalledWith({
         target: { value: "0.16667" },

@@ -5,11 +5,13 @@ import { getHelius } from "../getHelius";
 export function createWalletAdapter(userAddress: string) {
   return {
     publicKey: new PublicKey(userAddress),
-    signAllTransactions: async <T extends web3.Transaction | VersionedTransaction>(
-      txs: T[]
+    signAllTransactions: async <
+      T extends web3.Transaction | VersionedTransaction,
+    >(
+      txs: T[],
     ): Promise<T[]> => txs,
     signTransaction: async <T extends web3.Transaction | VersionedTransaction>(
-      tx: T
+      tx: T,
     ): Promise<T> => tx,
   };
 }
@@ -17,7 +19,7 @@ export function createWalletAdapter(userAddress: string) {
 export function createAnchorProvider(userAddress: string) {
   const helius = getHelius();
   const wallet = createWalletAdapter(userAddress);
-  
+
   return new AnchorProvider(helius.connection, wallet, {
     commitment: "confirmed",
   });

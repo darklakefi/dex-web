@@ -20,7 +20,8 @@ const skeletonVariants = cva(
         button: "h-10 w-32 rounded",
         wallet: "h-10 w-32 rounded",
         tokenInput: "h-24 w-full rounded border border-green-400 bg-green-600",
-        tokenInputBox: "w-full rounded border border-green-400 bg-green-600 pt-3 pb-3",
+        tokenInputBox:
+          "w-full rounded border border-green-400 bg-green-600 pt-3 pb-3",
         balance: "h-4 w-28 rounded",
         circle: "rounded-full",
         rectangle: "rounded-none",
@@ -49,10 +50,11 @@ const skeletonVariants = cva(
       variant: "default",
       pulse: false,
     },
-  }
+  },
 );
 
-interface SkeletonLoaderProps extends Omit<VariantProps<typeof skeletonVariants>, 'width'> {
+interface SkeletonLoaderProps
+  extends Omit<VariantProps<typeof skeletonVariants>, "width"> {
   className?: string;
   style?: React.CSSProperties;
   width?: string | number;
@@ -83,10 +85,7 @@ export function SkeletonLoader({
 
   return (
     <div
-      className={twMerge(
-        skeletonVariants({ variant, size, pulse }),
-        className
-      )}
+      className={twMerge(skeletonVariants({ variant, size, pulse }), className)}
       style={customStyle}
       aria-hidden="true"
       aria-label={ariaLabel || "Loading content"}

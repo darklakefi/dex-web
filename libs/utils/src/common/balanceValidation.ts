@@ -1,4 +1,3 @@
-
 import { convertToDecimal } from "../number";
 import { formatAmountInput, parseAmountBigNumber } from "./amountUtils";
 
@@ -23,7 +22,7 @@ export function validateHasSufficientBalance({
 
   const cleanAmount = formatAmountInput(amount);
   const symbol = tokenAccount.symbol || "token";
-  
+
   if (parseAmountBigNumber(cleanAmount).gt(0)) {
     const maxBalance = convertToDecimal(
       tokenAccount.amount || 0,
@@ -40,13 +39,15 @@ export function validateHasSufficientBalance({
 
 export function checkInsufficientBalance(
   amount: string,
-  tokenAccount?: TokenAccount
+  tokenAccount?: TokenAccount,
 ): boolean {
   if (!tokenAccount) return false;
-  
+
   const cleanAmount = formatAmountInput(amount);
   const accountAmount = tokenAccount.amount || 0;
   const decimal = tokenAccount.decimals || 0;
 
-  return parseAmountBigNumber(cleanAmount).gt(convertToDecimal(accountAmount, decimal));
+  return parseAmountBigNumber(cleanAmount).gt(
+    convertToDecimal(accountAmount, decimal),
+  );
 }

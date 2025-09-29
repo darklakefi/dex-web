@@ -24,7 +24,6 @@ export function CalculationProgressIndicator({
   workerError,
   className = "",
 }: CalculationProgressIndicatorProps) {
-
   const progressState = useMemo((): ProgressState => {
     if (workerError) {
       return {
@@ -67,7 +66,7 @@ export function CalculationProgressIndicator({
 
     const startProgress = animatedProgress;
     const targetProgress = progressState.progress;
-    const duration = 300; 
+    const duration = 300;
     const startTime = Date.now();
 
     const animate = () => {

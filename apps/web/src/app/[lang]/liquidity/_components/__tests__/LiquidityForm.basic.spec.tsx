@@ -62,14 +62,15 @@ vi.mock("@dex-web/orpc", () => ({
         }),
         {
           queryOptions: vi.fn().mockImplementation(() => ({
-            queryFn: () => Promise.resolve({
-              poolAddress: "mock-pool",
-              tokenXMint: "tokenX",
-              tokenYMint: "tokenY",
-            }),
+            queryFn: () =>
+              Promise.resolve({
+                poolAddress: "mock-pool",
+                tokenXMint: "tokenX",
+                tokenYMint: "tokenY",
+              }),
             queryKey: ["getPoolDetails"],
           })),
-        }
+        },
       ),
     },
   },
@@ -132,7 +133,9 @@ vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
   }),
 }));
 vi.mock("../../../_components/SkeletonTokenInput", () => ({
-  SkeletonTokenInput: () => <div data-testid="skeleton-token-input">Loading...</div>,
+  SkeletonTokenInput: () => (
+    <div data-testid="skeleton-token-input">Loading...</div>
+  ),
 }));
 import { LiquidityForm } from "../LiquidityForm";
 const createQueryClient = () =>
@@ -146,7 +149,7 @@ const renderWithWrapper = (
   searchParams = {
     tokenAAddress: DEFAULT_BUY_TOKEN,
     tokenBAddress: DEFAULT_SELL_TOKEN,
-  }
+  },
 ) => {
   const queryClient = createQueryClient();
   const mockMessages = {

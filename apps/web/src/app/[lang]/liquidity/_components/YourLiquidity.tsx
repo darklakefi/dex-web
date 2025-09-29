@@ -39,7 +39,7 @@ export function YourLiquidity({
     { data: poolDetails },
     { data: poolReserves },
     { data: tokenXPrice },
-    { data: tokenYPrice }
+    { data: tokenYPrice },
   ] = useSuspenseQueries({
     queries: [
       {
@@ -89,13 +89,13 @@ export function YourLiquidity({
           },
         }),
         staleTime: 5 * 1000,
-      }
-    ]
+      },
+    ],
   });
 
   const metadata = tokenMetadata as Record<string, Token>;
   const tokenXDetails = metadata[tokenXAddress]!;
-  const tokenYDetails = metadata[tokenYAddress]!
+  const tokenYDetails = metadata[tokenYAddress]!;
 
   const liquidityCalculations = useMemo(() => {
     if (

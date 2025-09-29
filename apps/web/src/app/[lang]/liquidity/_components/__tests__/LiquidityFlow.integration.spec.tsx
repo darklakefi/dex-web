@@ -55,7 +55,12 @@ vi.mock("../../../../hooks/useRealtimePoolData", () => ({
 const mockTokenAccounts = {
   buyTokenAccount: {
     tokenAccounts: [
-      { amount: 1000000000, decimals: 9, symbol: "SOL", address: "sol-account" },
+      {
+        amount: 1000000000,
+        decimals: 9,
+        symbol: "SOL",
+        address: "sol-account",
+      },
     ],
   },
   sellTokenAccount: {
@@ -71,7 +76,9 @@ vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
   useRealtimeTokenAccounts: () => mockTokenAccounts,
 }));
 vi.mock("../../../_components/SkeletonTokenInput", () => ({
-  SkeletonTokenInput: () => <div data-testid="skeleton-token-input">Loading...</div>,
+  SkeletonTokenInput: () => (
+    <div data-testid="skeleton-token-input">Loading...</div>
+  ),
 }));
 vi.mock("@dex-web/core", () => ({
   ERROR_MESSAGES: {
@@ -139,7 +146,7 @@ const renderLiquidityForm = (
   searchParams = {
     tokenAAddress: DEFAULT_BUY_TOKEN,
     tokenBAddress: DEFAULT_SELL_TOKEN,
-  }
+  },
 ) => {
   const queryClient = createQueryClient();
   const onUrlUpdate = vi.fn();
@@ -215,14 +222,18 @@ describe.skip("LiquidityFlow Integration Tests", () => {
           maxAmountY: expect.any(Number),
           slippage: 0.5,
           user: mockWallet.publicKey.toBase58(),
-        })
+        }),
       );
-      expect(mockSignTransaction).toHaveBeenCalledWith("mock-unsigned-transaction");
+      expect(mockSignTransaction).toHaveBeenCalledWith(
+        "mock-unsigned-transaction",
+      );
       await waitFor(
         () => {
-          expect(screen.getByText("Liquidity added successfully! 🎉")).toBeInTheDocument();
+          expect(
+            screen.getByText("Liquidity added successfully! 🎉"),
+          ).toBeInTheDocument();
         },
-        { timeout: 5000 }
+        { timeout: 5000 },
       );
       expect(mockTokenAccounts.refetchBuyTokenAccount).toHaveBeenCalled();
       expect(mockTokenAccounts.refetchSellTokenAccount).toHaveBeenCalled();
@@ -247,20 +258,20 @@ describe.skip("LiquidityFlow Integration Tests", () => {
             tokenA: DEFAULT_BUY_TOKEN,
             tokenB: DEFAULT_SELL_TOKEN,
           }),
-        })
+        }),
       );
       await waitFor(() => {
         expect(mockAnalytics.trackLiquidity).toHaveBeenCalledWith(
           expect.objectContaining({
             event: "liquidity_signed",
-          })
+          }),
         );
       });
       await waitFor(() => {
         expect(mockAnalytics.trackLiquidity).toHaveBeenCalledWith(
           expect.objectContaining({
             event: "liquidity_confirmed",
-          })
+          }),
         );
       });
     });
@@ -286,7 +297,7 @@ describe.skip("LiquidityFlow Integration Tests", () => {
         expect.objectContaining({
           context: "liquidity",
           error: "Network error",
-        })
+        }),
       );
     });
     it("should handle signing failure and recover", async () => {
@@ -307,7 +318,9 @@ describe.skip("LiquidityFlow Integration Tests", () => {
       mockSignTransaction.mockResolvedValue({});
       await user.click(retryButton);
       await waitFor(() => {
-        expect(screen.getByText("Liquidity added successfully! 🎉")).toBeInTheDocument();
+        expect(
+          screen.getByText("Liquidity added successfully! 🎉"),
+        ).toBeInTheDocument();
       });
     });
     it("should handle transaction status failure", async () => {
@@ -328,12 +341,12 @@ describe.skip("LiquidityFlow Integration Tests", () => {
         () => {
           expect(screen.getByText(/Error:/)).toBeInTheDocument();
         },
-        { timeout: 5000 }
+        { timeout: 5000 },
       );
       expect(mockAnalytics.trackLiquidity).toHaveBeenCalledWith(
         expect.objectContaining({
           event: "liquidity_failed",
-        })
+        }),
       );
     });
   });
@@ -360,7 +373,7 @@ describe.skip("LiquidityFlow Integration Tests", () => {
       await waitFor(() => {
         expect(screen.getByText("Insufficient balance")).toBeInTheDocument();
       });
-      mockTokenAccounts.buyTokenAccount!.tokenAccounts[0]!.amount = 20000000000; 
+      mockTokenAccounts.buyTokenAccount!.tokenAccounts[0]!.amount = 20000000000;
       const submitButton = screen.queryByText("Add Liquidity");
       if (submitButton) {
         expect(submitButton.closest("button")).not.toHaveAttribute("disabled");
@@ -400,7 +413,7 @@ describe.skip("LiquidityFlow Integration Tests", () => {
         expect.objectContaining({
           maxAmountX: expect.any(Number),
           maxAmountY: expect.any(Number),
-        })
+        }),
       );
     });
   });
@@ -431,7 +444,7 @@ describe.skip("LiquidityFlow Integration Tests", () => {
         expect.objectContaining({
           maxAmountX: 500,
           maxAmountY: 0.5,
-        })
+        }),
       );
     });
     it("should reset form state after successful transaction", async () => {
@@ -445,7 +458,9 @@ describe.skip("LiquidityFlow Integration Tests", () => {
       const submitButton = screen.getByText("Add Liquidity");
       await user.click(submitButton);
       await waitFor(() => {
-        expect(screen.getByText("Liquidity added successfully! 🎉")).toBeInTheDocument();
+        expect(
+          screen.getByText("Liquidity added successfully! 🎉"),
+        ).toBeInTheDocument();
       });
       const addMoreButton = screen.getByText("Add More Liquidity");
       await user.click(addMoreButton);
@@ -468,7 +483,7 @@ describe.skip("LiquidityFlow Integration Tests", () => {
         () => {
           expect(amountInputs[1]).toHaveValue("50");
         },
-        { timeout: 1000 }
+        { timeout: 1000 },
       );
     });
     it("should handle rapid typing correctly", async () => {
@@ -484,7 +499,7 @@ describe.skip("LiquidityFlow Integration Tests", () => {
         () => {
           expect(amountInputs[1]).toHaveValue("50");
         },
-        { timeout: 1000 }
+        { timeout: 1000 },
       );
     });
   });

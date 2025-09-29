@@ -9,7 +9,7 @@ import type {
 import { getTokenMetadataListHandler } from "../dex-gateway/getTokenMetadataList.handler";
 
 export const getTokensHandler = async (
-  input: GetTokensInput
+  input: GetTokensInput,
 ): Promise<GetTokensOutput> => {
   const { limit = 10, query, offset = 0, allowList } = input;
   const page = Math.floor(offset / limit) + 1;
@@ -68,7 +68,7 @@ export const getTokensHandler = async (
     .filter(
       (token) =>
         token.address.toUpperCase().includes(query.toUpperCase()) ||
-        token.symbol.toUpperCase().includes(query.toUpperCase())
+        token.symbol.toUpperCase().includes(query.toUpperCase()),
     );
 
   return {

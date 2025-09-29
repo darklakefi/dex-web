@@ -26,7 +26,10 @@ import {
   toRawUnitsBigint,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletPublicKey, useWalletAdapter } from "../../../../hooks/useWalletCache";
+import {
+  useWalletPublicKey,
+  useWalletAdapter,
+} from "../../../../hooks/useWalletCache";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -193,7 +196,10 @@ export function SwapForm() {
       const sellAmount = parseAmount(form.state.values.tokenAAmount);
       const buyAmount = parseAmount(form.state.values.tokenBAmount);
 
-      if (isSquadsX(walletAdapter?.wallet) && result.data?.status === TradeStatus.CONFIRMED) {
+      if (
+        isSquadsX(walletAdapter?.wallet) &&
+        result.data?.status === TradeStatus.CONFIRMED
+      ) {
         resetButtonState();
         toasts.showSuccessToast();
         return;
@@ -223,7 +229,8 @@ export function SwapForm() {
 
       if (tokenAAddress && tokenBAddress) {
         const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
-        const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } = sortedTokens;
+        const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
+          sortedTokens;
 
         const poolKey = `${tokenXMint}-${tokenYMint}`;
         const sortedPoolKey = [tokenXMint, tokenYMint].sort().join("-");
@@ -235,9 +242,10 @@ export function SwapForm() {
           queryKey: ["pool-details", sortedPoolKey],
         });
 
-        const poolDetailsOpts = tanstackClient.pools.getPoolDetails.queryOptions({
-          input: { tokenXMint, tokenYMint },
-        });
+        const poolDetailsOpts =
+          tanstackClient.pools.getPoolDetails.queryOptions({
+            input: { tokenXMint, tokenYMint },
+          });
 
         queryClient.invalidateQueries({ queryKey: poolDetailsOpts.queryKey });
 

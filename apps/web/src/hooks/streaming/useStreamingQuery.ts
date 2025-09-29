@@ -1,8 +1,11 @@
 "use client";
 
-import { useQuery, type UseQueryOptions, type QueryKey } from "@tanstack/react-query";
+import {
+  useQuery,
+  type UseQueryOptions,
+  type QueryKey,
+} from "@tanstack/react-query";
 import { type DeFiStreamConfig, DEFI_STREAM_CONFIGS } from "./types";
-
 
 interface StreamSubscriptionManager {
   subscribe: (key: string, callback: () => void) => () => void;
@@ -48,11 +51,12 @@ class QueryBasedSubscriptionManager implements StreamSubscriptionManager {
   }
 
   isSubscribed(key: string): boolean {
-    return this.subscriptions.has(key) && this.subscriptions.get(key)!.length > 0;
+    return (
+      this.subscriptions.has(key) && this.subscriptions.get(key)!.length > 0
+    );
   }
 
-  private startInterval(_key: string, _callback: () => void): void {
-  }
+  private startInterval(_key: string, _callback: () => void): void {}
 
   private clearInterval(key: string): void {
     const interval = this.intervals.get(key);
@@ -65,7 +69,6 @@ class QueryBasedSubscriptionManager implements StreamSubscriptionManager {
 
 const subscriptionManager = new QueryBasedSubscriptionManager();
 
-
 interface UseStreamingQueryOptions<TData, TError = Error>
   extends Omit<UseQueryOptions<TData, TError>, "queryKey" | "refetchInterval"> {
   priority?: DeFiStreamConfig["priority"];
@@ -76,7 +79,7 @@ interface UseStreamingQueryOptions<TData, TError = Error>
 export function useStreamingQuery<TData, TError = Error>(
   queryKey: QueryKey,
   queryFn: () => Promise<TData>,
-  options: UseStreamingQueryOptions<TData, TError> = {}
+  options: UseStreamingQueryOptions<TData, TError> = {},
 ) {
   const {
     priority = "normal",
@@ -86,7 +89,9 @@ export function useStreamingQuery<TData, TError = Error>(
   } = options;
 
   const config = DEFI_STREAM_CONFIGS[priority];
-  const subscriptionKey = Array.isArray(queryKey) ? queryKey.join(":") : String(queryKey);
+  const subscriptionKey = Array.isArray(queryKey)
+    ? queryKey.join(":")
+    : String(queryKey);
 
   const query = useQuery({
     queryKey,

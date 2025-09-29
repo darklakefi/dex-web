@@ -31,7 +31,7 @@ interface FormFieldsetProps extends NumericInputProps {
   isLoading?: boolean;
   isRefreshing?: boolean;
   onClearPendingCalculations?: () => void;
-  onHalfMaxClick?: (type: 'half' | 'max') => void;
+  onHalfMaxClick?: (type: "half" | "max") => void;
 }
 const QUOTE_CURRENCY = "USD" as const;
 
@@ -97,7 +97,7 @@ export function FormFieldset({
       target: { value: halfAmount },
     } as React.ChangeEvent<HTMLInputElement>);
 
-    onHalfMaxClick?.('half');
+    onHalfMaxClick?.("half");
   };
 
   const setValueToMaxAmount = () => {
@@ -105,9 +105,7 @@ export function FormFieldset({
 
     onClearPendingCalculations?.();
 
-    const maxAmount = convertToDecimal(amount, decimals)
-      .toFixed(5)
-      .toString();
+    const maxAmount = convertToDecimal(amount, decimals).toFixed(5).toString();
 
     if (inputRef.current) {
       inputRef.current.value = maxAmount;
@@ -119,7 +117,7 @@ export function FormFieldset({
       target: { value: maxAmount },
     } as React.ChangeEvent<HTMLInputElement>);
 
-    onHalfMaxClick?.('max');
+    onHalfMaxClick?.("max");
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,7 +217,7 @@ export function FormFieldset({
             disabled={disabled || (isLoading && !tokenAccount)}
             name={name}
             onChange={handleChange}
-            placeholder={(!tokenAccount || isLoading) ? "Loading..." : "0.00"}
+            placeholder={!tokenAccount || isLoading ? "Loading..." : "0.00"}
             ref={inputRef}
             type="text"
             value={formatValueWithThousandSeparator(

@@ -14,7 +14,9 @@ export interface TokenAccountsQueryClient {
         };
       }) => {
         queryKey: readonly unknown[];
-        queryFn: (context: QueryFunctionContext) => Promise<TokenAccountsData> | TokenAccountsData;
+        queryFn: (
+          context: QueryFunctionContext,
+        ) => Promise<TokenAccountsData> | TokenAccountsData;
       };
     };
   };

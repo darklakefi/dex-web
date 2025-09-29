@@ -16,15 +16,19 @@ interface LiquidityStateContextValue {
   error: string | null;
 }
 
-const LiquidityStateContext = createContext<LiquidityStateContextValue | null>(null);
+const LiquidityStateContext = createContext<LiquidityStateContextValue | null>(
+  null,
+);
 
 interface LiquidityStateProviderProps {
   children: ReactNode;
 }
 
-export function LiquidityStateProvider({ children }: LiquidityStateProviderProps) {
+export function LiquidityStateProvider({
+  children,
+}: LiquidityStateProviderProps) {
   const { poolDetails, tokenAccountsData } = usePoolData();
-  
+
   const [state, send] = useMachine(liquidityMachine, {
     input: {
       buyTokenAccount: null,
@@ -46,7 +50,11 @@ export function LiquidityStateProvider({ children }: LiquidityStateProviderProps
       buyAccount: tokenAccountsData.buyTokenAccount ?? null,
       sellAccount: tokenAccountsData.sellTokenAccount ?? null,
     });
-  }, [send, tokenAccountsData.buyTokenAccount, tokenAccountsData.sellTokenAccount]);
+  }, [
+    send,
+    tokenAccountsData.buyTokenAccount,
+    tokenAccountsData.sellTokenAccount,
+  ]);
 
   const value: LiquidityStateContextValue = {
     state,
@@ -68,7 +76,9 @@ export function LiquidityStateProvider({ children }: LiquidityStateProviderProps
 export function useLiquidityState() {
   const context = useContext(LiquidityStateContext);
   if (!context) {
-    throw new Error("useLiquidityState must be used within a LiquidityStateProvider");
+    throw new Error(
+      "useLiquidityState must be used within a LiquidityStateProvider",
+    );
   }
   return context;
 }

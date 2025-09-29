@@ -31,53 +31,63 @@ export function useLiquidityCalculations() {
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const calculate = useCallback(async (params: CalculationParams): Promise<CalculationResult | null> => {
-    const amountNumber = parseAmount(params.inputAmount);
+  const calculate = useCallback(
+    async (params: CalculationParams): Promise<CalculationResult | null> => {
+      const amountNumber = parseAmount(params.inputAmount);
 
-    if (parseAmountBigNumber(params.inputAmount).lte(0)) {
-      setState(prev => ({ ...prev, result: null, error: null }));
+      if (parseAmountBigNumber(params.inputAmount).lte(0)) {
+        setState((prev) => ({ ...prev, result: null, error: null }));
+        return null;
+      }
+
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = new AbortController();
+
+      setState((prev) => ({ ...prev, isCalculating: true, error: null }));
+
+      try {
+        const response = await client.liquidity.getAddLiquidityReview({
+          isTokenX: params.inputType === "tokenX",
+          tokenAmount: amountNumber,
+          tokenXMint: params.tokenXMint,
+          tokenYMint: params.tokenYMint,
+        });
+
+        if (
+          abortControllerRef.current &&
+          !abortControllerRef.current.signal.aborted
+        ) {
+          const result: CalculationResult = {
+            tokenAmount: response.tokenAmount,
+            inputType: params.inputType,
+          };
+
+          setState({
+            result,
+            isCalculating: false,
+            error: null,
+          });
+
+          return result;
+        }
+      } catch (error) {
+        if (
+          abortControllerRef.current &&
+          !abortControllerRef.current.signal.aborted
+        ) {
+          setState({
+            result: null,
+            isCalculating: false,
+            error:
+              error instanceof Error ? error.message : "Calculation failed",
+          });
+        }
+      }
+
       return null;
-    }
-
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-
-    setState(prev => ({ ...prev, isCalculating: true, error: null }));
-
-    try {
-      const response = await client.liquidity.getAddLiquidityReview({
-        isTokenX: params.inputType === "tokenX",
-        tokenAmount: amountNumber,
-        tokenXMint: params.tokenXMint,
-        tokenYMint: params.tokenYMint,
-      });
-
-      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
-        const result: CalculationResult = {
-          tokenAmount: response.tokenAmount,
-          inputType: params.inputType,
-        };
-
-        setState({
-          result,
-          isCalculating: false,
-          error: null,
-        });
-
-        return result;
-      }
-    } catch (error) {
-      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
-        setState({
-          result: null,
-          isCalculating: false,
-          error: error instanceof Error ? error.message : "Calculation failed",
-        });
-      }
-    }
-
-    return null;
-  }, []);
+    },
+    [],
+  );
 
   const clearCalculations = useCallback(() => {
     abortControllerRef.current?.abort();

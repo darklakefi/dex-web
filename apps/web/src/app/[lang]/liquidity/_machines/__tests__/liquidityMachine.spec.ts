@@ -45,7 +45,7 @@ describe("LiquidityMachine", () => {
       const mockData = {
         tokenAAmount: "100",
         tokenBAmount: "50",
-        slippage: "0.5"
+        slippage: "0.5",
       };
       actor.send({ type: "SUBMIT", data: mockData });
       expect(actor.getSnapshot().value).toBe("submitting");
@@ -57,12 +57,14 @@ describe("LiquidityMachine", () => {
       const mockData = {
         tokenAAmount: "100",
         tokenBAmount: "50",
-        slippage: "0.5"
+        slippage: "0.5",
       };
       actor.send({ type: "SUBMIT", data: mockData });
       actor.send({ type: "SIGN_TRANSACTION", signature: "test-signature" });
       expect(actor.getSnapshot().value).toBe("signing");
-      expect(actor.getSnapshot().context.transactionSignature).toBe("test-signature");
+      expect(actor.getSnapshot().context.transactionSignature).toBe(
+        "test-signature",
+      );
       expect(actor.getSnapshot().context.liquidityStep).toBe(3);
     });
 
@@ -70,7 +72,7 @@ describe("LiquidityMachine", () => {
       const mockData = {
         tokenAAmount: "100",
         tokenBAmount: "50",
-        slippage: "0.5"
+        slippage: "0.5",
       };
       actor.send({ type: "SUBMIT", data: mockData });
       actor.send({ type: "SIGN_TRANSACTION", signature: "test-signature" });
@@ -84,7 +86,7 @@ describe("LiquidityMachine", () => {
       const mockData = {
         tokenAAmount: "100",
         tokenBAmount: "50",
-        slippage: "0.5"
+        slippage: "0.5",
       };
       actor.send({ type: "SUBMIT", data: mockData });
       actor.send({ type: "ERROR", error: "Transaction failed" });
@@ -99,7 +101,7 @@ describe("LiquidityMachine", () => {
       const mockData = {
         tokenAAmount: "100",
         tokenBAmount: "50",
-        slippage: "0.5"
+        slippage: "0.5",
       };
       actor.send({ type: "SUBMIT", data: mockData });
       actor.send({ type: "ERROR", error: "Transaction failed" });
@@ -111,7 +113,7 @@ describe("LiquidityMachine", () => {
       const mockData = {
         tokenAAmount: "100",
         tokenBAmount: "50",
-        slippage: "0.5"
+        slippage: "0.5",
       };
       actor.send({ type: "SUBMIT", data: mockData });
       actor.send({ type: "ERROR", error: "Transaction failed" });
@@ -128,7 +130,7 @@ describe("LiquidityMachine", () => {
       const mockData = {
         tokenAAmount: "100",
         tokenBAmount: "50",
-        slippage: "0.5"
+        slippage: "0.5",
       };
       actor.send({ type: "SUBMIT", data: mockData });
       actor.send({ type: "SIGN_TRANSACTION", signature: "test-signature" });
@@ -159,7 +161,7 @@ describe("LiquidityMachine", () => {
       actor.send({
         type: "UPDATE_TOKEN_ACCOUNTS",
         buyAccount,
-        sellAccount
+        sellAccount,
       });
 
       expect(actor.getSnapshot().context.buyTokenAccount).toEqual(buyAccount);
@@ -175,7 +177,7 @@ describe("LiquidityMachine", () => {
       actor.send({
         type: "UPDATE_TOKEN_ACCOUNTS",
         buyAccount: null,
-        sellAccount: null
+        sellAccount: null,
       });
 
       expect(actor.getSnapshot().context.buyTokenAccount).toBeNull();
@@ -188,7 +190,7 @@ describe("LiquidityMachine", () => {
       const mockData = {
         tokenAAmount: "100",
         tokenBAmount: "50",
-        slippage: "0.5"
+        slippage: "0.5",
       };
       actor.send({ type: "START_CALCULATION" });
       actor.send({ type: "SUBMIT", data: mockData });
@@ -199,7 +201,7 @@ describe("LiquidityMachine", () => {
       const mockData = {
         tokenAAmount: "100",
         tokenBAmount: "50",
-        slippage: "0.5"
+        slippage: "0.5",
       };
       actor.send({ type: "SUBMIT", data: mockData });
       actor.send({ type: "SIGN_TRANSACTION", signature: "test-signature" });

@@ -45,7 +45,7 @@ export function useAnalytics() {
   const trackWalletConnection = (properties: {
     wallet: string;
     success: boolean;
-    address?: string
+    address?: string;
   }) => {
     trackEvent("wallet_connected", properties);
   };
@@ -53,15 +53,12 @@ export function useAnalytics() {
   const trackError = (properties: {
     error: string;
     context: string;
-    details?: unknown
+    details?: unknown;
   }) => {
     trackEvent("error", properties);
   };
 
-  const trackPageView = (properties?: {
-    page?: string;
-    referrer?: string
-  }) => {
+  const trackPageView = (properties?: { page?: string; referrer?: string }) => {
     trackEvent("$pageview", properties);
   };
 

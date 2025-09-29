@@ -43,7 +43,7 @@ export function useSolanaSubscription({
               console.error("Failed to parse account data:", error);
             }
           },
-          commitment
+          commitment,
         );
 
         if (subscriptionId.current) {
@@ -64,7 +64,15 @@ export function useSolanaSubscription({
         subscriptionId.current = null;
       }
     };
-  }, [accountAddress, enabled, commitment, queryKey, queryClient, parseAccountData, endpoint]);
+  }, [
+    accountAddress,
+    enabled,
+    commitment,
+    queryKey,
+    queryClient,
+    parseAccountData,
+    endpoint,
+  ]);
 
   return { isSubscribed: subscriptionId.current !== null };
 }

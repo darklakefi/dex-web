@@ -11,7 +11,10 @@ import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useCallback, useMemo } from "react";
 import { z } from "zod";
 import { FormFieldset } from "../../../_components/FormFieldset";
-import { LIQUIDITY_CONSTANTS, FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
+import {
+  LIQUIDITY_CONSTANTS,
+  FORM_FIELD_NAMES,
+} from "../_constants/liquidityConstants";
 
 interface TokenAccountData {
   tokenAccounts?: Array<{
@@ -52,58 +55,80 @@ export function useLiquidityForm({
   buyTokenAccount,
   onSubmit,
 }: UseLiquidityFormProps) {
-  const formConfig = useMemo(() => ({
-    defaultValues: {
-      [FORM_FIELD_NAMES.INITIAL_PRICE]: LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE,
-      [FORM_FIELD_NAMES.TOKEN_A_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
-      [FORM_FIELD_NAMES.TOKEN_B_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
-    } as LiquidityFormValues,
-    onSubmit: async ({ value }: { value: LiquidityFormValues }) => {
-      await onSubmit(value);
-    },
-    validators: {
-      onChange: liquidityFormSchema,
-      onDynamic: ({ value }: { value: LiquidityFormValues }) => {
-        if (
-          value[FORM_FIELD_NAMES.TOKEN_A_AMOUNT] &&
-          publicKey &&
-          buyTokenAccount?.tokenAccounts?.[0]
-        ) {
-          const tokenANumericValue = formatAmountInput(value[FORM_FIELD_NAMES.TOKEN_A_AMOUNT]);
-          if (parseAmountBigNumber(tokenANumericValue).gt(0)) {
-            const tokenAccount = buyTokenAccount.tokenAccounts[0];
-            const maxBalance = convertToDecimal(
-              tokenAccount.amount || 0,
-              tokenAccount.decimals || 0,
+  const formConfig = useMemo(
+    () => ({
+      defaultValues: {
+        [FORM_FIELD_NAMES.INITIAL_PRICE]:
+          LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE,
+        [FORM_FIELD_NAMES.TOKEN_A_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
+        [FORM_FIELD_NAMES.TOKEN_B_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
+      } as LiquidityFormValues,
+      onSubmit: async ({ value }: { value: LiquidityFormValues }) => {
+        await onSubmit(value);
+      },
+      validators: {
+        onChange: liquidityFormSchema,
+        onDynamic: ({ value }: { value: LiquidityFormValues }) => {
+          if (
+            value[FORM_FIELD_NAMES.TOKEN_A_AMOUNT] &&
+            publicKey &&
+            buyTokenAccount?.tokenAccounts?.[0]
+          ) {
+            const tokenANumericValue = formatAmountInput(
+              value[FORM_FIELD_NAMES.TOKEN_A_AMOUNT],
             );
+            if (parseAmountBigNumber(tokenANumericValue).gt(0)) {
+              const tokenAccount = buyTokenAccount.tokenAccounts[0];
+              const maxBalance = convertToDecimal(
+                tokenAccount.amount || 0,
+                tokenAccount.decimals || 0,
+              );
 
-            if (parseAmountBigNumber(tokenANumericValue).gt(maxBalance)) {
-              const symbol = tokenAccount.symbol || "token";
-              return { [FORM_FIELD_NAMES.TOKEN_A_AMOUNT]: `Insufficient ${symbol} balance.` };
+              if (parseAmountBigNumber(tokenANumericValue).gt(maxBalance)) {
+                const symbol = tokenAccount.symbol || "token";
+                return {
+                  [FORM_FIELD_NAMES.TOKEN_A_AMOUNT]: `Insufficient ${symbol} balance.`,
+                };
+              }
             }
           }
-        }
+        },
       },
-    },
-  }), [publicKey, buyTokenAccount, onSubmit]);
+    }),
+    [publicKey, buyTokenAccount, onSubmit],
+  );
 
   const form = useAppForm(formConfig);
 
   const resetFormToDefaults = useCallback((): void => {
-    form.setFieldValue(FORM_FIELD_NAMES.TOKEN_A_AMOUNT, LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT);
-    form.setFieldValue(FORM_FIELD_NAMES.TOKEN_B_AMOUNT, LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT);
-    form.setFieldValue(FORM_FIELD_NAMES.INITIAL_PRICE, LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE);
+    form.setFieldValue(
+      FORM_FIELD_NAMES.TOKEN_A_AMOUNT,
+      LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
+    );
+    form.setFieldValue(
+      FORM_FIELD_NAMES.TOKEN_B_AMOUNT,
+      LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
+    );
+    form.setFieldValue(
+      FORM_FIELD_NAMES.INITIAL_PRICE,
+      LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE,
+    );
   }, [form]);
 
-  const validateSufficientBalance = useCallback((
-    amount: string,
-    tokenAccount?: TokenAccountData["tokenAccounts"] extends (infer U)[] ? U : never
-  ): string | undefined => {
-    return validateHasSufficientBalance({
-      amount,
-      tokenAccount,
-    });
-  }, []);
+  const validateSufficientBalance = useCallback(
+    (
+      amount: string,
+      tokenAccount?: TokenAccountData["tokenAccounts"] extends (infer U)[]
+        ? U
+        : never,
+    ): string | undefined => {
+      return validateHasSufficientBalance({
+        amount,
+        tokenAccount,
+      });
+    },
+    [],
+  );
 
   return {
     form,

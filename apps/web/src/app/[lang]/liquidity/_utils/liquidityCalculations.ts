@@ -24,7 +24,10 @@ interface TokenAddresses {
 export function calculateLiquidityAmounts(
   poolDetails: PoolDetails,
   { tokenAAmount, tokenBAmount }: TokenAmounts,
-  { tokenAAddress: _tokenAAddress, tokenBAddress: _tokenBAddress }: TokenAddresses,
+  {
+    tokenAAddress: _tokenAAddress,
+    tokenBAddress: _tokenBAddress,
+  }: TokenAddresses,
 ): { maxAmountX: number; maxAmountY: number } {
   const sellAmount = parseAmount(tokenBAmount);
   const buyAmount = parseAmount(tokenAAmount);
@@ -36,16 +39,15 @@ export function calculateLiquidityAmounts(
   return { maxAmountX, maxAmountY };
 }
 
-export function createLiquidityTransactionPayload(
-  params: {
-    tokenAmounts: TokenAmounts;
-    tokenAddresses: TokenAddresses;
-    slippage: string;
-    publicKey: PublicKey;
-    poolDetails: PoolDetails;
-  }
-): CreateLiquidityTransactionInput {
-  const { tokenAmounts, tokenAddresses, slippage, publicKey, poolDetails } = params;
+export function createLiquidityTransactionPayload(params: {
+  tokenAmounts: TokenAmounts;
+  tokenAddresses: TokenAddresses;
+  slippage: string;
+  publicKey: PublicKey;
+  poolDetails: PoolDetails;
+}): CreateLiquidityTransactionInput {
+  const { tokenAmounts, tokenAddresses, slippage, publicKey, poolDetails } =
+    params;
 
   const sortedTokens = sortSolanaAddresses(
     tokenAddresses.tokenAAddress,
@@ -82,9 +84,7 @@ export function calculateTokenAmountByPrice(
     parseAmountBigNumber(inputAmount).gt(0) &&
     parseAmountBigNumber(price).gt(0)
   ) {
-    return parseAmountBigNumber(inputAmount)
-      .multipliedBy(price)
-      .toString();
+    return parseAmountBigNumber(inputAmount).multipliedBy(price).toString();
   }
   return "0";
 }
@@ -98,7 +98,7 @@ export function determineInputType(
   if (!poolDetails) return "tokenX";
 
   return (type === "sell" && poolDetails.tokenXMint === tokenBAddress) ||
-         (type === "buy" && poolDetails.tokenXMint === tokenAAddress)
+    (type === "buy" && poolDetails.tokenXMint === tokenAAddress)
     ? "tokenX"
     : "tokenY";
 }

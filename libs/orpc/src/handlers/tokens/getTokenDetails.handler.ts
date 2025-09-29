@@ -7,7 +7,7 @@ import type {
 } from "../../schemas/tokens/getTokenDetails.schema";
 
 export const getTokenDetailsHandler = async (
-  input: GetTokenDetailsInput
+  input: GetTokenDetailsInput,
 ): Promise<GetTokenDetailsOutput> => {
   const { address } = input;
 

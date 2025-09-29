@@ -2,14 +2,16 @@ import { z } from "zod";
 import type { PublicKey } from "@solana/web3.js";
 import type { FormApi } from "@tanstack/react-form";
 
-export const numericStringSchema = z.string().refine(
-  (val) => !Number.isNaN(Number(val)) && val !== "" && Number(val) >= 0,
-  "Must be a valid number"
-);
+export const numericStringSchema = z
+  .string()
+  .refine(
+    (val) => !Number.isNaN(Number(val)) && val !== "" && Number(val) >= 0,
+    "Must be a valid number",
+  );
 
 export const positiveNumericStringSchema = numericStringSchema.refine(
   (val) => Number(val) > 0,
-  "Must be positive"
+  "Must be positive",
 );
 
 export const liquidityFormSchema = z.object({
@@ -136,12 +138,28 @@ export interface CalculationParams {
   readonly inputType: "tokenX" | "tokenY";
 }
 
-export type LiquidityState = "idle" | "calculating" | "submitting" | "signing" | "success" | "error";
+export type LiquidityState =
+  | "idle"
+  | "calculating"
+  | "submitting"
+  | "signing"
+  | "success"
+  | "error";
 
 export interface LiquidityFormContextValue {
-  readonly form: FormApi<LiquidityFormValues, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined>;
+  readonly form: FormApi<
+    LiquidityFormValues,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined
+  >;
 
-  readonly state: unknown; 
+  readonly state: unknown;
   readonly send: (event: unknown) => void;
 
   readonly isSubmitting: boolean;
@@ -162,12 +180,24 @@ export interface LiquidityFormContextValue {
   readonly setSlippage: (slippage: string) => void;
 
   readonly resetFormToDefaults: () => void;
-  readonly handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>, type: "buy" | "sell") => void;
+  readonly handleAmountChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "buy" | "sell",
+  ) => void;
   readonly clearPendingCalculations: () => void;
-  readonly calculateTokenAmounts: (params: { inputAmount: string; inputType: "tokenX" | "tokenY" }) => Promise<void>;
+  readonly calculateTokenAmounts: (params: {
+    inputAmount: string;
+    inputType: "tokenX" | "tokenY";
+  }) => Promise<void>;
 
   readonly trackLiquidityAction: (data: LiquidityTrackingData) => void;
-  readonly trackError: (error: unknown, context?: Record<string, unknown>) => void;
+  readonly trackError: (
+    error: unknown,
+    context?: Record<string, unknown>,
+  ) => void;
 
-  readonly handleError: (error: unknown, context?: Record<string, unknown>) => void;
+  readonly handleError: (
+    error: unknown,
+    context?: Record<string, unknown>,
+  ) => void;
 }

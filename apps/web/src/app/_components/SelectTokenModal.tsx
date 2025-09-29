@@ -115,11 +115,11 @@ export function SelectTokenModal({
     const baseReturn = currentFrom || `/${returnUrl}`;
     const selectedTokenAddress = selectedToken.address;
     setRecentSearches(selectedToken);
-    
+
     if (type === "buy") {
       const sellAddress =
         selectedTokenAddress === tokenBAddress ? tokenAAddress : tokenBAddress;
-      
+
       if (currentFrom) {
         const urlWithParams = serialize(currentFrom, {
           tokenAAddress: selectedTokenAddress,
@@ -136,7 +136,7 @@ export function SelectTokenModal({
     } else {
       const buyAddress =
         selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
-      
+
       if (currentFrom) {
         const urlWithParams = serialize(currentFrom, {
           tokenAAddress: buyAddress,

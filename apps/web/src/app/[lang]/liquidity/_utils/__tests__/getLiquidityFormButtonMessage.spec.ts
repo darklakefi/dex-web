@@ -17,7 +17,7 @@ const defaultProps = {
 const mockTokenAccount = {
   tokenAccounts: [
     {
-      amount: 1000000000, 
+      amount: 1000000000,
       decimals: 9,
       symbol: "SOL",
     },
@@ -26,7 +26,7 @@ const mockTokenAccount = {
 const mockUSDCAccount = {
   tokenAccounts: [
     {
-      amount: 1000000, 
+      amount: 1000000,
       decimals: 6,
       symbol: "USDC",
     },
@@ -83,26 +83,26 @@ describe("getLiquidityFormButtonMessage", () => {
     it("should return insufficient balance for sell token", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
-        tokenBAmount: "10", 
-        sellTokenAccount: mockUSDCAccount, 
+        tokenBAmount: "10",
+        sellTokenAccount: mockUSDCAccount,
       });
       expect(result).toBe("Insufficient balance");
     });
     it("should return insufficient balance for buy token", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
-        tokenAAmount: "10", 
-        buyTokenAccount: mockTokenAccount, 
+        tokenAAmount: "10",
+        buyTokenAccount: mockTokenAccount,
       });
       expect(result).toBe("Insufficient balance");
     });
     it("should pass balance validation with sufficient funds", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
-        tokenAAmount: "0.5", 
-        tokenBAmount: "0.5", 
-        buyTokenAccount: mockTokenAccount, 
-        sellTokenAccount: mockUSDCAccount, 
+        tokenAAmount: "0.5",
+        tokenBAmount: "0.5",
+        buyTokenAccount: mockTokenAccount,
+        sellTokenAccount: mockUSDCAccount,
         poolDetails: mockPoolDetails,
       });
       expect(result).toBe("Add Liquidity");
@@ -110,8 +110,8 @@ describe("getLiquidityFormButtonMessage", () => {
     it("should handle tokens with commas in amounts", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
-        tokenBAmount: "1,000", 
-        sellTokenAccount: mockUSDCAccount, 
+        tokenBAmount: "1,000",
+        sellTokenAccount: mockUSDCAccount,
       });
       expect(result).toBe("Insufficient balance");
     });
@@ -261,7 +261,7 @@ describe("getLiquidityFormButtonMessage", () => {
       };
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
-        tokenAAmount: "1500", 
+        tokenAAmount: "1500",
         buyTokenAccount: accountWithZeroDecimals,
         poolDetails: mockPoolDetails,
       });

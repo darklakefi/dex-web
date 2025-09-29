@@ -1,8 +1,8 @@
 "use client";
 
-import type React from 'react';
-import { Component, type ReactNode } from 'react'
-import { Box, Button, Icon, Text } from '@dex-web/ui';
+import type React from "react";
+import { Component, type ReactNode } from "react";
+import { Box, Button, Icon, Text } from "@dex-web/ui";
 
 interface LiquidityErrorBoundaryState {
   hasError: boolean;
@@ -45,69 +45,85 @@ function ErrorFallback({
   onReport,
 }: ErrorFallbackProps) {
   const isRetryLimitReached = retryCount >= maxRetries;
-  const errorMessage = error?.message || 'An unexpected error occurred';
+  const errorMessage = error?.message || "An unexpected error occurred";
 
-  const getSeverityLevel = (error?: Error): 'low' | 'medium' | 'high' => {
-    if (!error) return 'medium';
+  const getSeverityLevel = (error?: Error): "low" | "medium" | "high" => {
+    if (!error) return "medium";
 
     const message = error.message.toLowerCase();
 
     if (
-      message.includes('wallet') ||
-      message.includes('transaction') ||
-      message.includes('signature') ||
-      message.includes('insufficient') ||
-      message.includes('security')
+      message.includes("wallet") ||
+      message.includes("transaction") ||
+      message.includes("signature") ||
+      message.includes("insufficient") ||
+      message.includes("security")
     ) {
-      return 'high';
+      return "high";
     }
 
     if (
-      message.includes('render') ||
-      message.includes('display') ||
-      message.includes('format')
+      message.includes("render") ||
+      message.includes("display") ||
+      message.includes("format")
     ) {
-      return 'low';
+      return "low";
     }
 
-    return 'medium';
+    return "medium";
   };
 
   const severity = getSeverityLevel(error);
 
   const getBorderColor = () => {
     switch (severity) {
-      case 'high': return 'border-red-400';
-      case 'medium': return 'border-yellow-400';
-      case 'low': return 'border-blue-400';
-      default: return 'border-gray-400';
+      case "high":
+        return "border-red-400";
+      case "medium":
+        return "border-yellow-400";
+      case "low":
+        return "border-blue-400";
+      default:
+        return "border-gray-400";
     }
   };
 
   const getBackgroundColor = () => {
     switch (severity) {
-      case 'high': return 'bg-red-600';
-      case 'medium': return 'bg-yellow-600';
-      case 'low': return 'bg-blue-600';
-      default: return 'bg-gray-600';
+      case "high":
+        return "bg-red-600";
+      case "medium":
+        return "bg-yellow-600";
+      case "low":
+        return "bg-blue-600";
+      default:
+        return "bg-gray-600";
     }
   };
 
   const getTextColor = () => {
     switch (severity) {
-      case 'high': return 'text-red-300';
-      case 'medium': return 'text-yellow-300';
-      case 'low': return 'text-blue-300';
-      default: return 'text-gray-300';
+      case "high":
+        return "text-red-300";
+      case "medium":
+        return "text-yellow-300";
+      case "low":
+        return "text-blue-300";
+      default:
+        return "text-gray-300";
     }
   };
 
   const getIconName = () => {
     switch (severity) {
-      case 'high': return 'exclamation';
-      case 'medium': return 'exclamation';
-      case 'low': return 'info';
-      default: return 'exclamation';
+      case "high":
+        return "exclamation";
+      case "medium":
+        return "exclamation";
+      case "low":
+        return "info";
+      default:
+        return "exclamation";
     }
   };
 
@@ -130,14 +146,13 @@ function ErrorFallback({
             )}
           </div>
 
-          <Text.Body2 className={getTextColor()}>
-            {errorMessage}
-          </Text.Body2>
+          <Text.Body2 className={getTextColor()}>{errorMessage}</Text.Body2>
 
-          {severity === 'high' && (
+          {severity === "high" && (
             <Box className="border border-red-300 bg-red-700 p-2">
               <Text.Body2 className="text-red-200 text-sm">
-                ⚠️ This error may affect your transaction security. Please refresh the page or contact support.
+                ⚠️ This error may affect your transaction security. Please
+                refresh the page or contact support.
               </Text.Body2>
             </Box>
           )}
@@ -178,7 +193,8 @@ function ErrorFallback({
 
           {isRetryLimitReached && (
             <Text.Body2 className="text-red-300 text-sm">
-              Maximum retry attempts reached. Please refresh the page or contact support.
+              Maximum retry attempts reached. Please refresh the page or contact
+              support.
             </Text.Body2>
           )}
         </div>
@@ -202,7 +218,9 @@ export class LiquidityErrorBoundary extends Component<
     };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<LiquidityErrorBoundaryState> {
+  static getDerivedStateFromError(
+    error: Error,
+  ): Partial<LiquidityErrorBoundaryState> {
     const errorId = `liquidity_error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     return {
@@ -219,8 +237,12 @@ export class LiquidityErrorBoundary extends Component<
 
     this.logErrorToAnalytics(error, errorInfo);
 
-    if (process.env.NODE_ENV === 'development') {
-      console.error('LiquidityErrorBoundary caught an error:', error, errorInfo);
+    if (process.env.NODE_ENV === "development") {
+      console.error(
+        "LiquidityErrorBoundary caught an error:",
+        error,
+        errorInfo,
+      );
     }
   }
 
@@ -233,7 +255,7 @@ export class LiquidityErrorBoundary extends Component<
   private logErrorToAnalytics = (error: Error, errorInfo: React.ErrorInfo) => {
     try {
       const errorData = {
-        component: this.props.componentName || 'LiquidityForm',
+        component: this.props.componentName || "LiquidityForm",
         error: {
           message: error.message,
           stack: error.stack,
@@ -243,18 +265,20 @@ export class LiquidityErrorBoundary extends Component<
           componentStack: errorInfo.componentStack,
         },
         metadata: {
-          userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown',
-          url: typeof window !== 'undefined' ? window.location.href : 'unknown',
+          userAgent:
+            typeof window !== "undefined"
+              ? window.navigator.userAgent
+              : "unknown",
+          url: typeof window !== "undefined" ? window.location.href : "unknown",
           timestamp: new Date().toISOString(),
           errorId: this.state.errorId,
           retryCount: this.state.retryCount,
         },
       };
 
-      console.info('Error logged to analytics:', errorData);
-
+      console.info("Error logged to analytics:", errorData);
     } catch (loggingError) {
-      console.error('Failed to log error to analytics:', loggingError);
+      console.error("Failed to log error to analytics:", loggingError);
     }
   };
 
@@ -265,7 +289,7 @@ export class LiquidityErrorBoundary extends Component<
       return;
     }
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       retryCount: prevState.retryCount + 1,
     }));
 
@@ -286,7 +310,7 @@ export class LiquidityErrorBoundary extends Component<
       retryCount: 0,
     });
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       window.location.reload();
     }
   };
@@ -296,25 +320,32 @@ export class LiquidityErrorBoundary extends Component<
 
     const errorReport = {
       errorId,
-      component: this.props.componentName || 'LiquidityForm',
-      error: error ? {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      } : null,
-      errorInfo: errorInfo ? {
-        componentStack: errorInfo.componentStack,
-      } : null,
+      component: this.props.componentName || "LiquidityForm",
+      error: error
+        ? {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+          }
+        : null,
+      errorInfo: errorInfo
+        ? {
+            componentStack: errorInfo.componentStack,
+          }
+        : null,
       timestamp: new Date().toISOString(),
       retryCount: this.state.retryCount,
     };
 
-    console.info('Error report generated:', errorReport);
+    console.info("Error report generated:", errorReport);
 
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(JSON.stringify(errorReport, null, 2))
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard
+        .writeText(JSON.stringify(errorReport, null, 2))
         .then(() => {
-          alert('Error details copied to clipboard. Please share this with support.');
+          alert(
+            "Error details copied to clipboard. Please share this with support.",
+          );
         })
         .catch(() => {
           alert(`Error ID: ${errorId}. Please share this with support.`);
@@ -337,7 +368,7 @@ export class LiquidityErrorBoundary extends Component<
           retryCount={this.state.retryCount}
           maxRetries={this.props.maxRetries || 3}
           enableRecovery={this.props.enableRecovery !== false}
-          componentName={this.props.componentName || 'Liquidity Form'}
+          componentName={this.props.componentName || "Liquidity Form"}
           onRetry={this.handleRetry}
           onReset={this.handleReset}
           onReport={this.handleReport}
@@ -351,15 +382,12 @@ export class LiquidityErrorBoundary extends Component<
 
 export function withLiquidityErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
-  errorBoundaryProps?: Partial<LiquidityErrorBoundaryProps>
+  errorBoundaryProps?: Partial<LiquidityErrorBoundaryProps>,
 ) {
-  const displayName = Component.displayName || Component.name || 'Component';
+  const displayName = Component.displayName || Component.name || "Component";
 
   const WrappedComponent = (props: P) => (
-    <LiquidityErrorBoundary
-      componentName={displayName}
-      {...errorBoundaryProps}
-    >
+    <LiquidityErrorBoundary componentName={displayName} {...errorBoundaryProps}>
       <Component {...props} />
     </LiquidityErrorBoundary>
   );
@@ -369,7 +397,11 @@ export function withLiquidityErrorBoundary<P extends object>(
   return WrappedComponent;
 }
 
-export function LiquidityFormErrorBoundary({ children }: { children: ReactNode }) {
+export function LiquidityFormErrorBoundary({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <LiquidityErrorBoundary
       componentName="Liquidity Form"
@@ -381,7 +413,11 @@ export function LiquidityFormErrorBoundary({ children }: { children: ReactNode }
   );
 }
 
-export function LiquidityTokenInputErrorBoundary({ children }: { children: ReactNode }) {
+export function LiquidityTokenInputErrorBoundary({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <LiquidityErrorBoundary
       componentName="Token Input"
@@ -393,19 +429,27 @@ export function LiquidityTokenInputErrorBoundary({ children }: { children: React
   );
 }
 
-export function LiquidityTransactionErrorBoundary({ children }: { children: ReactNode }) {
+export function LiquidityTransactionErrorBoundary({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <LiquidityErrorBoundary
       componentName="Transaction Processing"
       maxRetries={2}
-      enableRecovery={false} 
+      enableRecovery={false}
     >
       {children}
     </LiquidityErrorBoundary>
   );
 }
 
-export function LiquidityAPIErrorBoundary({ children }: { children: ReactNode }) {
+export function LiquidityAPIErrorBoundary({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <LiquidityErrorBoundary
       componentName="API Call"

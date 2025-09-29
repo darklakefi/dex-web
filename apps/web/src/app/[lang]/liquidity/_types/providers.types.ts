@@ -24,7 +24,17 @@ export interface LiquidityDataContextValue {
 }
 
 export interface LiquidityFormContextValue {
-  form: FormApi<LiquidityFormValues, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined>;
+  form: FormApi<
+    LiquidityFormValues,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined
+  >;
   isSubmitting: boolean;
   isValid: boolean;
   submitForm: () => Promise<void>;

@@ -13,7 +13,7 @@ interface SkeletonFormProps {
 export function SkeletonForm({
   testId: _testId = "skeleton-form",
   "aria-label": _ariaLabel = "Loading form",
-  type = "liquidity"
+  type = "liquidity",
 }: SkeletonFormProps = {}) {
   return (
     <section className="flex w-full max-w-xl items-start gap-1">
@@ -22,7 +22,9 @@ export function SkeletonForm({
       <Box padding="lg">
         <div className="flex flex-col gap-4">
           {}
-          <SkeletonTokenInput label={type === "liquidity" ? "SELL AMOUNT" : "SELLING"} />
+          <SkeletonTokenInput
+            label={type === "liquidity" ? "SELL AMOUNT" : "SELLING"}
+          />
 
           {}
           <div className="flex items-center justify-center">
@@ -31,15 +33,20 @@ export function SkeletonForm({
               role="img"
               aria-label={`${type === "liquidity" ? "Plus" : "Swap"} - ${type === "liquidity" ? "Adding liquidity to pool" : "Swapping tokens"}`}
             >
-              <Icon className="size-5" name={type === "liquidity" ? "plus" : "swap"} />
+              <Icon
+                className="size-5"
+                name={type === "liquidity" ? "plus" : "swap"}
+              />
             </div>
           </div>
 
-          <SkeletonTokenInput label={type === "liquidity" ? "BUY AMOUNT" : "BUYING"} />
-          
+          <SkeletonTokenInput
+            label={type === "liquidity" ? "BUY AMOUNT" : "BUYING"}
+          />
+
           {}
           <SkeletonLoader variant="button" className="h-12 w-full" />
-          
+
           {}
           <SkeletonLoader variant="text" className="h-4 w-40" />
         </div>
@@ -57,7 +64,7 @@ export function SkeletonForm({
       <div className="flex flex-col gap-1">
         {}
         <SkeletonLoader variant="button" className="h-10 w-10" />
-        
+
         {}
         <SkeletonLoader variant="button" className="h-10 w-10" />
       </div>

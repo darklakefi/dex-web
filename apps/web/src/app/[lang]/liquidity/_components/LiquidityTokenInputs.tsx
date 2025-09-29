@@ -212,10 +212,15 @@ export function LiquidityTokenInputs({
                 }}
                 onClearPendingCalculations={clearPendingCalculations}
                 onHalfMaxClick={(type) => handleHalfMaxClick(type, "sell")}
-                tokenAccount={sellTokenAccount?.tokenAccounts?.[0] ? {
-                  ...sellTokenAccount.tokenAccounts[0],
-                  address: sellTokenAccount.tokenAccounts[0].address || ''
-                } : undefined}
+                tokenAccount={
+                  sellTokenAccount?.tokenAccounts?.[0]
+                    ? {
+                        ...sellTokenAccount.tokenAccounts[0],
+                        address:
+                          sellTokenAccount.tokenAccounts[0].address || "",
+                      }
+                    : undefined
+                }
                 value={field.state.value}
               />
             )}
@@ -292,10 +297,14 @@ export function LiquidityTokenInputs({
                 }}
                 onClearPendingCalculations={clearPendingCalculations}
                 onHalfMaxClick={(type) => handleHalfMaxClick(type, "buy")}
-                tokenAccount={buyTokenAccount?.tokenAccounts?.[0] ? {
-                  ...buyTokenAccount.tokenAccounts[0],
-                  address: buyTokenAccount.tokenAccounts[0].address || ''
-                } : undefined}
+                tokenAccount={
+                  buyTokenAccount?.tokenAccounts?.[0]
+                    ? {
+                        ...buyTokenAccount.tokenAccounts[0],
+                        address: buyTokenAccount.tokenAccounts[0].address || "",
+                      }
+                    : undefined
+                }
                 value={field.state.value}
               />
             )}

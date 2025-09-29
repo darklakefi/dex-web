@@ -13,10 +13,10 @@ export function SkeletonWalletButton({
   testId = "skeleton-wallet-button",
   "aria-label": ariaLabel = "Loading wallet button",
   className,
-  suppressHydrationWarning = true
+  suppressHydrationWarning = true,
 }: SkeletonWalletButtonProps = {}) {
   return (
-    <button 
+    <button
       type="button"
       className={className}
       disabled
@@ -24,8 +24,8 @@ export function SkeletonWalletButton({
       data-testid={testId}
       suppressHydrationWarning={suppressHydrationWarning}
     >
-      <SkeletonLoader 
-        variant="wallet" 
+      <SkeletonLoader
+        variant="wallet"
         className="h-full w-full rounded-md"
         testId={testId}
         aria-label={ariaLabel}
