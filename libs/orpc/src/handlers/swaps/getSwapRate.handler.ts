@@ -18,7 +18,6 @@ import {
 } from "../../utils/solana";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
-// Define AmmConfig account structure
 export type AmmConfig = {
   trade_fee_rate: number;
   protocol_fee_rate: number;
@@ -31,24 +30,18 @@ export type AmmConfig = {
 };
 
 
-// Helper function to calculate trade fee
 function gateFee(sourceAmount: BigNumber, tradeFeeRate: BigNumber): BigNumber {
-  // tradeFeeRate is in basis points (e.g., 1000000 = 100%, 1 = 0.0001%)
-  // rounding up in our favor
   return sourceAmount
     .multipliedBy(tradeFeeRate)
     .dividedBy(MAX_PERCENTAGE)
     .integerValue(BigNumber.ROUND_UP);
 }
 
-// Constant product formula (like Uniswap AMM)
 function swapBaseInputWithoutFees(
   sourceAmount: BigNumber,
   swapSourceAmount: BigNumber,
   swapDestinationAmount: BigNumber,
 ): BigNumber {
-  // (x + delta_x) * (y - delta_y) = x * y
-  // delta_y = (delta_x * y) / (x + delta_x)
   const numerator = sourceAmount.multipliedBy(swapDestinationAmount);
   const denominator = swapSourceAmount.plus(sourceAmount);
   const destinationAmountSwapped = numerator
@@ -57,7 +50,6 @@ function swapBaseInputWithoutFees(
   return destinationAmountSwapped;
 }
 
-// Main swap calculation function
 function calculateSwap(
   sourceAmount: BigNumber,
   poolSourceAmount: BigNumber,
@@ -71,22 +63,17 @@ function calculateSwap(
   tradeFee: BigNumber;
   protocolFee: BigNumber;
 } {
-  // Calculate trade fee from input
   const tradeFee = gateFee(sourceAmount, tradeFeeRate);
-  // Protocol fee is a percentage of the trade fee
   const protocolFee = gateFee(tradeFee, protocolFeeRate);
 
-  // Subtract fee from input
   const sourceAmountPostFees = sourceAmount.minus(tradeFee);
 
-  // Use post fee amount to calculate output
   const destinationAmountSwapped = swapBaseInputWithoutFees(
     sourceAmountPostFees,
     poolSourceAmount,
     poolDestinationAmount,
   );
 
-  // Calculate rate (output per input)
   const rate = destinationAmountSwapped.dividedBy(sourceAmount);
 
   return {
@@ -98,7 +85,6 @@ function calculateSwap(
   };
 }
 
-// The response should be CACHED (or outright provided as env param since fees will change almost never)
 async function getAmmConfigAccount(
   connection: Connection,
   ammConfigPubkey: PublicKey,
@@ -109,11 +95,9 @@ async function getAmmConfigAccount(
     throw new Error("AmmConfig not found");
   }
 
-  // Decode the AmmConfig account using Anchor's built-in decoder
   try {
     const decodedData = IDL_CODER.accounts.decode("AmmConfig", accountInfo.data);
 
-    // Create a properly typed AmmConfig object
     const ammConfig: AmmConfig = {
       trade_fee_rate: decodedData.trade_fee_rate || 0,
       protocol_fee_rate: decodedData.protocol_fee_rate || 0,
@@ -160,11 +144,9 @@ export async function getSwapRateHandler(
 
     const connection = helius.connection;
 
-    // Fetch and parse both Pool and AmmConfig accounts
     const pool = await getPoolAccount(connection, poolPubkey);
     const ammConfig = await getAmmConfigAccount(connection, ammConfigPubkey);
 
-    // Get token balances
     const reserveXBalance = await getTokenBalance(
       connection,
       pool.reserve_x,

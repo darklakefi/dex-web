@@ -2,9 +2,8 @@ import { z } from "zod";
 import type { PublicKey } from "@solana/web3.js";
 import type { FormApi } from "@tanstack/react-form";
 
-// Zod schemas for form validation
 export const numericStringSchema = z.string().refine(
-  (val) => !isNaN(Number(val)) && val !== "" && Number(val) >= 0,
+  (val) => !Number.isNaN(Number(val)) && val !== "" && Number(val) >= 0,
   "Must be a valid number"
 );
 
@@ -21,7 +20,6 @@ export const liquidityFormSchema = z.object({
 
 export type LiquidityFormSchema = z.infer<typeof liquidityFormSchema>;
 
-// Core data interfaces
 export interface TokenAccount {
   readonly address?: string;
   readonly mint: string;
@@ -59,7 +57,6 @@ export interface WalletAdapter {
   } | null;
 }
 
-// Transaction and context interfaces
 export interface TransactionContext {
   readonly tokenA: string;
   readonly tokenB: string;
@@ -77,10 +74,9 @@ export interface ValidationError {
 
 export interface TransactionError {
   readonly message: string;
-  readonly context?: Record<string, any>;
+  readonly context?: Record<string, unknown>;
 }
 
-// Analytics tracking interfaces
 export interface LiquidityTrackingData {
   readonly action: "add" | "remove";
   readonly tokenA: string;
@@ -93,10 +89,9 @@ export interface LiquidityTrackingData {
 export interface ErrorTrackingData {
   readonly context: string;
   readonly error: string;
-  readonly details?: Record<string, any>;
+  readonly details?: Record<string, unknown>;
 }
 
-// Hook return types
 export interface UseRealtimePoolDataReturn {
   readonly poolDetails: PoolDetails | null;
   readonly isRealtime: boolean;
@@ -115,7 +110,6 @@ export interface UseRealtimeTokenAccountsReturn {
   readonly isRealtime: boolean;
 }
 
-// Component props interfaces
 export interface LiquidityComponentProps {
   readonly publicKey: PublicKey | null;
   readonly walletAdapter: WalletAdapter | null;
@@ -132,7 +126,6 @@ export interface LiquidityFormProviderProps {
   readonly tokenBAddress?: string | null;
 }
 
-// Event interfaces
 export interface AmountChangeEvent {
   readonly target: { readonly value: string };
   readonly isTrusted?: boolean;
@@ -143,49 +136,38 @@ export interface CalculationParams {
   readonly inputType: "tokenX" | "tokenY";
 }
 
-// State types
 export type LiquidityState = "idle" | "calculating" | "submitting" | "signing" | "success" | "error";
 
-// Form provider context interface
 export interface LiquidityFormContextValue {
-  // TanStack Form instance
   readonly form: FormApi<LiquidityFormValues, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined>;
 
-  // XState machine state and send function
-  readonly state: any; // Will be typed properly with machine context
-  readonly send: (event: any) => void;
+  readonly state: unknown; // Will be typed properly with machine context
+  readonly send: (event: unknown) => void;
 
-  // State selectors for optimization
   readonly isSubmitting: boolean;
   readonly isSuccess: boolean;
   readonly isError: boolean;
   readonly isCalculating: boolean;
   readonly hasError: boolean;
 
-  // Wallet and user data
   readonly publicKey: PublicKey | null;
   readonly walletAdapter: WalletAdapter | null;
 
-  // Token addresses and data
   readonly tokenAAddress: string | null;
   readonly tokenBAddress: string | null;
   readonly poolDetails: PoolDetails | null;
   readonly tokenAccountsData: UseRealtimeTokenAccountsReturn;
 
-  // Transaction management
   readonly slippage: string;
   readonly setSlippage: (slippage: string) => void;
 
-  // Form helpers
   readonly resetFormToDefaults: () => void;
   readonly handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>, type: "buy" | "sell") => void;
   readonly clearPendingCalculations: () => void;
   readonly calculateTokenAmounts: (params: { inputAmount: string; inputType: "tokenX" | "tokenY" }) => Promise<void>;
 
-  // Analytics and tracking
   readonly trackLiquidityAction: (data: LiquidityTrackingData) => void;
-  readonly trackError: (error: unknown, context?: Record<string, any>) => void;
+  readonly trackError: (error: unknown, context?: Record<string, unknown>) => void;
 
-  // Error handling
-  readonly handleError: (error: unknown, context?: Record<string, any>) => void;
+  readonly handleError: (error: unknown, context?: Record<string, unknown>) => void;
 }

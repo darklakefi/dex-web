@@ -1,9 +1,8 @@
 import { parseAmountBigNumber } from "@dex-web/utils";
 
-// Types for Web Worker communication
 export interface CalculationInput {
   type: 'PRICE_CALCULATION' | 'BALANCE_VALIDATION' | 'TOKEN_AMOUNT_CALCULATION';
-  payload: any;
+  payload: PriceCalculationPayload | BalanceValidationPayload | TokenAmountCalculationPayload;
 }
 
 export interface PriceCalculationPayload {
@@ -28,12 +27,11 @@ export interface TokenAmountCalculationPayload {
 export interface CalculationResult {
   type: string;
   success: boolean;
-  result?: any;
+  result?: unknown;
   error?: string;
   timestamp: number;
 }
 
-// Price calculation using BigNumber for precision
 function calculateTokenAmountByPrice(inputAmount: string, price: string): string {
   try {
     if (
@@ -50,7 +48,6 @@ function calculateTokenAmountByPrice(inputAmount: string, price: string): string
   }
 }
 
-// Balance validation calculation
 function validateBalance(
   inputAmount: string,
   maxBalance: number,
@@ -64,7 +61,7 @@ function validateBalance(
     }
 
     const maxBalanceDecimal = parseAmountBigNumber(maxBalance.toString()).div(
-      parseAmountBigNumber(10).pow(decimals)
+      parseAmountBigNumber(10).pow(decimals.toString())
     );
 
     if (amount.gt(maxBalanceDecimal)) {
@@ -83,7 +80,6 @@ function validateBalance(
   }
 }
 
-// Approximate token amount calculation for pools (for real-time feedback)
 function calculateApproximateTokenAmount(
   inputAmount: string,
   poolReserveX: number,
@@ -96,15 +92,12 @@ function calculateApproximateTokenAmount(
       return "0";
     }
 
-    // Calculate approximate ratio based on current pool reserves
     const reserveX = parseAmountBigNumber(poolReserveX.toString());
     const reserveY = parseAmountBigNumber(poolReserveY.toString());
 
     if (inputType === 'tokenX') {
-      // Calculate corresponding tokenY amount
       return amount.multipliedBy(reserveY).dividedBy(reserveX).toString();
     } else {
-      // Calculate corresponding tokenX amount
       return amount.multipliedBy(reserveX).dividedBy(reserveY).toString();
     }
   } catch (error) {
@@ -112,12 +105,11 @@ function calculateApproximateTokenAmount(
   }
 }
 
-// Main message handler
-self.onmessage = function(event: MessageEvent<CalculationInput>) {
+self.onmessage = (event: MessageEvent<CalculationInput>) => {
   const { type, payload } = event.data;
 
   try {
-    let result: any;
+    let result: unknown;
 
     switch (type) {
       case 'PRICE_CALCULATION': {
@@ -162,7 +154,6 @@ self.onmessage = function(event: MessageEvent<CalculationInput>) {
   }
 };
 
-// Handle worker initialization
 self.postMessage({
   type: 'WORKER_READY',
   success: true,

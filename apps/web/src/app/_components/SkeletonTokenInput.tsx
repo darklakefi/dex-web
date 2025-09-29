@@ -38,7 +38,7 @@ export function SkeletonTokenInput({
           <div className="flex items-center gap-2">
             <SkeletonLoader variant="input" className="h-10 w-32" />
           </div>
-          <SkeletonLoader variant="text" className="h-4 w-20 mt-1" />
+          <SkeletonLoader variant="text" className="mt-1 h-4 w-20" />
         </div>
       </div>
     </Box>

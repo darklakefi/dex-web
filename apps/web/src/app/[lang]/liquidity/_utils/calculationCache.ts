@@ -25,7 +25,6 @@ class LRUCache<T> {
   }
 
   set(key: string, value: T): void {
-    // Remove oldest entries if cache is full
     if (this.cache.size >= this.config.maxSize) {
       this.evictOldest();
     }
@@ -46,14 +45,12 @@ class LRUCache<T> {
       return undefined;
     }
 
-    // Check if entry has expired
     if (Date.now() - entry.timestamp > this.config.ttlMs) {
       this.cache.delete(key);
       this.accessOrder.delete(key);
       return undefined;
     }
 
-    // Update access tracking
     if (this.config.enableHitTracking) {
       entry.hits++;
     }
@@ -68,7 +65,6 @@ class LRUCache<T> {
       return false;
     }
 
-    // Check if entry has expired
     if (Date.now() - entry.timestamp > this.config.ttlMs) {
       this.cache.delete(key);
       this.accessOrder.delete(key);
@@ -91,7 +87,6 @@ class LRUCache<T> {
   }
 
   private evictOldest(): void {
-    // Find the key with the smallest access order (oldest access)
     let oldestKey: string | undefined;
     let oldestAccess = Infinity;
 
@@ -108,7 +103,6 @@ class LRUCache<T> {
     }
   }
 
-  // Cleanup expired entries
   cleanup(): void {
     const now = Date.now();
     const keysToDelete: string[] = [];
@@ -125,7 +119,6 @@ class LRUCache<T> {
     });
   }
 
-  // Get cache statistics
   getStats() {
     return {
       size: this.cache.size,
@@ -160,7 +153,6 @@ class LRUCache<T> {
   }
 }
 
-// Cache instances for different types of calculations
 export const priceCalculationCache = new LRUCache<string>({
   maxSize: 50,
   ttlMs: 10000, // 10 seconds for price calculations
@@ -187,7 +179,6 @@ export const poolRatioCache = new LRUCache<{
   ttlMs: 30000, // 30 seconds for pool ratios
 });
 
-// Utility functions for creating cache keys
 export function createPriceCalculationKey(
   inputAmount: string,
   price: string
@@ -220,7 +211,6 @@ export function createPoolRatioKey(
   return `ratio:${tokenXMint}:${tokenYMint}`;
 }
 
-// Periodic cleanup function
 export function startCacheCleanup(intervalMs: number = 60000): () => void {
   const interval = setInterval(() => {
     priceCalculationCache.cleanup();
@@ -232,7 +222,6 @@ export function startCacheCleanup(intervalMs: number = 60000): () => void {
   return () => clearInterval(interval);
 }
 
-// Debug function to get all cache stats
 export function getAllCacheStats() {
   return {
     priceCalculation: priceCalculationCache.getStats(),

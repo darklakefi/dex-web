@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { tanstackClient } from "@dex-web/orpc";
 import { useStreamingQuery } from "./useStreamingQuery";
 import { useServerSentEvents } from "./useServerSentEvents";
-import { type PoolStreamData, type DeFiStreamConfig } from "./types";
+import type { PoolStreamData, DeFiStreamConfig } from "./types";
 
 interface UseStreamingPoolDataParams {
   tokenXMint: string;
@@ -27,20 +27,18 @@ export function useStreamingPoolData({
 }: UseStreamingPoolDataParams) {
   const queryClient = useQueryClient();
 
-  // Create stable query key
   const poolKey = createPoolKey(tokenXMint, tokenYMint);
   const queryKey = ["pool-stream", poolKey];
 
-  // Base query function for fetching pool data
   const fetchPoolData = async () => {
-    const result = await tanstackClient.pools.getPoolDetails.queryOptions({
+    const queryOptions = tanstackClient.pools.getPoolDetails.queryOptions({
       input: { tokenXMint, tokenYMint }
-    }).queryFn();
+    });
+    const result = await queryOptions.queryFn({ queryKey: queryOptions.queryKey, signal: new AbortController().signal, meta: undefined });
 
     return transformToStreamData(result);
   };
 
-  // SSE streaming (when available)
   const sseQuery = useServerSentEvents<PoolStreamData>(
     `/api/streams/pools/${poolKey}`,
     queryKey,
@@ -50,7 +48,6 @@ export function useStreamingPoolData({
     }
   );
 
-  // Fallback streaming query using React Query intervals
   const streamingQuery = useStreamingQuery(
     queryKey,
     fetchPoolData,
@@ -60,7 +57,6 @@ export function useStreamingPoolData({
     }
   );
 
-  // WebSocket integration (optional - replaces existing usePoolSubscription)
   const webSocketQuery = useWebSocketPoolData({
     poolKey,
     queryKey,
@@ -70,7 +66,6 @@ export function useStreamingPoolData({
     priority,
   });
 
-  // Choose the best data source
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
 
   return {
@@ -82,7 +77,6 @@ export function useStreamingPoolData({
     isSubscribed: enableSSE ? sseQuery.isStreaming : streamingQuery.isSubscribed,
     priority,
     refetch: activeQuery.refetch,
-    // Additional metadata
     streamType: enableSSE ? "sse" : "polling",
     lastUpdate: activeQuery.data?.lastUpdate || 0,
   };
@@ -112,12 +106,9 @@ function useWebSocketPoolData({
   return useStreamingQuery(
     [...queryKey, "websocket"],
     async () => {
-      // WebSocket connection setup
       if (!enabled) return null;
 
       return new Promise<PoolStreamData | null>((resolve) => {
-        // This would integrate with existing WebSocket infrastructure
-        // For now, return null to indicate WebSocket not implemented
         resolve(null);
       });
     },

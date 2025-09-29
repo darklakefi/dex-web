@@ -24,12 +24,12 @@ interface TokenAddresses {
 export function calculateLiquidityAmounts(
   poolDetails: PoolDetails,
   { tokenAAmount, tokenBAmount }: TokenAmounts,
-  { tokenAAddress, tokenBAddress }: TokenAddresses,
+  { tokenAAddress: _tokenAAddress, tokenBAddress: _tokenBAddress }: TokenAddresses,
 ): { maxAmountX: number; maxAmountY: number } {
   const sellAmount = parseAmount(tokenBAmount);
   const buyAmount = parseAmount(tokenAAmount);
 
-  const isTokenXSell = poolDetails.tokenXMint === tokenBAddress;
+  const isTokenXSell = poolDetails.tokenXMint === _tokenBAddress;
   const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
   const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 

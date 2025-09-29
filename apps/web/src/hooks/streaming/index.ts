@@ -5,11 +5,9 @@
  * Real-time updates without useEffect anti-patterns
  */
 
-// Core streaming utilities
 export { useStreamingQuery } from "./useStreamingQuery";
 export { useServerSentEvents } from "./useServerSentEvents";
 
-// Specific streaming implementations
 export {
   useStreamingPoolData,
   useEnhancedRealtimePoolData,
@@ -32,7 +30,6 @@ export {
   useEnhancedTransactionMonitoring,
 } from "./useStreamingTransactionStatus";
 
-// Types and configurations
 export type {
   StreamConfig,
   DeFiStreamConfig,

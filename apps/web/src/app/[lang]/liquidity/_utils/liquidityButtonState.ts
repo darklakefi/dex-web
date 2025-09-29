@@ -1,5 +1,4 @@
 import type { ValidationState } from "../_hooks/useLiquidityValidation";
-import type { LiquidityMachineContext } from "../_machines/liquidityMachine";
 import type { PoolDetails } from "../_types/liquidity.types";
 
 
@@ -22,7 +21,6 @@ export interface ButtonStateRule {
 }
 
 export interface ButtonStateProps {
-  machineContext: LiquidityMachineContext;
   validation: ValidationState;
   poolDetails: PoolDetails | null;
   hasWallet: boolean;
@@ -34,7 +32,6 @@ export interface ButtonStateProps {
 }
 
 export function getLiquidityButtonState({
-  machineContext,
   validation,
   poolDetails,
   hasWallet,
@@ -44,10 +41,7 @@ export function getLiquidityButtonState({
   formCanSubmit = false,
   isFormSubmitting = false,
 }: ButtonStateProps): ButtonState {
-  if (isFormSubmitting ||
-      machineContext.liquidityStep === 1 ||
-      machineContext.liquidityStep === 2 ||
-      machineContext.liquidityStep === 3) {
+  if (isFormSubmitting) {
     return "SUBMITTING";
   }
 
@@ -80,7 +74,7 @@ export function getLiquidityButtonState({
       return "INVALID_PRICE";
     }
 
-    if (validation.hasAmounts) {
+    if (validation.hasAmounts && formCanSubmit) {
       return "CREATE_POOL";
     }
 
@@ -90,7 +84,7 @@ export function getLiquidityButtonState({
       return "ENTER_AMOUNT";
     }
 
-    if (validation.canSubmit) {
+    if (validation.canSubmit && formCanSubmit) {
       return "ADD_LIQUIDITY";
     }
 

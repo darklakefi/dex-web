@@ -1,9 +1,9 @@
 import type { TransactionError } from "../_types/liquidity.types";
 
 export class LiquidityError extends Error {
-  public readonly context?: Record<string, any>;
+  public readonly context?: Record<string, unknown>;
 
-  constructor(message: string, context?: Record<string, any>) {
+  constructor(message: string, context?: Record<string, unknown>) {
     super(message);
     this.name = "LiquidityError";
     this.context = context;
@@ -12,7 +12,7 @@ export class LiquidityError extends Error {
 
 export function createTransactionError(
   error: unknown,
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 ): TransactionError {
   const message = error instanceof Error ? error.message : String(error);
   return { message, context };
@@ -21,7 +21,7 @@ export function createTransactionError(
 export function handleAsyncError<T>(
   operation: () => Promise<T>,
   errorMessage: string,
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 ): Promise<T> {
   return operation().catch((error) => {
     throw new LiquidityError(
@@ -41,9 +41,9 @@ export function validateRequired<T>(
 }
 
 export function validateWalletConnection(
-  publicKey: any,
-  walletAdapter: any
+  publicKey: unknown,
+  walletAdapter: unknown
 ): void {
   validateRequired(publicKey, "Wallet public key");
-  validateRequired(walletAdapter?.wallet, "Wallet adapter");
+  validateRequired((walletAdapter as any)?.wallet, "Wallet adapter");
 }

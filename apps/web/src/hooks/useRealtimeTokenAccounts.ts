@@ -34,31 +34,49 @@ export function useRealtimeTokenAccounts({
 
   const { data: liveBuyTokenAccount } = usePollingQuery<TokenAccountsData>(
     ["token-accounts-live", publicKey?.toBase58(), tokenAAddress],
-    (context: QueryFunctionContext) => tanstackClient.helius.getTokenAccounts.queryOptions({
-      input: {
-        mint: tokenAAddress || "",
-        ownerAddress: publicKey?.toBase58() || "",
-      },
-    }).queryFn(context),
+    async () => {
+      const queryOptions = tanstackClient.helius.getTokenAccounts.queryOptions({
+        input: {
+          mint: tokenAAddress || "",
+          ownerAddress: publicKey?.toBase58() || "",
+        },
+      });
+      return queryOptions.queryFn({
+        client: {} as any,
+        queryKey: queryOptions.queryKey,
+        signal: new AbortController().signal,
+        meta: undefined,
+      });
+    },
     {
       pollingInterval: hasRecentTransaction ? 3000 : 15000,
       enabled: !!publicKey && !!tokenAAddress,
-      staleTime: hasRecentTransaction ? 2000 : 12000,
+      staleTime: hasRecentTransaction ? 2000 : 30000,
+      placeholderData: (previousData) => previousData,
     }
   );
 
   const { data: liveSellTokenAccount } = usePollingQuery<TokenAccountsData>(
     ["token-accounts-live", publicKey?.toBase58(), tokenBAddress],
-    (context: QueryFunctionContext) => tanstackClient.helius.getTokenAccounts.queryOptions({
-      input: {
-        mint: tokenBAddress || "",
-        ownerAddress: publicKey?.toBase58() || "",
-      },
-    }).queryFn(context),
+    async () => {
+      const queryOptions = tanstackClient.helius.getTokenAccounts.queryOptions({
+        input: {
+          mint: tokenBAddress || "",
+          ownerAddress: publicKey?.toBase58() || "",
+        },
+      });
+      return queryOptions.queryFn({
+        client: {} as any,
+        queryKey: queryOptions.queryKey,
+        signal: new AbortController().signal,
+        meta: undefined,
+      });
+    },
     {
       pollingInterval: hasRecentTransaction ? 3000 : 15000,
       enabled: !!publicKey && !!tokenBAddress,
-      staleTime: hasRecentTransaction ? 2000 : 12000,
+      staleTime: hasRecentTransaction ? 2000 : 30000,
+      placeholderData: (previousData) => previousData,
     }
   );
 

@@ -2,7 +2,7 @@
 
 import { useStreamingQuery } from "./useStreamingQuery";
 import { useServerSentEvents } from "./useServerSentEvents";
-import { type PriceStreamData, type DeFiStreamConfig } from "./types";
+import type { DeFiStreamConfig } from "./types";
 
 interface UseStreamingPriceFeedsParams {
   symbols: string[];
@@ -33,10 +33,7 @@ export function useStreamingPriceFeeds({
   const symbolsKey = symbols.sort().join(",");
   const queryKey = ["price-feeds-stream", symbolsKey];
 
-  // Base query function for price data
   const fetchPriceData = async (): Promise<PriceFeedData> => {
-    // This would integrate with your price data API
-    // For now, return mock data structure
     const priceData: PriceFeedData = {};
 
     for (const symbol of symbols) {
@@ -51,7 +48,6 @@ export function useStreamingPriceFeeds({
     return priceData;
   };
 
-  // SSE streaming for price feeds
   const sseQuery = useServerSentEvents<PriceFeedData>(
     `/api/streams/prices?symbols=${symbolsKey}`,
     queryKey,
@@ -71,10 +67,8 @@ export function useStreamingPriceFeeds({
     }
   );
 
-  // Choose the best data source
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
 
-  // Transform data for easier consumption
   const pricesBySymbol = activeQuery.data || {};
   const pricesArray = symbols.map(symbol => ({
     symbol,
@@ -157,7 +151,6 @@ export function useStreamingTradingPair({
   const tokenAPrice = pricesBySymbol[tokenA];
   const tokenBPrice = pricesBySymbol[tokenB];
 
-  // Calculate trading pair ratio
   const ratio = tokenAPrice && tokenBPrice && tokenBPrice.price > 0
     ? tokenAPrice.price / tokenBPrice.price
     : 0;

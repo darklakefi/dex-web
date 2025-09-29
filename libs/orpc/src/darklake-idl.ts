@@ -1,6 +1,5 @@
-import { type Idl } from "@coral-xyz/anchor";
 import { IDL_JSON } from "../darklake-json";
 
-const IDL = IDL_JSON as Idl;
+const IDL = IDL_JSON;
 
 export default IDL;

@@ -9,7 +9,6 @@ import {
   withLiquidityErrorBoundary,
 } from '../LiquidityErrorBoundary';
 
-// Mock UI components
 vi.mock('@dex-web/ui', () => ({
   Box: ({ children, className }: { children: React.ReactNode; className?: string }) => <div className={className}>{children}</div>,
   Button: ({ children, onClick, className }: { children: React.ReactNode; onClick?: () => void; className?: string }) => (
@@ -24,7 +23,6 @@ vi.mock('@dex-web/ui', () => ({
   },
 }));
 
-// Component that throws an error for testing
 function ThrowError({ shouldThrow = false, errorMessage = 'Test error' }) {
   if (shouldThrow) {
     throw new Error(errorMessage);
@@ -35,7 +33,6 @@ function ThrowError({ shouldThrow = false, errorMessage = 'Test error' }) {
 describe('LiquidityErrorBoundary', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Suppress console.error for tests
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -158,7 +155,6 @@ describe('LiquidityErrorBoundary', () => {
 
   describe('Error Reporting', () => {
     it('should provide error reporting functionality', () => {
-      // Mock clipboard API
       Object.assign(navigator, {
         clipboard: {
           writeText: vi.fn().mockResolvedValue(undefined),
@@ -178,10 +174,8 @@ describe('LiquidityErrorBoundary', () => {
     });
 
     it('should handle clipboard API not being available', () => {
-      // Mock window.alert
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
-      // Remove clipboard API
       Object.defineProperty(navigator, 'clipboard', {
         value: undefined,
         writable: true,

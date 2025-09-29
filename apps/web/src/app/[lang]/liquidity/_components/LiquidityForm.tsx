@@ -1,13 +1,10 @@
 "use client";
 
-import { Box, Button, Icon } from "@dex-web/ui";
+import { Box, Icon } from "@dex-web/ui";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
-import {
-  EMPTY_TOKEN,
-  LIQUIDITY_PAGE_TYPE,
-} from "../../../_utils/constants";
+import { EMPTY_TOKEN, LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import {
   liquidityPageParsers,
   selectedTokensParsers,
@@ -15,9 +12,11 @@ import {
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
 import { LiquidityActionButton } from "./LiquidityActionButton";
 import { LiquidityErrorBoundary } from "./LiquidityErrorBoundary";
-import { LiquidityFormProvider, useLiquidityFormWithDebounced } from "./LiquidityFormProvider";
+import {
+  LiquidityFormProvider,
+  useLiquidityFormWithDebounced,
+} from "./LiquidityFormProvider";
 import { LiquidityTokenInputs } from "./LiquidityTokenInputs";
-import { LiquidityTransactionStatus } from "./LiquidityTransactionStatus";
 
 const serialize = createSerializer(liquidityPageParsers);
 
@@ -56,7 +55,8 @@ function LiquidityFormContent() {
     router.push(`/${urlWithParams}`);
   };
 
-  const shouldShowAddLiquidityDetails = poolDetails &&
+  const shouldShowAddLiquidityDetails =
+    poolDetails &&
     form.state.values.tokenBAmount !== "0" &&
     form.state.values.tokenAAmount !== "0";
 
@@ -67,40 +67,47 @@ function LiquidityFormContent() {
       <Box padding="lg">
         <div className="flex flex-col gap-4">
           <LiquidityTokenInputs
-            form={form}
             buyTokenAccount={tokenAccountsData.buyTokenAccount}
-            sellTokenAccount={tokenAccountsData.sellTokenAccount}
+            form={form}
             isLoadingBuy={tokenAccountsData.isLoadingBuy}
             isLoadingSell={tokenAccountsData.isLoadingSell}
             isRefreshingBuy={tokenAccountsData.isRefreshingBuy}
             isRefreshingSell={tokenAccountsData.isRefreshingSell}
+            poolDetails={poolDetails}
+            sellTokenAccount={tokenAccountsData.sellTokenAccount}
             tokenAAddress={tokenAAddress}
             tokenBAddress={tokenBAddress}
-            poolDetails={poolDetails}
           />
           <LiquidityActionButton
-            publicKey={publicKey}
             buyTokenAccount={tokenAccountsData.buyTokenAccount}
-            sellTokenAccount={tokenAccountsData.sellTokenAccount}
-            poolDetails={poolDetails}
-            tokenAAddress={tokenAAddress}
-            tokenBAddress={tokenBAddress}
             isPoolLoading={false}
-            isTokenAccountsLoading={tokenAccountsData.isLoadingBuy || tokenAccountsData.isLoadingSell}
+            isTokenAccountsLoading={
+              tokenAccountsData.isLoadingBuy || tokenAccountsData.isLoadingSell
+            }
             onSubmit={() => {
               form.handleSubmit();
             }}
+            poolDetails={poolDetails}
+            publicKey={publicKey}
+            sellTokenAccount={tokenAccountsData.sellTokenAccount}
+            tokenAAddress={tokenAAddress}
+            tokenBAddress={tokenBAddress}
           />
-          <LiquidityTransactionStatus />
         </div>
 
         {shouldShowAddLiquidityDetails && (
           <AddLiquidityDetails
             slippage={slippage}
             tokenAAmount={form.state.values.tokenAAmount}
-            tokenASymbol={tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]?.symbol || ""}
+            tokenASymbol={
+              tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]?.symbol ||
+              ""
+            }
             tokenBAmount={form.state.values.tokenBAmount}
-            tokenBSymbol={tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]?.symbol || ""}
+            tokenBSymbol={
+              tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]?.symbol ||
+              ""
+            }
           />
         )}
       </Box>

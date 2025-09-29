@@ -29,7 +29,7 @@ export class LiquidityError extends Error {
   constructor(
     message: string,
     public code: LiquidityErrorCode,
-    public context?: Record<string, any>,
+    public context?: Record<string, unknown>,
     public retryable: boolean = false,
     public severity: 'error' | 'warning' | 'info' = 'error',
     public actionable: boolean = true,
@@ -40,7 +40,7 @@ export class LiquidityError extends Error {
   }
 }
 
-export function toLiquidityError(error: unknown, context?: Record<string, any>): LiquidityError {
+export function toLiquidityError(error: unknown, context?: Record<string, unknown>): LiquidityError {
   if (error instanceof LiquidityError) {
     return error;
   }
@@ -105,7 +105,7 @@ export function toLiquidityError(error: unknown, context?: Record<string, any>):
 export async function withErrorBoundary<T>(
   operation: () => Promise<T>,
   errorHandler: (error: LiquidityError) => void,
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 ): Promise<T> {
   try {
     return await operation();

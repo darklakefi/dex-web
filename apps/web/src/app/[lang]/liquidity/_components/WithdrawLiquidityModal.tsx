@@ -11,7 +11,7 @@ import {
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
 import { useState } from "react";
@@ -96,26 +96,32 @@ export function WithdrawLiquidityModal({
 	const [withdrawStep, setWithdrawStep] = useState(0);
 	const [isWithdrawing, setIsWithdrawing] = useState(false);
 
-	const { data: tokenXPrice } = useSuspenseQuery({
-		...tanstackClient.tokens.getTokenPrice.queryOptions({
-			input: {
-				amount: 1,
-				mint: tokenXAddress || DEFAULT_BUY_TOKEN,
-				quoteCurrency: "USD",
+	const [
+		{ data: tokenXPrice },
+		{ data: tokenYPrice }
+	] = useSuspenseQueries({
+		queries: [
+			{
+				...tanstackClient.tokens.getTokenPrice.queryOptions({
+					input: {
+						amount: 1,
+						mint: tokenXAddress || DEFAULT_BUY_TOKEN,
+						quoteCurrency: "USD",
+					},
+				}),
+				staleTime: 5 * 1000,
 			},
-		}),
-    staleTime: 5 * 1000,
-	});
-
-	const { data: tokenYPrice } = useSuspenseQuery({
-		...tanstackClient.tokens.getTokenPrice.queryOptions({
-			input: {
-				amount: 1,
-				mint: tokenYAddress || DEFAULT_SELL_TOKEN,
-				quoteCurrency: "USD",
-			},
-		}),
-    staleTime: 5 * 1000,
+			{
+				...tanstackClient.tokens.getTokenPrice.queryOptions({
+					input: {
+						amount: 1,
+						mint: tokenYAddress || DEFAULT_SELL_TOKEN,
+						quoteCurrency: "USD",
+					},
+				}),
+				staleTime: 5 * 1000,
+			}
+		]
 	});
 
 	const setCalculationEmpty = () => {
@@ -139,11 +145,6 @@ export function WithdrawLiquidityModal({
 			setCalculationEmpty();
 			return;
 		}
-
-		const _userLpBalance = convertToDecimal(
-			userLiquidity.lpTokenBalance,
-			userLiquidity.decimals,
-		);
 
 		let withdrawLpPercentage: BigNumber;
 		try {
@@ -312,7 +313,9 @@ export function WithdrawLiquidityModal({
 
                     queryClient.invalidateQueries({ queryKey: ["token-accounts", publicKey.toBase58()] }),
 				]);
-			} catch {}
+			} catch (error) {
+				console.error("Cache invalidation error:", error);
+			}
 
 			form.reset();
 			onClose();
@@ -451,7 +454,7 @@ export function WithdrawLiquidityModal({
 								validators={{
 									onChange: ({ value }) => {
 										if (!value || value.trim() === "") {
-											return undefined; // Allow empty for better UX
+											return undefined;
 										}
 
 										return undefined;

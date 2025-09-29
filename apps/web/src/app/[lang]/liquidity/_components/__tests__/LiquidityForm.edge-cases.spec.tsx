@@ -219,7 +219,7 @@ describe("LiquidityForm Edge Cases", () => {
           isRealtime: true,
         }),
       }));
-      (client.liquidity.createLiquidityTransaction as any).mockResolvedValue({
+      vi.mocked(client.liquidity.createLiquidityTransaction).mockResolvedValue({
         success: true,
         transaction: "mock-transaction",
       });
@@ -266,7 +266,7 @@ describe("LiquidityForm Edge Cases", () => {
         }),
       }));
       let callCount = 0;
-      (client.liquidity.createLiquidityTransaction as any).mockImplementation(() => {
+      vi.mocked(client.liquidity.createLiquidityTransaction).mockImplementation(() => {
         callCount++;
         return Promise.resolve({
           success: true,
@@ -291,7 +291,7 @@ describe("LiquidityForm Edge Cases", () => {
     it("should cleanup subscriptions on unmount", () => {
       const { unmount } = render(<LiquidityForm />, { wrapper: createTestWrapper() });
       const mockCleanup = vi.fn();
-      vi.spyOn(React, "useEffect").mockImplementation((effect, deps) => {
+      vi.spyOn(React, "useEffect").mockImplementation((effect, _deps) => {
         const cleanup = effect();
         if (typeof cleanup === "function") {
           mockCleanup.mockImplementation(cleanup);
@@ -401,7 +401,7 @@ describe("LiquidityForm Edge Cases", () => {
           isRealtime: true,
         }),
       }));
-      (client.liquidity.getAddLiquidityReview as any).mockResolvedValue({ tokenAmount: 50 });
+      vi.mocked(client.liquidity.getAddLiquidityReview).mockResolvedValue({ tokenAmount: 50 });
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();

@@ -154,7 +154,6 @@ export function ProgressiveEnhancedLiquidityForm()
 ### Server Action Implementation
 
 ```typescript
-// In Server Action
 const response = await serverClient.liquidity.createLiquidityTransaction({
   maxAmountX,
   maxAmountY,
@@ -174,7 +173,6 @@ return {
 ### Form Component Usage
 
 ```typescript
-// Progressive enhancement
 export function ProgressiveEnhancedLiquidityForm() {
   const [hasJS, setHasJS] = useState(false);
 
@@ -191,7 +189,6 @@ export function ProgressiveEnhancedLiquidityForm() {
 ### Error Handling
 
 ```typescript
-// Server-side validation
 const validationResult = liquidityFormSchema.safeParse(rawFormData);
 
 if (!validationResult.success) {

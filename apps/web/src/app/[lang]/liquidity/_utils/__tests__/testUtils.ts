@@ -8,7 +8,6 @@ import type {
   LiquidityFormValues
 } from '../../_types/liquidity.types';
 
-// Mock factory functions for consistent test data
 export const createMockPublicKey = (base58?: string): PublicKey => {
   const defaultKey = '11111111111111111111111111111112';
   return new PublicKey(base58 || defaultKey);
@@ -36,10 +35,11 @@ export const createMockPoolDetails = (overrides?: Partial<PoolDetails>): PoolDet
   ...overrides,
 });
 
-export const createMockWalletAdapter = (overrides?: any): WalletAdapter => ({
+export const createMockWalletAdapter = (overrides?: Partial<WalletAdapter>): WalletAdapter => ({
   wallet: {
-    name: 'Mock Wallet',
-    connected: true,
+    adapter: {
+      name: 'Mock Wallet',
+    },
     ...overrides,
   },
 });
@@ -53,7 +53,6 @@ export const createMockFormValues = (
   ...overrides,
 });
 
-// Test data sets for different scenarios
 export const TEST_SCENARIOS = {
   VALID_TRANSACTION: {
     publicKey: createMockPublicKey(),
@@ -86,7 +85,6 @@ export const TEST_SCENARIOS = {
   },
 } as const;
 
-// Helper functions for assertions
 export const expectValidTransactionPayload = (payload: any) => {
   expect(payload).toHaveProperty('maxAmountX');
   expect(payload).toHaveProperty('maxAmountY');
@@ -115,7 +113,6 @@ export const expectValidTokenAccount = (tokenAccount: any) => {
   expect(typeof tokenAccount.symbol).toBe('string');
 };
 
-// Mock implementations for external dependencies
 export const mockUtils = {
   parseAmount: (amount: string) => Number(amount),
   parseAmountBigNumber: (amount: string) => ({
@@ -130,7 +127,7 @@ export const mockUtils = {
   }),
   formatAmountInput: (value: string) => value,
   convertToDecimal: (amount: number, decimals: number) => amount / 10 ** decimals,
-  validateHasSufficientBalance: ({ amount, tokenAccount }: any) => {
+  validateHasSufficientBalance: ({ amount, tokenAccount }: { amount: string; tokenAccount: any }) => {
     if (!tokenAccount) return 'No token account';
     const numericAmount = Number(amount);
     const balance = tokenAccount.amount / 10 ** tokenAccount.decimals;

@@ -153,10 +153,10 @@ async function createPool(
 		program.programId,
 	);
 
-  const initializePoolMethod = await program.methods.initialize_pool?.(new BN(depositAmountX), new BN(depositAmountY), null);
+  const initializePoolMethod = await program.methods.initializePool?.(new BN(depositAmountX), new BN(depositAmountY), null);
 
   if (!initializePoolMethod) {
-    throw new Error("Program methods not available for initialize_pool");
+    throw new Error("Program methods not available for initializePool");
   }
 
   const programTx = await initializePoolMethod
@@ -229,7 +229,6 @@ export async function createPoolTransactionHandler(
     commitment: "confirmed",
   });
 
-  // Create validated program using factory (includes IDL validation and method checking)
 	const program = createLiquidityProgram(IDL, provider);
 
   const tokenXProgramId = await getTokenProgramId(

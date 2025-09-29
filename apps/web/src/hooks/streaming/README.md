@@ -166,7 +166,6 @@ const DEFI_STREAM_CONFIGS = {
 Enable SSE for maximum performance:
 
 ```typescript
-// Pool data with SSE
 const { poolDetails, isStreaming, isFallback } = useStreamingPoolData({
   tokenXMint,
   tokenYMint,
@@ -205,7 +204,6 @@ function useCustomStreamingData() {
   return useStreamingQuery(
     ["custom-data"],
     async () => {
-      // Your custom data fetching logic
       return await fetchCustomData();
     },
     {
@@ -287,10 +285,8 @@ function TradingPairComponent({ tokenA, tokenB }) {
 Multiple components using the same data automatically share subscriptions:
 
 ```typescript
-// Component A
 const poolA = useStreamingPoolData({ tokenXMint: "SOL", tokenYMint: "USDC" });
 
-// Component B - Shares the same subscription
 const poolB = useStreamingPoolData({ tokenXMint: "SOL", tokenYMint: "USDC" });
 ```
 
@@ -299,12 +295,10 @@ const poolB = useStreamingPoolData({ tokenXMint: "SOL", tokenYMint: "USDC" });
 Refresh rates adapt to user activity:
 
 ```typescript
-// High frequency during active trading
 const accounts = useStreamingTokenAccounts({
   hasRecentTransaction: true, // 3s intervals
 });
 
-// Normal frequency during idle periods
 const accounts = useStreamingTokenAccounts({
   hasRecentTransaction: false, // 15s intervals
 });
@@ -324,7 +318,6 @@ React Query's caching prevents unnecessary re-renders and API calls:
 Enable detailed logging:
 
 ```typescript
-// Add to your app initialization
 if (process.env.NODE_ENV === "development") {
   window.localStorage.setItem("debug", "streaming:*");
 }
@@ -367,4 +360,4 @@ console.log({
 | Network Efficiency | Lower (redundant requests) | Higher (intelligent caching) |
 | User Experience | Delayed updates | Real-time responsiveness |
 
-The streaming implementation provides 3-5x faster updates while using fewer resources through intelligent subscription management and caching.
+The streaming implementation provides 3-5x faster updates while using fewer resources through intelligent subscription management and caching.on management and caching.

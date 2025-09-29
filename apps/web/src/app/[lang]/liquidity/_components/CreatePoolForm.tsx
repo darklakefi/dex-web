@@ -19,7 +19,7 @@ import {
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -89,14 +89,22 @@ export function CreatePoolForm() {
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
 
-  const { data: poolDetails } = useSuspenseQuery(
-    tanstackClient.pools.getPoolDetails.queryOptions({
-      input: {
-        tokenXMint,
-        tokenYMint,
-      },
-    }),
-  );
+  const [{ data: poolDetails }, { data: tokenMetadata }] = useSuspenseQueries({
+    queries: [
+      tanstackClient.pools.getPoolDetails.queryOptions({
+        input: {
+          tokenXMint,
+          tokenYMint,
+        },
+      }),
+      tanstackClient.tokens.getTokenMetadata.queryOptions({
+        input: {
+          addresses: [tokenXMint, tokenYMint],
+          returnAsObject: true,
+        },
+      }),
+    ],
+  });
 
   const {
     buyTokenAccount,
@@ -110,20 +118,11 @@ export function CreatePoolForm() {
     tokenBAddress,
   });
 
-  const { data: tokenMetadata } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenMetadata.queryOptions({
-      input: {
-        addresses: [tokenXMint, tokenYMint],
-        returnAsObject: true,
-      },
-    }),
-  );
-
   const metadata = tokenMetadata as Record<string, Token>;
   const tokenADetails = metadata[tokenXMint];
   const tokenBDetails = metadata[tokenYMint];
 
-  useLiquidityTracking({
+  const { trackSigned, trackConfirmed, trackFailed } = useLiquidityTracking({
     trackError: (error: unknown, context?: Record<string, unknown>) => {
       trackError({
         context: "liquidity",
@@ -390,12 +389,10 @@ export function CreatePoolForm() {
       let calculatedTokenA: string;
 
       if (initialPriceTokenOrder === "ab") {
-        // If displaying price as "A per B", then tokenAAmount = tokenBAmount * price
         calculatedTokenA = BigNumber(tokenBAmount)
           .multipliedBy(price)
           .toString();
       } else {
-        // If displaying price as "B per A", then tokenAAmount = tokenBAmount / price
         calculatedTokenA = BigNumber(tokenBAmount).dividedBy(price).toString();
       }
 
@@ -505,11 +502,7 @@ export function CreatePoolForm() {
               >
                 {tokenAAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
               </Text.Body2>
-              <SelectTokenButton
-                // additionalParams={{ type: LIQUIDITY_PAGE_TYPE.CREATE_POOL }}
-                returnUrl="liquidity"
-                type="buy"
-              />
+              <SelectTokenButton returnUrl="liquidity" type="buy" />
             </div>
             <form.Field
               name="tokenAAmount"

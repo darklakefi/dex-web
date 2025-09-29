@@ -25,12 +25,10 @@ class QueryBasedSubscriptionManager implements StreamSubscriptionManager {
     const callbacks = this.subscriptions.get(key)!;
     callbacks.push(callback);
 
-    // If this is the first subscription, start the interval
     if (callbacks.length === 1) {
       this.startInterval(key, callback);
     }
 
-    // Return cleanup function
     return () => {
       const currentCallbacks = this.subscriptions.get(key);
       if (currentCallbacks) {
@@ -39,7 +37,6 @@ class QueryBasedSubscriptionManager implements StreamSubscriptionManager {
           currentCallbacks.splice(index, 1);
         }
 
-        // If no more subscribers, clear interval
         if (currentCallbacks.length === 0) {
           this.clearInterval(key);
           this.subscriptions.delete(key);
@@ -57,9 +54,7 @@ class QueryBasedSubscriptionManager implements StreamSubscriptionManager {
     return this.subscriptions.has(key) && this.subscriptions.get(key)!.length > 0;
   }
 
-  private startInterval(key: string, callback: () => void): void {
-    // Intervals are managed externally via React Query
-    // This is a placeholder for future SSE/WebSocket integration
+  private startInterval(_key: string, _callback: () => void): void {
   }
 
   private clearInterval(key: string): void {
@@ -92,7 +87,7 @@ export function useStreamingQuery<TData, TError = Error>(
   const {
     priority = "normal",
     enableStreaming = true,
-    fallbackToPolling = true,
+    fallbackToPolling: _fallbackToPolling = true,
     ...restOptions
   } = options;
 

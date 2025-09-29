@@ -105,12 +105,11 @@ async function removeLiquidity(
 
 	console.log("Building removeLiquidity instruction...");
 
-	// Access the method directly from the program
-	if (!program.methods.remove_liquidity) {
-		throw new Error("remove_liquidity method not found on program");
+	if (!program.methods.removeLiquidity) {
+		throw new Error("removeLiquidity method not found on program");
 	}
 
-	const instruction = await program.methods.remove_liquidity(
+	const instruction = await program.methods.removeLiquidity(
 		new BN(lpTokensToBurn),
 		new BN(minAmountX),
 		new BN(minAmountY),
@@ -137,7 +136,6 @@ async function removeLiquidity(
 		})
 		.instruction();
 
-	console.log("Successfully created removeLiquidity instruction");
 
 	const programTx = new web3.Transaction();
 	programTx.add(instruction);

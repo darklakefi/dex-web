@@ -15,6 +15,8 @@ import { LiquidityForm } from "../LiquidityForm";
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
+  usePathname: () => "/liquidity",
+  useSearchParams: () => new URLSearchParams(),
 }));
 const mockSignTransaction = vi.fn();
 const mockWallet = {

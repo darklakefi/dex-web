@@ -23,7 +23,7 @@ export function SkeletonForm({
         <div className="flex flex-col gap-4">
           {/* Token Inputs */}
           <SkeletonTokenInput label={type === "liquidity" ? "SELL AMOUNT" : "SELLING"} />
-          
+
           {/* Plus/Swap Icon Separator */}
           <div className="flex items-center justify-center">
             <div
@@ -31,14 +31,14 @@ export function SkeletonForm({
               role="img"
               aria-label={`${type === "liquidity" ? "Plus" : "Swap"} - ${type === "liquidity" ? "Adding liquidity to pool" : "Swapping tokens"}`}
             >
-              <Icon className="size-5" name={type === "liquidity" ? "plus" : "arrow-up-down"} />
+              <Icon className="size-5" name={type === "liquidity" ? "plus" : "swap"} />
             </div>
           </div>
 
           <SkeletonTokenInput label={type === "liquidity" ? "BUY AMOUNT" : "BUYING"} />
           
           {/* Action Button */}
-          <SkeletonLoader variant="button" className="w-full h-12" />
+          <SkeletonLoader variant="button" className="h-12 w-full" />
           
           {/* Transaction Status */}
           <SkeletonLoader variant="text" className="h-4 w-40" />

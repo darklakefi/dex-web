@@ -6,17 +6,17 @@ import {
   createMockFormValues,
 } from './testUtils';
 vi.mock('@dex-web/utils', () => ({
-  parseAmount: (amount: string) => Number(amount),
-  parseAmountBigNumber: (amount: string) => ({
+  parseAmount: vi.fn((amount: string) => Number(amount)),
+  parseAmountBigNumber: vi.fn((amount: string) => ({
     gt: (value: number) => Number(amount) > value,
     multipliedBy: (multiplier: string) => ({
       toString: () => (Number(amount) * Number(multiplier)).toString(),
     }),
-  }),
-  sortSolanaAddresses: (tokenA: string, tokenB: string) => ({
+  })),
+  sortSolanaAddresses: vi.fn((tokenA: string, tokenB: string) => ({
     tokenXAddress: tokenA,
     tokenYAddress: tokenB,
-  }),
+  })),
 }));
 import {
   createLiquidityTransactionPayload,
@@ -140,7 +140,8 @@ describe('Liquidity Integration Tests', () => {
         .toThrow('Wallet public key is required');
     });
     it('should handle invalid token addresses', () => {
-      vi.mocked(sortSolanaAddresses).mockReturnValueOnce({
+      const mockSortSolanaAddresses = vi.mocked(sortSolanaAddresses);
+      mockSortSolanaAddresses.mockReturnValue({
         tokenXAddress: null,
         tokenYAddress: 'valid',
       });

@@ -4,7 +4,7 @@ import { usePostHog } from "posthog-js/react";
 import { useCallback } from "react";
 
 interface TrackEventOptions {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function useAnalytics() {
@@ -56,7 +56,7 @@ export function useAnalytics() {
   );
 
   const trackError = useCallback(
-    (properties: { error: string; context: string; details?: any }) => {
+    (properties: { error: string; context: string; details?: unknown }) => {
       trackEvent("error", properties);
     },
     [trackEvent],

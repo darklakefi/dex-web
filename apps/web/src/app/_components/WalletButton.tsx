@@ -22,7 +22,6 @@ export function WalletButton({ ...props }: WalletButtonProps) {
 		router.push("/select-wallet");
 	}
 
-	// Show skeleton during initial load or when we have placeholder data
 	if (adapterLoading || addressLoading || adapterIsPlaceholder || addressIsPlaceholder) {
 		return (
 			<SkeletonWalletButton className={twMerge("h-10 w-32", props.className)} />

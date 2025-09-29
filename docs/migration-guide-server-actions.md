@@ -22,7 +22,6 @@ This guide provides step-by-step instructions for migrating the existing client-
 
 3. **Update oRPC Exports**
    ```typescript
-   // Add to /libs/orpc/src/index.ts
    export { serverClient } from "./serverClient";
    ```
 
@@ -32,7 +31,6 @@ This guide provides step-by-step instructions for migrating the existing client-
 
 1. **Create a Feature Flag**
    ```typescript
-   // /apps/web/src/app/[lang]/liquidity/_utils/featureFlags.ts
    export const useServerActions = () => {
      // Could be environment variable, user setting, or gradual rollout
      return process.env.NEXT_PUBLIC_USE_SERVER_ACTIONS === 'true';
@@ -41,7 +39,6 @@ This guide provides step-by-step instructions for migrating the existing client-
 
 2. **Modify Existing LiquidityForm**
    ```typescript
-   // /apps/web/src/app/[lang]/liquidity/_components/LiquidityForm.tsx
    import { useServerActions } from "../_utils/featureFlags";
    import { LiquidityFormEnhanced } from "./LiquidityFormEnhanced";
 
@@ -59,7 +56,6 @@ This guide provides step-by-step instructions for migrating the existing client-
        );
      }
 
-     // Keep existing implementation
      return (
        <LiquidityErrorBoundary>
          <LiquidityFormProvider tokenAAddress={tokenAAddress} tokenBAddress={tokenBAddress}>
@@ -88,10 +84,8 @@ This guide provides step-by-step instructions for migrating the existing client-
 The `LiquidityActionButton` component needs to be updated to work with Server Actions:
 
 ```typescript
-// Update /apps/web/src/app/[lang]/liquidity/_components/LiquidityActionButton.tsx
 
 interface LiquidityActionButtonProps {
-  // ... existing props
   onSubmit?: () => void;
   formId?: string; // For Server Actions
   disabled?: boolean;
@@ -101,15 +95,12 @@ export function LiquidityActionButton({
   onSubmit,
   formId,
   disabled,
-  // ... other props
 }: LiquidityActionButtonProps) {
   const handleClick = () => {
     if (formId) {
-      // Trigger form submission for Server Actions
       const form = document.getElementById(formId) as HTMLFormElement;
       form?.requestSubmit();
     } else if (onSubmit) {
-      // Use existing callback
       onSubmit();
     }
   };
@@ -120,7 +111,6 @@ export function LiquidityActionButton({
       form={formId}
       onClick={handleClick}
       disabled={disabled}
-      // ... other props
     >
       {/* Button content */}
     </button>
@@ -133,7 +123,6 @@ export function LiquidityActionButton({
 Enhance the existing form validation to work with Server Actions:
 
 ```typescript
-// Create /apps/web/src/app/[lang]/liquidity/_schemas/liquidityForm.schema.ts
 import { z } from "zod";
 
 export const liquidityFormSchema = z.object({
@@ -152,7 +141,6 @@ export type LiquidityFormData = z.infer<typeof liquidityFormSchema>;
 
 1. **Unit Tests for Server Actions**
    ```typescript
-   // /apps/web/src/app/[lang]/liquidity/_actions/__tests__/submitLiquidityAction.test.ts
    import { submitLiquidityAction } from "../submitLiquidityAction";
 
    describe("submitLiquidityAction", () => {
@@ -160,7 +148,6 @@ export type LiquidityFormData = z.infer<typeof liquidityFormSchema>;
        const formData = new FormData();
        formData.set("tokenAAmount", "100");
        formData.set("tokenBAmount", "200");
-       // ... set other required fields
 
        const result = await submitLiquidityAction({ success: false }, formData);
        expect(result.success).toBe(true);
@@ -186,7 +173,6 @@ export type LiquidityFormData = z.infer<typeof liquidityFormSchema>;
      });
 
      it("should work with JavaScript enabled", async () => {
-       // Test enhanced flow
      });
    });
    ```
@@ -272,7 +258,6 @@ Before going live, ensure:
 **Solution**: Ensure shared types are properly exported
 
 ```typescript
-// /libs/orpc/src/index.ts
 export type { CreateLiquidityTransactionInput } from "./schemas";
 ```
 
@@ -292,7 +277,6 @@ export type { CreateLiquidityTransactionInput } from "./schemas";
 **Solution**: Use optimistic updates and proper state synchronization
 
 ```typescript
-// Update client state after successful Server Action
 useEffect(() => {
   if (state.success) {
     form.setFieldValue("tokenAAmount", "0");
@@ -313,7 +297,6 @@ useEffect(() => {
   setIsHydrated(true);
 }, []);
 
-// Use isHydrated instead of checking for window
 ```
 
 ## Next Steps

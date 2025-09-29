@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 import type {
+  BalanceValidationPayload,
   CalculationInput,
   CalculationResult,
   PriceCalculationPayload,
-  BalanceValidationPayload,
   TokenAmountCalculationPayload,
-} from '../_workers/liquidityCalculationWorker';
+} from "../_workers/liquidityCalculationWorker";
 
 interface WorkerState {
   isReady: boolean;
@@ -16,36 +16,39 @@ interface WorkerState {
 export function useLiquidityCalculationWorker() {
   const workerRef = useRef<Worker | null>(null);
   const [state, setState] = useState<WorkerState>({
-    isReady: false,
-    isCalculating: false,
     error: null,
+    isCalculating: false,
+    isReady: false,
   });
 
-  // Pending promises for managing async calculations
-  const pendingCalculations = useRef<Map<string, {
-    resolve: (result: any) => void;
-    reject: (error: Error) => void;
-    timeout: NodeJS.Timeout;
-  }>>(new Map());
+  const pendingCalculations = useRef<
+    Map<
+      string,
+      {
+        resolve: (result: unknown) => void;
+        reject: (error: Error) => void;
+        timeout: NodeJS.Timeout;
+      }
+    >
+  >(new Map());
 
-  // Initialize worker
   useEffect(() => {
     try {
-      // Create worker from the TypeScript file - webpack will handle compilation
       workerRef.current = new Worker(
-        new URL('../_workers/liquidityCalculationWorker.ts', import.meta.url),
-        { type: 'module' }
+        new URL("../_workers/liquidityCalculationWorker.ts", import.meta.url),
+        { type: "module" },
       );
 
-      workerRef.current.onmessage = (event: MessageEvent<CalculationResult>) => {
+      workerRef.current.onmessage = (
+        event: MessageEvent<CalculationResult>,
+      ) => {
         const { type, success, result, error, timestamp } = event.data;
 
-        if (type === 'WORKER_READY') {
-          setState(prev => ({ ...prev, isReady: true, error: null }));
+        if (type === "WORKER_READY") {
+          setState((prev) => ({ ...prev, error: null, isReady: true }));
           return;
         }
 
-        // Generate unique key for the calculation
         const calculationKey = `${type}-${timestamp}`;
         const pendingCalc = pendingCalculations.current.get(calculationKey);
 
@@ -56,23 +59,23 @@ export function useLiquidityCalculationWorker() {
           if (success) {
             pendingCalc.resolve(result);
           } else {
-            pendingCalc.reject(new Error(error || 'Calculation failed'));
+            pendingCalc.reject(new Error(error || "Calculation failed"));
           }
         }
 
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
+          error: success ? null : error || "Calculation failed",
           isCalculating: pendingCalculations.current.size > 0,
-          error: success ? null : error || 'Calculation failed'
         }));
       };
 
       workerRef.current.onerror = (error) => {
-        console.error('Worker error:', error);
-        setState(prev => ({
+        console.error("Worker error:", error);
+        setState((prev) => ({
           ...prev,
+          error: "Worker failed to initialize",
           isReady: false,
-          error: 'Worker failed to initialize'
         }));
       };
 
@@ -81,69 +84,69 @@ export function useLiquidityCalculationWorker() {
           workerRef.current.terminate();
           workerRef.current = null;
         }
-        // Cleanup pending calculations
         pendingCalculations.current.forEach(({ timeout, reject }) => {
           clearTimeout(timeout);
-          reject(new Error('Worker terminated'));
+          reject(new Error("Worker terminated"));
         });
         pendingCalculations.current.clear();
       };
     } catch (error) {
-      console.error('Failed to create worker:', error);
-      setState(prev => ({
+      console.error("Failed to create worker:", error);
+      setState((prev) => ({
         ...prev,
-        error: 'Failed to create calculation worker'
+        error: "Failed to create calculation worker",
       }));
     }
   }, []);
 
-  // Generic calculation function
-  const calculate = useCallback(<T>(
-    type: CalculationInput['type'],
-    payload: any,
-    timeoutMs: number = 5000
-  ): Promise<T> => {
-    return new Promise((resolve, reject) => {
-      if (!workerRef.current || !state.isReady) {
-        reject(new Error('Worker not ready'));
-        return;
-      }
+  const calculate = useCallback(
+    <T>(
+      type: CalculationInput["type"],
+      payload:
+        | PriceCalculationPayload
+        | BalanceValidationPayload
+        | TokenAmountCalculationPayload,
+      timeoutMs: number = 5000,
+    ): Promise<T> => {
+      return new Promise((resolve, reject) => {
+        if (!workerRef.current || !state.isReady) {
+          reject(new Error("Worker not ready"));
+          return;
+        }
 
-      const timestamp = Date.now();
-      const calculationKey = `${type}-${timestamp}`;
+        const timestamp = Date.now();
+        const calculationKey = `${type}-${timestamp}`;
 
-      // Set up timeout
-      const timeout = setTimeout(() => {
-        pendingCalculations.current.delete(calculationKey);
-        reject(new Error('Calculation timeout'));
-      }, timeoutMs);
+        const timeout = setTimeout(() => {
+          pendingCalculations.current.delete(calculationKey);
+          reject(new Error("Calculation timeout"));
+        }, timeoutMs);
 
-      // Store pending calculation
-      pendingCalculations.current.set(calculationKey, {
-        resolve,
-        reject,
-        timeout,
+        pendingCalculations.current.set(calculationKey, {
+          reject,
+          resolve,
+          timeout,
+        });
+
+        setState((prev) => ({ ...prev, isCalculating: true }));
+
+        workerRef.current.postMessage({
+          payload: { ...payload, timestamp },
+          type,
+        } as CalculationInput);
       });
+    },
+    [state.isReady],
+  );
 
-      setState(prev => ({ ...prev, isCalculating: true }));
-
-      // Send calculation to worker
-      workerRef.current.postMessage({
-        type,
-        payload: { ...payload, timestamp },
-      } as CalculationInput);
-    });
-  }, [state.isReady]);
-
-  // Specific calculation methods
   const calculatePrice = useCallback(
     (inputAmount: string, price: string): Promise<string> => {
-      return calculate<string>('PRICE_CALCULATION', {
+      return calculate<string>("PRICE_CALCULATION", {
         inputAmount,
         price,
       } as PriceCalculationPayload);
     },
-    [calculate]
+    [calculate],
   );
 
   const validateBalance = useCallback(
@@ -151,16 +154,19 @@ export function useLiquidityCalculationWorker() {
       inputAmount: string,
       maxBalance: number,
       decimals: number,
-      symbol: string
+      symbol: string,
     ): Promise<{ isValid: boolean; error?: string }> => {
-      return calculate<{ isValid: boolean; error?: string }>('BALANCE_VALIDATION', {
-        inputAmount,
-        maxBalance,
-        decimals,
-        symbol,
-      } as BalanceValidationPayload);
+      return calculate<{ isValid: boolean; error?: string }>(
+        "BALANCE_VALIDATION",
+        {
+          decimals,
+          inputAmount,
+          maxBalance,
+          symbol,
+        } as BalanceValidationPayload,
+      );
     },
-    [calculate]
+    [calculate],
   );
 
   const calculateApproximateTokenAmount = useCallback(
@@ -168,38 +174,35 @@ export function useLiquidityCalculationWorker() {
       inputAmount: string,
       poolReserveX: number,
       poolReserveY: number,
-      inputType: 'tokenX' | 'tokenY'
+      inputType: "tokenX" | "tokenY",
     ): Promise<string> => {
-      return calculate<string>('TOKEN_AMOUNT_CALCULATION', {
+      return calculate<string>("TOKEN_AMOUNT_CALCULATION", {
         inputAmount,
+        inputType,
         poolReserveX,
         poolReserveY,
-        inputType,
       } as TokenAmountCalculationPayload);
     },
-    [calculate]
+    [calculate],
   );
 
-  // Cancel all pending calculations
   const cancelPendingCalculations = useCallback(() => {
     pendingCalculations.current.forEach(({ timeout, reject }) => {
       clearTimeout(timeout);
-      reject(new Error('Calculation cancelled'));
+      reject(new Error("Calculation cancelled"));
     });
     pendingCalculations.current.clear();
-    setState(prev => ({ ...prev, isCalculating: false }));
+    setState((prev) => ({ ...prev, isCalculating: false }));
   }, []);
 
   return {
-    // State
-    isReady: state.isReady,
-    isCalculating: state.isCalculating,
-    error: state.error,
-
-    // Calculation methods
-    calculatePrice,
-    validateBalance,
     calculateApproximateTokenAmount,
+
+    calculatePrice,
     cancelPendingCalculations,
+    error: state.error,
+    isCalculating: state.isCalculating,
+    isReady: state.isReady,
+    validateBalance,
   };
 }

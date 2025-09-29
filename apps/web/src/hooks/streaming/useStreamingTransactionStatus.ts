@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useStreamingQuery } from "./useStreamingQuery";
 import { useServerSentEvents } from "./useServerSentEvents";
-import { type TransactionStreamData, type DeFiStreamConfig } from "./types";
+import type { TransactionStreamData, } from "./types";
 import type { StatusCheckResult } from "@dex-web/core";
 
 interface UseStreamingTransactionStatusParams {
@@ -35,15 +35,12 @@ export function useStreamingTransactionStatus({
   onFailure,
   onFinalized,
 }: UseStreamingTransactionStatusParams) {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const queryKey = ["transaction-status-stream", trackingId, tradeId];
 
-  // Base query function for transaction status
   const fetchTransactionStatus = async (): Promise<TransactionStreamData | null> => {
     if (!trackingId) return null;
 
-    // This would integrate with your transaction status API
-    // Mock implementation - replace with actual API call
     const mockStatus: TransactionStreamData = {
       signature: trackingId,
       status: "pending",
@@ -54,7 +51,6 @@ export function useStreamingTransactionStatus({
     return mockStatus;
   };
 
-  // SSE streaming for transaction status (most critical for real-time updates)
   const sseQuery = useServerSentEvents<TransactionStreamData>(
     `/api/streams/transactions/${trackingId}${tradeId ? `?tradeId=${tradeId}` : ""}`,
     queryKey,
@@ -64,7 +60,6 @@ export function useStreamingTransactionStatus({
     }
   );
 
-  // Fallback streaming query with high-frequency polling
   const streamingQuery = useStreamingQuery(
     queryKey,
     fetchTransactionStatus,
@@ -75,7 +70,6 @@ export function useStreamingTransactionStatus({
     }
   );
 
-  // Choose the best data source
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
   const transactionData = activeQuery.data;
 
@@ -84,7 +78,6 @@ export function useStreamingTransactionStatus({
     onStatusUpdate(transactionData.status, transactionData);
   }
 
-  // Handle terminal states
   if (transactionData) {
     const { status } = transactionData;
 
@@ -111,7 +104,6 @@ export function useStreamingTransactionStatus({
     }
   }
 
-  // Auto-cleanup when transaction reaches terminal state
   const isTerminal = transactionData && (
     successStates.includes(transactionData.status) ||
     failStates.includes(transactionData.status) ||
@@ -157,8 +149,7 @@ export function useStreamingMultipleTransactionStatus({
     })
   );
 
-  // Aggregate statistics
-  const allStatuses = results.map(r => r.status);
+  const _allStatuses = results.map(r => r.status);
   const totalTransactions = transactions.length;
   const successCount = results.filter(r => r.isSuccess).length;
   const failedCount = results.filter(r => r.isFailed).length;
@@ -204,7 +195,7 @@ export function useEnhancedTransactionMonitoring({
   onFailure?: (result: StatusCheckResult) => void;
   onTimeout?: () => void;
 }) {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   const streamResult = useStreamingTransactionStatus({
     trackingId,
@@ -218,7 +209,6 @@ export function useEnhancedTransactionMonitoring({
     onFailure,
   });
 
-  // Auto-timeout after maxRetries * retryDelay
   const timeoutMs = maxRetries * retryDelay;
   const isTimedOut = streamResult.lastUpdate > 0 &&
     Date.now() - streamResult.lastUpdate > timeoutMs &&

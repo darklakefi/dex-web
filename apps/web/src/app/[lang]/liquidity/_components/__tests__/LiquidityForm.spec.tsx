@@ -159,7 +159,7 @@ const renderWithWrapper = (
     queryClient,
   };
 };
-const mockWalletContext = (wallet: any) => {
+const mockWalletContext = (wallet: unknown) => {
   vi.mocked(
     vi.doMock("@solana/wallet-adapter-react", () => ({
       useWallet: () => wallet,
@@ -177,7 +177,7 @@ describe("LiquidityForm - Critical Path User Stories", () => {
   });
   describe("Story 1: Default state — wallet disconnected", () => {
     it("should render safely with no wallet and guide user to connect", async () => {
-      const { container } = renderWithWrapper();
+      renderWithWrapper();
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });

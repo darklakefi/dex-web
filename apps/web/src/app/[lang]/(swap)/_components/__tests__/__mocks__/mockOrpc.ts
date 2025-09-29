@@ -124,6 +124,48 @@ export function mockOrpc() {
           queryKey: ["getTokens"],
         })),
       },
+      tokens: {
+        getTokenMetadata: {
+          queryOptions: vi.fn().mockImplementation(() => ({
+            queryFn: () =>
+              Promise.resolve({
+                [DEFAULT_BUY_TOKEN]: {
+                  address: DEFAULT_BUY_TOKEN,
+                  decimals: 9,
+                  imageUrl: "https://example.com/image.png",
+                  name: "Solana",
+                  symbol: "SOL",
+                },
+                [DEFAULT_SELL_TOKEN]: {
+                  address: DEFAULT_SELL_TOKEN,
+                  decimals: 6,
+                  imageUrl: "https://example.com/usdc.png",
+                  name: "USD Coin",
+                  symbol: "USDC",
+                },
+                "": {
+                  address: DEFAULT_BUY_TOKEN,
+                  decimals: 9,
+                  imageUrl: "https://example.com/image.png",
+                  name: "Solana",
+                  symbol: "SOL",
+                },
+              }),
+            queryKey: ["getTokenMetadata"],
+          })),
+        },
+        getTokenPrice: {
+          queryOptions: vi.fn().mockImplementation(() => ({
+            queryFn: () =>
+              Promise.resolve({
+                mint: DEFAULT_BUY_TOKEN,
+                price: 100,
+                quoteCurrency: "USD",
+              } satisfies GetTokenPriceOutput),
+            queryKey: ["getTokenPrice"],
+          })),
+        },
+      },
       helius: {
         getTokenAccounts: {
           queryOptions: vi.fn().mockImplementation(() => ({

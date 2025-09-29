@@ -72,8 +72,7 @@ export function ReferralCodeProvider({ children }: ReferralCodeProviderProps) {
 		ReferralStorage.setIncomingReferralCode(code);
 	}, []);
 
-	const setUserReferralCode = useCallback((code: string) => {
-		// TODO: Update the user's referral code on the server
+	const setUserReferralCode = useCallback((_code: string) => {
 	}, []);
 
 	const clearReferralCode = useCallback(() => {

@@ -1,4 +1,4 @@
-import { AnchorProvider, BN, type Program, web3, type Idl } from "@coral-xyz/anchor";
+import { AnchorProvider, BN, type Idl, type Program, web3 } from "@coral-xyz/anchor";
 import {
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 	createAssociatedTokenAccountIdempotentInstruction,
@@ -222,7 +222,7 @@ async function createLiquidityTransaction(
 		tokenProgram: TOKEN_PROGRAM_ID,
 	};
 
-	const addLiquidityMethod = program.methods.add_liquidity?.(
+	const addLiquidityMethod = program.methods.addLiquidity?.(
 		new BN(lpTokensToMint),
 		maxAmountXBN,
 		maxAmountYBN,
@@ -231,7 +231,7 @@ async function createLiquidityTransaction(
 	);
 
 	if (!addLiquidityMethod) {
-		throw new Error("Program methods not available for add_liquidity");
+		throw new Error("Program methods not available for addLiquidity");
 	}
 
 	const programTx = await addLiquidityMethod
@@ -287,7 +287,6 @@ export async function createLiquidityTransactionHandler(
 		commitment: "confirmed",
 	});
 
-	// Create validated program using factory (includes IDL validation and method checking)
 	const program = createLiquidityProgram(IDL, provider);
 
 	const lpRate = await getLPRateHandler({

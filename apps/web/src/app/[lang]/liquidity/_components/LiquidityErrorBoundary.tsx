@@ -52,7 +52,6 @@ function ErrorFallback({
 
     const message = error.message.toLowerCase();
 
-    // High severity: Security, wallet, or transaction errors
     if (
       message.includes('wallet') ||
       message.includes('transaction') ||
@@ -63,7 +62,6 @@ function ErrorFallback({
       return 'high';
     }
 
-    // Low severity: UI or formatting errors
     if (
       message.includes('render') ||
       message.includes('display') ||
@@ -106,10 +104,10 @@ function ErrorFallback({
 
   const getIconName = () => {
     switch (severity) {
-      case 'high': return 'alert-triangle';
-      case 'medium': return 'alert-circle';
+      case 'high': return 'exclamation';
+      case 'medium': return 'exclamation';
       case 'low': return 'info';
-      default: return 'alert-circle';
+      default: return 'exclamation';
     }
   };
 
@@ -205,7 +203,6 @@ export class LiquidityErrorBoundary extends Component<
   }
 
   static getDerivedStateFromError(error: Error): Partial<LiquidityErrorBoundaryState> {
-    // Generate unique error ID for tracking
     const errorId = `liquidity_error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     return {
@@ -216,16 +213,12 @@ export class LiquidityErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Store error info
     this.setState({ errorInfo });
 
-    // Call custom error handler
     this.props.onError?.(error, errorInfo);
 
-    // Log to analytics service
     this.logErrorToAnalytics(error, errorInfo);
 
-    // Log to console in development
     if (process.env.NODE_ENV === 'development') {
       console.error('LiquidityErrorBoundary caught an error:', error, errorInfo);
     }
@@ -239,8 +232,6 @@ export class LiquidityErrorBoundary extends Component<
 
   private logErrorToAnalytics = (error: Error, errorInfo: React.ErrorInfo) => {
     try {
-      // In a real app, you would integrate with your analytics service
-      // For now, we'll use a mock analytics call
       const errorData = {
         component: this.props.componentName || 'LiquidityForm',
         error: {
@@ -260,11 +251,8 @@ export class LiquidityErrorBoundary extends Component<
         },
       };
 
-      // Mock analytics call - replace with your actual analytics service
       console.info('Error logged to analytics:', errorData);
 
-      // You could also send to external services like Sentry, LogRocket, etc.
-      // Example: Sentry.captureException(error, { extra: errorData });
     } catch (loggingError) {
       console.error('Failed to log error to analytics:', loggingError);
     }
@@ -281,7 +269,6 @@ export class LiquidityErrorBoundary extends Component<
       retryCount: prevState.retryCount + 1,
     }));
 
-    // Add a small delay before retry to prevent rapid retries
     this.retryTimeoutId = setTimeout(() => {
       this.setState({
         hasError: false,
@@ -299,7 +286,6 @@ export class LiquidityErrorBoundary extends Component<
       retryCount: 0,
     });
 
-    // Trigger page refresh as a last resort
     if (typeof window !== 'undefined') {
       window.location.reload();
     }
@@ -308,7 +294,6 @@ export class LiquidityErrorBoundary extends Component<
   private handleReport = () => {
     const { error, errorInfo, errorId } = this.state;
 
-    // Create error report
     const errorReport = {
       errorId,
       component: this.props.componentName || 'LiquidityForm',
@@ -324,10 +309,8 @@ export class LiquidityErrorBoundary extends Component<
       retryCount: this.state.retryCount,
     };
 
-    // In a real app, you would send this to your support system
     console.info('Error report generated:', errorReport);
 
-    // Copy error details to clipboard for user to share
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(JSON.stringify(errorReport, null, 2))
         .then(() => {
@@ -343,12 +326,10 @@ export class LiquidityErrorBoundary extends Component<
 
   render() {
     if (this.state.hasError) {
-      // Use custom fallback if provided
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      // Default error fallback
       return (
         <ErrorFallback
           error={this.state.error}
@@ -368,7 +349,6 @@ export class LiquidityErrorBoundary extends Component<
   }
 }
 
-// Wrapper component for functional components that need error boundary
 export function withLiquidityErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   errorBoundaryProps?: Partial<LiquidityErrorBoundaryProps>
@@ -389,7 +369,6 @@ export function withLiquidityErrorBoundary<P extends object>(
   return WrappedComponent;
 }
 
-// Specialized error boundaries for different parts of the liquidity form
 export function LiquidityFormErrorBoundary({ children }: { children: ReactNode }) {
   return (
     <LiquidityErrorBoundary

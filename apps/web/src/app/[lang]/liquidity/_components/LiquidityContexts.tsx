@@ -1,22 +1,36 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
 import type { PublicKey } from "@solana/web3.js";
 import type { FormApi } from "@tanstack/react-form";
+import { createContext, useContext, useMemo } from "react";
+import type { ActorRefFrom } from "xstate";
 import type {
+  LiquidityMachineEvent,
+  liquidityMachine,
+} from "../_machines/liquidityMachine";
+import type {
+  CalculationParams,
   LiquidityFormValues,
-  WalletAdapter,
+  LiquidityTrackingData,
   PoolDetails,
   UseRealtimeTokenAccountsReturn,
-  LiquidityTrackingData,
-  CalculationParams,
+  WalletAdapter,
 } from "../_types/liquidity.types";
 
-// Form State Context - Updates frequently with form interactions
 export interface LiquidityFormStateContextValue {
-  readonly form: FormApi<LiquidityFormValues, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined>;
-  readonly state: any; // XState machine context
-  readonly send: (event: any) => void;
+  readonly form: FormApi<
+    LiquidityFormValues,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined
+  >;
+  readonly state: ActorRefFrom<typeof liquidityMachine>;
+  readonly send: (event: LiquidityMachineEvent) => void;
   readonly isSubmitting: boolean;
   readonly isSuccess: boolean;
   readonly isError: boolean;
@@ -24,12 +38,15 @@ export interface LiquidityFormStateContextValue {
   readonly hasError: boolean;
 }
 
-const LiquidityFormStateContext = createContext<LiquidityFormStateContextValue | null>(null);
+const LiquidityFormStateContext =
+  createContext<LiquidityFormStateContextValue | null>(null);
 
 export function useLiquidityFormState() {
   const context = useContext(LiquidityFormStateContext);
   if (!context) {
-    throw new Error("useLiquidityFormState must be used within LiquidityFormStateProvider");
+    throw new Error(
+      "useLiquidityFormState must be used within LiquidityFormStateProvider",
+    );
   }
   return context;
 }
@@ -41,25 +58,13 @@ export function LiquidityFormStateProvider({
   children: React.ReactNode;
   value: LiquidityFormStateContextValue;
 }) {
-  const memoizedValue = useMemo(() => value, [
-    value.form,
-    value.state,
-    value.send,
-    value.isSubmitting,
-    value.isSuccess,
-    value.isError,
-    value.isCalculating,
-    value.hasError,
-  ]);
-
   return (
-    <LiquidityFormStateContext.Provider value={memoizedValue}>
+    <LiquidityFormStateContext.Provider value={value}>
       {children}
     </LiquidityFormStateContext.Provider>
   );
 }
 
-// Data Context - Updates occasionally when pool or token data changes
 export interface LiquidityDataContextValue {
   readonly poolDetails: PoolDetails | null;
   readonly tokenAccountsData: UseRealtimeTokenAccountsReturn;
@@ -67,12 +72,16 @@ export interface LiquidityDataContextValue {
   readonly tokenBAddress: string | null;
 }
 
-const LiquidityDataContext = createContext<LiquidityDataContextValue | null>(null);
+const LiquidityDataContext = createContext<LiquidityDataContextValue | null>(
+  null,
+);
 
 export function useLiquidityData() {
   const context = useContext(LiquidityDataContext);
   if (!context) {
-    throw new Error("useLiquidityData must be used within LiquidityDataProvider");
+    throw new Error(
+      "useLiquidityData must be used within LiquidityDataProvider",
+    );
   }
   return context;
 }
@@ -84,37 +93,41 @@ export function LiquidityDataProvider({
   children: React.ReactNode;
   value: LiquidityDataContextValue;
 }) {
-  const memoizedValue = useMemo(() => value, [
-    value.poolDetails,
-    value.tokenAccountsData,
-    value.tokenAAddress,
-    value.tokenBAddress,
-  ]);
-
   return (
-    <LiquidityDataContext.Provider value={memoizedValue}>
+    <LiquidityDataContext.Provider value={value}>
       {children}
     </LiquidityDataContext.Provider>
   );
 }
 
-// Actions Context - Stable function references that rarely change
 export interface LiquidityActionsContextValue {
   readonly resetFormToDefaults: () => void;
-  readonly handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>, type: "buy" | "sell") => void;
+  readonly handleAmountChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "buy" | "sell",
+  ) => void;
   readonly clearPendingCalculations: () => void;
   readonly calculateTokenAmounts: (params: CalculationParams) => Promise<void>;
   readonly trackLiquidityAction: (data: LiquidityTrackingData) => void;
-  readonly trackError: (error: unknown, context?: Record<string, any>) => void;
-  readonly handleError: (error: unknown, context?: Record<string, any>) => void;
+  readonly trackError: (
+    error: unknown,
+    context?: Record<string, unknown>,
+  ) => void;
+  readonly handleError: (
+    error: unknown,
+    context?: Record<string, unknown>,
+  ) => void;
 }
 
-const LiquidityActionsContext = createContext<LiquidityActionsContextValue | null>(null);
+const LiquidityActionsContext =
+  createContext<LiquidityActionsContextValue | null>(null);
 
 export function useLiquidityActions() {
   const context = useContext(LiquidityActionsContext);
   if (!context) {
-    throw new Error("useLiquidityActions must be used within LiquidityActionsProvider");
+    throw new Error(
+      "useLiquidityActions must be used within LiquidityActionsProvider",
+    );
   }
   return context;
 }
@@ -126,15 +139,19 @@ export function LiquidityActionsProvider({
   children: React.ReactNode;
   value: LiquidityActionsContextValue;
 }) {
-  const memoizedValue = useMemo(() => value, [
-    value.resetFormToDefaults,
-    value.handleAmountChange,
-    value.clearPendingCalculations,
-    value.calculateTokenAmounts,
-    value.trackLiquidityAction,
-    value.trackError,
-    value.handleError,
-  ]);
+  const memoizedValue = useMemo(
+    () => value,
+    [
+      value.resetFormToDefaults,
+      value.handleAmountChange,
+      value.clearPendingCalculations,
+      value.calculateTokenAmounts,
+      value.trackLiquidityAction,
+      value.trackError,
+      value.handleError,
+      value,
+    ],
+  );
 
   return (
     <LiquidityActionsContext.Provider value={memoizedValue}>
@@ -143,18 +160,20 @@ export function LiquidityActionsProvider({
   );
 }
 
-// Wallet Context - Stable once wallet is connected
 export interface LiquidityWalletContextValue {
   readonly publicKey: PublicKey | null;
   readonly walletAdapter: WalletAdapter | null;
 }
 
-const LiquidityWalletContext = createContext<LiquidityWalletContextValue | null>(null);
+const LiquidityWalletContext =
+  createContext<LiquidityWalletContextValue | null>(null);
 
 export function useLiquidityWallet() {
   const context = useContext(LiquidityWalletContext);
   if (!context) {
-    throw new Error("useLiquidityWallet must be used within LiquidityWalletProvider");
+    throw new Error(
+      "useLiquidityWallet must be used within LiquidityWalletProvider",
+    );
   }
   return context;
 }
@@ -166,10 +185,10 @@ export function LiquidityWalletProvider({
   children: React.ReactNode;
   value: LiquidityWalletContextValue;
 }) {
-  const memoizedValue = useMemo(() => value, [
-    value.publicKey,
-    value.walletAdapter,
-  ]);
+  const memoizedValue = useMemo(
+    () => value,
+    [value.publicKey, value.walletAdapter, value],
+  );
 
   return (
     <LiquidityWalletContext.Provider value={memoizedValue}>
@@ -178,18 +197,20 @@ export function LiquidityWalletProvider({
   );
 }
 
-// Settings Context - Rarely changes (slippage, preferences)
 export interface LiquiditySettingsContextValue {
   readonly slippage: string;
   readonly setSlippage: (slippage: string) => void;
 }
 
-const LiquiditySettingsContext = createContext<LiquiditySettingsContextValue | null>(null);
+const LiquiditySettingsContext =
+  createContext<LiquiditySettingsContextValue | null>(null);
 
 export function useLiquiditySettings() {
   const context = useContext(LiquiditySettingsContext);
   if (!context) {
-    throw new Error("useLiquiditySettings must be used within LiquiditySettingsProvider");
+    throw new Error(
+      "useLiquiditySettings must be used within LiquiditySettingsProvider",
+    );
   }
   return context;
 }
@@ -201,10 +222,10 @@ export function LiquiditySettingsProvider({
   children: React.ReactNode;
   value: LiquiditySettingsContextValue;
 }) {
-  const memoizedValue = useMemo(() => value, [
-    value.slippage,
-    value.setSlippage,
-  ]);
+  const memoizedValue = useMemo(
+    () => value,
+    [value.slippage, value.setSlippage, value],
+  );
 
   return (
     <LiquiditySettingsContext.Provider value={memoizedValue}>
@@ -213,7 +234,6 @@ export function LiquiditySettingsProvider({
   );
 }
 
-// Composite hook for components that need multiple contexts
 export function useLiquidityForm() {
   return {
     ...useLiquidityFormState(),
@@ -224,13 +244,12 @@ export function useLiquidityForm() {
   };
 }
 
-// Selective hooks for components that only need specific contexts
 export function useLiquidityFormSpecific() {
   return {
-    formState: useLiquidityFormState(),
-    data: useLiquidityData(),
     actions: useLiquidityActions(),
-    wallet: useLiquidityWallet(),
+    data: useLiquidityData(),
+    formState: useLiquidityFormState(),
     settings: useLiquiditySettings(),
+    wallet: useLiquidityWallet(),
   };
 }

@@ -55,7 +55,6 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
-    // Use the main tsconfig for Next.js builds
     tsconfigPath: "./tsconfig.json",
   },
 

@@ -5,7 +5,7 @@ import type { QueryFunctionContext } from "@tanstack/react-query";
 import { tanstackClient } from "@dex-web/orpc";
 import { useStreamingQuery } from "./useStreamingQuery";
 import { useServerSentEvents } from "./useServerSentEvents";
-import { type TokenAccountStreamData, type DeFiStreamConfig } from "./types";
+import type { DeFiStreamConfig } from "./types";
 import type { UseTokenAccountsReturn, TokenAccountsData } from "@dex-web/core";
 
 interface UseStreamingTokenAccountsParams {
@@ -39,10 +39,8 @@ export function useStreamingTokenAccounts({
 } {
   const ownerAddress = publicKey?.toBase58();
 
-  // Dynamic priority based on transaction activity
   const priority: DeFiStreamConfig["priority"] = hasRecentTransaction ? "high" : "normal";
 
-  // Buy token account streaming
   const buyTokenQuery = useTokenAccountStream({
     mint: tokenAAddress,
     ownerAddress,
@@ -51,7 +49,6 @@ export function useStreamingTokenAccounts({
     enableSSE,
   });
 
-  // Sell token account streaming
   const sellTokenQuery = useTokenAccountStream({
     mint: tokenBAddress,
     ownerAddress,
@@ -64,8 +61,8 @@ export function useStreamingTokenAccounts({
   const isRefreshingSell = sellTokenQuery.isLoading && !!sellTokenQuery.data;
 
   return {
-    buyTokenAccount: buyTokenQuery.data,
-    sellTokenAccount: sellTokenQuery.data,
+    buyTokenAccount: buyTokenQuery.data ?? undefined,
+    sellTokenAccount: sellTokenQuery.data ?? undefined,
     refetchBuyTokenAccount: buyTokenQuery.refetch,
     refetchSellTokenAccount: sellTokenQuery.refetch,
     isLoadingBuy: buyTokenQuery.isLoading,
@@ -100,11 +97,11 @@ function useTokenAccountStream({
 }) {
   const queryKey = ["token-account-stream", ownerAddress, mint];
 
-  // Base query function
   const fetchTokenAccount = async (): Promise<TokenAccountsData | null> => {
     if (!mint || !ownerAddress) return null;
 
     const context: QueryFunctionContext = {
+      client: {} as any, // Query client not used in this context
       queryKey,
       signal: new AbortController().signal,
       meta: undefined,
@@ -118,7 +115,6 @@ function useTokenAccountStream({
     }).queryFn(context);
   };
 
-  // SSE streaming (when available)
   const sseQuery = useServerSentEvents<TokenAccountsData>(
     `/api/streams/token-accounts/${ownerAddress}/${mint}`,
     queryKey,
@@ -128,7 +124,6 @@ function useTokenAccountStream({
     }
   );
 
-  // Fallback streaming query
   const streamingQuery = useStreamingQuery(
     queryKey,
     fetchTokenAccount,
@@ -139,7 +134,6 @@ function useTokenAccountStream({
     }
   );
 
-  // Choose the best data source
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
 
   return {

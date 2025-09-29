@@ -31,6 +31,7 @@ interface FormFieldsetProps extends NumericInputProps {
   isLoading?: boolean;
   isRefreshing?: boolean;
   onClearPendingCalculations?: () => void;
+  onHalfMaxClick?: (type: 'half' | 'max') => void;
 }
 const QUOTE_CURRENCY = "USD" as const;
 
@@ -47,6 +48,7 @@ export function FormFieldset({
   isLoading = false,
   isRefreshing = false,
   onClearPendingCalculations,
+  onHalfMaxClick,
   ...rest
 }: FormFieldsetProps) {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -94,6 +96,8 @@ export function FormFieldset({
     onChange?.({
       target: { value: halfAmount },
     } as React.ChangeEvent<HTMLInputElement>);
+
+    onHalfMaxClick?.('half');
   };
 
   const setValueToMaxAmount = () => {
@@ -114,6 +118,8 @@ export function FormFieldset({
     onChange?.({
       target: { value: maxAmount },
     } as React.ChangeEvent<HTMLInputElement>);
+
+    onHalfMaxClick?.('max');
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,21 +158,19 @@ export function FormFieldset({
         {controls ? (
           controls
         ) : (
-          <Text.Body2 className="flex gap-3 text-green-300 uppercase">
+          <div className="flex gap-3 font-normal font-sans text-green-300 text-lg uppercase leading-6 tracking-wider">
             <span className="relative flex items-center">
-              {isLoading && !tokenAccount ? (
+              {(isLoading && !tokenAccount) || !tokenAccount ? (
                 <SkeletonLoader variant="balance" className="w-28" />
               ) : (
                 <>
                   <span>
-                    {amount
-                      ? `${numberFormatHelper({
-                          decimalScale: 2,
-                          thousandSeparator: true,
-                          trimTrailingZeros: true,
-                          value: convertToDecimal(amount, decimals),
-                        })}`
-                      : "0.00"}{" "}
+                    {numberFormatHelper({
+                      decimalScale: 2,
+                      thousandSeparator: true,
+                      trimTrailingZeros: true,
+                      value: convertToDecimal(amount, decimals),
+                    })}{" "}
                     {tokenSymbol}
                   </span>
                   {isRefreshing && (
@@ -175,7 +179,7 @@ export function FormFieldset({
                 </>
               )}
             </span>
-            {!isLoading && tokenAccount && (
+            {tokenAccount && (
               <>
                 <button
                   className={`uppercase underline ${
@@ -203,7 +207,7 @@ export function FormFieldset({
                 </button>
               </>
             )}
-          </Text.Body2>
+          </div>
         )}
       </div>
       <div className="flex flex-col items-end">
@@ -214,7 +218,7 @@ export function FormFieldset({
             disabled={disabled || (isLoading && !tokenAccount)}
             name={name}
             onChange={handleChange}
-            placeholder={isLoading && !tokenAccount ? "Loading..." : "0.00"}
+            placeholder={(!tokenAccount || isLoading) ? "Loading..." : "0.00"}
             ref={inputRef}
             type="text"
             value={formatValueWithThousandSeparator(

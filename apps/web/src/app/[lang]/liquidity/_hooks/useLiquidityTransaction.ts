@@ -23,7 +23,7 @@ interface TransactionParams {
 
 interface UseLiquidityTransactionProps {
   onSuccess: (signature?: string) => void;
-  onError: (error: Error, context?: Record<string, any>) => void;
+  onError: (error: Error, context?: Record<string, unknown>) => void;
   checkTransactionStatus: (signature: string) => Promise<void>;
 }
 
@@ -32,9 +32,9 @@ const DEFAULT_SELL_TOKEN = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const DEFAULT_SLIPPAGE = "0.5";
 
 export function useLiquidityTransaction({
-  onSuccess,
-  onError,
-  checkTransactionStatus,
+  onSuccess: _onSuccess,
+  onError: _onError,
+  checkTransactionStatus: _checkTransactionStatus,
 }: UseLiquidityTransactionProps) {
   const executeTransaction = useCallback(async (params: TransactionParams) => {
     const {
@@ -95,7 +95,7 @@ export function useLiquidityTransaction({
       });
       throw contextualError;
     }
-  }, [onError]);
+  }, []);
 
   return {
     executeTransaction,

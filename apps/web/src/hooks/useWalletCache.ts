@@ -4,7 +4,6 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFirstConnectedWalletAddress } from "../app/_utils/getFirstConnectedWalletAddress";
 
-// Query keys for wallet-related data
 export const walletQueryKeys = {
   all: ['wallet'] as const,
   address: () => [...walletQueryKeys.all, 'address'] as const,
@@ -27,9 +26,9 @@ export function useWalletAddress() {
       return getFirstConnectedWalletAddress(wallet.adapter);
     },
     enabled: !!wallet?.adapter,
-    placeholderData: null, // Show skeleton while loading
-    staleTime: 15 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
   });
 }
 
@@ -44,15 +43,12 @@ export function useWalletPublicKey() {
     queryKey: [...walletQueryKeys.publicKey(), publicKey?.toString()],
     queryFn: () => publicKey,
     enabled: !!publicKey,
-    staleTime: 15 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 }
 
-/**
- * Cached hook for wallet connection status
- * Returns connection state with React Query caching
- */
 export function useWalletConnection() {
   const { wallet, connected, connecting, disconnecting } = useWallet();
 
@@ -92,16 +88,12 @@ export function useWalletAdapter() {
       };
     },
     enabled: !!wallet?.adapter,
-    placeholderData: null, // Show skeleton while loading
+    placeholderData: (previousData) => previousData,
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
   });
 }
 
-/**
- * Hook to invalidate wallet cache
- * Useful when wallet state changes externally
- */
 export function useInvalidateWalletCache() {
   const queryClient = useQueryClient();
 
@@ -134,7 +126,6 @@ export function useCachedWallet() {
     signMessage,
     signAllTransactions,
 
-    // Cached data
     wallet: connectionQuery.data?.wallet || wallet,
     connected: connectionQuery.data?.connected ?? false,
     connecting: connectionQuery.data?.connecting ?? false,
@@ -143,7 +134,6 @@ export function useCachedWallet() {
     address: addressQuery.data || null,
     adapter: adapterQuery.data || null,
 
-    // Query states
     isLoading: addressQuery.isLoading || publicKeyQuery.isLoading || connectionQuery.isLoading || adapterQuery.isLoading,
     isError: addressQuery.isError || publicKeyQuery.isError || connectionQuery.isError || adapterQuery.isError,
     error: addressQuery.error || publicKeyQuery.error || connectionQuery.error || adapterQuery.error,

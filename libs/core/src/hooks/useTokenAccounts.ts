@@ -14,7 +14,7 @@ export interface TokenAccountsQueryClient {
         };
       }) => {
         queryKey: readonly unknown[];
-        queryFn: (context: QueryFunctionContext) => Promise<TokenAccountsData>;
+        queryFn: (context: QueryFunctionContext) => Promise<TokenAccountsData> | TokenAccountsData;
       };
     };
   };
@@ -69,7 +69,9 @@ export const useTokenAccounts = ({
       },
     }),
     enabled: !!publicKey && !!tokenAAddress,
-    staleTime: 12 * 1000,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 
   const {
@@ -85,7 +87,9 @@ export const useTokenAccounts = ({
       },
     }),
     enabled: !!publicKey && !!tokenBAddress,
-    staleTime: 12 * 1000,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 
   return {

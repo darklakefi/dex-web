@@ -14,9 +14,10 @@ export {
   validateIdlComprehensive,
 } from "./utils/idlValidation";
 export {
-  ProgramFactory,
+  createDarklakeProgram,
   createLiquidityProgram,
   createSwapProgram,
+  validateProgramMethods,
 } from "./utils/programFactory";
 export { getLpTokenMint, EXCHANGE_PROGRAM_ID } from "./utils/getLpTokenMint";
 export {

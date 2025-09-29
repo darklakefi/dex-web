@@ -4,7 +4,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LiquidityTransactionStatus } from "../LiquidityTransactionStatus";
 import { LiquidityError, LiquidityErrorCode } from "../../_utils/liquidityErrors";
 
-// Mock the focused context hooks
 const mockUseLiquidityFormState = vi.fn();
 const mockUseLiquidityActions = vi.fn();
 
@@ -86,6 +85,10 @@ describe("LiquidityTransactionStatus", () => {
         ...defaultMockFormState,
         isSuccess: true,
         send: mockSend,
+      });
+
+      mockUseLiquidityActions.mockReturnValue({
+        ...defaultMockActions,
         resetFormToDefaults: mockReset,
       });
 
@@ -321,7 +324,7 @@ describe("LiquidityTransactionStatus", () => {
 
       render(<LiquidityTransactionStatus className="custom-class" />);
 
-      const container = screen.getByRole("status").parentElement;
+      const container = screen.getByRole("status");
       expect(container).toHaveClass("custom-class");
     });
 

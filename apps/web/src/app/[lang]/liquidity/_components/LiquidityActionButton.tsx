@@ -1,23 +1,32 @@
 "use client";
 
 import { Button } from "@dex-web/ui";
-import { useLiquidityFormState } from "./LiquidityContexts";
-import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
-import { getLiquidityButtonState, getButtonMessage, type ButtonState } from "../_utils/liquidityButtonState";
+import type { PublicKey } from "@solana/web3.js";
+import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
-import { liquidityPageParsers } from "../../../_utils/searchParams";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
-import type { PublicKey } from "@solana/web3.js";
-import type { TokenAccountsData, PoolDetails } from "../_types/enhanced.types";
+import { liquidityPageParsers } from "../../../_utils/searchParams";
+import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
+import type {
+  LiquidityFormValues,
+  PoolDetails,
+  TokenAccountsData,
+} from "../_types/liquidity.types";
+import {
+  type ButtonState,
+  getButtonMessage,
+  getLiquidityButtonState,
+} from "../_utils/liquidityButtonState";
+import { useLiquidityFormState } from "./LiquidityContexts";
 
 interface LiquidityActionButtonProps {
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
   poolDetails: PoolDetails | null;
-  tokenAAddress: string;
-  tokenBAddress: string;
+  tokenAAddress: string | null;
+  tokenBAddress: string | null;
   isPoolLoading: boolean;
   isTokenAccountsLoading: boolean;
   onSubmit: () => void;
@@ -39,64 +48,72 @@ export function LiquidityActionButton({
   const router = useRouter();
   const { state, isCalculating, form } = useLiquidityFormState();
 
+  const formValues = useStore(
+    form.store,
+    (state) => state.values,
+  ) as LiquidityFormValues;
+
   const validation = useLiquidityValidation({
-    formValues: form.state.values,
     buyTokenAccount,
-    sellTokenAccount,
-    poolDetails,
-    tokenAAddress,
-    tokenBAddress,
+    formValues,
     hasWallet: !!publicKey,
+    poolDetails,
+    sellTokenAccount,
+    tokenAAddress: tokenAAddress || "",
+    tokenBAddress: tokenBAddress || "",
   });
 
   const buttonState = getLiquidityButtonState({
-    machineContext: state,
-    validation,
-    poolDetails,
     hasWallet: !!publicKey,
+    isCalculating,
     isPoolLoading,
     isTokenAccountsLoading,
-    isCalculating,
+    poolDetails,
+    validation,
   });
 
   const buttonMessage = getButtonMessage(buttonState);
 
   const handleButtonClick = () => {
     if (shouldShowTransactionPreview(validation)) {
-      console.warn('High-value transaction - consider adding preview modal');
     }
     onSubmit();
   };
 
-  const getButtonProps = () => {
-    const isDisabled = buttonState === 'INSUFFICIENT_BALANCE' ||
-                       buttonState === 'SAME_TOKENS' ||
-                       buttonState === 'INVALID_PRICE' ||
-                       buttonState === 'ENTER_AMOUNTS' ||
-                       buttonState === 'ENTER_AMOUNT' ||
-                       buttonState === 'LOADING' ||
-                       buttonState === 'DISABLED';
+  const getButtonProps = (buttonState: ButtonState) => {
+    const isDisabled =
+      buttonState === "INSUFFICIENT_BALANCE" ||
+      buttonState === "SAME_TOKENS" ||
+      buttonState === "INVALID_PRICE" ||
+      buttonState === "ENTER_AMOUNTS" ||
+      buttonState === "ENTER_AMOUNT" ||
+      buttonState === "LOADING" ||
+      buttonState === "DISABLED";
 
-    const isLoading = buttonState === 'SUBMITTING' || buttonState === 'CALCULATING';
+    const isLoading =
+      buttonState === "SUBMITTING" || buttonState === "CALCULATING";
 
     return {
+      "aria-describedby": isDisabled
+        ? `${buttonState.toLowerCase()}-help`
+        : undefined,
+      "aria-label": _getAriaLabel(buttonState, getButtonMessage(buttonState)),
       isDisabled,
       isLoading,
-      variant: _getButtonVariant(buttonState) as 'primary' | 'secondary' | 'danger',
-      'aria-label': _getAriaLabel(buttonState, buttonMessage),
-      'aria-describedby': isDisabled ? `${buttonState.toLowerCase()}-help` : undefined,
+      variant: _getButtonVariant(buttonState) as
+        | "primary"
+        | "secondary"
+        | "danger",
     };
   };
-
-  const buttonProps = getButtonProps();
 
   if (!publicKey) {
     return (
       <Button
+        aria-label="Connect wallet to add liquidity"
         className="w-full cursor-pointer py-3 leading-6"
         onClick={() => router.push("/select-wallet")}
         variant="primary"
-        aria-label="Connect wallet to add liquidity"
       >
         {buttonMessage}
       </Button>
@@ -111,9 +128,10 @@ export function LiquidityActionButton({
     );
   }
 
-  if (!poolDetails || buttonState === 'CREATE_POOL') {
+  if (!poolDetails || buttonState === "CREATE_POOL") {
     return (
       <Button
+        aria-label={`Create new liquidity pool for ${tokenAAddress} and ${tokenBAddress}`}
         className="w-full cursor-pointer py-3 leading-6"
         onClick={() => {
           const urlWithParams = serialize("liquidity", {
@@ -123,73 +141,103 @@ export function LiquidityActionButton({
           });
           router.push(`/${urlWithParams}`);
         }}
-        aria-label={`Create new liquidity pool for ${tokenAAddress} and ${tokenBAddress}`}
       >
         {buttonMessage}
       </Button>
     );
   }
 
+  const formState = useStore(form.store, (state) => state);
+  const formCanSubmit = formState.canSubmit;
+  const formIsSubmitting = formState.isSubmitting;
+
+  const enhancedButtonState = getLiquidityButtonState({
+    formCanSubmit,
+    hasWallet: !!publicKey,
+    isCalculating,
+    isFormSubmitting: formIsSubmitting,
+    isPoolLoading,
+    isTokenAccountsLoading,
+    poolDetails,
+    validation,
+  });
+
+  const enhancedButtonMessage = getButtonMessage(enhancedButtonState);
+  const enhancedButtonProps = getButtonProps(enhancedButtonState);
+
   return (
     <>
       <Button
+        aria-describedby={enhancedButtonProps["aria-describedby"]}
+        aria-label={enhancedButtonProps["aria-label"]}
         className={`w-full cursor-pointer py-3 leading-6 transition-all duration-200 ${
-          buttonProps.isDisabled ? 'opacity-60' : 'hover:opacity-90'
+          enhancedButtonProps.isDisabled
+            ? "opacity-60"
+            : "hover:opacity-90"
         }`}
-        disabled={buttonProps.isDisabled}
-        loading={buttonProps.isLoading}
-        onClick={handleButtonClick}
-        variant={buttonProps.variant}
-        aria-label={buttonProps['aria-label']}
-        aria-describedby={buttonProps['aria-describedby']}
+        data-button-state={enhancedButtonState}
         data-testid="liquidity-action-button"
-        data-button-state={buttonState}
+        disabled={enhancedButtonProps.isDisabled}
+        loading={enhancedButtonProps.isLoading}
+        onClick={handleButtonClick}
+        variant={enhancedButtonProps.variant}
       >
-        {buttonMessage}
+        {enhancedButtonMessage}
       </Button>
 
-      {shouldShowSecurityWarning(validation, buttonState) && (
+      {shouldShowSecurityWarning(validation, enhancedButtonState) && (
         <SecurityWarning
+          buttonState={enhancedButtonState}
           validation={validation}
-          buttonState={buttonState}
         />
       )}
     </>
   );
 }
 
-function _getButtonVariant(buttonState: ButtonState): 'primary' | 'secondary' | 'danger' {
+function _getButtonVariant(
+  buttonState: ButtonState,
+): "primary" | "secondary" | "danger" {
   switch (buttonState) {
-    case 'INSUFFICIENT_BALANCE':
-    case 'SAME_TOKENS':
-    case 'INVALID_PRICE':
-      return 'danger';
-    case 'CREATE_POOL':
-      return 'secondary';
+    case "INSUFFICIENT_BALANCE":
+    case "SAME_TOKENS":
+    case "INVALID_PRICE":
+      return "danger";
+    case "CREATE_POOL":
+      return "secondary";
     default:
-      return 'primary';
+      return "primary";
   }
 }
 
-function _getAriaLabel(buttonState: ButtonState, buttonMessage: string): string {
+function _getAriaLabel(
+  buttonState: ButtonState,
+  buttonMessage: string,
+): string {
   const stateDescriptions: Record<ButtonState, string> = {
-    SUBMITTING: 'Transaction in progress, please wait',
-    CALCULATING: 'Calculating optimal amounts, please wait',
-    INSUFFICIENT_BALANCE: 'Cannot proceed due to insufficient token balance',
-    ENTER_AMOUNTS: 'Enter token amounts to continue',
-    ENTER_AMOUNT: 'Enter an amount to add liquidity',
-    CREATE_POOL: 'Navigate to create new liquidity pool',
-    ADD_LIQUIDITY: 'Add liquidity to existing pool',
-    SAME_TOKENS: 'Cannot proceed - same token selected twice',
-    INVALID_PRICE: 'Cannot proceed - invalid initial price',
-    LOADING: 'Loading pool information',
-    DISABLED: 'Action not available'
+    ADD_LIQUIDITY: "Add liquidity to existing pool",
+    CALCULATING: "Calculating optimal amounts, please wait",
+    CREATE_POOL: "Navigate to create new liquidity pool",
+    DISABLED: "Action not available",
+    ENTER_AMOUNT: "Enter an amount to add liquidity",
+    ENTER_AMOUNTS: "Enter token amounts to continue",
+    INSUFFICIENT_BALANCE: "Cannot proceed due to insufficient token balance",
+    INVALID_PRICE: "Cannot proceed - invalid initial price",
+    LOADING: "Loading pool information",
+    SAME_TOKENS: "Cannot proceed - same token selected twice",
+    SUBMITTING: "Transaction in progress, please wait",
   };
 
   return stateDescriptions[buttonState] || buttonMessage;
 }
 
-function SecurityWarning({ validation: _validation, buttonState: _buttonState }: { validation: unknown; buttonState: ButtonState }) {
+function SecurityWarning({
+  validation: _validation,
+  buttonState: _buttonState,
+}: {
+  validation: unknown;
+  buttonState: ButtonState;
+}) {
   return (
     <div className="mt-2 rounded-md border border-yellow-200 bg-yellow-50 p-3">
       <div className="flex">
@@ -201,7 +249,10 @@ function SecurityWarning({ validation: _validation, buttonState: _buttonState }:
   );
 }
 
-function shouldShowSecurityWarning(_validation: unknown, _buttonState: ButtonState): boolean {
+function shouldShowSecurityWarning(
+  _validation: unknown,
+  _buttonState: ButtonState,
+): boolean {
   return false;
 }
 

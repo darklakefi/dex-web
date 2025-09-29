@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@dex-web/ui";
+import { useCallback, useEffect, useState } from "react";
 
 interface CalculationProgressIndicatorProps {
   isCalculating: boolean;
@@ -25,47 +25,45 @@ export function CalculationProgressIndicator({
   className = "",
 }: CalculationProgressIndicatorProps) {
   const [progressState, setProgressState] = useState<ProgressState>({
-    stage: "idle",
-    progress: 0,
     message: "",
+    progress: 0,
+    stage: "idle",
   });
 
-  // Update progress state based on calculation status
   useEffect(() => {
     if (workerError) {
       setProgressState({
-        stage: "error",
-        progress: 0,
         message: "Calculation failed - using fallback",
+        progress: 0,
+        stage: "error",
       });
       return;
     }
 
     if (!isCalculating) {
       setProgressState({
-        stage: "idle",
-        progress: 0,
         message: "",
+        progress: 0,
+        stage: "idle",
       });
       return;
     }
 
     if (hasApproximateResult) {
       setProgressState({
-        stage: "exact",
-        progress: 75,
         message: "Getting exact amounts...",
+        progress: 75,
+        stage: "exact",
       });
     } else {
       setProgressState({
-        stage: "approximate",
-        progress: 25,
         message: isWorkerReady ? "Calculating..." : "Loading...",
+        progress: 25,
+        stage: "approximate",
       });
     }
   }, [isCalculating, hasApproximateResult, isWorkerReady, workerError]);
 
-  // Animate progress for better UX
   const [animatedProgress, setAnimatedProgress] = useState(0);
 
   useEffect(() => {
@@ -83,9 +81,9 @@ export function CalculationProgressIndicator({
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // Ease out function
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      const currentProgress = startProgress + (targetProgress - startProgress) * easeOut;
+      const easeOut = 1 - (1 - progress) ** 3;
+      const currentProgress =
+        startProgress + (targetProgress - startProgress) * easeOut;
 
       setAnimatedProgress(currentProgress);
 
@@ -97,7 +95,6 @@ export function CalculationProgressIndicator({
     requestAnimationFrame(animate);
   }, [progressState.progress, animatedProgress]);
 
-  // Auto-hide after completion
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -114,15 +111,15 @@ export function CalculationProgressIndicator({
   const getStageIcon = useCallback(() => {
     switch (progressState.stage) {
       case "approximate":
-        return "clock";
+        return "refresh";
       case "exact":
-        return "refresh-cw";
+        return "refresh";
       case "complete":
-        return "check";
+        return "check-filled";
       case "error":
-        return "alert-triangle";
+        return "exclamation";
       default:
-        return "clock";
+        return "refresh";
     }
   }, [progressState.stage]);
 
@@ -147,41 +144,35 @@ export function CalculationProgressIndicator({
 
   return (
     <div
-      className={`
-        flex items-center gap-2 px-3 py-2
-        bg-gray-800/50 rounded-lg border border-gray-700/50
-        transition-all duration-300 ease-out
-        ${className}
-      `}
+      className={`flex items-center gap-2 rounded-lg border border-gray-700/50 bg-gray-800/50 px-3 py-2 transition-all duration-300 ease-out ${className}`}
     >
       {/* Progress bar */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex items-center gap-2">
           <Icon
-            name={getStageIcon()}
             className={`size-3 ${getStageColor()} ${
-              progressState.stage === "approximate" || progressState.stage === "exact"
+              progressState.stage === "approximate" ||
+              progressState.stage === "exact"
                 ? "animate-spin"
                 : ""
             }`}
+            name={getStageIcon()}
           />
-          <span className="text-xs text-gray-300 truncate">
+          <span className="truncate text-gray-300 text-xs">
             {progressState.message}
           </span>
         </div>
 
         {/* Progress bar */}
-        <div className="w-full bg-gray-700 rounded-full h-1">
+        <div className="h-1 w-full rounded-full bg-gray-700">
           <div
-            className={`
-              h-1 rounded-full transition-all duration-300 ease-out
-              ${progressState.stage === "error"
+            className={`h-1 rounded-full transition-all duration-300 ease-out ${
+              progressState.stage === "error"
                 ? "bg-red-500"
                 : progressState.stage === "complete"
-                ? "bg-green-500"
-                : "bg-blue-500"
-              }
-            `}
+                  ? "bg-green-500"
+                  : "bg-blue-500"
+            }`}
             style={{
               width: `${animatedProgress}%`,
             }}
@@ -208,12 +199,14 @@ export function CalculationProgressIndicator({
   );
 }
 
-// Simplified version for inline use
 export function MiniCalculationIndicator({
   isCalculating,
   hasApproximateResult,
   className = "",
-}: Pick<CalculationProgressIndicatorProps, "isCalculating" | "hasApproximateResult" | "className">) {
+}: Pick<
+  CalculationProgressIndicatorProps,
+  "isCalculating" | "hasApproximateResult" | "className"
+>) {
   if (!isCalculating && !hasApproximateResult) {
     return null;
   }
@@ -221,13 +214,10 @@ export function MiniCalculationIndicator({
   return (
     <div className={`flex items-center gap-1 ${className}`}>
       {isCalculating && (
-        <Icon
-          name="refresh-cw"
-          className="size-3 animate-spin text-blue-500"
-        />
+        <Icon className="size-3 animate-spin text-blue-500" name="refresh" />
       )}
       {hasApproximateResult && (
-        <span className="text-xs text-orange-400 font-medium">~</span>
+        <span className="font-medium text-orange-400 text-xs">~</span>
       )}
     </div>
   );

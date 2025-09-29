@@ -45,13 +45,11 @@ class SSEManager {
     const connectionKey = this.getConnectionKey(endpoint, priority);
     const queryKeyString = JSON.stringify(queryKey);
 
-    // Add subscriber
     if (!this.subscribers.has(connectionKey)) {
       this.subscribers.set(connectionKey, new Set());
     }
     this.subscribers.get(connectionKey)!.add(queryKey);
 
-    // Create connection if it doesn't exist
     if (!this.connections.has(connectionKey)) {
       this.connections.set(connectionKey, {
         eventSource: null,
@@ -69,7 +67,6 @@ class SSEManager {
       );
     }
 
-    // Setup message handler
     const connection = this.connections.get(connectionKey)!;
     if (connection.eventSource) {
       connection.eventSource.addEventListener("message", (event) => {
@@ -83,13 +80,11 @@ class SSEManager {
       });
     }
 
-    // Return cleanup function
     return () => {
       const subscribers = this.subscribers.get(connectionKey);
       if (subscribers) {
         subscribers.delete(queryKey);
 
-        // If no more subscribers, close connection
         if (subscribers.size === 0) {
           this.closeConnection(connectionKey);
         }
@@ -130,7 +125,7 @@ class SSEManager {
               maxReconnectAttempts,
               reconnectDelay
             );
-          }, reconnectDelay * Math.pow(2, connection.reconnectAttempts)); // Exponential backoff
+          }, reconnectDelay * 2 ** connection.reconnectAttempts); // Exponential backoff
         } else {
           console.error(`Max reconnection attempts reached for ${connectionKey}`);
           this.closeConnection(connectionKey);
@@ -180,20 +175,17 @@ export function useServerSentEvents<TData>(
   const query = useQuery({
     queryKey: [...queryKey, "sse"],
     queryFn: async (): Promise<TData | null> => {
-      // This query doesn't fetch data directly - it sets up SSE
       return new Promise((resolve) => {
         const cleanup = sseManager.createConnection(
           endpoint,
           queryKey,
           (data: TData) => {
-            // Update React Query cache when SSE message arrives
             queryClient.setQueryData(queryKey, data);
             resolve(data);
           },
           options
         );
 
-        // Store cleanup in query meta for later use
         queryClient.setQueryData([...queryKey, "sse", "cleanup"], cleanup);
       });
     },
@@ -203,11 +195,9 @@ export function useServerSentEvents<TData>(
     enabled: true,
   });
 
-  // Fallback to polling if SSE fails
   const fallbackQuery = useQuery({
     queryKey: [...queryKey, "fallback"],
     queryFn: async (): Promise<TData | null> => {
-      // This would be the original polling queryFn
       throw new Error("Fallback query function not implemented");
     },
     refetchInterval: enableFallback && !sseManager.isConnected(endpoint, priority)
