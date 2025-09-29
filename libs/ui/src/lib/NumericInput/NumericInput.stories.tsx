@@ -20,6 +20,7 @@ export const Default = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    // NumericInput uses type="text" which has role="textbox", not "spinbutton"
     const input = canvas.getByRole("textbox");
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute("inputMode", "numeric");
