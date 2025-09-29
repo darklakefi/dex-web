@@ -106,14 +106,14 @@ export function LiquidityTokenInputs({
             .toFixed(5)
             .toString();
 
-    const currentFieldName =
-      currentField === "sell"
-        ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
-        : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
-
-    form.setFieldValue(currentFieldName, currentValue);
-
     if (poolDetails && parseAmountBigNumber(currentValue).gt(0)) {
+      const currentFieldName =
+        currentField === "sell"
+          ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
+          : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
+
+      form.setFieldValue(currentFieldName, currentValue);
+
       const inputType =
         (currentField === "sell" &&
           poolDetails?.tokenXMint === tokenBAddress) ||
