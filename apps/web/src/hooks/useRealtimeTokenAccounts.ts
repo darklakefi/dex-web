@@ -2,6 +2,7 @@
 
 import { useTokenAccounts, type UseTokenAccountsReturn, type TokenAccountsData } from "@dex-web/core";
 import type { PublicKey } from "@solana/web3.js";
+import type { QueryFunctionContext } from "@tanstack/react-query";
 import { tanstackClient } from "@dex-web/orpc";
 import { usePollingQuery } from "./usePollingQuery";
 
@@ -33,12 +34,12 @@ export function useRealtimeTokenAccounts({
 
   const { data: liveBuyTokenAccount } = usePollingQuery<TokenAccountsData>(
     ["token-accounts-live", publicKey?.toBase58(), tokenAAddress],
-    () => tanstackClient.helius.getTokenAccounts.queryOptions({
+    (context: QueryFunctionContext) => tanstackClient.helius.getTokenAccounts.queryOptions({
       input: {
         mint: tokenAAddress || "",
         ownerAddress: publicKey?.toBase58() || "",
       },
-    }).queryFn(),
+    }).queryFn(context),
     {
       pollingInterval: hasRecentTransaction ? 3000 : 15000,
       enabled: !!publicKey && !!tokenAAddress,
@@ -48,12 +49,12 @@ export function useRealtimeTokenAccounts({
 
   const { data: liveSellTokenAccount } = usePollingQuery<TokenAccountsData>(
     ["token-accounts-live", publicKey?.toBase58(), tokenBAddress],
-    () => tanstackClient.helius.getTokenAccounts.queryOptions({
+    (context: QueryFunctionContext) => tanstackClient.helius.getTokenAccounts.queryOptions({
       input: {
         mint: tokenBAddress || "",
         ownerAddress: publicKey?.toBase58() || "",
       },
-    }).queryFn(),
+    }).queryFn(context),
     {
       pollingInterval: hasRecentTransaction ? 3000 : 15000,
       enabled: !!publicKey && !!tokenBAddress,

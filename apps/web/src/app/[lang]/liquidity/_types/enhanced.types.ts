@@ -121,7 +121,7 @@ export interface UseRealtimeTokenAccountsReturn {
 // Form provider context interface
 export interface LiquidityFormContextValue {
   // TanStack Form instance
-  readonly form: FormApi<LiquidityFormValues>;
+  readonly form: FormApi<LiquidityFormValues, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined>;
 
   // XState machine
   readonly state: LiquidityMachineContext;

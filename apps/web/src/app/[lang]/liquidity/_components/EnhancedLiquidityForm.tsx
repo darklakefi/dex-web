@@ -55,7 +55,7 @@ function LiquidityFormContent() {
   const { trackLiquidity, trackError } = useAnalytics();
   const queryClient = useQueryClient();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(selectedTokensParsers);
-  const { state, send } = useLiquidityForm();
+  const { state, send, form } = useLiquidityForm();
 
   const tx = useTranslations("liquidity");
 
@@ -323,6 +323,7 @@ function LiquidityFormContent() {
       <Box padding="lg">
         <div className="flex flex-col gap-4">
           <LiquidityTokenInputs
+            form={form}
             buyTokenAccount={buyTokenAccount}
             sellTokenAccount={sellTokenAccount}
             isLoadingBuy={isLoadingBuy}

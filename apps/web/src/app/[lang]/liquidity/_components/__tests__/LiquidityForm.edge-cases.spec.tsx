@@ -219,7 +219,7 @@ describe("LiquidityForm Edge Cases", () => {
           isRealtime: true,
         }),
       }));
-      (client.liquidity.createLiquidityTransaction as jest.MockedFunction<any>).mockResolvedValue({
+      (client.liquidity.createLiquidityTransaction as any).mockResolvedValue({
         success: true,
         transaction: "mock-transaction",
       });
@@ -266,7 +266,7 @@ describe("LiquidityForm Edge Cases", () => {
         }),
       }));
       let callCount = 0;
-      (client.liquidity.createLiquidityTransaction as jest.MockedFunction<any>).mockImplementation(() => {
+      (client.liquidity.createLiquidityTransaction as any).mockImplementation(() => {
         callCount++;
         return Promise.resolve({
           success: true,
@@ -401,14 +401,14 @@ describe("LiquidityForm Edge Cases", () => {
           isRealtime: true,
         }),
       }));
-      (client.liquidity.getAddLiquidityReview as jest.MockedFunction<any>).mockResolvedValue({ tokenAmount: 50 });
+      (client.liquidity.getAddLiquidityReview as any).mockResolvedValue({ tokenAmount: 50 });
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       const amountInputs = screen.getAllByRole("textbox");
       for (let i = 1; i <= 10; i++) {
-        await user.clear(amountInputs[0]);
+        await user.clear(amountInputs[0]!);
         await user.type(amountInputs[0]!,i.toString());
       }
       await waitFor(() => {

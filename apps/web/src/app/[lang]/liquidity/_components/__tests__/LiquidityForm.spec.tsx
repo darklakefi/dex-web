@@ -195,7 +195,7 @@ describe("LiquidityForm - Critical Path User Stories", () => {
       });
       const amountInputs = screen.getAllByRole("textbox");
       await user.type(amountInputs[0]!,"100");
-      fireEvent.keyDown(amountInputs[0], { key: "Enter" });
+      fireEvent.keyDown(amountInputs[0]!, { key: "Enter" });
       expect(screen.queryByText("Processing Transaction...")).not.toBeInTheDocument();
     });
     it("should preserve disconnected state on refresh", async () => {
@@ -406,7 +406,7 @@ describe("LiquidityForm - Critical Path User Stories", () => {
       await waitFor(() => {
         expect(screen.getByText(/Insufficient.*balance/)).toBeInTheDocument();
       });
-      await user.clear(amountInputs[0]);
+      await user.clear(amountInputs[0]!);
       await user.type(amountInputs[0]!,"0.1");
       await waitFor(() => {
         expect(screen.queryByText(/Insufficient.*balance/)).not.toBeInTheDocument();

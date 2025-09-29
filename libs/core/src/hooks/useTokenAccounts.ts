@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type QueryFunctionContext } from "@tanstack/react-query";
 import type { PublicKey } from "@solana/web3.js";
 
 export interface TokenAccountsQueryClient {
@@ -13,7 +13,7 @@ export interface TokenAccountsQueryClient {
         };
       }) => {
         queryKey: readonly unknown[];
-        queryFn: () => Promise<TokenAccountsData>;
+        queryFn: (context: QueryFunctionContext) => Promise<TokenAccountsData>;
       };
     };
   };

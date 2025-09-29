@@ -105,13 +105,12 @@ async function removeLiquidity(
 
 	console.log("Building removeLiquidity instruction...");
 
-	// Type-safe way to access the method without deep instantiation
-	const methods = program.methods as Record<string, unknown>;
-	if (!methods.remove_liquidity) {
+	// Access the method directly from the program
+	if (!program.methods.remove_liquidity) {
 		throw new Error("remove_liquidity method not found on program");
 	}
 
-	const instruction = await methods.remove_liquidity(
+	const instruction = await program.methods.remove_liquidity(
 		new BN(lpTokensToBurn),
 		new BN(minAmountX),
 		new BN(minAmountY),

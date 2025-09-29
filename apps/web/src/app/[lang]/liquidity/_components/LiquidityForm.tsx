@@ -67,7 +67,18 @@ function LiquidityFormContent() {
 
       <Box padding="lg">
         <div className="flex flex-col gap-4">
-          <LiquidityTokenInputs />
+          <LiquidityTokenInputs
+            form={form}
+            buyTokenAccount={tokenAccountsData.buyTokenAccount}
+            sellTokenAccount={tokenAccountsData.sellTokenAccount}
+            isLoadingBuy={tokenAccountsData.isLoadingBuy}
+            isLoadingSell={tokenAccountsData.isLoadingSell}
+            isRefreshingBuy={tokenAccountsData.isRefreshingBuy}
+            isRefreshingSell={tokenAccountsData.isRefreshingSell}
+            tokenAAddress={tokenAAddress}
+            tokenBAddress={tokenBAddress}
+            poolDetails={poolDetails}
+          />
           <LiquidityActionButton />
           <LiquidityTransactionStatus />
         </div>

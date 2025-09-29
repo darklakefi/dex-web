@@ -116,7 +116,7 @@ export function sanitizeNumericInput(input: string): string {
   // Remove leading zeros (except for decimal numbers like 0.123)
   if (sanitized.includes('.')) {
     const [integerPart, decimalPart] = sanitized.split('.');
-    const cleanInteger = integerPart.replace(/^0+/, '') || '0';
+    const cleanInteger = integerPart?.replace(/^0+/, '') || '0';
     sanitized = `${cleanInteger}.${decimalPart}`;
   } else {
     sanitized = sanitized.replace(/^0+/, '') || '0';
@@ -382,7 +382,7 @@ export function detectSuspiciousActivity(
 
     try {
       const currentAmount = parseAmountBigNumber(amount);
-      const lastAmount = parseAmountBigNumber(lastSubmission.amount);
+      const lastAmount = parseAmountBigNumber(lastSubmission?.amount ?? '0');
 
       if (lastAmount.gt(0)) {
         const ratio = currentAmount.div(lastAmount);

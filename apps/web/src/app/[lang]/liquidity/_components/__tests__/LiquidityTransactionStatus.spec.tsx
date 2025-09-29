@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LiquidityTransactionStatus } from "../LiquidityTransactionStatus";
 import { LiquidityError, LiquidityErrorCode } from "../../_utils/liquidityErrors";
 
 // Mock the LiquidityFormProvider
-const mockUseLiquidityForm = jest.fn();
+const mockUseLiquidityForm = vi.fn();
 
-jest.mock("../LiquidityFormProvider", () => ({
-  ...jest.requireActual("../LiquidityFormProvider"),
+vi.mock("../LiquidityFormProvider", () => ({
   useLiquidityForm: () => mockUseLiquidityForm(),
 }));
 
@@ -18,17 +18,17 @@ describe("LiquidityTransactionStatus", () => {
       transactionSignature: null,
       liquidityStep: 0,
     },
-    send: jest.fn(),
+    send: vi.fn(),
     isSuccess: false,
     isError: false,
     isSubmitting: false,
     hasError: false,
-    resetFormToDefaults: jest.fn(),
-    trackError: jest.fn(),
+    resetFormToDefaults: vi.fn(),
+    trackError: vi.fn(),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockUseLiquidityForm.mockReturnValue(defaultMockState);
   });
 
@@ -73,8 +73,8 @@ describe("LiquidityTransactionStatus", () => {
 
     it("should call reset when Add More Liquidity is clicked", async () => {
       const user = userEvent.setup();
-      const mockSend = jest.fn();
-      const mockReset = jest.fn();
+      const mockSend = vi.fn();
+      const mockReset = vi.fn();
 
       mockUseLiquidityForm.mockReturnValue({
         ...defaultMockState,
@@ -112,7 +112,7 @@ describe("LiquidityTransactionStatus", () => {
         },
       });
 
-      const mockRetry = jest.fn();
+      const mockRetry = vi.fn();
       render(<LiquidityTransactionStatus onRetry={mockRetry} />);
 
       expect(screen.getByText("Insufficient balance for this transaction")).toBeInTheDocument();
@@ -359,7 +359,7 @@ describe("LiquidityTransactionStatus", () => {
 
     it("should call onNavigateToPool when provided", async () => {
       const user = userEvent.setup();
-      const mockNavigateToPool = jest.fn();
+      const mockNavigateToPool = vi.fn();
 
       mockUseLiquidityForm.mockReturnValue({
         ...defaultMockState,

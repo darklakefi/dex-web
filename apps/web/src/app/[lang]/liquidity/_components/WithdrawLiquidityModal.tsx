@@ -484,7 +484,7 @@ export function WithdrawLiquidityModal({
 							<Text.Body2 className="text-green-300">
 								Total Withdrawal
 							</Text.Body2>
-							<Text.Body2 className="text-green-200 text-lg">
+							<div className="text-green-200 text-lg">
 								<div>
 									{numberFormatHelper({
 										decimalScale: 4,
@@ -501,13 +501,13 @@ export function WithdrawLiquidityModal({
 									})}{" "}
 									{tokenYDetails.symbol}
 								</div>
-							</Text.Body2>
+							</div>
 						</div>
 					)}
 
 					<div className="space-y-2 bg-green-600 p-3">
 						<Text.Body2 className="text-green-300">Your Liquidity</Text.Body2>
-						<Text.Body2 className="text-green-200 text-lg">
+						<div className="text-green-200 text-lg">
 							<div>
 								{numberFormatHelper({
 									decimalScale: 4,
@@ -524,7 +524,7 @@ export function WithdrawLiquidityModal({
 								})}{" "}
 								{tokenYDetails.symbol}
 							</div>
-						</Text.Body2>
+						</div>
 					</div>
 
 					<div className="hidden space-y-3">

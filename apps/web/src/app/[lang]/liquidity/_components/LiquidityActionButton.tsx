@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@dex-web/ui";
-import { DynamicWalletButton } from "../../../_components/DynamicWalletButton";
 import { useLiquidityForm } from "./LiquidityFormProvider";
 import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
 import { getLiquidityButtonState, getButtonMessage, type ButtonState } from "../_utils/liquidityButtonState";
@@ -96,7 +95,16 @@ export function LiquidityActionButton({
   const buttonProps = getButtonProps();
 
   if (!publicKey) {
-    return <DynamicWalletButton className="w-full py-3" />;
+    return (
+      <Button
+        className="w-full cursor-pointer py-3 leading-6"
+        onClick={() => router.push("/select-wallet")}
+        variant="primary"
+        aria-label="Connect wallet to add liquidity"
+      >
+        {buttonMessage}
+      </Button>
+    );
   }
 
   if (isPoolLoading) {

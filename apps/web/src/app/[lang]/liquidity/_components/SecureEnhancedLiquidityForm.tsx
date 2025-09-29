@@ -245,7 +245,7 @@ function SecureLiquidityFormContent() {
   const { trackLiquidity, trackError } = useAnalytics();
   const queryClient = useQueryClient();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(selectedTokensParsers);
-  const { state, send } = useLiquidityForm();
+  const { state, send, form } = useLiquidityForm();
 
   const tx = useTranslations("liquidity");
 
@@ -630,6 +630,7 @@ function SecureLiquidityFormContent() {
           {/* Token Inputs with Error Boundary */}
           <LiquidityTokenInputErrorBoundary>
             <LiquidityTokenInputs
+              form={form}
               buyTokenAccount={buyTokenAccount}
               sellTokenAccount={sellTokenAccount}
               isLoadingBuy={isLoadingBuy}
