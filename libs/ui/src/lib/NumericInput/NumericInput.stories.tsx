@@ -20,10 +20,10 @@ export const Default = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const input = canvas.getByRole("spinbutton");
+    const input = canvas.getByRole("textbox");
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute("inputMode", "numeric");
-    expect(input).toHaveAttribute("type", "number");
+    expect(input).toHaveAttribute("type", "text");
   },
   render: (args) => {
     const [value, setValue] = useState(args.value);
