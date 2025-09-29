@@ -8,10 +8,18 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
   experimental: {
-    reactCompiler: false,
+    reactCompiler: true,
     typedRoutes: true,
+    webpackBuildWorker: true,
   },
   images: {
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    dangerouslyAllowSVG: true,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    formats: ["image/webp", "image/avif"],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     unoptimized: false,
   },
   logging: {
@@ -48,15 +56,19 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
-    // Use the main tsconfig for Next.js builds
     tsconfigPath: "./tsconfig.json",
   },
 
   webpack(config, { isServer }) {
+    config.cache = {
+      type: "memory",
+      maxGenerations: 1,
+    };
+
     config.infrastructureLogging = {
+      debug: false,
       level: "warn",
       stream: process.stderr,
-      debug: false,
     };
 
     const originalWarn = console.warn;
@@ -76,8 +88,8 @@ const nextConfig = {
       config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(
           /client-server$/,
-          "./client-server.browser.ts"
-        )
+          "./client-server.browser.ts",
+        ),
       );
 
       config.resolve.fallback = {
@@ -117,4 +129,8 @@ export default withSentryConfig(nxConfig, {
   silent: !process.env.CI,
   tunnelRoute: "/monitoring",
   widenClientFileUpload: true,
+  sourcemaps: {
+    disable: process.env.NODE_ENV === "development" && process.env.CI === "true",
+    deleteSourcemapsAfterUpload: true,
+  },
 });

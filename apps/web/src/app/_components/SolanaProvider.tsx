@@ -5,6 +5,11 @@ import {
   WalletProvider,
 } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import {
+  PhantomWalletAdapter,
+  CoinbaseWalletAdapter,
+  TrustWalletAdapter,
+} from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
 import { type FC, type ReactNode, useMemo } from "react";
 import "@solana/wallet-adapter-react-ui/styles.css";
@@ -18,9 +23,18 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
   const network = getSolanaWalletAdapterNetwork();
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
+  const wallets = useMemo(
+    () => [
+      new PhantomWalletAdapter(),
+      new CoinbaseWalletAdapter(),
+      new TrustWalletAdapter(),
+    ],
+    [],
+  );
+
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider autoConnect wallets={[]}>
+      <WalletProvider autoConnect wallets={wallets}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

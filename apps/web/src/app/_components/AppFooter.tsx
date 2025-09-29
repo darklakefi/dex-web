@@ -75,7 +75,8 @@ export const AppFooter = () => {
           target="_blank"
           variant="link"
         >
-          {tx("docs")} <Icon className="size-4 fill-green-300" name="external-link" />
+          {tx("docs")}{" "}
+          <Icon className="size-4 fill-green-300" name="external-link" />
         </Text>
         <Text
           as={Link}

@@ -18,11 +18,6 @@ export async function checkLiquidityTransactionStatusHandler(
   const { signature } = input;
 
   try {
-    console.log(
-      "Checking liquidity transaction status for signature:",
-      signature,
-    );
-
     // Get Solana connection
     const helius = getHelius();
     const connection = helius.connection;

@@ -9,7 +9,7 @@ export const toRawUnitsBigint = (amount: number, decimals: number): bigint => {
 
   if (!result.isInteger()) {
     throw new Error(
-      `Amount ${amount} with ${decimals} decimals results in non-integer: ${result.toString()}`
+      `Amount ${amount} with ${decimals} decimals results in non-integer: ${result.toString()}`,
     );
   }
 

@@ -11,7 +11,9 @@ export interface UseTransactionSigningParams {
 }
 
 export interface UseTransactionSigningReturn {
-  signTransactionWithValidation: (transaction: VersionedTransaction) => Promise<VersionedTransaction>;
+  signTransactionWithValidation: (
+    transaction: VersionedTransaction,
+  ) => Promise<VersionedTransaction>;
   isReadyToSign: boolean;
 }
 
@@ -20,16 +22,18 @@ export const useTransactionSigning = ({
   signTransaction,
 }: UseTransactionSigningParams): UseTransactionSigningReturn => {
   const signTransactionWithValidation = useCallback(
-    async (transaction: VersionedTransaction): Promise<VersionedTransaction> => {
+    async (
+      transaction: VersionedTransaction,
+    ): Promise<VersionedTransaction> => {
       validateWalletForSigning({ publicKey, signTransaction });
-      
+
       if (!signTransaction) {
         throw new Error("Wallet does not support transaction signing");
       }
 
       return await signTransaction(transaction);
     },
-    [publicKey, signTransaction]
+    [publicKey, signTransaction],
   );
 
   const isReadyToSign = Boolean(publicKey && signTransaction);

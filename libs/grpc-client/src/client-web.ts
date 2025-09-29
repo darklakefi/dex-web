@@ -17,7 +17,7 @@ export function createSolanaGatewayClient(baseUrl: string = grpcClientUrl) {
 }
 
 export function createDarklakeIntegrationsClient(
-  baseUrl: string = process.env.GRPC_ENDPOINT!
+  baseUrl: string = process.env.GRPC_ENDPOINT!,
 ) {
   const transport = createGrpcWebTransport({
     baseUrl,

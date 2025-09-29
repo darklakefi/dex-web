@@ -2,7 +2,9 @@ import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
 import { QueryClient } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
+import { Suspense } from "react";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
+import { SkeletonLoader } from "../../_components/SkeletonLoader";
 import { selectedTokensCache } from "../../_utils/searchParams";
 import { SwapForm } from "./_components/SwapForm";
 import { SwapTransactionHistory } from "./_components/SwapTransactionHistory";
@@ -47,8 +49,34 @@ export default async function Page({
           </Box>
           <div className="size-9" />
         </section>
-        <SwapForm />
-        <SwapTransactionHistory />
+        <Suspense
+          fallback={
+            <Box className="w-full max-w-md animate-pulse">
+              <SkeletonLoader variant="text" className="mb-4 h-8 w-32" />
+              <div className="space-y-4">
+                <SkeletonLoader variant="input" className="h-20 w-full" />
+                <SkeletonLoader variant="input" className="h-20 w-full" />
+                <SkeletonLoader variant="button" className="h-12 w-full" />
+              </div>
+            </Box>
+          }
+        >
+          <SwapForm />
+        </Suspense>
+        <Suspense
+          fallback={
+            <Box className="mt-6 w-full max-w-md animate-pulse">
+              <SkeletonLoader variant="text" className="mb-3 h-6 w-40" />
+              <div className="space-y-2">
+                <SkeletonLoader variant="text" className="h-4 w-full" />
+                <SkeletonLoader variant="text" className="h-4 w-3/4" />
+                <SkeletonLoader variant="text" className="h-4 w-5/6" />
+              </div>
+            </Box>
+          }
+        >
+          <SwapTransactionHistory />
+        </Suspense>
       </div>
       <div className="hidden max-w-xs md:block">
         <FeaturesAndTrendingPoolPanel />

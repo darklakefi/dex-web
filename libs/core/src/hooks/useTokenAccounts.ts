@@ -1,6 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type QueryFunctionContext } from "@tanstack/react-query";
+
 import type { PublicKey } from "@solana/web3.js";
 
 export interface TokenAccountsQueryClient {
@@ -11,7 +12,12 @@ export interface TokenAccountsQueryClient {
           mint: string;
           ownerAddress: string;
         };
-      }) => any;
+      }) => {
+        queryKey: readonly unknown[];
+        queryFn: (
+          context: QueryFunctionContext,
+        ) => Promise<TokenAccountsData> | TokenAccountsData;
+      };
     };
   };
 }
@@ -38,8 +44,8 @@ export interface TokenAccountsData {
 export interface UseTokenAccountsReturn {
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
-  refetchBuyTokenAccount: () => Promise<any>;
-  refetchSellTokenAccount: () => Promise<any>;
+  refetchBuyTokenAccount: () => Promise<unknown>;
+  refetchSellTokenAccount: () => Promise<unknown>;
   isLoadingBuy: boolean;
   isLoadingSell: boolean;
   errorBuy: Error | null;
@@ -65,6 +71,9 @@ export const useTokenAccounts = ({
       },
     }),
     enabled: !!publicKey && !!tokenAAddress,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 
   const {
@@ -80,6 +89,9 @@ export const useTokenAccounts = ({
       },
     }),
     enabled: !!publicKey && !!tokenBAddress,
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   });
 
   return {

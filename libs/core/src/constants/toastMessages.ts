@@ -6,7 +6,7 @@ export const TRANSACTION_STEPS = {
   },
   STEP_2: {
     SWAP: "Confirm trade [2/3]",
-    LIQUIDITY: "Confirm liquidity transaction [2/3]", 
+    LIQUIDITY: "Confirm liquidity transaction [2/3]",
     POOL_CREATION: "Confirm Pool Creation [2/3]",
   },
   STEP_3: {
@@ -19,18 +19,22 @@ export const TRANSACTION_STEPS = {
 export const TRANSACTION_DESCRIPTIONS = {
   STEP_1: {
     SWAP: "Hiding your slippage tolerance from mev bot until verification. this may take a few seconds.",
-    LIQUIDITY: "Hiding your slippage tolerance from MEV bots until verification. This may take a few seconds.",
-    POOL_CREATION: "Preparing pool creation transaction. This may take a few seconds.",
+    LIQUIDITY:
+      "Hiding your slippage tolerance from MEV bots until verification. This may take a few seconds.",
+    POOL_CREATION:
+      "Preparing pool creation transaction. This may take a few seconds.",
   },
   STEP_2: {
     SWAP: "Tokens will be secured until slippage verification completes.",
     LIQUIDITY: "Please confirm the liquidity transaction in your wallet.",
-    POOL_CREATION: "Please confirm the pool creation transaction in your wallet.",
+    POOL_CREATION:
+      "Please confirm the pool creation transaction in your wallet.",
   },
   STEP_3: {
     SWAP: "Checking if swap stayed within your hidden slippage tolerance before finalizing trade.",
     LIQUIDITY: "Processing your liquidity transaction on the blockchain.",
-    POOL_CREATION: "Processing your pool creation transaction on the blockchain.",
+    POOL_CREATION:
+      "Processing your pool creation transaction on the blockchain.",
   },
 } as const;
 
@@ -47,7 +51,7 @@ export const ERROR_MESSAGES = {
 
 export const SUCCESS_MESSAGES = {
   SWAP_COMPLETE: "Swap complete",
-  LIQUIDITY_ADDED: "Liquidity Added Successfully", 
+  LIQUIDITY_ADDED: "Liquidity Added Successfully",
   POOL_CREATED: "Pool Created",
   PROPOSAL_CREATED: "Proposal created",
 } as const;

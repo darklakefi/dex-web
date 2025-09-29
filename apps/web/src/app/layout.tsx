@@ -15,6 +15,8 @@ const bitsumishiRegular = localFont({
   style: "normal",
   variable: "--font-bitsumishi-regular",
   weight: "400",
+  display: "swap",
+  preload: true,
 });
 
 const classicConsoleNeue = localFont({
@@ -22,6 +24,8 @@ const classicConsoleNeue = localFont({
   style: "normal",
   variable: "--font-classic-console-neue",
   weight: "400",
+  display: "swap",
+  preload: false,
 });
 
 export const metadata = {

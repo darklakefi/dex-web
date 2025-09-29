@@ -4,8 +4,8 @@ import type { Token } from "@dex-web/orpc/schemas";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import { Box, Button, Text } from "@dex-web/ui";
 import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import { useMemo, useState } from "react";
 import {
@@ -27,73 +27,75 @@ export function YourLiquidity({
   onWithdraw,
   onClaim,
 }: YourLiquidityProps) {
-  const { publicKey } = useWallet();
+  const { data: publicKey } = useWalletPublicKey();
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
   const tokenA = tokenAAddress || DEFAULT_BUY_TOKEN;
   const tokenB = tokenBAddress || DEFAULT_SELL_TOKEN;
   const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(tokenA, tokenB);
-  const { data: userLiquidity } = useSuspenseQuery(
-    tanstackClient.liquidity.getUserLiquidity.queryOptions({
-      enabled: !!publicKey,
-      input: {
-        ownerAddress: publicKey?.toBase58() ?? "",
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
+  const [
+    { data: userLiquidity },
+    { data: tokenMetadata },
+    { data: poolDetails },
+    { data: poolReserves },
+    { data: tokenXPrice },
+    { data: tokenYPrice },
+  ] = useSuspenseQueries({
+    queries: [
+      {
+        ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
+          enabled: !!publicKey,
+          input: {
+            ownerAddress: publicKey?.toBase58() ?? "",
+            tokenXMint: tokenXAddress,
+            tokenYMint: tokenYAddress,
+          },
+        }),
       },
-    }),
-  );
-
-  const { data: tokenMetadata } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenMetadata.queryOptions({
-      input: {
-        addresses: [tokenXAddress, tokenYAddress],
-        returnAsObject: true,
+      tanstackClient.tokens.getTokenMetadata.queryOptions({
+        input: {
+          addresses: [tokenXAddress, tokenYAddress],
+          returnAsObject: true,
+        },
+      }),
+      tanstackClient.pools.getPoolDetails.queryOptions({
+        input: {
+          tokenXMint: tokenXAddress,
+          tokenYMint: tokenYAddress,
+        },
+      }),
+      tanstackClient.pools.getPoolReserves.queryOptions({
+        input: {
+          tokenXMint: tokenXAddress,
+          tokenYMint: tokenYAddress,
+        },
+      }),
+      {
+        ...tanstackClient.tokens.getTokenPrice.queryOptions({
+          input: {
+            amount: 1,
+            mint: tokenXAddress,
+            quoteCurrency: "USD",
+          },
+        }),
+        staleTime: 5 * 1000,
       },
-    }),
-  );
+      {
+        ...tanstackClient.tokens.getTokenPrice.queryOptions({
+          input: {
+            amount: 1,
+            mint: tokenYAddress,
+            quoteCurrency: "USD",
+          },
+        }),
+        staleTime: 5 * 1000,
+      },
+    ],
+  });
 
   const metadata = tokenMetadata as Record<string, Token>;
   const tokenXDetails = metadata[tokenXAddress]!;
   const tokenYDetails = metadata[tokenYAddress]!;
-
-  const { data: poolDetails } = useSuspenseQuery(
-    tanstackClient.pools.getPoolDetails.queryOptions({
-      input: {
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
-      },
-    }),
-  );
-
-  const { data: poolReserves } = useSuspenseQuery(
-    tanstackClient.pools.getPoolReserves.queryOptions({
-      input: {
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
-      },
-    }),
-  );
-
-  const { data: tokenXPrice } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenPrice.queryOptions({
-      input: {
-        amount: 1,
-        mint: tokenXAddress,
-        quoteCurrency: "USD",
-      },
-    }),
-  );
-
-  const { data: tokenYPrice } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenPrice.queryOptions({
-      input: {
-        amount: 1,
-        mint: tokenYAddress,
-        quoteCurrency: "USD",
-      },
-    }),
-  );
 
   const liquidityCalculations = useMemo(() => {
     if (

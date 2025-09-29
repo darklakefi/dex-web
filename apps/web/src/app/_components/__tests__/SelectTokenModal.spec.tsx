@@ -6,9 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import z from "zod/v4";
 import { DEFAULT_BUY_TOKEN } from "../../_utils/constants";
 import { SelectTokenModal } from "../SelectTokenModal";
-
 const queryClient = new QueryClient();
-
 const onUrlUpdate = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -17,8 +15,8 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => ({
     get: vi.fn().mockReturnValue(""),
   }),
+  usePathname: () => "/swap",
 }));
-
 vi.mock("@dex-web/orpc", () => ({
   getTokensInputSchema: {
     pick: vi.fn().mockReturnValue(
@@ -37,7 +35,7 @@ vi.mock("@dex-web/orpc", () => ({
             tokens: [
               {
                 address: DEFAULT_BUY_TOKEN,
-                imageUrl: "https://example.com/image.png",
+                imageUrl: "https://example.com/solana.png",
                 name: "Solana",
                 symbol: "SOL",
                 value: "1000",
@@ -49,7 +47,6 @@ vi.mock("@dex-web/orpc", () => ({
     },
   },
 }));
-
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <NuqsTestingAdapter
     onUrlUpdate={onUrlUpdate}
@@ -58,7 +55,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   </NuqsTestingAdapter>
 );
-
 describe.skip("SelectTokenModal", () => {
   it("renders search input and token list", async () => {
     await act(async () => {
@@ -66,7 +62,6 @@ describe.skip("SelectTokenModal", () => {
         wrapper,
       });
     });
-
     expect(
       await screen.findByPlaceholderText("Search for a token"),
     ).toBeDefined();

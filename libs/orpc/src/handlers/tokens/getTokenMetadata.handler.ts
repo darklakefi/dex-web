@@ -28,7 +28,7 @@ const parseToken = (token: TokenMetadata): Token => ({
 });
 
 export const getTokenMetadataHandler = async (
-  input: GetTokenMetadataInput
+  input: GetTokenMetadataInput,
 ): Promise<GetTokenMetadataOutput> => {
   const { addresses, returnAsObject } = input;
 
@@ -44,21 +44,23 @@ export const getTokenMetadataHandler = async (
 
   const grpcClient = await getDexGatewayClient();
   try {
-    const { tokens } = await grpcClient.getTokenMetadataList({
-      filterBy: {
-        case: "addressesList",
-        value: {
-          tokenAddresses: addresses,
+    const { tokens } = await grpcClient
+      .getTokenMetadataList({
+        filterBy: {
+          case: "addressesList",
+          value: {
+            tokenAddresses: addresses,
+          },
         },
-      },
-      pageNumber: 1,
-      pageSize: addresses.length,
-    }).catch(() => {
-      return { tokens: [] as TokenMetadata[] };
-    });;
+        pageNumber: 1,
+        pageSize: addresses.length,
+      })
+      .catch(() => {
+        return { tokens: [] as TokenMetadata[] };
+      });
 
     const notFoundTokens = addresses.filter(
-      (address) => !tokens.some((token) => token.address === address)
+      (address) => !tokens.some((token) => token.address === address),
     );
 
     if (notFoundTokens.length > 0) {
@@ -67,10 +69,13 @@ export const getTokenMetadataHandler = async (
     }
 
     if (returnAsObject) {
-      return tokens.reduce((acc, token) => {
-        acc[token.address] = parseToken(token);
-        return acc;
-      }, {} as Record<string, Token>);
+      return tokens.reduce(
+        (acc, token) => {
+          acc[token.address] = parseToken(token);
+          return acc;
+        },
+        {} as Record<string, Token>,
+      );
     }
 
     return tokens.map(parseToken);
@@ -81,7 +86,7 @@ export const getTokenMetadataHandler = async (
 };
 
 async function fetchTokenMetadataFromChain(
-  tokenAddress: string[]
+  tokenAddress: string[],
 ): Promise<TokenMetadata[]> {
   const helius = getHelius();
   const rpc = new Connection(helius.endpoint);
@@ -90,7 +95,7 @@ async function fetchTokenMetadataFromChain(
   try {
     const digitalAsset = await fetchAllDigitalAsset(
       umi,
-      tokenAddress.map((address) => publicKey(address))
+      tokenAddress.map((address) => publicKey(address)),
     );
     return digitalAsset.map((asset) =>
       create(TokenMetadataPB, {
@@ -99,7 +104,7 @@ async function fetchTokenMetadataFromChain(
         logoUri: "",
         name: asset.metadata.name,
         symbol: asset.metadata.symbol,
-      })
+      }),
     );
   } catch (_error) {
     return [];

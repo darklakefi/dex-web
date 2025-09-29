@@ -19,7 +19,7 @@ import {
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -28,6 +28,7 @@ import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { z } from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
+import { logger } from "../../../../utils/logger";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { WalletButton } from "../../../_components/WalletButton";
@@ -42,7 +43,7 @@ import { getCreatePoolFormButtonMessage } from "../_utils/getCreatePoolFormButto
 import { requestCreatePoolTransactionSigning } from "../_utils/requestCreatePoolTransactionSigning";
 import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
 
-export const { fieldContext, formContext } = createFormHookContexts();
+const { fieldContext, formContext } = createFormHookContexts();
 
 const liquidityFormSchema = z.object({
   initialPrice: z.string(),
@@ -83,19 +84,33 @@ export function CreatePoolForm() {
 
   const sortedTokenAddresses = isMissingTokens
     ? { tokenXAddress: tokenAAddress, tokenYAddress: tokenBAddress }
-    : sortSolanaAddresses(tokenAAddress, tokenBAddress);
+    : (() => {
+        try {
+          return sortSolanaAddresses(tokenAAddress, tokenBAddress);
+        } catch (_error) {
+          return { tokenXAddress: tokenAAddress, tokenYAddress: tokenBAddress };
+        }
+      })();
 
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
 
-  const { data: poolDetails } = useSuspenseQuery(
-    tanstackClient.pools.getPoolDetails.queryOptions({
-      input: {
-        tokenXMint,
-        tokenYMint,
-      },
-    }),
-  );
+  const [{ data: poolDetails }, { data: tokenMetadata }] = useSuspenseQueries({
+    queries: [
+      tanstackClient.pools.getPoolDetails.queryOptions({
+        input: {
+          tokenXMint,
+          tokenYMint,
+        },
+      }),
+      tanstackClient.tokens.getTokenMetadata.queryOptions({
+        input: {
+          addresses: [tokenXMint, tokenYMint],
+          returnAsObject: true,
+        },
+      }),
+    ],
+  });
 
   const {
     buyTokenAccount,
@@ -109,27 +124,12 @@ export function CreatePoolForm() {
     tokenBAddress,
   });
 
-  const { data: tokenMetadata } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenMetadata.queryOptions({
-      input: {
-        addresses: [tokenXMint, tokenYMint],
-        returnAsObject: true,
-      },
-    }),
-  );
-
   const metadata = tokenMetadata as Record<string, Token>;
   const tokenADetails = metadata[tokenXMint];
   const tokenBDetails = metadata[tokenYMint];
 
-  const {
-    trackInitiated,
-    trackSigned,
-    trackConfirmed,
-    trackFailed,
-    trackError: trackLiquidityError,
-  } = useLiquidityTracking({
-    trackError: (error: unknown, context?: Record<string, any>) => {
+  const { trackSigned, trackConfirmed, trackFailed } = useLiquidityTracking({
+    trackError: (error: unknown, context?: Record<string, unknown>) => {
       trackError({
         context: "liquidity",
         details: context,
@@ -246,7 +246,7 @@ export function CreatePoolForm() {
     }: {
       value: { tokenAAmount: string; tokenBAmount: string };
     }) => {
-      console.log(value);
+      logger.log(value);
     },
     validators: {
       onChange: liquidityFormSchema,
@@ -321,7 +321,14 @@ export function CreatePoolForm() {
         throw new Error(ERROR_MESSAGES.MISSING_WALLET);
       }
 
-      const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
+      let sortedTokens: { tokenXAddress: string; tokenYAddress: string };
+      try {
+        sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
+      } catch (_error) {
+        throw new Error(
+          `Invalid token addresses: ${tokenAAddress} or ${tokenBAddress} is not a valid Solana public key`,
+        );
+      }
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
       const depositAmountX =
@@ -395,12 +402,10 @@ export function CreatePoolForm() {
       let calculatedTokenA: string;
 
       if (initialPriceTokenOrder === "ab") {
-        // If displaying price as "A per B", then tokenAAmount = tokenBAmount * price
         calculatedTokenA = BigNumber(tokenBAmount)
           .multipliedBy(price)
           .toString();
       } else {
-        // If displaying price as "B per A", then tokenAAmount = tokenBAmount / price
         calculatedTokenA = BigNumber(tokenBAmount).dividedBy(price).toString();
       }
 
@@ -510,11 +515,7 @@ export function CreatePoolForm() {
               >
                 {tokenAAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
               </Text.Body2>
-              <SelectTokenButton
-                // additionalParams={{ type: LIQUIDITY_PAGE_TYPE.CREATE_POOL }}
-                returnUrl="liquidity"
-                type="buy"
-              />
+              <SelectTokenButton returnUrl="liquidity" type="buy" />
             </div>
             <form.Field
               name="tokenAAmount"

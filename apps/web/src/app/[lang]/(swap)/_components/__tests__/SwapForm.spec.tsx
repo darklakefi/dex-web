@@ -1,7 +1,5 @@
 import { mockOrpc } from "./__mocks__/mockOrpc";
-
 mockOrpc();
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
@@ -12,7 +10,6 @@ import {
   DEFAULT_SELL_TOKEN,
 } from "../../../../_utils/constants";
 import { SwapForm } from "../SwapForm";
-
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 vi.mock("next/navigation", () => ({
   useSearchParams: () =>
@@ -20,11 +17,10 @@ vi.mock("next/navigation", () => ({
       tokenAAddress: DEFAULT_BUY_TOKEN,
       tokenBAddress: DEFAULT_SELL_TOKEN,
     }),
+  usePathname: () => "/swap",
 }));
-
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();
-
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <NextIntlClientProvider locale="en" messages={{}}>
     <NuqsTestingAdapter
@@ -38,7 +34,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     </NuqsTestingAdapter>
   </NextIntlClientProvider>
 );
-
 describe.skip("SwapForm", () => {
   it("renders both buy and sell sections", async () => {
     render(<SwapForm />, { wrapper });

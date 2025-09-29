@@ -13,6 +13,7 @@ import { useQueryStates } from "nuqs";
 import { useRef } from "react";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { useFormatPrice } from "../_utils/useFormatPrice";
+import { SkeletonLoader } from "./SkeletonLoader";
 
 interface FormFieldsetProps extends NumericInputProps {
   name: string;
@@ -27,6 +28,10 @@ interface FormFieldsetProps extends NumericInputProps {
   };
   maxAmount?: number;
   maxDecimals?: number;
+  isLoading?: boolean;
+  isRefreshing?: boolean;
+  onClearPendingCalculations?: () => void;
+  onHalfMaxClick?: (type: "half" | "max") => void;
 }
 const QUOTE_CURRENCY = "USD" as const;
 
@@ -40,21 +45,26 @@ export function FormFieldset({
   controls,
   maxAmount,
   maxDecimals,
+  isLoading = false,
+  isRefreshing = false,
+  onClearPendingCalculations,
+  onHalfMaxClick,
   ...rest
 }: FormFieldsetProps) {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
-  const { data: usdExchangeRate } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenPrice.queryOptions({
+  const { data: usdExchangeRate } = useSuspenseQuery({
+    ...tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
         mint: name === "tokenAAmount" ? tokenAAddress : tokenBAddress,
         quoteCurrency: QUOTE_CURRENCY,
       },
     }),
-  );
+    staleTime: 5 * 1000,
+  });
 
   const formattedPrice = useFormatPrice(
     value,
@@ -68,40 +78,51 @@ export function FormFieldset({
   const tokenSymbol = tokenAccount?.symbol;
   const decimals = tokenAccount?.decimals ?? 0;
   const setValueToHalfAmount = () => {
+    if (isRefreshing || isLoading || !tokenAccount?.amount) return;
+
+    onClearPendingCalculations?.();
+
+    const halfAmount = convertToDecimal(amount, decimals)
+      .div(2)
+      .toFixed(5)
+      .toString();
+
     if (inputRef.current) {
-      inputRef.current.value = convertToDecimal(amount, decimals)
-        .div(2)
-        .toFixed(5)
-        .toString();
+      inputRef.current.value = halfAmount;
       const event = new Event("change", { bubbles: true });
       inputRef.current.dispatchEvent(event);
-      onChange?.({
-        target: {
-          value: inputRef.current.value,
-        },
-      } as React.ChangeEvent<HTMLInputElement>);
     }
+
+    onChange?.({
+      target: { value: halfAmount },
+    } as React.ChangeEvent<HTMLInputElement>);
+
+    onHalfMaxClick?.("half");
   };
 
   const setValueToMaxAmount = () => {
+    if (isRefreshing || isLoading || !tokenAccount?.amount) return;
+
+    onClearPendingCalculations?.();
+
+    const maxAmount = convertToDecimal(amount, decimals).toFixed(5).toString();
+
     if (inputRef.current) {
-      inputRef.current.value = convertToDecimal(amount, decimals)
-        .toFixed(5)
-        .toString();
+      inputRef.current.value = maxAmount;
       const event = new Event("change", { bubbles: true });
       inputRef.current.dispatchEvent(event);
-      onChange?.({
-        target: {
-          value: inputRef.current.value,
-        },
-      } as React.ChangeEvent<HTMLInputElement>);
     }
+
+    onChange?.({
+      target: { value: maxAmount },
+    } as React.ChangeEvent<HTMLInputElement>);
+
+    onHalfMaxClick?.("max");
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let value = event.target.value;
 
-    // if the last character is a comma, replace it with a dot
     if (value.endsWith(",")) {
       value = `${value.slice(0, -1)}.`;
     }
@@ -122,9 +143,10 @@ export function FormFieldset({
       return;
     }
 
+    // Pass through the validated value immediately for responsive UI
     onChange?.({
       target: {
-        value,
+        value: cleanValue, // Use clean value for consistent handling
       },
     } as React.ChangeEvent<HTMLInputElement>);
   };
@@ -135,33 +157,56 @@ export function FormFieldset({
         {controls ? (
           controls
         ) : (
-          <Text.Body2 className="flex gap-3 text-green-300 uppercase">
-            <span>
-              {amount
-                ? `${numberFormatHelper({
-                    decimalScale: 2,
-                    thousandSeparator: true,
-                    trimTrailingZeros: true,
-                    value: convertToDecimal(amount, decimals),
-                  })}`
-                : "0.00"}{" "}
-              {tokenSymbol}
+          <div className="flex gap-3 font-normal font-sans text-green-300 text-lg uppercase leading-6 tracking-wider">
+            <span className="relative flex items-center">
+              {(isLoading && !tokenAccount) || !tokenAccount ? (
+                <SkeletonLoader variant="balance" className="w-28" />
+              ) : (
+                <>
+                  <span>
+                    {numberFormatHelper({
+                      decimalScale: 2,
+                      thousandSeparator: true,
+                      trimTrailingZeros: true,
+                      value: convertToDecimal(amount, decimals),
+                    })}{" "}
+                    {tokenSymbol}
+                  </span>
+                  {isRefreshing && (
+                    <div className="ml-2 h-3 w-3 animate-spin rounded-full border border-green-300 border-t-transparent opacity-70"></div>
+                  )}
+                </>
+              )}
             </span>
-            <button
-              className="cursor-pointer uppercase underline"
-              onClick={setValueToHalfAmount}
-              type="button"
-            >
-              Half
-            </button>
-            <button
-              className="cursor-pointer uppercase underline"
-              onClick={setValueToMaxAmount}
-              type="button"
-            >
-              Max
-            </button>
-          </Text.Body2>
+            {tokenAccount && (
+              <>
+                <button
+                  className={`uppercase underline ${
+                    isRefreshing || isLoading
+                      ? "cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
+                  }`}
+                  onClick={setValueToHalfAmount}
+                  disabled={isRefreshing || isLoading}
+                  type="button"
+                >
+                  Half
+                </button>
+                <button
+                  className={`uppercase underline ${
+                    isRefreshing || isLoading
+                      ? "cursor-not-allowed opacity-50"
+                      : "cursor-pointer"
+                  }`}
+                  onClick={setValueToMaxAmount}
+                  disabled={isRefreshing || isLoading}
+                  type="button"
+                >
+                  Max
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
       <div className="flex flex-col items-end">
@@ -169,10 +214,10 @@ export function FormFieldset({
           <NumericInput
             autoComplete="off"
             className={!formattedPrice ? "leading-10" : ""}
-            disabled={disabled}
+            disabled={disabled || (isLoading && !tokenAccount)}
             name={name}
             onChange={handleChange}
-            placeholder="0.00"
+            placeholder={!tokenAccount || isLoading ? "Loading..." : "0.00"}
             ref={inputRef}
             type="text"
             value={formatValueWithThousandSeparator(

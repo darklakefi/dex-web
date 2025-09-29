@@ -39,7 +39,7 @@ export const file_validate_validate: GenFile =
       file_google_protobuf_descriptor,
       file_google_protobuf_duration,
       file_google_protobuf_timestamp,
-    ]
+    ],
   );
 
 /**

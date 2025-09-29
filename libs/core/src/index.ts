@@ -14,9 +14,10 @@ export {
   validateIdlComprehensive,
 } from "./utils/idlValidation";
 export {
-  ProgramFactory,
+  createDarklakeProgram,
   createLiquidityProgram,
   createSwapProgram,
+  validateProgramMethods,
 } from "./utils/programFactory";
 export { getLpTokenMint, EXCHANGE_PROGRAM_ID } from "./utils/getLpTokenMint";
 export {
@@ -70,6 +71,8 @@ export {
   type UseTokenAccountsParams,
   type UseTokenAccountsReturn,
   type TokenAccountsQueryClient,
+  type TokenAccountsData,
+  type TokenAccount,
 } from "./hooks/useTokenAccounts";
 export {
   createSwapTracker,

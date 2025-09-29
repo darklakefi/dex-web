@@ -19,9 +19,7 @@
           "externalDependencies": ["typescript"]
         }
       ],
-      "outputs": [
-        "{workspaceRoot}/dist/libs/grpc-client"
-      ]
+      "outputs": ["{workspaceRoot}/dist/libs/grpc-client"]
     }
   }
 }

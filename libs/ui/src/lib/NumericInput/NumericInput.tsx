@@ -37,7 +37,7 @@ export function NumericInput({
       name={name}
       placeholder={placeholder}
       size={size}
-      type="number"
+      type="text"
       {...props}
     />
   );

@@ -68,7 +68,10 @@ export async function getLPRateHandler(
     const connection = helius.connection;
 
     // Fetch and parse Pool account
-    const pool = await getPoolAccount(connection, poolPubkey);
+    const pool = await getPoolAccount(connection, poolPubkey).catch((error) => {
+      console.error("Failed to get pool account:", error);
+      throw new Error("Pool not found");
+    });
 
     // Get token balances from reserve accounts
     const reserveXBalance = await getTokenBalance(

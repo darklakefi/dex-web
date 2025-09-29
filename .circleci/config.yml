@@ -11,49 +11,6 @@ orbs:
   github-cli: circleci/github-cli@2.7.1
 
 commands:
-  restore-nx-cache:
-    description: "Restore Nx cache with enhanced fallback"
-    steps:
-      - restore_cache:
-          name: Restore Nx Cache
-          keys:
-            - nx-cache-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "nx.json" }}
-            - nx-cache-v1-{{ checksum "pnpm-lock.yaml" }}
-            - nx-cache-v1-
-
-  setup-nx:
-    description: "Set up Nx SHAs for affected detection"
-    steps:
-      - nx/set-shas:
-          main-branch-name: develop
-          allow-on-hold-workflow: true
-          error-on-no-successful-workflow: true
-          workflow-name: "CI/CD"
-      - run:
-          name: Ensure base branch ref exists
-          command: |
-            git fetch --no-tags --prune origin develop:refs/remotes/origin/develop || true
-            
-            if [ -n "$NX_BASE" ]; then
-              if ! git rev-parse --verify "$NX_BASE" >/dev/null 2>&1; then
-                [[ "$NX_BASE" == origin/* ]] && git fetch --no-tags --prune origin "${NX_BASE#origin/}:refs/remotes/$NX_BASE" || true
-                git rev-parse --verify "$NX_BASE" >/dev/null 2>&1 || echo 'export NX_BASE=HEAD~1' >> $BASH_ENV
-              fi
-            elif git rev-parse --verify origin/develop >/dev/null 2>&1; then
-              echo 'export NX_BASE=origin/develop' >> $BASH_ENV
-            else
-              echo 'export NX_BASE=HEAD~1' >> $BASH_ENV
-            fi
-
-  save-nx-cache:
-    description: "Save Nx cache with revision-specific key"
-    steps:
-      - save_cache:
-          name: Save Nx Cache
-          key: nx-cache-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "nx.json" }}
-          paths:
-            - .nx/cache
-            - node_modules/.cache/nx
 
   restore-vercel-cache:
     description: "Restore Vercel build cache"
@@ -87,76 +44,41 @@ commands:
           with-cache: true
 
 jobs:
-  check:
+  main:
     docker:
       - image: cimg/node:24.3.0
-    resource_class: medium
+    resource_class: large
     steps:
       - checkout
+      - run:
+          name: Start Nx Cloud CI run with task distribution
+          command: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --stop-agents-after="e2e"
       - setup
-      - setup-nx
-      - restore-nx-cache
+      - nx/set-shas:
+          main-branch-name: develop
       - run:
           name: Run affected tasks
           command: |
-            AFFECTED_PROJECTS=$(pnpm exec nx show projects --affected --base=${NX_BASE:-origin/develop})
-            if [ -z "$AFFECTED_PROJECTS" ]; then
-              echo "✅ No affected projects found, skipping lint and typecheck"
-              exit 0
-            fi
-            pnpm exec nx affected --base=${NX_BASE:-origin/develop} -t lint:ci,typecheck
-      - save-nx-cache
-
-  test:
-    docker:
-      - image: cimg/node:24.3.0
-    resource_class: medium
-    parallelism: 8
-    steps:
-      - checkout
-      - setup
-      - setup-nx
-      - restore-nx-cache
+            npx nx-cloud record -- pnpm exec nx affected -t lint:ci,typecheck,test,build
       - run:
-          name: Run affected tests in parallel
+          name: Run E2E tests
           command: |
-            AFFECTED_PROJECTS=$(pnpm exec nx show projects --affected --base=${NX_BASE:-origin/develop} --with-target=test)
-
-            if [ -z "$AFFECTED_PROJECTS" ]; then
-              echo "✅ No affected projects with tests found, skipping"
-              exit 0
+            if pnpm exec nx show projects --affected --with-target=e2e | grep -q .; then
+              npx nx-cloud record -- pnpm exec nx affected -t e2e
+            else
+              echo "✅ No affected projects with e2e tests found, skipping"
             fi
-
-            echo "$AFFECTED_PROJECTS" | circleci tests split --split-by=timings | \
-            pnpm exec nx run-many --target=test --parallel --projects=$(xargs)
-      - save-nx-cache
+      - run:
+          name: Fix CI failures
+          command: npx nx-cloud fix-ci
+          when: always
       - store_test_results:
           path: test-results
+      - store_test_results:
+          path: dist/apps/web-e2e/junit.xml
       - store_artifacts:
           path: test-results
           destination: junit
-
-  e2e:
-    docker:
-      - image: mcr.microsoft.com/playwright:v1.53.2-noble
-    resource_class: large
-    parallelism: 2
-    steps:
-      - checkout
-      - setup
-      - setup-nx
-      - restore-nx-cache
-      - run:
-          name: Run affected e2e tests
-          command: |
-            if pnpm exec nx show projects --affected --base=${NX_BASE:-origin/develop} --with-target=e2e | wc -l | grep -q "^0$"; then
-              echo "✅ No affected projects with e2e tests found, skipping"
-              exit 0
-            fi
-            pnpm exec nx affected --base=${NX_BASE:-origin/develop} --target=e2e --parallel
-      - save-nx-cache
-      - store_test_results:
-          path: dist/apps/web-e2e/junit.xml
       - store_artifacts:
           path: dist/apps/web-e2e/html-report
           destination: playwright-report
@@ -170,12 +92,11 @@ jobs:
     steps:
       - checkout
       - setup
-      - setup-nx
-      - restore-nx-cache
+      - nx/set-shas:
+          main-branch-name: develop
       - run:
           name: Run Chromatic
           command: cd libs/ui && npx chromatic
-      - save-nx-cache
 
   deploy-preview:
     docker:
@@ -356,25 +277,18 @@ jobs:
 workflows:
   ci-cd:
     jobs:
-      - check
-      - test
-      - chromatic:
-          requires:
-            - check
-            - test
-      - e2e:
+      - main:
           context:
             - darklakefi-development
+      - chromatic:
           requires:
-            - check
-            - test
+            - main
       - deploy-preview:
           context:
             - darklakefi-deployments
             - darklakefi-development
           requires:
-            - check
-            - test
+            - main
           filters:
             branches:
               ignore: /main/
@@ -383,9 +297,7 @@ workflows:
             - darklakefi-deployments
             - darklakefi-production
           requires:
-            - check
-            - test
-            - e2e
+            - main
           filters:
             branches:
               only: /main/
