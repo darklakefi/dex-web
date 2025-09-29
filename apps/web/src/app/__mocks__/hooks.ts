@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-// Mock common hooks that are causing test failures
+
 export const mockUseOptimizedPoolData = vi.fn(() => ({
   poolDetails: {
     poolAddress: 'mock-pool-address',
@@ -60,7 +60,7 @@ export const mockUseSuspenseQuery = vi.fn(() => ({
   error: null
 }));
 
-// Setup global mocks
+
 vi.mock('../../hooks/useOptimizedPoolData', () => ({
   useOptimizedPoolData: mockUseOptimizedPoolData
 }));

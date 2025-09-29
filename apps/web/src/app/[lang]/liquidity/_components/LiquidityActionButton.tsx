@@ -74,6 +74,10 @@ export function LiquidityActionButton({
 
   const buttonMessage = getButtonMessage(buttonState);
 
+  const formState = useStore(form.store, (state) => state);
+  const formCanSubmit = formState.canSubmit;
+  const formIsSubmitting = formState.isSubmitting;
+
   const handleButtonClick = () => {
     if (shouldShowTransactionPreview(validation)) {
     }
@@ -147,10 +151,6 @@ export function LiquidityActionButton({
     );
   }
 
-  const formState = useStore(form.store, (state) => state);
-  const formCanSubmit = formState.canSubmit;
-  const formIsSubmitting = formState.isSubmitting;
-
   const enhancedButtonState = getLiquidityButtonState({
     formCanSubmit,
     hasWallet: !!publicKey,
@@ -171,9 +171,7 @@ export function LiquidityActionButton({
         aria-describedby={enhancedButtonProps["aria-describedby"]}
         aria-label={enhancedButtonProps["aria-label"]}
         className={`w-full cursor-pointer py-3 leading-6 transition-all duration-200 ${
-          enhancedButtonProps.isDisabled
-            ? "opacity-60"
-            : "hover:opacity-90"
+          enhancedButtonProps.isDisabled ? "opacity-60" : "hover:opacity-90"
         }`}
         data-button-state={enhancedButtonState}
         data-testid="liquidity-action-button"

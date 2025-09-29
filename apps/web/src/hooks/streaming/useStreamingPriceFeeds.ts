@@ -20,15 +20,12 @@ interface PriceFeedData {
   };
 }
 
-/**
- * Real-time price feeds streaming without useEffect
- * Optimized for high-frequency trading data
- */
+
 export function useStreamingPriceFeeds({
   symbols,
   priority = "high",
   enableStreaming = true,
-  enableSSE = true, // Price feeds benefit most from SSE
+  enableSSE = true, 
 }: UseStreamingPriceFeedsParams) {
   const symbolsKey = symbols.sort().join(",");
   const queryKey = ["price-feeds-stream", symbolsKey];
@@ -38,7 +35,7 @@ export function useStreamingPriceFeeds({
 
     for (const symbol of symbols) {
       priceData[symbol] = {
-        price: Math.random() * 100, // Mock price
+        price: Math.random() * 100, 
         change24h: (Math.random() - 0.5) * 10,
         volume24h: Math.random() * 1000000,
         lastUpdate: Date.now(),
@@ -57,7 +54,7 @@ export function useStreamingPriceFeeds({
     }
   );
 
-  // Fallback streaming query
+
   const streamingQuery = useStreamingQuery(
     queryKey,
     fetchPriceData,
@@ -87,9 +84,7 @@ export function useStreamingPriceFeeds({
   };
 }
 
-/**
- * Single token price streaming
- */
+
 export function useStreamingTokenPrice({
   symbol,
   priority = "high",
@@ -124,9 +119,7 @@ export function useStreamingTokenPrice({
   };
 }
 
-/**
- * Token pair price streaming for trading pairs
- */
+
 export function useStreamingTradingPair({
   tokenA,
   tokenB,

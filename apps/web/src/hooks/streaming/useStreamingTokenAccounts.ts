@@ -17,10 +17,7 @@ interface UseStreamingTokenAccountsParams {
   enableSSE?: boolean;
 }
 
-/**
- * Streaming token accounts hook without useEffect anti-patterns
- * Provides adaptive refresh rates based on transaction activity
- */
+
 export function useStreamingTokenAccounts({
   publicKey,
   tokenAAddress,
@@ -79,9 +76,7 @@ export function useStreamingTokenAccounts({
   };
 }
 
-/**
- * Individual token account streaming hook
- */
+
 function useTokenAccountStream({
   mint,
   ownerAddress,
@@ -101,7 +96,7 @@ function useTokenAccountStream({
     if (!mint || !ownerAddress) return null;
 
     const context: QueryFunctionContext = {
-      client: {} as any, // Query client not used in this context
+      client: {} as any, 
       queryKey,
       signal: new AbortController().signal,
       meta: undefined,
@@ -145,10 +140,7 @@ function useTokenAccountStream({
   };
 }
 
-/**
- * Enhanced version of useRealtimeTokenAccounts using streaming
- * Drop-in replacement with improved performance and better UX
- */
+
 export function useEnhancedRealtimeTokenAccounts({
   publicKey,
   tokenAAddress,
@@ -166,6 +158,6 @@ export function useEnhancedRealtimeTokenAccounts({
     tokenBAddress,
     hasRecentTransaction,
     enableStreaming: true,
-    enableSSE: false, // Enable when backend supports SSE
+    enableSSE: false, 
   });
 }

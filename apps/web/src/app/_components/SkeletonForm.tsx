@@ -21,10 +21,10 @@ export function SkeletonForm({
 
       <Box padding="lg">
         <div className="flex flex-col gap-4">
-          {/* Token Inputs */}
+          {}
           <SkeletonTokenInput label={type === "liquidity" ? "SELL AMOUNT" : "SELLING"} />
 
-          {/* Plus/Swap Icon Separator */}
+          {}
           <div className="flex items-center justify-center">
             <div
               className="inline-flex size-8 items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300"
@@ -37,14 +37,14 @@ export function SkeletonForm({
 
           <SkeletonTokenInput label={type === "liquidity" ? "BUY AMOUNT" : "BUYING"} />
           
-          {/* Action Button */}
+          {}
           <SkeletonLoader variant="button" className="h-12 w-full" />
           
-          {/* Transaction Status */}
+          {}
           <SkeletonLoader variant="text" className="h-4 w-40" />
         </div>
 
-        {/* Additional Details (for liquidity) */}
+        {}
         {type === "liquidity" && (
           <div className="mt-4 space-y-2">
             <SkeletonLoader variant="text" className="h-4 w-32" />
@@ -55,10 +55,10 @@ export function SkeletonForm({
       </Box>
 
       <div className="flex flex-col gap-1">
-        {/* Settings Button */}
+        {}
         <SkeletonLoader variant="button" className="h-10 w-10" />
         
-        {/* Plus/Create Pool Button */}
+        {}
         <SkeletonLoader variant="button" className="h-10 w-10" />
       </div>
     </section>

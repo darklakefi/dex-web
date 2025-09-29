@@ -1,18 +1,18 @@
 "use server";
 
-import { createLiquidityTransactionHandler } from "@dex-web/orpc/handlers/liquidity/createLiquidityTransaction.handler";
 import { checkLiquidityTransactionStatusHandler } from "@dex-web/orpc/handlers/liquidity/checkLiquidityTransactionStatus.handler";
+import { createLiquidityTransactionHandler } from "@dex-web/orpc/handlers/liquidity/createLiquidityTransaction.handler";
 import type { CreateLiquidityTransactionInput } from "@dex-web/orpc/schemas";
 import { parseAmount, sortSolanaAddresses } from "@dex-web/utils";
 import { PublicKey } from "@solana/web3.js";
 import { z } from "zod";
 
 const liquidityFormSchema = z.object({
-  tokenAAmount: z.string().min(1, "Token A amount is required"),
-  tokenBAmount: z.string().min(1, "Token B amount is required"),
-  tokenAAddress: z.string().min(1, "Token A address is required"),
-  tokenBAddress: z.string().min(1, "Token B address is required"),
   slippage: z.string().optional().default("0.5"),
+  tokenAAddress: z.string().min(1, "Token A address is required"),
+  tokenAAmount: z.string().min(1, "Token A amount is required"),
+  tokenBAddress: z.string().min(1, "Token B address is required"),
+  tokenBAmount: z.string().min(1, "Token B amount is required"),
   userAddress: z.string().min(1, "User address is required"),
 });
 
@@ -35,15 +35,15 @@ const DEFAULT_SELL_TOKEN = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
 export async function submitLiquidityAction(
   _prevState: LiquidityFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<LiquidityFormState> {
   try {
     const rawFormData = {
-      tokenAAmount: formData.get("tokenAAmount") as string,
-      tokenBAmount: formData.get("tokenBAmount") as string,
-      tokenAAddress: formData.get("tokenAAddress") as string,
-      tokenBAddress: formData.get("tokenBAddress") as string,
       slippage: formData.get("slippage") as string,
+      tokenAAddress: formData.get("tokenAAddress") as string,
+      tokenAAmount: formData.get("tokenAAmount") as string,
+      tokenBAddress: formData.get("tokenBAddress") as string,
+      tokenBAmount: formData.get("tokenBAmount") as string,
       userAddress: formData.get("userAddress") as string,
     };
 
@@ -52,9 +52,9 @@ export async function submitLiquidityAction(
     if (!validationResult.success) {
       const fieldErrors = validationResult.error.flatten().fieldErrors;
       return {
-        success: false,
         error: "Validation failed",
         fieldErrors,
+        success: false,
       };
     }
 
@@ -72,11 +72,11 @@ export async function submitLiquidityAction(
       publicKey = new PublicKey(userAddress);
     } catch (_error) {
       return {
-        success: false,
         error: "Invalid user address",
         fieldErrors: {
           userAddress: ["Invalid Solana address format"],
         },
+        success: false,
       };
     }
 
@@ -92,8 +92,8 @@ export async function submitLiquidityAction(
 
     if (!tokenXAddress || !tokenYAddress) {
       return {
-        success: false,
         error: "Invalid token addresses after sorting",
+        success: false,
       };
     }
 
@@ -114,14 +114,12 @@ export async function submitLiquidityAction(
         user: publicKey.toBase58(),
       };
 
-      const response = await createLiquidityTransactionHandler(
-        requestPayload
-      );
+      const response = await createLiquidityTransactionHandler(requestPayload);
 
       if (!response.success || !response.transaction) {
         return {
-          success: false,
           error: response.error || "Failed to create liquidity transaction",
+          success: false,
         };
       }
 
@@ -132,32 +130,27 @@ export async function submitLiquidityAction(
     } catch (error) {
       console.error("Server Action error:", error);
 
-      const errorMessage = error instanceof Error
-        ? error.message
-        : "An unexpected error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
 
       return {
-        success: false,
         error: errorMessage,
+        success: false,
       };
     }
   } catch (error) {
     console.error("Server Action validation error:", error);
 
     return {
-      success: false,
       error: "Form processing failed",
+      success: false,
     };
   }
 }
 
-/**
- * Alternative Server Action that handles the full flow including transaction submission.
- * This would be used if you want to handle signing on the server side (not recommended for wallets).
- */
 export async function submitAndProcessLiquidityAction(
   prevState: LiquidityFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<LiquidityFormState> {
   const transactionResult = await submitLiquidityAction(prevState, formData);
 
@@ -165,17 +158,13 @@ export async function submitAndProcessLiquidityAction(
     return transactionResult;
   }
 
-
   return {
     ...transactionResult,
   };
 }
 
-/**
- * Server Action for checking transaction status
- */
 export async function checkLiquidityTransactionStatus(
-  signature: string
+  signature: string,
 ): Promise<{ status: string; error?: string }> {
   try {
     const response = await checkLiquidityTransactionStatusHandler({
@@ -183,13 +172,13 @@ export async function checkLiquidityTransactionStatus(
     });
 
     return {
-      status: response.status,
       error: response.error,
+      status: response.status,
     };
   } catch (error) {
     return {
-      status: "error",
       error: error instanceof Error ? error.message : "Unknown error",
+      status: "error",
     };
   }
 }

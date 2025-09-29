@@ -12,10 +12,7 @@ export const walletQueryKeys = {
   adapter: () => [...walletQueryKeys.all, 'adapter'] as const,
 } as const;
 
-/**
- * Cached hook for wallet address
- * Returns the first connected wallet address with React Query caching
- */
+
 export function useWalletAddress() {
   const { wallet } = useWallet();
 
@@ -32,10 +29,7 @@ export function useWalletAddress() {
   });
 }
 
-/**
- * Cached hook for wallet public key
- * Returns the wallet's public key with React Query caching
- */
+
 export function useWalletPublicKey() {
   const { publicKey } = useWallet();
 
@@ -66,10 +60,7 @@ export function useWalletConnection() {
   });
 }
 
-/**
- * Cached hook for wallet adapter info
- * Returns wallet adapter details with React Query caching
- */
+
 export function useWalletAdapter() {
   const { wallet } = useWallet();
 
@@ -106,10 +97,7 @@ export function useInvalidateWalletCache() {
   };
 }
 
-/**
- * Combined hook that provides all wallet data with caching
- * Use this as a drop-in replacement for useWallet when you need comprehensive wallet info
- */
+
 export function useCachedWallet() {
   const { wallet, disconnect, select, wallets, signTransaction, signMessage, signAllTransactions } = useWallet();
   const addressQuery = useWalletAddress();
@@ -118,7 +106,7 @@ export function useCachedWallet() {
   const adapterQuery = useWalletAdapter();
 
   return {
-    // Original useWallet methods (not cached as they're functions)
+
     disconnect,
     select,
     wallets,

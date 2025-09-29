@@ -2,7 +2,7 @@
 
 import type { PublicKey } from "@solana/web3.js";
 import type { FormApi } from "@tanstack/react-form";
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext } from "react";
 import type { ActorRefFrom } from "xstate";
 import type {
   LiquidityMachineEvent,
@@ -139,22 +139,8 @@ export function LiquidityActionsProvider({
   children: React.ReactNode;
   value: LiquidityActionsContextValue;
 }) {
-  const memoizedValue = useMemo(
-    () => value,
-    [
-      value.resetFormToDefaults,
-      value.handleAmountChange,
-      value.clearPendingCalculations,
-      value.calculateTokenAmounts,
-      value.trackLiquidityAction,
-      value.trackError,
-      value.handleError,
-      value,
-    ],
-  );
-
   return (
-    <LiquidityActionsContext.Provider value={memoizedValue}>
+    <LiquidityActionsContext.Provider value={value}>
       {children}
     </LiquidityActionsContext.Provider>
   );
@@ -185,13 +171,8 @@ export function LiquidityWalletProvider({
   children: React.ReactNode;
   value: LiquidityWalletContextValue;
 }) {
-  const memoizedValue = useMemo(
-    () => value,
-    [value.publicKey, value.walletAdapter, value],
-  );
-
   return (
-    <LiquidityWalletContext.Provider value={memoizedValue}>
+    <LiquidityWalletContext.Provider value={value}>
       {children}
     </LiquidityWalletContext.Provider>
   );
@@ -222,13 +203,8 @@ export function LiquiditySettingsProvider({
   children: React.ReactNode;
   value: LiquiditySettingsContextValue;
 }) {
-  const memoizedValue = useMemo(
-    () => value,
-    [value.slippage, value.setSlippage, value],
-  );
-
   return (
-    <LiquiditySettingsContext.Provider value={memoizedValue}>
+    <LiquiditySettingsContext.Provider value={value}>
       {children}
     </LiquiditySettingsContext.Provider>
   );

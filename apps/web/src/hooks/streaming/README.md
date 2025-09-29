@@ -53,7 +53,7 @@ function TokenBalanceComponent({ publicKey, tokenAAddress, tokenBAddress, hasRec
     publicKey,
     tokenAAddress,
     tokenBAddress,
-    hasRecentTransaction, // Automatically adjusts priority
+    hasRecentTransaction, 
   });
 
   return (
@@ -75,19 +75,19 @@ The system uses DeFi-optimized priority levels:
 ```typescript
 const DEFI_STREAM_CONFIGS = {
   critical: {
-    refreshInterval: 1000,  // 1s - Transaction status
+    refreshInterval: 1000,  
     staleTime: 500,
   },
   high: {
-    refreshInterval: 3000,  // 3s - Active trading data
+    refreshInterval: 3000,  
     staleTime: 2000,
   },
   normal: {
-    refreshInterval: 10000, // 10s - General pool data
+    refreshInterval: 10000, 
     staleTime: 7000,
   },
   low: {
-    refreshInterval: 30000, // 30s - Background monitoring
+    refreshInterval: 30000, 
     staleTime: 25000,
   },
 };
@@ -129,7 +129,7 @@ const DEFI_STREAM_CONFIGS = {
     hasRecentTransaction,
   });
 
-// All existing properties are preserved + new streaming metadata
+
 ```
 
 ### From Manual Transaction Status
@@ -170,11 +170,11 @@ const { poolDetails, isStreaming, isFallback } = useStreamingPoolData({
   tokenXMint,
   tokenYMint,
   priority: "high",
-  enableSSE: true, // Enable SSE
-  enableStreaming: true, // Fallback to polling
+  enableSSE: true, 
+  enableStreaming: true, 
 });
 
-// Price feeds with SSE (recommended for trading)
+
 const { prices, isStreaming } = useStreamingPriceFeeds({
   symbols: ["SOL", "USDC", "BTC"],
   priority: "high",
@@ -296,11 +296,11 @@ Refresh rates adapt to user activity:
 
 ```typescript
 const accounts = useStreamingTokenAccounts({
-  hasRecentTransaction: true, // 3s intervals
+  hasRecentTransaction: true, 
 });
 
 const accounts = useStreamingTokenAccounts({
-  hasRecentTransaction: false, // 15s intervals
+  hasRecentTransaction: false, 
 });
 ```
 
@@ -333,7 +333,7 @@ const { isStreaming, streamType, lastUpdate } = useStreamingPoolData({
 
 console.log({
   streaming: isStreaming,
-  type: streamType, // "sse", "polling", "websocket"
+  type: streamType, 
   age: Date.now() - lastUpdate,
 });
 ```

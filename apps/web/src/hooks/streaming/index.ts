@@ -1,9 +1,6 @@
 "use client";
 
-/**
- * Streaming data hooks for DeFi applications
- * Real-time updates without useEffect anti-patterns
- */
+
 
 export { useStreamingQuery } from "./useStreamingQuery";
 export { useServerSentEvents } from "./useServerSentEvents";

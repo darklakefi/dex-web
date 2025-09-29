@@ -141,7 +141,7 @@ export type LiquidityState = "idle" | "calculating" | "submitting" | "signing" |
 export interface LiquidityFormContextValue {
   readonly form: FormApi<LiquidityFormValues, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined>;
 
-  readonly state: unknown; // Will be typed properly with machine context
+  readonly state: unknown; 
   readonly send: (event: unknown) => void;
 
   readonly isSubmitting: boolean;

@@ -43,7 +43,7 @@ export function mockOrpc() {
       getTokenDetails: vi.fn().mockResolvedValue({
         address: DEFAULT_BUY_TOKEN,
         decimals: 9,
-        imageUrl: "https://example.com/image.png",
+        imageUrl: "https:
         name: "Solana",
         symbol: "SOL",
       }),
@@ -87,22 +87,11 @@ export function mockOrpc() {
             Promise.resolve({
               address: DEFAULT_BUY_TOKEN,
               decimals: 9,
-              imageUrl: "https://example.com/image.png",
+              imageUrl: "https:
               name: "Solana",
               symbol: "SOL",
             } satisfies GetTokenDetailsOutput),
           queryKey: ["getTokenDetails"],
-        })),
-      },
-      getTokenPrice: {
-        queryOptions: vi.fn().mockImplementation(() => ({
-          queryFn: () =>
-            Promise.resolve({
-              mint: DEFAULT_BUY_TOKEN,
-              price: 100,
-              quoteCurrency: "USD",
-            } satisfies GetTokenPriceOutput),
-          queryKey: ["getTokenPrice"],
         })),
       },
       getTokens: {
@@ -114,7 +103,7 @@ export function mockOrpc() {
                 {
                   address: DEFAULT_BUY_TOKEN,
                   decimals: 9,
-                  imageUrl: "https://example.com/image.png",
+                  imageUrl: "https:
                   name: "Solana",
                   symbol: "SOL",
                 },
@@ -132,21 +121,21 @@ export function mockOrpc() {
                 [DEFAULT_BUY_TOKEN]: {
                   address: DEFAULT_BUY_TOKEN,
                   decimals: 9,
-                  imageUrl: "https://example.com/image.png",
+                  imageUrl: "https:
                   name: "Solana",
                   symbol: "SOL",
                 },
                 [DEFAULT_SELL_TOKEN]: {
                   address: DEFAULT_SELL_TOKEN,
                   decimals: 6,
-                  imageUrl: "https://example.com/usdc.png",
+                  imageUrl: "https:
                   name: "USD Coin",
                   symbol: "USDC",
                 },
                 "": {
                   address: DEFAULT_BUY_TOKEN,
                   decimals: 9,
-                  imageUrl: "https://example.com/image.png",
+                  imageUrl: "https:
                   name: "Solana",
                   symbol: "SOL",
                 },
@@ -191,7 +180,7 @@ export function mockOrpc() {
                 {
                   description: "Solana",
                   id: "1",
-                  image: { url: "https://example.com/image.png" },
+                  image: { url: "https:
                   name: "Solana",
                   symbol: "SOL",
                 },

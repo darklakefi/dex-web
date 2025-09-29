@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-// Mock ORPC client
+
 export const mockTanstackClient = {
   tokens: {
     getTokenPrice: {
@@ -17,7 +17,7 @@ export const mockTanstackClient = {
           "mock-token": {
             symbol: "MOCK",
             name: "Mock Token",
-            imageUrl: "https://example.com/mock.png",
+            imageUrl: "https:
           },
         }),
         staleTime: 5000,
@@ -46,7 +46,7 @@ export const mockTanstackClient = {
   },
 };
 
-// Mock wallet-related modules
+
 export const mockWalletAdapter = {
   connected: true,
   publicKey: {
@@ -56,7 +56,7 @@ export const mockWalletAdapter = {
   signAllTransactions: vi.fn(),
 };
 
-// Setup global ORPC mocks
+
 vi.mock('@dex-web/orpc', () => ({
   tanstackClient: mockTanstackClient,
 }));
@@ -71,12 +71,24 @@ vi.mock('@solana/wallet-adapter-react', () => ({
   }),
 }));
 
-// Mock sortSolanaAddresses to avoid PublicKey.toBuffer issues
+
 vi.mock('@dex-web/utils', () => ({
   sortSolanaAddresses: vi.fn((addrA, addrB) => ({
-    tokenXAddress: addrA,
-    tokenYAddress: addrB,
+    tokenXAddress: addrA || 'mock-token-x',
+    tokenYAddress: addrB || 'mock-token-y',
   })),
+  formatValueWithThousandSeparator: vi.fn((value) => {
+    if (typeof value === 'number') {
+      return value.toLocaleString();
+    }
+    return value;
+  }),
+  convertToDecimal: vi.fn((amount, decimals) => {
+    if (typeof amount === 'number' && typeof decimals === 'number') {
+      return amount / Math.pow(10, decimals);
+    }
+    return 0;
+  }),
 }));
 
 vi.mock('@solana/web3.js', () => ({

@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon } from "@dex-web/ui";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface CalculationProgressIndicatorProps {
   isCalculating: boolean;
@@ -24,44 +24,37 @@ export function CalculationProgressIndicator({
   workerError,
   className = "",
 }: CalculationProgressIndicatorProps) {
-  const [progressState, setProgressState] = useState<ProgressState>({
-    message: "",
-    progress: 0,
-    stage: "idle",
-  });
 
-  useEffect(() => {
+  const progressState = useMemo((): ProgressState => {
     if (workerError) {
-      setProgressState({
+      return {
         message: "Calculation failed - using fallback",
         progress: 0,
         stage: "error",
-      });
-      return;
+      };
     }
 
     if (!isCalculating) {
-      setProgressState({
+      return {
         message: "",
         progress: 0,
         stage: "idle",
-      });
-      return;
+      };
     }
 
     if (hasApproximateResult) {
-      setProgressState({
+      return {
         message: "Getting exact amounts...",
         progress: 75,
         stage: "exact",
-      });
-    } else {
-      setProgressState({
-        message: isWorkerReady ? "Calculating..." : "Loading...",
-        progress: 25,
-        stage: "approximate",
-      });
+      };
     }
+
+    return {
+      message: isWorkerReady ? "Calculating..." : "Loading...",
+      progress: 25,
+      stage: "approximate",
+    };
   }, [isCalculating, hasApproximateResult, isWorkerReady, workerError]);
 
   const [animatedProgress, setAnimatedProgress] = useState(0);
@@ -74,7 +67,7 @@ export function CalculationProgressIndicator({
 
     const startProgress = animatedProgress;
     const targetProgress = progressState.progress;
-    const duration = 300; // ms
+    const duration = 300; 
     const startTime = Date.now();
 
     const animate = () => {
@@ -108,7 +101,7 @@ export function CalculationProgressIndicator({
     }
   }, [isCalculating]);
 
-  const getStageIcon = useCallback(() => {
+  const getStageIcon = () => {
     switch (progressState.stage) {
       case "approximate":
         return "refresh";
@@ -121,9 +114,9 @@ export function CalculationProgressIndicator({
       default:
         return "refresh";
     }
-  }, [progressState.stage]);
+  };
 
-  const getStageColor = useCallback(() => {
+  const getStageColor = () => {
     switch (progressState.stage) {
       case "approximate":
         return "text-yellow-500";
@@ -136,7 +129,7 @@ export function CalculationProgressIndicator({
       default:
         return "text-gray-400";
     }
-  }, [progressState.stage]);
+  };
 
   if (!isVisible || progressState.stage === "idle") {
     return null;
@@ -146,7 +139,7 @@ export function CalculationProgressIndicator({
     <div
       className={`flex items-center gap-2 rounded-lg border border-gray-700/50 bg-gray-800/50 px-3 py-2 transition-all duration-300 ease-out ${className}`}
     >
-      {/* Progress bar */}
+      {}
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
           <Icon
@@ -163,7 +156,7 @@ export function CalculationProgressIndicator({
           </span>
         </div>
 
-        {/* Progress bar */}
+        {}
         <div className="h-1 w-full rounded-full bg-gray-700">
           <div
             className={`h-1 rounded-full transition-all duration-300 ease-out ${
@@ -180,7 +173,7 @@ export function CalculationProgressIndicator({
         </div>
       </div>
 
-      {/* Worker status indicator */}
+      {}
       {!isWorkerReady && !workerError && (
         <div className="flex items-center gap-1">
           <div className="size-2 animate-pulse rounded-full bg-yellow-500" />
@@ -188,7 +181,7 @@ export function CalculationProgressIndicator({
         </div>
       )}
 
-      {/* Approximate result indicator */}
+      {}
       {hasApproximateResult && (
         <div className="flex items-center gap-1">
           <div className="size-2 rounded-full bg-orange-500" />

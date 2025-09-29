@@ -14,16 +14,13 @@ interface UseStreamingPoolDataParams {
   enableSSE?: boolean;
 }
 
-/**
- * Streaming pool data hook without useEffect anti-patterns
- * Supports both WebSocket/SSE streaming and intelligent polling fallback
- */
+
 export function useStreamingPoolData({
   tokenXMint,
   tokenYMint,
   priority = "high",
   enableStreaming = true,
-  enableSSE = false, // Enable when SSE endpoint is available
+  enableSSE = false, 
 }: UseStreamingPoolDataParams) {
   const queryClient = useQueryClient();
 
@@ -82,10 +79,7 @@ export function useStreamingPoolData({
   };
 }
 
-/**
- * WebSocket integration that doesn't use useEffect
- * Uses React Query's subscription management
- */
+
 function useWebSocketPoolData({
   poolKey,
   queryKey,
@@ -115,14 +109,12 @@ function useWebSocketPoolData({
     {
       priority,
       enableStreaming: enabled,
-      staleTime: Infinity, // WebSocket data is always fresh
+      staleTime: Infinity, 
     }
   );
 }
 
-/**
- * Transform pool details to streaming format
- */
+
 function transformToStreamData(poolDetails: any): PoolStreamData {
   return {
     tokenXReserve: poolDetails?.tokenXReserve || "0",
@@ -133,18 +125,13 @@ function transformToStreamData(poolDetails: any): PoolStreamData {
   };
 }
 
-/**
- * Create stable pool key for caching
- */
+
 function createPoolKey(tokenXMint: string, tokenYMint: string): string {
   const [tokenA, tokenB] = [tokenXMint, tokenYMint].sort();
   return `${tokenA}-${tokenB}`;
 }
 
-/**
- * Enhanced version of useRealtimePoolData using streaming
- * Drop-in replacement with improved performance
- */
+
 export function useEnhancedRealtimePoolData({
   tokenXMint,
   tokenYMint,
@@ -157,6 +144,6 @@ export function useEnhancedRealtimePoolData({
     tokenYMint,
     priority: "high",
     enableStreaming: true,
-    enableSSE: false, // Enable when backend supports SSE
+    enableSSE: false, 
   });
 }

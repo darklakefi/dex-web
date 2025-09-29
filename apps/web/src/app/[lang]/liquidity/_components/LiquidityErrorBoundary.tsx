@@ -398,7 +398,7 @@ export function LiquidityTransactionErrorBoundary({ children }: { children: Reac
     <LiquidityErrorBoundary
       componentName="Transaction Processing"
       maxRetries={2}
-      enableRecovery={false} // Don't auto-retry transactions
+      enableRecovery={false} 
     >
       {children}
     </LiquidityErrorBoundary>

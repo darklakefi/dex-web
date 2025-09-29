@@ -80,16 +80,14 @@ export function SkeletonLoader({
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return <div className="h-4 w-20" aria-hidden="true" />;
-  }
-
   const customStyle = {
     width: customWidth || undefined,
     height: customHeight || undefined,
-    background: `linear-gradient(90deg, rgba(34, 197, 94, 0.2) 25%, rgba(34, 197, 94, 0.4) 50%, rgba(34, 197, 94, 0.2) 75%)`,
-    backgroundSize: '200% 100%',
-    animation: 'shimmer 2s infinite ease-in-out',
+    background: mounted 
+      ? `linear-gradient(90deg, rgba(34, 197, 94, 0.2) 25%, rgba(34, 197, 94, 0.4) 50%, rgba(34, 197, 94, 0.2) 75%)`
+      : 'rgba(34, 197, 94, 0.2)',
+    backgroundSize: mounted ? '200% 100%' : '100% 100%',
+    animation: mounted ? 'shimmer 2s infinite ease-in-out' : 'none',
     ...style,
   };
 

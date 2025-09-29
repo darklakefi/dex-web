@@ -34,7 +34,7 @@ vi.mock("@dex-web/orpc", () => ({
             tokens: [
               {
                 address: DEFAULT_BUY_TOKEN,
-                imageUrl: "https://example.com/image.png",
+                imageUrl: "https:
                 name: "Solana",
                 symbol: "SOL",
                 value: "1000",

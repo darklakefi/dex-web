@@ -19,7 +19,7 @@ class LRUCache<T> {
   constructor(config: Partial<CacheConfig> = {}) {
     this.config = {
       maxSize: config.maxSize ?? 100,
-      ttlMs: config.ttlMs ?? 30000, // 30 seconds default
+      ttlMs: config.ttlMs ?? 30000, 
       enableHitTracking: config.enableHitTracking ?? true,
     };
   }
@@ -155,7 +155,7 @@ class LRUCache<T> {
 
 export const priceCalculationCache = new LRUCache<string>({
   maxSize: 50,
-  ttlMs: 10000, // 10 seconds for price calculations
+  ttlMs: 10000, 
 });
 
 export const balanceValidationCache = new LRUCache<{
@@ -163,12 +163,12 @@ export const balanceValidationCache = new LRUCache<{
   error?: string;
 }>({
   maxSize: 30,
-  ttlMs: 5000, // 5 seconds for balance validation
+  ttlMs: 5000, 
 });
 
 export const tokenAmountCache = new LRUCache<string>({
   maxSize: 100,
-  ttlMs: 15000, // 15 seconds for token amount calculations
+  ttlMs: 15000, 
 });
 
 export const poolRatioCache = new LRUCache<{
@@ -176,7 +176,7 @@ export const poolRatioCache = new LRUCache<{
   tokenYToX: string;
 }>({
   maxSize: 20,
-  ttlMs: 30000, // 30 seconds for pool ratios
+  ttlMs: 30000, 
 });
 
 export function createPriceCalculationKey(

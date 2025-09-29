@@ -69,9 +69,9 @@ export const TEST_SCENARIOS = {
 
   INSUFFICIENT_BALANCE: {
     buyTokenAccount: createMockTokenAccountsData([
-      createMockTokenAccount({ symbol: 'SOL', amount: 50 }) // Low balance
+      createMockTokenAccount({ symbol: 'SOL', amount: 50 }) 
     ]),
-    formValues: createMockFormValues({ tokenAAmount: '1000' }), // High amount
+    formValues: createMockFormValues({ tokenAAmount: '1000' }), 
   },
 
   MISSING_POOL: {

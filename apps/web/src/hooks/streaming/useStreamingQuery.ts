@@ -3,10 +3,7 @@
 import { useQuery, type UseQueryOptions, type QueryKey } from "@tanstack/react-query";
 import { type DeFiStreamConfig, DEFI_STREAM_CONFIGS } from "./types";
 
-/**
- * Stream subscription manager without useEffect
- * Uses React Query's built-in subscription management
- */
+
 interface StreamSubscriptionManager {
   subscribe: (key: string, callback: () => void) => () => void;
   unsubscribe: (key: string) => void;
@@ -68,10 +65,7 @@ class QueryBasedSubscriptionManager implements StreamSubscriptionManager {
 
 const subscriptionManager = new QueryBasedSubscriptionManager();
 
-/**
- * Streaming query hook without useEffect anti-patterns
- * Uses React Query's lifecycle for subscription management
- */
+
 interface UseStreamingQueryOptions<TData, TError = Error>
   extends Omit<UseQueryOptions<TData, TError>, "queryKey" | "refetchInterval"> {
   priority?: DeFiStreamConfig["priority"];
