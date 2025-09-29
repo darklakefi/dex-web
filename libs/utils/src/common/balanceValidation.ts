@@ -29,7 +29,9 @@ export function validateHasSufficientBalance({
       tokenAccount.decimals || 0,
     );
 
-    if (parseAmountBigNumber(cleanAmount).gt(maxBalance)) {
+    const maxBalanceRounded = parseAmountBigNumber(maxBalance.toFixed(5));
+
+    if (parseAmountBigNumber(cleanAmount).gt(maxBalanceRounded)) {
       return `Insufficient ${symbol} balance.`;
     }
   }
@@ -47,7 +49,8 @@ export function checkInsufficientBalance(
   const accountAmount = tokenAccount.amount || 0;
   const decimal = tokenAccount.decimals || 0;
 
-  return parseAmountBigNumber(cleanAmount).gt(
-    convertToDecimal(accountAmount, decimal),
-  );
+  const maxBalance = convertToDecimal(accountAmount, decimal);
+  const maxBalanceRounded = parseAmountBigNumber(maxBalance.toFixed(5));
+
+  return parseAmountBigNumber(cleanAmount).gt(maxBalanceRounded);
 }

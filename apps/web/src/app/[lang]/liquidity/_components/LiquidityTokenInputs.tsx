@@ -105,12 +105,25 @@ export function LiquidityTokenInputs({
 						.toString()
 				: convertToDecimal(otherAmount, otherDecimals).toFixed(5).toString();
 
-		const otherFieldName =
-			otherField === "sell"
-				? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
-				: FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
+		if (poolDetails && parseAmountBigNumber(otherValue).gt(0)) {
+			const inputType =
+				(otherField === "sell" && poolDetails?.tokenXMint === tokenBAddress) ||
+				(otherField === "buy" && poolDetails?.tokenXMint === tokenAAddress)
+					? "tokenX"
+					: "tokenY";
 
-		form.setFieldValue(otherFieldName, otherValue);
+			const otherFieldName =
+				otherField === "sell"
+					? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
+					: FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
+
+			form.setFieldValue(otherFieldName, otherValue);
+
+			debouncedCalculateTokenAmounts({
+				inputAmount: otherValue,
+				inputType,
+			});
+		}
 	};
 
 	const handleAmountChange = (
