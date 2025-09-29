@@ -52,7 +52,7 @@ jobs:
       - checkout
       - run:
           name: Start Nx Cloud CI run with task distribution
-          command: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --stop-agents-after="e2e"
+          command: npx nx-cloud start-ci-run --distribute-on="8 linux-medium-js" --stop-agents-after="e2e" --require-explicit-completion
       - setup
       - nx/set-shas:
           main-branch-name: develop

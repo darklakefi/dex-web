@@ -1,13 +1,16 @@
 "use client";
 import { tanstackClient } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas";
-import { sortSolanaAddresses } from "@dex-web/utils";
 import { Box, Button, Text } from "@dex-web/ui";
-import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
-import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
+import {
+  convertToDecimal,
+  numberFormatHelper,
+  sortSolanaAddresses,
+} from "@dex-web/utils";
 import { useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import { useMemo, useState } from "react";
+import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
@@ -145,7 +148,7 @@ export function YourLiquidity({
   }, [userLiquidity, poolReserves, tokenXPrice, tokenYPrice, poolDetails]);
 
   if (!userLiquidity?.hasLiquidity || !poolDetails) {
-    return null;
+    return <div className="mt-4 w-full max-w-md" />;
   }
 
   const pendingYield = "0.00";

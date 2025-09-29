@@ -1,5 +1,6 @@
 "use server";
 
+import { getLpTokenMint } from "@dex-web/core";
 import {
   type Account,
   getAccount,
@@ -13,7 +14,6 @@ import type {
   GetPoolReservesInput,
   GetPoolReservesOutput,
 } from "../../schemas/pools/getPoolReserves.schema";
-import { getLpTokenMint } from "@dex-web/core";
 import { getPoolOnChain, LP_TOKEN_DECIMALS } from "../../utils/solana";
 
 async function detectTokenProgram(

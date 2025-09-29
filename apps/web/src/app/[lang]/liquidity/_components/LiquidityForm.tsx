@@ -102,11 +102,15 @@ function LiquidityFormContent() {
               tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]?.symbol ||
               ""
             }
+            tokenBAddress={tokenBAddress ?? ""}
             tokenBAmount={form.state.values.tokenBAmount}
             tokenBSymbol={
               tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]?.symbol ||
               ""
             }
+            tokenXMint={poolDetails?.tokenXMint}
+            tokenXReserve={poolDetails?.tokenXReserve}
+            tokenYReserve={poolDetails?.tokenYReserve}
           />
         )}
       </Box>

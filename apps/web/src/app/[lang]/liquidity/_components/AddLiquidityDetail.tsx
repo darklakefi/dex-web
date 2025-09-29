@@ -9,6 +9,10 @@ export type AddLiquidityDetailsProps = {
   tokenAAmount: string;
   tokenASymbol: string;
   slippage: string;
+  tokenXReserve?: number;
+  tokenYReserve?: number;
+  tokenXMint?: string;
+  tokenBAddress?: string;
 };
 
 export function AddLiquidityDetails({
@@ -17,10 +21,43 @@ export function AddLiquidityDetails({
   tokenAAmount,
   tokenASymbol,
   slippage,
+  tokenXReserve,
+  tokenYReserve,
+  tokenXMint,
+  tokenBAddress,
 }: AddLiquidityDetailsProps) {
-  const rateBtoA = BigNumber(tokenBAmount).dividedBy(tokenAAmount);
-  const rateAtoB = BigNumber(tokenAAmount).dividedBy(tokenBAmount);
   const [isAtoB, setIsAtoB] = useState(true);
+
+  let rateBtoA: BigNumber;
+  let rateAtoB: BigNumber;
+
+  if (
+    tokenXReserve &&
+    tokenYReserve &&
+    tokenXMint &&
+    tokenBAddress &&
+    tokenXReserve > 0 &&
+    tokenYReserve > 0
+  ) {
+    if (tokenXMint === tokenBAddress) {
+      rateBtoA = BigNumber(tokenYReserve).dividedBy(tokenXReserve);
+      rateAtoB = BigNumber(tokenXReserve).dividedBy(tokenYReserve);
+    } else {
+      rateBtoA = BigNumber(tokenXReserve).dividedBy(tokenYReserve);
+      rateAtoB = BigNumber(tokenYReserve).dividedBy(tokenXReserve);
+    }
+  } else if (
+    tokenAAmount &&
+    tokenBAmount &&
+    !BigNumber(tokenAAmount).isZero() &&
+    !BigNumber(tokenBAmount).isZero()
+  ) {
+    rateBtoA = BigNumber(tokenBAmount).dividedBy(tokenAAmount);
+    rateAtoB = BigNumber(tokenAAmount).dividedBy(tokenBAmount);
+  } else {
+    rateBtoA = BigNumber(0);
+    rateAtoB = BigNumber(0);
+  }
 
   const priceAtoB = `1 ${tokenASymbol} ≈ ${numberFormatHelper({
     decimalScale: 5,

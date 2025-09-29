@@ -28,7 +28,6 @@ import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { z } from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
-import { logger } from "../../../../utils/logger";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { WalletButton } from "../../../_components/WalletButton";
@@ -246,7 +245,7 @@ export function CreatePoolForm() {
     }: {
       value: { tokenAAmount: string; tokenBAmount: string };
     }) => {
-      logger.log(value);
+      // Form submission handled by button onClick
     },
     validators: {
       onChange: liquidityFormSchema,
@@ -377,7 +376,6 @@ export function CreatePoolForm() {
         throw new Error("Failed to create pool transaction");
       }
     } catch (error) {
-      console.error("Pool creation error:", error);
       toasts.dismiss();
       toasts.showErrorToast(
         error instanceof Error ? error.message : "Unknown error occurred",
@@ -423,17 +421,17 @@ export function CreatePoolForm() {
     if (type === "sell") {
       if (BigNumber(value).gt(0) && BigNumber(price).gt(0)) {
         const calculatedTokenA =
-          initialPriceTokenOrder === "ba"
-            ? BigNumber(value).dividedBy(price).toString()
-            : BigNumber(value).multipliedBy(price).toString();
+          initialPriceTokenOrder === "ab"
+            ? BigNumber(value).multipliedBy(price).toString()
+            : BigNumber(value).dividedBy(price).toString();
         form.setFieldValue("tokenAAmount", calculatedTokenA);
       }
     } else {
       if (BigNumber(value).gt(0) && BigNumber(price).gt(0)) {
         const calculatedTokenB =
-          initialPriceTokenOrder === "ba"
-            ? BigNumber(value).multipliedBy(price).toString()
-            : BigNumber(value).dividedBy(price).toString();
+          initialPriceTokenOrder === "ab"
+            ? BigNumber(value).dividedBy(price).toString()
+            : BigNumber(value).multipliedBy(price).toString();
         form.setFieldValue("tokenBAmount", calculatedTokenB);
       }
     }
