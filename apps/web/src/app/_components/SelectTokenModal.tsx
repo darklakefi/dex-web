@@ -4,7 +4,6 @@ import { tanstackClient } from "@dex-web/orpc";
 import { getTokensInputSchema, type Token } from "@dex-web/orpc/schemas";
 import { Box, Button, Modal, TextInput } from "@dex-web/ui";
 import { pasteFromClipboard, useDebouncedValue } from "@dex-web/utils";
-import { useWalletPublicKey } from "../../hooks/useWalletCache";
 import {
   type AnyFieldApi,
   createFormHook,
@@ -16,11 +15,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { Suspense } from "react";
 import useLocalStorageState from "use-local-storage-state";
+import { useWalletPublicKey } from "../../hooks/useWalletCache";
+import { logger } from "../../utils/logger";
 import { selectedTokensParsers } from "../_utils/searchParams";
-import type { RouteString } from "../_utils/types";
 import { TokenList } from "../[lang]/(swap)/_components/TokenList";
 import { NoResultFound } from "./NoResultFound";
-import { logger } from "../../utils/logger";
 
 const selectTokenModalFormSchema = getTokensInputSchema.pick({
   query: true,
@@ -77,7 +76,7 @@ export function SelectTokenModal({
   const handleClose = () => {
     const from = searchParams.get("from");
     if (from) {
-      router.push(from as RouteString);
+      router.replace(from);
       return;
     }
     router.back();
@@ -120,36 +119,22 @@ export function SelectTokenModal({
       const sellAddress =
         selectedTokenAddress === tokenBAddress ? tokenAAddress : tokenBAddress;
 
-      if (currentFrom) {
-        const urlWithParams = serialize(currentFrom, {
-          tokenAAddress: selectedTokenAddress,
-          tokenBAddress: sellAddress,
-        });
-        router.push(urlWithParams as RouteString);
-      } else {
-        const urlWithParams = serialize(baseReturn, {
-          tokenAAddress: selectedTokenAddress,
-          tokenBAddress: sellAddress,
-        });
-        router.push(urlWithParams as RouteString);
-      }
+      const urlWithParams = serialize(baseReturn, {
+        tokenAAddress: selectedTokenAddress,
+        tokenBAddress: sellAddress,
+      });
+
+      router.push(urlWithParams);
     } else {
       const buyAddress =
         selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
 
-      if (currentFrom) {
-        const urlWithParams = serialize(currentFrom, {
-          tokenAAddress: buyAddress,
-          tokenBAddress: selectedTokenAddress,
-        });
-        router.push(urlWithParams as RouteString);
-      } else {
-        const urlWithParams = serialize(baseReturn, {
-          tokenAAddress: buyAddress,
-          tokenBAddress: selectedTokenAddress,
-        });
-        router.push(urlWithParams as RouteString);
-      }
+      const urlWithParams = serialize(baseReturn, {
+        tokenAAddress: buyAddress,
+        tokenBAddress: selectedTokenAddress,
+      });
+
+      router.push(urlWithParams);
     }
   };
 

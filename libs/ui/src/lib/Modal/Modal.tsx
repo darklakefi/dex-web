@@ -4,9 +4,7 @@ interface ModalProps {
   children: React.ReactNode;
   onClose: () => void;
 }
-/**
- * The Modal component is a modal dialog that can be used to display content in a overlay.
- */
+
 export function Modal({ children, onClose }: ModalProps) {
   return (
     <dialog

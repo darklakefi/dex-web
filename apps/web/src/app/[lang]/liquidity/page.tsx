@@ -30,6 +30,11 @@ export default async function Page({
       queryKey: ["wallet", "adapter"],
       staleTime: 30 * 60 * 1000,
     }),
+    queryClient.prefetchQuery(
+      tanstackClient.tokens.getTokens.queryOptions({
+        input: { limit: 8, offset: 0, query: "" },
+      }),
+    ),
   ];
 
   if (parsedSearchParams.tokenAAddress && parsedSearchParams.tokenBAddress) {

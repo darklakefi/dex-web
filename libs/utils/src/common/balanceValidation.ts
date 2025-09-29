@@ -1,5 +1,6 @@
 import { convertToDecimal } from "../number";
 import { formatAmountInput, parseAmountBigNumber } from "./amountUtils";
+import Decimal from "decimal.js";
 
 export interface TokenAccount {
   amount?: number;
@@ -29,7 +30,9 @@ export function validateHasSufficientBalance({
       tokenAccount.decimals || 0,
     );
 
-    if (parseAmountBigNumber(cleanAmount).gt(maxBalance)) {
+    const maxBalanceRounded = parseAmountBigNumber(new Decimal(maxBalance.toString()).toFixed(5, Decimal.ROUND_DOWN));
+
+    if (parseAmountBigNumber(cleanAmount).gt(maxBalanceRounded)) {
       return `Insufficient ${symbol} balance.`;
     }
   }
@@ -47,7 +50,8 @@ export function checkInsufficientBalance(
   const accountAmount = tokenAccount.amount || 0;
   const decimal = tokenAccount.decimals || 0;
 
-  return parseAmountBigNumber(cleanAmount).gt(
-    convertToDecimal(accountAmount, decimal),
-  );
+  const maxBalance = convertToDecimal(accountAmount, decimal);
+  const maxBalanceRounded = parseAmountBigNumber(new Decimal(maxBalance.toString()).toFixed(5, Decimal.ROUND_DOWN));
+
+  return parseAmountBigNumber(cleanAmount).gt(maxBalanceRounded);
 }

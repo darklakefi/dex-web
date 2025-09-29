@@ -22,6 +22,12 @@ export default async function Page({
     tanstackClient.pools.getPinedPool.queryOptions({}),
   );
 
+  await queryClient.prefetchQuery(
+    tanstackClient.tokens.getTokens.queryOptions({
+      input: { limit: 8, offset: 0, query: "" },
+    }),
+  );
+
   return (
     <div className="flex justify-center gap-12">
       <div className="flex w-full max-w-xl flex-col items-center justify-center">
@@ -52,11 +58,11 @@ export default async function Page({
         <Suspense
           fallback={
             <Box className="w-full max-w-md animate-pulse">
-              <SkeletonLoader variant="text" className="mb-4 h-8 w-32" />
+              <SkeletonLoader className="mb-4 h-8 w-32" variant="text" />
               <div className="space-y-4">
-                <SkeletonLoader variant="input" className="h-20 w-full" />
-                <SkeletonLoader variant="input" className="h-20 w-full" />
-                <SkeletonLoader variant="button" className="h-12 w-full" />
+                <SkeletonLoader className="h-20 w-full" variant="input" />
+                <SkeletonLoader className="h-20 w-full" variant="input" />
+                <SkeletonLoader className="h-12 w-full" variant="button" />
               </div>
             </Box>
           }
@@ -66,11 +72,11 @@ export default async function Page({
         <Suspense
           fallback={
             <Box className="mt-6 w-full max-w-md animate-pulse">
-              <SkeletonLoader variant="text" className="mb-3 h-6 w-40" />
+              <SkeletonLoader className="mb-3 h-6 w-40" variant="text" />
               <div className="space-y-2">
-                <SkeletonLoader variant="text" className="h-4 w-full" />
-                <SkeletonLoader variant="text" className="h-4 w-3/4" />
-                <SkeletonLoader variant="text" className="h-4 w-5/6" />
+                <SkeletonLoader className="h-4 w-full" variant="text" />
+                <SkeletonLoader className="h-4 w-3/4" variant="text" />
+                <SkeletonLoader className="h-4 w-5/6" variant="text" />
               </div>
             </Box>
           }
