@@ -3,11 +3,11 @@
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useMachine } from "@xstate/react";
 import { liquidityMachine } from "../_machines/liquidityMachine";
-import type { LiquidityMachineEvent } from "../_machines/liquidityMachine";
+import type { LiquidityMachineEvent, LiquidityMachine } from "../_machines/liquidityMachine";
 import { usePoolData } from "./LiquidityDataProvider";
 
 interface LiquidityStateContextValue {
-  state: any;
+  state: ReturnType<typeof useMachine<typeof liquidityMachine>>[0];
   send: (event: LiquidityMachineEvent) => void;
   isCalculating: boolean;
   isSubmitting: boolean;

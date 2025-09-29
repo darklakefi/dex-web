@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { tanstackClient } from "@dex-web/orpc";
+import { client } from "@dex-web/orpc";
 
 interface UseBasicPoolDataParams {
   tokenXMint: string;

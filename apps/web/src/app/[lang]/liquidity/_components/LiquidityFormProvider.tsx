@@ -456,7 +456,7 @@ export function LiquidityFormProvider({
       }
     },
     [
-      poolDataResult.poolDetails,
+      poolDataResult.data,
       finalTokenAAddress,
       finalTokenBAddress,
       clearPendingCalculations,
@@ -516,7 +516,7 @@ export function LiquidityFormProvider({
         const buyAmount = parseAmount(values.tokenAAmount);
 
         const isTokenXSell =
-          poolDataResult.poolDetails?.tokenXMint === finalTokenBAddress;
+          poolDataResult.data?.tokenXMint === finalTokenBAddress;
         const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
         const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
@@ -569,7 +569,7 @@ export function LiquidityFormProvider({
       finalTokenAAddress,
       finalTokenBAddress,
       walletAdapter?.wallet,
-      poolDataResult.poolDetails,
+      poolDataResult.data,
       slippage,
       trackSigned,
       checkLiquidityTransactionStatus,
@@ -582,7 +582,7 @@ export function LiquidityFormProvider({
   const isSuccess = state.matches("success");
   const isError = state.matches("error");
   const isCalculating =
-    state.matches("calculating") || state.context.isCalculating;
+    state.matches("calculating");
   const hasError = isError && !!state.context.error;
 
   const trackLiquidityAction = useCallback(
@@ -623,7 +623,7 @@ export function LiquidityFormProvider({
       tokenBAddress: finalTokenBAddress,
     }),
     [
-      poolDataResult.poolDetails,
+      poolDataResult.data,
       tokenAccountsData,
       finalTokenAAddress,
       finalTokenBAddress,

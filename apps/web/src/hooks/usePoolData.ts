@@ -68,7 +68,7 @@ export function usePoolData({
     refetchInterval: REFETCH_INTERVAL_CONFIG[priority],
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: priority === "critical" || priority === "high",
-    retry: (failureCount, error) => {
+    retry: (failureCount, _error) => {
       const maxRetries = priority === "critical" ? 3 : priority === "high" ? 2 : 1;
       return failureCount < maxRetries;
     },

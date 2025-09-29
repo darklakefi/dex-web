@@ -1,7 +1,6 @@
+import type { TokenAccountsData } from "@dex-web/core";
 import type { ReactNode } from "react";
-import type { PublicKey } from "@solana/web3.js";
-import type { FormApi } from "@tanstack/react-form";
-import type { LiquidityFormValues, PoolDetails, TokenAccountsData } from "./liquidity.types";
+import type { PoolDetails } from "./liquidity.types";
 
 export interface LiquidityProviderProps {
   children: ReactNode;
@@ -24,7 +23,7 @@ export interface LiquidityDataContextValue {
 }
 
 export interface LiquidityFormContextValue {
-  form: FormApi<LiquidityFormValues, any>;
+  form: any;
   isSubmitting: boolean;
   isValid: boolean;
   submitForm: () => Promise<void>;

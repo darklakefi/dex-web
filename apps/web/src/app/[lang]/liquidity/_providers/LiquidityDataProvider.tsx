@@ -5,10 +5,10 @@ import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
 import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import { sortSolanaAddresses } from "@dex-web/utils";
-import type { PoolDetails, UseRealtimeTokenAccountsReturn } from "../_types/liquidity.types";
+import type { UseRealtimeTokenAccountsReturn } from "../_types/liquidity.types";
 
 interface PoolDataContextValue {
-  poolDetails: any | null;
+  poolDetails: PoolDetails | null;
   tokenAccountsData: UseRealtimeTokenAccountsReturn;
   tokenXMint: string;
   tokenYMint: string;

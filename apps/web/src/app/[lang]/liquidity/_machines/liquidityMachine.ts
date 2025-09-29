@@ -9,11 +9,14 @@ export interface LiquidityMachineContext {
   transactionSignature: string | null;
   liquidityStep: number;
   formData: LiquidityFormValues | null;
+  isCalculating: boolean;
 }
 
 export type LiquidityMachineEvent =
   | { type: "UPDATE_POOL_DETAILS"; data: PoolDetails | null }
   | { type: "UPDATE_TOKEN_ACCOUNTS"; buyAccount: TokenAccountsData | null; sellAccount: TokenAccountsData | null }
+  | { type: "START_CALCULATION" }
+  | { type: "FINISH_CALCULATION" }
   | { type: "CALCULATE"; data: LiquidityFormValues }
   | { type: "SUBMIT"; data: LiquidityFormValues }
   | { type: "SIGN_TRANSACTION"; signature: string }
@@ -28,11 +31,11 @@ export const liquidityMachine = setup({
     events: LiquidityMachineEvent;
   },
   actors: {
-    calculateLiquidity: fromPromise(async ({ input }: { input: LiquidityFormValues }) => {
+    calculateLiquidity: fromPromise(async ({ input: _input }: { input: LiquidityFormValues }) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       return { result: "calculated" };
     }),
-    submitTransaction: fromPromise(async ({ input }: { input: LiquidityFormValues }) => {
+    submitTransaction: fromPromise(async ({ input: _input }: { input: LiquidityFormValues }) => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       return { signature: "mock-signature" };
     }),
@@ -48,6 +51,7 @@ export const liquidityMachine = setup({
     transactionSignature: null,
     liquidityStep: 0,
     formData: null,
+    isCalculating: false,
   } as LiquidityMachineContext,
   states: {
     idle: {
