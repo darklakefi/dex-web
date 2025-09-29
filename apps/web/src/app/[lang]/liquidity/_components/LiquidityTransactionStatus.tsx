@@ -2,7 +2,8 @@
 
 import { useCallback, useMemo } from "react";
 import { Button, Text, Icon } from "@dex-web/ui";
-import { useLiquidityForm } from "./LiquidityFormProvider";
+import { useLiquidityFormState } from "./LiquidityContexts";
+import { useLiquidityActions } from "./LiquidityContexts";
 import {
   LiquidityError,
   toLiquidityError,
@@ -38,11 +39,13 @@ export function LiquidityTransactionStatus({
     isError,
     isSubmitting,
     hasError,
+  } = useLiquidityFormState();
+
+  const {
     resetFormToDefaults,
     trackError
-  } = useLiquidityForm();
+  } = useLiquidityActions();
 
-  // Convert error to LiquidityError for enhanced handling
   const liquidityError = useMemo(() => {
     if (!state.error) return null;
     return state.error instanceof LiquidityError
@@ -50,7 +53,6 @@ export function LiquidityTransactionStatus({
       : toLiquidityError(state.error);
   }, [state.error]);
 
-  // Enhanced retry handler with error context
   const handleRetry = useCallback(async () => {
     if (isSubmitting || !onRetry) return;
 
@@ -58,18 +60,15 @@ export function LiquidityTransactionStatus({
     try {
       await onRetry();
     } catch (error) {
-      // Error will be handled by the form's error boundary
       trackError(error, { context: 'retry_attempt' });
     }
   }, [onRetry, send, isSubmitting, trackError]);
 
-  // Reset handler with proper state cleanup
   const handleReset = useCallback(() => {
     send({ type: "RESET" });
     resetFormToDefaults();
   }, [send, resetFormToDefaults]);
 
-  // Transaction hash display
   const renderTransactionHash = () => {
     if (!showTransactionHash || !state.transactionSignature) return null;
 
@@ -97,7 +96,6 @@ export function LiquidityTransactionStatus({
     );
   };
 
-  // Success state with celebration UI
   if (isSuccess) {
     return (
       <div
@@ -145,7 +143,6 @@ export function LiquidityTransactionStatus({
             )}
           </div>
 
-          {/* Educational content */}
           <div className="mt-3 p-2 bg-green-700 bg-opacity-50 rounded border border-green-500">
             <Text.Body2 className="text-green-200 text-xs">
               💡 <strong>Pro tip:</strong> Monitor your position for impermanent loss and consider
@@ -157,13 +154,11 @@ export function LiquidityTransactionStatus({
     );
   }
 
-  // Error states with detailed feedback
   if (isError && hasError && liquidityError) {
     const canRetry = isRetryableError(liquidityError);
     const errorMessage = getErrorMessage(liquidityError);
     const errorSolution = getErrorSolution(liquidityError);
 
-    // Determine severity styling
     const severityClasses = {
       error: "bg-red-600 border-red-400",
       warning: "bg-yellow-600 border-yellow-400",
@@ -214,7 +209,6 @@ export function LiquidityTransactionStatus({
                 </Text.Body2>
               )}
 
-              {/* Additional error context */}
               {liquidityError.context && showDetailedErrors && (
                 <details className="mt-2">
                   <summary className={`${textClasses[liquidityError.severity]} text-xs cursor-pointer opacity-75 hover:opacity-100`}>
@@ -230,7 +224,6 @@ export function LiquidityTransactionStatus({
 
           {renderTransactionHash()}
 
-          {/* Action buttons */}
           <div className="flex flex-wrap gap-2 mt-4">
             {canRetry && onRetry && (
               <Button
@@ -253,11 +246,9 @@ export function LiquidityTransactionStatus({
               Reset Form
             </Button>
 
-            {/* Special actions for specific error types */}
             {liquidityError.code === LiquidityErrorCode.WALLET_NOT_CONNECTED && (
               <Button
                 onClick={() => {
-                  // This would typically connect wallet
                   window.location.reload();
                 }}
                 className="flex-1 sm:flex-none text-sm bg-blue-600 hover:bg-blue-700"
@@ -277,7 +268,6 @@ export function LiquidityTransactionStatus({
               </Button>
             )}
 
-            {/* Contact support for critical errors */}
             {!canRetry && onContactSupport && (
               <Button
                 onClick={onContactSupport}
@@ -291,7 +281,6 @@ export function LiquidityTransactionStatus({
             )}
           </div>
 
-          {/* Warning for high-impact errors */}
           {liquidityError.severity === 'warning' && (
             <div className="mt-3 p-2 bg-yellow-700 bg-opacity-50 rounded border border-yellow-500">
               <Text.Body2 className="text-yellow-200 text-xs">
@@ -301,7 +290,6 @@ export function LiquidityTransactionStatus({
             </div>
           )}
 
-          {/* Impermanent loss education for relevant errors */}
           {[LiquidityErrorCode.IMPERMANENT_LOSS_WARNING, LiquidityErrorCode.PRICE_IMPACT_HIGH].includes(liquidityError.code) && (
             <div className="mt-3">
               <a
@@ -317,7 +305,6 @@ export function LiquidityTransactionStatus({
             </div>
           )}
 
-          {/* Gas fee information for relevant errors */}
           {liquidityError.code === LiquidityErrorCode.GAS_ESTIMATION_FAILED && (
             <div className="mt-3 p-2 bg-orange-700 bg-opacity-50 rounded border border-orange-500">
               <Text.Body2 className="text-orange-200 text-xs">
@@ -327,7 +314,6 @@ export function LiquidityTransactionStatus({
             </div>
           )}
 
-          {/* Slippage tolerance information */}
           {[LiquidityErrorCode.SLIPPAGE_ERROR, LiquidityErrorCode.HIGH_SLIPPAGE_WARNING].includes(liquidityError.code) && (
             <div className="mt-3 p-2 bg-amber-700 bg-opacity-50 rounded border border-amber-500">
               <Text.Body2 className="text-amber-200 text-xs">
@@ -341,7 +327,6 @@ export function LiquidityTransactionStatus({
     );
   }
 
-  // Loading states during transaction steps
   if (isSubmitting) {
     const loadingMessages = {
       1: "Preparing transaction...",
@@ -371,7 +356,6 @@ export function LiquidityTransactionStatus({
             </div>
           </div>
 
-          {/* Progress indicator */}
           <div className="mt-4">
             <div className="flex justify-between items-center mb-2">
               <Text.Body2 className="text-blue-200 text-xs">
@@ -402,7 +386,6 @@ export function LiquidityTransactionStatus({
             </div>
           )}
 
-          {/* Security reminder during signing */}
           {state.liquidityStep === 2 && (
             <div className="mt-2 p-2 bg-blue-800 bg-opacity-50 rounded border border-blue-600">
               <Text.Body2 className="text-blue-300 text-xs">

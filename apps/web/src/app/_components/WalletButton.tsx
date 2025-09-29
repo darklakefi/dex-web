@@ -7,32 +7,25 @@ import { useWalletAdapter, useWalletAddress } from "../../hooks/useWalletCache";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { SkeletonLoader } from "./SkeletonLoader";
+import { SkeletonWalletButton } from "./SkeletonWalletButton";
 
 interface WalletButtonProps extends React.ComponentProps<typeof Button> {}
 
 export function WalletButton({ ...props }: WalletButtonProps) {
 	const router = useRouter();
 	const { disconnect } = useWallet();
-	const { data: adapter, isLoading: adapterLoading } = useWalletAdapter();
-	const { data: address, isLoading: addressLoading } = useWalletAddress();
-	const [hasMounted, setHasMounted] = useState(false);
-
-	useEffect(() => {
-		setHasMounted(true);
-	}, []);
+	const { data: adapter, isLoading: adapterLoading, isPlaceholderData: adapterIsPlaceholder } = useWalletAdapter();
+	const { data: address, isLoading: addressLoading, isPlaceholderData: addressIsPlaceholder } = useWalletAddress();
 
 	function handleClick() {
 		router.push("/select-wallet");
 	}
 
-	if (!hasMounted || adapterLoading || addressLoading) {
+	// Show skeleton during initial load or when we have placeholder data
+	if (adapterLoading || addressLoading || adapterIsPlaceholder || addressIsPlaceholder) {
 		return (
-			<div className={twMerge("h-10 w-32", props.className)}>
-				<SkeletonLoader variant="wallet" className="h-full w-full" />
-			</div>
+			<SkeletonWalletButton className={twMerge("h-10 w-32", props.className)} />
 		);
 	}
 

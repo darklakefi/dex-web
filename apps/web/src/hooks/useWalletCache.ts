@@ -27,6 +27,7 @@ export function useWalletAddress() {
       return getFirstConnectedWalletAddress(wallet.adapter);
     },
     enabled: !!wallet?.adapter,
+    placeholderData: null, // Show skeleton while loading
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
@@ -91,6 +92,7 @@ export function useWalletAdapter() {
       };
     },
     enabled: !!wallet?.adapter,
+    placeholderData: null, // Show skeleton while loading
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
   });

@@ -4,12 +4,17 @@
   --background-image-url: url("/background.png");
 }
 
-/* Skeleton loader animation */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
   }
   100% {
     background-position: 200% 0;
+  }
+}
+
+@layer utilities {
+  .animate-shimmer {
+    animation: shimmer 2s infinite ease-in-out;
   }
 }

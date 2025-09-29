@@ -13,7 +13,7 @@ interface OptimizedQueryOptions<TData>
 const STALE_TIME_MAP: Record<DataVolatility, number> = {
   "semi-static": 30 * 1000,
   static: Infinity,
-  volatile: 0,
+  volatile: 3 * 1000,
 };
 
 export function useOptimizedQuery<TData>(

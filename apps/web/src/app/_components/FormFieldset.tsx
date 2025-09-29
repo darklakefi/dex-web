@@ -53,15 +53,16 @@ export function FormFieldset({
     selectedTokensParsers,
   );
 
-  const { data: usdExchangeRate } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenPrice.queryOptions({
+  const { data: usdExchangeRate } = useSuspenseQuery({
+    ...tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
         mint: name === "tokenAAmount" ? tokenAAddress : tokenBAddress,
         quoteCurrency: QUOTE_CURRENCY,
       },
     }),
-  );
+    staleTime: 5 * 1000,
+  });
 
   const formattedPrice = useFormatPrice(
     value,
@@ -75,10 +76,8 @@ export function FormFieldset({
   const tokenSymbol = tokenAccount?.symbol;
   const decimals = tokenAccount?.decimals ?? 0;
   const setValueToHalfAmount = () => {
-    // Prevent action during refresh or loading to avoid race conditions
     if (isRefreshing || isLoading || !tokenAccount?.amount) return;
 
-    // Clear any pending debounced calculations
     onClearPendingCalculations?.();
 
     const halfAmount = convertToDecimal(amount, decimals)
@@ -92,17 +91,14 @@ export function FormFieldset({
       inputRef.current.dispatchEvent(event);
     }
 
-    // Direct onChange call with calculated value
     onChange?.({
       target: { value: halfAmount },
     } as React.ChangeEvent<HTMLInputElement>);
   };
 
   const setValueToMaxAmount = () => {
-    // Prevent action during refresh or loading to avoid race conditions
     if (isRefreshing || isLoading || !tokenAccount?.amount) return;
 
-    // Clear any pending debounced calculations
     onClearPendingCalculations?.();
 
     const maxAmount = convertToDecimal(amount, decimals)
@@ -115,7 +111,6 @@ export function FormFieldset({
       inputRef.current.dispatchEvent(event);
     }
 
-    // Direct onChange call with calculated value
     onChange?.({
       target: { value: maxAmount },
     } as React.ChangeEvent<HTMLInputElement>);
@@ -124,7 +119,6 @@ export function FormFieldset({
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let value = event.target.value;
 
-    // if the last character is a comma, replace it with a dot
     if (value.endsWith(",")) {
       value = `${value.slice(0, -1)}.`;
     }
@@ -161,7 +155,7 @@ export function FormFieldset({
           <Text.Body2 className="flex gap-3 text-green-300 uppercase">
             <span className="relative flex items-center">
               {isLoading && !tokenAccount ? (
-                <SkeletonLoader variant="text" className="w-28" />
+                <SkeletonLoader variant="balance" className="w-28" />
               ) : (
                 <>
                   <span>

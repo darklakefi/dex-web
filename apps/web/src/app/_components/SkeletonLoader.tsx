@@ -6,10 +6,11 @@ import { twMerge } from "tailwind-merge";
 
 const skeletonVariants = cva(
   [
-    "relative overflow-hidden bg-green-500/20",
+    "relative overflow-hidden bg-green-600/30",
     "before:absolute before:inset-0",
-    "before:-translate-x-full before:animate-pulse",
-    "before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent",
+    "before:-translate-x-full",
+    "before:bg-gradient-to-r before:from-transparent before:via-green-300/20 before:to-transparent",
+    "before:animate-shimmer",
   ],
   {
     variants: {
@@ -20,8 +21,11 @@ const skeletonVariants = cva(
         button: "h-10 w-32 rounded",
         wallet: "h-10 w-32 rounded",
         tokenInput: "h-24 w-full rounded border border-green-400 bg-green-600",
+        tokenInputBox: "w-full rounded border border-green-400 bg-green-600 pt-3 pb-3",
+        balance: "h-4 w-28 rounded",
         circle: "rounded-full",
         rectangle: "rounded-none",
+        form: "w-full max-w-xl",
       },
       size: {
         sm: "h-3",
@@ -83,7 +87,7 @@ export function SkeletonLoader({
   const customStyle = {
     width: customWidth || undefined,
     height: customHeight || undefined,
-    background: `linear-gradient(90deg, rgba(34, 197, 94, 0.1) 25%, rgba(34, 197, 94, 0.2) 50%, rgba(34, 197, 94, 0.1) 75%)`,
+    background: `linear-gradient(90deg, rgba(34, 197, 94, 0.2) 25%, rgba(34, 197, 94, 0.4) 50%, rgba(34, 197, 94, 0.2) 75%)`,
     backgroundSize: '200% 100%',
     animation: 'shimmer 2s infinite ease-in-out',
     ...style,
@@ -93,7 +97,6 @@ export function SkeletonLoader({
     <div
       className={twMerge(
         skeletonVariants({ variant, size, pulse }),
-        "bg-green-500/10",
         className
       )}
       style={customStyle}

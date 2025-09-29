@@ -96,25 +96,27 @@ export function WithdrawLiquidityModal({
 	const [withdrawStep, setWithdrawStep] = useState(0);
 	const [isWithdrawing, setIsWithdrawing] = useState(false);
 
-	const { data: tokenXPrice } = useSuspenseQuery(
-		tanstackClient.tokens.getTokenPrice.queryOptions({
+	const { data: tokenXPrice } = useSuspenseQuery({
+		...tanstackClient.tokens.getTokenPrice.queryOptions({
 			input: {
 				amount: 1,
 				mint: tokenXAddress || DEFAULT_BUY_TOKEN,
 				quoteCurrency: "USD",
 			},
 		}),
-	);
+    staleTime: 5 * 1000,
+	});
 
-	const { data: tokenYPrice } = useSuspenseQuery(
-		tanstackClient.tokens.getTokenPrice.queryOptions({
+	const { data: tokenYPrice } = useSuspenseQuery({
+		...tanstackClient.tokens.getTokenPrice.queryOptions({
 			input: {
 				amount: 1,
 				mint: tokenYAddress || DEFAULT_SELL_TOKEN,
 				quoteCurrency: "USD",
 			},
 		}),
-	);
+    staleTime: 5 * 1000,
+	});
 
 	const setCalculationEmpty = () => {
 		setWithdrawalCalculations({
@@ -157,9 +159,8 @@ export function WithdrawLiquidityModal({
 			return;
 		}
 
-		const percentage = withdrawLpPercentage.toNumber();
-		// Compute X/Y withdrawal then map to A/B for display
-		const tokenXAmount =
+    const percentage = withdrawLpPercentage.toNumber();
+    const tokenXAmount =
 			(liquidityCalculations.userTokenXAmount * percentage) / 100;
 		const tokenYAmount =
 			(liquidityCalculations.userTokenYAmount * percentage) / 100;
@@ -279,8 +280,7 @@ export function WithdrawLiquidityModal({
 				variant: "success",
 			});
 
-			// Invalidate related queries
-			try {
+            try {
 				const userLiqOpts =
 					tanstackClient.liquidity.getUserLiquidity.queryOptions({
 						input: {
@@ -292,9 +292,25 @@ export function WithdrawLiquidityModal({
 				const reservesOpts = tanstackClient.pools.getPoolReserves.queryOptions({
 					input: { tokenXMint: opts.tokenXMint, tokenYMint: opts.tokenYMint },
 				});
-				await Promise.all([
-					queryClient.invalidateQueries({ queryKey: userLiqOpts.queryKey }),
+				const poolDetailsOpts = tanstackClient.pools.getPoolDetails.queryOptions({
+					input: { tokenXMint: opts.tokenXMint, tokenYMint: opts.tokenYMint },
+				});
+
+                const poolKey = `${opts.tokenXMint}-${opts.tokenYMint}`;
+				const sortedPoolKey = [opts.tokenXMint, opts.tokenYMint].sort().join("-");
+
+                await Promise.all([
+                    queryClient.invalidateQueries({ queryKey: userLiqOpts.queryKey }),
 					queryClient.invalidateQueries({ queryKey: reservesOpts.queryKey }),
+					queryClient.invalidateQueries({ queryKey: poolDetailsOpts.queryKey }),
+
+                    queryClient.invalidateQueries({ queryKey: ["pool-details", poolKey] }),
+					queryClient.invalidateQueries({ queryKey: ["pool-details", sortedPoolKey] }),
+
+                    queryClient.invalidateQueries({ queryKey: ["pool", opts.tokenXMint, opts.tokenYMint] }),
+					queryClient.invalidateQueries({ queryKey: ["pool", opts.tokenYMint, opts.tokenXMint] }),
+
+                    queryClient.invalidateQueries({ queryKey: ["token-accounts", publicKey.toBase58()] }),
 				]);
 			} catch {}
 
@@ -467,11 +483,9 @@ export function WithdrawLiquidityModal({
 										maxAmount={100}
 										name={field.name}
 										onBlur={field.handleBlur}
-										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-											handleAmountChange(e);
-											// console.log("e.target.value", e.target.value);
-											// field.handleChange(e.target.value);
-										}}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                            handleAmountChange(e);
+                                        }}
 										value={field.state.value}
 									/>
 								)}

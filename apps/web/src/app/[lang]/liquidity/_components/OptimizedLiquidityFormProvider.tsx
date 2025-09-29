@@ -67,12 +67,15 @@ import {
   priceCalculationCache,
   balanceValidationCache,
   tokenAmountCache,
+  poolRatioCache,
   createPriceCalculationKey,
   createBalanceValidationKey,
   createTokenAmountKey,
+  createPoolRatioKey,
   startCacheCleanup,
 } from "../_utils/calculationCache";
 
+// Create TanStack Form contexts
 export const { fieldContext, formContext } = createFormHookContexts();
 
 const { useAppForm } = createFormHook({
@@ -84,9 +87,15 @@ const { useAppForm } = createFormHook({
   formContext,
 });
 
+// Enhanced calculation results interface
+interface CalculationState {
+  isCalculating: boolean;
+  lastCalculationTime: number;
+  approximateResult?: string;
+  hasApproximateResult: boolean;
+}
 
-
-export function LiquidityFormProvider({
+export function OptimizedLiquidityFormProvider({
   children,
   tokenAAddress: propTokenAAddress,
   tokenBAddress: propTokenBAddress,
@@ -108,6 +117,11 @@ export function LiquidityFormProvider({
   const finalTokenBAddress = propTokenBAddress ?? tokenBAddress;
 
   const [slippage, setSlippage] = useState(LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE);
+  const [calculationState, setCalculationState] = useState<CalculationState>({
+    isCalculating: false,
+    lastCalculationTime: 0,
+    hasApproximateResult: false,
+  });
 
   // Web Worker for heavy calculations
   const {
@@ -119,14 +133,6 @@ export function LiquidityFormProvider({
     cancelPendingCalculations,
     error: workerError,
   } = useLiquidityCalculationWorker();
-
-  // Enhanced calculation state
-  const [calculationState, setCalculationState] = useState({
-    isCalculating: false,
-    lastCalculationTime: 0,
-    approximateResult: undefined as string | undefined,
-    hasApproximateResult: false,
-  });
 
   // Initialize cache cleanup
   const cacheCleanupRef = useRef<(() => void) | null>(null);
@@ -268,13 +274,16 @@ export function LiquidityFormProvider({
       tokenAccountsData.refetchBuyTokenAccount();
       tokenAccountsData.refetchSellTokenAccount();
 
+      // Invalidate token account data
       queryClient.invalidateQueries({
         queryKey: ["token-accounts", publicKey?.toBase58()],
       });
 
+      // Invalidate pool data to ensure fresh pool information after liquidity changes
       const poolKey = `${tokenXMint}-${tokenYMint}`;
       const sortedPoolKey = [tokenXMint, tokenYMint].sort().join("-");
 
+      // Invalidate pool details with custom queryKey patterns
       queryClient.invalidateQueries({
         queryKey: ["pool-details", poolKey],
       });
@@ -282,6 +291,7 @@ export function LiquidityFormProvider({
         queryKey: ["pool-details", sortedPoolKey],
       });
 
+      // Invalidate pool queries using tanstack client queryOptions
       const poolDetailsOpts = tanstackClient.pools.getPoolDetails.queryOptions({
         input: { tokenXMint, tokenYMint },
       });
@@ -292,6 +302,7 @@ export function LiquidityFormProvider({
       queryClient.invalidateQueries({ queryKey: poolDetailsOpts.queryKey });
       queryClient.invalidateQueries({ queryKey: poolReservesOpts.queryKey });
 
+      // Invalidate pool subscription data for both token orders
       queryClient.invalidateQueries({
         queryKey: ["pool", tokenXMint, tokenYMint],
       });
@@ -310,6 +321,78 @@ export function LiquidityFormProvider({
     successStates: ["finalized"],
   });
 
+  // Optimized balance validation with caching
+  const validateTokenBalance = useCallback(async (
+    tokenAmount: string,
+    tokenAccount: any
+  ): Promise<{ tokenAAmount?: string } | undefined> => {
+    if (!tokenAmount || !publicKey || !tokenAccount?.tokenAccounts?.[0]) {
+      return undefined;
+    }
+
+    const tokenANumericValue = formatAmountInput(tokenAmount);
+    if (!parseAmountBigNumber(tokenANumericValue).gt(0)) {
+      return undefined;
+    }
+
+    const account = tokenAccount.tokenAccounts[0];
+    const cacheKey = createBalanceValidationKey(
+      tokenANumericValue,
+      account.amount || 0,
+      account.decimals || 0,
+      account.symbol || "token"
+    );
+
+    // Check cache first
+    const cachedResult = balanceValidationCache.get(cacheKey);
+    if (cachedResult) {
+      return cachedResult.isValid ? undefined : { tokenAAmount: cachedResult.error };
+    }
+
+    try {
+      // Use Web Worker for validation if available, otherwise fall back to sync
+      if (isWorkerReady) {
+        const result = await validateBalance(
+          tokenANumericValue,
+          account.amount || 0,
+          account.decimals || 0,
+          account.symbol || "token"
+        );
+
+        // Cache the result
+        balanceValidationCache.set(cacheKey, result);
+
+        return result.isValid ? undefined : { tokenAAmount: result.error };
+      } else {
+        // Fallback sync validation
+        const maxBalance = convertToDecimal(
+          account.amount || 0,
+          account.decimals || 0,
+        );
+
+        if (parseAmountBigNumber(tokenANumericValue).gt(maxBalance)) {
+          const symbol = account.symbol || "token";
+          const error = `Insufficient ${symbol} balance.`;
+
+          // Cache the result
+          balanceValidationCache.set(cacheKey, { isValid: false, error });
+
+          return { tokenAAmount: error };
+        }
+
+        // Cache successful validation
+        balanceValidationCache.set(cacheKey, { isValid: true });
+        return undefined;
+      }
+    } catch (error) {
+      console.warn("Balance validation failed:", error);
+      // Return fallback error
+      const fallbackError = "Balance validation failed";
+      balanceValidationCache.set(cacheKey, { isValid: false, error: fallbackError });
+      return { tokenAAmount: fallbackError };
+    }
+  }, [publicKey, isWorkerReady, validateBalance]);
+
   const formConfig = useMemo(() => ({
     defaultValues: {
       [FORM_FIELD_NAMES.INITIAL_PRICE]: LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE,
@@ -322,33 +405,18 @@ export function LiquidityFormProvider({
       value: { tokenAAmount: string; tokenBAmount: string };
     }) => {
       send({ data: value, type: "SUBMIT" });
-      await handleDeposit(value);
+      await handleDeposit();
     },
     validators: {
       onChange: liquidityFormSchema,
       onDynamic: ({ value }: { value: typeof liquidityFormSchema._type }) => {
-        if (
-          value.tokenAAmount &&
-          publicKey &&
-          tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
-        ) {
-          const tokenANumericValue = formatAmountInput(value.tokenAAmount);
-          if (parseAmountBigNumber(tokenANumericValue).gt(0)) {
-            const tokenAccount = tokenAccountsData.buyTokenAccount.tokenAccounts[0];
-            const maxBalance = convertToDecimal(
-              tokenAccount.amount || 0,
-              tokenAccount.decimals || 0,
-            );
-
-            if (parseAmountBigNumber(tokenANumericValue).gt(maxBalance)) {
-              const symbol = tokenAccount.symbol || "token";
-              return { tokenAAmount: `Insufficient ${symbol} balance.` };
-            }
-          }
+        if (value.tokenAAmount) {
+          return validateTokenBalance(value.tokenAAmount, tokenAccountsData.buyTokenAccount);
         }
+        return undefined;
       },
     },
-  }), [publicKey, tokenAccountsData.buyTokenAccount]);
+  }), [publicKey, tokenAccountsData.buyTokenAccount, validateTokenBalance]);
 
   const form = useAppForm(formConfig);
 
@@ -366,8 +434,19 @@ export function LiquidityFormProvider({
     form.setFieldValue("tokenAAmount", "0");
     form.setFieldValue("tokenBAmount", "0");
     form.setFieldValue("initialPrice", "1");
-  }, [form]);
 
+    // Clear calculation state
+    setCalculationState({
+      isCalculating: false,
+      lastCalculationTime: 0,
+      hasApproximateResult: false,
+    });
+
+    // Cancel any pending calculations
+    cancelPendingCalculations();
+  }, [form, cancelPendingCalculations]);
+
+  // Optimized calculateTokenAmounts with progressive loading and caching
   const calculateTokenAmounts = useCallback(async ({
     inputAmount,
     inputType,
@@ -376,25 +455,115 @@ export function LiquidityFormProvider({
     inputType: "tokenX" | "tokenY";
   }) => {
     const amountNumber = parseAmount(inputAmount);
-    if (!poolDataResult.poolDetails || parseAmountBigNumber(inputAmount).lte(0)) return;
+    if (!poolDataResult.poolDetails || parseAmountBigNumber(inputAmount).lte(0)) {
+      return;
+    }
 
-    const response = await client.liquidity.getAddLiquidityReview({
-      isTokenX: inputType === "tokenX",
-      tokenAmount: amountNumber,
-      tokenXMint: poolDataResult.poolDetails.tokenXMint,
-      tokenYMint: poolDataResult.poolDetails.tokenYMint,
-    });
+    setCalculationState(prev => ({
+      ...prev,
+      isCalculating: true,
+      lastCalculationTime: Date.now(),
+    }));
 
-    startTransition(() => {
-      if (inputType === "tokenX") {
-        form.setFieldValue("tokenBAmount", String(response.tokenAmount));
-        form.validateAllFields("change");
-      } else {
-        form.setFieldValue("tokenAAmount", String(response.tokenAmount));
-        form.validateAllFields("change");
+    try {
+      // First, try to provide approximate result from worker if available
+      if (isWorkerReady && poolDataResult.poolDetails.tokenXReserve && poolDataResult.poolDetails.tokenYReserve) {
+        const cacheKey = createTokenAmountKey(
+          inputAmount,
+          poolDataResult.poolDetails.tokenXReserve,
+          poolDataResult.poolDetails.tokenYReserve,
+          inputType
+        );
+
+        // Check cache first
+        const cachedResult = tokenAmountCache.get(cacheKey);
+        if (cachedResult) {
+          startTransition(() => {
+            if (inputType === "tokenX") {
+              form.setFieldValue("tokenBAmount", cachedResult);
+            } else {
+              form.setFieldValue("tokenAAmount", cachedResult);
+            }
+            form.validateAllFields("change");
+          });
+
+          setCalculationState(prev => ({
+            ...prev,
+            isCalculating: false,
+            approximateResult: cachedResult,
+            hasApproximateResult: true,
+          }));
+          return;
+        }
+
+        // Calculate approximate result using worker
+        try {
+          const approximateResult = await calculateApproximateTokenAmount(
+            inputAmount,
+            poolDataResult.poolDetails.tokenXReserve,
+            poolDataResult.poolDetails.tokenYReserve,
+            inputType
+          );
+
+          // Cache and apply approximate result immediately
+          tokenAmountCache.set(cacheKey, approximateResult);
+
+          startTransition(() => {
+            if (inputType === "tokenX") {
+              form.setFieldValue("tokenBAmount", approximateResult);
+            } else {
+              form.setFieldValue("tokenAAmount", approximateResult);
+            }
+            form.validateAllFields("change");
+          });
+
+          setCalculationState(prev => ({
+            ...prev,
+            approximateResult,
+            hasApproximateResult: true,
+          }));
+        } catch (workerError) {
+          console.warn("Worker calculation failed, falling back to API:", workerError);
+        }
       }
-    });
-  }, [poolDataResult.poolDetails, form]);
+
+      // Then get exact result from API
+      const response = await client.liquidity.getAddLiquidityReview({
+        isTokenX: inputType === "tokenX",
+        tokenAmount: amountNumber,
+        tokenXMint: poolDataResult.poolDetails.tokenXMint,
+        tokenYMint: poolDataResult.poolDetails.tokenYMint,
+      });
+
+      // Apply exact result
+      startTransition(() => {
+        if (inputType === "tokenX") {
+          form.setFieldValue("tokenBAmount", String(response.tokenAmount));
+        } else {
+          form.setFieldValue("tokenAAmount", String(response.tokenAmount));
+        }
+        form.validateAllFields("change");
+      });
+
+      setCalculationState(prev => ({
+        ...prev,
+        isCalculating: false,
+        hasApproximateResult: false,
+      }));
+
+    } catch (error) {
+      console.error("Token amount calculation failed:", error);
+      setCalculationState(prev => ({
+        ...prev,
+        isCalculating: false,
+      }));
+    }
+  }, [
+    poolDataResult.poolDetails,
+    form,
+    isWorkerReady,
+    calculateApproximateTokenAmount,
+  ]);
 
   const debouncedCalculateTokenAmounts = useDebouncedCallback(
     calculateTokenAmounts,
@@ -403,8 +572,14 @@ export function LiquidityFormProvider({
 
   const clearPendingCalculations = useCallback(() => {
     debouncedCalculateTokenAmounts.cancel();
-  }, [debouncedCalculateTokenAmounts]);
+    cancelPendingCalculations();
+    setCalculationState(prev => ({
+      ...prev,
+      isCalculating: false,
+    }));
+  }, [debouncedCalculateTokenAmounts, cancelPendingCalculations]);
 
+  // Optimized handleAmountChange with caching for new pool calculations
   const handleAmountChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement>,
     type: "buy" | "sell",
@@ -425,28 +600,73 @@ export function LiquidityFormProvider({
         inputType,
       });
     } else if (!poolDataResult.poolDetails) {
+      // Handle new pool price calculations with caching
       if (type === "buy") {
         const price = form.state.values.initialPrice || "1";
         if (
           parseAmountBigNumber(value).gt(0) &&
           parseAmountBigNumber(price).gt(0)
         ) {
-          const calculatedTokenB = parseAmountBigNumber(value)
-            .multipliedBy(price)
-            .toString();
-          startTransition(() => {
-            form.setFieldValue("tokenBAmount", calculatedTokenB);
-          });
+          const cacheKey = createPriceCalculationKey(value, price);
+
+          // Check cache first
+          const cachedResult = priceCalculationCache.get(cacheKey);
+          if (cachedResult) {
+            startTransition(() => {
+              form.setFieldValue("tokenBAmount", cachedResult);
+            });
+            return;
+          }
+
+          // Calculate with worker if available
+          if (isWorkerReady) {
+            calculatePrice(value, price)
+              .then((result) => {
+                priceCalculationCache.set(cacheKey, result);
+                startTransition(() => {
+                  form.setFieldValue("tokenBAmount", result);
+                });
+              })
+              .catch((error) => {
+                console.warn("Worker price calculation failed:", error);
+                // Fallback to sync calculation
+                const calculatedTokenB = parseAmountBigNumber(value)
+                  .multipliedBy(price)
+                  .toString();
+                priceCalculationCache.set(cacheKey, calculatedTokenB);
+                startTransition(() => {
+                  form.setFieldValue("tokenBAmount", calculatedTokenB);
+                });
+              });
+          } else {
+            // Sync fallback
+            const calculatedTokenB = parseAmountBigNumber(value)
+              .multipliedBy(price)
+              .toString();
+            priceCalculationCache.set(cacheKey, calculatedTokenB);
+            startTransition(() => {
+              form.setFieldValue("tokenBAmount", calculatedTokenB);
+            });
+          }
         }
       }
     }
-  }, [poolDataResult.poolDetails, finalTokenAAddress, finalTokenBAddress, clearPendingCalculations, debouncedCalculateTokenAmounts, form]);
+  }, [
+    poolDataResult.poolDetails,
+    finalTokenAAddress,
+    finalTokenBAddress,
+    clearPendingCalculations,
+    debouncedCalculateTokenAmounts,
+    form,
+    isWorkerReady,
+    calculatePrice,
+  ]);
 
   const checkLiquidityTransactionStatus = useCallback(async (signature: string) => {
     await statusChecker.checkTransactionStatus(signature);
   }, [statusChecker]);
 
-  const handleDeposit = useCallback(async (formValues?: LiquidityFormValues) => {
+  const handleDeposit = useCallback(async () => {
     if (!publicKey) {
       transactionToasts.showErrorToast(ERROR_MESSAGES.MISSING_WALLET_INFO);
       return;
@@ -454,9 +674,8 @@ export function LiquidityFormProvider({
 
     transactionToasts.showStepToast(1);
 
-    const values = formValues || form.state.values;
-    const tokenAAmount = parseAmount(values.tokenAAmount);
-    const tokenBAmount = parseAmount(values.tokenBAmount);
+    const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
+    const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
     trackInitiated({
       action: "add",
       amountA: tokenAAmount,
@@ -484,8 +703,8 @@ export function LiquidityFormProvider({
         throw new Error("Invalid token addresses after sorting");
       }
 
-      const sellAmount = parseAmount(values.tokenBAmount);
-      const buyAmount = parseAmount(values.tokenAAmount);
+      const sellAmount = parseAmount(form.state.values.tokenBAmount);
+      const buyAmount = parseAmount(form.state.values.tokenAAmount);
 
       const isTokenXSell = poolDataResult.poolDetails?.tokenXMint === finalTokenBAddress;
       const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
@@ -525,8 +744,8 @@ export function LiquidityFormProvider({
     } catch (error) {
       console.error("Liquidity error:", error);
       handleError(error, {
-        amountA: values.tokenAAmount,
-        amountB: values.tokenBAmount,
+        amountA: form.state.values.tokenAAmount,
+        amountB: form.state.values.tokenBAmount,
         tokenA: finalTokenAAddress,
         tokenB: finalTokenBAddress,
       });
@@ -547,16 +766,22 @@ export function LiquidityFormProvider({
     handleError,
   ]);
 
+  // State selectors for optimization
   const isSubmitting = state.matches("submitting") || state.matches("signing");
   const isSuccess = state.matches("success");
   const isError = state.matches("error");
-  const isCalculating = state.matches("calculating") || state.context.isCalculating;
+  const isCalculating = state.matches("calculating") ||
+                       state.context.isCalculating ||
+                       calculationState.isCalculating ||
+                       isWorkerCalculating;
   const hasError = isError && !!state.context.error;
 
+  // Track liquidity action wrapper
   const trackLiquidityAction = useCallback((data: Parameters<typeof trackConfirmed>[0]) => {
     trackConfirmed(data);
   }, [trackConfirmed]);
 
+  // Prepare context values for each focused provider
   const formStateValue = useMemo(() => ({
     form,
     state: state.context,
@@ -566,7 +791,23 @@ export function LiquidityFormProvider({
     isError,
     isCalculating,
     hasError,
-  }), [form, state.context, send, isSubmitting, isSuccess, isError, isCalculating, hasError]);
+    // Add calculation state for progressive feedback
+    calculationState,
+    isWorkerReady,
+    workerError,
+  }), [
+    form,
+    state.context,
+    send,
+    isSubmitting,
+    isSuccess,
+    isError,
+    isCalculating,
+    hasError,
+    calculationState,
+    isWorkerReady,
+    workerError,
+  ]);
 
   const dataValue = useMemo(() => ({
     poolDetails: poolDataResult.poolDetails,
@@ -583,7 +824,15 @@ export function LiquidityFormProvider({
     trackLiquidityAction,
     trackError: trackLiquidityError,
     handleError,
-  }), [resetFormToDefaults, handleAmountChange, clearPendingCalculations, calculateTokenAmounts, trackLiquidityAction, trackLiquidityError, handleError]);
+  }), [
+    resetFormToDefaults,
+    handleAmountChange,
+    clearPendingCalculations,
+    calculateTokenAmounts,
+    trackLiquidityAction,
+    trackLiquidityError,
+    handleError,
+  ]);
 
   const walletValue = useMemo(() => ({
     publicKey,
@@ -610,10 +859,12 @@ export function LiquidityFormProvider({
   );
 }
 
-export const useLiquidityForm = useCompositeContext;
+// Export the composite hook from LiquidityContexts
+export const useOptimizedLiquidityForm = useCompositeContext;
 
-export function useLiquidityFormWithDebounced() {
-  const context = useLiquidityForm();
+// Also export a debounced version for backward compatibility
+export function useOptimizedLiquidityFormWithDebounced() {
+  const context = useOptimizedLiquidityForm();
   const debouncedCalculateTokenAmounts = useDebouncedCallback(
     context.calculateTokenAmounts,
     LIQUIDITY_CONSTANTS.DEBOUNCE_DELAY_MS,

@@ -216,9 +216,38 @@ export function SwapForm() {
 
       refetchBuyTokenAccount();
       refetchSellTokenAccount();
+
       queryClient.invalidateQueries({
         queryKey: ["token-accounts", publicKey?.toBase58()],
       });
+
+      if (tokenAAddress && tokenBAddress) {
+        const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
+        const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } = sortedTokens;
+
+        const poolKey = `${tokenXMint}-${tokenYMint}`;
+        const sortedPoolKey = [tokenXMint, tokenYMint].sort().join("-");
+
+        queryClient.invalidateQueries({
+          queryKey: ["pool-details", poolKey],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["pool-details", sortedPoolKey],
+        });
+
+        const poolDetailsOpts = tanstackClient.pools.getPoolDetails.queryOptions({
+          input: { tokenXMint, tokenYMint },
+        });
+
+        queryClient.invalidateQueries({ queryKey: poolDetailsOpts.queryKey });
+
+        queryClient.invalidateQueries({
+          queryKey: ["pool", tokenXMint, tokenYMint],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["pool", tokenYMint, tokenXMint],
+        });
+      }
     },
     onTimeout: () => {
       toasts.showErrorToast("Failed to check trade status", {

@@ -4,15 +4,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LiquidityTransactionStatus } from "../LiquidityTransactionStatus";
 import { LiquidityError, LiquidityErrorCode } from "../../_utils/liquidityErrors";
 
-// Mock the LiquidityFormProvider
-const mockUseLiquidityForm = vi.fn();
+// Mock the focused context hooks
+const mockUseLiquidityFormState = vi.fn();
+const mockUseLiquidityActions = vi.fn();
 
-vi.mock("../LiquidityFormProvider", () => ({
-  useLiquidityForm: () => mockUseLiquidityForm(),
+vi.mock("../LiquidityContexts", () => ({
+  useLiquidityFormState: () => mockUseLiquidityFormState(),
+  useLiquidityActions: () => mockUseLiquidityActions(),
 }));
 
 describe("LiquidityTransactionStatus", () => {
-  const defaultMockState = {
+  const defaultMockFormState = {
     state: {
       error: null,
       transactionSignature: null,
@@ -23,22 +25,26 @@ describe("LiquidityTransactionStatus", () => {
     isError: false,
     isSubmitting: false,
     hasError: false,
+  };
+
+  const defaultMockActions = {
     resetFormToDefaults: vi.fn(),
     trackError: vi.fn(),
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseLiquidityForm.mockReturnValue(defaultMockState);
+    mockUseLiquidityFormState.mockReturnValue(defaultMockFormState);
+    mockUseLiquidityActions.mockReturnValue(defaultMockActions);
   });
 
   describe("Success State", () => {
     it("should display success message and celebration UI", () => {
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isSuccess: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           transactionSignature: "test-signature",
         },
       });
@@ -52,11 +58,11 @@ describe("LiquidityTransactionStatus", () => {
     });
 
     it("should display transaction hash link when provided", () => {
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isSuccess: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           transactionSignature: "abcd1234efgh5678",
         },
       });
@@ -76,8 +82,8 @@ describe("LiquidityTransactionStatus", () => {
       const mockSend = vi.fn();
       const mockReset = vi.fn();
 
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isSuccess: true,
         send: mockSend,
         resetFormToDefaults: mockReset,
@@ -102,12 +108,12 @@ describe("LiquidityTransactionStatus", () => {
         true
       );
 
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isError: true,
         hasError: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           error,
         },
       });
@@ -129,12 +135,12 @@ describe("LiquidityTransactionStatus", () => {
         true
       );
 
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isError: true,
         hasError: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           error,
         },
       });
@@ -153,12 +159,12 @@ describe("LiquidityTransactionStatus", () => {
         false
       );
 
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isError: true,
         hasError: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           error,
         },
       });
@@ -176,12 +182,12 @@ describe("LiquidityTransactionStatus", () => {
         true
       );
 
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isError: true,
         hasError: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           error,
         },
       });
@@ -201,12 +207,12 @@ describe("LiquidityTransactionStatus", () => {
         'warning'
       );
 
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isError: true,
         hasError: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           error,
         },
       });
@@ -220,11 +226,11 @@ describe("LiquidityTransactionStatus", () => {
 
   describe("Loading States", () => {
     it("should display loading state with progress bar", () => {
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isSubmitting: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           liquidityStep: 2,
         },
       });
@@ -240,11 +246,11 @@ describe("LiquidityTransactionStatus", () => {
     });
 
     it("should show wallet prompt message during step 2", () => {
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isSubmitting: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           liquidityStep: 2,
         },
       });
@@ -258,8 +264,8 @@ describe("LiquidityTransactionStatus", () => {
 
   describe("Accessibility", () => {
     it("should have proper ARIA labels and roles", () => {
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isSuccess: true,
       });
 
@@ -270,8 +276,8 @@ describe("LiquidityTransactionStatus", () => {
     });
 
     it("should have proper live regions", () => {
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isSuccess: true,
       });
 
@@ -289,12 +295,12 @@ describe("LiquidityTransactionStatus", () => {
         false
       );
 
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isError: true,
         hasError: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           error,
         },
       });
@@ -308,8 +314,8 @@ describe("LiquidityTransactionStatus", () => {
 
   describe("Custom Props", () => {
     it("should render with custom className", () => {
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isSuccess: true,
       });
 
@@ -320,11 +326,11 @@ describe("LiquidityTransactionStatus", () => {
     });
 
     it("should hide transaction hash when showTransactionHash is false", () => {
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isSuccess: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           transactionSignature: "test-signature",
         },
       });
@@ -342,12 +348,12 @@ describe("LiquidityTransactionStatus", () => {
         true
       );
 
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isError: true,
         hasError: true,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           error,
         },
       });
@@ -361,8 +367,8 @@ describe("LiquidityTransactionStatus", () => {
       const user = userEvent.setup();
       const mockNavigateToPool = vi.fn();
 
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isSuccess: true,
       });
 
@@ -377,7 +383,7 @@ describe("LiquidityTransactionStatus", () => {
 
   describe("Edge Cases", () => {
     it("should return null when no state matches", () => {
-      mockUseLiquidityForm.mockReturnValue(defaultMockState);
+      mockUseLiquidityFormState.mockReturnValue(defaultMockFormState);
 
       const { container } = render(<LiquidityTransactionStatus />);
 
@@ -385,12 +391,12 @@ describe("LiquidityTransactionStatus", () => {
     });
 
     it("should handle missing error gracefully", () => {
-      mockUseLiquidityForm.mockReturnValue({
-        ...defaultMockState,
+      mockUseLiquidityFormState.mockReturnValue({
+        ...defaultMockFormState,
         isError: true,
         hasError: false,
         state: {
-          ...defaultMockState.state,
+          ...defaultMockFormState.state,
           error: null,
         },
       });

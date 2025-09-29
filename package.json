@@ -30,6 +30,7 @@
     "next-intl": "^4.3.3",
     "nuqs": "^2.4.3",
     "pg": "^8.16.3",
+    "pino-pretty": "^13.1.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-infinite-scroll-component": "^6.1.0",

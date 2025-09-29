@@ -1,157 +1,150 @@
 import { assign, setup } from 'xstate';
+import type { LiquidityFormValues, PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
 
-interface PoolDetails {
-  poolAddress?: string;
-  tokenXMint?: string;
-  tokenYMint?: string;
-  price?: string;
-}
-
-interface TokenAccount {
-  address?: string;
-  amount?: number;
-  decimals?: number;
-  symbol?: string;
-  tokenAccounts?: Array<{
-    address: string;
-    amount: number;
-    decimals: number;
-    symbol: string;
-  }>;
-}
-
-export interface LiquidityInput {
-  poolDetails?: PoolDetails | null;
-  buyTokenAccount?: TokenAccount | null;
-  sellTokenAccount?: TokenAccount | null;
-}
-
-export interface LiquidityContext {
-  error: string | null;
-  tokenAAmount: string;
-  tokenBAmount: string;
-  transactionSignature?: string;
+export interface LiquidityMachineContext {
   poolDetails: PoolDetails | null;
-  tokenAccounts: {
-    buy: TokenAccount | null;
-    sell: TokenAccount | null;
-  };
-  isDataReady: boolean;
+  buyTokenAccount: TokenAccountsData | null;
+  sellTokenAccount: TokenAccountsData | null;
+  error: string | null;
+  transactionSignature: string | null;
+  liquidityStep: number;
+  isCalculating: boolean;
 }
 
-export type LiquidityEvent =
-  | { type: 'DATA_LOADED'; poolDetails?: PoolDetails; tokenAccounts?: { buy: TokenAccount | null; sell: TokenAccount | null } }
-  | { type: 'SUBMIT'; data: { tokenAAmount: string; tokenBAmount: string } }
-  | { type: 'SUCCESS'; signature?: string }
-  | { type: 'ERROR'; error: string }
-  | { type: 'RESET' }
-  | { type: 'RETRY' };
+export type LiquidityMachineEvent =
+  | { type: "UPDATE_POOL_DETAILS"; data: PoolDetails | null }
+  | { type: "UPDATE_TOKEN_ACCOUNTS"; buyAccount: TokenAccountsData | null; sellAccount: TokenAccountsData | null }
+  | { type: "START_CALCULATION" }
+  | { type: "FINISH_CALCULATION" }
+  | { type: "SUBMIT"; data: LiquidityFormValues }
+  | { type: "SIGN_TRANSACTION"; signature: string }
+  | { type: "SUCCESS" }
+  | { type: "ERROR"; error: string }
+  | { type: "RETRY" }
+  | { type: "RESET" };
 
 export const liquidityMachine = setup({
   types: {} as {
-    input: LiquidityInput;
-    context: LiquidityContext;
-    events: LiquidityEvent;
-  },
-  actions: {
-    setDataLoaded: assign({
-      poolDetails: ({ event }) => (event.type === 'DATA_LOADED' ? event.poolDetails || null : null),
-      tokenAccounts: ({ event }) => (event.type === 'DATA_LOADED' ? event.tokenAccounts || { buy: null, sell: null } : { buy: null, sell: null }),
-      isDataReady: true,
-    }),
-    setFormData: assign({
-      tokenAAmount: ({ event }) => (event.type === 'SUBMIT' ? event.data.tokenAAmount : '0'),
-      tokenBAmount: ({ event }) => (event.type === 'SUBMIT' ? event.data.tokenBAmount : '0'),
-      error: null,
-    }),
-    setTransactionSignature: assign({
-      transactionSignature: ({ event }) => (event.type === 'SUCCESS' ? event.signature : undefined),
-      error: null,
-    }),
-    setError: assign({
-      error: ({ event }) => (event.type === 'ERROR' ? event.error : null),
-    }),
-    clearError: assign({
-      error: null,
-    }),
-    clearContext: assign({
-      error: null,
-      tokenAAmount: '0',
-      tokenBAmount: '0',
-      transactionSignature: undefined,
-    }),
+    context: LiquidityMachineContext;
+    events: LiquidityMachineEvent;
   },
 }).createMachine({
-  id: 'liquidity',
-  initial: 'initializing',
-  context: ({ input }) => ({
+  id: "liquidity",
+  initial: "idle",
+  context: {
+    poolDetails: null,
+    buyTokenAccount: null,
+    sellTokenAccount: null,
     error: null,
-    tokenAAmount: '0',
-    tokenBAmount: '0',
-    transactionSignature: undefined,
-    poolDetails: input?.poolDetails || null,
-    tokenAccounts: {
-      buy: input?.buyTokenAccount || null,
-      sell: input?.sellTokenAccount || null,
-    },
-    isDataReady: !!(input?.poolDetails && input?.buyTokenAccount && input?.sellTokenAccount),
-  }),
+    transactionSignature: null,
+    liquidityStep: 0,
+    isCalculating: false,
+  } as LiquidityMachineContext,
   states: {
-    initializing: {
-      after: {
-        1000: {
-          target: 'editing',
-          actions: assign({ isDataReady: true }),
-        },
-      },
+    idle: {
       on: {
-        DATA_LOADED: {
-          target: 'editing',
-          actions: 'setDataLoaded',
+        UPDATE_POOL_DETAILS: {
+          actions: assign({
+            poolDetails: ({ event }) => event.data,
+          }),
         },
-      },
-    },
-    editing: {
-      entry: 'clearError',
-      on: {
-        DATA_LOADED: {
-          actions: 'setDataLoaded',
+        UPDATE_TOKEN_ACCOUNTS: {
+          actions: assign({
+            buyTokenAccount: ({ event }) => event.buyAccount,
+            sellTokenAccount: ({ event }) => event.sellAccount,
+          }),
+        },
+        START_CALCULATION: {
+          target: "calculating",
         },
         SUBMIT: {
-          target: 'submitting',
-          actions: 'setFormData',
+          target: "submitting",
+        },
+      },
+    },
+    calculating: {
+      entry: assign({
+        isCalculating: true,
+      }),
+      exit: assign({
+        isCalculating: false,
+      }),
+      on: {
+        FINISH_CALCULATION: {
+          target: "idle",
+        },
+        SUBMIT: {
+          target: "submitting",
         },
       },
     },
     submitting: {
+      entry: assign({
+        liquidityStep: 1,
+        error: null,
+      }),
       on: {
-        SUCCESS: {
-          target: 'success',
-          actions: 'setTransactionSignature',
+        SIGN_TRANSACTION: {
+          target: "signing",
+          actions: assign({
+            transactionSignature: ({ event }) => event.signature,
+            liquidityStep: 2,
+          }),
         },
         ERROR: {
-          target: 'error',
-          actions: 'setError',
+          target: "error",
+          actions: assign({
+            error: ({ event }) => event.error,
+            liquidityStep: 0,
+          }),
+        },
+      },
+    },
+    signing: {
+      entry: assign({
+        liquidityStep: 3,
+      }),
+      on: {
+        SUCCESS: {
+          target: "success",
+          actions: assign({
+            liquidityStep: 0,
+            error: null,
+          }),
+        },
+        ERROR: {
+          target: "error",
+          actions: assign({
+            error: ({ event }) => event.error,
+            liquidityStep: 0,
+          }),
         },
       },
     },
     success: {
       on: {
         RESET: {
-          target: 'editing',
-          actions: 'clearContext',
+          target: "idle",
+          actions: assign({
+            error: null,
+            transactionSignature: null,
+            liquidityStep: 0,
+          }),
         },
       },
     },
     error: {
       on: {
         RETRY: {
-          target: 'submitting',
-          actions: 'clearError',
+          target: "submitting",
         },
         RESET: {
-          target: 'editing',
-          actions: 'clearContext',
+          target: "idle",
+          actions: assign({
+            error: null,
+            transactionSignature: null,
+            liquidityStep: 0,
+          }),
         },
       },
     },
@@ -160,8 +153,8 @@ export const liquidityMachine = setup({
 
 export type LiquidityMachine = typeof liquidityMachine;
 
-export type LiquidityState = 'initializing' | 'editing' | 'submitting' | 'success' | 'error';
+export type LiquidityState = 'idle' | 'calculating' | 'submitting' | 'signing' | 'success' | 'error';
 
 export const isLiquidityState = (state: string): state is LiquidityState => {
-  return ['initializing', 'editing', 'submitting', 'success', 'error'].includes(state);
+  return ['idle', 'calculating', 'submitting', 'signing', 'success', 'error'].includes(state);
 };

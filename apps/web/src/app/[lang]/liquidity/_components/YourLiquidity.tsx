@@ -75,25 +75,27 @@ export function YourLiquidity({
     }),
   );
 
-  const { data: tokenXPrice } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenPrice.queryOptions({
+  const { data: tokenXPrice } = useSuspenseQuery({
+    ...tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
         mint: tokenXAddress,
         quoteCurrency: "USD",
       },
     }),
-  );
+    staleTime: 5 * 1000,
+  });
 
-  const { data: tokenYPrice } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenPrice.queryOptions({
+  const { data: tokenYPrice } = useSuspenseQuery({
+    ...tanstackClient.tokens.getTokenPrice.queryOptions({
       input: {
         amount: 1,
         mint: tokenYAddress,
         quoteCurrency: "USD",
       },
     }),
-  );
+    staleTime: 5 * 1000,
+  });
 
   const liquidityCalculations = useMemo(() => {
     if (

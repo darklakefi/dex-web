@@ -1,17 +1,7 @@
 import type { ValidationState } from "../_hooks/useLiquidityValidation";
-import type { LiquidityMachineContext } from "../_machines/enhancedLiquidityMachine";
+import type { LiquidityMachineContext } from "../_machines/liquidityMachine";
 import type { PoolDetails } from "../_types/liquidity.types";
 
-/**
- * Button state utilities for liquidity form actions
- *
- * This module provides comprehensive button state management that integrates:
- * - XState machine states for transaction flow
- * - TanStack Form validation and submission states
- * - DeFi-specific validation (balance, slippage, etc.)
- * - Loading states for async operations
- * - Accessibility considerations
- */
 
 export type ButtonState =
   | "SUBMITTING"
@@ -39,22 +29,10 @@ export interface ButtonStateProps {
   isPoolLoading: boolean;
   isTokenAccountsLoading: boolean;
   isCalculating: boolean;
-  /** TanStack Form canSubmit state */
   formCanSubmit?: boolean;
-  /** TanStack Form isSubmitting state */
   isFormSubmitting?: boolean;
 }
 
-/**
- * Enhanced button state logic with TanStack Form integration
- *
- * Priority order (first match wins):
- * 1. Transaction/Machine states (submitting, calculating)
- * 2. Loading states (pool, token accounts)
- * 3. Wallet connection
- * 4. Validation errors (tokens, balance, price)
- * 5. Form states (amounts, submission readiness)
- */
 export function getLiquidityButtonState({
   machineContext,
   validation,
@@ -66,7 +44,6 @@ export function getLiquidityButtonState({
   formCanSubmit = false,
   isFormSubmitting = false,
 }: ButtonStateProps): ButtonState {
-  // High priority states - transaction in progress
   if (isFormSubmitting ||
       machineContext.liquidityStep === 1 ||
       machineContext.liquidityStep === 2 ||
@@ -74,7 +51,6 @@ export function getLiquidityButtonState({
     return "SUBMITTING";
   }
 
-  // Loading states
   if (isPoolLoading || isTokenAccountsLoading) {
     return "LOADING";
   }
@@ -83,12 +59,10 @@ export function getLiquidityButtonState({
     return "CALCULATING";
   }
 
-  // Wallet connection required
   if (!hasWallet) {
     return "DISABLED";
   }
 
-  // Validation error states
   if (validation.errors?.general === "Select different tokens") {
     return "SAME_TOKENS";
   }
@@ -97,9 +71,7 @@ export function getLiquidityButtonState({
     return "INSUFFICIENT_BALANCE";
   }
 
-  // Pool-specific logic
   if (!poolDetails) {
-    // Creating new pool
     if (!validation.hasAmounts) {
       return "ENTER_AMOUNTS";
     }
@@ -108,20 +80,17 @@ export function getLiquidityButtonState({
       return "INVALID_PRICE";
     }
 
-    // Has amounts and valid price - ready to create
-    if (validation.hasAmounts && formCanSubmit) {
+    if (validation.hasAmounts) {
       return "CREATE_POOL";
     }
 
     return "ENTER_AMOUNTS";
   } else {
-    // Adding to existing pool
     if (!validation.hasAmounts) {
       return "ENTER_AMOUNT";
     }
 
-    // Check both validation and form state for full readiness
-    if (validation.canSubmit && formCanSubmit) {
+    if (validation.canSubmit) {
       return "ADD_LIQUIDITY";
     }
 
@@ -129,10 +98,6 @@ export function getLiquidityButtonState({
   }
 }
 
-/**
- * Get user-friendly button message based on state
- * Messages are optimized for clarity and actionability
- */
 export function getButtonMessage(state: ButtonState): string {
   const messages: Record<ButtonState, string> = {
     SUBMITTING: "Processing Transaction...",
@@ -151,9 +116,6 @@ export function getButtonMessage(state: ButtonState): string {
   return messages[state];
 }
 
-/**
- * Check if button should be disabled based on state
- */
 export function isButtonDisabled(state: ButtonState): boolean {
   const disabledStates: ButtonState[] = [
     "LOADING",
@@ -169,16 +131,10 @@ export function isButtonDisabled(state: ButtonState): boolean {
   return disabledStates.includes(state);
 }
 
-/**
- * Check if button should show loading state
- */
 export function isButtonLoading(state: ButtonState): boolean {
   return state === "SUBMITTING" || state === "CALCULATING";
 }
 
-/**
- * Get button severity level for styling
- */
 export function getButtonSeverity(state: ButtonState): 'info' | 'warning' | 'error' | 'success' {
   switch (state) {
     case "INSUFFICIENT_BALANCE":

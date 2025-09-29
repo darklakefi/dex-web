@@ -32,11 +32,8 @@ export const ProgramFactory = {
 			// Runtime validation of program methods
 			if (requiredInstructions.length > 0) {
 				const missingMethods = requiredInstructions.filter((instruction) => {
-					// Convert snake_case to camelCase for method names
-					const methodName = instruction.replace(/_([a-z])/g, (_, letter) =>
-						letter.toUpperCase(),
-					);
-					return !program.methods[methodName];
+					// Anchor programs use snake_case method names directly
+					return !program.methods[instruction];
 				});
 
 				if (missingMethods.length > 0) {

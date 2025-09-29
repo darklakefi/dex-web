@@ -15,7 +15,7 @@ import {
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
 import { LiquidityActionButton } from "./LiquidityActionButton";
 import { LiquidityErrorBoundary } from "./LiquidityErrorBoundary";
-import { LiquidityFormProvider, useLiquidityForm } from "./LiquidityFormProvider";
+import { LiquidityFormProvider, useLiquidityFormWithDebounced } from "./LiquidityFormProvider";
 import { LiquidityTokenInputs } from "./LiquidityTokenInputs";
 import { LiquidityTransactionStatus } from "./LiquidityTransactionStatus";
 
@@ -32,9 +32,9 @@ function LiquidityFormContent() {
     tokenAccountsData,
     tokenAAddress,
     tokenBAddress,
-  } = useLiquidityForm();
+    publicKey,
+  } = useLiquidityFormWithDebounced();
 
-  // Event handlers - these are functions that respond to user actions
   const handleSlippageChange = (newSlippage: string) => {
     setSlippage(newSlippage);
     if (form.state.values.tokenBAmount !== "0") {
@@ -56,7 +56,6 @@ function LiquidityFormContent() {
     router.push(`/${urlWithParams}`);
   };
 
-  // Derive values during render - no memoization needed unless proven expensive
   const shouldShowAddLiquidityDetails = poolDetails &&
     form.state.values.tokenBAmount !== "0" &&
     form.state.values.tokenAAmount !== "0";
@@ -79,7 +78,19 @@ function LiquidityFormContent() {
             tokenBAddress={tokenBAddress}
             poolDetails={poolDetails}
           />
-          <LiquidityActionButton />
+          <LiquidityActionButton
+            publicKey={publicKey}
+            buyTokenAccount={tokenAccountsData.buyTokenAccount}
+            sellTokenAccount={tokenAccountsData.sellTokenAccount}
+            poolDetails={poolDetails}
+            tokenAAddress={tokenAAddress}
+            tokenBAddress={tokenBAddress}
+            isPoolLoading={false}
+            isTokenAccountsLoading={tokenAccountsData.isLoadingBuy || tokenAccountsData.isLoadingSell}
+            onSubmit={() => {
+              form.handleSubmit();
+            }}
+          />
           <LiquidityTransactionStatus />
         </div>
 

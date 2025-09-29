@@ -12,11 +12,11 @@ interface UseOptimizedPoolDataParams {
 const getQueryConfig = (priority: string) => {
   switch (priority) {
     case "high":
-      return { refetchInterval: 15000, staleTime: 12000 };
+      return { refetchInterval: 10000, staleTime: 7000 };
     case "low":
-      return { refetchInterval: 60000, staleTime: 55000 };
+      return { refetchInterval: 45000, staleTime: 30000 };
     default:
-      return { refetchInterval: 30000, staleTime: 25000 };
+      return { refetchInterval: 15000, staleTime: 10000 };
   }
 };
 

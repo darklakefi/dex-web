@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@dex-web/ui";
-import { useLiquidityForm } from "./LiquidityFormProvider";
+import { useLiquidityFormState } from "./LiquidityContexts";
 import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
 import { getLiquidityButtonState, getButtonMessage, type ButtonState } from "../_utils/liquidityButtonState";
 import { useRouter } from "next/navigation";
@@ -37,10 +37,10 @@ export function LiquidityActionButton({
   onSubmit,
 }: LiquidityActionButtonProps) {
   const router = useRouter();
-  const { state, isCalculating } = useLiquidityForm();
+  const { state, isCalculating, form } = useLiquidityFormState();
 
   const validation = useLiquidityValidation({
-    formValues: state.formValues,
+    formValues: form.state.values,
     buyTokenAccount,
     sellTokenAccount,
     poolDetails,
@@ -61,17 +61,13 @@ export function LiquidityActionButton({
 
   const buttonMessage = getButtonMessage(buttonState);
 
-  // Function to handle button click
   const handleButtonClick = () => {
-    // Add transaction preview for high-value transactions
     if (shouldShowTransactionPreview(validation)) {
-      // This would open a preview modal in a real implementation
       console.warn('High-value transaction - consider adding preview modal');
     }
     onSubmit();
   };
 
-  // Get button properties based on state
   const getButtonProps = () => {
     const isDisabled = buttonState === 'INSUFFICIENT_BALANCE' ||
                        buttonState === 'SAME_TOKENS' ||
@@ -115,7 +111,6 @@ export function LiquidityActionButton({
     );
   }
 
-  // Handle pool creation navigation
   if (!poolDetails || buttonState === 'CREATE_POOL') {
     return (
       <Button
@@ -135,7 +130,6 @@ export function LiquidityActionButton({
     );
   }
 
-  // Main action button
   return (
     <>
       <Button
@@ -154,7 +148,6 @@ export function LiquidityActionButton({
         {buttonMessage}
       </Button>
 
-      {/* Security warnings for high-value transactions */}
       {shouldShowSecurityWarning(validation, buttonState) && (
         <SecurityWarning
           validation={validation}
@@ -165,9 +158,6 @@ export function LiquidityActionButton({
   );
 }
 
-/**
- * Get appropriate button variant based on state
- */
 function _getButtonVariant(buttonState: ButtonState): 'primary' | 'secondary' | 'danger' {
   switch (buttonState) {
     case 'INSUFFICIENT_BALANCE':
@@ -181,9 +171,6 @@ function _getButtonVariant(buttonState: ButtonState): 'primary' | 'secondary' | 
   }
 }
 
-/**
- * Generate accessible aria-label for the button
- */
 function _getAriaLabel(buttonState: ButtonState, buttonMessage: string): string {
   const stateDescriptions: Record<ButtonState, string> = {
     SUBMITTING: 'Transaction in progress, please wait',
@@ -202,9 +189,6 @@ function _getAriaLabel(buttonState: ButtonState, buttonMessage: string): string 
   return stateDescriptions[buttonState] || buttonMessage;
 }
 
-/**
- * Security warning component for high-value transactions
- */
 function SecurityWarning({ validation: _validation, buttonState: _buttonState }: { validation: unknown; buttonState: ButtonState }) {
   return (
     <div className="mt-2 rounded-md border border-yellow-200 bg-yellow-50 p-3">
@@ -217,20 +201,10 @@ function SecurityWarning({ validation: _validation, buttonState: _buttonState }:
   );
 }
 
-/**
- * Check if security warning should be shown
- */
 function shouldShowSecurityWarning(_validation: unknown, _buttonState: ButtonState): boolean {
-  // This would implement actual high-value detection logic
-  // For now, return false as placeholder
   return false;
 }
 
-/**
- * Check if transaction preview should be shown
- */
 function shouldShowTransactionPreview(_validation: unknown): boolean {
-  // This would implement actual high-value detection logic
-  // For now, return false as placeholder
   return false;
 }

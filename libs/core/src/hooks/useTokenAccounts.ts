@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, type QueryFunctionContext } from "@tanstack/react-query";
+
 import type { PublicKey } from "@solana/web3.js";
 
 export interface TokenAccountsQueryClient {
@@ -68,7 +69,7 @@ export const useTokenAccounts = ({
       },
     }),
     enabled: !!publicKey && !!tokenAAddress,
-    staleTime: 0,
+    staleTime: 12 * 1000,
   });
 
   const {
@@ -84,7 +85,7 @@ export const useTokenAccounts = ({
       },
     }),
     enabled: !!publicKey && !!tokenBAddress,
-    staleTime: 0,
+    staleTime: 12 * 1000,
   });
 
   return {

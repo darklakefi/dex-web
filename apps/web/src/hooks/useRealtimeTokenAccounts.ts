@@ -43,7 +43,7 @@ export function useRealtimeTokenAccounts({
     {
       pollingInterval: hasRecentTransaction ? 3000 : 15000,
       enabled: !!publicKey && !!tokenAAddress,
-      staleTime: hasRecentTransaction ? 2000 : 10000,
+      staleTime: hasRecentTransaction ? 2000 : 12000,
     }
   );
 
@@ -58,7 +58,7 @@ export function useRealtimeTokenAccounts({
     {
       pollingInterval: hasRecentTransaction ? 3000 : 15000,
       enabled: !!publicKey && !!tokenBAddress,
-      staleTime: hasRecentTransaction ? 2000 : 10000,
+      staleTime: hasRecentTransaction ? 2000 : 12000,
     }
   );
 

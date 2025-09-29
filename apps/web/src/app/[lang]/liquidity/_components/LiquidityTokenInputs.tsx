@@ -86,10 +86,8 @@ export function LiquidityTokenInputs({
   ) => {
     const value = formatAmountInput(e.target.value);
 
-    // Cancel pending calculations when user manually inputs
     clearPendingCalculations();
 
-    // Only trigger calculations for actual user input, not programmatic changes
     if (e.isTrusted && poolDetails && parseAmountBigNumber(value).gt(0)) {
       const inputType =
         (type === "sell" && poolDetails?.tokenXMint === tokenBAddress) ||
@@ -102,7 +100,6 @@ export function LiquidityTokenInputs({
         inputType,
       });
     } else if (!poolDetails) {
-      // Handle pool creation mode
       if (type === "buy") {
         const price = form.state.values.initialPrice || "1";
         if (
@@ -123,9 +120,8 @@ export function LiquidityTokenInputs({
       aria-labelledby="liquidity-inputs-heading"
       className="flex flex-col gap-4"
     >
-      {/* Sell Token Input */}
       {isLoadingSell && !sellTokenAccount ? (
-        <SkeletonTokenInput />
+        <SkeletonTokenInput label="SELL AMOUNT" />
       ) : (
         <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
           <div>
@@ -146,7 +142,6 @@ export function LiquidityTokenInputs({
             name={FORM_FIELD_NAMES.TOKEN_B_AMOUNT}
             validators={{
               onChange: ({ value }) => {
-                // Validate sufficient balance
                 const balanceValidation = validateHasSufficientBalance({
                   amount: value,
                   tokenAccount: sellTokenAccount?.tokenAccounts?.[0],
@@ -154,7 +149,6 @@ export function LiquidityTokenInputs({
 
                 if (balanceValidation) return balanceValidation;
 
-                // Validate numeric input
                 if (value && parseAmountBigNumber(value).isNaN()) {
                   return "Please enter a valid number";
                 }
@@ -186,7 +180,6 @@ export function LiquidityTokenInputs({
         </Box>
       )}
 
-      {/* Plus Icon Separator */}
       <div className="flex items-center justify-center">
         <div
           className="inline-flex size-8 items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300"
@@ -197,9 +190,8 @@ export function LiquidityTokenInputs({
         </div>
       </div>
 
-      {/* Buy Token Input */}
       {isLoadingBuy && !buyTokenAccount ? (
-        <SkeletonTokenInput />
+        <SkeletonTokenInput label="BUY AMOUNT" />
       ) : (
         <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
           <div>
@@ -220,7 +212,6 @@ export function LiquidityTokenInputs({
             name={FORM_FIELD_NAMES.TOKEN_A_AMOUNT}
             validators={{
               onChange: ({ value }) => {
-                // Validate sufficient balance
                 const balanceValidation = validateHasSufficientBalance({
                   amount: value,
                   tokenAccount: buyTokenAccount?.tokenAccounts?.[0],
@@ -228,7 +219,6 @@ export function LiquidityTokenInputs({
 
                 if (balanceValidation) return balanceValidation;
 
-                // Validate numeric input
                 if (value && parseAmountBigNumber(value).isNaN()) {
                   return "Please enter a valid number";
                 }
