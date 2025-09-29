@@ -160,7 +160,7 @@ export function FormFieldset({
           <div className="flex gap-3 font-normal font-sans text-green-300 text-lg uppercase leading-6 tracking-wider">
             <span className="relative flex items-center">
               {(isLoading && !tokenAccount) || !tokenAccount ? (
-                <SkeletonLoader variant="balance" className="w-28" />
+                <SkeletonLoader className="w-28" variant="balance" />
               ) : (
                 <>
                   <span>
@@ -186,8 +186,8 @@ export function FormFieldset({
                       ? "cursor-not-allowed opacity-50"
                       : "cursor-pointer"
                   }`}
-                  onClick={setValueToHalfAmount}
                   disabled={isRefreshing || isLoading}
+                  onClick={setValueToHalfAmount}
                   type="button"
                 >
                   Half
@@ -198,8 +198,8 @@ export function FormFieldset({
                       ? "cursor-not-allowed opacity-50"
                       : "cursor-pointer"
                   }`}
-                  onClick={setValueToMaxAmount}
                   disabled={isRefreshing || isLoading}
+                  onClick={setValueToMaxAmount}
                   type="button"
                 >
                   Max

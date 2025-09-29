@@ -59,6 +59,7 @@ import type {
 import { liquidityFormSchema } from "../_types/liquidity.types";
 import { startCacheCleanup } from "../_utils/calculationCache";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
+import type { LiquidityFormStateContextValue } from "./LiquidityContexts";
 import {
   LiquidityActionsProvider,
   LiquidityDataProvider,
@@ -67,7 +68,6 @@ import {
   LiquidityWalletProvider,
   useLiquidityForm as useCompositeContext,
 } from "./LiquidityContexts";
-import type { LiquidityFormStateContextValue } from "./LiquidityContexts";
 
 const { fieldContext, formContext } = createFormHookContexts();
 
@@ -159,17 +159,17 @@ export function LiquidityFormProvider({
   const hasRecentTransaction = state.matches("success");
 
   const tokenAccountsData = useRealtimeTokenAccounts({
+    hasRecentTransaction,
     publicKey: publicKey || null,
     tokenAAddress: finalTokenAAddress,
     tokenBAddress: finalTokenBAddress,
-    hasRecentTransaction,
   });
 
   useEffect(() => {
     send({
-      type: "UPDATE_TOKEN_ACCOUNTS",
       buyAccount: tokenAccountsData.buyTokenAccount ?? null,
       sellAccount: tokenAccountsData.sellTokenAccount ?? null,
+      type: "UPDATE_TOKEN_ACCOUNTS",
     });
   }, [
     send,
@@ -394,19 +394,24 @@ export function LiquidityFormProvider({
       if (!poolDataResult.data || parseAmountBigNumber(inputAmount).lte(0))
         return;
 
-      const response = await client.liquidity.getAddLiquidityReview({
-        isTokenX: inputType === "tokenX",
-        tokenAmount: amountNumber,
-        tokenXMint: poolDataResult.data.tokenXMint,
-        tokenYMint: poolDataResult.data.tokenYMint,
-      });
+      const reserveX = poolDataResult.data.reserveX;
+      const reserveY = poolDataResult.data.reserveY;
+
+      if (reserveX <= 0 || reserveY <= 0) return;
+
+      let outputAmount: number;
+      if (inputType === "tokenX") {
+        outputAmount = (amountNumber * reserveY) / reserveX;
+      } else {
+        outputAmount = (amountNumber * reserveX) / reserveY;
+      }
 
       startTransition(() => {
         if (inputType === "tokenX") {
-          form.setFieldValue("tokenBAmount", String(response.tokenAmount));
+          form.setFieldValue("tokenBAmount", String(outputAmount));
           form.validateAllFields("change");
         } else {
-          form.setFieldValue("tokenAAmount", String(response.tokenAmount));
+          form.setFieldValue("tokenAAmount", String(outputAmount));
           form.validateAllFields("change");
         }
       });
@@ -626,22 +631,14 @@ export function LiquidityFormProvider({
     () => ({
       poolDetails: poolDataResult.data
         ? {
-            poolAddress: undefined,
-            tokenXMint: poolDataResult.data.tokenXMint,
-            tokenYMint: poolDataResult.data.tokenYMint,
-            tokenXReserve: poolDataResult.data.tokenXReserve
-              ? parseFloat(poolDataResult.data.tokenXReserve)
-              : undefined,
-            tokenYReserve: poolDataResult.data.tokenYReserve
-              ? parseFloat(poolDataResult.data.tokenYReserve)
-              : undefined,
-            totalSupply: poolDataResult.data.lpSupply
-              ? parseFloat(poolDataResult.data.lpSupply)
-              : undefined,
-            fee: poolDataResult.data.fee
-              ? parseFloat(poolDataResult.data.fee)
-              : undefined,
+            fee: undefined,
+            poolAddress: poolDataResult.data.lpMint,
             price: undefined,
+            tokenXMint: poolDataResult.data.tokenXMint,
+            tokenXReserve: poolDataResult.data.reserveX,
+            tokenYMint: poolDataResult.data.tokenYMint,
+            tokenYReserve: poolDataResult.data.reserveY,
+            totalSupply: poolDataResult.data.totalLpSupply,
           }
         : null,
       tokenAAddress: finalTokenAAddress,

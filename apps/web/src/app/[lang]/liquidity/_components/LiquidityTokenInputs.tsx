@@ -47,32 +47,44 @@ export function LiquidityTokenInputs({
   const debouncedCalculateTokenAmounts = useDebouncedCallback(
     async ({
       inputAmount,
-      inputType,
+      sourceFieldName,
     }: {
       inputAmount: string;
-      inputType: "tokenX" | "tokenY";
+      sourceFieldName: string;
     }) => {
       if (!poolDetails || !tokenAAddress || !tokenBAddress) return;
 
+      let inputTokenAddress: string;
+      let targetFieldName: (typeof FORM_FIELD_NAMES)[keyof typeof FORM_FIELD_NAMES];
+
+      if (sourceFieldName === FORM_FIELD_NAMES.TOKEN_A_AMOUNT) {
+        inputTokenAddress = tokenAAddress;
+        targetFieldName = FORM_FIELD_NAMES.TOKEN_B_AMOUNT;
+      } else if (sourceFieldName === FORM_FIELD_NAMES.TOKEN_B_AMOUNT) {
+        inputTokenAddress = tokenBAddress;
+        targetFieldName = FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
+      } else {
+        return;
+      }
+
+      let isTokenX: boolean;
+      if (inputTokenAddress === poolDetails.tokenXMint) {
+        isTokenX = true;
+      } else if (inputTokenAddress === poolDetails.tokenYMint) {
+        isTokenX = false;
+      } else {
+        return;
+      }
+
       const result = await calculate({
         inputAmount,
-        inputType,
+        inputType: isTokenX ? "tokenX" : "tokenY",
         tokenXMint: poolDetails.tokenXMint,
         tokenYMint: poolDetails.tokenYMint,
       });
 
       if (result) {
-        if (inputType === "tokenX") {
-          form.setFieldValue(
-            FORM_FIELD_NAMES.TOKEN_B_AMOUNT,
-            String(result.tokenAmount),
-          );
-        } else {
-          form.setFieldValue(
-            FORM_FIELD_NAMES.TOKEN_A_AMOUNT,
-            String(result.tokenAmount),
-          );
-        }
+        form.setFieldValue(targetFieldName, String(result.tokenAmount));
         form.validateAllFields("change");
       }
     },
@@ -114,16 +126,9 @@ export function LiquidityTokenInputs({
 
       form.setFieldValue(currentFieldName, currentValue);
 
-      const inputType =
-        (currentField === "sell" &&
-          poolDetails?.tokenXMint === tokenBAddress) ||
-        (currentField === "buy" && poolDetails?.tokenXMint === tokenAAddress)
-          ? "tokenX"
-          : "tokenY";
-
       debouncedCalculateTokenAmounts({
         inputAmount: currentValue,
-        inputType,
+        sourceFieldName: currentFieldName,
       });
     }
   };
@@ -137,15 +142,14 @@ export function LiquidityTokenInputs({
     clearPendingCalculations();
 
     if (e.isTrusted && poolDetails && parseAmountBigNumber(value).gt(0)) {
-      const inputType =
-        (type === "sell" && poolDetails?.tokenXMint === tokenBAddress) ||
-        (type === "buy" && poolDetails?.tokenXMint === tokenAAddress)
-          ? "tokenX"
-          : "tokenY";
+      const sourceFieldName =
+        type === "sell"
+          ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
+          : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
 
       debouncedCalculateTokenAmounts({
         inputAmount: value,
-        inputType,
+        sourceFieldName,
       });
     } else if (!poolDetails) {
       if (type === "buy") {
@@ -169,7 +173,7 @@ export function LiquidityTokenInputs({
       className="flex flex-col gap-4"
     >
       {(isLoadingSell && !sellTokenAccount) || !sellTokenAccount ? (
-        <SkeletonTokenInput label="SELL AMOUNT" />
+        <SkeletonTokenInput label="TOKEN" />
       ) : (
         <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
           <div>
@@ -178,7 +182,7 @@ export function LiquidityTokenInputs({
               className="mb-3 block text-green-300 uppercase"
               id="sell-token-label"
             >
-              SELL AMOUNT
+              TOKEN
             </Text.Body2>
             <SelectTokenButton
               aria-describedby="sell-token-label"
@@ -254,7 +258,7 @@ export function LiquidityTokenInputs({
       </div>
 
       {(isLoadingBuy && !buyTokenAccount) || !buyTokenAccount ? (
-        <SkeletonTokenInput label="BUY AMOUNT" />
+        <SkeletonTokenInput label="TOKEN" />
       ) : (
         <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
           <div>
@@ -263,7 +267,7 @@ export function LiquidityTokenInputs({
               className="mb-3 block text-green-300 uppercase"
               id="buy-token-label"
             >
-              BUY AMOUNT
+              TOKEN
             </Text.Body2>
             <SelectTokenButton
               aria-describedby="buy-token-label"

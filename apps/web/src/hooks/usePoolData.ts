@@ -1,7 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { client } from "@dex-web/orpc";
+import { useQuery } from "@tanstack/react-query";
 
 interface UsePoolDataParams {
   tokenXMint: string;
@@ -10,30 +10,28 @@ interface UsePoolDataParams {
 }
 
 interface PoolData {
-  apr: number;
+  exists: boolean;
+  lpMint: string;
+  reserveX: number;
+  reserveY: number;
+  totalLpSupply: number;
   tokenXMint: string;
-  tokenXSymbol: string;
   tokenYMint: string;
-  tokenYSymbol: string;
-  tokenXReserve?: string;
-  tokenYReserve?: string;
-  lpSupply?: string;
-  fee?: string;
   lastUpdate: number;
 }
 
 const STALE_TIME_CONFIG = {
+  critical: 1_000,
+  high: 5_000,
   low: 60_000,
   normal: 30_000,
-  high: 5_000,
-  critical: 1_000,
 } as const;
 
 const REFETCH_INTERVAL_CONFIG = {
+  critical: 1_000,
+  high: 5_000,
   low: 60_000,
   normal: 30_000,
-  high: 5_000,
-  critical: 1_000,
 } as const;
 
 export function usePoolData({
@@ -44,27 +42,27 @@ export function usePoolData({
   const poolKey = createSortedPoolKey(tokenXMint, tokenYMint);
 
   return useQuery({
-    queryKey: ["pool", poolKey, tokenXMint, tokenYMint],
-    queryFn: async (): Promise<PoolData | null> => {
-      try {
-        const result = await client.pools.getPoolDetails({
-          tokenXMint,
-          tokenYMint,
-        });
-
-        if (!result) return null;
-
-        return {
-          ...result,
-          lastUpdate: Date.now(),
-        };
-      } catch (error) {
-        console.error(`Failed to fetch pool data for ${poolKey}:`, error);
-        throw error;
-      }
-    },
-    staleTime: STALE_TIME_CONFIG[priority],
     gcTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<PoolData | null> => {
+      const result = await client.pools.getPoolReserves({
+        tokenXMint,
+        tokenYMint,
+      });
+
+      if (!result || !result.exists) return null;
+
+      return {
+        exists: result.exists,
+        lastUpdate: Date.now(),
+        lpMint: result.lpMint,
+        reserveX: result.reserveX,
+        reserveY: result.reserveY,
+        tokenXMint,
+        tokenYMint,
+        totalLpSupply: result.totalLpSupply,
+      };
+    },
+    queryKey: ["pool", poolKey, tokenXMint, tokenYMint],
     refetchInterval: REFETCH_INTERVAL_CONFIG[priority],
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: priority === "critical" || priority === "high",
@@ -74,6 +72,7 @@ export function usePoolData({
       return failureCount < maxRetries;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: STALE_TIME_CONFIG[priority],
   });
 }
 

@@ -14,8 +14,8 @@ export function useRealtimePoolData({
   priority = "high",
 }: UseRealtimePoolDataParams) {
   return usePoolData({
+    priority,
     tokenXMint,
     tokenYMint,
-    priority,
   });
 }
