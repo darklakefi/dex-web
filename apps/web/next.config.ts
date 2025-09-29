@@ -10,6 +10,7 @@ const nextConfig = {
   experimental: {
     reactCompiler: true,
     typedRoutes: true,
+    webpackBuildWorker: true,
   },
   images: {
     contentDispositionType: "attachment",
@@ -59,6 +60,11 @@ const nextConfig = {
   },
 
   webpack(config, { isServer }) {
+    config.cache = {
+      type: 'memory',
+      maxGenerations: 1,
+    };
+
     config.infrastructureLogging = {
       debug: false,
       level: "warn",

@@ -145,9 +145,10 @@ export function FormFieldset({
       return;
     }
 
+    // Pass through the validated value immediately for responsive UI
     onChange?.({
       target: {
-        value,
+        value: cleanValue, // Use clean value for consistent handling
       },
     } as React.ChangeEvent<HTMLInputElement>);
   };

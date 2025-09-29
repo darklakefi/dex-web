@@ -144,7 +144,7 @@ export function LiquidityFormProvider({
   const [state, send] = useMachine(liquidityMachine, {
     input: {
       buyTokenAccount: null,
-      poolDetails: poolDataResult.poolDetails,
+      poolDetails: poolDataResult.data,
       sellTokenAccount: null,
     },
   });
@@ -381,7 +381,7 @@ export function LiquidityFormProvider({
     }) => {
       const amountNumber = parseAmount(inputAmount);
       if (
-        !poolDataResult.poolDetails ||
+        !poolDataResult.data ||
         parseAmountBigNumber(inputAmount).lte(0)
       )
         return;
@@ -389,8 +389,8 @@ export function LiquidityFormProvider({
       const response = await client.liquidity.getAddLiquidityReview({
         isTokenX: inputType === "tokenX",
         tokenAmount: amountNumber,
-        tokenXMint: poolDataResult.poolDetails.tokenXMint,
-        tokenYMint: poolDataResult.poolDetails.tokenYMint,
+        tokenXMint: poolDataResult.data.tokenXMint,
+        tokenYMint: poolDataResult.data.tokenYMint,
       });
 
       startTransition(() => {
@@ -403,7 +403,7 @@ export function LiquidityFormProvider({
         }
       });
     },
-    [poolDataResult.poolDetails, form],
+    [poolDataResult.data, form],
   );
 
   const debouncedCalculateTokenAmounts = useDebouncedCallback(
@@ -423,14 +423,14 @@ export function LiquidityFormProvider({
 
       if (
         e.isTrusted &&
-        poolDataResult.poolDetails &&
+        poolDataResult.data &&
         parseAmountBigNumber(value).gt(0)
       ) {
         const inputType =
           (type === "sell" &&
-            poolDataResult.poolDetails?.tokenXMint === finalTokenBAddress) ||
+            poolDataResult.data?.tokenXMint === finalTokenBAddress) ||
           (type === "buy" &&
-            poolDataResult.poolDetails?.tokenXMint === finalTokenAAddress)
+            poolDataResult.data?.tokenXMint === finalTokenAAddress)
             ? "tokenX"
             : "tokenY";
 
@@ -438,7 +438,7 @@ export function LiquidityFormProvider({
           inputAmount: value,
           inputType,
         });
-      } else if (!poolDataResult.poolDetails) {
+      } else if (!poolDataResult.data) {
         if (type === "buy") {
           const price = form.state.values.initialPrice || "1";
           if (
@@ -617,7 +617,7 @@ export function LiquidityFormProvider({
 
   const dataValue = useMemo(
     () => ({
-      poolDetails: poolDataResult.poolDetails || null,
+      poolDetails: poolDataResult.data || null,
       tokenAAddress: finalTokenAAddress,
       tokenAccountsData,
       tokenBAddress: finalTokenBAddress,

@@ -1,19 +1,21 @@
 "use client";
 
-import { useOptimizedPoolData } from "./useOptimizedPoolData";
+import { usePoolData } from "./usePoolData";
 
 interface UseRealtimePoolDataParams {
   tokenXMint: string;
   tokenYMint: string;
+  priority?: "high" | "critical";
 }
 
 export function useRealtimePoolData({
   tokenXMint,
   tokenYMint,
+  priority = "high",
 }: UseRealtimePoolDataParams) {
-  return useOptimizedPoolData({
+  return usePoolData({
     tokenXMint,
     tokenYMint,
-    priority: "high",
+    priority,
   });
 }

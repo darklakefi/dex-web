@@ -23,6 +23,8 @@ import type {
 import { createLiquidityProgram } from "@dex-web/core";
 import IDL from "../../darklake-idl";
 import { getLPRateHandler } from "../pools/getLPRate.handler";
+import { createAnchorProvider } from "../../utils/walletAdapter";
+import { createTransactionErrorResponse } from "../../utils/errorHandling";
 
 const POOL_RESERVE_SEED = "pool_reserve";
 const POOL_SEED = "pool";
@@ -267,41 +269,25 @@ async function createLiquidityTransaction(
 export async function createLiquidityTransactionHandler(
 	input: CreateLiquidityTransactionInput,
 ): Promise<CreateLiquidityTransactionOutput> {
-	const { user, tokenXMint, tokenYMint, maxAmountX, maxAmountY, slippage } =
-		input;
-
-	const helius = getHelius();
-	const connection = helius.connection;
-
-	const userWallet = {
-		publicKey: new PublicKey(user),
-		signAllTransactions: async <T extends Transaction | VersionedTransaction>(
-			txs: T[],
-		): Promise<T[]> => txs,
-		signTransaction: async <T extends Transaction | VersionedTransaction>(
-			tx: T,
-		): Promise<T> => tx,
-	};
-
-	const provider = new AnchorProvider(connection, userWallet, {
-		commitment: "confirmed",
-	});
-
-	const program = createLiquidityProgram(IDL, provider);
-
-	const lpRate = await getLPRateHandler({
-		slippage,
-		tokenXAmount: Number(maxAmountX),
-		tokenXMint,
-		tokenYAmount: Number(maxAmountY),
-		tokenYMint,
-	});
+	const { user, tokenXMint, tokenYMint, maxAmountX, maxAmountY, slippage } = input;
 
 	try {
+		const helius = getHelius();
+		const provider = createAnchorProvider(user);
+		const program = createLiquidityProgram(IDL, provider);
+
+		const lpRate = await getLPRateHandler({
+			slippage,
+			tokenXAmount: Number(maxAmountX),
+			tokenXMint,
+			tokenYAmount: Number(maxAmountY),
+			tokenYMint,
+		});
+
 		const vtx = await createLiquidityTransaction(
 			new PublicKey(user),
 			program,
-			connection,
+			helius.connection,
 			new PublicKey(tokenXMint),
 			new PublicKey(tokenYMint),
 			maxAmountX,
@@ -309,30 +295,12 @@ export async function createLiquidityTransactionHandler(
 			lpRate.estimatedLPTokens,
 		);
 
-		const serializedTx = Buffer.from(vtx.serialize()).toString("base64");
-
 		return {
 			success: true,
-			transaction: serializedTx,
+			transaction: Buffer.from(vtx.serialize()).toString("base64"),
 		};
 	} catch (error) {
 		console.error("Error during liquidity addition:", error);
-
-		let errorMessage = "Unknown error occurred";
-		if (error instanceof Error) {
-			errorMessage = error.message;
-
-			if (errorMessage.includes("maximum depth")) {
-				errorMessage = `Account resolution failed: ${errorMessage}. This may be due to circular account dependencies or incorrect PDA derivation.`;
-			}
-		} else if (typeof error === "string") {
-			errorMessage = error;
-		}
-
-		return {
-			error: errorMessage,
-			success: false,
-			transaction: null,
-		};
+		return createTransactionErrorResponse(error);
 	}
 }

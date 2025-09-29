@@ -76,7 +76,7 @@ export function LiquidityTokenInputs({
         form.validateAllFields("change");
       }
     },
-    500,
+    200,
   );
 
   const clearPendingCalculations = () => {
@@ -206,8 +206,9 @@ export function LiquidityTokenInputs({
                 name={field.name}
                 onBlur={field.handleBlur}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const formattedValue = formatAmountInput(e.target.value);
                   handleAmountChange(e, "sell");
-                  field.handleChange(e.target.value);
+                  field.handleChange(formattedValue);
                 }}
                 onClearPendingCalculations={clearPendingCalculations}
                 onHalfMaxClick={(type) => handleHalfMaxClick(type, "sell")}
@@ -285,8 +286,9 @@ export function LiquidityTokenInputs({
                 name={field.name}
                 onBlur={field.handleBlur}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  const formattedValue = formatAmountInput(e.target.value);
                   handleAmountChange(e, "buy");
-                  field.handleChange(e.target.value);
+                  field.handleChange(formattedValue);
                 }}
                 onClearPendingCalculations={clearPendingCalculations}
                 onHalfMaxClick={(type) => handleHalfMaxClick(type, "buy")}

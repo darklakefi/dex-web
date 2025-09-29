@@ -90,7 +90,7 @@ jobs:
   check:
     docker:
       - image: cimg/node:24.3.0
-    resource_class: medium
+    resource_class: large
     steps:
       - checkout
       - setup
@@ -104,7 +104,7 @@ jobs:
               echo "✅ No affected projects found, skipping lint and typecheck"
               exit 0
             fi
-            pnpm exec nx affected --base=${NX_BASE:-origin/develop} -t lint:ci,typecheck
+            NODE_OPTIONS="--max-old-space-size=6144" pnpm exec nx affected --base=${NX_BASE:-origin/develop} -t lint:ci,typecheck
       - save-nx-cache
 
   test:

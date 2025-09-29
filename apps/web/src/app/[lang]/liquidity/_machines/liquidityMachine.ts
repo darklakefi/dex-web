@@ -1,4 +1,4 @@
-import { assign, setup } from 'xstate';
+import { assign, setup, fromPromise } from 'xstate';
 import type { LiquidityFormValues, PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
 
 export interface LiquidityMachineContext {
@@ -8,14 +8,13 @@ export interface LiquidityMachineContext {
   error: string | null;
   transactionSignature: string | null;
   liquidityStep: number;
-  isCalculating: boolean;
+  formData: LiquidityFormValues | null;
 }
 
 export type LiquidityMachineEvent =
   | { type: "UPDATE_POOL_DETAILS"; data: PoolDetails | null }
   | { type: "UPDATE_TOKEN_ACCOUNTS"; buyAccount: TokenAccountsData | null; sellAccount: TokenAccountsData | null }
-  | { type: "START_CALCULATION" }
-  | { type: "FINISH_CALCULATION" }
+  | { type: "CALCULATE"; data: LiquidityFormValues }
   | { type: "SUBMIT"; data: LiquidityFormValues }
   | { type: "SIGN_TRANSACTION"; signature: string }
   | { type: "SUCCESS" }
@@ -28,6 +27,16 @@ export const liquidityMachine = setup({
     context: LiquidityMachineContext;
     events: LiquidityMachineEvent;
   },
+  actors: {
+    calculateLiquidity: fromPromise(async ({ input }: { input: LiquidityFormValues }) => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { result: "calculated" };
+    }),
+    submitTransaction: fromPromise(async ({ input }: { input: LiquidityFormValues }) => {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return { signature: "mock-signature" };
+    }),
+  },
 }).createMachine({
   id: "liquidity",
   initial: "idle",
@@ -38,7 +47,7 @@ export const liquidityMachine = setup({
     error: null,
     transactionSignature: null,
     liquidityStep: 0,
-    isCalculating: false,
+    formData: null,
   } as LiquidityMachineContext,
   states: {
     idle: {
@@ -54,8 +63,11 @@ export const liquidityMachine = setup({
             sellTokenAccount: ({ event }) => event.sellAccount,
           }),
         },
-        START_CALCULATION: {
+        CALCULATE: {
           target: "calculating",
+          actions: assign({
+            formData: ({ event }) => event.data,
+          }),
         },
         SUBMIT: {
           target: "submitting",
@@ -63,16 +75,27 @@ export const liquidityMachine = setup({
       },
     },
     calculating: {
-      entry: assign({
-        isCalculating: true,
-      }),
-      exit: assign({
-        isCalculating: false,
-      }),
-      on: {
-        FINISH_CALCULATION: {
-          target: "idle",
+      invoke: {
+        src: 'calculateLiquidity',
+        input: ({ context }) => context.formData || {
+          tokenAAmount: "0",
+          tokenBAmount: "0", 
+          initialPrice: "0"
         },
+        onDone: {
+          target: 'idle',
+          actions: assign({
+            error: null,
+          }),
+        },
+        onError: {
+          target: 'error',
+          actions: assign({
+            error: ({ event }) => String(event.error),
+          }),
+        },
+      },
+      on: {
         SUBMIT: {
           target: "submitting",
         },

@@ -7,7 +7,7 @@ export { useServerSentEvents } from "./useServerSentEvents";
 
 export {
   useStreamingPoolData,
-  useEnhancedRealtimePoolData,
+  useHighFrequencyPoolData,
 } from "./useStreamingPoolData";
 
 export {

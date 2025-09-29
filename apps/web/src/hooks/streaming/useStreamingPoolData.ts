@@ -24,7 +24,7 @@ export function useStreamingPoolData({
 }: UseStreamingPoolDataParams) {
   const queryClient = useQueryClient();
 
-  const poolKey = createPoolKey(tokenXMint, tokenYMint);
+  const poolKey = createSortedPoolKey(tokenXMint, tokenYMint);
   const queryKey = ["pool-stream", poolKey];
 
   const fetchPoolData = async () => {
@@ -38,7 +38,7 @@ export function useStreamingPoolData({
       meta: undefined 
     });
 
-    return result ? transformToStreamData(result) : null;
+    return result ? transformPoolDataToStream(result) : null;
   };
 
   const sseQuery = useServerSentEvents<PoolStreamData>(
@@ -59,15 +59,6 @@ export function useStreamingPoolData({
     }
   );
 
-  const _webSocketQuery = useWebSocketPoolData({
-    poolKey,
-    queryKey,
-    tokenXMint,
-    tokenYMint,
-    enabled: enableStreaming && !enableSSE,
-    priority,
-  });
-
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
 
   return {
@@ -85,42 +76,9 @@ export function useStreamingPoolData({
 }
 
 
-function useWebSocketPoolData({
-  poolKey: _poolKey,
-  queryKey,
-  tokenXMint: _tokenXMint,
-  tokenYMint: _tokenYMint,
-  enabled,
-  priority,
-}: {
-  poolKey: string;
-  queryKey: string[];
-  tokenXMint: string;
-  tokenYMint: string;
-  enabled: boolean;
-  priority: DeFiStreamConfig["priority"];
-}) {
-  const _queryClient = useQueryClient();
-
-  return useStreamingQuery(
-    [...queryKey, "websocket"],
-    async () => {
-      if (!enabled) return null;
-
-      return new Promise<PoolStreamData | null>((resolve) => {
-        resolve(null);
-      });
-    },
-    {
-      priority,
-      enableStreaming: enabled,
-      staleTime: Infinity, 
-    }
-  );
-}
 
 
-function transformToStreamData(poolDetails: Record<string, unknown>): PoolStreamData {
+function transformPoolDataToStream(poolDetails: Record<string, unknown>): PoolStreamData {
   return {
     tokenXReserve: String(poolDetails?.tokenXReserve || "0"),
     tokenYReserve: String(poolDetails?.tokenYReserve || "0"),
@@ -131,13 +89,13 @@ function transformToStreamData(poolDetails: Record<string, unknown>): PoolStream
 }
 
 
-function createPoolKey(tokenXMint: string, tokenYMint: string): string {
+function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {
   const [tokenA, tokenB] = [tokenXMint, tokenYMint].sort();
   return `${tokenA}-${tokenB}`;
 }
 
 
-export function useEnhancedRealtimePoolData({
+export function useHighFrequencyPoolData({
   tokenXMint,
   tokenYMint,
 }: {
@@ -149,6 +107,6 @@ export function useEnhancedRealtimePoolData({
     tokenYMint,
     priority: "high",
     enableStreaming: true,
-    enableSSE: false, 
+    enableSSE: true,
   });
 }
