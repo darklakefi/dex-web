@@ -13,17 +13,17 @@ import {
 
 export interface UseSwapTrackingParams {
   trackSwap: (params: SwapTrackingParams & { status: TransactionStatus }) => void;
-  trackError: (error: unknown, context?: Record<string, any>) => void;
+  trackError: (error: unknown, context?: Record<string, unknown>) => void;
 }
 
 export interface UseLiquidityTrackingParams {
   trackLiquidity: (params: LiquidityTrackingParams & { status: TransactionStatus }) => void;
-  trackError: (error: unknown, context?: Record<string, any>) => void;
+  trackError: (error: unknown, context?: Record<string, unknown>) => void;
 }
 
 export interface UseSwapTrackingReturn {
   tracker: TransactionTracker<SwapTrackingParams>;
-  trackError: (error: unknown, context?: Record<string, any>) => void;
+  trackError: (error: unknown, context?: Record<string, unknown>) => void;
   trackInitiated: (params: SwapTrackingParams) => void;
   trackSigned: (params: SwapTrackingParams) => void;
   trackSubmitted: (params: SwapTrackingParams) => void;
@@ -33,7 +33,7 @@ export interface UseSwapTrackingReturn {
 
 export interface UseLiquidityTrackingReturn {
   tracker: TransactionTracker<LiquidityTrackingParams>;
-  trackError: (error: unknown, context?: Record<string, any>) => void;
+  trackError: (error: unknown, context?: Record<string, unknown>) => void;
   trackInitiated: (params: LiquidityTrackingParams) => void;
   trackSigned: (params: LiquidityTrackingParams) => void;
   trackSubmitted: (params: LiquidityTrackingParams) => void;

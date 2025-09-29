@@ -3,3 +3,13 @@
 :root {
   --background-image-url: url("/background.png");
 }
+
+/* Skeleton loader animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

@@ -28,6 +28,7 @@ import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { z } from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
+import { logger } from "../../../../utils/logger";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { WalletButton } from "../../../_components/WalletButton";
@@ -122,14 +123,8 @@ export function CreatePoolForm() {
   const tokenADetails = metadata[tokenXMint];
   const tokenBDetails = metadata[tokenYMint];
 
-  const {
-    trackInitiated,
-    trackSigned,
-    trackConfirmed,
-    trackFailed,
-    trackError: trackLiquidityError,
-  } = useLiquidityTracking({
-    trackError: (error: unknown, context?: Record<string, any>) => {
+  useLiquidityTracking({
+    trackError: (error: unknown, context?: Record<string, unknown>) => {
       trackError({
         context: "liquidity",
         details: context,
@@ -246,7 +241,7 @@ export function CreatePoolForm() {
     }: {
       value: { tokenAAmount: string; tokenBAmount: string };
     }) => {
-      console.log(value);
+      logger.log(value);
     },
     validators: {
       onChange: liquidityFormSchema,

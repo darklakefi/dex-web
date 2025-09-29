@@ -4,7 +4,7 @@ import { validateIdlComprehensive } from "./idlValidation";
 /**
  * Type-safe wrapper for creating Anchor programs with IDL validation
  */
-export class ProgramFactory {
+export const ProgramFactory = {
 	/**
 	 * Creates a validated Anchor program instance
 	 * @param idl - The IDL to use for program creation
@@ -13,7 +13,7 @@ export class ProgramFactory {
 	 * @returns A validated Program instance
 	 * @throws Error if IDL validation fails or Program creation fails
 	 */
-	static createDarklakeProgram(
+	createDarklakeProgram(
 		idl: unknown,
 		provider: AnchorProvider,
 		requiredInstructions: string[] = [],
@@ -52,7 +52,7 @@ export class ProgramFactory {
 				error instanceof Error ? error.message : String(error);
 			throw new Error(`Failed to create Darklake program: ${errorMessage}`);
 		}
-	}
+	},
 
 	/**
 	 * Validates that a program has specific methods available
@@ -60,7 +60,7 @@ export class ProgramFactory {
 	 * @param requiredMethods - Array of method names that must be available
 	 * @returns boolean indicating if all methods are available
 	 */
-	static validateProgramMethods(
+	validateProgramMethods(
 		program: Program<Idl>,
 		requiredMethods: string[],
 	): boolean {

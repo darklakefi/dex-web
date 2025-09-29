@@ -4,7 +4,7 @@ import type { Token } from "@dex-web/orpc/schemas";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import { Box, Button, Text } from "@dex-web/ui";
 import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import { useMemo, useState } from "react";
@@ -27,7 +27,7 @@ export function YourLiquidity({
   onWithdraw,
   onClaim,
 }: YourLiquidityProps) {
-  const { publicKey } = useWallet();
+  const { data: publicKey } = useWalletPublicKey();
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
   const tokenA = tokenAAddress || DEFAULT_BUY_TOKEN;

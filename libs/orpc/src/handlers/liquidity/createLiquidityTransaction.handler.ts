@@ -1,4 +1,4 @@
-import { AnchorProvider, BN, type Program, web3 } from "@coral-xyz/anchor";
+import { AnchorProvider, BN, type Program, web3, type Idl } from "@coral-xyz/anchor";
 import {
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 	createAssociatedTokenAccountIdempotentInstruction,
@@ -80,7 +80,7 @@ async function ensureAtaIx(
 
 async function createLiquidityTransaction(
 	user: PublicKey,
-	program: Program<any>,
+	program: Program<Idl>,
 	connection: web3.Connection,
 	tokenXMint: PublicKey,
 	tokenYMint: PublicKey,
@@ -222,7 +222,7 @@ async function createLiquidityTransaction(
 		tokenProgram: TOKEN_PROGRAM_ID,
 	};
 
-	const addLiquidityMethod = program.methods.addLiquidity?.(
+	const addLiquidityMethod = program.methods.add_liquidity?.(
 		new BN(lpTokensToMint),
 		maxAmountXBN,
 		maxAmountYBN,
@@ -231,7 +231,7 @@ async function createLiquidityTransaction(
 	);
 
 	if (!addLiquidityMethod) {
-		throw new Error("Program methods not available for addLiquidity");
+		throw new Error("Program methods not available for add_liquidity");
 	}
 
 	const programTx = await addLiquidityMethod

@@ -70,6 +70,8 @@ export {
   type UseTokenAccountsParams,
   type UseTokenAccountsReturn,
   type TokenAccountsQueryClient,
+  type TokenAccountsData,
+  type TokenAccount,
 } from "./hooks/useTokenAccounts";
 export {
   createSwapTracker,

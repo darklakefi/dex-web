@@ -1,4 +1,4 @@
-import { BN, type Program, web3 } from "@coral-xyz/anchor";
+import { BN, type Program, web3, type Idl } from "@coral-xyz/anchor";
 import {
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 	createAssociatedTokenAccountInstruction,
@@ -20,7 +20,7 @@ const LIQUIDITY_SEED = "lp";
 
 async function removeLiquidity(
 	user: PublicKey,
-	program: Program<any>,
+	program: Program<Idl>,
 	tokenXMint: PublicKey,
 	tokenXProgramId: PublicKey,
 	tokenYMint: PublicKey,
@@ -106,12 +106,12 @@ async function removeLiquidity(
 	console.log("Building removeLiquidity instruction...");
 
 	// Type-safe way to access the method without deep instantiation
-	const methods = program.methods as any;
-	if (!methods.removeLiquidity) {
-		throw new Error("removeLiquidity method not found on program");
+	const methods = program.methods as Record<string, unknown>;
+	if (!methods.remove_liquidity) {
+		throw new Error("remove_liquidity method not found on program");
 	}
 
-	const instruction = await methods.removeLiquidity(
+	const instruction = await methods.remove_liquidity(
 		new BN(lpTokensToBurn),
 		new BN(minAmountX),
 		new BN(minAmountY),

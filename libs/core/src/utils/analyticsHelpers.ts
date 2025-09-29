@@ -18,7 +18,7 @@ export interface LiquidityTrackingParams {
 export interface ErrorTrackingParams {
   context: string;
   error: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export type TransactionStatus = "initiated" | "signed" | "submitted" | "confirmed" | "failed";
@@ -54,7 +54,7 @@ export const createLiquidityTracker = (
 export const standardizeErrorTracking = (
   trackError: (params: ErrorTrackingParams) => void,
   context: string
-) => (error: unknown, details?: Record<string, any>) => {
+) => (error: unknown, details?: Record<string, unknown>) => {
   trackError({
     context,
     error: error instanceof Error ? error.message : "Unknown error",

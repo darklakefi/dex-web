@@ -1,0 +1,264 @@
+"use client";
+
+import { Box, Icon, Text } from "@dex-web/ui";
+import {
+  formatAmountInput,
+  parseAmountBigNumber,
+  validateHasSufficientBalance
+} from "@dex-web/utils";
+import type { FormApi } from "@tanstack/react-form";
+import { useDebouncedCallback } from "use-debounce";
+import { FormFieldset } from "../../../_components/FormFieldset";
+import { SelectTokenButton } from "../../../_components/SelectTokenButton";
+import { SkeletonTokenInput } from "../../../_components/SkeletonTokenInput";
+import { useLiquidityCalculations } from "../_hooks/useLiquidityCalculations";
+import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
+import type {
+  LiquidityFormValues,
+  TokenAccountsData,
+  PoolDetails
+} from "../_types/liquidity.types";
+
+interface LiquidityTokenInputsProps {
+  form: FormApi<LiquidityFormValues, unknown>;
+  buyTokenAccount?: TokenAccountsData | null;
+  sellTokenAccount?: TokenAccountsData | null;
+  isLoadingBuy: boolean;
+  isLoadingSell: boolean;
+  isRefreshingBuy: boolean;
+  isRefreshingSell: boolean;
+  tokenAAddress: string | null;
+  tokenBAddress: string | null;
+  poolDetails: PoolDetails | null;
+}
+
+export function LiquidityTokenInputs({
+  form,
+  buyTokenAccount,
+  sellTokenAccount,
+  isLoadingBuy,
+  isLoadingSell,
+  isRefreshingBuy,
+  isRefreshingSell,
+  tokenAAddress,
+  tokenBAddress,
+  poolDetails,
+}: LiquidityTokenInputsProps) {
+  const { calculate, clearCalculations, isCalculating } = useLiquidityCalculations();
+
+  const debouncedCalculateTokenAmounts = useDebouncedCallback(
+    async ({
+      inputAmount,
+      inputType,
+    }: {
+      inputAmount: string;
+      inputType: "tokenX" | "tokenY";
+    }) => {
+      if (!poolDetails || !tokenAAddress || !tokenBAddress) return;
+
+      const result = await calculate({
+        inputAmount,
+        inputType,
+        tokenXMint: poolDetails.tokenXMint,
+        tokenYMint: poolDetails.tokenYMint,
+      });
+
+      if (result) {
+        if (inputType === "tokenX") {
+          form.setFieldValue(FORM_FIELD_NAMES.TOKEN_B_AMOUNT, String(result.tokenAmount));
+        } else {
+          form.setFieldValue(FORM_FIELD_NAMES.TOKEN_A_AMOUNT, String(result.tokenAmount));
+        }
+        form.validateAllFields("change");
+      }
+    },
+    500
+  );
+
+  const clearPendingCalculations = () => {
+    debouncedCalculateTokenAmounts.cancel();
+    clearCalculations();
+  };
+
+  const handleAmountChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "buy" | "sell"
+  ) => {
+    const value = formatAmountInput(e.target.value);
+
+    // Cancel pending calculations when user manually inputs
+    clearPendingCalculations();
+
+    // Only trigger calculations for actual user input, not programmatic changes
+    if (e.isTrusted && poolDetails && parseAmountBigNumber(value).gt(0)) {
+      const inputType =
+        (type === "sell" && poolDetails?.tokenXMint === tokenBAddress) ||
+        (type === "buy" && poolDetails?.tokenXMint === tokenAAddress)
+          ? "tokenX"
+          : "tokenY";
+
+      debouncedCalculateTokenAmounts({
+        inputAmount: value,
+        inputType,
+      });
+    } else if (!poolDetails) {
+      // Handle pool creation mode
+      if (type === "buy") {
+        const price = form.state.values.initialPrice || "1";
+        if (
+          parseAmountBigNumber(value).gt(0) &&
+          parseAmountBigNumber(price).gt(0)
+        ) {
+          const calculatedTokenB = parseAmountBigNumber(value)
+            .multipliedBy(price)
+            .toString();
+          form.setFieldValue(FORM_FIELD_NAMES.TOKEN_B_AMOUNT, calculatedTokenB);
+        }
+      }
+    }
+  };
+
+  return (
+    <fieldset
+      aria-labelledby="liquidity-inputs-heading"
+      className="flex flex-col gap-4"
+    >
+      {/* Sell Token Input */}
+      {isLoadingSell && !sellTokenAccount ? (
+        <SkeletonTokenInput />
+      ) : (
+        <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+          <div>
+            <Text.Body2
+              as="label"
+              id="sell-token-label"
+              className="mb-3 block text-green-300 uppercase"
+            >
+              SELL AMOUNT
+            </Text.Body2>
+            <SelectTokenButton
+              returnUrl="liquidity"
+              type="sell"
+              aria-describedby="sell-token-label"
+            />
+          </div>
+          <form.Field
+            name={FORM_FIELD_NAMES.TOKEN_B_AMOUNT}
+            validators={{
+              onChange: ({ value }) => {
+                // Validate sufficient balance
+                const balanceValidation = validateHasSufficientBalance({
+                  amount: value,
+                  tokenAccount: sellTokenAccount?.tokenAccounts?.[0],
+                });
+
+                if (balanceValidation) return balanceValidation;
+
+                // Validate numeric input
+                if (value && parseAmountBigNumber(value).isNaN()) {
+                  return "Please enter a valid number";
+                }
+
+                return undefined;
+              },
+              onChangeListenTo: [FORM_FIELD_NAMES.TOKEN_A_AMOUNT],
+            }}
+          >
+            {(field) => (
+              <FormFieldset
+                aria-labelledby="sell-token-label"
+                aria-describedby={field.state.meta.errors.length > 0 ? `${field.name}-error` : undefined}
+                isLoading={isLoadingSell || isCalculating}
+                isRefreshing={isRefreshingSell}
+                maxDecimals={5}
+                name={field.name}
+                onBlur={field.handleBlur}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  handleAmountChange(e, "sell");
+                  field.handleChange(e.target.value);
+                }}
+                onClearPendingCalculations={clearPendingCalculations}
+                tokenAccount={sellTokenAccount?.tokenAccounts?.[0]}
+                value={field.state.value}
+              />
+            )}
+          </form.Field>
+        </Box>
+      )}
+
+      {/* Plus Icon Separator */}
+      <div className="flex items-center justify-center">
+        <div
+          className="inline-flex size-8 items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300"
+          role="img"
+          aria-label="Plus - Adding liquidity to pool"
+        >
+          <Icon className="size-5" name="plus" />
+        </div>
+      </div>
+
+      {/* Buy Token Input */}
+      {isLoadingBuy && !buyTokenAccount ? (
+        <SkeletonTokenInput />
+      ) : (
+        <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
+          <div>
+            <Text.Body2
+              as="label"
+              id="buy-token-label"
+              className="mb-3 block text-green-300 uppercase"
+            >
+              BUY AMOUNT
+            </Text.Body2>
+            <SelectTokenButton
+              returnUrl="liquidity"
+              type="buy"
+              aria-describedby="buy-token-label"
+            />
+          </div>
+          <form.Field
+            name={FORM_FIELD_NAMES.TOKEN_A_AMOUNT}
+            validators={{
+              onChange: ({ value }) => {
+                // Validate sufficient balance
+                const balanceValidation = validateHasSufficientBalance({
+                  amount: value,
+                  tokenAccount: buyTokenAccount?.tokenAccounts?.[0],
+                });
+
+                if (balanceValidation) return balanceValidation;
+
+                // Validate numeric input
+                if (value && parseAmountBigNumber(value).isNaN()) {
+                  return "Please enter a valid number";
+                }
+
+                return undefined;
+              },
+              onChangeListenTo: [FORM_FIELD_NAMES.TOKEN_B_AMOUNT],
+            }}
+          >
+            {(field) => (
+              <FormFieldset
+                aria-labelledby="buy-token-label"
+                aria-describedby={field.state.meta.errors.length > 0 ? `${field.name}-error` : undefined}
+                isLoading={isLoadingBuy || isCalculating}
+                isRefreshing={isRefreshingBuy}
+                maxDecimals={5}
+                name={field.name}
+                onBlur={field.handleBlur}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  handleAmountChange(e, "buy");
+                  field.handleChange(e.target.value);
+                }}
+                onClearPendingCalculations={clearPendingCalculations}
+                tokenAccount={buyTokenAccount?.tokenAccounts?.[0]}
+                value={field.state.value}
+              />
+            )}
+          </form.Field>
+        </Box>
+      )}
+    </fieldset>
+  );
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { tanstackClient } from "@dex-web/orpc";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletPublicKey } from "../../hooks/useWalletCache";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import type React from "react";
@@ -38,7 +38,7 @@ interface ReferralCodeProviderProps {
 export function ReferralCodeProvider({ children }: ReferralCodeProviderProps) {
 	const searchParams = useSearchParams();
 	const urlReferralCode = searchParams.get("ref");
-	const { publicKey } = useWallet();
+	const { data: publicKey } = useWalletPublicKey();
 
 	const hasProcessedUrlRef = useRef(false);
 	const processedUrlRef = useRef<string | null>(null);

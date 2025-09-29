@@ -2,6 +2,7 @@ import { Box, Hero, Text } from "@dex-web/ui";
 import { QueryClient } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
 import { tanstackClient } from "../../../../../../libs/orpc/src/client";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
 import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
 import { liquidityPageCache } from "../../_utils/searchParams";
@@ -18,9 +19,36 @@ export default async function Page({
 
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery(
-    tanstackClient.pools.getPinedPool.queryOptions({}),
-  );
+  const prefetchPromises = [
+    queryClient.prefetchQuery(
+      tanstackClient.pools.getPinedPool.queryOptions({})
+    ),
+    queryClient.prefetchQuery({
+      queryKey: ['wallet', 'adapter'],
+      queryFn: () => null,
+      staleTime: 30 * 60 * 1000,
+    }),
+  ];
+
+  if (parsedSearchParams.tokenAAddress && parsedSearchParams.tokenBAddress) {
+    const sortedTokens = sortSolanaAddresses(
+      parsedSearchParams.tokenAAddress,
+      parsedSearchParams.tokenBAddress
+    );
+
+    prefetchPromises.push(
+      queryClient.prefetchQuery(
+        tanstackClient.pools.getPoolDetails.queryOptions({
+          input: {
+            tokenXMint: sortedTokens.tokenXAddress,
+            tokenYMint: sortedTokens.tokenYAddress,
+          },
+        })
+      )
+    );
+  }
+
+  await Promise.all(prefetchPromises);
 
   return (
     <div className="flex justify-center gap-12">

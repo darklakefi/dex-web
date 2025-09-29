@@ -1,4 +1,4 @@
-import { AnchorProvider, BN, type Program, web3 } from "@coral-xyz/anchor";
+import { AnchorProvider, BN, type Program, web3, type Idl } from "@coral-xyz/anchor";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
@@ -62,7 +62,7 @@ const createPoolFeeVault =
 
 async function createPool(
   user: PublicKey,
-  program: Program<any>,
+  program: Program<Idl>,
   tokenXMint: PublicKey,
   tokenXProgramId: PublicKey,
   tokenYMint: PublicKey,
@@ -153,10 +153,10 @@ async function createPool(
 		program.programId,
 	);
 
-  const initializePoolMethod = await program.methods.initializePool?.(new BN(depositAmountX), new BN(depositAmountY), null);
+  const initializePoolMethod = await program.methods.initialize_pool?.(new BN(depositAmountX), new BN(depositAmountY), null);
 
   if (!initializePoolMethod) {
-    throw new Error("Program methods not available for initializePool");
+    throw new Error("Program methods not available for initialize_pool");
   }
 
   const programTx = await initializePoolMethod

@@ -37,7 +37,7 @@ export interface UseTransactionToastsParams {
 export interface UseTransactionToastsReturn {
   showStepToast: (step: number) => void;
   showSuccessToast: (message?: string, customAction?: React.ReactNode) => void;
-  showErrorToast: (error: string | Error, context?: Record<string, any>) => void;
+  showErrorToast: (error: string | Error, context?: Record<string, unknown>) => void;
   showStatusToast: (message: string) => void;
   dismiss: () => void;
 }
@@ -95,7 +95,7 @@ export const useTransactionToasts = ({
   );
 
   const showErrorToast = useCallback(
-    (error: string | Error, context?: Record<string, any>) => {
+    (error: string | Error, context?: Record<string, unknown>) => {
       const errorMessage = error instanceof Error ? error.message : error;
       const contextString = context
         ? Object.entries(context).map(([key, value]) => `${key}: ${value}`).join(", ")

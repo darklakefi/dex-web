@@ -14,7 +14,7 @@ export const formatAmountInput = (value: string): string => {
 
 export const isValidAmount = (value: string): boolean => {
   const cleaned = formatAmountInput(value);
-  return !isNaN(Number(cleaned)) && Number(cleaned) > 0;
+  return !Number.isNaN(Number(cleaned)) && Number(cleaned) > 0;
 };
 
 export const isValidAmountBigNumber = (value: string): boolean => {

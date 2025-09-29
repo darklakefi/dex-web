@@ -1,5 +1,7 @@
 "use client";
 
+import { logger } from "../../utils/logger";
+
 const REFERRAL_CODE_KEY = "darklake_referral_code";
 const REFERRAL_EXPIRY_KEY = "darklake_referral_expiry";
 const DEFAULT_EXPIRY_DAYS = 30;
@@ -39,7 +41,7 @@ export class ReferralStorage {
 			sessionStorage.setItem(REFERRAL_CODE_KEY, JSON.stringify(data));
 			return "accepted";
 		} catch (error) {
-			console.warn("Failed to store referral code:", error);
+			logger.warn("Failed to store referral code:", error);
 			return "already_used";
 		}
 	}
@@ -66,7 +68,7 @@ export class ReferralStorage {
 
 				return data.incomingCode;
 			} catch (error) {
-				console.warn("Failed to parse referral data:", error);
+				logger.warn("Failed to parse referral data:", error);
 			}
 		}
 
@@ -81,7 +83,7 @@ export class ReferralStorage {
 			sessionStorage.removeItem(REFERRAL_CODE_KEY);
 			localStorage.removeItem(REFERRAL_EXPIRY_KEY);
 		} catch (error) {
-			console.warn("Failed to clear referral code:", error);
+			logger.warn("Failed to clear referral code:", error);
 		}
 	}
 
@@ -122,7 +124,7 @@ export class ReferralStorage {
 				daysRemaining,
 			};
 		} catch (error) {
-			console.warn("Failed to get referral metadata:", error);
+			logger.warn("Failed to get referral metadata:", error);
 			return null;
 		}
 	}

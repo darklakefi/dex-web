@@ -1,6 +1,7 @@
 "use server";
 
 import type { GetTokenMetadataListRequest } from "@dex-web/grpc-client";
+import { type TokenMetadataPB } from "@dex-web/grpc-client";
 import { tokensData, tokensDataMainnet } from "../../mocks/tokens.mock";
 import type {
   GetTokensInput,
@@ -17,7 +18,7 @@ export const getTokensHandler = async (
   const localTokensList =
     process.env.NEXT_PUBLIC_NETWORK === "2" ? tokensData : tokensDataMainnet;
 
-  let gatewayTokensList: any[] = [];
+  let gatewayTokensList: typeof TokenMetadataPB[] = [];
 
   if (query) {
     const gatewayInput: GetTokenMetadataListRequest = {
@@ -45,7 +46,7 @@ export const getTokensHandler = async (
     gatewayTokensList = response.tokens;
   }
 
-  const fullTokensList = [...localTokensList, ...gatewayTokensList];
+  const fullTokensList: TokenMetadataPB[] = [...localTokensList, ...gatewayTokensList];
   if (!query) {
     return {
       hasMore: localTokensList.length > limit,

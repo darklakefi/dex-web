@@ -18,6 +18,19 @@ import {
 } from "../../utils/solana";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
+// Define AmmConfig account structure
+export type AmmConfig = {
+  trade_fee_rate: number;
+  protocol_fee_rate: number;
+  index: number;
+  creator: PublicKey;
+  protocol_fee_collector: PublicKey;
+  fund_fee_collector: PublicKey;
+  protocol_owner: PublicKey;
+  padding: number[];
+};
+
+
 // Helper function to calculate trade fee
 function gateFee(sourceAmount: BigNumber, tradeFeeRate: BigNumber): BigNumber {
   // tradeFeeRate is in basis points (e.g., 1000000 = 100%, 1 = 0.0001%)
@@ -89,7 +102,7 @@ function calculateSwap(
 async function getAmmConfigAccount(
   connection: Connection,
   ammConfigPubkey: PublicKey,
-): Promise<any> {
+): Promise<AmmConfig> {
   const accountInfo = await connection.getAccountInfo(ammConfigPubkey);
 
   if (!accountInfo) {
@@ -98,7 +111,20 @@ async function getAmmConfigAccount(
 
   // Decode the AmmConfig account using Anchor's built-in decoder
   try {
-    const ammConfig = IDL_CODER.accounts.decode("AmmConfig", accountInfo.data);
+    const decodedData = IDL_CODER.accounts.decode("AmmConfig", accountInfo.data);
+
+    // Create a properly typed AmmConfig object
+    const ammConfig: AmmConfig = {
+      trade_fee_rate: decodedData.trade_fee_rate || 0,
+      protocol_fee_rate: decodedData.protocol_fee_rate || 0,
+      index: decodedData.index || 0,
+      creator: decodedData.creator || new PublicKey("11111111111111111111111111111112"),
+      protocol_fee_collector: decodedData.protocol_fee_collector || new PublicKey("11111111111111111111111111111112"),
+      fund_fee_collector: decodedData.fund_fee_collector || new PublicKey("11111111111111111111111111111112"),
+      protocol_owner: decodedData.protocol_owner || new PublicKey("11111111111111111111111111111112"),
+      padding: decodedData.padding || [],
+    };
+
     return ammConfig;
   } catch (error) {
     console.error("Failed to decode AmmConfig account:", error);

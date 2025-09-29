@@ -2,13 +2,13 @@
 
 import { useCallback } from "react";
 
-export interface StatusCheckResult<T = any> {
+export interface StatusCheckResult<T = unknown> {
 	status: string;
 	data?: T;
 	error?: string;
 }
 
-export interface UseTransactionStatusConfig<T = any> {
+export interface UseTransactionStatusConfig<T = unknown> {
 	checkStatus: (
 		trackingId: string,
 		tradeId?: string,
@@ -30,7 +30,7 @@ export interface UseTransactionStatusReturn {
 	) => Promise<void>;
 }
 
-export const useTransactionStatus = <T = any>({
+export const useTransactionStatus = <T = unknown>({
 	checkStatus,
 	successStates,
 	failStates,

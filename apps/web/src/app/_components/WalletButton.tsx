@@ -3,18 +3,21 @@ import { Box, Button, Icon } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletAdapter, useWalletAddress } from "../../hooks/useWalletCache";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { getFirstConnectedWalletAddress } from "../_utils/getFirstConnectedWalletAddress";
+import { SkeletonLoader } from "./SkeletonLoader";
 
 interface WalletButtonProps extends React.ComponentProps<typeof Button> {}
 
 export function WalletButton({ ...props }: WalletButtonProps) {
 	const router = useRouter();
-	const { wallet, disconnect } = useWallet();
+	const { disconnect } = useWallet();
+	const { data: adapter, isLoading: adapterLoading } = useWalletAdapter();
+	const { data: address, isLoading: addressLoading } = useWalletAddress();
 	const [hasMounted, setHasMounted] = useState(false);
 
 	useEffect(() => {
@@ -25,7 +28,15 @@ export function WalletButton({ ...props }: WalletButtonProps) {
 		router.push("/select-wallet");
 	}
 
-	if (!hasMounted || !wallet || !wallet.adapter) {
+	if (!hasMounted || adapterLoading || addressLoading) {
+		return (
+			<div className={twMerge("h-10 w-32", props.className)}>
+				<SkeletonLoader variant="wallet" className="h-full w-full" />
+			</div>
+		);
+	}
+
+	if (!adapter) {
 		return (
 			<Button
 				className={twMerge(props.className, "cursor-pointer leading-6")}
@@ -37,7 +48,7 @@ export function WalletButton({ ...props }: WalletButtonProps) {
 		);
 	}
 
-	const currentWalletAdapter = wallet.adapter;
+	const currentWalletAdapter = adapter.adapter;
 
 	return (
 		<Popover className="">
@@ -60,9 +71,7 @@ export function WalletButton({ ...props }: WalletButtonProps) {
 								src={currentWalletAdapter.icon}
 								width={18}
 							/>
-							{truncate(
-								getFirstConnectedWalletAddress(currentWalletAdapter) ?? "",
-							)}
+							{truncate(address ?? "")}
 						</Button>
 					</PopoverButton>
 					<PopoverPanel anchor="bottom end" className="z-30 mt-4">

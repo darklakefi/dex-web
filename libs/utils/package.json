@@ -5,6 +5,7 @@
       "types": "./src/index.ts"
     }
   },
+  "main": "./src/index.ts",
   "name": "@dex-web/utils",
   "types": "./src/index.ts",
   "version": "0.0.1"

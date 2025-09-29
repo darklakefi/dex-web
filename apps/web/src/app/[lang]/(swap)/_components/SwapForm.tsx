@@ -26,8 +26,9 @@ import {
   toRawUnitsBigint,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletPublicKey, useWalletAdapter } from "../../../../hooks/useWalletCache";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -48,6 +49,7 @@ import { isSquadsX } from "../../../_utils/isSquadsX";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { SwapPageRefreshButton } from "./SwapPageRefreshButton";
+import { logger } from "../../../../utils/logger";
 
 export const { fieldContext, formContext } = createFormHookContexts();
 
@@ -78,7 +80,7 @@ const formConfig = {
   }: {
     value: { tokenAAmount: string; tokenBAmount: string };
   }) => {
-    console.log(value);
+    logger.log(value);
   },
   validators: {
     onChange: swapFormSchema,
@@ -87,8 +89,11 @@ const formConfig = {
 
 export function SwapForm() {
   const form = useAppForm(formConfig);
-  const { wallet, signTransaction, publicKey } = useWallet();
+  const { signTransaction } = useWallet();
+  const { data: publicKey } = useWalletPublicKey();
+  const { data: walletAdapter } = useWalletAdapter();
   const { trackSwap, trackError } = useAnalytics();
+  const queryClient = useQueryClient();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
@@ -109,7 +114,7 @@ export function SwapForm() {
   const [slippage, setSlippage] = useState("0.5");
 
   const { signTransactionWithValidation } = useTransactionSigning({
-    publicKey,
+    publicKey: publicKey || null,
     signTransaction,
   });
 
@@ -121,7 +126,7 @@ export function SwapForm() {
     trackFailed,
     trackError: trackSwapError,
   } = useSwapTracking({
-    trackError: (error: unknown, context?: Record<string, any>) => {
+    trackError: (error: unknown, context?: Record<string, unknown>) => {
       trackError({
         context: "swap",
         details: context,
@@ -143,7 +148,7 @@ export function SwapForm() {
       },
     },
     dismissToast,
-    isSquadsX: isSquadsX(wallet),
+    isSquadsX: isSquadsX(walletAdapter?.wallet),
     toast,
     transactionType: "SWAP",
   });
@@ -181,21 +186,21 @@ export function SwapForm() {
         transactionHash: _trackDetails.trackingId,
       });
     },
-    onStatusUpdate: (status, attempt) => {
+    onStatusUpdate: (_status, _attempt) => {
       toasts.showStatusToast(`TrackingId: ${_trackDetails.trackingId}`);
     },
     onSuccess: (result) => {
       const sellAmount = parseAmount(form.state.values.tokenAAmount);
       const buyAmount = parseAmount(form.state.values.tokenBAmount);
 
-      if (isSquadsX(wallet) && result.data?.status === TradeStatus.CONFIRMED) {
+      if (isSquadsX(walletAdapter?.wallet) && result.data?.status === TradeStatus.CONFIRMED) {
         resetButtonState();
         toasts.showSuccessToast();
         return;
       }
 
       swapState.reset();
-      const successMessage = isSquadsX(wallet)
+      const successMessage = isSquadsX(walletAdapter?.wallet)
         ? undefined
         : `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`;
 
@@ -211,6 +216,9 @@ export function SwapForm() {
 
       refetchBuyTokenAccount();
       refetchSellTokenAccount();
+      queryClient.invalidateQueries({
+        queryKey: ["token-accounts", publicKey?.toBase58()],
+      });
     },
     onTimeout: () => {
       toasts.showErrorToast("Failed to check trade status", {
@@ -239,7 +247,7 @@ export function SwapForm() {
     refetchBuyTokenAccount,
     refetchSellTokenAccount,
   } = useTokenAccounts({
-    publicKey,
+    publicKey: publicKey || null,
     tanstackClient,
     tokenAAddress,
     tokenBAddress,
