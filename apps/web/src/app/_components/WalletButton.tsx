@@ -3,13 +3,17 @@ import { Box, Button, Icon } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletAdapter, useWalletAddress, useInvalidateWalletCache } from "../../hooks/useWalletCache";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { twMerge } from "tailwind-merge";
-import { SkeletonWalletButton } from "./SkeletonWalletButton";
 import { useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
+import {
+  useInvalidateWalletCache,
+  useWalletAdapter,
+  useWalletAddress,
+} from "../../hooks/useWalletCache";
+import { SkeletonWalletButton } from "./SkeletonWalletButton";
 
 export interface WalletButtonProps
   extends React.ComponentProps<typeof Button> {}
@@ -45,7 +49,11 @@ export function WalletButton({
 
   if (
     !isHydrated ||
-    (!isWalletDisconnected && (adapterLoading || addressLoading || adapterIsPlaceholder || addressIsPlaceholder))
+    (!isWalletDisconnected &&
+      (adapterLoading ||
+        addressLoading ||
+        adapterIsPlaceholder ||
+        addressIsPlaceholder))
   ) {
     return (
       <SkeletonWalletButton
@@ -67,7 +75,7 @@ export function WalletButton({
     );
   }
 
-  const currentWalletAdapter = adapter.adapter;
+  const currentWalletAdapter = adapter?.adapter;
 
   return (
     <Popover className="">
@@ -85,9 +93,9 @@ export function WalletButton({
               variant="secondary"
             >
               <Image
-                alt={currentWalletAdapter.name}
+                alt={currentWalletAdapter?.name ?? ""}
                 height={18}
-                src={currentWalletAdapter.icon}
+                src={currentWalletAdapter?.icon ?? ""}
                 width={18}
               />
               {truncate(address ?? "")}
@@ -97,10 +105,10 @@ export function WalletButton({
             {({ close }) => (
               <Box className="bg-green-600" padding="sm" shadow="sm">
                 <Link
-                  href="/referrals"
                   className="inline-flex min-w-48 cursor-pointer items-center gap-2 px-1 uppercase"
+                  href="/referrals"
                 >
-                  <Icon name="share" className="size-4" />
+                  <Icon className="size-4" name="share" />
                   Referrals
                 </Link>
                 <hr className="border-green-500 px-1" />
@@ -113,7 +121,7 @@ export function WalletButton({
                   }}
                   type="button"
                 >
-                  <Icon name="logout" className="size-4" />
+                  <Icon className="size-4" name="logout" />
                   Disconnect
                 </button>
               </Box>
