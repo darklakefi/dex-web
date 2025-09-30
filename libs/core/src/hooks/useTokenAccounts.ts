@@ -1,8 +1,7 @@
 "use client";
 
-import { useQuery, type QueryFunctionContext } from "@tanstack/react-query";
-
 import type { PublicKey } from "@solana/web3.js";
+import { type QueryFunctionContext, useQuery } from "@tanstack/react-query";
 
 export interface TokenAccountsQueryClient {
   helius: {
@@ -27,6 +26,7 @@ export interface UseTokenAccountsParams {
   tokenBAddress: string | null;
   publicKey: PublicKey | null;
   tanstackClient: TokenAccountsQueryClient;
+  network?: string | null;
 }
 
 export interface TokenAccount {
@@ -52,28 +52,59 @@ export interface UseTokenAccountsReturn {
   errorSell: Error | null;
 }
 
+const DEFAULT_NETWORK = "mainnet-beta";
+
+const resolveNetwork = (network?: string | null): string => {
+  if (network) {
+    return network;
+  }
+
+  if (process.env.NEXT_PUBLIC_SOLANA_NETWORK) {
+    return process.env.NEXT_PUBLIC_SOLANA_NETWORK;
+  }
+
+  if (process.env.NEXT_PUBLIC_NETWORK === "2") {
+    return "devnet";
+  }
+
+  return DEFAULT_NETWORK;
+};
+
 export const useTokenAccounts = ({
   tokenAAddress,
   tokenBAddress,
   publicKey,
   tanstackClient,
+  network,
 }: UseTokenAccountsParams): UseTokenAccountsReturn => {
+  const networkKey = resolveNetwork(network);
+
+  const buyQueryOptions = tanstackClient.helius.getTokenAccounts.queryOptions({
+    input: {
+      mint: tokenAAddress || "",
+      ownerAddress: publicKey?.toBase58() || "",
+    },
+  });
+
+  const sellQueryOptions = tanstackClient.helius.getTokenAccounts.queryOptions({
+    input: {
+      mint: tokenBAddress || "",
+      ownerAddress: publicKey?.toBase58() || "",
+    },
+  });
+
   const {
     data: buyTokenAccount,
     refetch: refetchBuyTokenAccount,
     isLoading: isLoadingBuy,
     error: errorBuy,
   } = useQuery({
-    ...tanstackClient.helius.getTokenAccounts.queryOptions({
-      input: {
-        mint: tokenAAddress || "",
-        ownerAddress: publicKey?.toBase58() || "",
-      },
-    }),
+    ...buyQueryOptions,
     enabled: !!publicKey && !!tokenAAddress,
-    staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000,
     placeholderData: (previousData) => previousData,
+    queryKey: [...buyQueryOptions.queryKey, networkKey] as const,
+    staleTime: 30 * 1000,
   });
 
   const {
@@ -82,26 +113,22 @@ export const useTokenAccounts = ({
     isLoading: isLoadingSell,
     error: errorSell,
   } = useQuery({
-    ...tanstackClient.helius.getTokenAccounts.queryOptions({
-      input: {
-        mint: tokenBAddress || "",
-        ownerAddress: publicKey?.toBase58() || "",
-      },
-    }),
+    ...sellQueryOptions,
     enabled: !!publicKey && !!tokenBAddress,
-    staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000,
     placeholderData: (previousData) => previousData,
+    queryKey: [...sellQueryOptions.queryKey, networkKey] as const,
+    staleTime: 30 * 1000,
   });
 
   return {
     buyTokenAccount: buyTokenAccount as TokenAccountsData | undefined,
-    sellTokenAccount: sellTokenAccount as TokenAccountsData | undefined,
-    refetchBuyTokenAccount,
-    refetchSellTokenAccount,
-    isLoadingBuy,
-    isLoadingSell,
     errorBuy,
     errorSell,
+    isLoadingBuy,
+    isLoadingSell,
+    refetchBuyTokenAccount,
+    refetchSellTokenAccount,
+    sellTokenAccount: sellTokenAccount as TokenAccountsData | undefined,
   };
 };
