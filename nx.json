@@ -10,7 +10,15 @@
     }
   },
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "!{projectRoot}/dist/**/*",
+      "!{projectRoot}/.next/**/*",
+      "!{projectRoot}/coverage/**/*",
+      "!{projectRoot}/cache/**/*",
+      "!{projectRoot}/**/*.tsbuildinfo",
+      "sharedGlobals"
+    ],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
@@ -30,9 +38,9 @@
       "{workspaceRoot}/tsconfig.base.json"
     ]
   },
+  "nxCloudId": "68d3b92a7aa7718fac7def74",
   "plugins": [
     {
-      "exclude": ["proto-definitions/*", "grpc-client/*"],
       "options": {
         "build": {
           "buildDepsName": "build-deps",
@@ -59,6 +67,7 @@
     },
     {
       "options": {
+        "ciTargetName": "e2e-ci",
         "targetName": "e2e"
       },
       "plugin": "@nx/playwright/plugin"
@@ -92,15 +101,6 @@
         "testStorybookTargetName": "test-storybook"
       },
       "plugin": "@nx/storybook/plugin"
-    },
-    {
-      "include": ["proto-definitions/*", "grpc-client/*"],
-      "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        }
-      },
-      "plugin": "@nx/js/typescript"
     }
   ],
   "sync": {
@@ -148,14 +148,18 @@
     "lint": {
       "cache": true,
       "executor": "nx:run-commands",
+      "inputs": ["default", "{workspaceRoot}/biome.json"],
       "options": {
         "command": "npx biome lint {projectRoot}"
       }
     },
     "lint:ci": {
       "cache": true,
-      "inputs": ["default", "^default"],
-      "outputs": ["{options.reportsDirectory}"]
+      "executor": "nx:run-commands",
+      "inputs": ["default", "{workspaceRoot}/biome.json"],
+      "options": {
+        "command": "npx biome ci {projectRoot}"
+      }
     },
     "test": {
       "cache": true,
@@ -167,6 +171,5 @@
       "cache": true,
       "dependsOn": ["^build"]
     }
-  },
-  "nxCloudId": "68d3b92a7aa7718fac7def74"
+  }
 }

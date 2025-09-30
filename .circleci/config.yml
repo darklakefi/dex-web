@@ -11,7 +11,6 @@ orbs:
   github-cli: circleci/github-cli@2.7.1
 
 commands:
-
   restore-vercel-cache:
     description: "Restore Vercel build cache"
     steps:
@@ -64,7 +63,7 @@ jobs:
           name: Run E2E tests
           command: |
             if pnpm exec nx show projects --affected --with-target=e2e | grep -q .; then
-              npx nx-cloud record -- pnpm exec nx affected -t e2e
+              npx nx-cloud record -- pnpm exec nx affected -t e2e-ci
             else
               echo "✅ No affected projects with e2e tests found, skipping"
             fi
@@ -82,6 +81,10 @@ jobs:
       - store_artifacts:
           path: dist/apps/web-e2e/html-report
           destination: playwright-report
+      - run:
+          name: Complete Nx Cloud run
+          command: npx nx-cloud complete-ci-run
+          when: always
 
   chromatic:
     docker:

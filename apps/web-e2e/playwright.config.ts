@@ -33,8 +33,8 @@ export default defineConfig({
   webServer: {
     command: "npx nx serve web --port=3000",
     cwd: workspaceRoot,
-    reuseExistingServer: true,
-    url: "http://localhost:3000",
+    reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 180000 : 60000,
+    url: "http://localhost:3000",
   },
 });
