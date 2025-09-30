@@ -6,8 +6,8 @@ import { Suspense } from "react";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
 import { SkeletonLoader } from "../../_components/SkeletonLoader";
 import { selectedTokensCache } from "../../_utils/searchParams";
-import { SwapForm } from "./_components/SwapForm";
-import { SwapTransactionHistory } from "./_components/SwapTransactionHistory";
+import { LazySwapForm } from "../../_components/LazySwapForm";
+import { LazySwapTransactionHistory } from "./_components/LazySwapTransactionHistory";
 
 export default async function Page({
   searchParams,
@@ -15,18 +15,6 @@ export default async function Page({
   searchParams: SearchParams;
 }) {
   await selectedTokensCache.parse(searchParams);
-
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery(
-    tanstackClient.pools.getPinedPool.queryOptions({}),
-  );
-
-  await queryClient.prefetchQuery(
-    tanstackClient.tokens.getTokens.queryOptions({
-      input: { limit: 8, offset: 0, query: "" },
-    }),
-  );
 
   return (
     <div className="flex justify-center gap-12">
@@ -55,34 +43,8 @@ export default async function Page({
           </Box>
           <div className="size-9" />
         </section>
-        <Suspense
-          fallback={
-            <Box className="w-full max-w-md animate-pulse">
-              <SkeletonLoader className="mb-4 h-8 w-32" variant="text" />
-              <div className="space-y-4">
-                <SkeletonLoader className="h-20 w-full" variant="input" />
-                <SkeletonLoader className="h-20 w-full" variant="input" />
-                <SkeletonLoader className="h-12 w-full" variant="button" />
-              </div>
-            </Box>
-          }
-        >
-          <SwapForm />
-        </Suspense>
-        <Suspense
-          fallback={
-            <Box className="mt-6 w-full max-w-md animate-pulse">
-              <SkeletonLoader className="mb-3 h-6 w-40" variant="text" />
-              <div className="space-y-2">
-                <SkeletonLoader className="h-4 w-full" variant="text" />
-                <SkeletonLoader className="h-4 w-3/4" variant="text" />
-                <SkeletonLoader className="h-4 w-5/6" variant="text" />
-              </div>
-            </Box>
-          }
-        >
-          <SwapTransactionHistory />
-        </Suspense>
+        <LazySwapForm />
+        <LazySwapTransactionHistory />
       </div>
       <div className="hidden max-w-xs md:block">
         <FeaturesAndTrendingPoolPanel />

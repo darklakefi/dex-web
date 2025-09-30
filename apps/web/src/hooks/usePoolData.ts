@@ -21,15 +21,15 @@ interface PoolData {
 }
 
 const STALE_TIME_CONFIG = {
-  critical: 1_000,
-  high: 5_000,
+  critical: 3_000,
+  high: 7_000,
   low: 60_000,
   normal: 30_000,
 } as const;
 
 const REFETCH_INTERVAL_CONFIG = {
-  critical: 1_000,
-  high: 5_000,
+  critical: 5_000,
+  high: 10_000,
   low: 60_000,
   normal: 30_000,
 } as const;
