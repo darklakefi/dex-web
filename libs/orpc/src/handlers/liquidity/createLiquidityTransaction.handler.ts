@@ -1,10 +1,4 @@
-import {
-  AnchorProvider,
-  BN,
-  type Idl,
-  type Program,
-  web3,
-} from "@coral-xyz/anchor";
+import { BN, type Idl, type Program, web3 } from "@coral-xyz/anchor";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
@@ -16,7 +10,6 @@ import {
 } from "@solana/spl-token";
 import {
   PublicKey,
-  type Transaction,
   type TransactionInstruction,
   TransactionMessage,
   type VersionedTransaction,

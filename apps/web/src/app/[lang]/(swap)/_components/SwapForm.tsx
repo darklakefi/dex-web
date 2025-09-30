@@ -11,7 +11,6 @@ import {
   useTransactionStatus,
   useTransactionToasts,
 } from "@dex-web/core";
-import { TradeStatus } from "@dex-web/grpc-client";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
@@ -26,12 +25,8 @@ import {
   toRawUnitsBigint,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import {
-  useWalletPublicKey,
-  useWalletAdapter,
-} from "../../../../hooks/useWalletCache";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -40,6 +35,11 @@ import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { z } from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
+import {
+  useWalletAdapter,
+  useWalletPublicKey,
+} from "../../../../hooks/useWalletCache";
+import { logger } from "../../../../utils/logger";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { useReferralCode } from "../../../_components/ReferralCodeProvider";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
@@ -52,7 +52,6 @@ import { isSquadsX } from "../../../_utils/isSquadsX";
 import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { SwapPageRefreshButton } from "./SwapPageRefreshButton";
-import { logger } from "../../../../utils/logger";
 
 const { fieldContext, formContext } = createFormHookContexts();
 
@@ -167,10 +166,7 @@ export function SwapForm() {
         status: response.status.toString(),
       };
     },
-    failStates: [
-      TradeStatus.CANCELLED.toString(),
-      TradeStatus.FAILED.toString(),
-    ],
+    failStates: ["CANCELLED", "FAILED"],
     maxAttempts: 10,
     onFailure: (result) => {
       swapState.reset();
@@ -198,7 +194,7 @@ export function SwapForm() {
 
       if (
         isSquadsX(walletAdapter?.wallet) &&
-        result.data?.status === TradeStatus.CONFIRMED
+        result.data?.status.toString() === "CONFIRMED"
       ) {
         resetButtonState();
         toasts.showSuccessToast();
@@ -263,10 +259,7 @@ export function SwapForm() {
       });
     },
     retryDelay: 2000,
-    successStates: [
-      TradeStatus.SETTLED.toString(),
-      TradeStatus.SLASHED.toString(),
-    ],
+    successStates: ["SETTLED", "SLASHED"],
   });
 
   const { data: poolDetails } = useSuspenseQuery(

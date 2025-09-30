@@ -32,7 +32,10 @@ const countryCache = new Map<string, { country: string; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
 export default function middleware(request: NextRequest) {
-  const ip = request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || '';
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0] ||
+    request.headers.get("x-real-ip") ||
+    "";
 
   let country: string | undefined;
   const cached = countryCache.get(ip);

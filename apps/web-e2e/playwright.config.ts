@@ -4,7 +4,6 @@ import { defineConfig, devices } from "@playwright/test";
 
 const baseURL = process.env.BASE_URL || "http://localhost:3000";
 
-
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: "./e2e" }),
   projects: [
@@ -22,8 +21,6 @@ export default defineConfig({
       name: "webkit",
       use: { ...devices["Desktop Safari"] },
     },
-
-
   ],
   reporter: [
     ["html", { outputFolder: "../../dist/apps/web-e2e/html-report" }],

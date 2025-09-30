@@ -31,18 +31,14 @@ export const AppHeader = () => {
         data-testid="home-link"
         href="/"
       >
-        <Text variant="link">
-          {tx("swap")}
-        </Text>
+        <Text variant="link">{tx("swap")}</Text>
       </Link>
       <Link
         className={`inline-flex items-baseline justify-center leading-none no-underline ${pathname === "/liquidity" ? "text-green-100" : "text-green-300"}`}
         data-testid="liquidity-link"
         href="/liquidity"
       >
-        <Text variant="link">
-          {tx("liquidity")}
-        </Text>
+        <Text variant="link">{tx("liquidity")}</Text>
       </Link>
       <Text
         as={Link}

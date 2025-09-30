@@ -86,20 +86,19 @@ export function LiquidityFormProvider({
   tokenBAddress: propTokenBAddress,
 }: LiquidityFormProviderProps) {
   const { signTransaction, wallet } = useWallet();
-  const { data: publicKey } = useWalletPublicKey();
+  const { data: walletPublicKey } = useWalletPublicKey();
   const { data: walletAdapter } = useWalletAdapter() as {
     data: WalletAdapter | null;
   };
   const { trackLiquidity, trackError } = useAnalytics();
   const queryClient = useQueryClient();
-  const tx = useTranslations("liquidity");
+  const liquidityTranslations = useTranslations("liquidity");
 
-  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
-    selectedTokensParsers,
-  );
+  const [{ tokenAAddress: urlTokenAAddress, tokenBAddress: urlTokenBAddress }] =
+    useQueryStates(selectedTokensParsers);
 
-  const finalTokenAAddress = propTokenAAddress ?? tokenAAddress;
-  const finalTokenBAddress = propTokenBAddress ?? tokenBAddress;
+  const resolvedTokenAAddress = propTokenAAddress ?? urlTokenAAddress;
+  const resolvedTokenBAddress = propTokenBAddress ?? urlTokenBAddress;
 
   const [slippage, setSlippage] = useState<string>(
     LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
@@ -136,8 +135,8 @@ export function LiquidityFormProvider({
   }, []);
 
   const sortedTokenAddresses = useMemo(
-    () => sortSolanaAddresses(finalTokenAAddress, finalTokenBAddress),
-    [finalTokenAAddress, finalTokenBAddress],
+    () => sortSolanaAddresses(resolvedTokenAAddress, resolvedTokenBAddress),
+    [resolvedTokenAAddress, resolvedTokenBAddress],
   );
 
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
@@ -160,9 +159,9 @@ export function LiquidityFormProvider({
 
   const tokenAccountsData = useRealtimeTokenAccounts({
     hasRecentTransaction,
-    publicKey: publicKey || null,
-    tokenAAddress: finalTokenAAddress,
-    tokenBAddress: finalTokenBAddress,
+    publicKey: walletPublicKey || null,
+    tokenAAddress: resolvedTokenAAddress,
+    tokenBAddress: resolvedTokenBAddress,
   });
 
   useEffect(() => {
@@ -197,12 +196,16 @@ export function LiquidityFormProvider({
   const transactionToasts = useTransactionToasts({
     customMessages: {
       squadsXFailure: {
-        description: tx("squadsX.responseStatus.failed.description"),
-        title: tx("squadsX.responseStatus.failed.title"),
+        description: liquidityTranslations(
+          "squadsX.responseStatus.failed.description",
+        ),
+        title: liquidityTranslations("squadsX.responseStatus.failed.title"),
       },
       squadsXSuccess: {
-        description: tx("squadsX.responseStatus.confirmed.description"),
-        title: tx("squadsX.responseStatus.confirmed.title"),
+        description: liquidityTranslations(
+          "squadsX.responseStatus.confirmed.description",
+        ),
+        title: liquidityTranslations("squadsX.responseStatus.confirmed.title"),
       },
     },
     dismissToast,
@@ -240,16 +243,16 @@ export function LiquidityFormProvider({
         handleError(new Error(result.error), {
           amountA: form.state.values.tokenAAmount,
           amountB: form.state.values.tokenBAmount,
-          tokenA: finalTokenAAddress,
-          tokenB: finalTokenBAddress,
+          tokenA: resolvedTokenAAddress,
+          tokenB: resolvedTokenBAddress,
         });
 
         trackFailed({
           action: "add",
           amountA: tokenAAmount,
           amountB: tokenBAmount,
-          tokenA: finalTokenAAddress || "",
-          tokenB: finalTokenBAddress || "",
+          tokenA: resolvedTokenAAddress || "",
+          tokenB: resolvedTokenBAddress || "",
           transactionHash: "",
         });
         return;
@@ -263,13 +266,13 @@ export function LiquidityFormProvider({
         action: "add",
         amountA: tokenAAmount,
         amountB: tokenBAmount,
-        tokenA: finalTokenAAddress || "",
-        tokenB: finalTokenBAddress || "",
+        tokenA: resolvedTokenAAddress || "",
+        tokenB: resolvedTokenBAddress || "",
         transactionHash: "",
       });
 
       const successMessage = !isSquadsX(wallet)
-        ? `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${finalTokenBAddress} + ${form.state.values.tokenBAmount} ${finalTokenAAddress}`
+        ? `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${resolvedTokenBAddress} + ${form.state.values.tokenBAmount} ${resolvedTokenAAddress}`
         : undefined;
 
       transactionToasts.showSuccessToast(successMessage);
@@ -277,7 +280,7 @@ export function LiquidityFormProvider({
       tokenAccountsData.refetchSellTokenAccount();
 
       queryClient.invalidateQueries({
-        queryKey: ["token-accounts", publicKey?.toBase58()],
+        queryKey: ["token-accounts", walletPublicKey?.toBase58()],
       });
 
       const poolKey = `${tokenXMint}-${tokenYMint}`;
@@ -336,7 +339,7 @@ export function LiquidityFormProvider({
         onDynamic: ({ value }: { value: typeof liquidityFormSchema._type }) => {
           if (
             value.tokenAAmount &&
-            publicKey &&
+            walletPublicKey &&
             tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
           ) {
             const tokenANumericValue = formatAmountInput(value.tokenAAmount);
@@ -357,7 +360,7 @@ export function LiquidityFormProvider({
         },
       },
     }),
-    [publicKey, tokenAccountsData.buyTokenAccount, send],
+    [walletPublicKey, tokenAccountsData.buyTokenAccount, send],
   );
 
   const form = useAppForm(formConfig);
@@ -441,9 +444,9 @@ export function LiquidityFormProvider({
       ) {
         const inputType =
           (type === "sell" &&
-            poolDataResult.data?.tokenXMint === finalTokenBAddress) ||
+            poolDataResult.data?.tokenXMint === resolvedTokenBAddress) ||
           (type === "buy" &&
-            poolDataResult.data?.tokenXMint === finalTokenAAddress)
+            poolDataResult.data?.tokenXMint === resolvedTokenAAddress)
             ? "tokenX"
             : "tokenY";
 
@@ -470,8 +473,8 @@ export function LiquidityFormProvider({
     },
     [
       poolDataResult.data,
-      finalTokenAAddress,
-      finalTokenBAddress,
+      resolvedTokenAAddress,
+      resolvedTokenBAddress,
       clearPendingCalculations,
       debouncedCalculateTokenAmounts,
       form,
@@ -487,7 +490,7 @@ export function LiquidityFormProvider({
 
   const handleDeposit = useCallback(
     async (formValues?: LiquidityFormValues) => {
-      if (!publicKey) {
+      if (!walletPublicKey) {
         transactionToasts.showErrorToast(ERROR_MESSAGES.MISSING_WALLET_INFO);
         return;
       }
@@ -501,18 +504,19 @@ export function LiquidityFormProvider({
         action: "add",
         amountA: tokenAAmount,
         amountB: tokenBAmount,
-        tokenA: finalTokenAAddress || "",
-        tokenB: finalTokenBAddress || "",
+        tokenA: resolvedTokenAAddress || "",
+        tokenB: resolvedTokenBAddress || "",
       });
 
       try {
-        const finalTokenAAddr = finalTokenAAddress?.trim() || DEFAULT_BUY_TOKEN;
-        const finalTokenBAddr =
-          finalTokenBAddress?.trim() || DEFAULT_SELL_TOKEN;
+        const trimmedTokenAAddress =
+          resolvedTokenAAddress?.trim() || DEFAULT_BUY_TOKEN;
+        const trimmedTokenBAddress =
+          resolvedTokenBAddress?.trim() || DEFAULT_SELL_TOKEN;
 
         const sortedTokens = sortSolanaAddresses(
-          finalTokenAAddr,
-          finalTokenBAddr,
+          trimmedTokenAAddress,
+          trimmedTokenBAddress,
         );
 
         const { tokenXAddress, tokenYAddress } = sortedTokens;
@@ -529,7 +533,7 @@ export function LiquidityFormProvider({
         const buyAmount = parseAmount(values.tokenAAmount);
 
         const isTokenXSell =
-          poolDataResult.data?.tokenXMint === finalTokenBAddress;
+          poolDataResult.data?.tokenXMint === resolvedTokenBAddress;
         const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
         const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
@@ -539,7 +543,7 @@ export function LiquidityFormProvider({
           slippage: Number(slippage || "0.5"),
           tokenXMint: tokenXAddress,
           tokenYMint: tokenYAddress,
-          user: publicKey.toBase58(),
+          user: walletPublicKey.toBase58(),
         } satisfies CreateLiquidityTransactionInput;
 
         const response =
@@ -550,13 +554,13 @@ export function LiquidityFormProvider({
             action: "add",
             amountA: buyAmount,
             amountB: sellAmount,
-            tokenA: finalTokenAAddress || "",
-            tokenB: finalTokenBAddress || "",
+            tokenA: resolvedTokenAAddress || "",
+            tokenB: resolvedTokenBAddress || "",
           });
 
           requestLiquidityTransactionSigning({
             checkLiquidityTransactionStatus,
-            publicKey,
+            publicKey: walletPublicKey,
             setLiquidityStep: () => {},
             signTransaction,
             unsignedTransaction: response.transaction,
@@ -569,18 +573,18 @@ export function LiquidityFormProvider({
         handleError(error, {
           amountA: values.tokenAAmount,
           amountB: values.tokenBAmount,
-          tokenA: finalTokenAAddress,
-          tokenB: finalTokenBAddress,
+          tokenA: resolvedTokenAAddress,
+          tokenB: resolvedTokenBAddress,
         });
       }
     },
     [
-      publicKey,
+      walletPublicKey,
       transactionToasts,
       form.state.values,
       trackInitiated,
-      finalTokenAAddress,
-      finalTokenBAddress,
+      resolvedTokenAAddress,
+      resolvedTokenBAddress,
       walletAdapter?.wallet,
       poolDataResult.data?.tokenXMint,
       slippage,
@@ -641,15 +645,15 @@ export function LiquidityFormProvider({
             totalSupply: poolDataResult.data.totalLpSupply,
           }
         : null,
-      tokenAAddress: finalTokenAAddress,
+      tokenAAddress: resolvedTokenAAddress,
       tokenAccountsData,
-      tokenBAddress: finalTokenBAddress,
+      tokenBAddress: resolvedTokenBAddress,
     }),
     [
       poolDataResult.data,
       tokenAccountsData,
-      finalTokenAAddress,
-      finalTokenBAddress,
+      resolvedTokenAAddress,
+      resolvedTokenBAddress,
     ],
   );
 
@@ -676,10 +680,10 @@ export function LiquidityFormProvider({
 
   const walletValue = useMemo(
     () => ({
-      publicKey: publicKey || null,
+      publicKey: walletPublicKey || null,
       walletAdapter,
     }),
-    [publicKey, walletAdapter],
+    [walletPublicKey, walletAdapter],
   );
 
   const settingsValue = useMemo(

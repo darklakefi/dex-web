@@ -1,11 +1,6 @@
 import { Box, Hero, Text } from "@dex-web/ui";
-import { sortSolanaAddresses } from "@dex-web/utils";
-import { QueryClient } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
-import { Suspense } from "react";
-import { tanstackClient } from "../../../../../../libs/orpc/src/client";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
-import { SkeletonLoader } from "../../_components/SkeletonLoader";
 import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
 import { liquidityPageCache } from "../../_utils/searchParams";
 import { LazyLiquidityForm } from "../../_components/LazyLiquidityForm";
@@ -18,6 +13,9 @@ export default async function Page({
   searchParams: SearchParams;
 }) {
   const parsedSearchParams = await liquidityPageCache.parse(searchParams);
+
+  const isCreatePoolMode =
+    parsedSearchParams.type === LIQUIDITY_PAGE_TYPE.CREATE_POOL;
 
   return (
     <div className="flex justify-center gap-12">
@@ -46,7 +44,7 @@ export default async function Page({
           </Box>
           <div className="size-9" />
         </section>
-        <LazyLiquidityForm />
+        {isCreatePoolMode ? <LazyCreatePoolForm /> : <LazyLiquidityForm />}
         <LazyYourLiquidity
           tokenAAddress={parsedSearchParams.tokenAAddress}
           tokenBAddress={parsedSearchParams.tokenBAddress}
