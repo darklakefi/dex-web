@@ -91,7 +91,7 @@ const formConfig = {
 
 export function SwapForm() {
   const form = useAppForm(formConfig);
-  const { signTransaction } = useWallet();
+  const { signTransaction, wallet, connected } = useWallet();
   const { data: publicKey } = useWalletPublicKey();
   const { data: walletAdapter } = useWalletAdapter();
   const { trackSwap, trackError } = useAnalytics();
@@ -706,7 +706,7 @@ export function SwapForm() {
               </form.Field>
             </Box>
             <div className="w-full">
-              {!publicKey ? (
+              {!wallet || !connected ? (
                 <WalletButton className="w-full py-3" />
               ) : poolDetails ? (
                 <Button

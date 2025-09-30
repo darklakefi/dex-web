@@ -5,6 +5,7 @@ import type { PublicKey } from "@solana/web3.js";
 import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { liquidityPageParsers } from "../../../_utils/searchParams";
 import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
@@ -46,6 +47,7 @@ export function LiquidityActionButton({
   onSubmit,
 }: LiquidityActionButtonProps) {
   const router = useRouter();
+  const { wallet, connected } = useWallet();
   const { isCalculating, form } = useLiquidityFormState();
 
   const formValues = useStore(
@@ -111,7 +113,7 @@ export function LiquidityActionButton({
     };
   };
 
-  if (!publicKey) {
+  if (!wallet || !connected) {
     return (
       <Button
         aria-label="Connect wallet to add liquidity"

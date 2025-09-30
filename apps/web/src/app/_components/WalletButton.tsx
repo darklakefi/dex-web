@@ -3,7 +3,7 @@ import { Box, Button, Icon } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletAdapter, useWalletAddress } from "../../hooks/useWalletCache";
+import { useWalletAdapter, useWalletAddress, useInvalidateWalletCache } from "../../hooks/useWalletCache";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,8 @@ export function WalletButton({
   ...props
 }: WalletButtonProps) {
   const router = useRouter();
-  const { disconnect } = useWallet();
+  const { disconnect, wallet, connected } = useWallet();
+  const { invalidateAll } = useInvalidateWalletCache();
   const {
     data: adapter,
     isLoading: adapterLoading,
@@ -32,7 +33,6 @@ export function WalletButton({
   } = useWalletAddress();
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Ensure consistent rendering between server and client
   useEffect(() => {
     setIsHydrated(true);
   }, []);
@@ -41,13 +41,11 @@ export function WalletButton({
     router.push("/select-wallet");
   }
 
-  // Always show skeleton during SSR and initial hydration
+  const isWalletDisconnected = !wallet || !connected;
+
   if (
     !isHydrated ||
-    adapterLoading ||
-    addressLoading ||
-    adapterIsPlaceholder ||
-    addressIsPlaceholder
+    (!isWalletDisconnected && (adapterLoading || addressLoading || adapterIsPlaceholder || addressIsPlaceholder))
   ) {
     return (
       <SkeletonWalletButton
@@ -57,7 +55,7 @@ export function WalletButton({
     );
   }
 
-  if (!adapter) {
+  if (!wallet || !connected) {
     return (
       <Button
         className={twMerge(props.className, "cursor-pointer leading-6")}
@@ -111,6 +109,7 @@ export function WalletButton({
                   onClick={() => {
                     close();
                     disconnect();
+                    invalidateAll();
                   }}
                   type="button"
                 >

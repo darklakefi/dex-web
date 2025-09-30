@@ -172,7 +172,7 @@ export function LiquidityTokenInputs({
       aria-labelledby="liquidity-inputs-heading"
       className="flex flex-col gap-4"
     >
-      {(isLoadingSell && !sellTokenAccount) || !sellTokenAccount ? (
+      {isLoadingSell && !sellTokenAccount ? (
         <SkeletonTokenInput label="TOKEN" />
       ) : (
         <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
@@ -257,7 +257,7 @@ export function LiquidityTokenInputs({
         </div>
       </div>
 
-      {(isLoadingBuy && !buyTokenAccount) || !buyTokenAccount ? (
+      {isLoadingBuy && !buyTokenAccount ? (
         <SkeletonTokenInput label="TOKEN" />
       ) : (
         <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
