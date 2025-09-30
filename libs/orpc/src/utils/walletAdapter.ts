@@ -1,4 +1,4 @@
-import { AnchorProvider, type Program, web3 } from "@coral-xyz/anchor";
+import { AnchorProvider, type web3 } from "@coral-xyz/anchor";
 import { PublicKey, type VersionedTransaction } from "@solana/web3.js";
 import { getHelius } from "../getHelius";
 

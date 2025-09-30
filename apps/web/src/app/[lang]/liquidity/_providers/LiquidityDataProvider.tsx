@@ -34,7 +34,7 @@ export function PoolDataProvider({
   tokenBAddress,
   hasRecentTransaction = false,
 }: PoolDataProviderProps) {
-  const { data: publicKey } = useWalletPublicKey();
+  const { data: walletPublicKey } = useWalletPublicKey();
 
   const sortedTokenAddresses = sortSolanaAddresses(
     tokenAAddress,
@@ -49,7 +49,7 @@ export function PoolDataProvider({
   });
 
   const tokenAccountsData = useRealtimeTokenAccounts({
-    publicKey: publicKey || null,
+    publicKey: walletPublicKey || null,
     tokenAAddress,
     tokenBAddress,
     hasRecentTransaction,

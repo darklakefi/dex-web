@@ -12,7 +12,6 @@ import {
 } from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
 import { type FC, type ReactNode, useMemo } from "react";
-import dynamic from "next/dynamic";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { getSolanaWalletAdapterNetwork } from "../_utils/getSolanaWalletAdapterNetwork";
 
@@ -27,10 +26,9 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
-      ...(typeof window !== 'undefined' ? [
-        new CoinbaseWalletAdapter(),
-        new TrustWalletAdapter(),
-      ] : []),
+      ...(typeof window !== "undefined"
+        ? [new CoinbaseWalletAdapter(), new TrustWalletAdapter()]
+        : []),
     ],
     [],
   );

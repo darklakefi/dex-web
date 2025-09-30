@@ -17,7 +17,7 @@ import {
 } from "../../../_utils/constants";
 import { WithdrawLiquidityModal } from "./WithdrawLiquidityModal";
 
-interface YourLiquidityProps {
+export interface YourLiquidityProps {
   tokenAAddress?: string;
   tokenBAddress?: string;
   onWithdraw?: () => void;
@@ -30,12 +30,16 @@ export function YourLiquidity({
   onWithdraw,
   onClaim,
 }: YourLiquidityProps) {
-  const { data: publicKey } = useWalletPublicKey();
+  const { data: walletPublicKey } = useWalletPublicKey();
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
-  const tokenA = tokenAAddress || DEFAULT_BUY_TOKEN;
-  const tokenB = tokenBAddress || DEFAULT_SELL_TOKEN;
-  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(tokenA, tokenB);
+  const resolvedTokenAAddress = tokenAAddress || DEFAULT_BUY_TOKEN;
+  const resolvedTokenBAddress = tokenBAddress || DEFAULT_SELL_TOKEN;
+
+  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+    resolvedTokenAAddress,
+    resolvedTokenBAddress,
+  );
   const [
     { data: userLiquidity },
     { data: tokenMetadata },
@@ -47,9 +51,9 @@ export function YourLiquidity({
     queries: [
       {
         ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
-          enabled: !!publicKey,
+          enabled: !!walletPublicKey,
           input: {
-            ownerAddress: publicKey?.toBase58() ?? "",
+            ownerAddress: walletPublicKey?.toBase58() ?? "",
             tokenXMint: tokenXAddress,
             tokenYMint: tokenYAddress,
           },
@@ -96,9 +100,9 @@ export function YourLiquidity({
     ],
   });
 
-  const metadata = tokenMetadata as Record<string, Token>;
-  const tokenXDetails = metadata[tokenXAddress]!;
-  const tokenYDetails = metadata[tokenYAddress]!;
+  const tokenMetadataMap = tokenMetadata as Record<string, Token>;
+  const tokenXMetadata = tokenMetadataMap[tokenXAddress]!;
+  const tokenYMetadata = tokenMetadataMap[tokenYAddress]!;
 
   const liquidityCalculations = useMemo(() => {
     if (
@@ -171,7 +175,7 @@ export function YourLiquidity({
                 trimTrailingZeros: true,
                 value: liquidityCalculations.userTokenXAmount,
               })}{" "}
-              {tokenXDetails?.symbol}
+              {tokenXMetadata?.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-200">
               {numberFormatHelper({
@@ -179,7 +183,7 @@ export function YourLiquidity({
                 trimTrailingZeros: true,
                 value: liquidityCalculations.userTokenYAmount,
               })}{" "}
-              {tokenYDetails?.symbol}
+              {tokenYMetadata?.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
             <Button
@@ -221,9 +225,9 @@ export function YourLiquidity({
         onClose={() => setIsWithdrawModalOpen(false)}
         poolReserves={poolReserves}
         tokenXAddress={tokenXAddress}
-        tokenXDetails={tokenXDetails}
+        tokenXDetails={tokenXMetadata}
         tokenYAddress={tokenYAddress}
-        tokenYDetails={tokenYDetails}
+        tokenYDetails={tokenYMetadata}
         userLiquidity={userLiquidity}
       />
     </div>

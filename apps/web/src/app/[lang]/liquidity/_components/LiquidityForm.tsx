@@ -4,7 +4,7 @@ import { Box, Icon } from "@dex-web/ui";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
-import { EMPTY_TOKEN, LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
+import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import {
   liquidityPageParsers,
   selectedTokensParsers,
@@ -48,8 +48,6 @@ function LiquidityFormContent() {
 
   const handleCreatePoolClick = () => {
     const urlWithParams = serialize("liquidity", {
-      tokenAAddress: EMPTY_TOKEN,
-      tokenBAddress: EMPTY_TOKEN,
       type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
     });
     router.push(`/${urlWithParams}`);

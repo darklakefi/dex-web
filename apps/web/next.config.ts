@@ -130,7 +130,8 @@ export default withSentryConfig(nxConfig, {
   tunnelRoute: "/monitoring",
   widenClientFileUpload: true,
   sourcemaps: {
-    disable: process.env.NODE_ENV === "development" && process.env.CI === "true",
+    disable:
+      process.env.NODE_ENV === "development" && process.env.CI === "true",
     deleteSourcemapsAfterUpload: true,
   },
 });

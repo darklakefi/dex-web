@@ -777,12 +777,10 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
               success: true,
               transaction: "mock-transaction",
             }),
-            checkLiquidityTransactionStatus: vi
-              .fn()
-              .mockResolvedValue({
-                status: "failed",
-                error: "Transaction failed",
-              }),
+            checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
+              status: "failed",
+              error: "Transaction failed",
+            }),
           },
         },
       }));

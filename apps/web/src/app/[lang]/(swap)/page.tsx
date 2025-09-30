@@ -1,10 +1,6 @@
-import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
-import { QueryClient } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
-import { Suspense } from "react";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
-import { SkeletonLoader } from "../../_components/SkeletonLoader";
 import { selectedTokensCache } from "../../_utils/searchParams";
 import { LazySwapForm } from "../../_components/LazySwapForm";
 import { LazySwapTransactionHistory } from "./_components/LazySwapTransactionHistory";
