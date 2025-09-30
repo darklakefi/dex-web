@@ -8,9 +8,9 @@ import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrend
 import { SkeletonLoader } from "../../_components/SkeletonLoader";
 import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
 import { liquidityPageCache } from "../../_utils/searchParams";
-import { CreatePoolForm } from "./_components/CreatePoolForm";
-import { LiquidityForm } from "./_components/LiquidityForm";
-import { YourLiquidity } from "./_components/YourLiquidity";
+import { LazyLiquidityForm } from "../../_components/LazyLiquidityForm";
+import { LazyCreatePoolForm } from "./_components/LazyCreatePoolForm";
+import { LazyYourLiquidity } from "./_components/LazyYourLiquidity";
 
 export default async function Page({
   searchParams,
@@ -18,48 +18,6 @@ export default async function Page({
   searchParams: SearchParams;
 }) {
   const parsedSearchParams = await liquidityPageCache.parse(searchParams);
-
-  const queryClient = new QueryClient();
-
-  const prefetchPromises = [
-    queryClient.prefetchQuery(
-      tanstackClient.pools.getPinedPool.queryOptions({}),
-    ),
-    queryClient.prefetchQuery({
-      queryFn: () => null,
-      queryKey: ["wallet", "adapter"],
-      staleTime: 30 * 60 * 1000,
-    }),
-    queryClient.prefetchQuery(
-      tanstackClient.tokens.getTokens.queryOptions({
-        input: { limit: 8, offset: 0, query: "" },
-      }),
-    ),
-  ];
-
-  if (parsedSearchParams.tokenAAddress && parsedSearchParams.tokenBAddress) {
-    try {
-      const sortedTokens = sortSolanaAddresses(
-        parsedSearchParams.tokenAAddress,
-        parsedSearchParams.tokenBAddress,
-      );
-
-      prefetchPromises.push(
-        queryClient.prefetchQuery(
-          tanstackClient.pools.getPoolDetails.queryOptions({
-            input: {
-              tokenXMint: sortedTokens.tokenXAddress,
-              tokenYMint: sortedTokens.tokenYAddress,
-            },
-          }),
-        ),
-      );
-    } catch (error) {
-      console.warn("Invalid token addresses for prefetch:", error);
-    }
-  }
-
-  await Promise.all(prefetchPromises);
 
   return (
     <div className="flex justify-center gap-12">
@@ -88,58 +46,11 @@ export default async function Page({
           </Box>
           <div className="size-9" />
         </section>
-        {parsedSearchParams.type === LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY && (
-          <>
-            <Suspense
-              fallback={
-                <Box className="w-full max-w-md animate-pulse">
-                  <SkeletonLoader className="mb-4 h-8 w-48" variant="text" />
-                  <div className="space-y-4">
-                    <SkeletonLoader className="h-20 w-full" variant="input" />
-                    <SkeletonLoader className="h-20 w-full" variant="input" />
-                    <SkeletonLoader className="h-12 w-full" variant="button" />
-                  </div>
-                </Box>
-              }
-            >
-              <LiquidityForm />
-            </Suspense>
-            <Suspense
-              fallback={
-                <Box className="mt-4 w-full max-w-md animate-pulse">
-                  <SkeletonLoader className="mb-3 h-6 w-32" variant="text" />
-                  <div className="space-y-3">
-                    <SkeletonLoader className="h-4 w-40" variant="balance" />
-                    <SkeletonLoader className="h-4 w-36" variant="balance" />
-                    <SkeletonLoader className="h-10 w-full" variant="button" />
-                  </div>
-                </Box>
-              }
-            >
-              <YourLiquidity
-                tokenAAddress={parsedSearchParams.tokenAAddress}
-                tokenBAddress={parsedSearchParams.tokenBAddress}
-              />
-            </Suspense>
-          </>
-        )}
-        {parsedSearchParams.type === LIQUIDITY_PAGE_TYPE.CREATE_POOL && (
-          <Suspense
-            fallback={
-              <Box className="w-full max-w-md animate-pulse">
-                <SkeletonLoader className="mb-4 h-8 w-48" variant="text" />
-                <div className="space-y-4">
-                  <SkeletonLoader className="h-20 w-full" variant="input" />
-                  <SkeletonLoader className="h-20 w-full" variant="input" />
-                  <SkeletonLoader className="h-16 w-full" variant="input" />
-                  <SkeletonLoader className="h-12 w-full" variant="button" />
-                </div>
-              </Box>
-            }
-          >
-            <CreatePoolForm />
-          </Suspense>
-        )}
+        <LazyLiquidityForm />
+        <LazyYourLiquidity
+          tokenAAddress={parsedSearchParams.tokenAAddress}
+          tokenBAddress={parsedSearchParams.tokenBAddress}
+        />
       </div>
       <div className="hidden max-w-xs md:block">
         <FeaturesAndTrendingPoolPanel />
