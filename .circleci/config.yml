@@ -64,7 +64,7 @@ jobs:
           name: Run E2E tests
           command: |
             if pnpm exec nx show projects --affected --with-target=e2e | grep -q .; then
-              npx nx-cloud record -- pnpm exec nx affected -t e2e
+              npx nx-cloud record -- pnpm exec nx affected -t e2e-ci
             else
               echo "✅ No affected projects with e2e tests found, skipping"
             fi

@@ -30,6 +30,7 @@
       "{workspaceRoot}/tsconfig.base.json"
     ]
   },
+  "nxCloudId": "68d3b92a7aa7718fac7def74",
   "plugins": [
     {
       "exclude": ["proto-definitions/*", "grpc-client/*"],
@@ -59,6 +60,7 @@
     },
     {
       "options": {
+        "ciTargetName": "e2e-ci",
         "targetName": "e2e"
       },
       "plugin": "@nx/playwright/plugin"
@@ -167,6 +169,5 @@
       "cache": true,
       "dependsOn": ["^build"]
     }
-  },
-  "nxCloudId": "68d3b92a7aa7718fac7def74"
+  }
 }
