@@ -10,7 +10,15 @@
     }
   },
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "!{projectRoot}/dist/**/*",
+      "!{projectRoot}/.next/**/*",
+      "!{projectRoot}/coverage/**/*",
+      "!{projectRoot}/cache/**/*",
+      "!{projectRoot}/**/*.tsbuildinfo",
+      "sharedGlobals"
+    ],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
