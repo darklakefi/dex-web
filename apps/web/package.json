@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@sentry/nextjs": "^10.3.0",
-    "@vercel/functions": "^2.2.8",
+    "@vercel/functions": "^3.1.0",
     "posthog-js": "^1.259.0"
   },
   "devDependencies": {
