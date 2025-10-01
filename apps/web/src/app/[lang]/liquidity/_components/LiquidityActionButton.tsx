@@ -3,13 +3,14 @@
 import { Button } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
-import { type AnyFormApi, useStore } from "@tanstack/react-form";
+import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { liquidityPageParsers } from "../../../_utils/searchParams";
 import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
 import type {
+  LiquidityFormApi,
   LiquidityFormValues,
   PoolDetails,
   TokenAccountsData,
@@ -20,8 +21,8 @@ import {
   getLiquidityButtonState,
 } from "../_utils/liquidityButtonState";
 
-interface LiquidityActionButtonProps<T extends AnyFormApi> {
-  form: T;
+interface LiquidityActionButtonProps {
+  form: LiquidityFormApi;
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
@@ -35,7 +36,7 @@ interface LiquidityActionButtonProps<T extends AnyFormApi> {
 
 const serialize = createSerializer(liquidityPageParsers);
 
-export function LiquidityActionButton<T extends AnyFormApi>({
+export function LiquidityActionButton({
   form,
   publicKey,
   buyTokenAccount,
@@ -46,7 +47,7 @@ export function LiquidityActionButton<T extends AnyFormApi>({
   isPoolLoading,
   isTokenAccountsLoading,
   onSubmit,
-}: LiquidityActionButtonProps<T>) {
+}: LiquidityActionButtonProps) {
   const router = useRouter();
   const { wallet, connected } = useWallet();
 
@@ -70,6 +71,7 @@ export function LiquidityActionButton<T extends AnyFormApi>({
   const hasAnyAmount =
     isPositiveNumber(tokenAAmount) || isPositiveNumber(tokenBAmount);
   const isFormSubmitting = useStore(form.store, (state) => state.isSubmitting);
+  const formCanSubmit = useStore(form.store, (state) => state.canSubmit);
 
   const validation = useLiquidityValidation({
     buyTokenAccount,
@@ -82,6 +84,7 @@ export function LiquidityActionButton<T extends AnyFormApi>({
   });
 
   const buttonState = getLiquidityButtonState({
+    formCanSubmit,
     hasAnyAmount,
     hasWallet: !!publicKey,
     isCalculating: isFormSubmitting,
