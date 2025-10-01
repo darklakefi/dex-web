@@ -11,6 +11,7 @@ import {
 import { publicKey } from "@metaplex-foundation/umi";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { Connection } from "@solana/web3.js";
+import type { Asset } from "helius-sdk/types/das";
 import { getDexGatewayClient } from "../../dex-gateway";
 import { getHelius } from "../../getHelius";
 import type {
@@ -115,11 +116,10 @@ async function fetchTokenMetadataFromChain(
 
 async function fetchTokenMetadataFromHelius(addresses: string[]) {
   const helius = getHelius();
-  const connection = helius.rpc;
 
   try {
-    const assets = await connection.getAssetBatch({ ids: addresses });
-    return assets.map((token) => ({
+    const assets = await helius.getAssetBatch({ ids: addresses });
+    return assets.map((token: Asset) => ({
       address: token.id,
       decimals: token.token_info?.decimals || 0,
       imageUrl: "",
