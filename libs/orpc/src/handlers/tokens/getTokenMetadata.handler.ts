@@ -80,7 +80,6 @@ export const getTokenMetadataHandler = async (
         {} as Record<string, Token>,
       );
     }
-    console.log("Tokens: ", tokens);
     return tokens;
   } catch (error) {
     console.error(error, "error");
