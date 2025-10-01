@@ -3,6 +3,7 @@
 import { create } from "@bufbuild/protobuf";
 import type { TokenMetadata } from "@dex-web/grpc-client";
 import { TokenMetadataPB } from "@dex-web/grpc-client";
+import { isSolanaAddress } from "@dex-web/utils";
 import {
   fetchAllDigitalAsset,
   mplTokenMetadata,
@@ -17,7 +18,6 @@ import type {
   GetTokenMetadataOutput,
 } from "../../schemas/tokens/getTokenMetadata.schema";
 import type { Token } from "./../../schemas/tokens/token.schema";
-import { isSolanaAddress } from "@dex-web/utils";
 
 const parseToken = (token: TokenMetadata): Token => ({
   address: token.address,
@@ -44,7 +44,7 @@ export const getTokenMetadataHandler = async (
 
   const grpcClient = await getDexGatewayClient();
   try {
-    const { tokens } = await grpcClient
+    const { tokens: grpcTokens } = await grpcClient
       .getTokenMetadataList({
         filterBy: {
           case: "addressesList",
@@ -59,26 +59,28 @@ export const getTokenMetadataHandler = async (
         return { tokens: [] as TokenMetadata[] };
       });
 
+    const tokens: Token[] = grpcTokens.map(parseToken);
+
     const notFoundTokens = addresses.filter(
       (address) => !tokens.some((token) => token.address === address),
     );
 
     if (notFoundTokens.length > 0) {
-      const tokensFromChain = await fetchTokenMetadataFromChain(notFoundTokens);
+      const tokensFromChain =
+        await fetchTokenMetadataFromHelius(notFoundTokens);
       tokens.push(...tokensFromChain);
     }
 
     if (returnAsObject) {
       return tokens.reduce(
         (acc, token) => {
-          acc[token.address] = parseToken(token);
+          acc[token.address] = token;
           return acc;
         },
         {} as Record<string, Token>,
       );
     }
-
-    return tokens.map(parseToken);
+    return tokens;
   } catch (error) {
     console.error(error, "error");
     return returnAsObject ? ({} as Record<string, Token>) : [];
@@ -107,6 +109,25 @@ async function fetchTokenMetadataFromChain(
       }),
     );
   } catch (_error) {
+    return [];
+  }
+}
+
+async function fetchTokenMetadataFromHelius(addresses: string[]) {
+  const helius = getHelius();
+  const connection = helius.rpc;
+
+  try {
+    const assets = await connection.getAssetBatch({ ids: addresses });
+    return assets.map((token) => ({
+      address: token.id,
+      decimals: token.token_info?.decimals || 0,
+      imageUrl: "",
+      name: token.content?.metadata?.name || token.id.slice(-4),
+      symbol: token.token_info?.symbol || token.id.slice(0, 4),
+    }));
+  } catch (error) {
+    console.error("Error with RPC: ", error);
     return [];
   }
 }
