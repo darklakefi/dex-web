@@ -84,6 +84,13 @@ export const config = mergeConfig(baseConfig, {
     }),
     nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
+      exclude: [
+        "src/**/*.spec.ts",
+        "src/**/*.test.ts",
+        "src/**/*.spec.tsx",
+        "src/**/*.test.tsx",
+      ],
+      include: ["src/**/*"],
       outDir: "../../dist/libs/ui",
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),

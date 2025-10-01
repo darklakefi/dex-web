@@ -1,3 +1,7 @@
+import {
+  getUserFriendlyErrorMessage,
+  signTransactionWithRecovery,
+} from "@dex-web/core";
 import { client } from "@dex-web/orpc";
 import {
   type PublicKey,
@@ -42,7 +46,10 @@ export async function requestCreatePoolTransactionSigning({
       unsignedTransactionBuffer,
     );
 
-    const signedTransaction = await signTransaction(transaction);
+    const signedTransaction = await signTransactionWithRecovery(
+      transaction,
+      signTransaction,
+    );
     const signedTransactionBase64 = Buffer.from(
       signedTransaction.serialize(),
     ).toString("base64");
@@ -71,10 +78,11 @@ export async function requestCreatePoolTransactionSigning({
   } catch (error) {
     console.error("Signing error:", error);
     dismissToast();
+
+    const userMessage = getUserFriendlyErrorMessage(error);
+
     toast({
-      description: `${
-        error instanceof Error ? error.message : "Unknown error occurred"
-      }`,
+      description: userMessage,
       title: "Signing Error",
       variant: "error",
     });
