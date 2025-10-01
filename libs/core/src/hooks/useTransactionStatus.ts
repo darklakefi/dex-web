@@ -17,9 +17,13 @@ export interface UseTransactionStatusConfig<T = unknown> {
   failStates: string[];
   maxAttempts?: number;
   retryDelay?: number;
-  onStatusUpdate?: (status: string, attempt: number) => void;
-  onSuccess?: (result: StatusCheckResult<T>) => void;
-  onFailure?: (result: StatusCheckResult<T>) => void;
+  onStatusUpdate?: (
+    status: string,
+    attempt: number,
+    trackingId?: string,
+  ) => void;
+  onSuccess?: (result: StatusCheckResult<T>, trackingId?: string) => void;
+  onFailure?: (result: StatusCheckResult<T>, trackingId?: string) => void;
   onTimeout?: () => void;
 }
 
@@ -47,15 +51,15 @@ export const useTransactionStatus = <T = unknown>({
         try {
           const result = await checkStatus(trackingId, tradeId);
 
-          onStatusUpdate?.(result.status, attempt + 1);
+          onStatusUpdate?.(result.status, attempt + 1, trackingId);
 
           if (successStates.includes(result.status)) {
-            onSuccess?.(result);
+            onSuccess?.(result, trackingId);
             return;
           }
 
           if (failStates.includes(result.status)) {
-            onFailure?.(result);
+            onFailure?.(result, trackingId);
             return;
           }
 
@@ -70,8 +74,8 @@ export const useTransactionStatus = <T = unknown>({
 
           if (attempt === maxAttempts - 1) {
             onFailure?.({
-              status: "error",
               error: error instanceof Error ? error.message : "Unknown error",
+              status: "error",
             });
             return;
           }
