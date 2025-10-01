@@ -1,8 +1,8 @@
 "use client";
-
 import {
   BUTTON_MESSAGES,
   ERROR_MESSAGES,
+  SwapTxStatus,
   TRANSACTION_STEPS,
   useSwapTracking,
   useTokenAccounts,
@@ -166,15 +166,22 @@ export function SwapForm() {
         status: response.status.toString(),
       };
     },
-    failStates: ["CANCELLED", "FAILED"],
+    failStates: [SwapTxStatus.CANCELLED, SwapTxStatus.FAILED].map((s) =>
+      s.toString(),
+    ),
     maxAttempts: 10,
-    onFailure: (result) => {
+    onFailure: (result, trackingId) => {
       swapState.reset();
       const sellAmount = parseAmount(form.state.values.tokenAAmount);
       const buyAmount = parseAmount(form.state.values.tokenBAmount);
 
-      toasts.showErrorToast(`Trade ${result.status}!`, {
-        trackingId: _trackDetails.trackingId,
+      const status =
+        result.status === SwapTxStatus.CANCELLED.toString()
+          ? "Cancelled"
+          : "Failed";
+
+      toasts.showErrorToast(`Trade ${status}!`, {
+        trackingId: trackingId || _trackDetails.trackingId,
       });
 
       trackFailed({
@@ -185,8 +192,11 @@ export function SwapForm() {
         transactionHash: _trackDetails.trackingId,
       });
     },
-    onStatusUpdate: (_status, _attempt) => {
-      toasts.showStatusToast(`TrackingId: ${_trackDetails.trackingId}`);
+    onStatusUpdate: (_status, _attempt, trackingId) => {
+      toasts.dismiss();
+      toasts.showStatusToast(
+        `TrackingId: ${_trackDetails.trackingId || trackingId}`,
+      );
     },
     onSuccess: (result) => {
       const sellAmount = parseAmount(form.state.values.tokenAAmount);
@@ -205,6 +215,8 @@ export function SwapForm() {
       const successMessage = isSquadsX(walletAdapter?.wallet)
         ? undefined
         : `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`;
+
+      toasts.dismiss();
 
       toasts.showSuccessToast(successMessage);
 
@@ -259,7 +271,9 @@ export function SwapForm() {
       });
     },
     retryDelay: 2000,
-    successStates: ["SETTLED", "SLASHED"],
+    successStates: [SwapTxStatus.SETTLED, SwapTxStatus.SLASHED].map((s) =>
+      s.toString(),
+    ),
   });
 
   const { data: poolDetails } = useSuspenseQuery(
