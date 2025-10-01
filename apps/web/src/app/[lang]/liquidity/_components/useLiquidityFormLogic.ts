@@ -365,10 +365,10 @@ export function useLiquidityFormLogic({
   const calculateTokenAmounts = useCallback(
     async ({
       inputAmount,
-      inputType,
+      editedToken,
     }: {
       inputAmount: string;
-      inputType: "tokenX" | "tokenY";
+      editedToken: "tokenA" | "tokenB";
     }) => {
       const amountNumber = parseAmount(inputAmount);
       if (!poolDataResult.data || parseAmountBigNumber(inputAmount).lte(0))
@@ -379,24 +379,26 @@ export function useLiquidityFormLogic({
 
       if (reserveX <= 0 || reserveY <= 0) return;
 
+      const editedTokenAddress =
+        editedToken === "tokenA" ? tokenAAddress : tokenBAddress;
+      const isEditedTokenX =
+        poolDataResult.data.tokenXMint === editedTokenAddress;
+
       let outputAmount: number;
-      if (inputType === "tokenX") {
+      if (isEditedTokenX) {
         outputAmount = (amountNumber * reserveY) / reserveX;
       } else {
         outputAmount = (amountNumber * reserveX) / reserveY;
       }
 
       startTransition(() => {
-        if (inputType === "tokenX") {
-          form.setFieldValue("tokenBAmount", String(outputAmount));
-          form.validateAllFields("change");
-        } else {
-          form.setFieldValue("tokenAAmount", String(outputAmount));
-          form.validateAllFields("change");
-        }
+        const targetField =
+          editedToken === "tokenA" ? "tokenBAmount" : "tokenAAmount";
+        form.setFieldValue(targetField, String(outputAmount));
+        form.validateAllFields("change");
       });
     },
-    [poolDataResult.data, form],
+    [poolDataResult.data, form, tokenAAddress, tokenBAddress],
   );
 
   const debouncedCalculateTokenAmounts = useDebouncedCallback(
@@ -414,7 +416,10 @@ export function useLiquidityFormLogic({
   }, [debouncedCalculateTokenAmounts]);
 
   const _handleAmountChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>, type: "buy" | "sell") => {
+    (
+      e: React.ChangeEvent<HTMLInputElement>,
+      tokenType: "tokenA" | "tokenB",
+    ) => {
       const value = formatAmountInput(e.target.value);
 
       clearPendingCalculations();
@@ -424,19 +429,12 @@ export function useLiquidityFormLogic({
         poolDataResult.data &&
         parseAmountBigNumber(value).gt(0)
       ) {
-        const inputType =
-          (type === "sell" &&
-            poolDataResult.data?.tokenXMint === tokenBAddress) ||
-          (type === "buy" && poolDataResult.data?.tokenXMint === tokenAAddress)
-            ? "tokenX"
-            : "tokenY";
-
         debouncedCalculateTokenAmounts({
+          editedToken: tokenType,
           inputAmount: value,
-          inputType,
         });
       } else if (!poolDataResult.data) {
-        if (type === "buy") {
+        if (tokenType === "tokenA") {
           const price = form.state.values.initialPrice || "1";
           if (
             parseAmountBigNumber(value).gt(0) &&
@@ -454,8 +452,6 @@ export function useLiquidityFormLogic({
     },
     [
       poolDataResult.data,
-      tokenAAddress,
-      tokenBAddress,
       clearPendingCalculations,
       debouncedCalculateTokenAmounts,
       form,

@@ -31,7 +31,7 @@ interface LiquidityTokenInputsProps<T extends AnyFormApi> {
   poolDetails: PoolDetails | null;
   debouncedCalculateTokenAmounts: (params: {
     inputAmount: string;
-    inputType: "tokenX" | "tokenY";
+    editedToken: "tokenA" | "tokenB";
   }) => void;
 }
 
@@ -62,10 +62,10 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
 
   const handleHalfMaxClick = (
     type: "half" | "max",
-    currentField: "sell" | "buy",
+    tokenType: "tokenA" | "tokenB",
   ) => {
     const currentTokenAccount =
-      currentField === "sell" ? sellTokenAccount : buyTokenAccount;
+      tokenType === "tokenA" ? buyTokenAccount : sellTokenAccount;
 
     if (!currentTokenAccount?.tokenAccounts?.[0]) return;
 
@@ -84,44 +84,34 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
 
     if (poolDetails && parseAmountBigNumber(currentValue).gt(0)) {
       const currentFieldName =
-        currentField === "sell"
-          ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
-          : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
+        tokenType === "tokenA"
+          ? FORM_FIELD_NAMES.TOKEN_A_AMOUNT
+          : FORM_FIELD_NAMES.TOKEN_B_AMOUNT;
 
       form.setFieldValue(currentFieldName, currentValue);
 
-      const inputType =
-        (currentField === "sell" &&
-          poolDetails?.tokenXMint === tokenBAddress) ||
-        (currentField === "buy" && poolDetails?.tokenXMint === tokenAAddress)
-          ? "tokenX"
-          : "tokenY";
-
       debouncedCalculateTokenAmounts({
+        editedToken: tokenType,
         inputAmount: currentValue,
-        inputType,
       });
     }
   };
 
-  const handleAmountChange = (value: string, type: "buy" | "sell") => {
+  const handleAmountChange = (
+    value: string,
+    tokenType: "tokenA" | "tokenB",
+  ) => {
     clearPendingCalculations();
 
     const formattedValue = formatAmountInput(value);
 
     if (poolDetails && parseAmountBigNumber(formattedValue).gt(0)) {
-      const inputType =
-        (type === "sell" && poolDetails?.tokenXMint === tokenBAddress) ||
-        (type === "buy" && poolDetails?.tokenXMint === tokenAAddress)
-          ? "tokenX"
-          : "tokenY";
-
       debouncedCalculateTokenAmounts({
+        editedToken: tokenType,
         inputAmount: formattedValue,
-        inputType,
       });
     } else if (!poolDetails) {
-      if (type === "buy") {
+      if (tokenType === "tokenA") {
         const price = form.state.values.initialPrice || DEFAULT_PRICE;
         if (
           parseAmountBigNumber(formattedValue).gt(0) &&
@@ -197,11 +187,11 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
                 onBlur={field.handleBlur}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const value = e.target.value;
-                  handleAmountChange(value, "sell");
+                  handleAmountChange(value, "tokenB");
                   field.handleChange(value);
                 }}
                 onClearPendingCalculations={clearPendingCalculations}
-                onHalfMaxClick={(type) => handleHalfMaxClick(type, "sell")}
+                onHalfMaxClick={(type) => handleHalfMaxClick(type, "tokenB")}
                 tokenAccount={
                   sellTokenAccount?.tokenAccounts?.[0]
                     ? {
@@ -286,11 +276,11 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
                 onBlur={field.handleBlur}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const value = e.target.value;
-                  handleAmountChange(value, "buy");
+                  handleAmountChange(value, "tokenA");
                   field.handleChange(value);
                 }}
                 onClearPendingCalculations={clearPendingCalculations}
-                onHalfMaxClick={(type) => handleHalfMaxClick(type, "buy")}
+                onHalfMaxClick={(type) => handleHalfMaxClick(type, "tokenA")}
                 tokenAccount={
                   buyTokenAccount?.tokenAccounts?.[0]
                     ? {

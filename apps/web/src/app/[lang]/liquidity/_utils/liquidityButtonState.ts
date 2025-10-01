@@ -27,6 +27,7 @@ export interface ButtonStateProps {
   isTokenAccountsLoading: boolean;
   isCalculating: boolean;
   hasAnyAmount?: boolean;
+  formCanSubmit?: boolean;
   isFormSubmitting?: boolean;
 }
 
@@ -38,6 +39,7 @@ export function getLiquidityButtonState({
   isTokenAccountsLoading,
   isCalculating,
   hasAnyAmount = false,
+  formCanSubmit = false,
   isFormSubmitting = false,
 }: ButtonStateProps): ButtonState {
   if (isFormSubmitting) {
@@ -76,11 +78,11 @@ export function getLiquidityButtonState({
       return "INVALID_PRICE";
     }
 
-    if (validation.canSubmit) {
+    if (formCanSubmit) {
       return "CREATE_POOL";
     }
 
-    return "ENTER_AMOUNTS";
+    return "CALCULATING";
   } else {
     if (!validation.hasAmounts) {
       if (hasAnyAmount) {
@@ -89,11 +91,11 @@ export function getLiquidityButtonState({
       return "ENTER_AMOUNT";
     }
 
-    if (validation.canSubmit) {
+    if (formCanSubmit) {
       return "ADD_LIQUIDITY";
     }
 
-    return "ENTER_AMOUNT";
+    return "CALCULATING";
   }
 }
 
