@@ -7,23 +7,19 @@ import {
   parseAmountBigNumber,
   validateHasSufficientBalance,
 } from "@dex-web/utils";
-import { Field } from "@tanstack/react-form";
+import { type AnyFormApi, Field } from "@tanstack/react-form";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { SkeletonTokenInput } from "../../../_components/SkeletonTokenInput";
 import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
 import { useLiquidityCalculations } from "../_hooks/useLiquidityCalculations";
-import type {
-  LiquidityFormApi,
-  PoolDetails,
-  TokenAccountsData,
-} from "../_types/liquidity.types";
+import type { PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
 
 const MAX_DECIMALS = 5;
 const DEFAULT_PRICE = "1";
 
-interface LiquidityTokenInputsProps {
-  form: LiquidityFormApi;
+interface LiquidityTokenInputsProps<T extends AnyFormApi> {
+  form: T;
   buyTokenAccount?: TokenAccountsData | null;
   sellTokenAccount?: TokenAccountsData | null;
   isLoadingBuy: boolean;
@@ -39,7 +35,7 @@ interface LiquidityTokenInputsProps {
   }) => void;
 }
 
-export function LiquidityTokenInputs({
+export function LiquidityTokenInputs<T extends AnyFormApi>({
   form,
   buyTokenAccount,
   sellTokenAccount,
@@ -51,7 +47,7 @@ export function LiquidityTokenInputs({
   tokenBAddress,
   poolDetails,
   debouncedCalculateTokenAmounts,
-}: LiquidityTokenInputsProps) {
+}: LiquidityTokenInputsProps<T>) {
   const { clearCalculations, isCalculating } = useLiquidityCalculations();
 
   const clearPendingCalculations = () => {

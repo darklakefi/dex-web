@@ -3,14 +3,13 @@
 import { Button } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
-import { useStore } from "@tanstack/react-form";
+import { type AnyFormApi, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { liquidityPageParsers } from "../../../_utils/searchParams";
 import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
 import type {
-  LiquidityFormApi,
   LiquidityFormValues,
   PoolDetails,
   TokenAccountsData,
@@ -21,8 +20,8 @@ import {
   getLiquidityButtonState,
 } from "../_utils/liquidityButtonState";
 
-interface LiquidityActionButtonProps {
-  form: LiquidityFormApi;
+interface LiquidityActionButtonProps<T extends AnyFormApi> {
+  form: T;
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
@@ -36,7 +35,7 @@ interface LiquidityActionButtonProps {
 
 const serialize = createSerializer(liquidityPageParsers);
 
-export function LiquidityActionButton({
+export function LiquidityActionButton<T extends AnyFormApi>({
   form,
   publicKey,
   buyTokenAccount,
@@ -47,7 +46,7 @@ export function LiquidityActionButton({
   isPoolLoading,
   isTokenAccountsLoading,
   onSubmit,
-}: LiquidityActionButtonProps) {
+}: LiquidityActionButtonProps<T>) {
   const router = useRouter();
   const { wallet, connected } = useWallet();
 

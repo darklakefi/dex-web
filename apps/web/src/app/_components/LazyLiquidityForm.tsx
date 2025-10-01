@@ -5,8 +5,10 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
+import { Suspense } from "react";
+import type { PoolData } from "../../hooks/usePoolData";
 import { LiquidityForm } from "../[lang]/liquidity/_components/LiquidityForm";
-import type { PoolData } from "../hooks/usePoolData";
+import { SkeletonForm } from "./SkeletonForm";
 
 type LazyLiquidityFormProps = {
   tokenAAddress?: string | null;
@@ -64,7 +66,9 @@ export async function LazyLiquidityForm({
 
   return (
     <HydrationBoundary state={state}>
-      <LiquidityForm />
+      <Suspense fallback={<SkeletonForm type="liquidity" />}>
+        <LiquidityForm />
+      </Suspense>
     </HydrationBoundary>
   );
 }
