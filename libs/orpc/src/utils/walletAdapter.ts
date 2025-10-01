@@ -1,6 +1,6 @@
 import { AnchorProvider, type web3 } from "@coral-xyz/anchor";
 import { PublicKey, type VersionedTransaction } from "@solana/web3.js";
-import { getHelius } from "../getHelius";
+import { getHeliusConnection } from "./getHeliusConnection";
 
 export function createWalletAdapter(userAddress: string) {
   return {
@@ -17,10 +17,11 @@ export function createWalletAdapter(userAddress: string) {
 }
 
 export function createAnchorProvider(userAddress: string) {
-  const helius = getHelius();
+  const connection = getHeliusConnection();
+
   const wallet = createWalletAdapter(userAddress);
 
-  return new AnchorProvider(helius.connection, wallet, {
+  return new AnchorProvider(connection, wallet, {
     commitment: "confirmed",
   });
 }

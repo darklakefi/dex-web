@@ -17,11 +17,13 @@ export async function getTokenAccountsHandler({
   const helius = getHelius();
 
   const [getTokenAccountsResponse, tokenMetadataResponse] = await Promise.all([
-    helius.rpc
+    helius
       .getTokenAccounts({
-        mint: mint,
+        mint,
+        options: {
+          showZeroBalance: false,
+        },
         owner: ownerAddress,
-        page: 1,
       })
       .catch(() => null),
     getTokenMetadataHandler({
@@ -30,13 +32,13 @@ export async function getTokenAccountsHandler({
     }).catch(() => null),
   ]);
 
-  const hasTokenAccounts =
-    (getTokenAccountsResponse?.token_accounts?.length ?? 0) > 0;
+  const tokenAccountsData = getTokenAccountsResponse?.token_accounts;
+  const hasTokenAccounts = (tokenAccountsData?.length ?? 0) > 0;
 
   const tokenMetadata = (tokenMetadataResponse as Token[])?.[0];
   const tokenAccounts = (
     hasTokenAccounts
-      ? getTokenAccountsResponse?.token_accounts
+      ? tokenAccountsData
       : [
           {
             address: ownerAddress,

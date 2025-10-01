@@ -8,16 +8,15 @@ import {
   validateHasSufficientBalance,
 } from "@dex-web/utils";
 import { Field } from "@tanstack/react-form";
-import { useDebouncedCallback } from "use-debounce";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { SkeletonTokenInput } from "../../../_components/SkeletonTokenInput";
 import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
 import { useLiquidityCalculations } from "../_hooks/useLiquidityCalculations";
 import type { PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
-import { useLiquidityForm } from "./LiquidityContexts";
 
 interface LiquidityTokenInputsProps {
+  form: any; // TODO: Fix this type properly
   buyTokenAccount?: TokenAccountsData | null;
   sellTokenAccount?: TokenAccountsData | null;
   isLoadingBuy: boolean;
@@ -27,9 +26,14 @@ interface LiquidityTokenInputsProps {
   tokenAAddress: string | null;
   tokenBAddress: string | null;
   poolDetails: PoolDetails | null;
+  debouncedCalculateTokenAmounts: (params: {
+    inputAmount: string;
+    inputType: "tokenX" | "tokenY";
+  }) => void;
 }
 
 export function LiquidityTokenInputs({
+  form,
   buyTokenAccount,
   sellTokenAccount,
   isLoadingBuy,
@@ -39,60 +43,17 @@ export function LiquidityTokenInputs({
   tokenAAddress,
   tokenBAddress,
   poolDetails,
+  debouncedCalculateTokenAmounts,
 }: LiquidityTokenInputsProps) {
-  const { form } = useLiquidityForm();
-  const { calculate, clearCalculations, isCalculating } =
-    useLiquidityCalculations();
-
-  const debouncedCalculateTokenAmounts = useDebouncedCallback(
-    async ({
-      inputAmount,
-      sourceFieldName,
-    }: {
-      inputAmount: string;
-      sourceFieldName: string;
-    }) => {
-      if (!poolDetails || !tokenAAddress || !tokenBAddress) return;
-
-      let inputTokenAddress: string;
-      let targetFieldName: (typeof FORM_FIELD_NAMES)[keyof typeof FORM_FIELD_NAMES];
-
-      if (sourceFieldName === FORM_FIELD_NAMES.TOKEN_A_AMOUNT) {
-        inputTokenAddress = tokenAAddress;
-        targetFieldName = FORM_FIELD_NAMES.TOKEN_B_AMOUNT;
-      } else if (sourceFieldName === FORM_FIELD_NAMES.TOKEN_B_AMOUNT) {
-        inputTokenAddress = tokenBAddress;
-        targetFieldName = FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
-      } else {
-        return;
-      }
-
-      let isTokenX: boolean;
-      if (inputTokenAddress === poolDetails.tokenXMint) {
-        isTokenX = true;
-      } else if (inputTokenAddress === poolDetails.tokenYMint) {
-        isTokenX = false;
-      } else {
-        return;
-      }
-
-      const result = await calculate({
-        inputAmount,
-        inputType: isTokenX ? "tokenX" : "tokenY",
-        tokenXMint: poolDetails.tokenXMint,
-        tokenYMint: poolDetails.tokenYMint,
-      });
-
-      if (result) {
-        form.setFieldValue(targetFieldName, String(result.tokenAmount));
-        form.validateAllFields("change");
-      }
-    },
-    200,
-  );
+  const { clearCalculations, isCalculating } = useLiquidityCalculations();
 
   const clearPendingCalculations = () => {
-    debouncedCalculateTokenAmounts.cancel();
+    if (
+      "cancel" in debouncedCalculateTokenAmounts &&
+      typeof debouncedCalculateTokenAmounts.cancel === "function"
+    ) {
+      debouncedCalculateTokenAmounts.cancel();
+    }
     clearCalculations();
   };
 
@@ -126,9 +87,16 @@ export function LiquidityTokenInputs({
 
       form.setFieldValue(currentFieldName, currentValue);
 
+      const inputType =
+        (currentField === "sell" &&
+          poolDetails?.tokenXMint === tokenBAddress) ||
+        (currentField === "buy" && poolDetails?.tokenXMint === tokenAAddress)
+          ? "tokenX"
+          : "tokenY";
+
       debouncedCalculateTokenAmounts({
         inputAmount: currentValue,
-        sourceFieldName: currentFieldName,
+        inputType,
       });
     }
   };
@@ -142,14 +110,15 @@ export function LiquidityTokenInputs({
     clearPendingCalculations();
 
     if (e.isTrusted && poolDetails && parseAmountBigNumber(value).gt(0)) {
-      const sourceFieldName =
-        type === "sell"
-          ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
-          : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
+      const inputType =
+        (type === "sell" && poolDetails?.tokenXMint === tokenBAddress) ||
+        (type === "buy" && poolDetails?.tokenXMint === tokenAAddress)
+          ? "tokenX"
+          : "tokenY";
 
       debouncedCalculateTokenAmounts({
         inputAmount: value,
-        sourceFieldName,
+        inputType,
       });
     } else if (!poolDetails) {
       if (type === "buy") {
@@ -194,7 +163,9 @@ export function LiquidityTokenInputs({
             form={form}
             name={FORM_FIELD_NAMES.TOKEN_B_AMOUNT}
             validators={{
-              onChange: ({ value }: { value: string }) => {
+              onChange: ({ value }: { value: unknown }) => {
+                if (typeof value !== "string") return undefined;
+
                 const balanceValidation = validateHasSufficientBalance({
                   amount: value,
                   tokenAccount: sellTokenAccount?.tokenAccounts?.[0],
@@ -240,7 +211,9 @@ export function LiquidityTokenInputs({
                       }
                     : undefined
                 }
-                value={field.state.value}
+                value={
+                  typeof field.state.value === "string" ? field.state.value : ""
+                }
               />
             )}
           </Field>
@@ -279,7 +252,9 @@ export function LiquidityTokenInputs({
             form={form}
             name={FORM_FIELD_NAMES.TOKEN_A_AMOUNT}
             validators={{
-              onChange: ({ value }: { value: string }) => {
+              onChange: ({ value }: { value: unknown }) => {
+                if (typeof value !== "string") return undefined;
+
                 const balanceValidation = validateHasSufficientBalance({
                   amount: value,
                   tokenAccount: buyTokenAccount?.tokenAccounts?.[0],
@@ -324,7 +299,9 @@ export function LiquidityTokenInputs({
                       }
                     : undefined
                 }
-                value={field.state.value}
+                value={
+                  typeof field.state.value === "string" ? field.state.value : ""
+                }
               />
             )}
           </Field>

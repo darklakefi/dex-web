@@ -20,12 +20,10 @@ import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMachine } from "@xstate/react";
 import { useTranslations } from "next-intl";
-import { useQueryStates } from "nuqs";
 import {
   startTransition,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -43,7 +41,6 @@ import {
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
 import { isSquadsX } from "../../../_utils/isSquadsX";
-import { selectedTokensParsers } from "../../../_utils/searchParams";
 import { dismissToast, toast } from "../../../_utils/toast";
 import {
   FORM_FIELD_NAMES,
@@ -51,23 +48,10 @@ import {
 } from "../_constants/liquidityConstants";
 import { useLiquidityCalculationWorker } from "../_hooks/useLiquidityCalculationWorker";
 import { liquidityMachine } from "../_machines/liquidityMachine";
-import type {
-  LiquidityFormProviderProps,
-  LiquidityFormValues,
-  WalletAdapter,
-} from "../_types/liquidity.types";
+import type { LiquidityFormValues } from "../_types/liquidity.types";
 import { liquidityFormSchema } from "../_types/liquidity.types";
 import { startCacheCleanup } from "../_utils/calculationCache";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
-import type { LiquidityFormStateContextValue } from "./LiquidityContexts";
-import {
-  LiquidityActionsProvider,
-  LiquidityDataProvider,
-  LiquidityFormStateProvider,
-  LiquiditySettingsProvider,
-  LiquidityWalletProvider,
-  useLiquidityForm as useCompositeContext,
-} from "./LiquidityContexts";
 
 const { fieldContext, formContext } = createFormHookContexts();
 
@@ -80,25 +64,21 @@ const { useAppForm } = createFormHook({
   formContext,
 });
 
-export function LiquidityFormProvider({
-  children,
-  tokenAAddress: propTokenAAddress,
-  tokenBAddress: propTokenBAddress,
-}: LiquidityFormProviderProps) {
+interface UseLiquidityFormLogicProps {
+  tokenAAddress: string | null;
+  tokenBAddress: string | null;
+}
+
+export function useLiquidityFormLogic({
+  tokenAAddress,
+  tokenBAddress,
+}: UseLiquidityFormLogicProps) {
   const { signTransaction, wallet } = useWallet();
   const { data: walletPublicKey } = useWalletPublicKey();
-  const { data: walletAdapter } = useWalletAdapter() as {
-    data: WalletAdapter | null;
-  };
+  const { data: walletAdapter } = useWalletAdapter();
   const { trackLiquidity, trackError } = useAnalytics();
   const queryClient = useQueryClient();
   const liquidityTranslations = useTranslations("liquidity");
-
-  const [{ tokenAAddress: urlTokenAAddress, tokenBAddress: urlTokenBAddress }] =
-    useQueryStates(selectedTokensParsers);
-
-  const resolvedTokenAAddress = propTokenAAddress ?? urlTokenAAddress;
-  const resolvedTokenBAddress = propTokenBAddress ?? urlTokenBAddress;
 
   const [slippage, setSlippage] = useState<string>(
     LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
@@ -122,23 +102,15 @@ export function LiquidityFormProvider({
   });
 
   const cacheCleanupRef = useRef<(() => void) | null>(null);
-  useMemo(() => {
-    if (!cacheCleanupRef.current) {
-      cacheCleanupRef.current = startCacheCleanup();
-    }
-    return () => {
-      if (cacheCleanupRef.current) {
-        cacheCleanupRef.current();
-        cacheCleanupRef.current = null;
-      }
-    };
-  }, []);
 
-  const sortedTokenAddresses = useMemo(
-    () => sortSolanaAddresses(resolvedTokenAAddress, resolvedTokenBAddress),
-    [resolvedTokenAAddress, resolvedTokenBAddress],
+  if (!cacheCleanupRef.current) {
+    cacheCleanupRef.current = startCacheCleanup();
+  }
+
+  const sortedTokenAddresses = sortSolanaAddresses(
+    tokenAAddress || "",
+    tokenBAddress || "",
   );
-
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
 
@@ -160,8 +132,8 @@ export function LiquidityFormProvider({
   const tokenAccountsData = useRealtimeTokenAccounts({
     hasRecentTransaction,
     publicKey: walletPublicKey || null,
-    tokenAAddress: resolvedTokenAAddress,
-    tokenBAddress: resolvedTokenBAddress,
+    tokenAAddress: tokenAAddress,
+    tokenBAddress: tokenBAddress,
   });
 
   useEffect(() => {
@@ -243,16 +215,16 @@ export function LiquidityFormProvider({
         handleError(new Error(result.error), {
           amountA: form.state.values.tokenAAmount,
           amountB: form.state.values.tokenBAmount,
-          tokenA: resolvedTokenAAddress,
-          tokenB: resolvedTokenBAddress,
+          tokenA: tokenAAddress,
+          tokenB: tokenBAddress,
         });
 
         trackFailed({
           action: "add",
           amountA: tokenAAmount,
           amountB: tokenBAmount,
-          tokenA: resolvedTokenAAddress || "",
-          tokenB: resolvedTokenBAddress || "",
+          tokenA: tokenAAddress || "",
+          tokenB: tokenBAddress || "",
           transactionHash: "",
         });
         return;
@@ -266,13 +238,13 @@ export function LiquidityFormProvider({
         action: "add",
         amountA: tokenAAmount,
         amountB: tokenBAmount,
-        tokenA: resolvedTokenAAddress || "",
-        tokenB: resolvedTokenBAddress || "",
+        tokenA: tokenAAddress || "",
+        tokenB: tokenBAddress || "",
         transactionHash: "",
       });
 
       const successMessage = !isSquadsX(wallet)
-        ? `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${resolvedTokenBAddress} + ${form.state.values.tokenBAmount} ${resolvedTokenAAddress}`
+        ? `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
         : undefined;
 
       transactionToasts.showSuccessToast(successMessage);
@@ -322,46 +294,44 @@ export function LiquidityFormProvider({
     successStates: ["finalized"],
   });
 
-  const formConfig = useMemo(
-    () => ({
-      defaultValues: {
-        [FORM_FIELD_NAMES.INITIAL_PRICE]:
-          LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE,
-        [FORM_FIELD_NAMES.TOKEN_A_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
-        [FORM_FIELD_NAMES.TOKEN_B_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
-      } as LiquidityFormValues,
-      onSubmit: async ({ value }: { value: LiquidityFormValues }) => {
-        send({ data: value, type: "SUBMIT" });
-        await handleDeposit(value);
-      },
-      validators: {
-        onChange: liquidityFormSchema,
-        onDynamic: ({ value }: { value: typeof liquidityFormSchema._type }) => {
-          if (
-            value.tokenAAmount &&
-            walletPublicKey &&
-            tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
-          ) {
-            const tokenANumericValue = formatAmountInput(value.tokenAAmount);
-            if (parseAmountBigNumber(tokenANumericValue).gt(0)) {
-              const tokenAccount =
-                tokenAccountsData.buyTokenAccount.tokenAccounts[0];
-              const maxBalance = convertToDecimal(
-                tokenAccount.amount || 0,
-                tokenAccount.decimals || 0,
-              );
+  const defaultValues: LiquidityFormValues = {
+    [FORM_FIELD_NAMES.INITIAL_PRICE]: LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE,
+    [FORM_FIELD_NAMES.TOKEN_A_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
+    [FORM_FIELD_NAMES.TOKEN_B_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
+  };
 
-              if (parseAmountBigNumber(tokenANumericValue).gt(maxBalance)) {
-                const symbol = tokenAccount.symbol || "token";
-                return { tokenAAmount: `Insufficient ${symbol} balance.` };
-              }
+  const formConfig = {
+    defaultValues,
+    onSubmit: async ({ value }: { value: LiquidityFormValues }) => {
+      send({ data: value, type: "SUBMIT" });
+      await handleDeposit(value);
+    },
+    validators: {
+      onChange: liquidityFormSchema,
+      onDynamic: ({ value }: { value: LiquidityFormValues }) => {
+        if (
+          value.tokenAAmount &&
+          walletPublicKey &&
+          tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
+        ) {
+          const tokenANumericValue = formatAmountInput(value.tokenAAmount);
+          if (parseAmountBigNumber(tokenANumericValue).gt(0)) {
+            const tokenAccount =
+              tokenAccountsData.buyTokenAccount.tokenAccounts[0];
+            const maxBalance = convertToDecimal(
+              tokenAccount.amount || 0,
+              tokenAccount.decimals || 0,
+            );
+
+            if (parseAmountBigNumber(tokenANumericValue).gt(maxBalance)) {
+              const symbol = tokenAccount.symbol || "token";
+              return { tokenAAmount: `Insufficient ${symbol} balance.` };
             }
           }
-        },
+        }
       },
-    }),
-    [walletPublicKey, tokenAccountsData.buyTokenAccount, send],
-  );
+    },
+  };
 
   const form = useAppForm(formConfig);
 
@@ -379,10 +349,10 @@ export function LiquidityFormProvider({
     [send, transactionToasts, trackLiquidityError],
   );
 
-  const resetFormToDefaults = useCallback((): void => {
-    form.setFieldValue("tokenAAmount", "0");
-    form.setFieldValue("tokenBAmount", "0");
-    form.setFieldValue("initialPrice", "1");
+  const _resetFormToDefaults = useCallback((): void => {
+    form.setFieldValue(FORM_FIELD_NAMES.TOKEN_A_AMOUNT, "0");
+    form.setFieldValue(FORM_FIELD_NAMES.TOKEN_B_AMOUNT, "0");
+    form.setFieldValue(FORM_FIELD_NAMES.INITIAL_PRICE, "1");
   }, [form]);
 
   const calculateTokenAmounts = useCallback(
@@ -428,10 +398,15 @@ export function LiquidityFormProvider({
   );
 
   const clearPendingCalculations = useCallback(() => {
-    debouncedCalculateTokenAmounts.cancel();
+    if (
+      "cancel" in debouncedCalculateTokenAmounts &&
+      typeof debouncedCalculateTokenAmounts.cancel === "function"
+    ) {
+      debouncedCalculateTokenAmounts.cancel();
+    }
   }, [debouncedCalculateTokenAmounts]);
 
-  const handleAmountChange = useCallback(
+  const _handleAmountChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, type: "buy" | "sell") => {
       const value = formatAmountInput(e.target.value);
 
@@ -444,9 +419,8 @@ export function LiquidityFormProvider({
       ) {
         const inputType =
           (type === "sell" &&
-            poolDataResult.data?.tokenXMint === resolvedTokenBAddress) ||
-          (type === "buy" &&
-            poolDataResult.data?.tokenXMint === resolvedTokenAAddress)
+            poolDataResult.data?.tokenXMint === tokenBAddress) ||
+          (type === "buy" && poolDataResult.data?.tokenXMint === tokenAAddress)
             ? "tokenX"
             : "tokenY";
 
@@ -473,8 +447,8 @@ export function LiquidityFormProvider({
     },
     [
       poolDataResult.data,
-      resolvedTokenAAddress,
-      resolvedTokenBAddress,
+      tokenAAddress,
+      tokenBAddress,
       clearPendingCalculations,
       debouncedCalculateTokenAmounts,
       form,
@@ -504,15 +478,14 @@ export function LiquidityFormProvider({
         action: "add",
         amountA: tokenAAmount,
         amountB: tokenBAmount,
-        tokenA: resolvedTokenAAddress || "",
-        tokenB: resolvedTokenBAddress || "",
+        tokenA: tokenAAddress || "",
+        tokenB: tokenBAddress || "",
       });
 
       try {
-        const trimmedTokenAAddress =
-          resolvedTokenAAddress?.trim() || DEFAULT_BUY_TOKEN;
+        const trimmedTokenAAddress = tokenAAddress?.trim() || DEFAULT_BUY_TOKEN;
         const trimmedTokenBAddress =
-          resolvedTokenBAddress?.trim() || DEFAULT_SELL_TOKEN;
+          tokenBAddress?.trim() || DEFAULT_SELL_TOKEN;
 
         const sortedTokens = sortSolanaAddresses(
           trimmedTokenAAddress,
@@ -532,8 +505,7 @@ export function LiquidityFormProvider({
         const sellAmount = parseAmount(values.tokenBAmount);
         const buyAmount = parseAmount(values.tokenAAmount);
 
-        const isTokenXSell =
-          poolDataResult.data?.tokenXMint === resolvedTokenBAddress;
+        const isTokenXSell = poolDataResult.data?.tokenXMint === tokenBAddress;
         const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
         const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
@@ -554,8 +526,8 @@ export function LiquidityFormProvider({
             action: "add",
             amountA: buyAmount,
             amountB: sellAmount,
-            tokenA: resolvedTokenAAddress || "",
-            tokenB: resolvedTokenBAddress || "",
+            tokenA: tokenAAddress || "",
+            tokenB: tokenBAddress || "",
           });
 
           requestLiquidityTransactionSigning({
@@ -573,8 +545,8 @@ export function LiquidityFormProvider({
         handleError(error, {
           amountA: values.tokenAAmount,
           amountB: values.tokenBAmount,
-          tokenA: resolvedTokenAAddress,
-          tokenB: resolvedTokenBAddress,
+          tokenA: tokenAAddress,
+          tokenB: tokenBAddress,
         });
       }
     },
@@ -583,8 +555,8 @@ export function LiquidityFormProvider({
       transactionToasts,
       form.state.values,
       trackInitiated,
-      resolvedTokenAAddress,
-      resolvedTokenBAddress,
+      tokenAAddress,
+      tokenBAddress,
       walletAdapter?.wallet,
       poolDataResult.data?.tokenXMint,
       slippage,
@@ -595,135 +567,41 @@ export function LiquidityFormProvider({
     ],
   );
 
-  const isSubmitting = state.matches("submitting") || state.matches("signing");
-  const isSuccess = state.matches("success");
-  const isError = state.matches("error");
-  const isCalculating = state.matches("calculating");
-  const hasError = isError && !!state.context.error;
+  useEffect(() => {
+    return () => {
+      if (cacheCleanupRef.current) {
+        cacheCleanupRef.current();
+        cacheCleanupRef.current = null;
+      }
+    };
+  }, []);
 
-  const trackLiquidityAction = useCallback(
-    (data: Parameters<typeof trackConfirmed>[0]) => {
-      trackConfirmed(data);
-    },
-    [trackConfirmed],
-  );
-
-  const formStateValue = useMemo(
-    () => ({
-      form,
-      hasError,
-      isCalculating,
-      isError,
-      isSubmitting,
-      isSuccess,
-      send,
-      state,
-    }),
-    [
-      form,
-      state,
-      send,
-      isSubmitting,
-      isSuccess,
-      isError,
-      isCalculating,
-      hasError,
-    ],
-  );
-
-  const dataValue = useMemo(
-    () => ({
-      poolDetails: poolDataResult.data
-        ? {
-            fee: undefined,
-            poolAddress: poolDataResult.data.lpMint,
-            price: undefined,
-            tokenXMint: poolDataResult.data.tokenXMint,
-            tokenXReserve: poolDataResult.data.reserveX,
-            tokenYMint: poolDataResult.data.tokenYMint,
-            tokenYReserve: poolDataResult.data.reserveY,
-            totalSupply: poolDataResult.data.totalLpSupply,
-          }
-        : null,
-      tokenAAddress: resolvedTokenAAddress,
-      tokenAccountsData,
-      tokenBAddress: resolvedTokenBAddress,
-    }),
-    [
-      poolDataResult.data,
-      tokenAccountsData,
-      resolvedTokenAAddress,
-      resolvedTokenBAddress,
-    ],
-  );
-
-  const actionsValue = useMemo(
-    () => ({
-      calculateTokenAmounts,
-      clearPendingCalculations,
-      handleAmountChange,
-      handleError,
-      resetFormToDefaults,
-      trackError: trackLiquidityError,
-      trackLiquidityAction,
-    }),
-    [
-      resetFormToDefaults,
-      handleAmountChange,
-      clearPendingCalculations,
-      calculateTokenAmounts,
-      trackLiquidityAction,
-      trackLiquidityError,
-      handleError,
-    ],
-  );
-
-  const walletValue = useMemo(
-    () => ({
-      publicKey: walletPublicKey || null,
-      walletAdapter,
-    }),
-    [walletPublicKey, walletAdapter],
-  );
-
-  const settingsValue = useMemo(
-    () => ({
-      setSlippage,
-      slippage,
-    }),
-    [slippage],
-  );
-
-  return (
-    <LiquidityWalletProvider value={walletValue}>
-      <LiquiditySettingsProvider value={settingsValue}>
-        <LiquidityDataProvider value={dataValue}>
-          <LiquidityActionsProvider value={actionsValue}>
-            <LiquidityFormStateProvider
-              value={
-                formStateValue as unknown as LiquidityFormStateContextValue
-              }
-            >
-              {children}
-            </LiquidityFormStateProvider>
-          </LiquidityActionsProvider>
-        </LiquidityDataProvider>
-      </LiquiditySettingsProvider>
-    </LiquidityWalletProvider>
-  );
-}
-
-export const useLiquidityForm = useCompositeContext;
-
-export function useLiquidityFormWithDebounced() {
-  const context = useLiquidityForm();
-  const debouncedCalculateTokenAmounts = useDebouncedCallback(
-    context.calculateTokenAmounts,
-    LIQUIDITY_CONSTANTS.DEBOUNCE_DELAY_MS,
-  );
+  const poolDetails = poolDataResult.data
+    ? {
+        fee: undefined,
+        poolAddress: poolDataResult.data.lpMint,
+        price: undefined,
+        tokenXMint: poolDataResult.data.tokenXMint,
+        tokenXReserve: poolDataResult.data.reserveX,
+        tokenYMint: poolDataResult.data.tokenYMint,
+        tokenYReserve: poolDataResult.data.reserveY,
+        totalSupply: poolDataResult.data.totalLpSupply,
+      }
+    : null;
 
   return {
-    ...context,
     debouncedCalculateTokenAmounts,
+    form,
+    handleDeposit,
+    hasError: state.matches("error") && !!state.context.error,
+    isCalculating: state.matches("calculating"),
+    isError: state.matches("error"),
+    isSubmitting: state.matches("submitting") || state.matches("signing"),
+    isSuccess: state.matches("success"),
+    poolDetails,
+    publicKey: walletPublicKey || null,
+    setSlippage,
+    slippage,
+    tokenAccountsData,
   };
 }

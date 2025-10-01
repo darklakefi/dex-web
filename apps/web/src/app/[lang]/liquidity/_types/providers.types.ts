@@ -1,7 +1,15 @@
 import type { TokenAccountsData } from "@dex-web/core";
-import type { FormApi } from "@tanstack/react-form";
+import type {
+  FormApi,
+  FormAsyncValidateOrFn,
+  FormValidateOrFn,
+} from "@tanstack/react-form";
 import type { ReactNode } from "react";
-import type { LiquidityFormValues, PoolDetails } from "./liquidity.types";
+import type {
+  LiquidityFormValues,
+  liquidityFormSchema,
+  PoolDetails,
+} from "./liquidity.types";
 
 export interface LiquidityProviderProps {
   children: ReactNode;
@@ -26,10 +34,13 @@ export interface LiquidityDataContextValue {
 export interface LiquidityFormContextValue {
   form: FormApi<
     LiquidityFormValues,
+    FormValidateOrFn<LiquidityFormValues> | undefined,
+    typeof liquidityFormSchema,
     undefined,
     undefined,
     undefined,
     undefined,
+    FormAsyncValidateOrFn<LiquidityFormValues> | undefined,
     undefined,
     undefined,
     undefined,

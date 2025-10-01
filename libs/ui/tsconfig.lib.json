@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declarationDir": "../../dist/libs/ui",
     "outDir": "../../dist/libs/ui"
   },
   "exclude": [
@@ -15,6 +16,12 @@
     "src/**/*.test.jsx"
   ],
   "extends": "./tsconfig.json",
-  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
+  "include": [
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/types/**/*.d.ts"
+  ],
   "references": []
 }

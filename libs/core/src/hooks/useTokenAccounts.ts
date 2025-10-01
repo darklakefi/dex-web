@@ -52,15 +52,11 @@ export interface UseTokenAccountsReturn {
   errorSell: Error | null;
 }
 
-const DEFAULT_NETWORK = "mainnet-beta";
+const DEFAULT_NETWORK = "mainnet";
 
 const resolveNetwork = (network?: string | null): string => {
   if (network) {
     return network;
-  }
-
-  if (process.env.NEXT_PUBLIC_SOLANA_NETWORK) {
-    return process.env.NEXT_PUBLIC_SOLANA_NETWORK;
   }
 
   if (process.env.NEXT_PUBLIC_NETWORK === "2") {

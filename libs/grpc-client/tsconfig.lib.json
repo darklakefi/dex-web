@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declarationDir": "../../dist/libs/grpc-client",
     "outDir": "../../dist/libs/grpc-client",
     "types": ["node"]
   },
