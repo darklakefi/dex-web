@@ -1,27 +1,22 @@
 "use client";
 
 import { Button } from "@dex-web/ui";
+import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
-import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { liquidityPageParsers } from "../../../_utils/searchParams";
 import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
-import type {
-  LiquidityFormValues,
-  PoolDetails,
-  TokenAccountsData,
-} from "../_types/liquidity.types";
+import type { PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
 import {
   type ButtonState,
   getButtonMessage,
   getLiquidityButtonState,
 } from "../_utils/liquidityButtonState";
-import { useLiquidityFormState } from "./LiquidityContexts";
 
 interface LiquidityActionButtonProps {
+  form: any; // TODO: Fix this type properly
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
@@ -36,6 +31,7 @@ interface LiquidityActionButtonProps {
 const serialize = createSerializer(liquidityPageParsers);
 
 export function LiquidityActionButton({
+  form,
   publicKey,
   buyTokenAccount,
   sellTokenAccount,
@@ -48,12 +44,9 @@ export function LiquidityActionButton({
 }: LiquidityActionButtonProps) {
   const router = useRouter();
   const { wallet, connected } = useWallet();
-  const { isCalculating, form } = useLiquidityFormState();
 
-  const formValues = useStore(
-    form.store,
-    (state) => state.values,
-  ) as LiquidityFormValues;
+  const formValues = form.state.values;
+  const isCalculating = form.state.isSubmitting;
 
   const validation = useLiquidityValidation({
     buyTokenAccount,
@@ -76,9 +69,8 @@ export function LiquidityActionButton({
 
   const buttonMessage = getButtonMessage(buttonState);
 
-  const formState = useStore(form.store, (state) => state);
-  const formCanSubmit = formState.canSubmit;
-  const formIsSubmitting = formState.isSubmitting;
+  const formCanSubmit = form.state.canSubmit;
+  const formIsSubmitting = form.state.isSubmitting;
 
   const handleButtonClick = () => {
     if (shouldShowTransactionPreview(validation)) {
@@ -106,10 +98,7 @@ export function LiquidityActionButton({
       "aria-label": _getAriaLabel(buttonState, getButtonMessage(buttonState)),
       isDisabled,
       isLoading,
-      variant: _getButtonVariant(buttonState) as
-        | "primary"
-        | "secondary"
-        | "danger",
+      variant: _getButtonVariant(buttonState),
     };
   };
 

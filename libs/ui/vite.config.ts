@@ -76,7 +76,12 @@ export const config = mergeConfig(baseConfig, {
     react(),
     tailwindcss(),
     nxViteTsPaths(),
-    svgr({ include: "**/*.svg" }),
+    svgr({
+      include: "**/*.svg",
+      svgrOptions: {
+        exportType: "default",
+      },
+    }),
     nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
       outDir: "../../dist/libs/ui",

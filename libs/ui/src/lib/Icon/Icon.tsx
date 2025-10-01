@@ -65,27 +65,26 @@ export type IconName =
   | "x";
 
 const iconComponents = {
+  analytics: AnalyticsIcon,
+  backpack: BackpackWalletIcon,
   "check-filled": CheckFilledIcon,
   "chevron-down": ChevronDownIcon,
+  cog: CogIcon,
+  crown: CrownIcon,
+  exclamation: ExclamationIcon,
   "external-link": ExternalLinkIcon,
+  fire: FireIcon,
+  github: GithubIcon,
+  info: InfoIcon,
   "info-filled": InfoFilledIcon,
   "loading-stripe": LoadingStripeIcon,
   "logo-lg": LogoLgIcon,
   "logo-sm": LogoSmIcon,
-  "plus-circle": PlusCircleIcon,
-  "times-filled": TimesFilledIcon,
-  analytics: AnalyticsIcon,
-  backpack: BackpackWalletIcon,
-  cog: CogIcon,
-  crown: CrownIcon,
-  exclamation: ExclamationIcon,
-  fire: FireIcon,
-  github: GithubIcon,
-  info: InfoIcon,
   logout: LogoutIcon,
   phantom: PhantomWalletIcon,
   play: PlayIcon,
   plus: PlusIcon,
+  "plus-circle": PlusCircleIcon,
   refresh: RefreshIcon,
   search: SearchIcon,
   seedlings: SeedlingsIcon,
@@ -94,9 +93,10 @@ const iconComponents = {
   swap: SwapIcon,
   telegram: TelegramIcon,
   times: TimesIcon,
+  "times-filled": TimesFilledIcon,
   trending: TrendingIcon,
   x: XIcon,
-} as const satisfies Record<
+} satisfies Record<
   IconName,
   React.ComponentType<React.SVGProps<SVGSVGElement>>
 >;

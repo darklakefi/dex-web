@@ -1,8 +1,8 @@
 import { Box, Hero, Text } from "@dex-web/ui";
 import type { SearchParams } from "nuqs/server";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
-import { selectedTokensCache } from "../../_utils/searchParams";
 import { LazySwapForm } from "../../_components/LazySwapForm";
+import { selectedTokensCache } from "../../_utils/searchParams";
 import { LazySwapTransactionHistory } from "./_components/LazySwapTransactionHistory";
 
 export default async function Page({

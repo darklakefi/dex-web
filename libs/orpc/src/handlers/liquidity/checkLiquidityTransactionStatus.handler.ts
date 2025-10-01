@@ -1,5 +1,6 @@
 "use server";
 
+import { signature as toSignature } from "@solana/kit";
 import { getHelius } from "../../getHelius";
 
 export interface CheckLiquidityTransactionStatusInput {
@@ -18,39 +19,39 @@ export async function checkLiquidityTransactionStatusHandler(
   const { signature } = input;
 
   try {
-    // Get Solana connection
     const helius = getHelius();
-    const connection = helius.connection;
+    const { value } = await helius.getSignatureStatuses(
+      [toSignature(signature)],
+      {
+        searchTransactionHistory: true,
+      },
+    );
 
-    // Check transaction status
-    const status = await connection.getSignatureStatus(signature, {
-      searchTransactionHistory: true,
-    });
+    const status = value?.[0];
 
-    if (!status.value) {
+    if (!status) {
       return {
         signature,
         status: "pending",
       };
     }
 
-    if (status.value.err) {
+    if (status.err) {
       return {
-        error: JSON.stringify(status.value.err),
+        error: JSON.stringify(status.err),
         signature,
         status: "failed",
       };
     }
 
-    // Map Solana confirmation status to our status
-    if (status.value.confirmationStatus === "finalized") {
+    if (status.confirmationStatus === "finalized") {
       return {
         signature,
         status: "finalized",
       };
     }
 
-    if (status.value.confirmationStatus === "confirmed") {
+    if (status.confirmationStatus === "confirmed") {
       return {
         signature,
         status: "confirmed",

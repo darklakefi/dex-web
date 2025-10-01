@@ -9,7 +9,6 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
   experimental: {
     reactCompiler: true,
-    typedRoutes: true,
     webpackBuildWorker: true,
   },
   images: {
@@ -54,6 +53,7 @@ const nextConfig = {
       },
     },
   },
+  typedRoutes: true,
   typescript: {
     ignoreBuildErrors: true,
     tsconfigPath: "./tsconfig.json",
@@ -61,8 +61,8 @@ const nextConfig = {
 
   webpack(config, { isServer }) {
     config.cache = {
-      type: "memory",
       maxGenerations: 1,
+      type: "memory",
     };
 
     config.infrastructureLogging = {
@@ -127,11 +127,11 @@ export default withSentryConfig(nxConfig, {
   org: "darklake",
   project: "darklake",
   silent: !process.env.CI,
-  tunnelRoute: "/monitoring",
-  widenClientFileUpload: true,
   sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
     disable:
       process.env.NODE_ENV === "development" && process.env.CI === "true",
-    deleteSourcemapsAfterUpload: true,
   },
+  tunnelRoute: "/monitoring",
+  widenClientFileUpload: true,
 });

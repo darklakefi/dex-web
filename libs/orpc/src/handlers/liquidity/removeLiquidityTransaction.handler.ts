@@ -1,4 +1,5 @@
-import { BN, type Program, web3, type Idl } from "@coral-xyz/anchor";
+import { BN, type Idl, type Program, web3 } from "@coral-xyz/anchor";
+import { createLiquidityProgram } from "@dex-web/core";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
@@ -6,12 +7,11 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { PublicKey, type Transaction } from "@solana/web3.js";
+import IDL from "../../darklake-idl";
 import type {
   RemoveLiquidityTransactionInput,
   RemoveLiquidityTransactionOutput,
 } from "../../schemas/liquidity/removeLiquidityTransaction.schema";
-import { createLiquidityProgram } from "@dex-web/core";
-import IDL from "../../darklake-idl";
 
 const POOL_RESERVE_SEED = "pool_reserve";
 const POOL_SEED = "pool";
@@ -115,23 +115,23 @@ async function removeLiquidity(
       null,
     )
     .accounts({
-      user,
-      tokenMintX: tokenXMint,
-      tokenMintY: tokenYMint,
       ammConfig: ammConfig,
-      tokenMintLp: lpMint,
-      pool: poolPubkey,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       authority,
-      userTokenAccountX: userTokenAccountX,
-      userTokenAccountY: userTokenAccountY,
-      userTokenAccountLp: userTokenAccountLp,
+      pool: poolPubkey,
       poolTokenReserveX: poolTokenAccountX,
       poolTokenReserveY: poolTokenAccountY,
-      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       systemProgram: web3.SystemProgram.programId,
+      tokenMintLp: lpMint,
+      tokenMintX: tokenXMint,
       tokenMintXProgram: tokenXProgramId,
+      tokenMintY: tokenYMint,
       tokenMintYProgram: tokenYProgramId,
       tokenProgram: TOKEN_PROGRAM_ID,
+      user,
+      userTokenAccountLp: userTokenAccountLp,
+      userTokenAccountX: userTokenAccountX,
+      userTokenAccountY: userTokenAccountY,
     })
     .instruction();
 

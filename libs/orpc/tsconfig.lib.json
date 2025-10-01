@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declarationDir": "../../dist/libs/orpc",
     "outDir": "../../dist/libs/orpc",
     "resolveJsonModule": true,
     "types": ["node"]

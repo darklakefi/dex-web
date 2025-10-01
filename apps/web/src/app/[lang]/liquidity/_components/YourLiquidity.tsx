@@ -6,6 +6,7 @@ import {
   convertToDecimal,
   numberFormatHelper,
   sortSolanaAddresses,
+  truncate,
 } from "@dex-web/utils";
 import { useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
@@ -100,9 +101,21 @@ export function YourLiquidity({
     ],
   });
 
-  const tokenMetadataMap = tokenMetadata as Record<string, Token>;
-  const tokenXMetadata = tokenMetadataMap[tokenXAddress]!;
-  const tokenYMetadata = tokenMetadataMap[tokenYAddress]!;
+  const tokenMetadataMap =
+    (tokenMetadata as Record<string, Token | undefined>) ?? {};
+
+  const createFallbackTokenDetails = (address: string): Token => ({
+    address,
+    decimals: 0,
+    symbol: truncate(address),
+  });
+
+  const tokenXDetails =
+    tokenMetadataMap[tokenXAddress] ??
+    createFallbackTokenDetails(tokenXAddress);
+  const tokenYDetails =
+    tokenMetadataMap[tokenYAddress] ??
+    createFallbackTokenDetails(tokenYAddress);
 
   const liquidityCalculations = useMemo(() => {
     if (
@@ -175,7 +188,7 @@ export function YourLiquidity({
                 trimTrailingZeros: true,
                 value: liquidityCalculations.userTokenXAmount,
               })}{" "}
-              {tokenXMetadata?.symbol}
+              {tokenXDetails.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-200">
               {numberFormatHelper({
@@ -183,7 +196,7 @@ export function YourLiquidity({
                 trimTrailingZeros: true,
                 value: liquidityCalculations.userTokenYAmount,
               })}{" "}
-              {tokenYMetadata?.symbol}
+              {tokenYDetails.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
             <Button
@@ -225,9 +238,9 @@ export function YourLiquidity({
         onClose={() => setIsWithdrawModalOpen(false)}
         poolReserves={poolReserves}
         tokenXAddress={tokenXAddress}
-        tokenXDetails={tokenXMetadata}
+        tokenXDetails={tokenXDetails}
         tokenYAddress={tokenYAddress}
-        tokenYDetails={tokenYMetadata}
+        tokenYDetails={tokenYDetails}
         userLiquidity={userLiquidity}
       />
     </div>

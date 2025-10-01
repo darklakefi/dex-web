@@ -1,6 +1,10 @@
-import { z } from "zod";
 import type { PublicKey } from "@solana/web3.js";
-import type { FormApi } from "@tanstack/react-form";
+import type {
+  FormApi,
+  FormAsyncValidateOrFn,
+  FormValidateOrFn,
+} from "@tanstack/react-form";
+import { z } from "zod";
 
 export const numericStringSchema = z
   .string()
@@ -15,9 +19,9 @@ export const positiveNumericStringSchema = numericStringSchema.refine(
 );
 
 export const liquidityFormSchema = z.object({
+  initialPrice: positiveNumericStringSchema,
   tokenAAmount: numericStringSchema,
   tokenBAmount: numericStringSchema,
-  initialPrice: positiveNumericStringSchema,
 });
 
 export type LiquidityFormSchema = z.infer<typeof liquidityFormSchema>;
@@ -50,6 +54,20 @@ export interface LiquidityFormValues {
   readonly tokenBAmount: string;
   readonly initialPrice: string;
 }
+
+export type LiquidityFormApi = FormApi<
+  LiquidityFormValues,
+  FormValidateOrFn<LiquidityFormValues> | undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  FormAsyncValidateOrFn<LiquidityFormValues> | undefined,
+  undefined,
+  undefined,
+  undefined
+>;
 
 export interface WalletAdapter {
   readonly wallet: {
@@ -149,10 +167,13 @@ export type LiquidityState =
 export interface LiquidityFormContextValue {
   readonly form: FormApi<
     LiquidityFormValues,
+    FormValidateOrFn<LiquidityFormValues> | undefined,
+    typeof liquidityFormSchema,
     undefined,
     undefined,
     undefined,
     undefined,
+    FormAsyncValidateOrFn<LiquidityFormValues> | undefined,
     undefined,
     undefined,
     undefined,

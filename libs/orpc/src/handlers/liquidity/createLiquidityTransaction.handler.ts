@@ -1,4 +1,5 @@
 import { BN, type Idl, type Program, web3 } from "@coral-xyz/anchor";
+import { createLiquidityProgram } from "@dex-web/core";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
@@ -14,16 +15,15 @@ import {
   TransactionMessage,
   type VersionedTransaction,
 } from "@solana/web3.js";
+import IDL from "../../darklake-idl";
 import { getHelius } from "../../getHelius";
 import type {
   CreateLiquidityTransactionInput,
   CreateLiquidityTransactionOutput,
 } from "../../schemas/liquidity/createLiquidityTransaction.schema";
-import { createLiquidityProgram } from "@dex-web/core";
-import IDL from "../../darklake-idl";
-import { getLPRateHandler } from "../pools/getLPRate.handler";
-import { createAnchorProvider } from "../../utils/walletAdapter";
 import { createTransactionErrorResponse } from "../../utils/errorHandling";
+import { createAnchorProvider } from "../../utils/walletAdapter";
+import { getLPRateHandler } from "../pools/getLPRate.handler";
 
 const POOL_RESERVE_SEED = "pool_reserve";
 const POOL_SEED = "pool";
@@ -204,23 +204,23 @@ async function createLiquidityTransaction(
   );
 
   const addLiquidityAccounts = {
-    user,
-    tokenMintX: tokenXMint,
-    tokenMintY: tokenYMint,
-    tokenMintLp: lpMint,
-    pool: poolPubkey,
     ammConfig: ammConfig,
+    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
     authority,
-    userTokenAccountX: userTokenAccountX,
-    userTokenAccountY: userTokenAccountY,
-    userTokenAccountLp: userTokenAccountLp,
+    pool: poolPubkey,
     poolTokenReserveX: poolTokenAccountX,
     poolTokenReserveY: poolTokenAccountY,
-    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
     systemProgram: web3.SystemProgram.programId,
+    tokenMintLp: lpMint,
+    tokenMintX: tokenXMint,
     tokenMintXProgram: tokenXProgramId,
+    tokenMintY: tokenYMint,
     tokenMintYProgram: tokenYProgramId,
     tokenProgram: TOKEN_PROGRAM_ID,
+    user,
+    userTokenAccountLp: userTokenAccountLp,
+    userTokenAccountX: userTokenAccountX,
+    userTokenAccountY: userTokenAccountY,
   };
 
   const addLiquidityMethod = program.methods.addLiquidity?.(
@@ -275,6 +275,7 @@ export async function createLiquidityTransactionHandler(
     const helius = getHelius();
     const provider = createAnchorProvider(user);
     const program = createLiquidityProgram(IDL, provider);
+    const connection = helius.connection;
 
     const lpRate = await getLPRateHandler({
       slippage,
@@ -287,7 +288,7 @@ export async function createLiquidityTransactionHandler(
     const vtx = await createLiquidityTransaction(
       new PublicKey(user),
       program,
-      helius.connection,
+      connection,
       new PublicKey(tokenXMint),
       new PublicKey(tokenYMint),
       maxAmountX,

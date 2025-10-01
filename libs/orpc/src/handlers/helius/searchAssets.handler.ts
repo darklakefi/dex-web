@@ -1,5 +1,6 @@
 "use server";
 
+import type { Asset } from "helius-sdk/dist/types";
 import { getHelius } from "../../getHelius";
 import type {
   SearchAssetsInput,
@@ -12,16 +13,14 @@ export async function searchAssetsHandler({
   try {
     const helius = getHelius();
 
-    const result = await helius.rpc.searchAssets({
+    const result = await helius.searchAssets({
       limit,
     });
 
-    const { items } = await result;
-
-    const tokenListOutput = items.map((item) => {
-      const imageUrl =
-        item.content?.files?.find((file) => file.mime?.includes("image"))
-          ?.cdn_uri ?? null;
+    const tokenListOutput = result.items.map((item: Asset) => {
+      const imageUrl = item.content?.files?.find((file: any) =>
+        file.mime?.includes("image"),
+      )?.cdn_uri;
 
       return {
         description: item.content?.metadata?.description ?? "",

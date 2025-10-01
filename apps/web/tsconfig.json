@@ -1,24 +1,26 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "incremental": true,
     "jsx": "preserve",
-    "noEmit": false,
+    "noEmit": true,
     "plugins": [
       {
         "name": "next"
       }
     ]
   },
+  "exclude": ["node_modules"],
   "extends": "../../tsconfig.base.json",
-  "files": [],
+  "files": ["next-env.d.ts"],
   "include": [
-    "../../apps/web/dist/dist/types/**/*.ts",
-    "../../dist/.next/types/**/*.ts",
-    "../../types/css.d.ts",
-    "../../types/image.d.ts",
-    "../../types/svg.d.ts",
-    "../../vite.config.base.ts",
-    ".next/types/**/*.ts"
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    "../../dist/.next/types/**/*.ts"
   ],
   "references": [
     {

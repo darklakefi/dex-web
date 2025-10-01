@@ -7,6 +7,7 @@ import {
   convertToDecimal,
   getExplorerUrl,
   numberFormatHelper,
+  truncate,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
@@ -64,8 +65,8 @@ interface WithdrawLiquidityModalProps {
     userTokenXAmount: number;
     userTokenYAmount: number;
   };
-  tokenXDetails: Token;
-  tokenYDetails: Token;
+  tokenXDetails?: Token;
+  tokenYDetails?: Token;
 }
 
 export function WithdrawLiquidityModal({
@@ -95,6 +96,9 @@ export function WithdrawLiquidityModal({
   });
   const [withdrawStep, setWithdrawStep] = useState(0);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+
+  const tokenXSymbol = tokenXDetails?.symbol ?? truncate(tokenXAddress);
+  const tokenYSymbol = tokenYDetails?.symbol ?? truncate(tokenYAddress);
 
   const [{ data: tokenXPrice }, { data: tokenYPrice }] = useSuspenseQueries({
     queries: [
@@ -456,7 +460,7 @@ export function WithdrawLiquidityModal({
                   Withdrawal Amount
                 </Text.Body2>
                 <Text.Body2 className="flex max-w-fit items-center bg-green-700 p-2 text-green-300 leading-none">
-                  {tokenXDetails.symbol} / {tokenYDetails.symbol}
+                  {tokenXSymbol} / {tokenYSymbol}
                 </Text.Body2>
               </div>
               <form.Field
@@ -518,7 +522,7 @@ export function WithdrawLiquidityModal({
                     trimTrailingZeros: true,
                     value: withdrawalCalculations.tokenXAmount,
                   })}{" "}
-                  {tokenXDetails.symbol}
+                  {tokenXSymbol}
                 </div>
                 <div>
                   {numberFormatHelper({
@@ -526,7 +530,7 @@ export function WithdrawLiquidityModal({
                     trimTrailingZeros: true,
                     value: withdrawalCalculations.tokenYAmount,
                   })}{" "}
-                  {tokenYDetails.symbol}
+                  {tokenYSymbol}
                 </div>
               </div>
             </div>
@@ -541,7 +545,7 @@ export function WithdrawLiquidityModal({
                   trimTrailingZeros: true,
                   value: liquidityCalculations.userTokenXAmount,
                 })}{" "}
-                {tokenXDetails.symbol}
+                {tokenXSymbol}
               </div>
               <div>
                 {numberFormatHelper({
@@ -549,7 +553,7 @@ export function WithdrawLiquidityModal({
                   trimTrailingZeros: true,
                   value: liquidityCalculations.userTokenYAmount,
                 })}{" "}
-                {tokenYDetails.symbol}
+                {tokenYSymbol}
               </div>
             </div>
           </div>

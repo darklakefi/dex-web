@@ -1,5 +1,6 @@
 import type { Idl } from "@coral-xyz/anchor";
 import { BN, BorshCoder } from "@coral-xyz/anchor";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import {
   getAccount,
   TOKEN_2022_PROGRAM_ID,
@@ -12,9 +13,8 @@ import {
   VersionedTransaction,
 } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
-import { sortSolanaAddresses } from "@dex-web/utils";
 import IDL from "../darklake-idl";
-import { getHelius } from "../getHelius";
+import { getHeliusConnection } from "./getHeliusConnection";
 
 export const EXCHANGE_PROGRAM_ID = new PublicKey(
   process.env.EXCHANGE_PROGRAM_ID ||
@@ -87,8 +87,7 @@ export async function getPoolPubkey(tokenA: string, tokenB: string) {
 }
 
 export async function getPoolOnChain(tokenXMint: string, tokenYMint: string) {
-  const helius = getHelius();
-  const connection = helius.connection;
+  const connection = getHeliusConnection();
 
   const poolPubkey = await getPoolPubkey(tokenXMint, tokenYMint);
 
