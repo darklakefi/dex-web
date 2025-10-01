@@ -1,8 +1,8 @@
 "use client";
 
+import { Box, Button, Icon, Text } from "@dex-web/ui";
 import type React from "react";
 import { Component, type ReactNode } from "react";
-import { Box, Button, Icon, Text } from "@dex-web/ui";
 
 interface LiquidityErrorBoundaryState {
   hasError: boolean;
@@ -166,26 +166,26 @@ function ErrorFallback({
           <div className="flex flex-wrap gap-2">
             {enableRecovery && !isRetryLimitReached && (
               <Button
-                size="sm"
-                onClick={onRetry}
                 className="bg-green-600 text-green-100 hover:bg-green-700"
+                onClick={onRetry}
+                size="sm"
               >
                 Try Again
               </Button>
             )}
 
             <Button
-              size="sm"
-              onClick={onReset}
               className="bg-gray-600 text-gray-100 hover:bg-gray-700"
+              onClick={onReset}
+              size="sm"
             >
               Reset Form
             </Button>
 
             <Button
-              size="sm"
-              onClick={onReport}
               className="bg-blue-600 text-blue-100 hover:bg-blue-700"
+              onClick={onReport}
+              size="sm"
             >
               Report Issue
             </Button>
@@ -224,9 +224,9 @@ export class LiquidityErrorBoundary extends Component<
     const errorId = `liquidity_error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     return {
-      hasError: true,
       error,
       errorId,
+      hasError: true,
     };
   }
 
@@ -258,21 +258,21 @@ export class LiquidityErrorBoundary extends Component<
         component: this.props.componentName || "LiquidityForm",
         error: {
           message: error.message,
-          stack: error.stack,
           name: error.name,
+          stack: error.stack,
         },
         errorInfo: {
           componentStack: errorInfo.componentStack,
         },
         metadata: {
+          errorId: this.state.errorId,
+          retryCount: this.state.retryCount,
+          timestamp: new Date().toISOString(),
+          url: typeof window !== "undefined" ? window.location.href : "unknown",
           userAgent:
             typeof window !== "undefined"
               ? window.navigator.userAgent
               : "unknown",
-          url: typeof window !== "undefined" ? window.location.href : "unknown",
-          timestamp: new Date().toISOString(),
-          errorId: this.state.errorId,
-          retryCount: this.state.retryCount,
         },
       };
 
@@ -295,18 +295,18 @@ export class LiquidityErrorBoundary extends Component<
 
     this.retryTimeoutId = setTimeout(() => {
       this.setState({
-        hasError: false,
         error: undefined,
         errorInfo: undefined,
+        hasError: false,
       });
     }, 1000);
   };
 
   private handleReset = () => {
     this.setState({
-      hasError: false,
       error: undefined,
       errorInfo: undefined,
+      hasError: false,
       retryCount: 0,
     });
 
@@ -319,22 +319,22 @@ export class LiquidityErrorBoundary extends Component<
     const { error, errorInfo, errorId } = this.state;
 
     const errorReport = {
-      errorId,
       component: this.props.componentName || "LiquidityForm",
       error: error
         ? {
             message: error.message,
-            stack: error.stack,
             name: error.name,
+            stack: error.stack,
           }
         : null,
+      errorId,
       errorInfo: errorInfo
         ? {
             componentStack: errorInfo.componentStack,
           }
         : null,
-      timestamp: new Date().toISOString(),
       retryCount: this.state.retryCount,
+      timestamp: new Date().toISOString(),
     };
 
     console.info("Error report generated:", errorReport);
@@ -363,15 +363,15 @@ export class LiquidityErrorBoundary extends Component<
 
       return (
         <ErrorFallback
+          componentName={this.props.componentName || "Liquidity Form"}
+          enableRecovery={this.props.enableRecovery !== false}
           error={this.state.error}
           errorId={this.state.errorId}
-          retryCount={this.state.retryCount}
           maxRetries={this.props.maxRetries || 3}
-          enableRecovery={this.props.enableRecovery !== false}
-          componentName={this.props.componentName || "Liquidity Form"}
-          onRetry={this.handleRetry}
-          onReset={this.handleReset}
           onReport={this.handleReport}
+          onReset={this.handleReset}
+          onRetry={this.handleRetry}
+          retryCount={this.state.retryCount}
         />
       );
     }
@@ -405,8 +405,8 @@ export function LiquidityFormErrorBoundary({
   return (
     <LiquidityErrorBoundary
       componentName="Liquidity Form"
-      maxRetries={3}
       enableRecovery={true}
+      maxRetries={3}
     >
       {children}
     </LiquidityErrorBoundary>
@@ -421,8 +421,8 @@ export function LiquidityTokenInputErrorBoundary({
   return (
     <LiquidityErrorBoundary
       componentName="Token Input"
-      maxRetries={5}
       enableRecovery={true}
+      maxRetries={5}
     >
       {children}
     </LiquidityErrorBoundary>
@@ -437,8 +437,8 @@ export function LiquidityTransactionErrorBoundary({
   return (
     <LiquidityErrorBoundary
       componentName="Transaction Processing"
-      maxRetries={2}
       enableRecovery={false}
+      maxRetries={2}
     >
       {children}
     </LiquidityErrorBoundary>
@@ -453,8 +453,8 @@ export function LiquidityAPIErrorBoundary({
   return (
     <LiquidityErrorBoundary
       componentName="API Call"
-      maxRetries={3}
       enableRecovery={true}
+      maxRetries={3}
     >
       {children}
     </LiquidityErrorBoundary>

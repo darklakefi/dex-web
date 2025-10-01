@@ -2,6 +2,7 @@
 // @generated from file api.proto (package darklake.v1, syntax proto3)
 /* eslint-disable */
 
+import type { Message } from "@bufbuild/protobuf";
 import type {
   GenEnum,
   GenFile,
@@ -15,7 +16,6 @@ import {
   serviceDesc,
 } from "@bufbuild/protobuf/codegenv2";
 import { file_validate_validate } from "./validate/validate_pb";
-import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file api.proto.

@@ -29,9 +29,9 @@ export function SkeletonForm({
           {}
           <div className="flex items-center justify-center">
             <div
+              aria-label={`${type === "liquidity" ? "Plus" : "Swap"} - ${type === "liquidity" ? "Adding liquidity to pool" : "Swapping tokens"}`}
               className="inline-flex size-8 items-center justify-center border border-green-600 bg-green-800 p-1 text-green-300"
               role="img"
-              aria-label={`${type === "liquidity" ? "Plus" : "Swap"} - ${type === "liquidity" ? "Adding liquidity to pool" : "Swapping tokens"}`}
             >
               <Icon
                 className="size-5"
@@ -45,28 +45,28 @@ export function SkeletonForm({
           />
 
           {}
-          <SkeletonLoader variant="button" className="h-12 w-full" />
+          <SkeletonLoader className="h-12 w-full" variant="button" />
 
           {}
-          <SkeletonLoader variant="text" className="h-4 w-40" />
+          <SkeletonLoader className="h-4 w-40" variant="text" />
         </div>
 
         {}
         {type === "liquidity" && (
           <div className="mt-4 space-y-2">
-            <SkeletonLoader variant="text" className="h-4 w-32" />
-            <SkeletonLoader variant="text" className="h-4 w-24" />
-            <SkeletonLoader variant="text" className="h-4 w-28" />
+            <SkeletonLoader className="h-4 w-32" variant="text" />
+            <SkeletonLoader className="h-4 w-24" variant="text" />
+            <SkeletonLoader className="h-4 w-28" variant="text" />
           </div>
         )}
       </Box>
 
       <div className="flex flex-col gap-1">
         {}
-        <SkeletonLoader variant="button" className="h-10 w-10" />
+        <SkeletonLoader className="h-10 w-10" variant="button" />
 
         {}
-        <SkeletonLoader variant="button" className="h-10 w-10" />
+        <SkeletonLoader className="h-10 w-10" variant="button" />
       </div>
     </section>
   );

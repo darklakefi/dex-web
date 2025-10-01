@@ -11,9 +11,9 @@ Object.defineProperty(window, "focus", {
 });
 
 Object.defineProperty(HTMLElement.prototype, "focus", {
+  configurable: true,
   value: () => {},
   writable: true,
-  configurable: true,
 });
 
 afterEach(() => {

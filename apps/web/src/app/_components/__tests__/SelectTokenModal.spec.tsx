@@ -6,16 +6,17 @@ import { describe, expect, it, vi } from "vitest";
 import z from "zod/v4";
 import { DEFAULT_BUY_TOKEN } from "../../_utils/constants";
 import { SelectTokenModal } from "../SelectTokenModal";
+
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();
 vi.mock("next/navigation", () => ({
+  usePathname: () => "/swap",
   useRouter: () => ({
     push: vi.fn(),
   }),
   useSearchParams: () => ({
     get: vi.fn().mockReturnValue(""),
   }),
-  usePathname: () => "/swap",
 }));
 vi.mock("@dex-web/orpc", () => ({
   getTokensInputSchema: {

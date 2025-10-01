@@ -12,43 +12,43 @@ const skeletonVariants = cva(
     "before:animate-shimmer",
   ],
   {
+    defaultVariants: {
+      pulse: false,
+      variant: "default",
+    },
     variants: {
+      pulse: {
+        false: "",
+        true: "animate-pulse",
+      },
+      size: {
+        lg: "h-6",
+        md: "h-4",
+        sm: "h-3",
+        xl: "h-8",
+      },
       variant: {
-        default: "h-4 w-20 rounded",
-        text: "h-4 w-24 rounded",
-        input: "h-12 w-40 rounded text-3xl leading-8.5",
+        balance: "h-4 w-28 rounded",
         button: "h-10 w-32 rounded",
-        wallet: "h-10 w-32 rounded",
+        circle: "rounded-full",
+        default: "h-4 w-20 rounded",
+        form: "w-full max-w-xl",
+        input: "h-12 w-40 rounded text-3xl leading-8.5",
+        rectangle: "rounded-none",
+        text: "h-4 w-24 rounded",
         tokenInput: "h-24 w-full rounded border border-green-400 bg-green-600",
         tokenInputBox:
           "w-full rounded border border-green-400 bg-green-600 pt-3 pb-3",
-        balance: "h-4 w-28 rounded",
-        circle: "rounded-full",
-        rectangle: "rounded-none",
-        form: "w-full max-w-xl",
-      },
-      size: {
-        sm: "h-3",
-        md: "h-4",
-        lg: "h-6",
-        xl: "h-8",
+        wallet: "h-10 w-32 rounded",
       },
       width: {
-        xs: "w-12",
-        sm: "w-16",
-        md: "w-24",
-        lg: "w-32",
-        xl: "w-40",
         full: "w-full",
+        lg: "w-32",
+        md: "w-24",
+        sm: "w-16",
+        xl: "w-40",
+        xs: "w-12",
       },
-      pulse: {
-        true: "animate-pulse",
-        false: "",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      pulse: false,
     },
   },
 );
@@ -78,19 +78,19 @@ export function SkeletonLoader({
   ...props
 }: SkeletonLoaderProps) {
   const customStyle = {
-    width: customWidth || undefined,
     height: customHeight || undefined,
+    width: customWidth || undefined,
     ...style,
   };
 
   return (
     <div
-      className={twMerge(skeletonVariants({ variant, size, pulse }), className)}
-      style={customStyle}
       aria-hidden="true"
       aria-label={ariaLabel || "Loading content"}
-      role="img"
+      className={twMerge(skeletonVariants({ pulse, size, variant }), className)}
       data-testid={testId}
+      role="img"
+      style={customStyle}
       suppressHydrationWarning={suppressHydrationWarning}
       {...props}
     />

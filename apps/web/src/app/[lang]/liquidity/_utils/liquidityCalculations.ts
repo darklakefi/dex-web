@@ -1,9 +1,9 @@
+import type { CreateLiquidityTransactionInput } from "@dex-web/orpc/schemas";
 import {
   parseAmount,
   parseAmountBigNumber,
   sortSolanaAddresses,
 } from "@dex-web/utils";
-import type { CreateLiquidityTransactionInput } from "@dex-web/orpc/schemas";
 import type { PublicKey } from "@solana/web3.js";
 
 interface PoolDetails {

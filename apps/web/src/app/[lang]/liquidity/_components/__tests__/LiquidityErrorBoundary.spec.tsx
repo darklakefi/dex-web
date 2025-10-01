@@ -1,11 +1,11 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  LiquidityAPIErrorBoundary,
   LiquidityErrorBoundary,
   LiquidityFormErrorBoundary,
   LiquidityTokenInputErrorBoundary,
   LiquidityTransactionErrorBoundary,
-  LiquidityAPIErrorBoundary,
   withLiquidityErrorBoundary,
 } from "../LiquidityErrorBoundary";
 
@@ -26,7 +26,7 @@ vi.mock("@dex-web/ui", () => ({
     onClick?: () => void;
     className?: string;
   }) => (
-    <button type="button" className={className} onClick={onClick}>
+    <button className={className} onClick={onClick} type="button">
       {children}
     </button>
   ),
@@ -78,7 +78,7 @@ describe.skip("LiquidityErrorBoundary", () => {
     it("should catch and display error when child component throws", () => {
       render(
         <LiquidityErrorBoundary>
-          <ThrowError shouldThrow={true} errorMessage="Component crashed" />
+          <ThrowError errorMessage="Component crashed" shouldThrow={true} />
         </LiquidityErrorBoundary>,
       );
 
@@ -101,7 +101,7 @@ describe.skip("LiquidityErrorBoundary", () => {
     it("should detect high severity for security errors", () => {
       render(
         <LiquidityErrorBoundary>
-          <ThrowError shouldThrow={true} errorMessage="wallet security error" />
+          <ThrowError errorMessage="wallet security error" shouldThrow={true} />
         </LiquidityErrorBoundary>,
       );
 
@@ -114,7 +114,7 @@ describe.skip("LiquidityErrorBoundary", () => {
     it("should detect medium severity for general errors", () => {
       render(
         <LiquidityErrorBoundary>
-          <ThrowError shouldThrow={true} errorMessage="general error" />
+          <ThrowError errorMessage="general error" shouldThrow={true} />
         </LiquidityErrorBoundary>,
       );
 
@@ -125,7 +125,7 @@ describe.skip("LiquidityErrorBoundary", () => {
     it("should detect low severity for display errors", () => {
       render(
         <LiquidityErrorBoundary>
-          <ThrowError shouldThrow={true} errorMessage="render display error" />
+          <ThrowError errorMessage="render display error" shouldThrow={true} />
         </LiquidityErrorBoundary>,
       );
 
@@ -232,7 +232,7 @@ describe.skip("LiquidityErrorBoundary", () => {
 
       render(
         <LiquidityErrorBoundary onError={onError}>
-          <ThrowError shouldThrow={true} errorMessage="Custom error" />
+          <ThrowError errorMessage="Custom error" shouldThrow={true} />
         </LiquidityErrorBoundary>,
       );
 
@@ -325,8 +325,8 @@ describe.skip("LiquidityErrorBoundary", () => {
       render(
         <LiquidityErrorBoundary>
           <ThrowError
-            shouldThrow={true}
             errorMessage="transaction security breach"
+            shouldThrow={true}
           />
         </LiquidityErrorBoundary>,
       );
@@ -340,8 +340,8 @@ describe.skip("LiquidityErrorBoundary", () => {
       render(
         <LiquidityErrorBoundary>
           <ThrowError
-            shouldThrow={true}
             errorMessage="display formatting issue"
+            shouldThrow={true}
           />
         </LiquidityErrorBoundary>,
       );

@@ -18,9 +18,9 @@ class LRUCache<T> {
 
   constructor(config: Partial<CacheConfig> = {}) {
     this.config = {
+      enableHitTracking: config.enableHitTracking ?? true,
       maxSize: config.maxSize ?? 100,
       ttlMs: config.ttlMs ?? 30000,
-      enableHitTracking: config.enableHitTracking ?? true,
     };
   }
 
@@ -30,9 +30,9 @@ class LRUCache<T> {
     }
 
     const entry: CacheEntry<T> = {
-      value,
-      timestamp: Date.now(),
       hits: 0,
+      timestamp: Date.now(),
+      value,
     };
 
     this.cache.set(key, entry);
@@ -121,10 +121,10 @@ class LRUCache<T> {
 
   getStats() {
     return {
-      size: this.cache.size,
-      maxSize: this.config.maxSize,
       hitRatio: this.calculateHitRatio(),
+      maxSize: this.config.maxSize,
       oldestEntry: this.getOldestEntryAge(),
+      size: this.cache.size,
     };
   }
 
@@ -224,9 +224,9 @@ export function startCacheCleanup(intervalMs: number = 60000): () => void {
 
 export function getAllCacheStats() {
   return {
-    priceCalculation: priceCalculationCache.getStats(),
     balanceValidation: balanceValidationCache.getStats(),
-    tokenAmount: tokenAmountCache.getStats(),
     poolRatio: poolRatioCache.getStats(),
+    priceCalculation: priceCalculationCache.getStats(),
+    tokenAmount: tokenAmountCache.getStats(),
   };
 }

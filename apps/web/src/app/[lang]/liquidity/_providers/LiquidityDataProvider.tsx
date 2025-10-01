@@ -1,10 +1,10 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { sortSolanaAddresses } from "@dex-web/utils";
+import { createContext, type ReactNode, useContext } from "react";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
 import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
-import { sortSolanaAddresses } from "@dex-web/utils";
 import type {
   PoolDetails,
   UseRealtimeTokenAccountsReturn,
@@ -49,22 +49,22 @@ export function PoolDataProvider({
   });
 
   const tokenAccountsData = useRealtimeTokenAccounts({
+    hasRecentTransaction,
     publicKey: walletPublicKey || null,
     tokenAAddress,
     tokenBAddress,
-    hasRecentTransaction,
   });
 
   const value: PoolDataContextValue = {
-    poolDetails: poolDataResult.data as any,
-    tokenAccountsData,
-    tokenXMint,
-    tokenYMint,
+    error: poolDataResult.error || null,
     isLoading:
       poolDataResult.isLoading ||
       tokenAccountsData.isLoadingBuy ||
       tokenAccountsData.isLoadingSell,
-    error: poolDataResult.error || null,
+    poolDetails: poolDataResult.data as any,
+    tokenAccountsData,
+    tokenXMint,
+    tokenYMint,
   };
 
   return (

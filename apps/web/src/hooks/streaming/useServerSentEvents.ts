@@ -47,9 +47,9 @@ class SSEManager {
     if (!this.connections.has(connectionKey)) {
       this.connections.set(connectionKey, {
         eventSource: null,
-        reconnectAttempts: 0,
         isConnected: false,
         lastEventTime: 0,
+        reconnectAttempts: 0,
       });
 
       this.establishConnection(
@@ -176,7 +176,7 @@ export function useServerSentEvents<TData>(
   const config = DEFI_STREAM_CONFIGS[priority];
 
   const query = useQuery({
-    queryKey: [...queryKey, "sse"],
+    enabled: true,
     queryFn: async (): Promise<TData | null> => {
       return new Promise((resolve) => {
         const cleanup = sseManager.createConnection<TData>(
@@ -192,22 +192,22 @@ export function useServerSentEvents<TData>(
         queryClient.setQueryData([...queryKey, "sse", "cleanup"], cleanup);
       });
     },
-    staleTime: Infinity,
+    queryKey: [...queryKey, "sse"],
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    enabled: true,
+    staleTime: Infinity,
   });
 
   const fallbackQuery = useQuery({
-    queryKey: [...queryKey, "fallback"],
+    enabled: enableFallback && !sseManager.isConnected(endpoint, priority),
     queryFn: async (): Promise<TData | null> => {
       throw new Error("Fallback query function not implemented");
     },
+    queryKey: [...queryKey, "fallback"],
     refetchInterval:
       enableFallback && !sseManager.isConnected(endpoint, priority)
         ? config.refreshInterval
         : false,
-    enabled: enableFallback && !sseManager.isConnected(endpoint, priority),
     staleTime: config.staleTime,
   });
 
@@ -215,10 +215,10 @@ export function useServerSentEvents<TData>(
 
   return {
     data: query.data || fallbackQuery.data,
-    isLoading: query.isLoading || fallbackQuery.isLoading,
     error: query.error || fallbackQuery.error,
-    isStreaming: isConnected,
     isFallback: !isConnected && enableFallback,
+    isLoading: query.isLoading || fallbackQuery.isLoading,
+    isStreaming: isConnected,
     refetch: query.refetch,
   };
 }

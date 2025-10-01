@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  useTokenAccounts,
-  type UseTokenAccountsReturn,
   type TokenAccountsData,
+  type UseTokenAccountsReturn,
+  useTokenAccounts,
 } from "@dex-web/core";
+import { tanstackClient } from "@dex-web/orpc";
 import type { PublicKey } from "@solana/web3.js";
 import { QueryClient as QueryClientClass } from "@tanstack/react-query";
-import { tanstackClient } from "@dex-web/orpc";
 import { usePollingQuery } from "./usePollingQuery";
 
 interface UseRealtimeTokenAccountsParams {
@@ -47,16 +47,16 @@ export function useRealtimeTokenAccounts({
       });
       return queryOptions.queryFn({
         client: new QueryClientClass(),
+        meta: undefined,
         queryKey: queryOptions.queryKey,
         signal: new AbortController().signal,
-        meta: undefined,
       });
     },
     {
-      pollingInterval: hasRecentTransaction ? 3000 : 15000,
       enabled: !!publicKey && !!tokenAAddress,
-      staleTime: hasRecentTransaction ? 2000 : 30000,
       placeholderData: (previousData) => previousData,
+      pollingInterval: hasRecentTransaction ? 3000 : 15000,
+      staleTime: hasRecentTransaction ? 2000 : 30000,
     },
   );
 
@@ -71,16 +71,16 @@ export function useRealtimeTokenAccounts({
       });
       return queryOptions.queryFn({
         client: new QueryClientClass(),
+        meta: undefined,
         queryKey: queryOptions.queryKey,
         signal: new AbortController().signal,
-        meta: undefined,
       });
     },
     {
-      pollingInterval: hasRecentTransaction ? 3000 : 15000,
       enabled: !!publicKey && !!tokenBAddress,
-      staleTime: hasRecentTransaction ? 2000 : 30000,
       placeholderData: (previousData) => previousData,
+      pollingInterval: hasRecentTransaction ? 3000 : 15000,
+      staleTime: hasRecentTransaction ? 2000 : 30000,
     },
   );
 
@@ -91,18 +91,18 @@ export function useRealtimeTokenAccounts({
 
   return {
     buyTokenAccount: liveBuyTokenAccount || tokenAccountsResult.buyTokenAccount,
-    sellTokenAccount:
-      liveSellTokenAccount || tokenAccountsResult.sellTokenAccount,
-    refetchBuyTokenAccount: tokenAccountsResult.refetchBuyTokenAccount,
-    refetchSellTokenAccount: tokenAccountsResult.refetchSellTokenAccount,
-    isLoadingBuy: tokenAccountsResult.isLoadingBuy,
-    isLoadingSell: tokenAccountsResult.isLoadingSell,
-    isRefreshingBuy,
-    isRefreshingSell,
     errorBuy: tokenAccountsResult.errorBuy,
     errorSell: tokenAccountsResult.errorSell,
+    isLoadingBuy: tokenAccountsResult.isLoadingBuy,
+    isLoadingSell: tokenAccountsResult.isLoadingSell,
+    isRealtime: !!publicKey && !!tokenAAddress && !!tokenBAddress,
     isRealtimeBuy: !!publicKey && !!tokenAAddress,
     isRealtimeSell: !!publicKey && !!tokenBAddress,
-    isRealtime: !!publicKey && !!tokenAAddress && !!tokenBAddress,
+    isRefreshingBuy,
+    isRefreshingSell,
+    refetchBuyTokenAccount: tokenAccountsResult.refetchBuyTokenAccount,
+    refetchSellTokenAccount: tokenAccountsResult.refetchSellTokenAccount,
+    sellTokenAccount:
+      liveSellTokenAccount || tokenAccountsResult.sellTokenAccount,
   };
 }

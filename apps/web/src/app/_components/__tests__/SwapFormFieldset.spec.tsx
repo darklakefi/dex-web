@@ -1,4 +1,5 @@
 import { mockOrpc } from "../../[lang]/(swap)/_components/__tests__/__mocks__/mockOrpc";
+
 mockOrpc();
 import "@testing-library/jest-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
 import { FormFieldset } from "../FormFieldset";
+
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();

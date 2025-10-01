@@ -1,12 +1,13 @@
-import { describe, it, expect, vi } from "vitest";
+import { parseAmountBigNumber, sortSolanaAddresses } from "@dex-web/utils";
 import { PublicKey } from "@solana/web3.js";
+import { describe, expect, it, vi } from "vitest";
 import {
   calculateLiquidityAmounts,
-  createLiquidityTransactionPayload,
   calculateTokenAmountByPrice,
+  createLiquidityTransactionPayload,
   determineInputType,
 } from "../liquidityCalculations";
-import { sortSolanaAddresses, parseAmountBigNumber } from "@dex-web/utils";
+
 vi.mock("@dex-web/utils", () => ({
   parseAmount: vi.fn((amount: string) => Number(amount)),
   parseAmountBigNumber: vi.fn((amount: string) => ({
@@ -63,14 +64,14 @@ describe("liquidityCalculations", () => {
   describe("createLiquidityTransactionPayload", () => {
     const mockPublicKey = new PublicKey("11111111111111111111111111111112");
     const mockParams = {
-      tokenAmounts: { tokenAAmount: "100", tokenBAmount: "200" },
+      poolDetails: { tokenXMint: "tokenX123", tokenYMint: "tokenY456" },
+      publicKey: mockPublicKey,
+      slippage: "0.5",
       tokenAddresses: {
         tokenAAddress: "tokenA123",
         tokenBAddress: "tokenB456",
       },
-      slippage: "0.5",
-      publicKey: mockPublicKey,
-      poolDetails: { tokenXMint: "tokenX123", tokenYMint: "tokenY456" },
+      tokenAmounts: { tokenAAmount: "100", tokenBAmount: "200" },
     };
     it("should create valid transaction payload", () => {
       const result = createLiquidityTransactionPayload(mockParams);

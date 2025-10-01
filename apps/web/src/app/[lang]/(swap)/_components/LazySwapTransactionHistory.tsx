@@ -1,7 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { Box } from "@dex-web/ui";
+import dynamic from "next/dynamic";
 import { SkeletonLoader } from "../../../_components/SkeletonLoader";
 
 const SwapTransactionHistory = dynamic(

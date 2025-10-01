@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
-import { convertToDecimal } from "../number";
 import { sortSolanaAddresses } from "../blockchain/sortSolanaAddresses";
+import { convertToDecimal } from "../number";
 
 interface WithdrawalCalculationParams {
   userLiquidity: {

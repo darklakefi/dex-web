@@ -64,9 +64,9 @@ export function ReferralsModal() {
               <Text.Body2 className="flex items-center justify-between gap-2">
                 {`${process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, "")}/referral/${currentUserReferralCode || ""}`}
                 <Button
-                  variant="secondary"
-                  onClick={handleCopy}
                   disabled={!currentUserReferralCode}
+                  onClick={handleCopy}
+                  variant="secondary"
                 >
                   {isCopied ? "Copied" : "Copy"}
                 </Button>

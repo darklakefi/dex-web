@@ -94,7 +94,7 @@ export async function getPoolOnChain(tokenXMint: string, tokenYMint: string) {
   try {
     const pool = await getPoolAccount(connection, poolPubkey);
     return pool;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

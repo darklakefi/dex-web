@@ -35,10 +35,10 @@ export function usePoolSubscription({
         const lpSupply = dataView.getBigUint64(24, true).toString();
 
         return {
+          lastUpdate: Date.now(),
+          lpSupply,
           tokenXReserve,
           tokenYReserve,
-          lpSupply,
-          lastUpdate: Date.now(),
         };
       } catch (error) {
         console.error("Failed to parse pool account data:", error);
@@ -50,8 +50,8 @@ export function usePoolSubscription({
 
   return useSolanaSubscription({
     accountAddress: poolAddress,
-    queryKey: ["pool", tokenXMint, tokenYMint],
-    parseAccountData: parsePoolAccountData,
     enabled: enabled && !!poolAddress,
+    parseAccountData: parsePoolAccountData,
+    queryKey: ["pool", tokenXMint, tokenYMint],
   });
 }

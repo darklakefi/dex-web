@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { TokenTransactionButton } from "../../../../_components/TokenTransactionButton";
+
 const onUrlUpdate = vi.fn();
 describe("SwapButton", () => {
   it("swaps tokens", async () => {

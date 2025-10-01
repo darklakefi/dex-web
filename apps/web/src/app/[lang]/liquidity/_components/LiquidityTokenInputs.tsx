@@ -13,10 +13,17 @@ import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { SkeletonTokenInput } from "../../../_components/SkeletonTokenInput";
 import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
 import { useLiquidityCalculations } from "../_hooks/useLiquidityCalculations";
-import type { PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
+import type {
+  LiquidityFormApi,
+  PoolDetails,
+  TokenAccountsData,
+} from "../_types/liquidity.types";
+
+const MAX_DECIMALS = 5;
+const DEFAULT_PRICE = "1";
 
 interface LiquidityTokenInputsProps {
-  form: any; // TODO: Fix this type properly
+  form: LiquidityFormApi;
   buyTokenAccount?: TokenAccountsData | null;
   sellTokenAccount?: TokenAccountsData | null;
   isLoadingBuy: boolean;
@@ -73,10 +80,10 @@ export function LiquidityTokenInputs({
       type === "half"
         ? convertToDecimal(currentAmount, currentDecimals)
             .div(2)
-            .toFixed(5)
+            .toFixed(MAX_DECIMALS)
             .toString()
         : convertToDecimal(currentAmount, currentDecimals)
-            .toFixed(5)
+            .toFixed(MAX_DECIMALS)
             .toString();
 
     if (poolDetails && parseAmountBigNumber(currentValue).gt(0)) {
@@ -101,15 +108,12 @@ export function LiquidityTokenInputs({
     }
   };
 
-  const handleAmountChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "buy" | "sell",
-  ) => {
-    const value = formatAmountInput(e.target.value);
-
+  const handleAmountChange = (value: string, type: "buy" | "sell") => {
     clearPendingCalculations();
 
-    if (e.isTrusted && poolDetails && parseAmountBigNumber(value).gt(0)) {
+    const formattedValue = formatAmountInput(value);
+
+    if (poolDetails && parseAmountBigNumber(formattedValue).gt(0)) {
       const inputType =
         (type === "sell" && poolDetails?.tokenXMint === tokenBAddress) ||
         (type === "buy" && poolDetails?.tokenXMint === tokenAAddress)
@@ -117,17 +121,17 @@ export function LiquidityTokenInputs({
           : "tokenY";
 
       debouncedCalculateTokenAmounts({
-        inputAmount: value,
+        inputAmount: formattedValue,
         inputType,
       });
     } else if (!poolDetails) {
       if (type === "buy") {
-        const price = form.state.values.initialPrice || "1";
+        const price = form.state.values.initialPrice || DEFAULT_PRICE;
         if (
-          parseAmountBigNumber(value).gt(0) &&
+          parseAmountBigNumber(formattedValue).gt(0) &&
           parseAmountBigNumber(price).gt(0)
         ) {
-          const calculatedTokenB = parseAmountBigNumber(value)
+          const calculatedTokenB = parseAmountBigNumber(formattedValue)
             .multipliedBy(price)
             .toString();
           form.setFieldValue(FORM_FIELD_NAMES.TOKEN_B_AMOUNT, calculatedTokenB);
@@ -191,14 +195,14 @@ export function LiquidityTokenInputs({
                 }
                 aria-labelledby="sell-token-label"
                 isLoading={isLoadingSell || isCalculating}
-                isRefreshing={isRefreshingSell}
-                maxDecimals={5}
+                isRefreshing={isRefreshingSell || isCalculating}
+                maxDecimals={MAX_DECIMALS}
                 name={field.name}
                 onBlur={field.handleBlur}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const formattedValue = formatAmountInput(e.target.value);
-                  handleAmountChange(e, "sell");
-                  field.handleChange(formattedValue);
+                  const value = e.target.value;
+                  handleAmountChange(value, "sell");
+                  field.handleChange(value);
                 }}
                 onClearPendingCalculations={clearPendingCalculations}
                 onHalfMaxClick={(type) => handleHalfMaxClick(type, "sell")}
@@ -280,14 +284,14 @@ export function LiquidityTokenInputs({
                 }
                 aria-labelledby="buy-token-label"
                 isLoading={isLoadingBuy || isCalculating}
-                isRefreshing={isRefreshingBuy}
-                maxDecimals={5}
+                isRefreshing={isRefreshingBuy || isCalculating}
+                maxDecimals={MAX_DECIMALS}
                 name={field.name}
                 onBlur={field.handleBlur}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const formattedValue = formatAmountInput(e.target.value);
-                  handleAmountChange(e, "buy");
-                  field.handleChange(formattedValue);
+                  const value = e.target.value;
+                  handleAmountChange(value, "buy");
+                  field.handleChange(value);
                 }}
                 onClearPendingCalculations={clearPendingCalculations}
                 onHalfMaxClick={(type) => handleHalfMaxClick(type, "buy")}

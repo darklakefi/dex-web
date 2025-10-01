@@ -2,6 +2,7 @@
 
 import {
   ERROR_MESSAGES,
+  isWarningMessage,
   useLiquidityTracking,
   useTransactionStatus,
   useTransactionToasts,
@@ -340,7 +341,13 @@ export function useLiquidityFormLogic({
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       send({ error: errorMessage, type: "ERROR" });
-      transactionToasts.showErrorToast(errorMessage);
+
+      const isWarning = isWarningMessage(error);
+      if (isWarning) {
+        transactionToasts.showWarningToast(errorMessage, context);
+      } else {
+        transactionToasts.showErrorToast(errorMessage, context);
+      }
 
       if (context) {
         trackLiquidityError(error, context);

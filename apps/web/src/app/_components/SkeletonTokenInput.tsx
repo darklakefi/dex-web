@@ -21,21 +21,21 @@ export function SkeletonTokenInput({
           {label}
         </Text.Body2>
         <div className="flex items-center gap-2">
-          <SkeletonLoader variant="text" className="h-8 w-24" />
-          <SkeletonLoader variant="text" className="h-4 w-16" />
+          <SkeletonLoader className="h-8 w-24" variant="text" />
+          <SkeletonLoader className="h-4 w-16" variant="text" />
         </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col items-end gap-3">
         <div className="mb-3 flex gap-3">
-          <SkeletonLoader variant="balance" className="h-4 w-28" />
-          <SkeletonLoader variant="text" className="h-4 w-12" />
-          <SkeletonLoader variant="text" className="h-4 w-12" />
+          <SkeletonLoader className="h-4 w-28" variant="balance" />
+          <SkeletonLoader className="h-4 w-12" variant="text" />
+          <SkeletonLoader className="h-4 w-12" variant="text" />
         </div>
         <div className="flex flex-col items-end">
           <div className="flex items-center gap-2">
-            <SkeletonLoader variant="input" className="h-10 w-32" />
+            <SkeletonLoader className="h-10 w-32" variant="input" />
           </div>
-          <SkeletonLoader variant="text" className="mt-1 h-4 w-20" />
+          <SkeletonLoader className="mt-1 h-4 w-20" variant="text" />
         </div>
       </div>
     </Box>

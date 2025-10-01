@@ -15,11 +15,11 @@ export async function resolveTorqueReferralHandler({
     const response = await fetch(
       `${torqueApiUrl}/resolve-ref-code?code=${referralCode}`,
       {
-        method: "GET",
         headers: {
-          "Content-Type": "application/json",
           Accept: "application/json",
+          "Content-Type": "application/json",
         },
+        method: "GET",
       },
     );
 
@@ -27,35 +27,35 @@ export async function resolveTorqueReferralHandler({
 
     if (!response.ok) {
       console.error("Torque API error:", {
+        response: torqueResponse,
         status: response.status,
         statusText: response.statusText,
-        response: torqueResponse,
       });
 
       return {
-        success: false,
         error: torqueResponse.message || `API Error: ${response.status}`,
+        success: false,
       };
     }
 
     if (torqueResponse.status === "SUCCESS" && torqueResponse.data) {
       return {
-        success: true,
         publicKey: torqueResponse.data.publicKey,
+        success: true,
         vanity: torqueResponse.data.vanity,
       };
     } else {
       return {
-        success: false,
         error: "Torque API returned unexpected response format",
+        success: false,
       };
     }
   } catch (error) {
     console.error("Torque API request failed:", error);
 
     return {
-      success: false,
       error: error instanceof Error ? error.message : "Unknown error",
+      success: false,
     };
   }
 }

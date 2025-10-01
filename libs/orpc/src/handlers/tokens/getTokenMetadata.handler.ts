@@ -88,7 +88,7 @@ export const getTokenMetadataHandler = async (
   }
 };
 
-async function fetchTokenMetadataFromChain(
+async function _fetchTokenMetadataFromChain(
   tokenAddress: string[],
 ): Promise<TokenMetadata[]> {
   const helius = getHelius();

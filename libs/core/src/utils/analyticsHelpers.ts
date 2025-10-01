@@ -41,11 +41,11 @@ export const createSwapTracker = (
     params: SwapTrackingParams & { status: TransactionStatus },
   ) => void,
 ): TransactionTracker<SwapTrackingParams> => ({
+  trackConfirmed: (params) => trackSwap({ ...params, status: "confirmed" }),
+  trackFailed: (params) => trackSwap({ ...params, status: "failed" }),
   trackInitiated: (params) => trackSwap({ ...params, status: "initiated" }),
   trackSigned: (params) => trackSwap({ ...params, status: "signed" }),
   trackSubmitted: (params) => trackSwap({ ...params, status: "submitted" }),
-  trackConfirmed: (params) => trackSwap({ ...params, status: "confirmed" }),
-  trackFailed: (params) => trackSwap({ ...params, status: "failed" }),
 });
 
 export const createLiquidityTracker = (
@@ -53,14 +53,14 @@ export const createLiquidityTracker = (
     params: LiquidityTrackingParams & { status: TransactionStatus },
   ) => void,
 ): TransactionTracker<LiquidityTrackingParams> => ({
+  trackConfirmed: (params) =>
+    trackLiquidity({ ...params, status: "confirmed" }),
+  trackFailed: (params) => trackLiquidity({ ...params, status: "failed" }),
   trackInitiated: (params) =>
     trackLiquidity({ ...params, status: "initiated" }),
   trackSigned: (params) => trackLiquidity({ ...params, status: "signed" }),
   trackSubmitted: (params) =>
     trackLiquidity({ ...params, status: "submitted" }),
-  trackConfirmed: (params) =>
-    trackLiquidity({ ...params, status: "confirmed" }),
-  trackFailed: (params) => trackLiquidity({ ...params, status: "failed" }),
 });
 
 export const standardizeErrorTracking =
@@ -68,7 +68,7 @@ export const standardizeErrorTracking =
   (error: unknown, details?: Record<string, unknown>) => {
     trackError({
       context,
-      error: error instanceof Error ? error.message : "Unknown error",
       details,
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   };

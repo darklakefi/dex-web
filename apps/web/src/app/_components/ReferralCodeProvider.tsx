@@ -1,7 +1,6 @@
 "use client";
 
 import { tanstackClient } from "@dex-web/orpc";
-import { useWalletPublicKey } from "../../hooks/useWalletCache";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import type React from "react";
@@ -13,6 +12,7 @@ import {
   useMemo,
   useRef,
 } from "react";
+import { useWalletPublicKey } from "../../hooks/useWalletCache";
 import { ReferralStorage } from "../_utils/referralStorage";
 import { toast } from "../_utils/toast";
 
@@ -82,8 +82,8 @@ export function ReferralCodeProvider({ children }: ReferralCodeProviderProps) {
     (code: string) => {
       if (ReferralStorage.isSelfReferral(code, userReferralCode)) {
         toast({
-          title: "REFERRAL INVALID",
           description: "YOU CANNOT REFER YOURSELF",
+          title: "REFERRAL INVALID",
           variant: "error",
         });
         return;
@@ -93,8 +93,8 @@ export function ReferralCodeProvider({ children }: ReferralCodeProviderProps) {
 
       if (result === "accepted") {
         toast({
-          title: "REFERRAL ACCEPTED",
           description: `YOU GOT REFERRED BY ${code}`,
+          title: "REFERRAL ACCEPTED",
           variant: "success",
         });
       }
@@ -121,14 +121,14 @@ export function ReferralCodeProvider({ children }: ReferralCodeProviderProps) {
 
   const value = useMemo(
     (): ReferralCodeContextType => ({
-      incomingReferralCode,
-      userReferralCode,
-      setIncomingReferralCode,
-      setUserReferralCode,
       clearReferralCode,
+      incomingReferralCode,
       isLoading,
       metadata,
       processUrlReferral,
+      setIncomingReferralCode,
+      setUserReferralCode,
+      userReferralCode,
     }),
     [
       incomingReferralCode,

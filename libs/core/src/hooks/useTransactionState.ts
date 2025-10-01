@@ -47,13 +47,13 @@ export const useTransactionState = (
   }, []);
 
   return {
-    step,
-    isLoading,
-    isDisabled,
-    setStep,
-    setLoading,
-    setDisabled,
-    reset,
     incrementStep,
+    isDisabled,
+    isLoading,
+    reset,
+    setDisabled,
+    setLoading,
+    setStep,
+    step,
   };
 };

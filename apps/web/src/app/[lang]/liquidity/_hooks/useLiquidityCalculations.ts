@@ -24,9 +24,9 @@ export interface CalculationState {
 
 export function useLiquidityCalculations() {
   const [state, setState] = useState<CalculationState>({
-    result: null,
-    isCalculating: false,
     error: null,
+    isCalculating: false,
+    result: null,
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -36,14 +36,14 @@ export function useLiquidityCalculations() {
       const amountNumber = parseAmount(params.inputAmount);
 
       if (parseAmountBigNumber(params.inputAmount).lte(0)) {
-        setState((prev) => ({ ...prev, result: null, error: null }));
+        setState((prev) => ({ ...prev, error: null, result: null }));
         return null;
       }
 
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
 
-      setState((prev) => ({ ...prev, isCalculating: true, error: null }));
+      setState((prev) => ({ ...prev, error: null, isCalculating: true }));
 
       try {
         const response = await client.liquidity.getAddLiquidityReview({
@@ -58,14 +58,14 @@ export function useLiquidityCalculations() {
           !abortControllerRef.current.signal.aborted
         ) {
           const result: CalculationResult = {
-            tokenAmount: response.tokenAmount,
             inputType: params.inputType,
+            tokenAmount: response.tokenAmount,
           };
 
           setState({
-            result,
-            isCalculating: false,
             error: null,
+            isCalculating: false,
+            result,
           });
 
           return result;
@@ -76,10 +76,10 @@ export function useLiquidityCalculations() {
           !abortControllerRef.current.signal.aborted
         ) {
           setState({
-            result: null,
-            isCalculating: false,
             error:
               error instanceof Error ? error.message : "Calculation failed",
+            isCalculating: false,
+            result: null,
           });
         }
       }
@@ -92,9 +92,9 @@ export function useLiquidityCalculations() {
   const clearCalculations = useCallback(() => {
     abortControllerRef.current?.abort();
     setState({
-      result: null,
-      isCalculating: false,
       error: null,
+      isCalculating: false,
+      result: null,
     });
   }, []);
 

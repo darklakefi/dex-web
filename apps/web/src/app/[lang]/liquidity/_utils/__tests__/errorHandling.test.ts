@@ -1,11 +1,12 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
-  LiquidityError,
   createTransactionError,
   handleAsyncError,
+  LiquidityError,
   validateRequired,
   validateWalletConnection,
 } from "../errorHandling";
+
 describe("errorHandling", () => {
   describe("LiquidityError", () => {
     it("should create error with message only", () => {
@@ -16,7 +17,7 @@ describe("errorHandling", () => {
       expect(error).toBeInstanceOf(Error);
     });
     it("should create error with message and context", () => {
-      const context = { tokenA: "SOL", tokenB: "USDC", amount: 100 };
+      const context = { amount: 100, tokenA: "SOL", tokenB: "USDC" };
       const error = new LiquidityError("Insufficient balance", context);
       expect(error.message).toBe("Insufficient balance");
       expect(error.name).toBe("LiquidityError");
@@ -28,23 +29,23 @@ describe("errorHandling", () => {
       const originalError = new Error("Network timeout");
       const result = createTransactionError(originalError);
       expect(result).toEqual({
-        message: "Network timeout",
         context: undefined,
+        message: "Network timeout",
       });
     });
     it("should create error from string", () => {
       const result = createTransactionError("String error message");
       expect(result).toEqual({
-        message: "String error message",
         context: undefined,
+        message: "String error message",
       });
     });
     it("should create error with context", () => {
-      const context = { retry: 3, endpoint: "/api/liquidity" };
+      const context = { endpoint: "/api/liquidity", retry: 3 };
       const result = createTransactionError("API failed", context);
       expect(result).toEqual({
-        message: "API failed",
         context,
+        message: "API failed",
       });
     });
     it("should handle unknown error types", () => {
@@ -87,7 +88,7 @@ describe("errorHandling", () => {
       const failingOperation = vi
         .fn()
         .mockRejectedValue(new Error("Test error"));
-      const context = { tokenPair: "SOL/USDC", amount: 1000 };
+      const context = { amount: 1000, tokenPair: "SOL/USDC" };
       try {
         await handleAsyncError(failingOperation, "Swap failed", context);
       } catch (error) {

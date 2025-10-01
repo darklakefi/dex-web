@@ -72,16 +72,16 @@ function validateBalance(
 
     if (amount.gt(maxBalanceDecimal)) {
       return {
-        isValid: false,
         error: `Insufficient ${symbol} balance.`,
+        isValid: false,
       };
     }
 
     return { isValid: true };
   } catch (error) {
     return {
-      isValid: false,
       error: `Balance validation failed: ${error}`,
+      isValid: false,
     };
   }
 }
@@ -148,19 +148,19 @@ self.onmessage = (event: MessageEvent<CalculationInput>) => {
     }
 
     const response: CalculationResult = {
-      type,
-      success: true,
       result,
+      success: true,
       timestamp: Date.now(),
+      type,
     };
 
     self.postMessage(response);
   } catch (error) {
     const errorResponse: CalculationResult = {
-      type,
-      success: false,
       error: error instanceof Error ? error.message : String(error),
+      success: false,
       timestamp: Date.now(),
+      type,
     };
 
     self.postMessage(errorResponse);
@@ -168,7 +168,7 @@ self.onmessage = (event: MessageEvent<CalculationInput>) => {
 };
 
 self.postMessage({
-  type: "WORKER_READY",
   success: true,
   timestamp: Date.now(),
+  type: "WORKER_READY",
 });

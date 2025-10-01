@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
-import type { VersionedTransaction } from "@solana/web3.js";
-import { validateWalletForSigning } from "../utils/walletValidation";
 import type { WalletContextState } from "@solana/wallet-adapter-react";
+import type { VersionedTransaction } from "@solana/web3.js";
+import { useCallback } from "react";
+import { validateWalletForSigning } from "../utils/walletValidation";
 
 export interface UseTransactionSigningParams {
   publicKey: WalletContextState["publicKey"];
@@ -39,7 +39,7 @@ export const useTransactionSigning = ({
   const isReadyToSign = Boolean(publicKey && signTransaction);
 
   return {
-    signTransactionWithValidation,
     isReadyToSign,
+    signTransactionWithValidation,
   };
 };

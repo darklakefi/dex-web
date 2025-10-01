@@ -1,7 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { client } from "@dex-web/orpc";
+import { useQuery } from "@tanstack/react-query";
 
 interface UseBasicPoolDataParams {
   tokenXMint: string;
@@ -17,7 +17,6 @@ export function useBasicPoolData({
   const poolKey = [tokenXMint, tokenYMint].sort().join("-");
 
   return useQuery({
-    queryKey: ["pool", poolKey],
     queryFn: async () => {
       const result = await client.pools.getPoolDetails({
         tokenXMint,
@@ -31,10 +30,11 @@ export function useBasicPoolData({
           }
         : null;
     },
-    staleTime: 1000,
+    queryKey: ["pool", poolKey],
     refetchInterval,
     refetchIntervalInBackground: true,
     retry: 2,
     retryDelay: 1000,
+    staleTime: 1000,
   });
 }

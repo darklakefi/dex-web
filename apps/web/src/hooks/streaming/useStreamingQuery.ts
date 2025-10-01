@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  useQuery,
-  type UseQueryOptions,
   type QueryKey,
+  type UseQueryOptions,
+  useQuery,
 } from "@tanstack/react-query";
-import { type DeFiStreamConfig, DEFI_STREAM_CONFIGS } from "./types";
+import { DEFI_STREAM_CONFIGS, type DeFiStreamConfig } from "./types";
 
 interface StreamSubscriptionManager {
   subscribe: (key: string, callback: () => void) => () => void;
@@ -94,8 +94,8 @@ export function useStreamingQuery<TData, TError = Error>(
     : String(queryKey);
 
   const query = useQuery({
-    queryKey,
     queryFn,
+    queryKey,
     refetchInterval: enableStreaming ? config.refreshInterval : false,
     refetchIntervalInBackground: config.refetchInBackground,
     refetchOnWindowFocus: config.refetchOnWindowFocus,

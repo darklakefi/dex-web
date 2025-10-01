@@ -11,8 +11,8 @@ vi.mock("next-intl", async () => {
     useFormatter: () => ({
       number: (value: number, options: { currency: string; style: string }) => {
         return new Intl.NumberFormat("en-US", {
-          style: "currency",
           currency: options.currency,
+          style: "currency",
         }).format(value);
       },
     }),

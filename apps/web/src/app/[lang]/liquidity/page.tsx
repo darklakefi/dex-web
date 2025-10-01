@@ -1,9 +1,9 @@
 import { Box, Hero, Text } from "@dex-web/ui";
 import type { SearchParams } from "nuqs/server";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
+import { LazyLiquidityForm } from "../../_components/LazyLiquidityForm";
 import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
 import { liquidityPageCache } from "../../_utils/searchParams";
-import { LazyLiquidityForm } from "../../_components/LazyLiquidityForm";
 import { LazyCreatePoolForm } from "./_components/LazyCreatePoolForm";
 import { LazyYourLiquidity } from "./_components/LazyYourLiquidity";
 
@@ -44,7 +44,14 @@ export default async function Page({
           </Box>
           <div className="size-9" />
         </section>
-        {isCreatePoolMode ? <LazyCreatePoolForm /> : <LazyLiquidityForm />}
+        {isCreatePoolMode ? (
+          <LazyCreatePoolForm />
+        ) : (
+          <LazyLiquidityForm
+            tokenAAddress={parsedSearchParams.tokenAAddress}
+            tokenBAddress={parsedSearchParams.tokenBAddress}
+          />
+        )}
         <LazyYourLiquidity
           tokenAAddress={parsedSearchParams.tokenAAddress}
           tokenBAddress={parsedSearchParams.tokenBAddress}

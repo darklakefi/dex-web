@@ -1,10 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  LIQUIDITY_CONSTANTS,
   FORM_FIELD_NAMES,
-  TRANSACTION_STATES,
+  LIQUIDITY_CONSTANTS,
   STATE_MACHINE_EVENTS,
+  TRANSACTION_STATES,
 } from "../liquidityConstants";
+
 describe("liquidityConstants", () => {
   describe("LIQUIDITY_CONSTANTS", () => {
     it("should have correct default values", () => {

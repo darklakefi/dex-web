@@ -10,8 +10,13 @@ import {
   selectedTokensParsers,
 } from "../../../_utils/searchParams";
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
+import { CalculationLoadingIndicator } from "./CalculationLoadingIndicator";
 import { LiquidityActionButton } from "./LiquidityActionButton";
 import { LiquidityErrorBoundary } from "./LiquidityErrorBoundary";
+import {
+  LiquidityFormSkeleton,
+  PoolDetailsSkeleton,
+} from "./LiquidityFormSkeletons";
 import { LiquidityTokenInputs } from "./LiquidityTokenInputs";
 import { useLiquidityFormLogic } from "./useLiquidityFormLogic";
 
@@ -31,6 +36,8 @@ export function LiquidityForm() {
     debouncedCalculateTokenAmounts,
     tokenAccountsData,
     publicKey,
+    isSubmitting,
+    isCalculating,
   } = useLiquidityFormLogic({
     tokenAAddress,
     tokenBAddress,
@@ -60,6 +67,19 @@ export function LiquidityForm() {
     form.state.values.tokenBAmount !== "0" &&
     form.state.values.tokenAAmount !== "0";
 
+  const isInitialLoading =
+    !tokenAAddress ||
+    !tokenBAddress ||
+    (tokenAccountsData.isLoadingBuy && tokenAccountsData.isLoadingSell);
+
+  if (isInitialLoading) {
+    return (
+      <LiquidityErrorBoundary>
+        <LiquidityFormSkeleton />
+      </LiquidityErrorBoundary>
+    );
+  }
+
   return (
     <LiquidityErrorBoundary>
       <section className="flex w-full max-w-xl items-start gap-1">
@@ -80,6 +100,9 @@ export function LiquidityForm() {
               tokenAAddress={tokenAAddress}
               tokenBAddress={tokenBAddress}
             />
+
+            {isCalculating && <CalculationLoadingIndicator />}
+
             <LiquidityActionButton
               buyTokenAccount={tokenAccountsData.buyTokenAccount}
               form={form}
@@ -99,25 +122,28 @@ export function LiquidityForm() {
             />
           </div>
 
-          {shouldShowAddLiquidityDetails && (
-            <AddLiquidityDetails
-              slippage={slippage}
-              tokenAAmount={form.state.values.tokenAAmount}
-              tokenASymbol={
-                tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]?.symbol ||
-                ""
-              }
-              tokenBAddress={tokenBAddress ?? ""}
-              tokenBAmount={form.state.values.tokenBAmount}
-              tokenBSymbol={
-                tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]
-                  ?.symbol || ""
-              }
-              tokenXMint={poolDetails?.tokenXMint}
-              tokenXReserve={poolDetails?.tokenXReserve}
-              tokenYReserve={poolDetails?.tokenYReserve}
-            />
-          )}
+          {shouldShowAddLiquidityDetails &&
+            (isCalculating ? (
+              <PoolDetailsSkeleton />
+            ) : (
+              <AddLiquidityDetails
+                slippage={slippage}
+                tokenAAmount={form.state.values.tokenAAmount}
+                tokenASymbol={
+                  tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
+                    ?.symbol || ""
+                }
+                tokenBAddress={tokenBAddress ?? ""}
+                tokenBAmount={form.state.values.tokenBAmount}
+                tokenBSymbol={
+                  tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]
+                    ?.symbol || ""
+                }
+                tokenXMint={poolDetails?.tokenXMint}
+                tokenXReserve={poolDetails?.tokenXReserve}
+                tokenYReserve={poolDetails?.tokenYReserve}
+              />
+            ))}
         </Box>
 
         <div className="flex flex-col gap-1">
