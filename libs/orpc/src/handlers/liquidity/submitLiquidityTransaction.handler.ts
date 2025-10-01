@@ -32,8 +32,8 @@ export async function submitLiquidityTransactionHandler(
       transaction.serialize(),
       {
         maxRetries: 3,
-        preflightCommitment: "confirmed",
-        skipPreflight: false,
+        // preflightCommitment: "confirmed",
+        // skipPreflight: false,
       },
     );
 

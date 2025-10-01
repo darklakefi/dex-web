@@ -170,16 +170,19 @@ export function CreatePoolForm() {
     maxAttempts: 15,
     onFailure: (result) => {
       createState.reset();
+      toasts.dismiss();
       toasts.showErrorToast(
         `Transaction failed: ${result.error || "Unknown error"}`,
       );
     },
     onStatusUpdate: (status, attempt) => {
+      toasts.dismiss();
       toasts.showStatusToast(
         `Finalizing transaction... (${attempt}/15) - ${status}`,
       );
     },
     onSuccess: (result) => {
+      toasts.dismiss();
       if (result.error) {
         createState.reset();
         toasts.showErrorToast(`Transaction failed: ${result.error}`);
