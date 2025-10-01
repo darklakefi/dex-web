@@ -80,6 +80,18 @@ export {
   verifyMemoSignature,
 } from "./utils/signMessageWithMemo";
 export {
+  analyzeTransactionError,
+  extractTransactionSignature,
+  getUserFriendlyErrorMessage,
+  isLikelyFalsePositive,
+  isRetryableError,
+  type TransactionErrorInfo,
+} from "./utils/transactionErrorHandling";
+export {
+  type SignTransactionFunction,
+  signTransactionWithRecovery,
+} from "./utils/transactionSigning";
+export {
   hasSigningCapability,
   isWalletConnected,
   validateWalletForSigning,

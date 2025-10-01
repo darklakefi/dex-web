@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  getUserFriendlyErrorMessage,
+  signTransactionWithRecovery,
+} from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
@@ -30,6 +34,7 @@ type WithdrawLiquidityFormSchema = z.infer<typeof withdrawLiquidityFormSchema>;
 const withdrawLiquidityFormSchema = z.object({
   withdrawalAmount: z.string().min(1, "Amount is required"),
 });
+
 const { fieldContext, formContext } = createFormHookContexts();
 
 const { useAppForm } = createFormHook({
@@ -227,7 +232,10 @@ export function WithdrawLiquidityModal({
       );
       const transaction = Transaction.from(unsignedTransactionBuffer);
 
-      const signedTransaction = await signTransaction(transaction);
+      const signedTransaction = await signTransactionWithRecovery(
+        transaction,
+        signTransaction,
+      );
 
       setWithdrawStep(3);
       toast({
@@ -338,10 +346,13 @@ export function WithdrawLiquidityModal({
       console.error("Signing error:", error);
       dismissToast();
       const squads = isSquadsX(wallet);
+
+      const userMessage = getUserFriendlyErrorMessage(error);
+
       toast({
         description: squads
           ? `Transaction failed in Squads. Please review the proposal in the Squads app.`
-          : `${error instanceof Error ? error.message : "Unknown error occurred"}`,
+          : userMessage,
         title: squads ? "Proposal failed" : "Transaction Error",
         variant: "error",
       });

@@ -64,42 +64,74 @@ export type IconName =
   | "trending"
   | "x";
 
-const iconComponents = {
-  analytics: AnalyticsIcon,
-  backpack: BackpackWalletIcon,
-  "check-filled": CheckFilledIcon,
-  "chevron-down": ChevronDownIcon,
-  cog: CogIcon,
-  crown: CrownIcon,
-  exclamation: ExclamationIcon,
-  "external-link": ExternalLinkIcon,
-  fire: FireIcon,
-  github: GithubIcon,
-  info: InfoIcon,
-  "info-filled": InfoFilledIcon,
-  "loading-stripe": LoadingStripeIcon,
-  "logo-lg": LogoLgIcon,
-  "logo-sm": LogoSmIcon,
-  logout: LogoutIcon,
-  phantom: PhantomWalletIcon,
-  play: PlayIcon,
-  plus: PlusIcon,
-  "plus-circle": PlusCircleIcon,
-  refresh: RefreshIcon,
-  search: SearchIcon,
-  seedlings: SeedlingsIcon,
-  share: ShareIcon,
-  solflare: SolflareWalletIcon,
-  swap: SwapIcon,
-  telegram: TelegramIcon,
-  times: TimesIcon,
-  "times-filled": TimesFilledIcon,
-  trending: TrendingIcon,
-  x: XIcon,
-} satisfies Record<
-  IconName,
-  React.ComponentType<React.SVGProps<SVGSVGElement>>
->;
+function getIconComponent(name: IconName): any {
+  switch (name) {
+    case "analytics":
+      return AnalyticsIcon;
+    case "backpack":
+      return BackpackWalletIcon;
+    case "check-filled":
+      return CheckFilledIcon;
+    case "chevron-down":
+      return ChevronDownIcon;
+    case "cog":
+      return CogIcon;
+    case "crown":
+      return CrownIcon;
+    case "exclamation":
+      return ExclamationIcon;
+    case "external-link":
+      return ExternalLinkIcon;
+    case "fire":
+      return FireIcon;
+    case "github":
+      return GithubIcon;
+    case "info":
+      return InfoIcon;
+    case "info-filled":
+      return InfoFilledIcon;
+    case "loading-stripe":
+      return LoadingStripeIcon;
+    case "logo-lg":
+      return LogoLgIcon;
+    case "logo-sm":
+      return LogoSmIcon;
+    case "logout":
+      return LogoutIcon;
+    case "phantom":
+      return PhantomWalletIcon;
+    case "play":
+      return PlayIcon;
+    case "plus":
+      return PlusIcon;
+    case "plus-circle":
+      return PlusCircleIcon;
+    case "refresh":
+      return RefreshIcon;
+    case "search":
+      return SearchIcon;
+    case "seedlings":
+      return SeedlingsIcon;
+    case "share":
+      return ShareIcon;
+    case "solflare":
+      return SolflareWalletIcon;
+    case "swap":
+      return SwapIcon;
+    case "telegram":
+      return TelegramIcon;
+    case "times":
+      return TimesIcon;
+    case "times-filled":
+      return TimesFilledIcon;
+    case "trending":
+      return TrendingIcon;
+    case "x":
+      return XIcon;
+    default:
+      throw new Error(`Unknown icon name: ${name}`);
+  }
+}
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   name: IconName;
@@ -112,8 +144,7 @@ interface IconProps extends React.SVGProps<SVGSVGElement> {
  * This is a server component that supports tree shaking.
  */
 export function Icon({ name, title, className, ...props }: IconProps) {
-  const IconComponent = iconComponents[name];
-  if (!IconComponent) return null;
+  const IconComponent = getIconComponent(name);
 
   const classNames = twMerge("size-6 text-current fill-current", className);
 

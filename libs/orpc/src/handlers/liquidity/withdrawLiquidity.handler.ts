@@ -1,6 +1,7 @@
 "use server";
 
 import { AnchorProvider } from "@coral-xyz/anchor";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import {
   getMint,
   TOKEN_2022_PROGRAM_ID,
@@ -13,7 +14,11 @@ import type {
   WithdrawLiquidityInput,
   WithdrawLiquidityOutput,
 } from "../../schemas/liquidity/withdrawLiquidity.schema";
-import { sortSolanaAddresses } from "@dex-web/utils";
+import {
+  handleNetworkError,
+  handleTransactionError,
+  handleValidationError,
+} from "../../utils/orpcErrorHandling";
 import { LP_TOKEN_DECIMALS } from "../../utils/solana";
 import { removeLiquidityTransactionHandler } from "./removeLiquidityTransaction.handler";
 
@@ -142,11 +147,16 @@ export async function withdrawLiquidityHandler({
       unsignedTransaction: base64Transaction,
     };
   } catch (error) {
-    console.error("Error withdrawing liquidity:", error);
-    return {
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-      success: false,
-      unsignedTransaction: null,
-    };
+    if (error instanceof Error) {
+      if (error.message.includes("exceeds max safe integer")) {
+        handleValidationError("amount", error.message);
+      }
+
+      if (error.message.includes("Account resolution failed")) {
+        handleNetworkError("Account resolution failed", true);
+      }
+    }
+
+    handleTransactionError(error, "withdrawLiquidity");
   }
 }
