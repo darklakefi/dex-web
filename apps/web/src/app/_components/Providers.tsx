@@ -13,9 +13,9 @@ function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000,
-        refetchOnWindowFocus: false,
+        gcTime: 5 * 60 * 1000,
         refetchOnReconnect: true,
+        refetchOnWindowFocus: false,
         retry: (failureCount, error) => {
           if (error && "status" in error && typeof error.status === "number") {
             return error.status >= 500 && failureCount < 2;
@@ -23,7 +23,7 @@ function makeQueryClient() {
           return failureCount < 2;
         },
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 15000),
-        gcTime: 5 * 60 * 1000,
+        staleTime: 60 * 1000,
       },
     },
   });

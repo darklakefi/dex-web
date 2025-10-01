@@ -1,11 +1,11 @@
 import { PublicKey } from "@solana/web3.js";
 import { expect } from "vitest";
 import type {
+  LiquidityFormValues,
+  PoolDetails,
   TokenAccount,
   TokenAccountsData,
-  PoolDetails,
   WalletAdapter,
-  LiquidityFormValues,
 } from "../../_types/liquidity.types";
 
 export const createMockPublicKey = (base58?: string): PublicKey => {
@@ -17,9 +17,9 @@ export const createMockTokenAccount = (
   overrides?: Partial<TokenAccount>,
 ): TokenAccount => ({
   address: "token123",
-  mint: "mint123",
   amount: 1000000,
   decimals: 6,
+  mint: "mint123",
   symbol: "TEST",
   ...overrides,
 });
@@ -34,9 +34,9 @@ export const createMockPoolDetails = (
   overrides?: Partial<PoolDetails>,
 ): PoolDetails => ({
   poolAddress: "pool123",
+  price: "1.5",
   tokenXMint: "tokenX123",
   tokenYMint: "tokenY456",
-  price: "1.5",
   ...overrides,
 });
 
@@ -61,34 +61,33 @@ export const createMockFormValues = (
 });
 
 export const TEST_SCENARIOS = {
-  VALID_TRANSACTION: {
-    publicKey: createMockPublicKey(),
-    walletAdapter: createMockWalletAdapter(),
-    poolDetails: createMockPoolDetails(),
-    buyTokenAccount: createMockTokenAccountsData([
-      createMockTokenAccount({ symbol: "SOL", amount: 2000000 }),
-    ]),
-    sellTokenAccount: createMockTokenAccountsData([
-      createMockTokenAccount({ symbol: "USDC", amount: 1000000000 }),
-    ]),
-    formValues: createMockFormValues(),
+  DISCONNECTED_WALLET: {
+    publicKey: null,
+    walletAdapter: null,
   },
 
   INSUFFICIENT_BALANCE: {
     buyTokenAccount: createMockTokenAccountsData([
-      createMockTokenAccount({ symbol: "SOL", amount: 50 }),
+      createMockTokenAccount({ amount: 50, symbol: "SOL" }),
     ]),
     formValues: createMockFormValues({ tokenAAmount: "1000" }),
   },
 
   MISSING_POOL: {
-    poolDetails: null,
     formValues: createMockFormValues(),
+    poolDetails: null,
   },
-
-  DISCONNECTED_WALLET: {
-    publicKey: null,
-    walletAdapter: null,
+  VALID_TRANSACTION: {
+    buyTokenAccount: createMockTokenAccountsData([
+      createMockTokenAccount({ amount: 2000000, symbol: "SOL" }),
+    ]),
+    formValues: createMockFormValues(),
+    poolDetails: createMockPoolDetails(),
+    publicKey: createMockPublicKey(),
+    sellTokenAccount: createMockTokenAccountsData([
+      createMockTokenAccount({ amount: 1000000000, symbol: "USDC" }),
+    ]),
+    walletAdapter: createMockWalletAdapter(),
   },
 } as const;
 
@@ -125,6 +124,9 @@ export const expectValidTokenAccount = (
 };
 
 export const mockUtils = {
+  convertToDecimal: (amount: number, decimals: number) =>
+    amount / 10 ** decimals,
+  formatAmountInput: (value: string) => value,
   parseAmount: (amount: string) => Number(amount),
   parseAmountBigNumber: (amount: string) => ({
     gt: (value: number) => Number(amount) > value,
@@ -136,9 +138,6 @@ export const mockUtils = {
     tokenXAddress: tokenA,
     tokenYAddress: tokenB,
   }),
-  formatAmountInput: (value: string) => value,
-  convertToDecimal: (amount: number, decimals: number) =>
-    amount / 10 ** decimals,
   validateHasSufficientBalance: ({
     amount,
     tokenAccount,

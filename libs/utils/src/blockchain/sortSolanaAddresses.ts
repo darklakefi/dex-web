@@ -13,7 +13,7 @@ export function sortSolanaAddresses(
     return comparison > 0
       ? { tokenXAddress: addrB, tokenYAddress: addrA }
       : { tokenXAddress: addrA, tokenYAddress: addrB };
-  } catch (error) {
+  } catch (_error) {
     throw new Error(
       `Invalid public key input: ${addrA} or ${addrB} is not a valid Solana public key`,
     );

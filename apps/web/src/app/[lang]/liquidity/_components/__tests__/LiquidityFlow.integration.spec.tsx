@@ -1,35 +1,38 @@
 import { mockOrpc } from "../../../(swap)/_components/__tests__/__mocks__/mockOrpc";
+
 mockOrpc();
+
+import { PublicKey } from "@solana/web3.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { PublicKey } from "@solana/web3.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../../_utils/constants";
 import { LiquidityForm } from "../LiquidityForm";
+
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
   usePathname: () => "/liquidity",
+  useRouter: () => ({ push: mockPush }),
   useSearchParams: () => new URLSearchParams(),
 }));
 const mockSignTransaction = vi.fn();
 const mockWallet = {
   publicKey: new PublicKey("11111111111111111111111111111112"),
-  wallet: { adapter: { name: "Phantom" } },
   signTransaction: mockSignTransaction,
+  wallet: { adapter: { name: "Phantom" } },
 };
 vi.mock("@solana/wallet-adapter-react", () => ({
   useWallet: () => mockWallet,
 }));
 const mockAnalytics = {
-  trackLiquidity: vi.fn(),
   trackError: vi.fn(),
+  trackLiquidity: vi.fn(),
 };
 vi.mock("../../../../hooks/useAnalytics", () => ({
   useAnalytics: () => mockAnalytics,
@@ -42,12 +45,12 @@ const mockPoolData: {
   } | null;
   isRealtime: boolean;
 } = {
+  isRealtime: true,
   poolDetails: {
+    poolAddress: "existing-pool-123",
     tokenXMint: DEFAULT_BUY_TOKEN,
     tokenYMint: DEFAULT_SELL_TOKEN,
-    poolAddress: "existing-pool-123",
   },
-  isRealtime: true,
 };
 vi.mock("../../../../hooks/useRealtimePoolData", () => ({
   useRealtimePoolData: () => mockPoolData,
@@ -56,21 +59,21 @@ const mockTokenAccounts = {
   buyTokenAccount: {
     tokenAccounts: [
       {
+        address: "sol-account",
         amount: 1000000000,
         decimals: 9,
         symbol: "SOL",
-        address: "sol-account",
       },
     ],
   },
-  sellTokenAccount: {
-    tokenAccounts: [
-      { amount: 1000000, decimals: 6, symbol: "USDC", address: "usdc-account" },
-    ],
-  },
+  isRealtime: true,
   refetchBuyTokenAccount: vi.fn(),
   refetchSellTokenAccount: vi.fn(),
-  isRealtime: true,
+  sellTokenAccount: {
+    tokenAccounts: [
+      { address: "usdc-account", amount: 1000000, decimals: 6, symbol: "USDC" },
+    ],
+  },
 };
 vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
   useRealtimeTokenAccounts: () => mockTokenAccounts,
@@ -82,15 +85,15 @@ vi.mock("../../../_components/SkeletonTokenInput", () => ({
 }));
 vi.mock("@dex-web/core", () => ({
   ERROR_MESSAGES: {
-    MISSING_WALLET_INFO: "Wallet not connected",
     MISSING_WALLET: "No wallet available",
+    MISSING_WALLET_INFO: "Wallet not connected",
   },
   useLiquidityTracking: () => ({
+    trackConfirmed: vi.fn(),
+    trackError: vi.fn(),
+    trackFailed: vi.fn(),
     trackInitiated: vi.fn(),
     trackSigned: vi.fn(),
-    trackConfirmed: vi.fn(),
-    trackFailed: vi.fn(),
-    trackError: vi.fn(),
   }),
   useTokenAccounts: () => ({
     buyTokenAccount: null,
@@ -101,9 +104,9 @@ vi.mock("@dex-web/core", () => ({
   }),
   useTransactionToasts: () => ({
     showErrorToast: vi.fn(),
-    showSuccessToast: vi.fn(),
-    showStepToast: vi.fn(),
     showStatusToast: vi.fn(),
+    showStepToast: vi.fn(),
+    showSuccessToast: vi.fn(),
   }),
 }));
 const mockCreateTransaction = vi.fn();
@@ -111,8 +114,8 @@ const mockCheckStatus = vi.fn();
 vi.mock("@dex-web/orpc", () => ({
   client: {
     liquidity: {
-      createLiquidityTransaction: mockCreateTransaction,
       checkLiquidityTransactionStatus: mockCheckStatus,
+      createLiquidityTransaction: mockCreateTransaction,
       getAddLiquidityReview: vi.fn().mockResolvedValue({ tokenAmount: 50 }),
     },
     pools: {
@@ -127,9 +130,9 @@ vi.mock("@dex-web/orpc", () => ({
     liquidity: {
       createLiquidityTransaction: {
         useMutation: vi.fn().mockReturnValue({
-          mutate: vi.fn(),
-          isLoading: false,
           error: null,
+          isLoading: false,
+          mutate: vi.fn(),
         }),
       },
     },
@@ -138,8 +141,8 @@ vi.mock("@dex-web/orpc", () => ({
 const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {
-      queries: { retry: false },
       mutations: { retry: false },
+      queries: { retry: false },
     },
   });
 const renderLiquidityForm = (
@@ -154,13 +157,13 @@ const renderLiquidityForm = (
     liquidity: {
       squadsX: {
         responseStatus: {
-          failed: {
-            description: "Failed description",
-            title: "Failed title",
-          },
           confirmed: {
             description: "Success description",
             title: "Success title",
+          },
+          failed: {
+            description: "Failed description",
+            title: "Failed title",
           },
         },
       },
@@ -192,8 +195,8 @@ describe.skip("LiquidityFlow Integration Tests", () => {
       transaction: "mock-unsigned-transaction",
     });
     mockCheckStatus.mockResolvedValue({
-      status: "finalized",
       error: null,
+      status: "finalized",
     });
   });
   afterEach(() => {
@@ -216,11 +219,11 @@ describe.skip("LiquidityFlow Integration Tests", () => {
       await user.click(submitButton);
       expect(mockCreateTransaction).toHaveBeenCalledWith(
         expect.objectContaining({
-          tokenXMint: expect.any(String),
-          tokenYMint: expect.any(String),
           maxAmountX: expect.any(Number),
           maxAmountY: expect.any(Number),
           slippage: 0.5,
+          tokenXMint: expect.any(String),
+          tokenYMint: expect.any(String),
           user: mockWallet.publicKey.toBase58(),
         }),
       );
@@ -325,8 +328,8 @@ describe.skip("LiquidityFlow Integration Tests", () => {
     });
     it("should handle transaction status failure", async () => {
       mockCheckStatus.mockResolvedValue({
-        status: "failed",
         error: "Transaction failed on chain",
+        status: "failed",
       });
       renderLiquidityForm();
       await waitFor(() => {

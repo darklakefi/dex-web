@@ -1,12 +1,12 @@
 "use server";
 
+import { isSolanaAddress } from "@dex-web/utils";
 import { PublicKey } from "@solana/web3.js";
 import { getHelius } from "../../getHelius";
 import type {
   GetTokenOwnerInput,
   GetTokenOwnerOutput,
 } from "../../schemas/tokens/getTokenOwner.schema";
-import { isSolanaAddress } from "@dex-web/utils";
 
 export const getTokenOwnerHandler = async (
   input: GetTokenOwnerInput,

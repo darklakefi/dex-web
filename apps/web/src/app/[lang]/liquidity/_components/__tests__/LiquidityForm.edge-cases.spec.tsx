@@ -1,24 +1,25 @@
+import { PublicKey } from "@solana/web3.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { PublicKey } from "@solana/web3.js";
 import React from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../../_utils/constants";
+
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
   usePathname: () => "/liquidity",
+  useRouter: () => ({ push: mockPush }),
   useSearchParams: () => new URLSearchParams(),
 }));
 const mockAnalytics = {
-  trackLiquidity: vi.fn(),
   trackError: vi.fn(),
+  trackLiquidity: vi.fn(),
 };
 vi.mock("../../../../hooks/useAnalytics", () => ({
   useAnalytics: () => mockAnalytics,
@@ -31,13 +32,13 @@ vi.mock("../../../_components/SkeletonTokenInput", () => ({
 vi.mock("@dex-web/orpc", () => ({
   client: {
     liquidity: {
+      checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
+        error: null,
+        status: "finalized",
+      }),
       createLiquidityTransaction: vi.fn().mockResolvedValue({
         success: true,
         transaction: "mock-transaction",
-      }),
-      checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
-        status: "finalized",
-        error: null,
       }),
       getAddLiquidityReview: vi.fn().mockResolvedValue({ tokenAmount: 50 }),
     },
@@ -53,9 +54,9 @@ vi.mock("@dex-web/orpc", () => ({
     liquidity: {
       createLiquidityTransaction: {
         useMutation: vi.fn().mockReturnValue({
-          mutate: vi.fn(),
-          isLoading: false,
           error: null,
+          isLoading: false,
+          mutate: vi.fn(),
         }),
       },
     },
@@ -63,15 +64,15 @@ vi.mock("@dex-web/orpc", () => ({
 }));
 vi.mock("@dex-web/core", () => ({
   ERROR_MESSAGES: {
-    MISSING_WALLET_INFO: "Wallet not connected",
     MISSING_WALLET: "No wallet available",
+    MISSING_WALLET_INFO: "Wallet not connected",
   },
   useLiquidityTracking: () => ({
+    trackConfirmed: vi.fn(),
+    trackError: vi.fn(),
+    trackFailed: vi.fn(),
     trackInitiated: vi.fn(),
     trackSigned: vi.fn(),
-    trackConfirmed: vi.fn(),
-    trackFailed: vi.fn(),
-    trackError: vi.fn(),
   }),
   useTokenAccounts: () => ({
     buyTokenAccount: null,
@@ -82,26 +83,26 @@ vi.mock("@dex-web/core", () => ({
   }),
   useTransactionToasts: () => ({
     showErrorToast: vi.fn(),
-    showSuccessToast: vi.fn(),
-    showStepToast: vi.fn(),
     showStatusToast: vi.fn(),
+    showStepToast: vi.fn(),
+    showSuccessToast: vi.fn(),
   }),
 }));
 const createTestWrapper = (searchParams = {}) => {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
   const mockMessages = {
     liquidity: {
       squadsX: {
         responseStatus: {
-          failed: {
-            description: "Failed description",
-            title: "Failed title",
-          },
           confirmed: {
             description: "Success description",
             title: "Success title",
+          },
+          failed: {
+            description: "Failed description",
+            title: "Failed title",
           },
         },
       },
@@ -124,8 +125,10 @@ const createTestWrapper = (searchParams = {}) => {
     </NextIntlClientProvider>
   );
 };
-import { LiquidityForm } from "../LiquidityForm";
+
 import { client } from "@dex-web/orpc";
+import { LiquidityForm } from "../LiquidityForm";
+
 describe.skip("LiquidityForm Edge Cases", () => {
   let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
@@ -136,11 +139,11 @@ describe.skip("LiquidityForm Edge Cases", () => {
     it("should handle wallet connection failures gracefully", async () => {
       vi.mock("@solana/wallet-adapter-react", () => ({
         useWallet: () => ({
-          publicKey: null,
-          wallet: null,
-          signTransaction: null,
-          connecting: false,
           connected: false,
+          connecting: false,
+          publicKey: null,
+          signTransaction: null,
+          wallet: null,
         }),
       }));
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
@@ -153,18 +156,18 @@ describe.skip("LiquidityForm Edge Cases", () => {
       vi.mock("@solana/wallet-adapter-react", () => ({
         useWallet: () => ({
           publicKey: new PublicKey("11111111111111111111111111111112"),
-          wallet: { adapter: { name: "Phantom" } },
           signTransaction: vi.fn(),
+          wallet: { adapter: { name: "Phantom" } },
         }),
       }));
       vi.mock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "test-pool",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "test-pool",
           },
-          isRealtime: true,
         }),
       }));
       vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -172,12 +175,12 @@ describe.skip("LiquidityForm Edge Cases", () => {
           buyTokenAccount: {
             tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
@@ -194,22 +197,22 @@ describe.skip("LiquidityForm Edge Cases", () => {
       vi.mock("@solana/wallet-adapter-react", () => ({
         useWallet: () => ({
           publicKey: new PublicKey("11111111111111111111111111111112"),
-          wallet: { adapter: { name: "Phantom" } },
           signTransaction: vi
             .fn()
             .mockImplementation(
               () => new Promise((resolve) => setTimeout(resolve, 3000)),
             ),
+          wallet: { adapter: { name: "Phantom" } },
         }),
       }));
       vi.mock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "test-pool",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "test-pool",
           },
-          isRealtime: true,
         }),
       }));
       vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -217,12 +220,12 @@ describe.skip("LiquidityForm Edge Cases", () => {
           buyTokenAccount: {
             tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
       vi.mocked(client.liquidity.createLiquidityTransaction).mockResolvedValue({
@@ -244,18 +247,18 @@ describe.skip("LiquidityForm Edge Cases", () => {
       vi.mock("@solana/wallet-adapter-react", () => ({
         useWallet: () => ({
           publicKey: new PublicKey("11111111111111111111111111111112"),
-          wallet: { adapter: { name: "Phantom" } },
           signTransaction: vi.fn().mockResolvedValue({}),
+          wallet: { adapter: { name: "Phantom" } },
         }),
       }));
       vi.mock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "test-pool",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "test-pool",
           },
-          isRealtime: true,
         }),
       }));
       vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -263,12 +266,12 @@ describe.skip("LiquidityForm Edge Cases", () => {
           buyTokenAccount: {
             tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
       let callCount = 0;
@@ -319,22 +322,22 @@ describe.skip("LiquidityForm Edge Cases", () => {
       vi.mock("@solana/wallet-adapter-react", () => ({
         useWallet: () => ({
           publicKey: new PublicKey("11111111111111111111111111111112"),
-          wallet: { adapter: { name: "Phantom" } },
           signTransaction: vi
             .fn()
             .mockImplementation(
               () => new Promise((resolve) => setTimeout(resolve, 1000)),
             ),
+          wallet: { adapter: { name: "Phantom" } },
         }),
       }));
       vi.mock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "test-pool",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "test-pool",
           },
-          isRealtime: true,
         }),
       }));
       vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -342,12 +345,12 @@ describe.skip("LiquidityForm Edge Cases", () => {
           buyTokenAccount: {
             tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
@@ -369,8 +372,8 @@ describe.skip("LiquidityForm Edge Cases", () => {
       vi.mock("@solana/wallet-adapter-react", () => ({
         useWallet: () => ({
           publicKey: new PublicKey("11111111111111111111111111111112"),
-          wallet: { adapter: { name: "Phantom" } },
           signTransaction: vi.fn().mockResolvedValue({}),
+          wallet: { adapter: { name: "Phantom" } },
         }),
       }));
       vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -378,12 +381,12 @@ describe.skip("LiquidityForm Edge Cases", () => {
           buyTokenAccount: {
             tokenAccounts: [{ amount: 100, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 100, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
@@ -404,18 +407,18 @@ describe.skip("LiquidityForm Edge Cases", () => {
       vi.mock("@solana/wallet-adapter-react", () => ({
         useWallet: () => ({
           publicKey: new PublicKey("11111111111111111111111111111112"),
-          wallet: { adapter: { name: "Phantom" } },
           signTransaction: vi.fn(),
+          wallet: { adapter: { name: "Phantom" } },
         }),
       }));
       vi.mock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "test-pool",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "test-pool",
           },
-          isRealtime: true,
         }),
       }));
       vi.mocked(client.liquidity.getAddLiquidityReview).mockResolvedValue({
@@ -444,8 +447,8 @@ describe.skip("LiquidityForm Edge Cases", () => {
       vi.mock("@solana/wallet-adapter-react", () => ({
         useWallet: () => ({
           publicKey: new PublicKey("11111111111111111111111111111112"),
-          wallet: { adapter: { name: "Phantom" } },
           signTransaction: vi.fn(),
+          wallet: { adapter: { name: "Phantom" } },
         }),
       }));
       vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -459,6 +462,9 @@ describe.skip("LiquidityForm Edge Cases", () => {
               },
             ],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [
               {
@@ -468,9 +474,6 @@ describe.skip("LiquidityForm Edge Cases", () => {
               },
             ],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
       render(<LiquidityForm />, { wrapper: createTestWrapper() });

@@ -1,9 +1,8 @@
-import { convertToDecimal } from "@dex-web/utils";
+import { convertToDecimal, sortSolanaAddresses } from "@dex-web/utils";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
-import { sortSolanaAddresses } from "@dex-web/utils";
 
 interface WithdrawalCalculationParams {
   userLiquidity: {

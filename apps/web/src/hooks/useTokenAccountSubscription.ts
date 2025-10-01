@@ -45,10 +45,10 @@ export function useTokenAccountSubscription({
 
   return useSolanaSubscription({
     accountAddress: tokenAccountAddress,
+    enabled: enabled && !!tokenAccountAddress && !!publicKey,
+    parseAccountData: parseTokenAccountData,
     queryKey: ["token-accounts", publicKey, tokenMint].filter(
       (item): item is string => item !== null,
     ),
-    parseAccountData: parseTokenAccountData,
-    enabled: enabled && !!tokenAccountAddress && !!publicKey,
   });
 }

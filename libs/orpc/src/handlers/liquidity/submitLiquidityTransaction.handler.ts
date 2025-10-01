@@ -152,7 +152,7 @@ function isRateLimitError(error: unknown): boolean {
   );
 }
 
-function categorizeError(error: unknown): string {
+function _categorizeError(error: unknown): string {
   if (!(error instanceof Error)) {
     return typeof error === "string" ? error : "Unknown error occurred";
   }

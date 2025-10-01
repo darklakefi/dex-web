@@ -1,18 +1,19 @@
-import { describe, expect, it } from "vitest";
 import { PublicKey } from "@solana/web3.js";
+import { describe, expect, it } from "vitest";
 import { getLiquidityFormButtonMessage } from "../getLiquidityFormButtonMessage";
+
 const mockPublicKey = new PublicKey("11111111111111111111111111111112");
 const defaultProps = {
-  tokenAAmount: "0",
-  tokenBAmount: "0",
+  buyTokenAccount: null,
   initialPrice: "1",
   liquidityStep: 0,
   poolDetails: null,
-  tokenBAddress: "TokenB123",
-  tokenAAddress: "TokenA123",
-  buyTokenAccount: null,
-  sellTokenAccount: null,
   publicKey: mockPublicKey,
+  sellTokenAccount: null,
+  tokenAAddress: "TokenA123",
+  tokenAAmount: "0",
+  tokenBAddress: "TokenB123",
+  tokenBAmount: "0",
 };
 const mockTokenAccount = {
   tokenAccounts: [
@@ -34,9 +35,9 @@ const mockUSDCAccount = {
 };
 const mockPoolDetails = {
   poolAddress: "pool123",
+  price: "1.5",
   tokenXMint: "TokenA123",
   tokenYMint: "TokenB123",
-  price: "1.5",
 };
 describe("getLiquidityFormButtonMessage", () => {
   describe("Step-based messages", () => {
@@ -83,35 +84,35 @@ describe("getLiquidityFormButtonMessage", () => {
     it("should return insufficient balance for sell token", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
-        tokenBAmount: "10",
         sellTokenAccount: mockUSDCAccount,
+        tokenBAmount: "10",
       });
       expect(result).toBe("Insufficient balance");
     });
     it("should return insufficient balance for buy token", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
-        tokenAAmount: "10",
         buyTokenAccount: mockTokenAccount,
+        tokenAAmount: "10",
       });
       expect(result).toBe("Insufficient balance");
     });
     it("should pass balance validation with sufficient funds", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
+        buyTokenAccount: mockTokenAccount,
+        poolDetails: mockPoolDetails,
+        sellTokenAccount: mockUSDCAccount,
         tokenAAmount: "0.5",
         tokenBAmount: "0.5",
-        buyTokenAccount: mockTokenAccount,
-        sellTokenAccount: mockUSDCAccount,
-        poolDetails: mockPoolDetails,
       });
       expect(result).toBe("Add Liquidity");
     });
     it("should handle tokens with commas in amounts", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
-        tokenBAmount: "1,000",
         sellTokenAccount: mockUSDCAccount,
+        tokenBAmount: "1,000",
       });
       expect(result).toBe("Insufficient balance");
     });
@@ -138,30 +139,30 @@ describe("getLiquidityFormButtonMessage", () => {
     it("should return invalid price when no pool and invalid initial price", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
+        initialPrice: "0",
         poolDetails: null,
         tokenAAmount: "100",
         tokenBAmount: "50",
-        initialPrice: "0",
       });
       expect(result).toBe("Invalid price");
     });
     it("should return invalid price when no pool and negative price", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
+        initialPrice: "-1",
         poolDetails: null,
         tokenAAmount: "100",
         tokenBAmount: "50",
-        initialPrice: "-1",
       });
       expect(result).toBe("Invalid price");
     });
     it("should return create pool when valid amounts and price", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
+        initialPrice: "1.5",
         poolDetails: null,
         tokenAAmount: "100",
         tokenBAmount: "50",
-        initialPrice: "1.5",
       });
       expect(result).toBe("Create Pool");
     });
@@ -199,53 +200,53 @@ describe("getLiquidityFormButtonMessage", () => {
     it("should handle missing token accounts gracefully", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
+        buyTokenAccount: null,
+        poolDetails: mockPoolDetails,
+        sellTokenAccount: null,
         tokenAAmount: "100",
         tokenBAmount: "50",
-        poolDetails: mockPoolDetails,
-        buyTokenAccount: null,
-        sellTokenAccount: null,
       });
       expect(result).toBe("Add Liquidity");
     });
     it("should handle token accounts without tokenAccounts array", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
+        buyTokenAccount: { tokenAccounts: undefined },
+        poolDetails: mockPoolDetails,
+        sellTokenAccount: { tokenAccounts: undefined },
         tokenAAmount: "100",
         tokenBAmount: "50",
-        poolDetails: mockPoolDetails,
-        buyTokenAccount: { tokenAccounts: undefined },
-        sellTokenAccount: { tokenAccounts: undefined },
       });
       expect(result).toBe("Add Liquidity");
     });
     it("should handle empty tokenAccounts array", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
+        buyTokenAccount: { tokenAccounts: [] },
+        poolDetails: mockPoolDetails,
+        sellTokenAccount: { tokenAccounts: [] },
         tokenAAmount: "100",
         tokenBAmount: "50",
-        poolDetails: mockPoolDetails,
-        buyTokenAccount: { tokenAccounts: [] },
-        sellTokenAccount: { tokenAccounts: [] },
       });
       expect(result).toBe("Add Liquidity");
     });
     it("should handle very small amounts", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
+        buyTokenAccount: mockTokenAccount,
+        poolDetails: mockPoolDetails,
+        sellTokenAccount: mockUSDCAccount,
         tokenAAmount: "0.000001",
         tokenBAmount: "0.000001",
-        poolDetails: mockPoolDetails,
-        buyTokenAccount: mockTokenAccount,
-        sellTokenAccount: mockUSDCAccount,
       });
       expect(result).toBe("Add Liquidity");
     });
     it("should handle negative amounts by treating as zero", () => {
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
+        poolDetails: mockPoolDetails,
         tokenAAmount: "-100",
         tokenBAmount: "50",
-        poolDetails: mockPoolDetails,
       });
       expect(result).toBe("enter an amount");
     });
@@ -261,9 +262,9 @@ describe("getLiquidityFormButtonMessage", () => {
       };
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
-        tokenAAmount: "1500",
         buyTokenAccount: accountWithZeroDecimals,
         poolDetails: mockPoolDetails,
+        tokenAAmount: "1500",
       });
       expect(result).toBe("Insufficient balance");
     });
@@ -279,9 +280,9 @@ describe("getLiquidityFormButtonMessage", () => {
       };
       const result = getLiquidityFormButtonMessage({
         ...defaultProps,
-        tokenAAmount: "100",
         buyTokenAccount: accountWithoutAmount,
         poolDetails: mockPoolDetails,
+        tokenAAmount: "100",
       });
       expect(result).toBe("Insufficient balance");
     });

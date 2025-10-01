@@ -17,19 +17,19 @@ export function SkeletonWalletButton({
 }: SkeletonWalletButtonProps = {}) {
   return (
     <button
-      type="button"
-      className={className}
-      disabled
       aria-label={ariaLabel}
+      className={className}
       data-testid={testId}
+      disabled
       suppressHydrationWarning={suppressHydrationWarning}
+      type="button"
     >
       <SkeletonLoader
-        variant="wallet"
-        className="h-full w-full rounded-md"
-        testId={testId}
         aria-label={ariaLabel}
+        className="h-full w-full rounded-md"
         suppressHydrationWarning={suppressHydrationWarning}
+        testId={testId}
+        variant="wallet"
       />
     </button>
   );

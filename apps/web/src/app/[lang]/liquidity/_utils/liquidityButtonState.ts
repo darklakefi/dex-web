@@ -26,7 +26,7 @@ export interface ButtonStateProps {
   isPoolLoading: boolean;
   isTokenAccountsLoading: boolean;
   isCalculating: boolean;
-  formCanSubmit?: boolean;
+  hasAnyAmount?: boolean;
   isFormSubmitting?: boolean;
 }
 
@@ -37,7 +37,7 @@ export function getLiquidityButtonState({
   isPoolLoading,
   isTokenAccountsLoading,
   isCalculating,
-  formCanSubmit = false,
+  hasAnyAmount = false,
   isFormSubmitting = false,
 }: ButtonStateProps): ButtonState {
   if (isFormSubmitting) {
@@ -66,6 +66,9 @@ export function getLiquidityButtonState({
 
   if (!poolDetails) {
     if (!validation.hasAmounts) {
+      if (hasAnyAmount) {
+        return "CALCULATING";
+      }
       return "ENTER_AMOUNTS";
     }
 
@@ -73,17 +76,20 @@ export function getLiquidityButtonState({
       return "INVALID_PRICE";
     }
 
-    if (validation.hasAmounts && formCanSubmit) {
+    if (validation.canSubmit) {
       return "CREATE_POOL";
     }
 
     return "ENTER_AMOUNTS";
   } else {
     if (!validation.hasAmounts) {
+      if (hasAnyAmount) {
+        return "CALCULATING";
+      }
       return "ENTER_AMOUNT";
     }
 
-    if (validation.canSubmit && formCanSubmit) {
+    if (validation.canSubmit) {
       return "ADD_LIQUIDITY";
     }
 
@@ -93,17 +99,17 @@ export function getLiquidityButtonState({
 
 export function getButtonMessage(state: ButtonState): string {
   const messages: Record<ButtonState, string> = {
-    SUBMITTING: "Processing Transaction...",
-    CALCULATING: "Calculating amounts...",
-    INSUFFICIENT_BALANCE: "Insufficient balance",
-    ENTER_AMOUNTS: "Enter token amounts",
-    ENTER_AMOUNT: "Enter an amount",
-    CREATE_POOL: "Create Pool",
     ADD_LIQUIDITY: "Add Liquidity",
-    SAME_TOKENS: "Select different tokens",
+    CALCULATING: "Calculating amounts...",
+    CREATE_POOL: "Create Pool",
+    DISABLED: "Connect Wallet",
+    ENTER_AMOUNT: "Enter an amount",
+    ENTER_AMOUNTS: "Enter token amounts",
+    INSUFFICIENT_BALANCE: "Insufficient balance",
     INVALID_PRICE: "Invalid price",
     LOADING: "Loading...",
-    DISABLED: "Connect Wallet",
+    SAME_TOKENS: "Select different tokens",
+    SUBMITTING: "Processing Transaction...",
   };
 
   return messages[state];

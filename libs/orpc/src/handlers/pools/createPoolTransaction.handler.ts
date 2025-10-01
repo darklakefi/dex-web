@@ -1,10 +1,11 @@
 import {
   AnchorProvider,
   BN,
+  type Idl,
   type Program,
   web3,
-  type Idl,
 } from "@coral-xyz/anchor";
+import { createLiquidityProgram } from "@dex-web/core";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
@@ -14,9 +15,9 @@ import {
 } from "@solana/spl-token";
 import {
   PublicKey,
+  type Transaction,
   type TransactionInstruction,
   TransactionMessage,
-  type Transaction,
   type VersionedTransaction,
 } from "@solana/web3.js";
 import IDL from "../../darklake-idl";
@@ -26,7 +27,6 @@ import type {
   CreatePoolTransactionOutput,
 } from "../../schemas/pools/createPoolTransaction.schema";
 import { getTokenProgramId } from "../../utils/solana";
-import { createLiquidityProgram } from "@dex-web/core";
 
 const POOL_RESERVE_SEED = "pool_reserve";
 const POOL_SEED = "pool";
@@ -171,24 +171,24 @@ async function createPool(
 
   const programTx = await initializePoolMethod
     ?.accountsPartial({
-      user,
-      pool: poolPubkey,
-      authority,
       ammConfig,
-      tokenMintX: tokenXMint,
-      tokenMintY: tokenYMint,
-      tokenMintLp: lpMint,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      authority,
       createPoolFeeVault,
-      userTokenAccountX: userTokenAccountX,
-      userTokenAccountY: userTokenAccountY,
-      userTokenAccountLp: userTokenAccountLp,
+      pool: poolPubkey,
       poolTokenReserveX: poolTokenAccountX,
       poolTokenReserveY: poolTokenAccountY,
-      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       systemProgram: web3.SystemProgram.programId,
+      tokenMintLp: lpMint,
+      tokenMintX: tokenXMint,
       tokenMintXProgram: tokenXProgramId,
+      tokenMintY: tokenYMint,
       tokenMintYProgram: tokenYProgramId,
       tokenProgram: TOKEN_PROGRAM_ID,
+      user,
+      userTokenAccountLp: userTokenAccountLp,
+      userTokenAccountX: userTokenAccountX,
+      userTokenAccountY: userTokenAccountY,
     })
     .transaction();
 

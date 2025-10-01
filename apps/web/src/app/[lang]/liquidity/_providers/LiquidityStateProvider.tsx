@@ -1,9 +1,9 @@
 "use client";
 
-import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useMachine } from "@xstate/react";
-import { liquidityMachine } from "../_machines/liquidityMachine";
+import { createContext, type ReactNode, useContext, useEffect } from "react";
 import type { LiquidityMachineEvent } from "../_machines/liquidityMachine";
+import { liquidityMachine } from "../_machines/liquidityMachine";
 import { usePoolData } from "./LiquidityDataProvider";
 
 interface LiquidityStateContextValue {
@@ -39,16 +39,16 @@ export function LiquidityStateProvider({
 
   useEffect(() => {
     send({
-      type: "UPDATE_POOL_DETAILS",
       data: poolDetails,
+      type: "UPDATE_POOL_DETAILS",
     });
   }, [send, poolDetails]);
 
   useEffect(() => {
     send({
-      type: "UPDATE_TOKEN_ACCOUNTS",
       buyAccount: tokenAccountsData.buyTokenAccount ?? null,
       sellAccount: tokenAccountsData.sellTokenAccount ?? null,
+      type: "UPDATE_TOKEN_ACCOUNTS",
     });
   }, [
     send,
@@ -57,13 +57,13 @@ export function LiquidityStateProvider({
   ]);
 
   const value: LiquidityStateContextValue = {
-    state,
-    send,
+    error: state.context.error,
     isCalculating: state.matches("calculating"),
+    isError: state.matches("error"),
     isSubmitting: state.matches("submitting"),
     isSuccess: state.matches("success"),
-    isError: state.matches("error"),
-    error: state.context.error,
+    send,
+    state,
   };
 
   return (

@@ -1,57 +1,57 @@
+import { PublicKey } from "@solana/web3.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
-import { PublicKey } from "@solana/web3.js";
 
 // Mock all the complex dependencies
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
   usePathname: () => "/liquidity",
+  useRouter: () => ({ push: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("@solana/wallet-adapter-react", () => ({
   useWallet: () => ({
     publicKey: null,
-    wallet: null,
     signTransaction: vi.fn(),
+    wallet: null,
   }),
 }));
 
 vi.mock("../../../../hooks/useAnalytics", () => ({
   useAnalytics: () => ({
-    trackLiquidity: vi.fn(),
     trackError: vi.fn(),
+    trackLiquidity: vi.fn(),
   }),
 }));
 
 vi.mock("../../../../hooks/useRealtimePoolData", () => ({
   useRealtimePoolData: () => ({
-    poolDetails: null,
     isRealtime: false,
+    poolDetails: null,
   }),
 }));
 
 vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
   useRealtimeTokenAccounts: () => ({
     buyTokenAccount: null,
-    sellTokenAccount: null,
-    refetchBuyTokenAccount: vi.fn(),
-    refetchSellTokenAccount: vi.fn(),
     isLoadingBuy: false,
     isLoadingSell: false,
+    isRealtime: false,
     isRefreshingBuy: false,
     isRefreshingSell: false,
-    isRealtime: false,
+    refetchBuyTokenAccount: vi.fn(),
+    refetchSellTokenAccount: vi.fn(),
+    sellTokenAccount: null,
   }),
 }));
 
 vi.mock("../_hooks/useLiquidityCalculationWorker", () => ({
   useLiquidityCalculationWorker: () => ({
-    isCalculating: false,
     calculateLiquidity: vi.fn(),
+    isCalculating: false,
   }),
 }));
 

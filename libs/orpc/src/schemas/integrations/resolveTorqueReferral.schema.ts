@@ -5,10 +5,10 @@ export const resolveTorqueReferralInputSchema = z.object({
 });
 
 export const resolveTorqueReferralOutputSchema = z.object({
-  success: z.boolean(),
-  publicKey: z.string().optional(),
-  vanity: z.string().nullable().optional(),
   error: z.string().optional(),
+  publicKey: z.string().optional(),
+  success: z.boolean(),
+  vanity: z.string().nullable().optional(),
 });
 
 export type ResolveTorqueReferralInput = z.infer<

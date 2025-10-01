@@ -113,6 +113,40 @@ export function mockOrpc() {
           queryKey: ["getTokens"],
         })),
       },
+      helius: {
+        getTokenAccounts: {
+          queryOptions: vi.fn().mockImplementation(() => ({
+            queryFn: () =>
+              Promise.resolve({
+                tokenAccounts: [
+                  {
+                    address: "0x123",
+                    amount: 1000,
+                    decimals: 9,
+                    mint: "0x123",
+                    symbol: "SOL",
+                  } satisfies TokenAccount,
+                ],
+              }),
+            queryKey: ["helius", "getTokenAccounts", { ownerAddress: "0x123" }],
+          })),
+        },
+        searchAssets: {
+          queryOptions: vi.fn().mockImplementation(() => ({
+            queryFn: () =>
+              Promise.resolve([
+                {
+                  description: "Solana",
+                  id: "1",
+                  image: { url: "https://example.com/solana.png" },
+                  name: "Solana",
+                  symbol: "SOL",
+                },
+              ]),
+            queryKey: ["helius", "searchAssets"],
+          })),
+        },
+      },
       tokens: {
         getTokenMetadata: {
           queryOptions: vi.fn().mockImplementation(() => ({
@@ -152,40 +186,6 @@ export function mockOrpc() {
                 quoteCurrency: "USD",
               } satisfies GetTokenPriceOutput),
             queryKey: ["getTokenPrice"],
-          })),
-        },
-      },
-      helius: {
-        getTokenAccounts: {
-          queryOptions: vi.fn().mockImplementation(() => ({
-            queryFn: () =>
-              Promise.resolve({
-                tokenAccounts: [
-                  {
-                    address: "0x123",
-                    amount: 1000,
-                    decimals: 9,
-                    mint: "0x123",
-                    symbol: "SOL",
-                  } satisfies TokenAccount,
-                ],
-              }),
-            queryKey: ["helius", "getTokenAccounts", { ownerAddress: "0x123" }],
-          })),
-        },
-        searchAssets: {
-          queryOptions: vi.fn().mockImplementation(() => ({
-            queryFn: () =>
-              Promise.resolve([
-                {
-                  description: "Solana",
-                  id: "1",
-                  image: { url: "https://example.com/solana.png" },
-                  name: "Solana",
-                  symbol: "SOL",
-                },
-              ]),
-            queryKey: ["helius", "searchAssets"],
           })),
         },
       },

@@ -2,6 +2,7 @@
 
 import {
   ERROR_MESSAGES,
+  isWarningMessage,
   useLiquidityTracking,
   useTokenAccounts,
   useTransactionState,
@@ -171,9 +172,17 @@ export function CreatePoolForm() {
     onFailure: (result) => {
       createState.reset();
       toasts.dismiss();
-      toasts.showErrorToast(
-        `Transaction failed: ${result.error || "Unknown error"}`,
-      );
+      const error = new Error(result.error || "Unknown error");
+      const isWarning = isWarningMessage(error);
+      if (isWarning) {
+        toasts.showWarningToast(
+          `Transaction warning: ${result.error || "Unknown error"}`,
+        );
+      } else {
+        toasts.showErrorToast(
+          `Transaction failed: ${result.error || "Unknown error"}`,
+        );
+      }
     },
     onStatusUpdate: (status, attempt) => {
       toasts.dismiss();
@@ -185,7 +194,13 @@ export function CreatePoolForm() {
       toasts.dismiss();
       if (result.error) {
         createState.reset();
-        toasts.showErrorToast(`Transaction failed: ${result.error}`);
+        const error = new Error(result.error);
+        const isWarning = isWarningMessage(error);
+        if (isWarning) {
+          toasts.showWarningToast(`Transaction warning: ${result.error}`);
+        } else {
+          toasts.showErrorToast(`Transaction failed: ${result.error}`);
+        }
 
         const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
         const tokenBAmount = parseAmount(form.state.values.tokenBAmount);

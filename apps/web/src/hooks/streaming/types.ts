@@ -73,27 +73,27 @@ export const DEFI_STREAM_CONFIGS: Record<
   StreamConfig
 > = {
   critical: {
+    refetchInBackground: true,
+    refetchOnWindowFocus: true,
     refreshInterval: 5000,
     staleTime: 3000,
-    refetchOnWindowFocus: true,
-    refetchInBackground: true,
   },
   high: {
+    refetchInBackground: false,
+    refetchOnWindowFocus: true,
     refreshInterval: 10000,
     staleTime: 7000,
-    refetchOnWindowFocus: true,
-    refetchInBackground: false,
-  },
-  normal: {
-    refreshInterval: 30000,
-    staleTime: 25000,
-    refetchOnWindowFocus: true,
-    refetchInBackground: false,
   },
   low: {
+    refetchInBackground: false,
+    refetchOnWindowFocus: false,
     refreshInterval: 60000,
     staleTime: 50000,
-    refetchOnWindowFocus: false,
+  },
+  normal: {
     refetchInBackground: false,
+    refetchOnWindowFocus: true,
+    refreshInterval: 30000,
+    staleTime: 25000,
   },
 };

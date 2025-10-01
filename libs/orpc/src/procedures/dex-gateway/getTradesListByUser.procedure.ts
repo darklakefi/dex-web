@@ -24,10 +24,10 @@ export const getTradesListByUser = baseProcedure
     }
 
     const response = await getTradesListByUserHandler({
+      $typeName: "darklake.v1.GetTradesListByUserRequest",
       pageNumber: offset / limit + 1,
       pageSize: limit,
       userAddress: userAddress,
-      $typeName: "darklake.v1.GetTradesListByUserRequest",
     });
 
     const items = response?.data?.trades.map((trade: Trade) => {

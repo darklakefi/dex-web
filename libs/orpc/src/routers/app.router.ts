@@ -10,11 +10,11 @@ export const appRouter = {
   dexGateway: dexGatewayRouter,
 
   helius: heliusRouter,
+  integrations: integrationsRouter,
   liquidity: liquidityRouter,
   pools: poolsRouter,
   swap: swapRouter,
   tokens: tokensRouter,
-  integrations: integrationsRouter,
 };
 
 export type AppRouter = typeof appRouter;

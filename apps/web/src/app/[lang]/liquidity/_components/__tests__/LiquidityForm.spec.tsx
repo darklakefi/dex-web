@@ -1,22 +1,25 @@
 import { mockOrpc } from "../../../(swap)/_components/__tests__/__mocks__/mockOrpc";
+
 mockOrpc();
+
+import { PublicKey } from "@solana/web3.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { PublicKey } from "@solana/web3.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../../_utils/constants";
 import { LiquidityForm } from "../LiquidityForm";
+
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
   usePathname: () => "/liquidity",
+  useRouter: () => ({ push: mockPush }),
   useSearchParams: () => new URLSearchParams(),
 }));
 interface MockWallet {
@@ -27,8 +30,8 @@ interface MockWallet {
 
 const mockWallet: MockWallet = {
   publicKey: null,
-  wallet: null,
   signTransaction: vi.fn(),
+  wallet: null,
 };
 
 vi.mock("@solana/wallet-adapter-react", () => ({
@@ -37,33 +40,33 @@ vi.mock("@solana/wallet-adapter-react", () => ({
 
 vi.mock("../_hooks/useLiquidityCalculationWorker", () => ({
   useLiquidityCalculationWorker: () => ({
-    isCalculating: false,
     calculateLiquidity: vi.fn(),
+    isCalculating: false,
   }),
 }));
 vi.mock("../../../../hooks/useAnalytics", () => ({
   useAnalytics: () => ({
-    trackLiquidity: vi.fn(),
     trackError: vi.fn(),
+    trackLiquidity: vi.fn(),
   }),
 }));
 vi.mock("../../../../hooks/useRealtimePoolData", () => ({
   useRealtimePoolData: () => ({
-    poolDetails: null,
     isRealtime: false,
+    poolDetails: null,
   }),
 }));
 vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
   useRealtimeTokenAccounts: () => ({
     buyTokenAccount: null,
-    sellTokenAccount: null,
-    refetchBuyTokenAccount: vi.fn(),
-    refetchSellTokenAccount: vi.fn(),
     isLoadingBuy: false,
     isLoadingSell: false,
+    isRealtime: false,
     isRefreshingBuy: false,
     isRefreshingSell: false,
-    isRealtime: false,
+    refetchBuyTokenAccount: vi.fn(),
+    refetchSellTokenAccount: vi.fn(),
+    sellTokenAccount: null,
   }),
 }));
 vi.mock("../../../_components/SkeletonTokenInput", () => ({
@@ -75,13 +78,13 @@ vi.mock("../../../_components/SkeletonTokenInput", () => ({
 vi.mock("@dex-web/orpc", () => ({
   client: {
     liquidity: {
+      checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
+        error: null,
+        status: "finalized",
+      }),
       createLiquidityTransaction: vi.fn().mockResolvedValue({
         success: true,
         transaction: "mock-transaction",
-      }),
-      checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
-        status: "finalized",
-        error: null,
       }),
       getAddLiquidityReview: vi.fn().mockResolvedValue({
         tokenAmount: 50,
@@ -99,9 +102,9 @@ vi.mock("@dex-web/orpc", () => ({
     liquidity: {
       createLiquidityTransaction: {
         useMutation: vi.fn().mockReturnValue({
-          mutate: vi.fn(),
-          isLoading: false,
           error: null,
+          isLoading: false,
+          mutate: vi.fn(),
         }),
       },
     },
@@ -109,15 +112,15 @@ vi.mock("@dex-web/orpc", () => ({
 }));
 vi.mock("@dex-web/core", () => ({
   ERROR_MESSAGES: {
-    MISSING_WALLET_INFO: "Wallet not connected",
     MISSING_WALLET: "No wallet available",
+    MISSING_WALLET_INFO: "Wallet not connected",
   },
   useLiquidityTracking: () => ({
+    trackConfirmed: vi.fn(),
+    trackError: vi.fn(),
+    trackFailed: vi.fn(),
     trackInitiated: vi.fn(),
     trackSigned: vi.fn(),
-    trackConfirmed: vi.fn(),
-    trackFailed: vi.fn(),
-    trackError: vi.fn(),
   }),
   useTokenAccounts: () => ({
     buyTokenAccount: null,
@@ -128,16 +131,16 @@ vi.mock("@dex-web/core", () => ({
   }),
   useTransactionToasts: () => ({
     showErrorToast: vi.fn(),
-    showSuccessToast: vi.fn(),
-    showStepToast: vi.fn(),
     showStatusToast: vi.fn(),
+    showStepToast: vi.fn(),
+    showSuccessToast: vi.fn(),
   }),
 }));
 const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {
-      queries: { retry: false },
       mutations: { retry: false },
+      queries: { retry: false },
     },
   });
 const renderWithWrapper = (
@@ -152,13 +155,13 @@ const renderWithWrapper = (
     liquidity: {
       squadsX: {
         responseStatus: {
-          failed: {
-            description: "Failed description",
-            title: "Failed title",
-          },
           confirmed: {
             description: "Success description",
             title: "Success title",
+          },
+          failed: {
+            description: "Failed description",
+            title: "Failed title",
           },
         },
       },
@@ -196,8 +199,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       // Ensure wallet is disconnected
       setWalletState({
         publicKey: null,
-        wallet: null,
         signTransaction: vi.fn(),
+        wallet: null,
       });
 
       renderWithWrapper();
@@ -218,8 +221,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       // Ensure wallet is disconnected
       setWalletState({
         publicKey: null,
-        wallet: null,
         signTransaction: vi.fn(),
+        wallet: null,
       });
 
       renderWithWrapper();
@@ -237,8 +240,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       // Ensure wallet is disconnected
       setWalletState({
         publicKey: null,
-        wallet: null,
         signTransaction: vi.fn(),
+        wallet: null,
       });
 
       const { rerender } = renderWithWrapper();
@@ -253,19 +256,19 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     beforeEach(() => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn(),
+        wallet: { adapter: { name: "Phantom" } },
       });
     });
     it("should keep CTA disabled with empty inputs after connecting", async () => {
       vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "test-pool",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "test-pool",
           },
-          isRealtime: true,
         }),
       }));
       renderWithWrapper();
@@ -280,8 +283,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("@dex-web/orpc", () => ({
         client: {
           liquidity: {
-            createLiquidityTransaction,
             checkLiquidityTransactionStatus: vi.fn(),
+            createLiquidityTransaction,
           },
         },
       }));
@@ -327,8 +330,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       const mockPoolData = vi.fn();
       vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: mockPoolData.mockReturnValue({
-          poolDetails: null,
           isRealtime: false,
+          poolDetails: null,
         }),
       }));
       renderWithWrapper({
@@ -348,17 +351,17 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     beforeEach(() => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn(),
+        wallet: { adapter: { name: "Phantom" } },
       });
       vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "existing-pool-123",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "existing-pool-123",
           },
-          isRealtime: true,
         }),
       }));
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -366,12 +369,12 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
           buyTokenAccount: {
             tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
     });
@@ -400,20 +403,20 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     beforeEach(() => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn(),
+        wallet: { adapter: { name: "Phantom" } },
       });
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
         useRealtimeTokenAccounts: () => ({
           buyTokenAccount: {
             tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
     });
@@ -453,17 +456,17 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     beforeEach(() => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn(),
+        wallet: { adapter: { name: "Phantom" } },
       });
       vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "existing-pool-123",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "existing-pool-123",
           },
-          isRealtime: true,
         }),
       }));
     });
@@ -501,26 +504,26 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     beforeEach(() => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn(),
+        wallet: { adapter: { name: "Phantom" } },
       });
       vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "existing-pool-123",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "existing-pool-123",
           },
-          isRealtime: true,
         }),
       }));
       const mockPreview = vi.fn().mockResolvedValue({ tokenAmount: 50 });
       vi.doMock("@dex-web/orpc", () => ({
         client: {
           liquidity: {
-            getAddLiquidityReview: mockPreview,
-            createLiquidityTransaction: vi.fn(),
             checkLiquidityTransactionStatus: vi.fn(),
+            createLiquidityTransaction: vi.fn(),
+            getAddLiquidityReview: mockPreview,
           },
         },
       }));
@@ -551,13 +554,13 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     it("should show 'Create Pool' when no pool exists", async () => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn(),
+        wallet: { adapter: { name: "Phantom" } },
       });
       vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
-          poolDetails: null,
           isRealtime: true,
+          poolDetails: null,
         }),
       }));
       renderWithWrapper();
@@ -569,17 +572,17 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     it("should show 'Add Liquidity' with valid inputs and existing pool", async () => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn(),
+        wallet: { adapter: { name: "Phantom" } },
       });
       vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "existing-pool-123",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "existing-pool-123",
           },
-          isRealtime: true,
         }),
       }));
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -587,12 +590,12 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
           buyTokenAccount: {
             tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
       renderWithWrapper();
@@ -611,17 +614,17 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     beforeEach(() => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn().mockResolvedValue({}),
+        wallet: { adapter: { name: "Phantom" } },
       });
       vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "existing-pool-123",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "existing-pool-123",
           },
-          isRealtime: true,
         }),
       }));
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -629,12 +632,12 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
           buyTokenAccount: {
             tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
     });
@@ -646,8 +649,8 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("@dex-web/orpc", () => ({
         client: {
           liquidity: {
-            createLiquidityTransaction: mockCreate,
             checkLiquidityTransactionStatus: vi.fn(),
+            createLiquidityTransaction: mockCreate,
           },
         },
       }));
@@ -663,11 +666,11 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       await waitFor(() => {
         expect(mockCreate).toHaveBeenCalledWith(
           expect.objectContaining({
-            tokenXMint: expect.any(String),
-            tokenYMint: expect.any(String),
             maxAmountX: expect.any(Number),
             maxAmountY: expect.any(Number),
             slippage: 0.5,
+            tokenXMint: expect.any(String),
+            tokenYMint: expect.any(String),
             user: expect.any(String),
           }),
         );
@@ -678,17 +681,17 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     beforeEach(() => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn().mockResolvedValue({}),
+        wallet: { adapter: { name: "Phantom" } },
       });
       vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "existing-pool-123",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "existing-pool-123",
           },
-          isRealtime: true,
         }),
       }));
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -696,12 +699,12 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
           buyTokenAccount: {
             tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
     });
@@ -709,13 +712,13 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("@dex-web/orpc", () => ({
         client: {
           liquidity: {
+            checkLiquidityTransactionStatus: vi
+              .fn()
+              .mockResolvedValue({ error: null, status: "finalized" }),
             createLiquidityTransaction: vi.fn().mockResolvedValue({
               success: true,
               transaction: "mock-transaction",
             }),
-            checkLiquidityTransactionStatus: vi
-              .fn()
-              .mockResolvedValue({ status: "finalized", error: null }),
           },
         },
       }));
@@ -742,17 +745,17 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     beforeEach(() => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn().mockResolvedValue({}),
+        wallet: { adapter: { name: "Phantom" } },
       });
       vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
         useRealtimePoolData: () => ({
+          isRealtime: true,
           poolDetails: {
+            poolAddress: "existing-pool-123",
             tokenXMint: DEFAULT_BUY_TOKEN,
             tokenYMint: DEFAULT_SELL_TOKEN,
-            poolAddress: "existing-pool-123",
           },
-          isRealtime: true,
         }),
       }));
       vi.doMock("../../../../hooks/useRealtimeTokenAccounts", () => ({
@@ -760,12 +763,12 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
           buyTokenAccount: {
             tokenAccounts: [{ amount: 1000000000, decimals: 9, symbol: "SOL" }],
           },
+          isRealtime: true,
+          refetchBuyTokenAccount: vi.fn(),
+          refetchSellTokenAccount: vi.fn(),
           sellTokenAccount: {
             tokenAccounts: [{ amount: 1000000, decimals: 6, symbol: "USDC" }],
           },
-          refetchBuyTokenAccount: vi.fn(),
-          refetchSellTokenAccount: vi.fn(),
-          isRealtime: true,
         }),
       }));
     });
@@ -773,13 +776,13 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("@dex-web/orpc", () => ({
         client: {
           liquidity: {
+            checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
+              error: "Transaction failed",
+              status: "failed",
+            }),
             createLiquidityTransaction: vi.fn().mockResolvedValue({
               success: true,
               transaction: "mock-transaction",
-            }),
-            checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
-              status: "failed",
-              error: "Transaction failed",
             }),
           },
         },
@@ -806,10 +809,10 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       vi.doMock("@dex-web/orpc", () => ({
         client: {
           liquidity: {
+            checkLiquidityTransactionStatus: vi.fn(),
             createLiquidityTransaction: vi
               .fn()
               .mockRejectedValue(new Error("Network error")),
-            checkLiquidityTransactionStatus: vi.fn(),
           },
         },
       }));
@@ -847,16 +850,16 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
     it("should handle network errors gracefully", async () => {
       setWalletState({
         publicKey: new PublicKey("11111111111111111111111111111112"),
-        wallet: { adapter: { name: "Phantom" } },
         signTransaction: vi.fn(),
+        wallet: { adapter: { name: "Phantom" } },
       });
       vi.doMock("@dex-web/orpc", () => ({
         client: {
           liquidity: {
+            checkLiquidityTransactionStatus: vi.fn(),
             createLiquidityTransaction: vi
               .fn()
               .mockRejectedValue(new Error("Network error")),
-            checkLiquidityTransactionStatus: vi.fn(),
           },
         },
       }));

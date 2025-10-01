@@ -15,11 +15,11 @@ export async function createTorqueReferralHandler({
     const response = await fetch(
       `${torqueApiUrl}/user-ref-code?wallet=${userId}`,
       {
-        method: "GET",
         headers: {
-          "Content-Type": "application/json",
           Accept: "application/json",
+          "Content-Type": "application/json",
         },
+        method: "GET",
       },
     );
 
@@ -27,39 +27,39 @@ export async function createTorqueReferralHandler({
 
     if (!response.ok) {
       console.error("Torque API error:", {
+        response: torqueResponse,
         status: response.status,
         statusText: response.statusText,
-        response: torqueResponse,
       });
 
       return {
-        success: false,
-        referralCode: "",
         error: torqueResponse.message || `API Error: ${response.status}`,
+        referralCode: "",
+        success: false,
       };
     }
 
     if (torqueResponse.status === "SUCCESS" && torqueResponse.data) {
       return {
-        success: true,
-        referralCode: torqueResponse.data.code,
         publicKey: torqueResponse.data.publicKey,
+        referralCode: torqueResponse.data.code,
+        success: true,
         vanity: torqueResponse.data.vanity,
       };
     } else {
       return {
-        success: false,
-        referralCode: "",
         error: "Torque API returned unexpected response format",
+        referralCode: "",
+        success: false,
       };
     }
   } catch (error) {
     console.error("Torque API request failed:", error);
 
     return {
-      success: false,
-      referralCode: "",
       error: error instanceof Error ? error.message : "Unknown error",
+      referralCode: "",
+      success: false,
     };
   }
 }

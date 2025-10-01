@@ -1,6 +1,6 @@
+import Decimal from "decimal.js";
 import { convertToDecimal } from "../number";
 import { formatAmountInput, parseAmountBigNumber } from "./amountUtils";
-import Decimal from "decimal.js";
 
 export interface TokenAccount {
   amount?: number;

@@ -1,31 +1,31 @@
 import { vi } from "vitest";
 
 export const mockUseOptimizedPoolData = vi.fn(() => ({
+  error: null,
+  isLoading: false,
   poolDetails: {
-    poolAddress: "mock-pool-address",
-    tokenXMint: "mock-token-x",
-    tokenYMint: "mock-token-y",
-    price: "1.5",
     getPoolDetails: vi.fn(() => ({
       poolAddress: "mock-pool-address",
+      price: "1.5",
       tokenXMint: "mock-token-x",
       tokenYMint: "mock-token-y",
-      price: "1.5",
     })),
+    poolAddress: "mock-pool-address",
+    price: "1.5",
+    tokenXMint: "mock-token-x",
+    tokenYMint: "mock-token-y",
   },
-  isLoading: false,
-  error: null,
 }));
 
 export const mockUseRealtimePoolData = vi.fn(() => ({
+  error: null,
+  isLoading: false,
   poolDetails: {
     poolAddress: "mock-pool-address",
+    price: "1.5",
     tokenXMint: "mock-token-x",
     tokenYMint: "mock-token-y",
-    price: "1.5",
   },
-  isLoading: false,
-  error: null,
 }));
 
 export const mockUseRealtimeTokenAccounts = vi.fn(() => ({
@@ -35,28 +35,28 @@ export const mockUseRealtimeTokenAccounts = vi.fn(() => ({
     decimals: 9,
     symbol: "SOL",
   },
+  error: null,
+  isLoading: false,
   sellTokenAccount: {
     address: "mock-sell-address",
     amount: 500000000,
     decimals: 6,
     symbol: "USDC",
   },
-  isLoading: false,
-  error: null,
 }));
 
 export const mockUseAnalytics = vi.fn(() => ({
-  track: vi.fn(),
-  page: vi.fn(),
   identify: vi.fn(),
+  page: vi.fn(),
+  track: vi.fn(),
 }));
 
 export const mockUseFormatPrice = vi.fn(() => "$150.00");
 
 export const mockUseSuspenseQuery = vi.fn(() => ({
   data: { price: 1.5 },
-  isLoading: false,
   error: null,
+  isLoading: false,
 }));
 
 vi.mock("../../hooks/useOptimizedPoolData", () => ({
@@ -83,11 +83,11 @@ vi.mock("@tanstack/react-query", async () => {
   const actual = await vi.importActual("@tanstack/react-query");
   return {
     ...actual,
-    useSuspenseQuery: mockUseSuspenseQuery,
     useQuery: vi.fn(() => ({
       data: { price: 1.5 },
-      isLoading: false,
       error: null,
+      isLoading: false,
     })),
+    useSuspenseQuery: mockUseSuspenseQuery,
   };
 });

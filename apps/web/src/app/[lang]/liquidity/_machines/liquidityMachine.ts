@@ -1,4 +1,4 @@
-import { assign, setup, fromPromise } from "xstate";
+import { assign, fromPromise, setup } from "xstate";
 import type {
   LiquidityFormValues,
   PoolDetails,
@@ -34,10 +34,6 @@ export type LiquidityMachineEvent =
   | { type: "RESET" };
 
 export const liquidityMachine = setup({
-  types: {} as {
-    context: LiquidityMachineContext;
-    events: LiquidityMachineEvent;
-  },
   actors: {
     calculateLiquidity: fromPromise(
       async ({ input: _input }: { input: LiquidityFormValues }) => {
@@ -52,22 +48,94 @@ export const liquidityMachine = setup({
       },
     ),
   },
+  types: {} as {
+    context: LiquidityMachineContext;
+    events: LiquidityMachineEvent;
+  },
 }).createMachine({
-  id: "liquidity",
-  initial: "idle",
   context: {
-    poolDetails: null,
     buyTokenAccount: null,
-    sellTokenAccount: null,
     error: null,
-    transactionSignature: null,
-    liquidityStep: 0,
     formData: null,
     isCalculating: false,
+    liquidityStep: 0,
+    poolDetails: null,
+    sellTokenAccount: null,
+    transactionSignature: null,
   } as LiquidityMachineContext,
+  id: "liquidity",
+  initial: "idle",
   states: {
+    calculating: {
+      invoke: {
+        input: ({ context }) =>
+          context.formData || {
+            initialPrice: "0",
+            tokenAAmount: "0",
+            tokenBAmount: "0",
+          },
+        onDone: {
+          actions: assign({
+            error: null,
+            isCalculating: false,
+          }),
+          target: "idle",
+        },
+        onError: {
+          actions: assign({
+            error: ({ event }) => String(event.error),
+            isCalculating: false,
+          }),
+          target: "error",
+        },
+        src: "calculateLiquidity",
+      },
+      on: {
+        FINISH_CALCULATION: {
+          actions: assign({
+            isCalculating: false,
+          }),
+          target: "idle",
+        },
+        SUBMIT: {
+          target: "submitting",
+        },
+      },
+    },
+    error: {
+      on: {
+        RESET: {
+          actions: assign({
+            error: null,
+            isCalculating: false,
+            liquidityStep: 0,
+            transactionSignature: null,
+          }),
+          target: "idle",
+        },
+        RETRY: {
+          target: "submitting",
+        },
+      },
+    },
     idle: {
       on: {
+        CALCULATE: {
+          actions: assign({
+            formData: ({ event }) => event.data,
+            isCalculating: true,
+          }),
+          target: "calculating",
+        },
+        START_CALCULATION: {
+          actions: assign({
+            isCalculating: true,
+          }),
+          target: "calculating",
+        },
+        SUBMIT: {
+          target: "submitting",
+        },
         UPDATE_POOL_DETAILS: {
           actions: assign({
             poolDetails: ({ event }) => event.data,
@@ -79,80 +147,6 @@ export const liquidityMachine = setup({
             sellTokenAccount: ({ event }) => event.sellAccount,
           }),
         },
-        START_CALCULATION: {
-          target: "calculating",
-          actions: assign({
-            isCalculating: true,
-          }),
-        },
-        CALCULATE: {
-          target: "calculating",
-          actions: assign({
-            formData: ({ event }) => event.data,
-            isCalculating: true,
-          }),
-        },
-        SUBMIT: {
-          target: "submitting",
-        },
-      },
-    },
-    calculating: {
-      invoke: {
-        src: "calculateLiquidity",
-        input: ({ context }) =>
-          context.formData || {
-            tokenAAmount: "0",
-            tokenBAmount: "0",
-            initialPrice: "0",
-          },
-        onDone: {
-          target: "idle",
-          actions: assign({
-            error: null,
-            isCalculating: false,
-          }),
-        },
-        onError: {
-          target: "error",
-          actions: assign({
-            error: ({ event }) => String(event.error),
-            isCalculating: false,
-          }),
-        },
-      },
-      on: {
-        FINISH_CALCULATION: {
-          target: "idle",
-          actions: assign({
-            isCalculating: false,
-          }),
-        },
-        SUBMIT: {
-          target: "submitting",
-        },
-      },
-    },
-    submitting: {
-      entry: assign({
-        liquidityStep: 1,
-        error: null,
-      }),
-      on: {
-        SIGN_TRANSACTION: {
-          target: "signing",
-          actions: assign({
-            transactionSignature: ({ event }) => event.signature,
-            liquidityStep: 2,
-          }),
-        },
-        ERROR: {
-          target: "error",
-          actions: assign({
-            error: ({ event }) => event.error,
-            liquidityStep: 0,
-          }),
-        },
       },
     },
     signing: {
@@ -160,48 +154,54 @@ export const liquidityMachine = setup({
         liquidityStep: 3,
       }),
       on: {
-        SUCCESS: {
-          target: "success",
-          actions: assign({
-            liquidityStep: 0,
-            error: null,
-          }),
-        },
         ERROR: {
-          target: "error",
           actions: assign({
             error: ({ event }) => event.error,
             liquidityStep: 0,
           }),
+          target: "error",
+        },
+        SUCCESS: {
+          actions: assign({
+            error: null,
+            liquidityStep: 0,
+          }),
+          target: "success",
+        },
+      },
+    },
+    submitting: {
+      entry: assign({
+        error: null,
+        liquidityStep: 1,
+      }),
+      on: {
+        ERROR: {
+          actions: assign({
+            error: ({ event }) => event.error,
+            liquidityStep: 0,
+          }),
+          target: "error",
+        },
+        SIGN_TRANSACTION: {
+          actions: assign({
+            liquidityStep: 2,
+            transactionSignature: ({ event }) => event.signature,
+          }),
+          target: "signing",
         },
       },
     },
     success: {
       on: {
         RESET: {
-          target: "idle",
           actions: assign({
             error: null,
-            transactionSignature: null,
-            liquidityStep: 0,
             isCalculating: false,
+            liquidityStep: 0,
+            transactionSignature: null,
           }),
-        },
-      },
-    },
-    error: {
-      on: {
-        RETRY: {
-          target: "submitting",
-        },
-        RESET: {
           target: "idle",
-          actions: assign({
-            error: null,
-            transactionSignature: null,
-            liquidityStep: 0,
-            isCalculating: false,
-          }),
         },
       },
     },

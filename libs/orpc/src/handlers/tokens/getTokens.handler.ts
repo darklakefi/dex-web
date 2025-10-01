@@ -21,13 +21,14 @@ export const getTokensHandler = async (
 
   if (query) {
     const gatewayInput: GetTokenMetadataListRequest = {
+      $typeName: "darklake.v1.GetTokenMetadataListRequest",
       filterBy:
         query.length > 30
           ? {
               case: "addressesList",
               value: {
-                tokenAddresses: [query],
                 $typeName: "darklake.v1.TokenAddressesList",
+                tokenAddresses: [query],
               },
             }
           : {
@@ -36,7 +37,6 @@ export const getTokensHandler = async (
             },
       pageNumber: page,
       pageSize: limit,
-      $typeName: "darklake.v1.GetTokenMetadataListRequest",
     };
     const response = await getTokenMetadataListHandler(gatewayInput);
     gatewayTokensList = response.tokens;

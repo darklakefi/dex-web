@@ -1,7 +1,7 @@
 import type {
   PublicKey,
-  VersionedTransaction,
   Transaction,
+  VersionedTransaction,
 } from "@solana/web3.js";
 
 export interface WalletSigningCapabilities {

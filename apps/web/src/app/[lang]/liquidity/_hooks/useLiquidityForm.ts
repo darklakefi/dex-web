@@ -12,8 +12,8 @@ import { useCallback, useMemo } from "react";
 import { z } from "zod";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import {
-  LIQUIDITY_CONSTANTS,
   FORM_FIELD_NAMES,
+  LIQUIDITY_CONSTANTS,
 } from "../_constants/liquidityConstants";
 
 interface TokenAccountData {
@@ -131,10 +131,10 @@ export function useLiquidityForm({
   );
 
   return {
+    fieldContext,
     form,
+    formContext,
     resetFormToDefaults,
     validateSufficientBalance,
-    fieldContext,
-    formContext,
   };
 }

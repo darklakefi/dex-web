@@ -1,11 +1,19 @@
 export const IDL_JSON = {
+  accounts: [
+    {
+      discriminator: [218, 244, 33, 104, 203, 203, 43, 111],
+      name: "AmmConfig",
+    },
+    {
+      discriminator: [134, 173, 223, 185, 77, 86, 28, 51],
+      name: "Order",
+    },
+    {
+      discriminator: [241, 154, 109, 4, 17, 177, 109, 188],
+      name: "Pool",
+    },
+  ],
   address: "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
-  metadata: {
-    name: "darklake",
-    version: "0.1.1",
-    spec: "0.1.0",
-    description: "Darklake",
-  },
   docs: [
     "# Darklake DEX - Two-Step Confidential Trading Protocol",
     "",
@@ -83,43 +91,215 @@ export const IDL_JSON = {
     ".rpc();",
     "```",
   ],
+  errors: [
+    {
+      code: 6000,
+      msg: "Invalid input",
+      name: "InvalidInput",
+    },
+    {
+      code: 6001,
+      msg: "Invalid proof",
+      name: "InvalidProof",
+    },
+    {
+      code: 6002,
+      msg: "Invalid token mint",
+      name: "InvalidTokenMint",
+    },
+    {
+      code: 6003,
+      msg: "Invalid deposit, too few tokens",
+      name: "TooFewTokensSupplied",
+    },
+    {
+      code: 6004,
+      msg: "Pool received X or Y token quantity is 0",
+      name: "ReceivedZeroTokens",
+    },
+    {
+      code: 6005,
+      msg: "Slippage tolerance exceeded",
+      name: "SlippageExceeded",
+    },
+    {
+      code: 6006,
+      msg: "Math overflow",
+      name: "MathOverflow",
+    },
+    {
+      code: 6007,
+      msg: "Math underflow",
+      name: "MathUnderflow",
+    },
+    {
+      code: 6008,
+      msg: "Unable to create Groth16Verifier",
+      name: "InvalidGroth16Verifier",
+    },
+    {
+      code: 6009,
+      msg: "Invalid token order",
+      name: "InvalidTokenOrder",
+    },
+    {
+      code: 6010,
+      msg: "Invalid swap amount",
+      name: "InvalidSwapAmount",
+    },
+    {
+      code: 6011,
+      msg: "Invalid LP mint",
+      name: "InvalidLpMint",
+    },
+    {
+      code: 6012,
+      msg: "Invalid metadata account",
+      name: "InvalidMetadataAccount",
+    },
+    {
+      code: 6013,
+      msg: "Pool reserve and public signals mismatch",
+      name: "PublicSignalAndPoolReserveMismatch",
+    },
+    {
+      code: 6014,
+      msg: "Proof input not equal to pool input",
+      name: "PoolInputAmountMismatch",
+    },
+    {
+      code: 6015,
+      msg: "Proof amount received exceeds pool output",
+      name: "PoolOutputAmountTooLow",
+    },
+    {
+      code: 6016,
+      msg: "Unable to parse public signals",
+      name: "InvalidPublicSignals",
+    },
+    {
+      code: 6017,
+      msg: "LP mint already initialized",
+      name: "LpMintAlreadyInitialized",
+    },
+    {
+      code: 6018,
+      msg: "Liquidity too low",
+      name: "LiquidityTooLow",
+    },
+    {
+      code: 6019,
+      msg: "Invalid transfer calculation",
+      name: "TransferFeeCalculateNotMatch",
+    },
+    {
+      code: 6020,
+      msg: "Config is already initialized",
+      name: "ConfigAlreadyExists",
+    },
+    {
+      code: 6021,
+      msg: "Invalid admin address",
+      name: "InvalidAdmin",
+    },
+    {
+      code: 6022,
+      msg: "Insufficient SOL balance for WSOL deposit",
+      name: "InsufficientSolBalance",
+    },
+    {
+      code: 6023,
+      msg: "Order expired",
+      name: "OrderExpired",
+    },
+    {
+      code: 6024,
+      msg: "Order still valid",
+      name: "OrderStillValid",
+    },
+    {
+      code: 6025,
+      msg: "AMM is halted",
+      name: "AmmHalted",
+    },
+    {
+      code: 6026,
+      msg: "Order data doesn't match",
+      name: "OrderDataMismatch",
+    },
+    {
+      code: 6027,
+      msg: "Order already exists",
+      name: "OrderAlreadyExists",
+    },
+    {
+      code: 6028,
+      msg: "Liquidity tokens did not yield any pair tokens",
+      name: "ZeroTokenOutput",
+    },
+    {
+      code: 6029,
+      msg: "Output is zero",
+      name: "OutputIsZero",
+    },
+    {
+      code: 6030,
+      msg: "Invalid associated token program",
+      name: "InvalidAssociatedTokenProgram",
+    },
+    {
+      code: 6031,
+      msg: "User token account X is uninitialized",
+      name: "UserTokenAccountXUninitialized",
+    },
+    {
+      code: 6032,
+      msg: "User token account Y is uninitialized",
+      name: "UserTokenAccountYUninitialized",
+    },
+    {
+      code: 6033,
+      msg: "Caller token account WSOL is uninitialized",
+      name: "CallerTokenAccountWSolUninitialized",
+    },
+  ],
+  events: [
+    {
+      discriminator: [31, 94, 125, 90, 227, 52, 61, 186],
+      name: "AddLiquidity",
+    },
+    {
+      discriminator: [196, 40, 17, 225, 87, 58, 126, 44],
+      name: "Cancel",
+    },
+    {
+      discriminator: [145, 104, 208, 79, 8, 159, 145, 240],
+      name: "InitializePool",
+    },
+    {
+      discriminator: [116, 244, 97, 232, 103, 31, 152, 58],
+      name: "RemoveLiquidity",
+    },
+    {
+      discriminator: [172, 88, 86, 73, 227, 209, 204, 56],
+      name: "Settle",
+    },
+    {
+      discriminator: [157, 91, 23, 33, 129, 182, 68, 120],
+      name: "Slash",
+    },
+    {
+      discriminator: [81, 108, 227, 190, 205, 208, 10, 196],
+      name: "Swap",
+    },
+  ],
   instructions: [
     {
-      name: "add_liquidity",
-      docs: [
-        "# Add Liquidity",
-        "Adds liquidity to an existing pool.",
-        "",
-        "This function allows users to provide additional liquidity to an existing pool.",
-        "The user specifies the desired amount of LP tokens to receive and maximum amounts",
-        "of tokens they are willing to provide. The actual amounts will be calculated based",
-        "on the current pool state and price.",
-        "",
-        "# Arguments",
-        "",
-        "* `ctx` - The context containing all required accounts for adding liquidity",
-        "* `amount_lp` - The desired amount of LP tokens to receive",
-        "* `max_amount_x` - The maximum amount of token X the user is willing to provide",
-        "* `max_amount_y` - The maximum amount of token Y the user is willing to provide",
-        "",
-        "# Returns",
-        "",
-        "Returns `Ok(())` on successful liquidity addition, or an error if the operation fails.",
-        "",
-        "# Errors",
-        "",
-        "This function will return an error if:",
-        "- The pool does not exist or is not properly initialized",
-        "- The user does not have sufficient token balances",
-        "- The calculated amounts exceed the maximum amounts specified",
-        "- The liquidity addition would result in an invalid pool state",
-      ],
-      discriminator: [181, 157, 89, 67, 143, 182, 52, 72],
       accounts: [
         {
           name: "user",
-          writable: true,
           signer: true,
+          writable: true,
         },
         {
           name: "token_mint_x",
@@ -129,7 +309,6 @@ export const IDL_JSON = {
         },
         {
           name: "token_mint_lp",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -142,10 +321,10 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "pool",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -166,6 +345,7 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "amm_config",
@@ -195,8 +375,15 @@ export const IDL_JSON = {
         },
         {
           name: "user_token_account_x",
-          writable: true,
           pda: {
+            program: {
+              kind: "const",
+              value: [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89,
+              ],
+            },
             seeds: [
               {
                 kind: "account",
@@ -211,6 +398,12 @@ export const IDL_JSON = {
                 path: "token_mint_x",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_y",
+          pda: {
             program: {
               kind: "const",
               value: [
@@ -219,12 +412,6 @@ export const IDL_JSON = {
                 219, 233, 248, 89,
               ],
             },
-          },
-        },
-        {
-          name: "user_token_account_y",
-          writable: true,
-          pda: {
             seeds: [
               {
                 kind: "account",
@@ -239,20 +426,16 @@ export const IDL_JSON = {
                 path: "token_mint_y",
               },
             ],
-            program: {
-              kind: "const",
-              value: [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89,
-              ],
-            },
           },
+          writable: true,
         },
         {
           name: "user_token_account_lp",
-          writable: true,
           pda: {
+            program: {
+              kind: "account",
+              path: "associated_token_program",
+            },
             seeds: [
               {
                 kind: "account",
@@ -267,11 +450,8 @@ export const IDL_JSON = {
                 path: "token_mint_lp",
               },
             ],
-            program: {
-              kind: "account",
-              path: "associated_token_program",
-            },
           },
+          writable: true,
         },
         {
           name: "pool_token_reserve_x",
@@ -282,12 +462,12 @@ export const IDL_JSON = {
           writable: true,
         },
         {
-          name: "associated_token_program",
           address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+          name: "associated_token_program",
         },
         {
-          name: "system_program",
           address: "11111111111111111111111111111111",
+          name: "system_program",
         },
         {
           name: "token_mint_x_program",
@@ -296,8 +476,8 @@ export const IDL_JSON = {
           name: "token_mint_y_program",
         },
         {
-          name: "token_program",
           address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          name: "token_program",
         },
       ],
       args: [
@@ -330,48 +510,43 @@ export const IDL_JSON = {
           },
         },
       ],
-    },
-    {
-      name: "cancel",
+      discriminator: [181, 157, 89, 67, 143, 182, 52, 72],
       docs: [
-        "# Cancel",
-        "Cancels a confidential swap using zero-knowledge proof verification.",
+        "# Add Liquidity",
+        "Adds liquidity to an existing pool.",
         "",
-        "This function allows users to cancel a previously initiated swap by providing a",
-        "zero-knowledge (groth16) proof that demonstrates the cancellation is valid. This maintains",
-        "privacy while ensuring only legitimate cancellations are processed.",
-        "",
-        "Groth16 proof is generated using [snarkjs](https://github.com/darklakefi/snarkjs).",
-        "Curve: bn128, wasm and final zkey files are contained within this repo cancel-circuits.",
+        "This function allows users to provide additional liquidity to an existing pool.",
+        "The user specifies the desired amount of LP tokens to receive and maximum amounts",
+        "of tokens they are willing to provide. The actual amounts will be calculated based",
+        "on the current pool state and price.",
         "",
         "# Arguments",
         "",
-        "* `ctx` - The context containing all required accounts for cancellation",
-        "* `proof_a` - The first component of the Groth16 zero-knowledge proof (64 bytes)",
-        "* `proof_b` - The second component of the Groth16 zero-knowledge proof (128 bytes)",
-        "* `proof_c` - The third component of the Groth16 zero-knowledge proof (64 bytes)",
-        "* `public_inputs` - Array of two 32-byte public inputs for the proof verification",
-        "It contains real output amount and the commitment to the minimum output amount, made during the swap.",
+        "* `ctx` - The context containing all required accounts for adding liquidity",
+        "* `amount_lp` - The desired amount of LP tokens to receive",
+        "* `max_amount_x` - The maximum amount of token X the user is willing to provide",
+        "* `max_amount_y` - The maximum amount of token Y the user is willing to provide",
         "",
         "# Returns",
         "",
-        "Returns `Ok(())` on successful cancellation, or an error if the operation fails.",
+        "Returns `Ok(())` on successful liquidity addition, or an error if the operation fails.",
         "",
         "# Errors",
         "",
         "This function will return an error if:",
-        "- The zero-knowledge proof verification fails",
-        "- The public inputs are invalid or inconsistent",
-        "- The swap has already been settled or cancelled",
-        "- The cancellation deadline has passed",
-        "- The cancellation would violate pool invariants",
+        "- The pool does not exist or is not properly initialized",
+        "- The user does not have sufficient token balances",
+        "- The calculated amounts exceed the maximum amounts specified",
+        "- The liquidity addition would result in an invalid pool state",
       ],
-      discriminator: [232, 219, 223, 41, 219, 236, 220, 190],
+      name: "add_liquidity",
+    },
+    {
       accounts: [
         {
           name: "caller",
-          writable: true,
           signer: true,
+          writable: true,
         },
         {
           name: "order_owner",
@@ -388,7 +563,6 @@ export const IDL_JSON = {
         },
         {
           name: "pool",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -409,6 +583,7 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "authority",
@@ -431,7 +606,6 @@ export const IDL_JSON = {
         },
         {
           name: "pool_wsol_reserve",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -447,6 +621,7 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "amm_config",
@@ -465,8 +640,11 @@ export const IDL_JSON = {
         },
         {
           name: "user_token_account_x",
-          writable: true,
           pda: {
+            program: {
+              kind: "account",
+              path: "associated_token_program",
+            },
             seeds: [
               {
                 kind: "account",
@@ -481,16 +659,16 @@ export const IDL_JSON = {
                 path: "token_mint_x",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_y",
+          pda: {
             program: {
               kind: "account",
               path: "associated_token_program",
             },
-          },
-        },
-        {
-          name: "user_token_account_y",
-          writable: true,
-          pda: {
             seeds: [
               {
                 kind: "account",
@@ -505,16 +683,16 @@ export const IDL_JSON = {
                 path: "token_mint_y",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_wsol",
+          pda: {
             program: {
               kind: "account",
               path: "associated_token_program",
             },
-          },
-        },
-        {
-          name: "user_token_account_wsol",
-          writable: true,
-          pda: {
             seeds: [
               {
                 kind: "account",
@@ -529,16 +707,16 @@ export const IDL_JSON = {
                 path: "token_mint_wsol",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "caller_token_account_wsol",
+          pda: {
             program: {
               kind: "account",
               path: "associated_token_program",
             },
-          },
-        },
-        {
-          name: "caller_token_account_wsol",
-          writable: true,
-          pda: {
             seeds: [
               {
                 kind: "account",
@@ -553,15 +731,11 @@ export const IDL_JSON = {
                 path: "token_mint_wsol",
               },
             ],
-            program: {
-              kind: "account",
-              path: "associated_token_program",
-            },
           },
+          writable: true,
         },
         {
           name: "order",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -578,14 +752,15 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
-          name: "system_program",
           address: "11111111111111111111111111111111",
+          name: "system_program",
         },
         {
-          name: "associated_token_program",
           address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+          name: "associated_token_program",
         },
         {
           name: "token_mint_x_program",
@@ -594,8 +769,8 @@ export const IDL_JSON = {
           name: "token_mint_y_program",
         },
         {
-          name: "token_program",
           address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          name: "token_program",
         },
       ],
       args: [
@@ -637,9 +812,139 @@ export const IDL_JSON = {
           },
         },
       ],
+      discriminator: [232, 219, 223, 41, 219, 236, 220, 190],
+      docs: [
+        "# Cancel",
+        "Cancels a confidential swap using zero-knowledge proof verification.",
+        "",
+        "This function allows users to cancel a previously initiated swap by providing a",
+        "zero-knowledge (groth16) proof that demonstrates the cancellation is valid. This maintains",
+        "privacy while ensuring only legitimate cancellations are processed.",
+        "",
+        "Groth16 proof is generated using [snarkjs](https://github.com/darklakefi/snarkjs).",
+        "Curve: bn128, wasm and final zkey files are contained within this repo cancel-circuits.",
+        "",
+        "# Arguments",
+        "",
+        "* `ctx` - The context containing all required accounts for cancellation",
+        "* `proof_a` - The first component of the Groth16 zero-knowledge proof (64 bytes)",
+        "* `proof_b` - The second component of the Groth16 zero-knowledge proof (128 bytes)",
+        "* `proof_c` - The third component of the Groth16 zero-knowledge proof (64 bytes)",
+        "* `public_inputs` - Array of two 32-byte public inputs for the proof verification",
+        "It contains real output amount and the commitment to the minimum output amount, made during the swap.",
+        "",
+        "# Returns",
+        "",
+        "Returns `Ok(())` on successful cancellation, or an error if the operation fails.",
+        "",
+        "# Errors",
+        "",
+        "This function will return an error if:",
+        "- The zero-knowledge proof verification fails",
+        "- The public inputs are invalid or inconsistent",
+        "- The swap has already been settled or cancelled",
+        "- The cancellation deadline has passed",
+        "- The cancellation would violate pool invariants",
+      ],
+      name: "cancel",
     },
     {
-      name: "collect_protocol_fees",
+      accounts: [
+        {
+          docs: ["Only admin or owner can collect fee now"],
+          name: "admin",
+          signer: true,
+        },
+        {
+          name: "authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [97, 117, 116, 104, 111, 114, 105, 116, 121],
+              },
+            ],
+          },
+        },
+        {
+          docs: ["Pool state stores accumulated protocol fee amount"],
+          name: "pool",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [112, 111, 111, 108],
+              },
+              {
+                kind: "account",
+                path: "amm_config",
+              },
+              {
+                kind: "account",
+                path: "token_mint_x",
+              },
+              {
+                kind: "account",
+                path: "token_mint_y",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          docs: ["Amm config account stores owner"],
+          name: "amm_config",
+        },
+        {
+          docs: ["The address that holds pool tokens for token_x"],
+          name: "pool_token_reserve_x",
+          writable: true,
+        },
+        {
+          docs: ["The address that holds pool tokens for token_y"],
+          name: "pool_token_reserve_y",
+          writable: true,
+        },
+        {
+          docs: ["The mint of token_x vault"],
+          name: "token_mint_x",
+        },
+        {
+          docs: ["The mint of token_y vault"],
+          name: "token_mint_y",
+        },
+        {
+          docs: [
+            "The address that receives the collected token_x protocol fees",
+          ],
+          name: "to_token_x",
+          writable: true,
+        },
+        {
+          docs: [
+            "The address that receives the collected token_y protocol fees",
+          ],
+          name: "to_token_y",
+          writable: true,
+        },
+        {
+          name: "token_mint_x_program",
+        },
+        {
+          name: "token_mint_y_program",
+        },
+      ],
+      args: [
+        {
+          name: "amount_x_requested",
+          type: "u64",
+        },
+        {
+          name: "amount_y_requested",
+          type: "u64",
+        },
+      ],
+      discriminator: [22, 67, 23, 98, 150, 178, 70, 220],
       docs: [
         "# Collect Protocol Fees",
         "Collects accumulated protocol fees from pools.",
@@ -667,151 +972,22 @@ export const IDL_JSON = {
         "- The fee collection accounts are not properly configured",
         "- The transfer operations fail",
       ],
-      discriminator: [22, 67, 23, 98, 150, 178, 70, 220],
-      accounts: [
-        {
-          name: "admin",
-          docs: ["Only admin or owner can collect fee now"],
-          signer: true,
-        },
-        {
-          name: "authority",
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [97, 117, 116, 104, 111, 114, 105, 116, 121],
-              },
-            ],
-          },
-        },
-        {
-          name: "pool",
-          docs: ["Pool state stores accumulated protocol fee amount"],
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [112, 111, 111, 108],
-              },
-              {
-                kind: "account",
-                path: "amm_config",
-              },
-              {
-                kind: "account",
-                path: "token_mint_x",
-              },
-              {
-                kind: "account",
-                path: "token_mint_y",
-              },
-            ],
-          },
-        },
-        {
-          name: "amm_config",
-          docs: ["Amm config account stores owner"],
-        },
-        {
-          name: "pool_token_reserve_x",
-          docs: ["The address that holds pool tokens for token_x"],
-          writable: true,
-        },
-        {
-          name: "pool_token_reserve_y",
-          docs: ["The address that holds pool tokens for token_y"],
-          writable: true,
-        },
-        {
-          name: "token_mint_x",
-          docs: ["The mint of token_x vault"],
-        },
-        {
-          name: "token_mint_y",
-          docs: ["The mint of token_y vault"],
-        },
-        {
-          name: "to_token_x",
-          docs: [
-            "The address that receives the collected token_x protocol fees",
-          ],
-          writable: true,
-        },
-        {
-          name: "to_token_y",
-          docs: [
-            "The address that receives the collected token_y protocol fees",
-          ],
-          writable: true,
-        },
-        {
-          name: "token_mint_x_program",
-        },
-        {
-          name: "token_mint_y_program",
-        },
-      ],
-      args: [
-        {
-          name: "amount_x_requested",
-          type: "u64",
-        },
-        {
-          name: "amount_y_requested",
-          type: "u64",
-        },
-      ],
+      name: "collect_protocol_fees",
     },
     {
-      name: "create_amm_config",
-      docs: [
-        "# Create AMM Configuration",
-        "Creates a new AMM (Automated Market Maker) configuration (one time).",
-        "",
-        "This administrative function creates a new configuration for the AMM that defines",
-        "various parameters such as fee rates, pool creation fees, and operational settings.",
-        "Only authorized administrators can call this function.",
-        "",
-        "# Arguments",
-        "",
-        "* `ctx` - The context containing all required accounts for AMM configuration creation",
-        "* `trade_fee_rate` - The fee rate for trades (must be <= MAX_PERCENTAGE)",
-        "* `protocol_fee_rate` - The protocol fee rate (must be <= MAX_PERCENTAGE)",
-        "* `create_pool_fee` - The fee charged for creating new pools",
-        "* `create_pool_fee_vault` - The vault account that receives pool creation fees",
-        "* `wsol_trade_deposit` - The required deposit amount for WSOL trades",
-        "* `deadline_slot_duration` - The duration (in slots) for transaction deadlines",
-        "* `halted` - Whether the AMM is currently halted",
-        "",
-        "# Returns",
-        "",
-        "Returns `Ok(())` on successful configuration creation, or an error if the operation fails.",
-        "",
-        "# Errors",
-        "",
-        "This function will return an error if:",
-        "- Any fee rate exceeds MAX_PERCENTAGE",
-        "- The create_pool_fee_vault is the default pubkey",
-        "- The caller is not authorized to create AMM configurations (only admin can do this)",
-        "- The configuration accounts are not properly set up",
-      ],
-      discriminator: [137, 52, 237, 212, 215, 117, 108, 104],
       accounts: [
         {
-          name: "admin",
-          docs: ["Address to be set as protocol owner."],
-          writable: true,
-          signer: true,
           address: "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB",
+          docs: ["Address to be set as protocol owner."],
+          name: "admin",
+          signer: true,
+          writable: true,
         },
         {
-          name: "amm_config",
           docs: [
             "Initialize config state account to store protocol owner address and fee rates.",
           ],
-          writable: true,
+          name: "amm_config",
           pda: {
             seeds: [
               {
@@ -824,10 +1000,11 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
-          name: "system_program",
           address: "11111111111111111111111111111111",
+          name: "system_program",
         },
       ],
       args: [
@@ -860,45 +1037,49 @@ export const IDL_JSON = {
           type: "bool",
         },
       ],
-    },
-    {
-      name: "initialize_pool",
+      discriminator: [137, 52, 237, 212, 215, 117, 108, 104],
       docs: [
-        "# Initialize Pool",
-        "Initializes a new liquidity pool for trading between two tokens.",
+        "# Create AMM Configuration",
+        "Creates a new AMM (Automated Market Maker) configuration (one time).",
         "",
-        "This function creates a new pool with initial liquidity provided by the caller.",
-        "The pool will be initialized with the specified amounts of token X and token Y,",
-        "and LP tokens will be minted to represent the initial liquidity position.",
+        "This administrative function creates a new configuration for the AMM that defines",
+        "various parameters such as fee rates, pool creation fees, and operational settings.",
+        "Only authorized administrators can call this function.",
         "",
         "# Arguments",
         "",
-        "* `ctx` - The context containing all required accounts for pool initialization",
-        "* `amount_x` - The initial amount of token X to add to the pool",
-        "* `amount_y` - The initial amount of token Y to add to the pool",
+        "* `ctx` - The context containing all required accounts for AMM configuration creation",
+        "* `trade_fee_rate` - The fee rate for trades (must be <= MAX_PERCENTAGE)",
+        "* `protocol_fee_rate` - The protocol fee rate (must be <= MAX_PERCENTAGE)",
+        "* `create_pool_fee` - The fee charged for creating new pools",
+        "* `create_pool_fee_vault` - The vault account that receives pool creation fees",
+        "* `wsol_trade_deposit` - The required deposit amount for WSOL trades",
+        "* `deadline_slot_duration` - The duration (in slots) for transaction deadlines",
+        "* `halted` - Whether the AMM is currently halted",
         "",
         "# Returns",
         "",
-        "Returns `Ok(())` on successful pool initialization, or an error if the operation fails.",
+        "Returns `Ok(())` on successful configuration creation, or an error if the operation fails.",
         "",
         "# Errors",
         "",
         "This function will return an error if:",
-        "- Any of the required accounts are missing or invalid",
-        "- The amounts provided are zero or invalid",
-        "- The pool has already been initialized",
-        "- The token accounts are not properly configured",
+        "- Any fee rate exceeds MAX_PERCENTAGE",
+        "- The create_pool_fee_vault is the default pubkey",
+        "- The caller is not authorized to create AMM configurations (only admin can do this)",
+        "- The configuration accounts are not properly set up",
       ],
-      discriminator: [95, 180, 10, 172, 84, 174, 232, 40],
+      name: "create_amm_config",
+    },
+    {
       accounts: [
         {
           name: "user",
-          writable: true,
           signer: true,
+          writable: true,
         },
         {
           name: "pool",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -919,6 +1100,7 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "authority",
@@ -953,12 +1135,11 @@ export const IDL_JSON = {
           name: "token_mint_y",
         },
         {
-          name: "token_mint_wsol",
           address: "So11111111111111111111111111111111111111112",
+          name: "token_mint_wsol",
         },
         {
           name: "token_mint_lp",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -971,11 +1152,19 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "metadata_account",
-          writable: true,
           pda: {
+            program: {
+              kind: "const",
+              value: [
+                11, 112, 101, 177, 227, 209, 124, 69, 56, 157, 82, 127, 107, 4,
+                195, 205, 88, 184, 108, 115, 26, 160, 253, 181, 73, 182, 209,
+                188, 3, 248, 41, 70,
+              ],
+            },
             seeds: [
               {
                 kind: "const",
@@ -994,6 +1183,12 @@ export const IDL_JSON = {
                 path: "token_mint_lp",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "metadata_account_x",
+          pda: {
             program: {
               kind: "const",
               value: [
@@ -1002,11 +1197,6 @@ export const IDL_JSON = {
                 188, 3, 248, 41, 70,
               ],
             },
-          },
-        },
-        {
-          name: "metadata_account_x",
-          pda: {
             seeds: [
               {
                 kind: "const",
@@ -1025,6 +1215,11 @@ export const IDL_JSON = {
                 path: "token_mint_x",
               },
             ],
+          },
+        },
+        {
+          name: "metadata_account_y",
+          pda: {
             program: {
               kind: "const",
               value: [
@@ -1033,11 +1228,6 @@ export const IDL_JSON = {
                 188, 3, 248, 41, 70,
               ],
             },
-          },
-        },
-        {
-          name: "metadata_account_y",
-          pda: {
             seeds: [
               {
                 kind: "const",
@@ -1056,20 +1246,19 @@ export const IDL_JSON = {
                 path: "token_mint_y",
               },
             ],
-            program: {
-              kind: "const",
-              value: [
-                11, 112, 101, 177, 227, 209, 124, 69, 56, 157, 82, 127, 107, 4,
-                195, 205, 88, 184, 108, 115, 26, 160, 253, 181, 73, 182, 209,
-                188, 3, 248, 41, 70,
-              ],
-            },
           },
         },
         {
           name: "user_token_account_x",
-          writable: true,
           pda: {
+            program: {
+              kind: "const",
+              value: [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89,
+              ],
+            },
             seeds: [
               {
                 kind: "account",
@@ -1084,6 +1273,12 @@ export const IDL_JSON = {
                 path: "token_mint_x",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_y",
+          pda: {
             program: {
               kind: "const",
               value: [
@@ -1092,12 +1287,6 @@ export const IDL_JSON = {
                 219, 233, 248, 89,
               ],
             },
-          },
-        },
-        {
-          name: "user_token_account_y",
-          writable: true,
-          pda: {
             seeds: [
               {
                 kind: "account",
@@ -1112,15 +1301,8 @@ export const IDL_JSON = {
                 path: "token_mint_y",
               },
             ],
-            program: {
-              kind: "const",
-              value: [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89,
-              ],
-            },
           },
+          writable: true,
         },
         {
           name: "user_token_account_lp",
@@ -1128,7 +1310,6 @@ export const IDL_JSON = {
         },
         {
           name: "pool_token_reserve_x",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -1147,10 +1328,10 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "pool_token_reserve_y",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -1169,10 +1350,10 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "pool_wsol_reserve",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -1188,27 +1369,28 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
+          address: "HNVk87PuSDucX14Eh6CJ5dNm2mG6iNpuT3PHLdbGZeLo",
           name: "create_pool_fee_vault",
           writable: true,
-          address: "HNVk87PuSDucX14Eh6CJ5dNm2mG6iNpuT3PHLdbGZeLo",
         },
         {
-          name: "mpl_program",
           address: "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+          name: "mpl_program",
         },
         {
-          name: "system_program",
           address: "11111111111111111111111111111111",
+          name: "system_program",
         },
         {
-          name: "rent",
           address: "SysvarRent111111111111111111111111111111111",
+          name: "rent",
         },
         {
-          name: "associated_token_program",
           address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+          name: "associated_token_program",
         },
         {
           name: "token_mint_x_program",
@@ -1217,8 +1399,8 @@ export const IDL_JSON = {
           name: "token_mint_y_program",
         },
         {
-          name: "token_program",
           address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          name: "token_program",
         },
       ],
       args: [
@@ -1239,9 +1421,248 @@ export const IDL_JSON = {
           },
         },
       ],
+      discriminator: [95, 180, 10, 172, 84, 174, 232, 40],
+      docs: [
+        "# Initialize Pool",
+        "Initializes a new liquidity pool for trading between two tokens.",
+        "",
+        "This function creates a new pool with initial liquidity provided by the caller.",
+        "The pool will be initialized with the specified amounts of token X and token Y,",
+        "and LP tokens will be minted to represent the initial liquidity position.",
+        "",
+        "# Arguments",
+        "",
+        "* `ctx` - The context containing all required accounts for pool initialization",
+        "* `amount_x` - The initial amount of token X to add to the pool",
+        "* `amount_y` - The initial amount of token Y to add to the pool",
+        "",
+        "# Returns",
+        "",
+        "Returns `Ok(())` on successful pool initialization, or an error if the operation fails.",
+        "",
+        "# Errors",
+        "",
+        "This function will return an error if:",
+        "- Any of the required accounts are missing or invalid",
+        "- The amounts provided are zero or invalid",
+        "- The pool has already been initialized",
+        "- The token accounts are not properly configured",
+      ],
+      name: "initialize_pool",
     },
     {
-      name: "remove_liquidity",
+      accounts: [
+        {
+          name: "user",
+          signer: true,
+          writable: true,
+        },
+        {
+          name: "token_mint_x",
+        },
+        {
+          name: "token_mint_y",
+        },
+        {
+          name: "amm_config",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [97, 109, 109, 95, 99, 111, 110, 102, 105, 103],
+              },
+              {
+                kind: "const",
+                value: [0, 0, 0, 0],
+              },
+            ],
+          },
+        },
+        {
+          name: "token_mint_lp",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [108, 112],
+              },
+              {
+                kind: "account",
+                path: "pool",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          name: "pool",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [112, 111, 111, 108],
+              },
+              {
+                kind: "account",
+                path: "amm_config",
+              },
+              {
+                kind: "account",
+                path: "token_mint_x",
+              },
+              {
+                kind: "account",
+                path: "token_mint_y",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          name: "authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [97, 117, 116, 104, 111, 114, 105, 116, 121],
+              },
+            ],
+          },
+        },
+        {
+          name: "user_token_account_x",
+          pda: {
+            program: {
+              kind: "const",
+              value: [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89,
+              ],
+            },
+            seeds: [
+              {
+                kind: "account",
+                path: "user",
+              },
+              {
+                kind: "account",
+                path: "token_mint_x_program",
+              },
+              {
+                kind: "account",
+                path: "token_mint_x",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_y",
+          pda: {
+            program: {
+              kind: "const",
+              value: [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89,
+              ],
+            },
+            seeds: [
+              {
+                kind: "account",
+                path: "user",
+              },
+              {
+                kind: "account",
+                path: "token_mint_y_program",
+              },
+              {
+                kind: "account",
+                path: "token_mint_y",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_lp",
+          pda: {
+            program: {
+              kind: "const",
+              value: [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89,
+              ],
+            },
+            seeds: [
+              {
+                kind: "account",
+                path: "user",
+              },
+              {
+                kind: "account",
+                path: "token_program",
+              },
+              {
+                kind: "account",
+                path: "token_mint_lp",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          name: "pool_token_reserve_x",
+          writable: true,
+        },
+        {
+          name: "pool_token_reserve_y",
+          writable: true,
+        },
+        {
+          address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+          name: "associated_token_program",
+        },
+        {
+          address: "11111111111111111111111111111111",
+          name: "system_program",
+        },
+        {
+          name: "token_mint_x_program",
+        },
+        {
+          name: "token_mint_y_program",
+        },
+        {
+          address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          name: "token_program",
+        },
+      ],
+      args: [
+        {
+          name: "amount_lp",
+          type: "u64",
+        },
+        {
+          name: "min_receive_x",
+          type: "u64",
+        },
+        {
+          name: "min_receive_y",
+          type: "u64",
+        },
+        {
+          name: "label",
+          type: {
+            option: {
+              array: ["u8", 21],
+            },
+          },
+        },
+      ],
+      discriminator: [80, 85, 209, 72, 24, 206, 177, 108],
       docs: [
         "# Remove Liquidity",
         "Removes liquidity from an existing pool.",
@@ -1270,260 +1691,14 @@ export const IDL_JSON = {
         "- The calculated amounts are below the minimum amounts specified",
         "- The pool state is invalid or the operation would break invariants",
       ],
-      discriminator: [80, 85, 209, 72, 24, 206, 177, 108],
-      accounts: [
-        {
-          name: "user",
-          writable: true,
-          signer: true,
-        },
-        {
-          name: "token_mint_x",
-        },
-        {
-          name: "token_mint_y",
-        },
-        {
-          name: "amm_config",
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [97, 109, 109, 95, 99, 111, 110, 102, 105, 103],
-              },
-              {
-                kind: "const",
-                value: [0, 0, 0, 0],
-              },
-            ],
-          },
-        },
-        {
-          name: "token_mint_lp",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [108, 112],
-              },
-              {
-                kind: "account",
-                path: "pool",
-              },
-            ],
-          },
-        },
-        {
-          name: "pool",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [112, 111, 111, 108],
-              },
-              {
-                kind: "account",
-                path: "amm_config",
-              },
-              {
-                kind: "account",
-                path: "token_mint_x",
-              },
-              {
-                kind: "account",
-                path: "token_mint_y",
-              },
-            ],
-          },
-        },
-        {
-          name: "authority",
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [97, 117, 116, 104, 111, 114, 105, 116, 121],
-              },
-            ],
-          },
-        },
-        {
-          name: "user_token_account_x",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "account",
-                path: "user",
-              },
-              {
-                kind: "account",
-                path: "token_mint_x_program",
-              },
-              {
-                kind: "account",
-                path: "token_mint_x",
-              },
-            ],
-            program: {
-              kind: "const",
-              value: [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89,
-              ],
-            },
-          },
-        },
-        {
-          name: "user_token_account_y",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "account",
-                path: "user",
-              },
-              {
-                kind: "account",
-                path: "token_mint_y_program",
-              },
-              {
-                kind: "account",
-                path: "token_mint_y",
-              },
-            ],
-            program: {
-              kind: "const",
-              value: [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89,
-              ],
-            },
-          },
-        },
-        {
-          name: "user_token_account_lp",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "account",
-                path: "user",
-              },
-              {
-                kind: "account",
-                path: "token_program",
-              },
-              {
-                kind: "account",
-                path: "token_mint_lp",
-              },
-            ],
-            program: {
-              kind: "const",
-              value: [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89,
-              ],
-            },
-          },
-        },
-        {
-          name: "pool_token_reserve_x",
-          writable: true,
-        },
-        {
-          name: "pool_token_reserve_y",
-          writable: true,
-        },
-        {
-          name: "associated_token_program",
-          address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
-        },
-        {
-          name: "system_program",
-          address: "11111111111111111111111111111111",
-        },
-        {
-          name: "token_mint_x_program",
-        },
-        {
-          name: "token_mint_y_program",
-        },
-        {
-          name: "token_program",
-          address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-        },
-      ],
-      args: [
-        {
-          name: "amount_lp",
-          type: "u64",
-        },
-        {
-          name: "min_receive_x",
-          type: "u64",
-        },
-        {
-          name: "min_receive_y",
-          type: "u64",
-        },
-        {
-          name: "label",
-          type: {
-            option: {
-              array: ["u8", 21],
-            },
-          },
-        },
-      ],
+      name: "remove_liquidity",
     },
     {
-      name: "settle",
-      docs: [
-        "# Settle",
-        "Settles a confidential swap using zero-knowledge proof verification.",
-        "",
-        "This function finalizes a previously initiated swap by verifying a zero-knowledge (groth16)",
-        "proof that demonstrates the swap was executed correctly while maintaining privacy. The proof",
-        "components and public inputs are provided to verify the swap's validity.",
-        "",
-        "Groth16 proof is generated using [snarkjs](https://github.com/darklakefi/snarkjs).",
-        "Curve: bn128, wasm and final zkey files are contained within this repo settle-circuits.",
-        "",
-        "# Arguments",
-        "",
-        "* `ctx` - The context containing all required accounts for settlement",
-        "* `proof_a` - The first component of the Groth16 zero-knowledge proof (64 bytes)",
-        "* `proof_b` - The second component of the Groth16 zero-knowledge proof (128 bytes)",
-        "* `proof_c` - The third component of the Groth16 zero-knowledge proof (64 bytes)",
-        "* `public_inputs` - Array of two 32-byte public inputs for the proof verification.",
-        "It contains real output amount and the commitment to the minimum output amount, made during the swap.",
-        "",
-        "# Returns",
-        "",
-        "Returns `Ok(())` on successful settlement, or an error if the operation fails.",
-        "",
-        "# Errors",
-        "",
-        "This function will return an error if:",
-        "- The zero-knowledge proof verification fails",
-        "- The public inputs are invalid or inconsistent",
-        "- The settlement would violate pool invariants",
-        "- The settlement deadline has passed",
-        "- The swap has already been settled or cancelled",
-      ],
-      discriminator: [175, 42, 185, 87, 144, 131, 102, 212],
       accounts: [
         {
           name: "caller",
-          writable: true,
           signer: true,
+          writable: true,
         },
         {
           name: "order_owner",
@@ -1536,12 +1711,11 @@ export const IDL_JSON = {
           name: "token_mint_y",
         },
         {
-          name: "token_mint_wsol",
           address: "So11111111111111111111111111111111111111112",
+          name: "token_mint_wsol",
         },
         {
           name: "pool",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -1562,6 +1736,7 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "authority",
@@ -1584,7 +1759,6 @@ export const IDL_JSON = {
         },
         {
           name: "pool_wsol_reserve",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -1600,6 +1774,7 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "amm_config",
@@ -1618,8 +1793,11 @@ export const IDL_JSON = {
         },
         {
           name: "user_token_account_x",
-          writable: true,
           pda: {
+            program: {
+              kind: "account",
+              path: "associated_token_program",
+            },
             seeds: [
               {
                 kind: "account",
@@ -1634,16 +1812,16 @@ export const IDL_JSON = {
                 path: "token_mint_x",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_y",
+          pda: {
             program: {
               kind: "account",
               path: "associated_token_program",
             },
-          },
-        },
-        {
-          name: "user_token_account_y",
-          writable: true,
-          pda: {
             seeds: [
               {
                 kind: "account",
@@ -1658,16 +1836,16 @@ export const IDL_JSON = {
                 path: "token_mint_y",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_wsol",
+          pda: {
             program: {
               kind: "account",
               path: "associated_token_program",
             },
-          },
-        },
-        {
-          name: "user_token_account_wsol",
-          writable: true,
-          pda: {
             seeds: [
               {
                 kind: "account",
@@ -1682,16 +1860,16 @@ export const IDL_JSON = {
                 path: "token_mint_wsol",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "caller_token_account_wsol",
+          pda: {
             program: {
               kind: "account",
               path: "associated_token_program",
             },
-          },
-        },
-        {
-          name: "caller_token_account_wsol",
-          writable: true,
-          pda: {
             seeds: [
               {
                 kind: "account",
@@ -1706,15 +1884,11 @@ export const IDL_JSON = {
                 path: "token_mint_wsol",
               },
             ],
-            program: {
-              kind: "account",
-              path: "associated_token_program",
-            },
           },
+          writable: true,
         },
         {
           name: "order",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -1731,10 +1905,10 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "order_token_account_wsol",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -1751,14 +1925,15 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
-          name: "system_program",
           address: "11111111111111111111111111111111",
+          name: "system_program",
         },
         {
-          name: "associated_token_program",
           address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+          name: "associated_token_program",
         },
         {
           name: "token_mint_x_program",
@@ -1767,8 +1942,8 @@ export const IDL_JSON = {
           name: "token_mint_y_program",
         },
         {
-          name: "token_program",
           address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          name: "token_program",
         },
       ],
       args: [
@@ -1822,9 +1997,262 @@ export const IDL_JSON = {
           },
         },
       ],
+      discriminator: [175, 42, 185, 87, 144, 131, 102, 212],
+      docs: [
+        "# Settle",
+        "Settles a confidential swap using zero-knowledge proof verification.",
+        "",
+        "This function finalizes a previously initiated swap by verifying a zero-knowledge (groth16)",
+        "proof that demonstrates the swap was executed correctly while maintaining privacy. The proof",
+        "components and public inputs are provided to verify the swap's validity.",
+        "",
+        "Groth16 proof is generated using [snarkjs](https://github.com/darklakefi/snarkjs).",
+        "Curve: bn128, wasm and final zkey files are contained within this repo settle-circuits.",
+        "",
+        "# Arguments",
+        "",
+        "* `ctx` - The context containing all required accounts for settlement",
+        "* `proof_a` - The first component of the Groth16 zero-knowledge proof (64 bytes)",
+        "* `proof_b` - The second component of the Groth16 zero-knowledge proof (128 bytes)",
+        "* `proof_c` - The third component of the Groth16 zero-knowledge proof (64 bytes)",
+        "* `public_inputs` - Array of two 32-byte public inputs for the proof verification.",
+        "It contains real output amount and the commitment to the minimum output amount, made during the swap.",
+        "",
+        "# Returns",
+        "",
+        "Returns `Ok(())` on successful settlement, or an error if the operation fails.",
+        "",
+        "# Errors",
+        "",
+        "This function will return an error if:",
+        "- The zero-knowledge proof verification fails",
+        "- The public inputs are invalid or inconsistent",
+        "- The settlement would violate pool invariants",
+        "- The settlement deadline has passed",
+        "- The swap has already been settled or cancelled",
+      ],
+      name: "settle",
     },
     {
-      name: "slash",
+      accounts: [
+        {
+          name: "caller",
+          signer: true,
+          writable: true,
+        },
+        {
+          name: "order_owner",
+          writable: true,
+        },
+        {
+          name: "token_mint_x",
+        },
+        {
+          name: "token_mint_y",
+        },
+        {
+          address: "So11111111111111111111111111111111111111112",
+          name: "token_mint_wsol",
+        },
+        {
+          name: "pool",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [112, 111, 111, 108],
+              },
+              {
+                kind: "account",
+                path: "amm_config",
+              },
+              {
+                kind: "account",
+                path: "token_mint_x",
+              },
+              {
+                kind: "account",
+                path: "token_mint_y",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          name: "authority",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [97, 117, 116, 104, 111, 114, 105, 116, 121],
+              },
+            ],
+          },
+        },
+        {
+          name: "pool_token_reserve_x",
+          writable: true,
+        },
+        {
+          name: "pool_token_reserve_y",
+          writable: true,
+        },
+        {
+          name: "pool_wsol_reserve",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  112, 111, 111, 108, 95, 119, 115, 111, 108, 95, 114, 101, 115,
+                  101, 114, 118, 101,
+                ],
+              },
+              {
+                kind: "account",
+                path: "pool",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          name: "amm_config",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [97, 109, 109, 95, 99, 111, 110, 102, 105, 103],
+              },
+              {
+                kind: "const",
+                value: [0, 0, 0, 0],
+              },
+            ],
+          },
+        },
+        {
+          name: "user_token_account_x",
+          pda: {
+            program: {
+              kind: "account",
+              path: "associated_token_program",
+            },
+            seeds: [
+              {
+                kind: "account",
+                path: "order_owner",
+              },
+              {
+                kind: "account",
+                path: "token_mint_x_program",
+              },
+              {
+                kind: "account",
+                path: "token_mint_x",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_y",
+          pda: {
+            program: {
+              kind: "account",
+              path: "associated_token_program",
+            },
+            seeds: [
+              {
+                kind: "account",
+                path: "order_owner",
+              },
+              {
+                kind: "account",
+                path: "token_mint_y_program",
+              },
+              {
+                kind: "account",
+                path: "token_mint_y",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          name: "caller_token_account_wsol",
+          pda: {
+            program: {
+              kind: "account",
+              path: "associated_token_program",
+            },
+            seeds: [
+              {
+                kind: "account",
+                path: "caller",
+              },
+              {
+                kind: "account",
+                path: "token_program",
+              },
+              {
+                kind: "account",
+                path: "token_mint_wsol",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          name: "order",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [111, 114, 100, 101, 114],
+              },
+              {
+                kind: "account",
+                path: "pool",
+              },
+              {
+                kind: "account",
+                path: "order_owner",
+              },
+            ],
+          },
+          writable: true,
+        },
+        {
+          address: "11111111111111111111111111111111",
+          name: "system_program",
+        },
+        {
+          address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+          name: "associated_token_program",
+        },
+        {
+          name: "token_mint_x_program",
+        },
+        {
+          name: "token_mint_y_program",
+        },
+        {
+          address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          name: "token_program",
+        },
+      ],
+      args: [
+        {
+          name: "label",
+          type: {
+            option: {
+              array: ["u8", 21],
+            },
+          },
+        },
+      ],
+      discriminator: [204, 141, 18, 161, 8, 177, 92, 142],
       docs: [
         "# Slash",
         "Executes a slash operation to penalize malicious behavior.",
@@ -1849,15 +2277,13 @@ export const IDL_JSON = {
         "- The target accounts are not properly configured",
         "- The caller doesn't have a WSOL token account",
       ],
-      discriminator: [204, 141, 18, 161, 8, 177, 92, 142],
+      name: "slash",
+    },
+    {
       accounts: [
         {
-          name: "caller",
-          writable: true,
+          name: "user",
           signer: true,
-        },
-        {
-          name: "order_owner",
           writable: true,
         },
         {
@@ -1867,12 +2293,11 @@ export const IDL_JSON = {
           name: "token_mint_y",
         },
         {
-          name: "token_mint_wsol",
           address: "So11111111111111111111111111111111111111112",
+          name: "token_mint_wsol",
         },
         {
           name: "pool",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -1893,6 +2318,7 @@ export const IDL_JSON = {
               },
             ],
           },
+          writable: true,
         },
         {
           name: "authority",
@@ -1901,33 +2327,6 @@ export const IDL_JSON = {
               {
                 kind: "const",
                 value: [97, 117, 116, 104, 111, 114, 105, 116, 121],
-              },
-            ],
-          },
-        },
-        {
-          name: "pool_token_reserve_x",
-          writable: true,
-        },
-        {
-          name: "pool_token_reserve_y",
-          writable: true,
-        },
-        {
-          name: "pool_wsol_reserve",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [
-                  112, 111, 111, 108, 95, 119, 115, 111, 108, 95, 114, 101, 115,
-                  101, 114, 118, 101,
-                ],
-              },
-              {
-                kind: "account",
-                path: "pool",
               },
             ],
           },
@@ -1949,12 +2348,15 @@ export const IDL_JSON = {
         },
         {
           name: "user_token_account_x",
-          writable: true,
           pda: {
+            program: {
+              kind: "account",
+              path: "associated_token_program",
+            },
             seeds: [
               {
                 kind: "account",
-                path: "order_owner",
+                path: "user",
               },
               {
                 kind: "account",
@@ -1965,20 +2367,20 @@ export const IDL_JSON = {
                 path: "token_mint_x",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_y",
+          pda: {
             program: {
               kind: "account",
               path: "associated_token_program",
             },
-          },
-        },
-        {
-          name: "user_token_account_y",
-          writable: true,
-          pda: {
             seeds: [
               {
                 kind: "account",
-                path: "order_owner",
+                path: "user",
               },
               {
                 kind: "account",
@@ -1989,20 +2391,20 @@ export const IDL_JSON = {
                 path: "token_mint_y",
               },
             ],
+          },
+          writable: true,
+        },
+        {
+          name: "user_token_account_wsol",
+          pda: {
             program: {
               kind: "account",
               path: "associated_token_program",
             },
-          },
-        },
-        {
-          name: "caller_token_account_wsol",
-          writable: true,
-          pda: {
             seeds: [
               {
                 kind: "account",
-                path: "caller",
+                path: "user",
               },
               {
                 kind: "account",
@@ -2013,15 +2415,38 @@ export const IDL_JSON = {
                 path: "token_mint_wsol",
               },
             ],
-            program: {
-              kind: "account",
-              path: "associated_token_program",
-            },
           },
+          writable: true,
+        },
+        {
+          name: "pool_token_reserve_x",
+          writable: true,
+        },
+        {
+          name: "pool_token_reserve_y",
+          writable: true,
+        },
+        {
+          name: "pool_wsol_reserve",
+          pda: {
+            seeds: [
+              {
+                kind: "const",
+                value: [
+                  112, 111, 111, 108, 95, 119, 115, 111, 108, 95, 114, 101, 115,
+                  101, 114, 118, 101,
+                ],
+              },
+              {
+                kind: "account",
+                path: "pool",
+              },
+            ],
+          },
+          writable: true,
         },
         {
           name: "order",
-          writable: true,
           pda: {
             seeds: [
               {
@@ -2034,18 +2459,19 @@ export const IDL_JSON = {
               },
               {
                 kind: "account",
-                path: "order_owner",
+                path: "user",
               },
             ],
           },
+          writable: true,
         },
         {
-          name: "system_program",
-          address: "11111111111111111111111111111111",
-        },
-        {
-          name: "associated_token_program",
           address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+          name: "associated_token_program",
+        },
+        {
+          address: "11111111111111111111111111111111",
+          name: "system_program",
         },
         {
           name: "token_mint_x_program",
@@ -2054,11 +2480,25 @@ export const IDL_JSON = {
           name: "token_mint_y_program",
         },
         {
-          name: "token_program",
           address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          name: "token_program",
         },
       ],
       args: [
+        {
+          name: "amount_in",
+          type: "u64",
+        },
+        {
+          name: "is_swap_x_to_y",
+          type: "bool",
+        },
+        {
+          name: "c_min",
+          type: {
+            array: ["u8", 32],
+          },
+        },
         {
           name: "label",
           type: {
@@ -2068,9 +2508,7 @@ export const IDL_JSON = {
           },
         },
       ],
-    },
-    {
-      name: "swap",
+      discriminator: [248, 198, 158, 145, 225, 117, 135, 200],
       docs: [
         "# Swap",
         "Performs a confidential swap between tokens in the pool.",
@@ -2102,59 +2540,18 @@ export const IDL_JSON = {
         "- The pool does not have sufficient liquidity",
         "- The swap violates pool invariants",
       ],
-      discriminator: [248, 198, 158, 145, 225, 117, 135, 200],
+      name: "swap",
+    },
+    {
       accounts: [
         {
-          name: "user",
-          writable: true,
+          address: "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB",
+          docs: ["The config admin"],
+          name: "admin",
           signer: true,
         },
         {
-          name: "token_mint_x",
-        },
-        {
-          name: "token_mint_y",
-        },
-        {
-          name: "token_mint_wsol",
-          address: "So11111111111111111111111111111111111111112",
-        },
-        {
-          name: "pool",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [112, 111, 111, 108],
-              },
-              {
-                kind: "account",
-                path: "amm_config",
-              },
-              {
-                kind: "account",
-                path: "token_mint_x",
-              },
-              {
-                kind: "account",
-                path: "token_mint_y",
-              },
-            ],
-          },
-        },
-        {
-          name: "authority",
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [97, 117, 116, 104, 111, 114, 105, 116, 121],
-              },
-            ],
-          },
-        },
-        {
+          docs: ["Config account to be changed"],
           name: "amm_config",
           pda: {
             seeds: [
@@ -2168,172 +2565,20 @@ export const IDL_JSON = {
               },
             ],
           },
-        },
-        {
-          name: "user_token_account_x",
           writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "account",
-                path: "user",
-              },
-              {
-                kind: "account",
-                path: "token_mint_x_program",
-              },
-              {
-                kind: "account",
-                path: "token_mint_x",
-              },
-            ],
-            program: {
-              kind: "account",
-              path: "associated_token_program",
-            },
-          },
-        },
-        {
-          name: "user_token_account_y",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "account",
-                path: "user",
-              },
-              {
-                kind: "account",
-                path: "token_mint_y_program",
-              },
-              {
-                kind: "account",
-                path: "token_mint_y",
-              },
-            ],
-            program: {
-              kind: "account",
-              path: "associated_token_program",
-            },
-          },
-        },
-        {
-          name: "user_token_account_wsol",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "account",
-                path: "user",
-              },
-              {
-                kind: "account",
-                path: "token_program",
-              },
-              {
-                kind: "account",
-                path: "token_mint_wsol",
-              },
-            ],
-            program: {
-              kind: "account",
-              path: "associated_token_program",
-            },
-          },
-        },
-        {
-          name: "pool_token_reserve_x",
-          writable: true,
-        },
-        {
-          name: "pool_token_reserve_y",
-          writable: true,
-        },
-        {
-          name: "pool_wsol_reserve",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [
-                  112, 111, 111, 108, 95, 119, 115, 111, 108, 95, 114, 101, 115,
-                  101, 114, 118, 101,
-                ],
-              },
-              {
-                kind: "account",
-                path: "pool",
-              },
-            ],
-          },
-        },
-        {
-          name: "order",
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [111, 114, 100, 101, 114],
-              },
-              {
-                kind: "account",
-                path: "pool",
-              },
-              {
-                kind: "account",
-                path: "user",
-              },
-            ],
-          },
-        },
-        {
-          name: "associated_token_program",
-          address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
-        },
-        {
-          name: "system_program",
-          address: "11111111111111111111111111111111",
-        },
-        {
-          name: "token_mint_x_program",
-        },
-        {
-          name: "token_mint_y_program",
-        },
-        {
-          name: "token_program",
-          address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
         },
       ],
       args: [
         {
-          name: "amount_in",
+          name: "param",
+          type: "u8",
+        },
+        {
+          name: "value",
           type: "u64",
         },
-        {
-          name: "is_swap_x_to_y",
-          type: "bool",
-        },
-        {
-          name: "c_min",
-          type: {
-            array: ["u8", 32],
-          },
-        },
-        {
-          name: "label",
-          type: {
-            option: {
-              array: ["u8", 21],
-            },
-          },
-        },
       ],
-    },
-    {
-      name: "update_amm_config",
+      discriminator: [49, 60, 174, 136, 154, 28, 116, 200],
       docs: [
         "# Update AMM Configuration",
         "Updates an existing AMM configuration parameter.",
@@ -2360,265 +2605,19 @@ export const IDL_JSON = {
         "- The new value violates constraints or invariants",
         "- The configuration does not exist",
       ],
-      discriminator: [49, 60, 174, 136, 154, 28, 116, 200],
-      accounts: [
-        {
-          name: "admin",
-          docs: ["The config admin"],
-          signer: true,
-          address: "5hHsEaTXVNhsYT7TgkrPB3GwZ7ZYrtzC5t3KTLNuwJkB",
-        },
-        {
-          name: "amm_config",
-          docs: ["Config account to be changed"],
-          writable: true,
-          pda: {
-            seeds: [
-              {
-                kind: "const",
-                value: [97, 109, 109, 95, 99, 111, 110, 102, 105, 103],
-              },
-              {
-                kind: "const",
-                value: [0, 0, 0, 0],
-              },
-            ],
-          },
-        },
-      ],
-      args: [
-        {
-          name: "param",
-          type: "u8",
-        },
-        {
-          name: "value",
-          type: "u64",
-        },
-      ],
+      name: "update_amm_config",
     },
   ],
-  accounts: [
-    {
-      name: "AmmConfig",
-      discriminator: [218, 244, 33, 104, 203, 203, 43, 111],
-    },
-    {
-      name: "Order",
-      discriminator: [134, 173, 223, 185, 77, 86, 28, 51],
-    },
-    {
-      name: "Pool",
-      discriminator: [241, 154, 109, 4, 17, 177, 109, 188],
-    },
-  ],
-  events: [
-    {
-      name: "AddLiquidity",
-      discriminator: [31, 94, 125, 90, 227, 52, 61, 186],
-    },
-    {
-      name: "Cancel",
-      discriminator: [196, 40, 17, 225, 87, 58, 126, 44],
-    },
-    {
-      name: "InitializePool",
-      discriminator: [145, 104, 208, 79, 8, 159, 145, 240],
-    },
-    {
-      name: "RemoveLiquidity",
-      discriminator: [116, 244, 97, 232, 103, 31, 152, 58],
-    },
-    {
-      name: "Settle",
-      discriminator: [172, 88, 86, 73, 227, 209, 204, 56],
-    },
-    {
-      name: "Slash",
-      discriminator: [157, 91, 23, 33, 129, 182, 68, 120],
-    },
-    {
-      name: "Swap",
-      discriminator: [81, 108, 227, 190, 205, 208, 10, 196],
-    },
-  ],
-  errors: [
-    {
-      code: 6000,
-      name: "InvalidInput",
-      msg: "Invalid input",
-    },
-    {
-      code: 6001,
-      name: "InvalidProof",
-      msg: "Invalid proof",
-    },
-    {
-      code: 6002,
-      name: "InvalidTokenMint",
-      msg: "Invalid token mint",
-    },
-    {
-      code: 6003,
-      name: "TooFewTokensSupplied",
-      msg: "Invalid deposit, too few tokens",
-    },
-    {
-      code: 6004,
-      name: "ReceivedZeroTokens",
-      msg: "Pool received X or Y token quantity is 0",
-    },
-    {
-      code: 6005,
-      name: "SlippageExceeded",
-      msg: "Slippage tolerance exceeded",
-    },
-    {
-      code: 6006,
-      name: "MathOverflow",
-      msg: "Math overflow",
-    },
-    {
-      code: 6007,
-      name: "MathUnderflow",
-      msg: "Math underflow",
-    },
-    {
-      code: 6008,
-      name: "InvalidGroth16Verifier",
-      msg: "Unable to create Groth16Verifier",
-    },
-    {
-      code: 6009,
-      name: "InvalidTokenOrder",
-      msg: "Invalid token order",
-    },
-    {
-      code: 6010,
-      name: "InvalidSwapAmount",
-      msg: "Invalid swap amount",
-    },
-    {
-      code: 6011,
-      name: "InvalidLpMint",
-      msg: "Invalid LP mint",
-    },
-    {
-      code: 6012,
-      name: "InvalidMetadataAccount",
-      msg: "Invalid metadata account",
-    },
-    {
-      code: 6013,
-      name: "PublicSignalAndPoolReserveMismatch",
-      msg: "Pool reserve and public signals mismatch",
-    },
-    {
-      code: 6014,
-      name: "PoolInputAmountMismatch",
-      msg: "Proof input not equal to pool input",
-    },
-    {
-      code: 6015,
-      name: "PoolOutputAmountTooLow",
-      msg: "Proof amount received exceeds pool output",
-    },
-    {
-      code: 6016,
-      name: "InvalidPublicSignals",
-      msg: "Unable to parse public signals",
-    },
-    {
-      code: 6017,
-      name: "LpMintAlreadyInitialized",
-      msg: "LP mint already initialized",
-    },
-    {
-      code: 6018,
-      name: "LiquidityTooLow",
-      msg: "Liquidity too low",
-    },
-    {
-      code: 6019,
-      name: "TransferFeeCalculateNotMatch",
-      msg: "Invalid transfer calculation",
-    },
-    {
-      code: 6020,
-      name: "ConfigAlreadyExists",
-      msg: "Config is already initialized",
-    },
-    {
-      code: 6021,
-      name: "InvalidAdmin",
-      msg: "Invalid admin address",
-    },
-    {
-      code: 6022,
-      name: "InsufficientSolBalance",
-      msg: "Insufficient SOL balance for WSOL deposit",
-    },
-    {
-      code: 6023,
-      name: "OrderExpired",
-      msg: "Order expired",
-    },
-    {
-      code: 6024,
-      name: "OrderStillValid",
-      msg: "Order still valid",
-    },
-    {
-      code: 6025,
-      name: "AmmHalted",
-      msg: "AMM is halted",
-    },
-    {
-      code: 6026,
-      name: "OrderDataMismatch",
-      msg: "Order data doesn't match",
-    },
-    {
-      code: 6027,
-      name: "OrderAlreadyExists",
-      msg: "Order already exists",
-    },
-    {
-      code: 6028,
-      name: "ZeroTokenOutput",
-      msg: "Liquidity tokens did not yield any pair tokens",
-    },
-    {
-      code: 6029,
-      name: "OutputIsZero",
-      msg: "Output is zero",
-    },
-    {
-      code: 6030,
-      name: "InvalidAssociatedTokenProgram",
-      msg: "Invalid associated token program",
-    },
-    {
-      code: 6031,
-      name: "UserTokenAccountXUninitialized",
-      msg: "User token account X is uninitialized",
-    },
-    {
-      code: 6032,
-      name: "UserTokenAccountYUninitialized",
-      msg: "User token account Y is uninitialized",
-    },
-    {
-      code: 6033,
-      name: "CallerTokenAccountWSolUninitialized",
-      msg: "Caller token account WSOL is uninitialized",
-    },
-  ],
+  metadata: {
+    description: "Darklake",
+    name: "darklake",
+    spec: "0.1.0",
+    version: "0.1.1",
+  },
   types: [
     {
       name: "AddLiquidity",
       type: {
-        kind: "struct",
         fields: [
           {
             name: "supplier",
@@ -2685,12 +2684,12 @@ export const IDL_JSON = {
             type: "string",
           },
         ],
+        kind: "struct",
       },
     },
     {
       name: "AmmConfig",
       type: {
-        kind: "struct",
         fields: [
           {
             name: "trade_fee_rate",
@@ -2725,19 +2724,19 @@ export const IDL_JSON = {
             type: "bool",
           },
           {
-            name: "padding",
             docs: ["padding"],
+            name: "padding",
             type: {
               array: ["u64", 16],
             },
           },
         ],
+        kind: "struct",
       },
     },
     {
       name: "Cancel",
       type: {
-        kind: "struct",
         fields: [
           {
             name: "caller",
@@ -2848,12 +2847,12 @@ export const IDL_JSON = {
             type: "string",
           },
         ],
+        kind: "struct",
       },
     },
     {
       name: "InitializePool",
       type: {
-        kind: "struct",
         fields: [
           {
             name: "trader",
@@ -2892,12 +2891,12 @@ export const IDL_JSON = {
             type: "string",
           },
         ],
+        kind: "struct",
       },
     },
     {
       name: "Order",
       type: {
-        kind: "struct",
         fields: [
           {
             name: "trader",
@@ -2968,12 +2967,12 @@ export const IDL_JSON = {
             },
           },
         ],
+        kind: "struct",
       },
     },
     {
       name: "Pool",
       type: {
-        kind: "struct",
         fields: [
           {
             name: "creator",
@@ -3038,12 +3037,12 @@ export const IDL_JSON = {
             },
           },
         ],
+        kind: "struct",
       },
     },
     {
       name: "RemoveLiquidity",
       type: {
-        kind: "struct",
         fields: [
           {
             name: "supplier",
@@ -3106,12 +3105,12 @@ export const IDL_JSON = {
             type: "string",
           },
         ],
+        kind: "struct",
       },
     },
     {
       name: "Settle",
       type: {
-        kind: "struct",
         fields: [
           {
             name: "caller",
@@ -3230,12 +3229,12 @@ export const IDL_JSON = {
             type: "string",
           },
         ],
+        kind: "struct",
       },
     },
     {
       name: "Slash",
       type: {
-        kind: "struct",
         fields: [
           {
             name: "caller",
@@ -3346,12 +3345,12 @@ export const IDL_JSON = {
             type: "string",
           },
         ],
+        kind: "struct",
       },
     },
     {
       name: "Swap",
       type: {
-        kind: "struct",
         fields: [
           {
             name: "trader",
@@ -3458,6 +3457,7 @@ export const IDL_JSON = {
             type: "string",
           },
         ],
+        kind: "struct",
       },
     },
   ],

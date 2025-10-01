@@ -2,16 +2,16 @@
 
 import { useCallback } from "react";
 import {
-  TRANSACTION_STEPS,
-  TRANSACTION_DESCRIPTIONS,
   SUCCESS_MESSAGES,
+  TRANSACTION_DESCRIPTIONS,
+  TRANSACTION_STEPS,
   type TransactionType,
 } from "../constants/toastMessages";
 
 export type ToastFunction = (options: {
   title: string;
   description: string;
-  variant: "loading" | "success" | "error";
+  variant: "loading" | "success" | "error" | "warning";
   customAction?: React.ReactNode;
 }) => void;
 
@@ -41,6 +41,10 @@ export interface UseTransactionToastsReturn {
     error: string | Error,
     context?: Record<string, unknown>,
   ) => void;
+  showWarningToast: (
+    message: string | Error,
+    context?: Record<string, unknown>,
+  ) => void;
   showStatusToast: (message: string) => void;
   dismiss: () => void;
 }
@@ -60,8 +64,8 @@ export const useTransactionToasts = ({
 
       if (stepData && descriptionData) {
         toast({
-          title: stepData[transactionType],
           description: descriptionData[transactionType],
+          title: stepData[transactionType],
           variant: "loading",
         });
       }
@@ -73,10 +77,10 @@ export const useTransactionToasts = ({
     (message?: string, customAction?: React.ReactNode) => {
       if (isSquadsX && customMessages?.squadsXSuccess) {
         toast({
-          title: customMessages.squadsXSuccess.title,
-          description: customMessages.squadsXSuccess.description,
-          variant: "success",
           customAction,
+          description: customMessages.squadsXSuccess.description,
+          title: customMessages.squadsXSuccess.title,
+          variant: "success",
         });
       } else {
         const defaultMessage =
@@ -91,10 +95,10 @@ export const useTransactionToasts = ({
           ];
 
         toast({
-          title: defaultMessage,
-          description: message || "",
-          variant: "success",
           customAction,
+          description: message || "",
+          title: defaultMessage,
+          variant: "success",
         });
       }
     },
@@ -112,16 +116,16 @@ export const useTransactionToasts = ({
 
       if (isSquadsX && customMessages?.squadsXFailure) {
         toast({
-          title: customMessages.squadsXFailure.title,
           description: customMessages.squadsXFailure.description,
+          title: customMessages.squadsXFailure.title,
           variant: "error",
         });
       } else {
         toast({
-          title: `${transactionType.replace("_", " ")} Error`,
           description: contextString
             ? `${errorMessage}${contextString ? `, ${contextString}` : ""}`
             : errorMessage,
+          title: `${transactionType.replace("_", " ")} Error`,
           variant: "error",
         });
       }
@@ -129,11 +133,32 @@ export const useTransactionToasts = ({
     [toast, transactionType, isSquadsX, customMessages],
   );
 
+  const showWarningToast = useCallback(
+    (message: string | Error, context?: Record<string, unknown>) => {
+      const warningMessage =
+        message instanceof Error ? message.message : message;
+      const contextString = context
+        ? Object.entries(context)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(", ")
+        : "";
+
+      toast({
+        description: contextString
+          ? `${warningMessage}${contextString ? `, ${contextString}` : ""}`
+          : warningMessage,
+        title: `${transactionType.replace("_", " ")} Warning`,
+        variant: "warning",
+      });
+    },
+    [toast, transactionType],
+  );
+
   const showStatusToast = useCallback(
     (message: string) => {
       toast({
-        title: `Checking ${transactionType.toLowerCase()} status`,
         description: message,
+        title: `Checking ${transactionType.toLowerCase()} status`,
         variant: "loading",
       });
     },
@@ -145,10 +170,11 @@ export const useTransactionToasts = ({
   }, [dismissToast]);
 
   return {
-    showStepToast,
-    showSuccessToast,
+    dismiss,
     showErrorToast,
     showStatusToast,
-    dismiss,
+    showStepToast,
+    showSuccessToast,
+    showWarningToast,
   };
 };

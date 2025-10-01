@@ -11,21 +11,21 @@ import { GeolocationAwareDisclaimerProvider } from "./_components/GeolocationAwa
 import { ReferralCodeProvider } from "./_components/ReferralCodeProvider";
 
 const bitsumishiRegular = localFont({
+  display: "swap",
+  preload: true,
   src: "./_fonts/bitsumishi-regular.woff2",
   style: "normal",
   variable: "--font-bitsumishi-regular",
   weight: "400",
-  display: "swap",
-  preload: true,
 });
 
 const classicConsoleNeue = localFont({
+  display: "swap",
+  preload: false,
   src: "./_fonts/classic-console-neue.woff2",
   style: "normal",
   variable: "--font-classic-console-neue",
   weight: "400",
-  display: "swap",
-  preload: false,
 });
 
 export const metadata = {

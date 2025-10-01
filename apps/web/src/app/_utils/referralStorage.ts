@@ -29,10 +29,10 @@ export function setIncomingReferralCode(
   const timestamp = Date.now();
   const expiry = timestamp + expiryDays * 24 * 60 * 60 * 1000;
   const data: ReferralData = {
-    incomingCode: code,
-    timestamp,
     expiry,
+    incomingCode: code,
     isAccepted: true,
+    timestamp,
   };
 
   try {
@@ -141,11 +141,11 @@ export function isSelfReferral(
 
 // Export as namespace for backward compatibility
 export const ReferralStorage = {
-  setIncomingReferralCode,
-  getIncomingReferralCode,
   clearReferralCode,
-  updateExpiry,
-  isExpired,
+  getIncomingReferralCode,
   getReferralMetadata,
+  isExpired,
   isSelfReferral,
+  setIncomingReferralCode,
+  updateExpiry,
 };

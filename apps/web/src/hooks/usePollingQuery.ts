@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
 
 interface PollingQueryOptions<TData, TError = Error>
   extends Omit<UseQueryOptions<TData, TError>, "refetchInterval" | "queryKey"> {
@@ -21,8 +21,8 @@ export function usePollingQuery<TData, TError = Error>(
   } = options;
 
   return useQuery({
-    queryKey,
     queryFn,
+    queryKey,
     refetchInterval: enablePolling ? pollingInterval : false,
     refetchIntervalInBackground: false,
     staleTime,

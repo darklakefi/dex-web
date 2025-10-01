@@ -15,7 +15,7 @@ export function createTransactionError(
   context?: Record<string, unknown>,
 ): TransactionError {
   const message = error instanceof Error ? error.message : String(error);
-  return { message, context };
+  return { context, message };
 }
 
 export function handleAsyncError<T>(

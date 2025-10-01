@@ -5,11 +5,11 @@ export const createTorqueReferralInputSchema = z.object({
 });
 
 export const createTorqueReferralOutputSchema = z.object({
-  success: z.boolean(),
-  referralCode: z.string(),
-  publicKey: z.string().optional(),
-  vanity: z.string().nullable().optional(),
   error: z.string().optional(),
+  publicKey: z.string().optional(),
+  referralCode: z.string(),
+  success: z.boolean(),
+  vanity: z.string().nullable().optional(),
 });
 
 export type CreateTorqueReferralInput = z.infer<

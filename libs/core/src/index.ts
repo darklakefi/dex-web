@@ -85,6 +85,7 @@ export {
   getUserFriendlyErrorMessage,
   isLikelyFalsePositive,
   isRetryableError,
+  isWarningMessage,
   type TransactionErrorInfo,
 } from "./utils/transactionErrorHandling";
 export {

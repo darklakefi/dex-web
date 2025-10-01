@@ -1,13 +1,14 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  LIQUIDITY_CONSTANTS,
   FORM_FIELD_NAMES,
+  LIQUIDITY_CONSTANTS,
 } from "../../_constants/liquidityConstants";
 import {
-  TEST_SCENARIOS,
-  expectValidTransactionPayload,
   createMockFormValues,
+  expectValidTransactionPayload,
+  TEST_SCENARIOS,
 } from "./testUtils";
+
 vi.mock("@dex-web/utils", () => ({
   parseAmount: vi.fn((amount: string) => Number(amount)),
   parseAmountBigNumber: vi.fn((amount: string) => ({
@@ -21,13 +22,15 @@ vi.mock("@dex-web/utils", () => ({
     tokenYAddress: tokenB,
   })),
 }));
+
+import { sortSolanaAddresses } from "@dex-web/utils";
+import { LiquidityError, validateWalletConnection } from "../errorHandling";
 import {
-  createLiquidityTransactionPayload,
   calculateLiquidityAmounts,
+  createLiquidityTransactionPayload,
   determineInputType,
 } from "../liquidityCalculations";
-import { LiquidityError, validateWalletConnection } from "../errorHandling";
-import { sortSolanaAddresses } from "@dex-web/utils";
+
 describe.skip("Liquidity Integration Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,17 +59,17 @@ describe.skip("Liquidity Integration Tests", () => {
       expect(amounts.maxAmountX).toBe(100);
       expect(amounts.maxAmountY).toBe(200);
       const payload = createLiquidityTransactionPayload({
-        tokenAmounts: {
-          tokenAAmount: formValues.tokenAAmount,
-          tokenBAmount: formValues.tokenBAmount,
-        },
+        poolDetails: scenario.poolDetails,
+        publicKey: scenario.publicKey,
+        slippage: LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
         tokenAddresses: {
           tokenAAddress: "tokenA123",
           tokenBAddress: "tokenB456",
         },
-        slippage: LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
-        publicKey: scenario.publicKey,
-        poolDetails: scenario.poolDetails,
+        tokenAmounts: {
+          tokenAAmount: formValues.tokenAAmount,
+          tokenBAmount: formValues.tokenBAmount,
+        },
       });
       expectValidTransactionPayload(payload);
       expect(payload.user).toBe(scenario.publicKey.toBase58());
@@ -75,26 +78,26 @@ describe.skip("Liquidity Integration Tests", () => {
     it("should handle different token configurations correctly", () => {
       const testCases = [
         {
+          amounts: { tokenAAmount: "100", tokenBAmount: "200" },
+          expectedX: 100,
+          expectedY: 200,
           name: "Token A is Token X",
           poolDetails: { tokenXMint: "tokenA123", tokenYMint: "tokenB456" },
           tokenAddresses: {
             tokenAAddress: "tokenA123",
             tokenBAddress: "tokenB456",
           },
-          amounts: { tokenAAmount: "100", tokenBAmount: "200" },
-          expectedX: 100,
-          expectedY: 200,
         },
         {
+          amounts: { tokenAAmount: "100", tokenBAmount: "200" },
+          expectedX: 200,
+          expectedY: 100,
           name: "Token B is Token X",
           poolDetails: { tokenXMint: "tokenB456", tokenYMint: "tokenA123" },
           tokenAddresses: {
             tokenAAddress: "tokenA123",
             tokenBAddress: "tokenB456",
           },
-          amounts: { tokenAAmount: "100", tokenBAmount: "200" },
-          expectedX: 200,
-          expectedY: 100,
         },
       ];
       testCases.forEach((testCase) => {
@@ -116,22 +119,22 @@ describe.skip("Liquidity Integration Tests", () => {
       };
       const testCases = [
         {
-          type: "buy" as const,
-          tokenAAddress: "SOL123",
-          tokenBAddress: "USDC456",
           expected: "tokenX",
-        },
-        {
-          type: "sell" as const,
           tokenAAddress: "SOL123",
           tokenBAddress: "USDC456",
-          expected: "tokenY",
+          type: "buy" as const,
         },
         {
+          expected: "tokenY",
+          tokenAAddress: "SOL123",
+          tokenBAddress: "USDC456",
           type: "sell" as const,
+        },
+        {
+          expected: "tokenX",
           tokenAAddress: "USDC456",
           tokenBAddress: "SOL123",
-          expected: "tokenX",
+          type: "sell" as const,
         },
       ];
       testCases.forEach(({ type, tokenAAddress, tokenBAddress, expected }) => {
@@ -162,11 +165,11 @@ describe.skip("Liquidity Integration Tests", () => {
       });
       expect(() =>
         createLiquidityTransactionPayload({
-          tokenAmounts: { tokenAAmount: "100", tokenBAmount: "200" },
-          tokenAddresses: { tokenAAddress: "invalid", tokenBAddress: "valid" },
-          slippage: "0.5",
-          publicKey: TEST_SCENARIOS.VALID_TRANSACTION.publicKey,
           poolDetails: TEST_SCENARIOS.VALID_TRANSACTION.poolDetails,
+          publicKey: TEST_SCENARIOS.VALID_TRANSACTION.publicKey,
+          slippage: "0.5",
+          tokenAddresses: { tokenAAddress: "invalid", tokenBAddress: "valid" },
+          tokenAmounts: { tokenAAmount: "100", tokenBAmount: "200" },
         }),
       ).toThrow("Invalid token addresses after sorting");
     });
@@ -175,14 +178,14 @@ describe.skip("Liquidity Integration Tests", () => {
       const scenario = TEST_SCENARIOS.VALID_TRANSACTION;
       validSlippages.forEach((slippage) => {
         const payload = createLiquidityTransactionPayload({
-          tokenAmounts: { tokenAAmount: "100", tokenBAmount: "200" },
+          poolDetails: scenario.poolDetails,
+          publicKey: scenario.publicKey,
+          slippage,
           tokenAddresses: {
             tokenAAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
             tokenBAddress: "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
           },
-          slippage,
-          publicKey: scenario.publicKey,
-          poolDetails: scenario.poolDetails,
+          tokenAmounts: { tokenAAmount: "100", tokenBAmount: "200" },
         });
         expect(payload.slippage).toBe(Number(slippage));
         expect(payload.slippage).toBeGreaterThan(0);
@@ -218,17 +221,17 @@ describe.skip("Liquidity Integration Tests", () => {
   describe("Constants Integration", () => {
     it("should use constants consistently across functions", () => {
       const payload = createLiquidityTransactionPayload({
-        tokenAmounts: {
-          tokenAAmount: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
-          tokenBAmount: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
-        },
+        poolDetails: TEST_SCENARIOS.VALID_TRANSACTION.poolDetails,
+        publicKey: TEST_SCENARIOS.VALID_TRANSACTION.publicKey,
+        slippage: LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
         tokenAddresses: {
           tokenAAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
           tokenBAddress: "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
         },
-        slippage: LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
-        publicKey: TEST_SCENARIOS.VALID_TRANSACTION.publicKey,
-        poolDetails: TEST_SCENARIOS.VALID_TRANSACTION.poolDetails,
+        tokenAmounts: {
+          tokenAAmount: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
+          tokenBAmount: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
+        },
       });
       expect(payload.maxAmountX).toBe(0);
       expect(payload.maxAmountY).toBe(0);

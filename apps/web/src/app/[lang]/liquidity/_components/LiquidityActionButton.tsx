@@ -3,20 +3,25 @@
 import { Button } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
+import { type AnyFormApi, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { liquidityPageParsers } from "../../../_utils/searchParams";
 import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
-import type { PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
+import type {
+  LiquidityFormValues,
+  PoolDetails,
+  TokenAccountsData,
+} from "../_types/liquidity.types";
 import {
   type ButtonState,
   getButtonMessage,
   getLiquidityButtonState,
 } from "../_utils/liquidityButtonState";
 
-interface LiquidityActionButtonProps {
-  form: any; // TODO: Fix this type properly
+interface LiquidityActionButtonProps<T extends AnyFormApi> {
+  form: T;
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
@@ -30,7 +35,7 @@ interface LiquidityActionButtonProps {
 
 const serialize = createSerializer(liquidityPageParsers);
 
-export function LiquidityActionButton({
+export function LiquidityActionButton<T extends AnyFormApi>({
   form,
   publicKey,
   buyTokenAccount,
@@ -41,12 +46,30 @@ export function LiquidityActionButton({
   isPoolLoading,
   isTokenAccountsLoading,
   onSubmit,
-}: LiquidityActionButtonProps) {
+}: LiquidityActionButtonProps<T>) {
   const router = useRouter();
   const { wallet, connected } = useWallet();
 
-  const formValues = form.state.values;
-  const isCalculating = form.state.isSubmitting;
+  const tokenAAmount = useStore(
+    form.store,
+    (state) => state.values.tokenAAmount,
+  );
+  const tokenBAmount = useStore(
+    form.store,
+    (state) => state.values.tokenBAmount,
+  );
+  const initialPrice = useStore(
+    form.store,
+    (state) => state.values.initialPrice,
+  );
+  const formValues: LiquidityFormValues = {
+    initialPrice,
+    tokenAAmount,
+    tokenBAmount,
+  };
+  const hasAnyAmount =
+    isPositiveNumber(tokenAAmount) || isPositiveNumber(tokenBAmount);
+  const isFormSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   const validation = useLiquidityValidation({
     buyTokenAccount,
@@ -59,8 +82,10 @@ export function LiquidityActionButton({
   });
 
   const buttonState = getLiquidityButtonState({
+    hasAnyAmount,
     hasWallet: !!publicKey,
-    isCalculating,
+    isCalculating: isFormSubmitting,
+    isFormSubmitting,
     isPoolLoading,
     isTokenAccountsLoading,
     poolDetails,
@@ -68,9 +93,6 @@ export function LiquidityActionButton({
   });
 
   const buttonMessage = getButtonMessage(buttonState);
-
-  const formCanSubmit = form.state.canSubmit;
-  const formIsSubmitting = form.state.isSubmitting;
 
   const handleButtonClick = () => {
     if (shouldShowTransactionPreview(validation)) {
@@ -142,19 +164,7 @@ export function LiquidityActionButton({
     );
   }
 
-  const enhancedButtonState = getLiquidityButtonState({
-    formCanSubmit,
-    hasWallet: !!publicKey,
-    isCalculating,
-    isFormSubmitting: formIsSubmitting,
-    isPoolLoading,
-    isTokenAccountsLoading,
-    poolDetails,
-    validation,
-  });
-
-  const enhancedButtonMessage = getButtonMessage(enhancedButtonState);
-  const enhancedButtonProps = getButtonProps(enhancedButtonState);
+  const enhancedButtonProps = getButtonProps(buttonState);
 
   return (
     <>
@@ -164,24 +174,27 @@ export function LiquidityActionButton({
         className={`w-full cursor-pointer py-3 leading-6 transition-all duration-200 ${
           enhancedButtonProps.isDisabled ? "opacity-60" : "hover:opacity-90"
         }`}
-        data-button-state={enhancedButtonState}
+        data-button-state={buttonState}
         data-testid="liquidity-action-button"
         disabled={enhancedButtonProps.isDisabled}
         loading={enhancedButtonProps.isLoading}
         onClick={handleButtonClick}
         variant={enhancedButtonProps.variant}
       >
-        {enhancedButtonMessage}
+        {buttonMessage}
       </Button>
 
-      {shouldShowSecurityWarning(validation, enhancedButtonState) && (
-        <SecurityWarning
-          buttonState={enhancedButtonState}
-          validation={validation}
-        />
+      {shouldShowSecurityWarning(validation, buttonState) && (
+        <SecurityWarning buttonState={buttonState} validation={validation} />
       )}
     </>
   );
+}
+
+function isPositiveNumber(value: string): boolean {
+  if (!value) return false;
+  const parsed = Number.parseFloat(value.replace(/,/g, ""));
+  return Number.isFinite(parsed) && parsed > 0;
 }
 
 function _getButtonVariant(

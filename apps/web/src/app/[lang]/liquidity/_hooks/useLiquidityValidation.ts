@@ -1,13 +1,13 @@
 "use client";
 
 import { convertToDecimal } from "@dex-web/utils";
+import BigNumber from "bignumber.js";
+import { useMemo } from "react";
 import type {
   LiquidityFormValues,
   PoolDetails,
   TokenAccountsData,
 } from "../_types/liquidity.types";
-import { useMemo } from "react";
-import BigNumber from "bignumber.js";
 
 export interface ValidationState {
   errors: {
@@ -98,11 +98,11 @@ export function useLiquidityValidation({
       isValid && hasAmounts && hasWallet && !hasInsufficientBalance;
 
     return {
-      errors,
-      isValid,
-      hasInsufficientBalance,
-      hasAmounts,
       canSubmit,
+      errors,
+      hasAmounts,
+      hasInsufficientBalance,
+      isValid,
     };
   }, [
     formValues,

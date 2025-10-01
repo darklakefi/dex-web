@@ -1,5 +1,6 @@
 "use server";
 
+import { toRawUnits } from "@dex-web/utils";
 import { type Connection, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import { getHelius } from "../../getHelius";
@@ -8,7 +9,6 @@ import type {
   GetSwapRateOutput,
 } from "../../schemas/swaps/getSwapRate.schema";
 import type { Token } from "../../schemas/tokens/token.schema";
-import { toRawUnits } from "@dex-web/utils";
 import {
   EXCHANGE_PROGRAM_ID,
   getPoolAccount,
@@ -101,22 +101,22 @@ async function getAmmConfigAccount(
     );
 
     const ammConfig: AmmConfig = {
-      trade_fee_rate: decodedData.trade_fee_rate || 0,
-      protocol_fee_rate: decodedData.protocol_fee_rate || 0,
-      index: decodedData.index || 0,
       creator:
         decodedData.creator ||
-        new PublicKey("11111111111111111111111111111112"),
-      protocol_fee_collector:
-        decodedData.protocol_fee_collector ||
         new PublicKey("11111111111111111111111111111112"),
       fund_fee_collector:
         decodedData.fund_fee_collector ||
         new PublicKey("11111111111111111111111111111112"),
+      index: decodedData.index || 0,
+      padding: decodedData.padding || [],
+      protocol_fee_collector:
+        decodedData.protocol_fee_collector ||
+        new PublicKey("11111111111111111111111111111112"),
+      protocol_fee_rate: decodedData.protocol_fee_rate || 0,
       protocol_owner:
         decodedData.protocol_owner ||
         new PublicKey("11111111111111111111111111111112"),
-      padding: decodedData.padding || [],
+      trade_fee_rate: decodedData.trade_fee_rate || 0,
     };
 
     return ammConfig;

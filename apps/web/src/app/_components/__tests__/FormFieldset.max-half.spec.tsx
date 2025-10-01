@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FormFieldset } from "../FormFieldset";
 
 vi.mock("@dex-web/orpc", () => ({
@@ -11,8 +11,8 @@ vi.mock("@dex-web/orpc", () => ({
     tokens: {
       getTokenPrice: {
         queryOptions: vi.fn(() => ({
-          queryKey: ["tokenPrice", "token-a"],
           queryFn: () => Promise.resolve({ price: 1.5 }),
+          queryKey: ["tokenPrice", "token-a"],
           staleTime: 5000,
         })),
       },
@@ -27,8 +27,8 @@ vi.mock("../../../_utils/useFormatPrice", () => ({
 const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {
-      queries: { retry: false },
       mutations: { retry: false },
+      queries: { retry: false },
     },
   });
 
@@ -53,12 +53,12 @@ const renderWithWrapper = (props: Record<string, unknown> = {}) => {
 
   const defaultProps = {
     name: "tokenAAmount",
-    value: "",
-    onChange: vi.fn(),
     onBlur: vi.fn(),
-    tokenAccount: mockTokenAccount,
+    onChange: vi.fn(),
     onClearPendingCalculations: vi.fn(),
     onHalfMaxClick: vi.fn(),
+    tokenAccount: mockTokenAccount,
+    value: "",
     ...props,
   };
 
@@ -78,8 +78,8 @@ const renderWithWrapper = (props: Record<string, unknown> = {}) => {
   return {
     ...render(<FormFieldset {...defaultProps} />, { wrapper }),
     onUrlUpdate,
-    queryClient,
     props: defaultProps,
+    queryClient,
   };
 };
 
@@ -485,12 +485,12 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
 
       const newProps = {
         name: "tokenBAmount",
-        value: "",
-        onChange: mockOnChange,
         onBlur: vi.fn(),
-        tokenAccount: mockTokenAccountSmall,
+        onChange: mockOnChange,
         onClearPendingCalculations: vi.fn(),
         onHalfMaxClick: vi.fn(),
+        tokenAccount: mockTokenAccountSmall,
+        value: "",
       };
 
       rerender(<FormFieldset {...newProps} />);
@@ -516,14 +516,14 @@ describe.skip("FormFieldset Max/Half Functionality", () => {
       });
 
       const loadingProps = {
+        isLoading: true,
         name: "tokenAAmount",
-        value: "",
-        onChange: vi.fn(),
         onBlur: vi.fn(),
-        tokenAccount: mockTokenAccount,
+        onChange: vi.fn(),
         onClearPendingCalculations: vi.fn(),
         onHalfMaxClick: vi.fn(),
-        isLoading: true,
+        tokenAccount: mockTokenAccount,
+        value: "",
       };
 
       rerender(<FormFieldset {...loadingProps} />);

@@ -39,10 +39,10 @@ export function useStreamingTransactionStatus({
       if (!trackingId) return null;
 
       const mockStatus: TransactionStreamData = {
-        signature: trackingId,
-        status: "pending",
         confirmations: 0,
         lastUpdate: Date.now(),
+        signature: trackingId,
+        status: "pending",
       };
 
       return mockStatus;
@@ -52,15 +52,15 @@ export function useStreamingTransactionStatus({
     `/api/streams/transactions/${trackingId}${tradeId ? `?tradeId=${tradeId}` : ""}`,
     queryKey,
     {
-      priority: "critical",
       enableFallback: true,
+      priority: "critical",
     },
   );
 
   const streamingQuery = useStreamingQuery(queryKey, fetchTransactionStatus, {
-    priority: "critical",
-    enableStreaming: enableStreaming && !enableSSE,
     enabled: !!trackingId,
+    enableStreaming: enableStreaming && !enableSSE,
+    priority: "critical",
   });
 
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
@@ -75,23 +75,23 @@ export function useStreamingTransactionStatus({
 
     if (successStates.includes(status) && onSuccess) {
       onSuccess({
-        status,
         data: transactionData,
+        status,
       });
     }
 
     if (failStates.includes(status) && onFailure) {
       onFailure({
-        status,
         data: transactionData,
         error: transactionData.error,
+        status,
       });
     }
 
     if (status === "finalized" && onFinalized) {
       onFinalized({
-        status,
         data: transactionData,
+        status,
       });
     }
   }
@@ -103,23 +103,23 @@ export function useStreamingTransactionStatus({
       transactionData.status === "finalized");
 
   return {
-    status: transactionData?.status || "unknown",
-    signature: transactionData?.signature || trackingId || "",
     confirmations: transactionData?.confirmations || 0,
-    lastUpdate: transactionData?.lastUpdate || 0,
     error: transactionData?.error || activeQuery.error?.message,
-    isLoading: activeQuery.isLoading && !transactionData,
-    isStreaming: enableSSE ? sseQuery.isStreaming : streamingQuery.isStreaming,
-    isFallback: enableSSE ? sseQuery.isFallback : false,
-    isTerminal,
-    isSuccess: transactionData
-      ? successStates.includes(transactionData.status)
-      : false,
     isFailed: transactionData
       ? failStates.includes(transactionData.status)
       : false,
+    isFallback: enableSSE ? sseQuery.isFallback : false,
     isFinalized: transactionData?.status === "finalized",
+    isLoading: activeQuery.isLoading && !transactionData,
+    isStreaming: enableSSE ? sseQuery.isStreaming : streamingQuery.isStreaming,
+    isSuccess: transactionData
+      ? successStates.includes(transactionData.status)
+      : false,
+    isTerminal,
+    lastUpdate: transactionData?.lastUpdate || 0,
     refetch: activeQuery.refetch,
+    signature: transactionData?.signature || trackingId || "",
+    status: transactionData?.status || "unknown",
   };
 }
 
@@ -144,10 +144,10 @@ export function useStreamingMultipleTransactionStatus({
 
     // Mock implementation - in real scenario, this would fetch all transaction statuses
     return allTrackingIds.map((trackingId) => ({
-      signature: trackingId,
-      status: "pending" as const,
       confirmations: 0,
       lastUpdate: Date.now(),
+      signature: trackingId,
+      status: "pending" as const,
     }));
   };
 
@@ -155,9 +155,9 @@ export function useStreamingMultipleTransactionStatus({
     queryKey,
     fetchMultipleTransactionStatus,
     {
-      priority: "critical",
-      enableStreaming: enableStreaming && !enableSSE,
       enabled: allTrackingIds.length > 0,
+      enableStreaming: enableStreaming && !enableSSE,
+      priority: "critical",
     },
   );
 
@@ -174,35 +174,35 @@ export function useStreamingMultipleTransactionStatus({
   ).length;
 
   return {
+    isLoading: streamingQuery.isLoading,
+    isStreaming: streamingQuery.isStreaming,
+    summary: {
+      completed: successCount + failedCount,
+      failed: failedCount,
+      isAllComplete: pendingCount === 0,
+      isAllSuccess: successCount === totalTransactions,
+      isAnyFailed: failedCount > 0,
+      pending: pendingCount,
+      success: successCount,
+      total: totalTransactions,
+    },
     transactions: transactionData.map((data, _index) => ({
-      status: data.status,
-      signature: data.signature,
       confirmations: data.confirmations,
-      lastUpdate: data.lastUpdate,
       error: data.error,
+      isFailed: ["failed", "rejected"].includes(data.status),
+      isFallback: false,
+      isFinalized: data.status === "finalized",
       isLoading: false,
       isStreaming: streamingQuery.isStreaming,
-      isFallback: false,
+      isSuccess: ["confirmed", "finalized"].includes(data.status),
       isTerminal: ["confirmed", "finalized", "failed", "rejected"].includes(
         data.status,
       ),
-      isSuccess: ["confirmed", "finalized"].includes(data.status),
-      isFailed: ["failed", "rejected"].includes(data.status),
-      isFinalized: data.status === "finalized",
+      lastUpdate: data.lastUpdate,
       refetch: streamingQuery.refetch,
+      signature: data.signature,
+      status: data.status,
     })),
-    summary: {
-      total: totalTransactions,
-      success: successCount,
-      failed: failedCount,
-      pending: pendingCount,
-      completed: successCount + failedCount,
-      isAllComplete: pendingCount === 0,
-      isAnyFailed: failedCount > 0,
-      isAllSuccess: successCount === totalTransactions,
-    },
-    isLoading: streamingQuery.isLoading,
-    isStreaming: streamingQuery.isStreaming,
   };
 }
 
@@ -228,15 +228,15 @@ export function useEnhancedTransactionMonitoring({
   const _queryClient = useQueryClient();
 
   const streamResult = useStreamingTransactionStatus({
-    trackingId,
-    tradeId,
-    enableStreaming: true,
     enableSSE: true,
+    enableStreaming: true,
+    onFailure,
     onStatusUpdate: (status, _data) => {
       onStatusUpdate?.(status, 1);
     },
     onSuccess,
-    onFailure,
+    trackingId,
+    tradeId,
   });
 
   const timeoutMs = maxRetries * retryDelay;
@@ -251,7 +251,7 @@ export function useEnhancedTransactionMonitoring({
 
   return {
     ...streamResult,
-    isTimedOut,
     checkTransactionStatus: streamResult.refetch,
+    isTimedOut,
   };
 }

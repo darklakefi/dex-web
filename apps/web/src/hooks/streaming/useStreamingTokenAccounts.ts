@@ -1,13 +1,13 @@
 "use client";
 
+import type { TokenAccountsData, UseTokenAccountsReturn } from "@dex-web/core";
+import { tanstackClient } from "@dex-web/orpc";
 import type { PublicKey } from "@solana/web3.js";
 import type { QueryFunctionContext } from "@tanstack/react-query";
 import { QueryClient as QueryClientClass } from "@tanstack/react-query";
-import { tanstackClient } from "@dex-web/orpc";
-import { useStreamingQuery } from "./useStreamingQuery";
-import { useServerSentEvents } from "./useServerSentEvents";
 import type { DeFiStreamConfig } from "./types";
-import type { UseTokenAccountsReturn, TokenAccountsData } from "@dex-web/core";
+import { useServerSentEvents } from "./useServerSentEvents";
+import { useStreamingQuery } from "./useStreamingQuery";
 
 interface UseStreamingTokenAccountsParams {
   publicKey: PublicKey | null;
@@ -41,19 +41,19 @@ export function useStreamingTokenAccounts({
     : "normal";
 
   const buyTokenQuery = useTokenAccountStream({
+    enableSSE,
+    enableStreaming,
     mint: tokenAAddress,
     ownerAddress,
     priority,
-    enableStreaming,
-    enableSSE,
   });
 
   const sellTokenQuery = useTokenAccountStream({
+    enableSSE,
+    enableStreaming,
     mint: tokenBAddress,
     ownerAddress,
     priority,
-    enableStreaming,
-    enableSSE,
   });
 
   const isRefreshingBuy = buyTokenQuery.isLoading && !!buyTokenQuery.data;
@@ -61,19 +61,19 @@ export function useStreamingTokenAccounts({
 
   return {
     buyTokenAccount: buyTokenQuery.data ?? undefined,
-    sellTokenAccount: sellTokenQuery.data ?? undefined,
-    refetchBuyTokenAccount: buyTokenQuery.refetch,
-    refetchSellTokenAccount: sellTokenQuery.refetch,
-    isLoadingBuy: buyTokenQuery.isLoading,
-    isLoadingSell: sellTokenQuery.isLoading,
-    isRefreshingBuy,
-    isRefreshingSell,
     errorBuy: buyTokenQuery.error,
     errorSell: sellTokenQuery.error,
+    isLoadingBuy: buyTokenQuery.isLoading,
+    isLoadingSell: sellTokenQuery.isLoading,
+    isRealtime: !!publicKey && !!tokenAAddress && !!tokenBAddress,
     isRealtimeBuy: !!publicKey && !!tokenAAddress,
     isRealtimeSell: !!publicKey && !!tokenBAddress,
-    isRealtime: !!publicKey && !!tokenAAddress && !!tokenBAddress,
+    isRefreshingBuy,
+    isRefreshingSell,
     isStreaming: enableStreaming,
+    refetchBuyTokenAccount: buyTokenQuery.refetch,
+    refetchSellTokenAccount: sellTokenQuery.refetch,
+    sellTokenAccount: sellTokenQuery.data ?? undefined,
     streamType: enableSSE ? "sse" : "polling",
   };
 }
@@ -98,9 +98,9 @@ function useTokenAccountStream({
 
     const context: QueryFunctionContext = {
       client: new QueryClientClass(),
+      meta: undefined,
       queryKey,
       signal: new AbortController().signal,
-      meta: undefined,
     };
 
     return tanstackClient.helius.getTokenAccounts
@@ -117,25 +117,25 @@ function useTokenAccountStream({
     `/api/streams/token-accounts/${ownerAddress}/${mint}`,
     queryKey,
     {
-      priority,
       enableFallback: true,
+      priority,
     },
   );
 
   const streamingQuery = useStreamingQuery(queryKey, fetchTokenAccount, {
-    priority,
-    enableStreaming: enableStreaming && !enableSSE,
     enabled: !!mint && !!ownerAddress,
+    enableStreaming: enableStreaming && !enableSSE,
+    priority,
   });
 
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
 
   return {
     data: activeQuery.data,
-    isLoading: activeQuery.isLoading,
     error: activeQuery.error,
-    refetch: activeQuery.refetch,
+    isLoading: activeQuery.isLoading,
     isStreaming: enableSSE ? sseQuery.isStreaming : streamingQuery.isStreaming,
+    refetch: activeQuery.refetch,
   };
 }
 
@@ -151,11 +151,11 @@ export function useEnhancedRealtimeTokenAccounts({
   hasRecentTransaction?: boolean;
 }) {
   return useStreamingTokenAccounts({
+    enableSSE: false,
+    enableStreaming: true,
+    hasRecentTransaction,
     publicKey,
     tokenAAddress,
     tokenBAddress,
-    hasRecentTransaction,
-    enableStreaming: true,
-    enableSSE: false,
   });
 }

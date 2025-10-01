@@ -2,13 +2,13 @@
 
 import { useCallback } from "react";
 import {
-  createSwapTracker,
   createLiquidityTracker,
-  standardizeErrorTracking,
-  type SwapTrackingParams,
+  createSwapTracker,
   type LiquidityTrackingParams,
-  type TransactionTracker,
+  type SwapTrackingParams,
+  standardizeErrorTracking,
   type TransactionStatus,
+  type TransactionTracker,
 } from "../utils/analyticsHelpers";
 
 export interface UseSwapTrackingParams {
@@ -91,13 +91,13 @@ export const useSwapTracking = ({
   );
 
   return {
-    tracker,
+    trackConfirmed,
     trackError,
+    tracker,
+    trackFailed,
     trackInitiated,
     trackSigned,
     trackSubmitted,
-    trackConfirmed,
-    trackFailed,
   };
 };
 
@@ -147,12 +147,12 @@ export const useLiquidityTracking = ({
   );
 
   return {
-    tracker,
+    trackConfirmed,
     trackError,
+    tracker,
+    trackFailed,
     trackInitiated,
     trackSigned,
     trackSubmitted,
-    trackConfirmed,
-    trackFailed,
   };
 };

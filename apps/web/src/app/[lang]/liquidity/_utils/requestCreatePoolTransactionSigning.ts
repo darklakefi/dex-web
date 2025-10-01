@@ -1,5 +1,6 @@
 import {
   getUserFriendlyErrorMessage,
+  isWarningMessage,
   signTransactionWithRecovery,
 } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
@@ -80,11 +81,12 @@ export async function requestCreatePoolTransactionSigning({
     dismissToast();
 
     const userMessage = getUserFriendlyErrorMessage(error);
+    const isWarning = isWarningMessage(error);
 
     toast({
       description: userMessage,
-      title: "Signing Error",
-      variant: "error",
+      title: isWarning ? "Transaction Warning" : "Signing Error",
+      variant: isWarning ? "warning" : "error",
     });
     setCreateStep(0);
   }

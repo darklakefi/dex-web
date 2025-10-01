@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 import { TokenList } from "../../[lang]/(swap)/_components/TokenList";
+
 const tokens = [
   {
     address: "So11111111111111111111111111111111111111112",

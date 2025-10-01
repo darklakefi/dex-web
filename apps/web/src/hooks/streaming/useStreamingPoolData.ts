@@ -1,10 +1,10 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import { tanstackClient } from "@dex-web/orpc";
-import { useStreamingQuery } from "./useStreamingQuery";
+import { useQueryClient } from "@tanstack/react-query";
+import type { DeFiStreamConfig, PoolStreamData } from "./types";
 import { useServerSentEvents } from "./useServerSentEvents";
-import type { PoolStreamData, DeFiStreamConfig } from "./types";
+import { useStreamingQuery } from "./useStreamingQuery";
 
 interface UseStreamingPoolDataParams {
   tokenXMint: string;
@@ -32,9 +32,9 @@ export function useStreamingPoolData({
     });
     const result = await queryOptions.queryFn({
       client: queryClient,
+      meta: undefined,
       queryKey: queryOptions.queryKey,
       signal: new AbortController().signal,
-      meta: undefined,
     });
 
     return result ? transformPoolDataToStream(result) : null;
@@ -44,31 +44,31 @@ export function useStreamingPoolData({
     `/api/streams/pools/${poolKey}`,
     queryKey,
     {
-      priority,
       enableFallback: true,
+      priority,
     },
   );
 
   const streamingQuery = useStreamingQuery(queryKey, fetchPoolData, {
-    priority,
     enableStreaming: enableStreaming && !enableSSE,
+    priority,
   });
 
   const activeQuery = enableSSE ? sseQuery : streamingQuery;
 
   return {
-    poolDetails: activeQuery.data,
-    isLoading: activeQuery.isLoading,
     error: activeQuery.error,
-    isStreaming: enableSSE ? sseQuery.isStreaming : streamingQuery.isStreaming,
+    isLoading: activeQuery.isLoading,
     isRealtime: true,
+    isStreaming: enableSSE ? sseQuery.isStreaming : streamingQuery.isStreaming,
     isSubscribed: enableSSE
       ? sseQuery.isStreaming
       : streamingQuery.isSubscribed,
+    lastUpdate: activeQuery.data?.lastUpdate || 0,
+    poolDetails: activeQuery.data,
     priority,
     refetch: activeQuery.refetch,
     streamType: enableSSE ? "sse" : "polling",
-    lastUpdate: activeQuery.data?.lastUpdate || 0,
   };
 }
 
@@ -76,11 +76,11 @@ function transformPoolDataToStream(
   poolDetails: Record<string, unknown>,
 ): PoolStreamData {
   return {
-    tokenXReserve: String(poolDetails?.tokenXReserve || "0"),
-    tokenYReserve: String(poolDetails?.tokenYReserve || "0"),
-    lpSupply: String(poolDetails?.lpSupply || "0"),
     fee: String(poolDetails?.fee || "0"),
     lastUpdate: Date.now(),
+    lpSupply: String(poolDetails?.lpSupply || "0"),
+    tokenXReserve: String(poolDetails?.tokenXReserve || "0"),
+    tokenYReserve: String(poolDetails?.tokenYReserve || "0"),
   };
 }
 
@@ -97,10 +97,10 @@ export function useHighFrequencyPoolData({
   tokenYMint: string;
 }) {
   return useStreamingPoolData({
+    enableSSE: true,
+    enableStreaming: true,
+    priority: "high",
     tokenXMint,
     tokenYMint,
-    priority: "high",
-    enableStreaming: true,
-    enableSSE: true,
   });
 }

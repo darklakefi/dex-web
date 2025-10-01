@@ -1,35 +1,36 @@
+import { PublicKey } from "@solana/web3.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { PublicKey } from "@solana/web3.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../../_utils/constants";
+
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
   usePathname: () => "/liquidity",
+  useRouter: () => ({ push: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("../../../../hooks/useAnalytics", () => ({
   useAnalytics: () => ({
-    trackLiquidity: vi.fn(),
     trackError: vi.fn(),
+    trackLiquidity: vi.fn(),
   }),
 }));
 vi.mock("@dex-web/orpc", () => ({
   client: {
     liquidity: {
+      checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
+        error: null,
+        status: "finalized",
+      }),
       createLiquidityTransaction: vi.fn().mockResolvedValue({
         success: true,
         transaction: "mock-transaction",
-      }),
-      checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
-        status: "finalized",
-        error: null,
       }),
       getAddLiquidityReview: vi.fn().mockResolvedValue({
         tokenAmount: 50,
@@ -47,9 +48,9 @@ vi.mock("@dex-web/orpc", () => ({
     liquidity: {
       createLiquidityTransaction: {
         useMutation: vi.fn().mockReturnValue({
-          mutate: vi.fn(),
-          isLoading: false,
           error: null,
+          isLoading: false,
+          mutate: vi.fn(),
         }),
       },
     },
@@ -77,15 +78,15 @@ vi.mock("@dex-web/orpc", () => ({
 }));
 vi.mock("@dex-web/core", () => ({
   ERROR_MESSAGES: {
-    MISSING_WALLET_INFO: "Wallet not connected",
     MISSING_WALLET: "No wallet available",
+    MISSING_WALLET_INFO: "Wallet not connected",
   },
   useLiquidityTracking: () => ({
+    trackConfirmed: vi.fn(),
+    trackError: vi.fn(),
+    trackFailed: vi.fn(),
     trackInitiated: vi.fn(),
     trackSigned: vi.fn(),
-    trackConfirmed: vi.fn(),
-    trackFailed: vi.fn(),
-    trackError: vi.fn(),
   }),
   useTokenAccounts: () => ({
     buyTokenAccount: null,
@@ -96,9 +97,9 @@ vi.mock("@dex-web/core", () => ({
   }),
   useTransactionToasts: () => ({
     showErrorToast: vi.fn(),
-    showSuccessToast: vi.fn(),
-    showStepToast: vi.fn(),
     showStatusToast: vi.fn(),
+    showStepToast: vi.fn(),
+    showSuccessToast: vi.fn(),
   }),
 }));
 const mockWallet: {
@@ -107,29 +108,29 @@ const mockWallet: {
   signTransaction: ReturnType<typeof vi.fn>;
 } = {
   publicKey: null,
-  wallet: null,
   signTransaction: vi.fn(),
+  wallet: null,
 };
 vi.mock("@solana/wallet-adapter-react", () => ({
   useWallet: () => mockWallet,
 }));
 vi.mock("../../../../hooks/useRealtimePoolData", () => ({
   useRealtimePoolData: () => ({
-    poolDetails: null,
     isRealtime: false,
+    poolDetails: null,
   }),
 }));
 vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
   useRealtimeTokenAccounts: () => ({
     buyTokenAccount: null,
-    sellTokenAccount: null,
-    refetchBuyTokenAccount: vi.fn(),
-    refetchSellTokenAccount: vi.fn(),
     isLoadingBuy: false,
     isLoadingSell: false,
+    isRealtime: false,
     isRefreshingBuy: false,
     isRefreshingSell: false,
-    isRealtime: false,
+    refetchBuyTokenAccount: vi.fn(),
+    refetchSellTokenAccount: vi.fn(),
+    sellTokenAccount: null,
   }),
 }));
 vi.mock("../../../_components/SkeletonTokenInput", () => ({
@@ -137,12 +138,14 @@ vi.mock("../../../_components/SkeletonTokenInput", () => ({
     <div data-testid="skeleton-token-input">Loading...</div>
   ),
 }));
+
 import { LiquidityForm } from "../LiquidityForm";
+
 const createQueryClient = () =>
   new QueryClient({
     defaultOptions: {
-      queries: { retry: false },
       mutations: { retry: false },
+      queries: { retry: false },
     },
   });
 const renderWithWrapper = (
@@ -156,13 +159,13 @@ const renderWithWrapper = (
     liquidity: {
       squadsX: {
         responseStatus: {
-          failed: {
-            description: "Failed description",
-            title: "Failed title",
-          },
           confirmed: {
             description: "Success description",
             title: "Success title",
+          },
+          failed: {
+            description: "Failed description",
+            title: "Failed title",
           },
         },
       },

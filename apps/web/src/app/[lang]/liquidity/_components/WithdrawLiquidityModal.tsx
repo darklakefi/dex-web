@@ -2,6 +2,7 @@
 
 import {
   getUserFriendlyErrorMessage,
+  isWarningMessage,
   signTransactionWithRecovery,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
@@ -348,13 +349,18 @@ export function WithdrawLiquidityModal({
       const squads = isSquadsX(wallet);
 
       const userMessage = getUserFriendlyErrorMessage(error);
+      const isWarning = isWarningMessage(error);
 
       toast({
         description: squads
           ? `Transaction failed in Squads. Please review the proposal in the Squads app.`
           : userMessage,
-        title: squads ? "Proposal failed" : "Transaction Error",
-        variant: "error",
+        title: squads
+          ? "Proposal failed"
+          : isWarning
+            ? "Transaction Warning"
+            : "Transaction Error",
+        variant: squads ? "error" : isWarning ? "warning" : "error",
       });
       resetWithdrawState();
     }

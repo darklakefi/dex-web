@@ -143,3 +143,19 @@ export function getUserFriendlyErrorMessage(error: unknown): string {
     "An unknown error occurred during the transaction."
   );
 }
+
+export function isWarningMessage(error: unknown): boolean {
+  if (error && typeof error === "object" && "code" in error) {
+    const orpcError = error as any;
+
+    // SIMULATION_ERROR with recoverable flag should be treated as warning
+    if (orpcError.code === "SIMULATION_ERROR" && orpcError.data?.recoverable) {
+      return true;
+    }
+  }
+
+  const analysis = analyzeTransactionError(error);
+
+  // Recoverable errors (canRecover) should be treated as warnings
+  return analysis.canRecover;
+}

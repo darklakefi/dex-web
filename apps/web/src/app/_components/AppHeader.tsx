@@ -15,7 +15,7 @@ export const AppHeader = () => {
       button={
         <Suspense
           fallback={
-            <Button variant="secondary" loading>
+            <Button loading variant="secondary">
               Loading...
             </Button>
           }
