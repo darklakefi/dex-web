@@ -61,7 +61,7 @@ export function PoolDataProvider({
       poolDataResult.isLoading ||
       tokenAccountsData.isLoadingBuy ||
       tokenAccountsData.isLoadingSell,
-    poolDetails: poolDataResult.data as any,
+    poolDetails: poolDataResult.data as PoolDetails | null,
     tokenAccountsData,
     tokenXMint,
     tokenYMint,

@@ -69,7 +69,7 @@ export function getCreatePoolFormButtonMessage({
         sellTokenAcc.amount || 0,
         sellTokenAcc.decimals || 0,
       );
-      if (BigNumber(sellAmount).gt(maxBalance)) {
+      if (BigNumber(sellAmount).gt(maxBalance.toString())) {
         return BUTTON_MESSAGE.INSUFFICIENT_BALANCE;
       }
     }
@@ -82,7 +82,7 @@ export function getCreatePoolFormButtonMessage({
         buyTokenAcc.amount || 0,
         buyTokenAcc.decimals || 0,
       );
-      if (BigNumber(buyAmount).gt(maxBalance)) {
+      if (BigNumber(buyAmount).gt(maxBalance.toString())) {
         return BUTTON_MESSAGE.INSUFFICIENT_BALANCE;
       }
     }

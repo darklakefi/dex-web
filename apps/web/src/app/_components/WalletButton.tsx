@@ -23,7 +23,7 @@ export function WalletButton({
   ...props
 }: WalletButtonProps) {
   const router = useRouter();
-  const { disconnect, wallet, connected } = useWallet();
+  const { disconnect, wallet, connected, publicKey } = useWallet();
   const { invalidateAll } = useInvalidateWalletCache();
   const {
     data: adapter,
@@ -46,6 +46,8 @@ export function WalletButton({
   }
 
   const isWalletDisconnected = !wallet || !connected;
+  const displayAddress = address || publicKey?.toString() || "";
+  const hasValidAddress = displayAddress.length > 0;
 
   if (
     !isHydrated ||
@@ -53,7 +55,8 @@ export function WalletButton({
       (adapterLoading ||
         addressLoading ||
         adapterIsPlaceholder ||
-        addressIsPlaceholder))
+        addressIsPlaceholder ||
+        !hasValidAddress))
   ) {
     return (
       <SkeletonWalletButton
@@ -98,7 +101,7 @@ export function WalletButton({
                 src={currentWalletAdapter?.icon ?? ""}
                 width={18}
               />
-              {truncate(address ?? "")}
+              {truncate(displayAddress)}
             </Button>
           </PopoverButton>
           <PopoverPanel anchor="bottom end" className="z-30 mt-4">

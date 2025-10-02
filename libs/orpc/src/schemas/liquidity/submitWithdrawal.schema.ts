@@ -22,6 +22,7 @@ export const submitWithdrawalInputSchema = z.object({
 export const submitWithdrawalOutputSchema = z.object({
   error: z.string().optional(),
   signature: z.string().optional(),
+  status: z.enum(["confirmed", "submitted"]).optional(),
   success: z.boolean(),
 });
 

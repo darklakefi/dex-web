@@ -1,4 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
+import Decimal from "decimal.js";
 import { expect } from "vitest";
 import type {
   LiquidityFormValues,
@@ -125,7 +126,7 @@ export const expectValidTokenAccount = (
 
 export const mockUtils = {
   convertToDecimal: (amount: number, decimals: number) =>
-    amount / 10 ** decimals,
+    new Decimal(amount).div(new Decimal(10).pow(decimals)),
   formatAmountInput: (value: string) => value,
   parseAmount: (amount: string) => Number(amount),
   parseAmountBigNumber: (amount: string) => ({

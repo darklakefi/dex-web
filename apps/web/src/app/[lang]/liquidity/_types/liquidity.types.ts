@@ -55,20 +55,6 @@ export interface LiquidityFormValues {
   readonly initialPrice: string;
 }
 
-export type LiquidityFormApi = FormApi<
-  LiquidityFormValues,
-  FormValidateOrFn<LiquidityFormValues> | undefined,
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  FormAsyncValidateOrFn<LiquidityFormValues> | undefined,
-  undefined,
-  undefined,
-  undefined
->;
-
 export interface WalletAdapter {
   readonly wallet: {
     readonly adapter: {

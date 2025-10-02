@@ -1,8 +1,14 @@
 import { convertToDecimal, sortSolanaAddresses } from "@dex-web/utils";
+import Decimal from "decimal.js";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
+
+export enum InputType {
+  Percentage = "percentage",
+  Raw = "raw",
+}
 
 interface WithdrawalCalculationParams {
   userLiquidity: {
@@ -19,6 +25,7 @@ interface WithdrawalCalculationParams {
   tokenBAddress: string;
   tokenAPrice: { price: number };
   tokenBPrice: { price: number };
+  inputType?: InputType;
 }
 
 export function calculateWithdrawalDetails({
@@ -29,6 +36,7 @@ export function calculateWithdrawalDetails({
   tokenBAddress,
   tokenAPrice,
   tokenBPrice,
+  inputType = InputType.Percentage,
 }: WithdrawalCalculationParams) {
   if (
     !userLiquidity ||
@@ -50,16 +58,29 @@ export function calculateWithdrawalDetails({
     userLiquidity.decimals,
   );
 
-  let withdrawLpAmount: BigNumber;
+  let withdrawLpAmount: Decimal;
+  let percentage: Decimal;
+
   try {
-    withdrawLpAmount = BigNumber(withdrawalAmount.replace(/,/g, ""));
-    if (withdrawLpAmount.isNaN() || withdrawLpAmount.lte(0)) {
+    const inputAmount = new Decimal(withdrawalAmount.replace(/,/g, ""));
+    if (!inputAmount.isFinite() || inputAmount.lte(0)) {
       return {
         percentage: 0,
         tokenAAmount: 0,
         tokenBAmount: 0,
         usdValue: 0,
       };
+    }
+
+    if (inputType === InputType.Percentage) {
+      percentage = inputAmount;
+      withdrawLpAmount = userLpBalance.mul(percentage.div(100));
+    } else {
+      withdrawLpAmount = convertToDecimal(
+        inputAmount.toNumber(),
+        userLiquidity.decimals,
+      );
+      percentage = withdrawLpAmount.div(userLpBalance).mul(100);
     }
   } catch {
     return {
@@ -69,35 +90,33 @@ export function calculateWithdrawalDetails({
       usdValue: 0,
     };
   }
-
-  const percentage = withdrawLpAmount
-    .dividedBy(userLpBalance)
-    .multipliedBy(100);
-  const withdrawLpShare = withdrawLpAmount.dividedBy(
+  const totalLpSupplyDecimal = convertToDecimal(
     poolReserves.totalLpSupply,
+    userLiquidity.decimals,
   );
+  const withdrawLpShare = withdrawLpAmount.div(totalLpSupplyDecimal);
 
-  const tokenXAmount = withdrawLpShare
-    .multipliedBy(poolReserves.reserveX)
-    .toNumber();
-  const tokenYAmount = withdrawLpShare
-    .multipliedBy(poolReserves.reserveY)
-    .toNumber();
+  const reserveXDecimal = convertToDecimal(
+    poolReserves.reserveX,
+    userLiquidity.decimals,
+  );
+  const reserveYDecimal = convertToDecimal(
+    poolReserves.reserveY,
+    userLiquidity.decimals,
+  );
+  const tokenXAmount = withdrawLpShare.mul(reserveXDecimal).toNumber();
+  const tokenYAmount = withdrawLpShare.mul(reserveYDecimal).toNumber();
 
   const tokenA = tokenAAddress || DEFAULT_BUY_TOKEN;
   const tokenB = tokenBAddress || DEFAULT_SELL_TOKEN;
-  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(tokenA, tokenB);
+  const { tokenXAddress } = sortSolanaAddresses(tokenA, tokenB);
 
   const tokenAAmount = tokenA === tokenXAddress ? tokenXAmount : tokenYAmount;
-  const tokenBAmount = tokenB === tokenYAddress ? tokenYAmount : tokenXAmount;
+  const tokenBAmount = tokenB === tokenXAddress ? tokenXAmount : tokenYAmount;
 
-  const tokenAValue = BigNumber(tokenAAmount).multipliedBy(
-    tokenAPrice.price || 0,
-  );
-  const tokenBValue = BigNumber(tokenBAmount).multipliedBy(
-    tokenBPrice.price || 0,
-  );
-  const usdValue = tokenAValue.plus(tokenBValue).toNumber();
+  const tokenAValue = new Decimal(tokenAAmount).mul(tokenAPrice.price || 0);
+  const tokenBValue = new Decimal(tokenBAmount).mul(tokenBPrice.price || 0);
+  const usdValue = tokenAValue.add(tokenBValue).toNumber();
 
   return {
     percentage: percentage.toNumber(),

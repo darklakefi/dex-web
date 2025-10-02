@@ -1,6 +1,6 @@
 "use server";
 
-import { VersionedTransaction } from "@solana/web3.js";
+import { type Connection, VersionedTransaction } from "@solana/web3.js";
 import { getHelius } from "../../getHelius";
 import { handleTransactionError } from "../../utils/orpcErrorHandling";
 
@@ -38,9 +38,11 @@ export async function submitLiquidityTransactionHandler(
 
     if (simulation.value.err) {
       console.error("Transaction simulation failed:", simulation.value.err);
+
+      const _errorDetails = parseSimulationError(simulation.value.err);
+
       return {
         error_logs: `Simulation failed: ${JSON.stringify(simulation.value.err)}`,
-        simulation_error: JSON.stringify(simulation.value.err),
         success: false,
       };
     }
@@ -101,7 +103,10 @@ export async function submitLiquidityTransactionHandler(
   }
 }
 
-async function pollTransactionConfirmation(connection: any, signature: string) {
+async function pollTransactionConfirmation(
+  connection: Connection,
+  signature: string,
+) {
   const startTime = Date.now();
 
   while (Date.now() - startTime < CONFIRMATION_TIMEOUT) {
@@ -150,6 +155,58 @@ function isRateLimitError(error: unknown): boolean {
     message.includes("rate limit") ||
     message.includes("too many requests")
   );
+}
+
+function parseSimulationError(error: unknown): {
+  type: string;
+  message: string;
+} {
+  if (!error) {
+    return { message: "Unknown simulation error", type: "unknown" };
+  }
+
+  const errorStr = JSON.stringify(error).toLowerCase();
+
+  if (errorStr.includes("insufficient") && errorStr.includes("lamports")) {
+    return {
+      message: "Insufficient SOL balance for transaction fees",
+      type: "insufficient_sol",
+    };
+  }
+
+  if (errorStr.includes("insufficient") && errorStr.includes("balance")) {
+    return {
+      message: "Insufficient token balance for this transaction",
+      type: "insufficient_token_balance",
+    };
+  }
+
+  if (errorStr.includes("account") && errorStr.includes("not found")) {
+    return {
+      message:
+        "Required account not found. Token account may need to be created",
+      type: "account_not_found",
+    };
+  }
+
+  if (errorStr.includes("compute") || errorStr.includes("program failed")) {
+    return {
+      message: "Transaction exceeded compute limits",
+      type: "compute_exceeded",
+    };
+  }
+
+  if (errorStr.includes("slippage") || errorStr.includes("minimum")) {
+    return {
+      message: "Transaction failed due to slippage tolerance",
+      type: "slippage_exceeded",
+    };
+  }
+
+  return {
+    message: "Transaction simulation failed for unknown reasons",
+    type: "simulation_failed",
+  };
 }
 
 function _categorizeError(error: unknown): string {

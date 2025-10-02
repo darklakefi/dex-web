@@ -1,6 +1,7 @@
 "use server";
 
 import { AnchorProvider } from "@coral-xyz/anchor";
+import { validateWithdrawalTransaction } from "@dex-web/core";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import {
   getMint,
@@ -8,7 +9,7 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
-import BigNumber from "bignumber.js";
+import Decimal from "decimal.js";
 import { getHelius } from "../../getHelius";
 import type {
   WithdrawLiquidityInput,
@@ -51,6 +52,24 @@ export async function withdrawLiquidityHandler({
     const helius = getHelius();
     const connection = helius.connection;
 
+    const validationResult = await validateWithdrawalTransaction({
+      connection,
+      lpTokenAmount,
+      minTokenXOut,
+      minTokenYOut,
+      tokenXMint,
+      tokenYMint,
+      userAddress: ownerAddress,
+    });
+
+    if (!validationResult.isValid) {
+      return {
+        error: validationResult.errors.join("; "),
+        success: false,
+        unsignedTransaction: null,
+      };
+    }
+
     const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
       tokenXMint,
       tokenYMint,
@@ -66,10 +85,6 @@ export async function withdrawLiquidityHandler({
       },
       { commitment: "confirmed" },
     );
-
-    const lpTokenAmountBN = new BigNumber(lpTokenAmount);
-    const minTokenXOutBN = new BigNumber(minTokenXOut);
-    const minTokenYOutBN = new BigNumber(minTokenYOut);
 
     const xMintPk = new PublicKey(tokenXAddress);
     const yMintPk = new PublicKey(tokenYAddress);
@@ -90,28 +105,36 @@ export async function withdrawLiquidityHandler({
       tokenYProgramId,
     );
 
-    const lpAmountBase = lpTokenAmountBN
-      .multipliedBy(new BigNumber(10).pow(LP_TOKEN_DECIMALS))
-      .integerValue(BigNumber.ROUND_FLOOR);
-    const minXBase = minTokenXOutBN
-      .multipliedBy(new BigNumber(10).pow(xMintInfo.decimals))
-      .integerValue(BigNumber.ROUND_FLOOR);
-    const minYBase = minTokenYOutBN
-      .multipliedBy(new BigNumber(10).pow(yMintInfo.decimals))
-      .integerValue(BigNumber.ROUND_FLOOR);
+    const lpAmountBase = new Decimal(lpTokenAmount || "0")
+      .mul(new Decimal(10).pow(LP_TOKEN_DECIMALS))
+      .floor();
+    const minXBase = new Decimal(minTokenXOut || "0")
+      .mul(new Decimal(10).pow(xMintInfo.decimals))
+      .floor();
+    const minYBase = new Decimal(minTokenYOut || "0")
+      .mul(new Decimal(10).pow(yMintInfo.decimals))
+      .floor();
 
-    // Guard against JS number precision limits
-    const toSafeNumber = (bn: BigNumber, label: string) => {
-      if (bn.gt(Number.MAX_SAFE_INTEGER)) {
-        throw new Error(`${label} exceeds max safe integer`);
-      }
-      return bn.toNumber();
-    };
+    if (lpAmountBase.isNegative()) {
+      handleValidationError("amount", "LP amount must be non-negative");
+    }
+    if (minXBase.isNegative()) {
+      handleValidationError(
+        "minTokenXOut",
+        "Minimum token out must be non-negative",
+      );
+    }
+    if (minYBase.isNegative()) {
+      handleValidationError(
+        "minTokenYOut",
+        "Minimum token out must be non-negative",
+      );
+    }
 
     const txResult = await removeLiquidityTransactionHandler({
-      lpTokensToBurn: toSafeNumber(lpAmountBase, "LP amount"),
-      minAmountX: toSafeNumber(minXBase, "minTokenXOut"),
-      minAmountY: toSafeNumber(minYBase, "minTokenYOut"),
+      lpTokensToBurn: lpAmountBase.toFixed(0),
+      minAmountX: minXBase.toFixed(0),
+      minAmountY: minYBase.toFixed(0),
       provider,
       tokenXMint: tokenXAddress,
       tokenXProgramId: tokenXProgramId.toBase58(),

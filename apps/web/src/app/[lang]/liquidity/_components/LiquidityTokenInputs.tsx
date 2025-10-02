@@ -43,8 +43,8 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
   isLoadingSell,
   isRefreshingBuy,
   isRefreshingSell,
-  tokenAAddress,
-  tokenBAddress,
+  tokenAAddress: _tokenAAddress,
+  tokenBAddress: _tokenBAddress,
   poolDetails,
   debouncedCalculateTokenAmounts,
 }: LiquidityTokenInputsProps<T>) {

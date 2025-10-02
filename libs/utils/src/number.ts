@@ -1,19 +1,22 @@
 import BigNumber from "bignumber.js";
+import Decimal from "decimal.js";
 
 export function convertToDecimal(
   value: number | string | BigNumber,
   decimalPlaces: number = 8,
-) {
-  const divideBy = 10 ** decimalPlaces;
-  return BigNumber(value).dividedBy(divideBy);
+): Decimal {
+  const base = new Decimal(10).pow(decimalPlaces);
+  const numericValue = value instanceof BigNumber ? value.toString() : value;
+  return new Decimal(numericValue).div(base);
 }
 
 export function convertToWholeNumber(
   value: number | string | BigNumber,
   decimalPlaces: number = 8,
-) {
-  const multiply = 10 ** decimalPlaces;
-  return BigNumber(value).multipliedBy(multiply);
+): Decimal {
+  const base = new Decimal(10).pow(decimalPlaces);
+  const numericValue = value instanceof BigNumber ? value.toString() : value;
+  return new Decimal(numericValue).mul(base);
 }
 
 type NumberFormatHelperParams = {
@@ -74,14 +77,12 @@ export function formatValueWithThousandSeparator(
     return value;
   }
 
-  // Split the number into integer and decimal parts
   const parts = cleanValue.split(".");
   let integerPart = parts[0]?.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   if (integerPart?.length && integerPart?.length >= 2) {
     integerPart = integerPart?.replace(/^0+/, "");
   }
 
-  // If there's a decimal part, keep it as is without adding commas
   if (parts.length > 1) {
     if (maxDecimals) {
       return `${integerPart}.${parts[1]?.slice(0, maxDecimals) ?? ""}`;
@@ -109,11 +110,8 @@ export function formatValueWithThousandSeparator(
 export function isValidNumberFormat(value: string): boolean {
   if (!value) return false;
 
-  // Allow empty string or just a decimal point
   if (value === "" || value === ".") return true;
 
-  // Regular expression to validate number format with commas as thousand separators
-  // and optional decimal part
   const regex = /^-?(?:\d{1,3}(?:,\d{3})*|\d+)(?:\.\d*)?$/;
 
   return regex.test(value);

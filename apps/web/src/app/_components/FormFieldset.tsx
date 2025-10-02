@@ -32,6 +32,7 @@ interface FormFieldsetProps extends NumericInputProps {
   isRefreshing?: boolean;
   onClearPendingCalculations?: () => void;
   onHalfMaxClick?: (type: "half" | "max") => void;
+  error?: string;
 }
 const QUOTE_CURRENCY = "USD" as const;
 
@@ -49,6 +50,7 @@ export function FormFieldset({
   isRefreshing = false,
   onClearPendingCalculations,
   onHalfMaxClick,
+  error,
   ...rest
 }: FormFieldsetProps) {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -143,10 +145,9 @@ export function FormFieldset({
       return;
     }
 
-    // Pass through the validated value immediately for responsive UI
     onChange?.({
       target: {
-        value: cleanValue, // Use clean value for consistent handling
+        value: cleanValue,
       },
     } as React.ChangeEvent<HTMLInputElement>);
   };
@@ -168,7 +169,7 @@ export function FormFieldset({
                       decimalScale: 2,
                       thousandSeparator: true,
                       trimTrailingZeros: true,
-                      value: convertToDecimal(amount, decimals),
+                      value: convertToDecimal(amount, decimals).toString(),
                     })}{" "}
                     {tokenSymbol}
                   </span>
@@ -217,7 +218,11 @@ export function FormFieldset({
             disabled={disabled || (isLoading && !tokenAccount)}
             name={name}
             onChange={handleChange}
-            placeholder={!tokenAccount || isLoading ? "Loading..." : "0.00"}
+            placeholder={
+              (!tokenAccount && !currencyCode) || isLoading
+                ? "Loading..."
+                : "0.00"
+            }
             ref={inputRef}
             type="text"
             value={formatValueWithThousandSeparator(
@@ -235,6 +240,7 @@ export function FormFieldset({
         <Text.Body2 className="text-green-300 uppercase">
           {formattedPrice}
         </Text.Body2>
+        {error && <Text.Body2 className="text-red-500">{error}</Text.Body2>}
       </div>
     </fieldset>
   );

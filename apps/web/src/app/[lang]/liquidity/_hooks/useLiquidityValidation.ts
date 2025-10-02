@@ -68,7 +68,7 @@ export function useLiquidityValidation({
           sellTokenAcc.amount || 0,
           sellTokenAcc.decimals || 0,
         );
-        if (BigNumber(sellAmount).gt(maxBalance)) {
+        if (BigNumber(sellAmount).gt(maxBalance.toString())) {
           errors.tokenBAmount = `Insufficient ${sellTokenAcc.symbol || "token"} balance`;
           hasInsufficientBalance = true;
         }
@@ -82,7 +82,7 @@ export function useLiquidityValidation({
           buyTokenAcc.amount || 0,
           buyTokenAcc.decimals || 0,
         );
-        if (BigNumber(buyAmount).gt(maxBalance)) {
+        if (BigNumber(buyAmount).gt(maxBalance.toString())) {
           errors.tokenAAmount = `Insufficient ${buyTokenAcc.symbol || "token"} balance`;
           hasInsufficientBalance = true;
         }
