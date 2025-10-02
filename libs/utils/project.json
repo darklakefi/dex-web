@@ -3,5 +3,8 @@
   "name": "utils",
   "projectType": "library",
   "sourceRoot": "libs/utils/src",
-  "tags": []
+  "tags": [],
+  "targets": {
+    "lint": {}
+  }
 }

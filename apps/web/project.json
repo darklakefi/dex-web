@@ -13,6 +13,7 @@
       },
       "outputs": ["{options.outputPath}"]
     },
+    "lint": {},
     "serve": {
       "configurations": {
         "development": {
@@ -37,12 +38,19 @@
       }
     },
     "typecheck": {
-      "executor": "@nx/next:build",
+      "cache": true,
+      "executor": "nx:run-commands",
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
       "options": {
-        "outputPath": "dist",
-        "typeCheck": true
-      },
-      "outputs": ["{options.outputPath}"]
+        "command": "tsc --project tsconfig.json --noEmit",
+        "cwd": "apps/web"
+      }
     }
   }
 }

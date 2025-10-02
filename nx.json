@@ -67,6 +67,7 @@
         "devTargetName": "dev",
         "serveStaticTargetName": "serve-static",
         "startTargetName": "start",
+        "typecheckTargetName": "typecheck",
         "watchDepsTargetName": "watch-deps"
       },
       "plugin": "@nx/next/plugin"
@@ -180,7 +181,7 @@
     },
     "typecheck": {
       "cache": true,
-      "dependsOn": ["^build"]
+      "dependsOn": ["^typecheck"]
     }
   }
 }

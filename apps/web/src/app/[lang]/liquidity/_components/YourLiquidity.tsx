@@ -9,7 +9,7 @@ import {
 } from "@dex-web/utils";
 import BigNumber from "bignumber.js";
 import { useMemo, useState } from "react";
-import { useUserLiquiditySuspense } from "../../../../hooks/queries/useLiquidityQueries";
+import { useUserLiquidity } from "../../../../hooks/queries/useLiquidityQueries";
 import {
   usePoolDetailsSuspense,
   usePoolReservesSuspense,
@@ -48,11 +48,15 @@ export function YourLiquidity({
     resolvedTokenAAddress,
     resolvedTokenBAddress,
   );
+
+  const shouldFetchLiquidity = !!walletPublicKey;
+
   const { data: userLiquidity, isFetching: isLiquidityFetching } =
-    useUserLiquiditySuspense(
+    useUserLiquidity(
       walletPublicKey?.toBase58() ?? "",
       tokenXAddress,
       tokenYAddress,
+      { enabled: shouldFetchLiquidity },
     );
 
   const { data: tokenMetadata } = useTokenMetadataSuspense([
@@ -87,7 +91,7 @@ export function YourLiquidity({
 
   const liquidityCalculations = useMemo(() => {
     if (
-      !userLiquidity.hasLiquidity ||
+      !userLiquidity?.hasLiquidity ||
       !poolDetails ||
       !poolReserves ||
       poolReserves.totalLpSupply === 0
@@ -129,7 +133,11 @@ export function YourLiquidity({
   const isBackgroundFetching =
     isLiquidityFetching || isPoolFetching || isReservesFetching;
 
-  if (isBackgroundFetching && !userLiquidity?.hasLiquidity) {
+  if (
+    shouldFetchLiquidity &&
+    isBackgroundFetching &&
+    !userLiquidity?.hasLiquidity
+  ) {
     return (
       <div className="mt-4 w-full max-w-md">
         <div className="flex flex-col gap-4">
@@ -163,7 +171,7 @@ export function YourLiquidity({
     );
   }
 
-  if (!userLiquidity?.hasLiquidity || !poolDetails) {
+  if (!shouldFetchLiquidity || !userLiquidity?.hasLiquidity || !poolDetails) {
     return <div className="mt-4 w-full max-w-md" />;
   }
 

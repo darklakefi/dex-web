@@ -1,5 +1,8 @@
 import { tanstackClient } from "@dex-web/orpc";
-import type { GetPoolReservesOutput } from "@dex-web/orpc/schemas";
+import type {
+  GetPoolReservesOutput,
+  GetUserLiquidityOutput,
+} from "@dex-web/orpc/schemas";
 import type { QueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../../../lib/queryKeys";
 
@@ -66,10 +69,19 @@ export async function invalidateLiquidityQueries({
       currentUserLiquidity &&
       typeof currentUserLiquidity === "object" &&
       "hasLiquidity" in currentUserLiquidity &&
-      currentUserLiquidity.hasLiquidity &&
-      (!newUserLiquidity || !newUserLiquidity.hasLiquidity)
+      currentUserLiquidity.hasLiquidity
     ) {
-      queryClient.setQueryData(userLiquidityKey, currentUserLiquidity);
+      const currentLpBalance = (currentUserLiquidity as GetUserLiquidityOutput)
+        .lpTokenBalance;
+      const newLpBalance = newUserLiquidity?.lpTokenBalance || 0;
+
+      if (
+        !newUserLiquidity ||
+        !newUserLiquidity.hasLiquidity ||
+        newLpBalance < currentLpBalance
+      ) {
+        queryClient.setQueryData(userLiquidityKey, currentUserLiquidity);
+      }
     }
 
     if (

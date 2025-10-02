@@ -1,3 +1,4 @@
+import type React from "react";
 import { twMerge } from "tailwind-merge";
 
 import AnalyticsIcon from "./icons/analytics.svg";

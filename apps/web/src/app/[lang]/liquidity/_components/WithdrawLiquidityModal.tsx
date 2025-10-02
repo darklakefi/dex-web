@@ -8,7 +8,6 @@ import {
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas";
-import type { GetUserLiquidityOutput } from "@dex-web/orpc/schemas/pools/getUserLiquidity.schema";
 import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import {
   convertToDecimal,
@@ -24,6 +23,7 @@ import Decimal from "decimal.js";
 import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
+import { useSubmitWithdrawal } from "../../../../hooks/mutations/useLiquidityMutations";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import {
   DEFAULT_BUY_TOKEN,
@@ -35,7 +35,6 @@ import {
   calculateWithdrawalDetails,
   InputType,
 } from "../_utils/calculateWithdrawalDetails";
-import { invalidateLiquidityQueries } from "../_utils/invalidateLiquidityCache";
 
 type WithdrawLiquidityFormSchema = z.infer<typeof withdrawLiquidityFormSchema>;
 
@@ -95,6 +94,7 @@ export function WithdrawLiquidityModal({
 }: WithdrawLiquidityModalProps) {
   const { publicKey, signTransaction, wallet } = useWallet();
   const queryClient = useQueryClient();
+  const submitWithdrawalMutation = useSubmitWithdrawal();
   const [withdrawalCalculations, setWithdrawalCalculations] = useState({
     percentage: 0,
     tokenXAmount: 0,
@@ -242,7 +242,7 @@ export function WithdrawLiquidityModal({
         signedTransaction.serialize(),
       ).toString("base64");
 
-      const submitRes = await client.liquidity.submitWithdrawal({
+      const submitRes = await submitWithdrawalMutation.mutateAsync({
         lpTokenAmount: opts.lpTokenAmount,
         minTokenXOut: opts.minTokenXOut,
         minTokenYOut: opts.minTokenYOut,
@@ -302,54 +302,6 @@ export function WithdrawLiquidityModal({
             ? submittedToast.variant
             : "success",
       });
-
-      const userLiquidityOpts =
-        tanstackClient.liquidity.getUserLiquidity.queryOptions({
-          input: {
-            ownerAddress: publicKey.toBase58(),
-            tokenXMint: opts.tokenXMint,
-            tokenYMint: opts.tokenYMint,
-          },
-        });
-
-      const currentLiquidity = queryClient.getQueryData(
-        userLiquidityOpts.queryKey,
-      );
-      if (
-        currentLiquidity &&
-        (currentLiquidity as GetUserLiquidityOutput).hasLiquidity
-      ) {
-        const withdrawnAmount = new Decimal(opts.lpTokenAmount)
-          .mul(
-            new Decimal(10).pow(
-              (currentLiquidity as GetUserLiquidityOutput).decimals,
-            ),
-          )
-          .toNumber();
-        const newBalance = Math.max(
-          0,
-          (currentLiquidity as GetUserLiquidityOutput).lpTokenBalance -
-            withdrawnAmount,
-        );
-        const optimisticLiquidity = {
-          ...currentLiquidity,
-          hasLiquidity: newBalance > 0,
-          lpTokenBalance: newBalance,
-        };
-        queryClient.setQueryData(
-          userLiquidityOpts.queryKey,
-          optimisticLiquidity,
-        );
-      }
-
-      setTimeout(async () => {
-        await invalidateLiquidityQueries({
-          queryClient,
-          tokenXMint: opts.tokenXMint,
-          tokenYMint: opts.tokenYMint,
-          walletPublicKey: publicKey.toBase58(),
-        });
-      }, 2000);
 
       form.reset();
       onClose();

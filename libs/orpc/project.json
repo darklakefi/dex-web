@@ -3,5 +3,8 @@
   "name": "orpc",
   "projectType": "library",
   "sourceRoot": "libs/orpc/src",
-  "tags": []
+  "tags": [],
+  "targets": {
+    "lint": {}
+  }
 }

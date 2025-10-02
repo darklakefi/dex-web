@@ -3,5 +3,8 @@
   "name": "grpc-client",
   "projectType": "library",
   "sourceRoot": "libs/grpc-client/src",
-  "tags": ["type:lib", "scope:grpc", "platform:shared"]
+  "tags": ["type:lib", "scope:grpc", "platform:shared"],
+  "targets": {
+    "lint": {}
+  }
 }

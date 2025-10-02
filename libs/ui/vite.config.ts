@@ -66,12 +66,14 @@ const baseConfig = {
     ],
     teardownTimeout: 10000,
     testTimeout: 30000,
+    transformMode: {
+      web: ["**/*.{js,ts,jsx,tsx}", "**/*.svg"],
+    },
     watch: false,
   },
 };
 
 export const config = mergeConfig(baseConfig, {
-  assetsInclude: ["**/*.svg"],
   plugins: [
     react(),
     tailwindcss(),
@@ -80,6 +82,7 @@ export const config = mergeConfig(baseConfig, {
       include: "src/**/*.svg",
       svgrOptions: {
         exportType: "default",
+        svgo: false,
       },
     }),
     nxCopyAssetsPlugin(["*.md", "package.json"]),
@@ -95,6 +98,11 @@ export const config = mergeConfig(baseConfig, {
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),
   ],
+  resolve: {
+    alias: {
+      "*.svg": "*.svg?react",
+    },
+  },
 });
 
 export default defineConfig(({ mode }) => {
@@ -113,5 +121,25 @@ export default defineConfig(({ mode }) => {
       },
     };
   }
+
+  if (mode === "test") {
+    return {
+      ...config,
+      plugins: [
+        react(),
+        tailwindcss(),
+        nxViteTsPaths(),
+        svgr({
+          include: "src/**/*.svg",
+          svgrOptions: {
+            exportType: "default",
+            svgo: false,
+          },
+        }),
+        nxCopyAssetsPlugin(["*.md", "package.json"]),
+      ],
+    };
+  }
+
   return config;
 });

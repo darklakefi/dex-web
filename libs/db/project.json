@@ -11,6 +11,7 @@
         "command": "drizzle-kit generate --config=libs/db/drizzle.config.ts"
       }
     },
+    "lint": {},
     "migrate": {
       "executor": "nx:run-commands",
       "options": {

@@ -40,6 +40,7 @@ import {
   useWalletAdapter,
   useWalletPublicKey,
 } from "../../../../hooks/useWalletCache";
+import { queryKeys } from "../../../../lib/queryKeys";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import {
   DEFAULT_BUY_TOKEN,
@@ -252,15 +253,21 @@ export function useLiquidityFormLogic({
           },
         });
 
+      const userLiquidityQueryKey = queryKeys.liquidity.user(
+        walletPublicKey?.toBase58() || "",
+        tokenXMint,
+        tokenYMint,
+      );
+      const poolReservesQueryKey = queryKeys.pools.reserves(
+        tokenXMint,
+        tokenYMint,
+      );
+
       const previousUserLiquidity = queryClient.getQueryData(
-        userLiquidityOpts.queryKey,
+        userLiquidityQueryKey,
       );
       const previousPoolReserves =
-        queryClient.getQueryData<GetPoolReservesOutput>([
-          "pool-reserves",
-          tokenXMint,
-          tokenYMint,
-        ]);
+        queryClient.getQueryData<GetPoolReservesOutput>(poolReservesQueryKey);
 
       const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
       const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
@@ -286,10 +293,15 @@ export function useLiquidityFormLogic({
             (previousUserLiquidity as GetUserLiquidityOutput).lpTokenBalance +
             actualLpTokens,
         };
-        queryClient.setQueryData(
-          userLiquidityOpts.queryKey,
-          optimisticLiquidity,
-        );
+        queryClient.setQueryData(userLiquidityQueryKey, optimisticLiquidity);
+      } else if (!previousUserLiquidity) {
+        const optimisticLiquidity: GetUserLiquidityOutput = {
+          decimals: 6,
+          hasLiquidity: true,
+          lpTokenBalance: actualLpTokens,
+          lpTokenMint: tokenXMint,
+        };
+        queryClient.setQueryData(userLiquidityQueryKey, optimisticLiquidity);
       }
 
       if (previousPoolReserves) {
@@ -299,10 +311,7 @@ export function useLiquidityFormLogic({
           reserveY: previousPoolReserves.reserveY + tokenBAmount,
           totalLpSupply: previousPoolReserves.totalLpSupply + actualLpTokens,
         };
-        queryClient.setQueryData(
-          ["pool-reserves", tokenXMint, tokenYMint],
-          optimisticPoolReserves,
-        );
+        queryClient.setQueryData(poolReservesQueryKey, optimisticPoolReserves);
       }
 
       send({ type: "SUCCESS" });
@@ -326,25 +335,38 @@ export function useLiquidityFormLogic({
       tokenAccountsData.refetchBuyTokenAccount();
       tokenAccountsData.refetchSellTokenAccount();
 
+      const walletAddress = walletPublicKey?.toBase58() || "";
+
+      try {
+        await invalidateLiquidityQueries({
+          queryClient,
+          tokenXMint,
+          tokenYMint,
+          walletPublicKey: walletAddress,
+        });
+      } catch (error) {
+        console.error("Immediate cache invalidation failed:", error);
+      }
+
       setTimeout(async () => {
         try {
           await invalidateLiquidityQueries({
             queryClient,
             tokenXMint,
             tokenYMint,
-            walletPublicKey: walletPublicKey?.toBase58() || "",
+            walletPublicKey: walletAddress,
           });
 
           await verifyDataConsistency(
             queryClient,
             tokenXMint,
             tokenYMint,
-            walletPublicKey?.toBase58() || "",
+            walletAddress,
           );
         } catch (error) {
-          console.error("Cache invalidation failed:", error);
+          console.error("Delayed cache invalidation failed:", error);
         }
-      }, 3000);
+      }, 5000);
 
       return { previousPoolReserves, previousUserLiquidity };
     },
