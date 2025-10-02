@@ -175,8 +175,8 @@ export function CreatePoolForm() {
       const error = new Error(result.error || "Unknown error");
       const isWarning = isWarningMessage(error);
       if (isWarning) {
-        toasts.showWarningToast(
-          `Transaction warning: ${result.error || "Unknown error"}`,
+        toasts.showInfoToast(
+          `Transaction status: ${result.error || "Unknown error"}`,
         );
       } else {
         toasts.showErrorToast(
@@ -197,7 +197,7 @@ export function CreatePoolForm() {
         const error = new Error(result.error);
         const isWarning = isWarningMessage(error);
         if (isWarning) {
-          toasts.showWarningToast(`Transaction warning: ${result.error}`);
+          toasts.showInfoToast(`Transaction status: ${result.error}`);
         } else {
           toasts.showErrorToast(`Transaction failed: ${result.error}`);
         }
@@ -258,13 +258,7 @@ export function CreatePoolForm() {
       tokenAAmount: "0",
       tokenBAmount: "0",
     } satisfies LiquidityFormSchema,
-    onSubmit: async ({
-      value,
-    }: {
-      value: { tokenAAmount: string; tokenBAmount: string };
-    }) => {
-      // Form submission handled by button onClick
-    },
+    onSubmit: async () => {},
     validators: {
       onChange: liquidityFormSchema,
       onDynamic: ({ value }: { value: LiquidityFormSchema }) => {
@@ -281,7 +275,7 @@ export function CreatePoolForm() {
               tokenAccount.decimals || 0,
             );
 
-            if (BigNumber(tokenANumericValue).gt(maxBalance)) {
+            if (BigNumber(tokenANumericValue).gt(maxBalance.toString())) {
               const symbol = tokenAccount.symbol || "token";
               return { tokenAAmount: `Insufficient ${symbol} balance.` };
             }

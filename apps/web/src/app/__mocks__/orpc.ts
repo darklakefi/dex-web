@@ -1,3 +1,4 @@
+import Decimal from "decimal.js";
 import { vi } from "vitest";
 
 export const mockTanstackClient = {
@@ -77,11 +78,11 @@ vi.mock("@solana/wallet-adapter-react", () => ({
 }));
 
 vi.mock("@dex-web/utils", () => ({
-  convertToDecimal: vi.fn((amount, decimals) => {
+  convertToDecimal: vi.fn((amount: number, decimals: number) => {
     if (typeof amount === "number" && typeof decimals === "number") {
-      return amount / 10 ** decimals;
+      return new Decimal(amount).div(new Decimal(10).pow(decimals));
     }
-    return 0;
+    return new Decimal(0);
   }),
   formatValueWithThousandSeparator: vi.fn((value) => {
     if (typeof value === "number") {

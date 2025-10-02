@@ -9,6 +9,7 @@ import {
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { CreateLiquidityTransactionInput } from "@dex-web/orpc/schemas";
+import type { GetUserLiquidityOutput } from "@dex-web/orpc/schemas/pools/getUserLiquidity.schema";
 import {
   convertToDecimal,
   formatAmountInput,
@@ -52,6 +53,7 @@ import { liquidityMachine } from "../_machines/liquidityMachine";
 import type { LiquidityFormValues } from "../_types/liquidity.types";
 import { liquidityFormSchema } from "../_types/liquidity.types";
 import { startCacheCleanup } from "../_utils/calculationCache";
+import { invalidateLiquidityQueries } from "../_utils/invalidateLiquidityCache";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
 
 const { fieldContext, formContext } = createFormHookContexts();
@@ -244,6 +246,35 @@ export function useLiquidityFormLogic({
         transactionHash: "",
       });
 
+      const userLiquidityOpts =
+        tanstackClient.liquidity.getUserLiquidity.queryOptions({
+          input: {
+            ownerAddress: walletPublicKey?.toBase58() || "",
+            tokenXMint,
+            tokenYMint,
+          },
+        });
+
+      const currentLiquidity = queryClient.getQueryData(
+        userLiquidityOpts.queryKey,
+      );
+      if (
+        currentLiquidity &&
+        typeof currentLiquidity === "object" &&
+        "hasLiquidity" in currentLiquidity
+      ) {
+        const optimisticLiquidity = {
+          ...currentLiquidity,
+          hasLiquidity: true,
+          lpTokenBalance:
+            (currentLiquidity as GetUserLiquidityOutput).lpTokenBalance + 1,
+        };
+        queryClient.setQueryData(
+          userLiquidityOpts.queryKey,
+          optimisticLiquidity,
+        );
+      }
+
       const successMessage = !isSquadsX(wallet)
         ? `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
         : undefined;
@@ -252,36 +283,11 @@ export function useLiquidityFormLogic({
       tokenAccountsData.refetchBuyTokenAccount();
       tokenAccountsData.refetchSellTokenAccount();
 
-      queryClient.invalidateQueries({
-        queryKey: ["token-accounts", walletPublicKey?.toBase58()],
-      });
-
-      const poolKey = `${tokenXMint}-${tokenYMint}`;
-      const sortedPoolKey = [tokenXMint, tokenYMint].sort().join("-");
-
-      queryClient.invalidateQueries({
-        queryKey: ["pool-details", poolKey],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["pool-details", sortedPoolKey],
-      });
-
-      const poolDetailsOpts = tanstackClient.pools.getPoolDetails.queryOptions({
-        input: { tokenXMint, tokenYMint },
-      });
-      const poolReservesOpts =
-        tanstackClient.pools.getPoolReserves.queryOptions({
-          input: { tokenXMint, tokenYMint },
-        });
-
-      queryClient.invalidateQueries({ queryKey: poolDetailsOpts.queryKey });
-      queryClient.invalidateQueries({ queryKey: poolReservesOpts.queryKey });
-
-      queryClient.invalidateQueries({
-        queryKey: ["pool", tokenXMint, tokenYMint],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["pool", tokenYMint, tokenXMint],
+      invalidateLiquidityQueries({
+        queryClient,
+        tokenXMint,
+        tokenYMint,
+        walletPublicKey: walletPublicKey?.toBase58() || "",
       });
     },
     onTimeout: () => {
@@ -324,7 +330,9 @@ export function useLiquidityFormLogic({
               tokenAccount.decimals || 0,
             );
 
-            if (parseAmountBigNumber(tokenANumericValue).gt(maxBalance)) {
+            if (
+              parseAmountBigNumber(tokenANumericValue).gt(maxBalance.toString())
+            ) {
               const symbol = tokenAccount.symbol || "token";
               return { tokenAAmount: `Insufficient ${symbol} balance.` };
             }
@@ -344,7 +352,7 @@ export function useLiquidityFormLogic({
 
       const isWarning = isWarningMessage(error);
       if (isWarning) {
-        transactionToasts.showWarningToast(errorMessage, context);
+        transactionToasts.showInfoToast(errorMessage, context);
       } else {
         transactionToasts.showErrorToast(errorMessage, context);
       }

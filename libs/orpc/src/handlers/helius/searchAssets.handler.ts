@@ -18,7 +18,7 @@ export async function searchAssetsHandler({
     });
 
     const tokenListOutput = result.items.map((item: Asset) => {
-      const imageUrl = item.content?.files?.find((file: any) =>
+      const imageUrl = item.content?.files?.find((file: { mime?: string }) =>
         file.mime?.includes("image"),
       )?.cdn_uri;
 

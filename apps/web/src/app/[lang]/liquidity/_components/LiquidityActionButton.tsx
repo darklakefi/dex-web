@@ -3,6 +3,7 @@
 import { Button } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
+import type { AnyFormApi } from "@tanstack/react-form";
 import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
@@ -10,7 +11,6 @@ import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { liquidityPageParsers } from "../../../_utils/searchParams";
 import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
 import type {
-  LiquidityFormApi,
   LiquidityFormValues,
   PoolDetails,
   TokenAccountsData,
@@ -22,7 +22,7 @@ import {
 } from "../_utils/liquidityButtonState";
 
 interface LiquidityActionButtonProps {
-  form: LiquidityFormApi;
+  form: AnyFormApi;
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;

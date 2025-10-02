@@ -49,7 +49,7 @@ const iconColorVariants = cva([], {
   variants: {
     variant: {
       error: "text-red-300",
-      info: "text-blue-300",
+      info: "text-white",
       loading: "text-white",
       success: "text-green-200",
       warning: "text-yellow-300",

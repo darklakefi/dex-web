@@ -25,9 +25,9 @@ async function removeLiquidity(
   tokenXProgramId: PublicKey,
   tokenYMint: PublicKey,
   tokenYProgramId: PublicKey,
-  minAmountX: number,
-  minAmountY: number,
-  lpTokensToBurn: number,
+  minAmountX: string,
+  minAmountY: string,
+  lpTokensToBurn: string,
 ): Promise<Transaction> {
   const sortedMints = [tokenXMint, tokenYMint].sort((a, b) =>
     a.toBuffer().compare(b.toBuffer()),

@@ -137,16 +137,10 @@ export function YourLiquidity({
       userLiquidity.decimals,
     );
 
-    const userLpShare = BigNumber(userLpBalance).dividedBy(
-      poolReserves.totalLpSupply,
-    );
+    const userLpShare = userLpBalance.dividedBy(poolReserves.totalLpSupply);
 
-    const userTokenYAmount = userLpShare
-      .multipliedBy(poolReserves.reserveY)
-      .toNumber();
-    const userTokenXAmount = userLpShare
-      .multipliedBy(poolReserves.reserveX)
-      .toNumber();
+    const userTokenYAmount = userLpShare.mul(poolReserves.reserveY).toNumber();
+    const userTokenXAmount = userLpShare.mul(poolReserves.reserveX).toNumber();
 
     const tokenYValue = BigNumber(userTokenYAmount).multipliedBy(
       tokenYPrice.price || 0,

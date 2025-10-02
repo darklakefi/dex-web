@@ -19,6 +19,7 @@ interface WithdrawalCalculationParams {
   tokenBPrice: { price: number };
   defaultBuyToken?: string;
   defaultSellToken?: string;
+  inputType?: "tokenX" | "tokenY";
 }
 
 export function calculateWithdrawalDetails({
@@ -73,7 +74,7 @@ export function calculateWithdrawalDetails({
   }
 
   const percentage = withdrawLpAmount
-    .dividedBy(userLpBalance)
+    .dividedBy(userLpBalance.toNumber())
     .multipliedBy(100);
   const withdrawLpShare = withdrawLpAmount.dividedBy(
     poolReserves.totalLpSupply,

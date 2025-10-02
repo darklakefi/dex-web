@@ -38,6 +38,9 @@ export function LiquidityFormSkeleton({
   testId = "liquidity-form-skeleton",
   "aria-label": ariaLabel = "Loading liquidity form",
 }: LiquidityFormSkeletonProps = {}) {
+  // Suppress unused parameter warnings for accessibility props
+  void testId;
+  void ariaLabel;
   return (
     <section className="flex w-full max-w-xl items-start gap-1">
       <div className="size-9" />

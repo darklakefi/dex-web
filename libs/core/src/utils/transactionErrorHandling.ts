@@ -4,11 +4,40 @@ export interface TransactionErrorInfo {
   canRecover: boolean;
   retryable: boolean;
   originalError: Error;
+  isSolBalanceError?: boolean;
+  isTokenBalanceError?: boolean;
+  isComputeError?: boolean;
+  isSlippageError?: boolean;
 }
 
 const SIMULATION_ERROR_PATTERNS = [
   "simulation failed",
   "transaction simulation failed",
+];
+
+const SOL_BALANCE_ERROR_PATTERNS = [
+  "insufficient funds",
+  "insufficient lamports",
+  "insufficient sol",
+  "account not found",
+];
+
+const TOKEN_BALANCE_ERROR_PATTERNS = [
+  "insufficient token balance",
+  "token account not found",
+  "invalid token account",
+];
+
+const COMPUTE_ERROR_PATTERNS = [
+  "compute budget exceeded",
+  "program failed to complete",
+  "out of compute",
+];
+
+const SLIPPAGE_ERROR_PATTERNS = [
+  "slippage tolerance exceeded",
+  "price impact too high",
+  "minimum amount not met",
 ];
 
 const DUPLICATE_TRANSACTION_PATTERNS = [
@@ -29,22 +58,60 @@ export function analyzeTransactionError(error: unknown): TransactionErrorInfo {
     (pattern) => lowerMessage.includes(pattern),
   );
 
+  const isSolBalanceError = SOL_BALANCE_ERROR_PATTERNS.some((pattern) =>
+    lowerMessage.includes(pattern),
+  );
+
+  const isTokenBalanceError = TOKEN_BALANCE_ERROR_PATTERNS.some((pattern) =>
+    lowerMessage.includes(pattern),
+  );
+
+  const isComputeError = COMPUTE_ERROR_PATTERNS.some((pattern) =>
+    lowerMessage.includes(pattern),
+  );
+
+  const isSlippageError = SLIPPAGE_ERROR_PATTERNS.some((pattern) =>
+    lowerMessage.includes(pattern),
+  );
+
   const canRecover = isSimulationError && isDuplicateTransaction;
-  const retryable = isSimulationError || isDuplicateTransaction;
+  const retryable =
+    isSimulationError || isDuplicateTransaction || isComputeError;
 
   return {
     canRecover,
+    isComputeError,
     isDuplicateTransaction,
     isSimulationError,
+    isSlippageError,
+    isSolBalanceError,
+    isTokenBalanceError,
     originalError: error instanceof Error ? error : new Error(String(error)),
     retryable,
   };
 }
 
+interface OrpcError {
+  code: string;
+  message?: string;
+  data?: {
+    recoverable?: boolean;
+    retryable?: boolean;
+    reason?: string;
+  };
+}
+
+interface TransactionObject {
+  signature?: string;
+}
+
 export function isLikelyFalsePositive(error: unknown): boolean {
   if (error && typeof error === "object" && "code" in error) {
-    const orpcError = error as any;
-    return orpcError.code === "SIMULATION_ERROR" && orpcError.data?.recoverable;
+    const orpcError = error as OrpcError;
+    return (
+      orpcError.code === "SIMULATION_ERROR" &&
+      (orpcError.data?.recoverable ?? false)
+    );
   }
 
   const analysis = analyzeTransactionError(error);
@@ -53,7 +120,7 @@ export function isLikelyFalsePositive(error: unknown): boolean {
 
 export function isRetryableError(error: unknown): boolean {
   if (error && typeof error === "object" && "code" in error) {
-    const orpcError = error as any;
+    const orpcError = error as OrpcError;
 
     switch (orpcError.code) {
       case "NETWORK_ERROR":
@@ -87,7 +154,7 @@ export function extractTransactionSignature(error: unknown): string | null {
     error.transaction &&
     typeof error.transaction === "object"
   ) {
-    const tx = error.transaction as any;
+    const tx = error.transaction as TransactionObject;
     if (tx.signature && typeof tx.signature === "string") {
       return tx.signature;
     }
@@ -98,7 +165,7 @@ export function extractTransactionSignature(error: unknown): string | null {
 
 export function getUserFriendlyErrorMessage(error: unknown): string {
   if (error && typeof error === "object" && "code" in error) {
-    const orpcError = error as any;
+    const orpcError = error as OrpcError;
 
     switch (orpcError.code) {
       case "SIMULATION_ERROR":
@@ -130,8 +197,24 @@ export function getUserFriendlyErrorMessage(error: unknown): string {
     return "Transaction may have succeeded despite the error message. Please check your wallet balance.";
   }
 
+  if (analysis.isSolBalanceError) {
+    return "Insufficient SOL balance for transaction fees. Please add SOL to your wallet and try again.";
+  }
+
+  if (analysis.isTokenBalanceError) {
+    return "Insufficient token balance or missing token account. Please check your token balances and try again.";
+  }
+
+  if (analysis.isComputeError) {
+    return "Transaction exceeded compute limits. Please try with a smaller amount or try again later.";
+  }
+
+  if (analysis.isSlippageError) {
+    return "Transaction failed due to slippage. Please increase your slippage tolerance or try again.";
+  }
+
   if (analysis.isSimulationError) {
-    return "Transaction simulation failed. Please try again or check your wallet balance.";
+    return "Transaction simulation failed. This could be due to insufficient balance, network congestion, or invalid parameters. Please check your wallet balance and try again.";
   }
 
   if (analysis.isDuplicateTransaction) {
@@ -146,9 +229,8 @@ export function getUserFriendlyErrorMessage(error: unknown): string {
 
 export function isWarningMessage(error: unknown): boolean {
   if (error && typeof error === "object" && "code" in error) {
-    const orpcError = error as any;
+    const orpcError = error as OrpcError;
 
-    // SIMULATION_ERROR with recoverable flag should be treated as warning
     if (orpcError.code === "SIMULATION_ERROR" && orpcError.data?.recoverable) {
       return true;
     }
@@ -156,6 +238,5 @@ export function isWarningMessage(error: unknown): boolean {
 
   const analysis = analyzeTransactionError(error);
 
-  // Recoverable errors (canRecover) should be treated as warnings
   return analysis.canRecover;
 }

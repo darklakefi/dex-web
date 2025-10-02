@@ -9,6 +9,7 @@ import {
   liquidityPageParsers,
   selectedTokensParsers,
 } from "../../../_utils/searchParams";
+import { useLiquidityFormLogic } from "../_hooks/useLiquidityFormLogic";
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
 import { CalculationLoadingIndicator } from "./CalculationLoadingIndicator";
 import { LiquidityActionButton } from "./LiquidityActionButton";
@@ -18,7 +19,6 @@ import {
   PoolDetailsSkeleton,
 } from "./LiquidityFormSkeletons";
 import { LiquidityTokenInputs } from "./LiquidityTokenInputs";
-import { useLiquidityFormLogic } from "./useLiquidityFormLogic";
 
 const serialize = createSerializer(liquidityPageParsers);
 
@@ -36,7 +36,6 @@ export function LiquidityForm() {
     debouncedCalculateTokenAmounts,
     tokenAccountsData,
     publicKey,
-    isSubmitting,
     isCalculating,
   } = useLiquidityFormLogic({
     tokenAAddress,
@@ -46,11 +45,9 @@ export function LiquidityForm() {
   const handleSlippageChange = (newSlippage: string) => {
     setSlippage(newSlippage);
     if (form.state.values.tokenBAmount !== "0") {
-      const inputType =
-        poolDetails?.tokenXMint === tokenBAddress ? "tokenX" : "tokenY";
       debouncedCalculateTokenAmounts({
+        editedToken: "tokenB",
         inputAmount: form.state.values.tokenBAmount,
-        inputType,
       });
     }
   };

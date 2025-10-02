@@ -84,7 +84,11 @@ export function useLiquidityForm({
                 tokenAccount.decimals || 0,
               );
 
-              if (parseAmountBigNumber(tokenANumericValue).gt(maxBalance)) {
+              if (
+                parseAmountBigNumber(tokenANumericValue).gt(
+                  maxBalance.toString(),
+                )
+              ) {
                 const symbol = tokenAccount.symbol || "token";
                 return {
                   [FORM_FIELD_NAMES.TOKEN_A_AMOUNT]: `Insufficient ${symbol} balance.`,

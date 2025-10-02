@@ -11,7 +11,7 @@ import {
 export type ToastFunction = (options: {
   title: string;
   description: string;
-  variant: "loading" | "success" | "error" | "warning";
+  variant: "loading" | "success" | "error" | "warning" | "info";
   customAction?: React.ReactNode;
 }) => void;
 
@@ -45,8 +45,38 @@ export interface UseTransactionToastsReturn {
     message: string | Error,
     context?: Record<string, unknown>,
   ) => void;
+  showInfoToast: (
+    message: string | Error,
+    context?: Record<string, unknown>,
+  ) => void;
   showStatusToast: (message: string) => void;
   dismiss: () => void;
+}
+
+const SUBMITTED_TITLES: Record<TransactionType, string> = {
+  LIQUIDITY: "Liquidity transaction submitted",
+  POOL_CREATION: "Pool creation submitted",
+  SWAP: "Swap submitted",
+};
+
+export function buildSubmittedToast({
+  transactionType,
+  signature,
+  description,
+  title,
+}: {
+  transactionType: TransactionType;
+  signature: string;
+  description?: string;
+  title?: string;
+}) {
+  return {
+    description:
+      description ??
+      `Transaction is awaiting confirmation. Transaction: ${signature}`,
+    title: title ?? SUBMITTED_TITLES[transactionType],
+    variant: "info" as const,
+  };
 }
 
 export const useTransactionToasts = ({
@@ -154,6 +184,26 @@ export const useTransactionToasts = ({
     [toast, transactionType],
   );
 
+  const showInfoToast = useCallback(
+    (message: string | Error, context?: Record<string, unknown>) => {
+      const infoMessage = message instanceof Error ? message.message : message;
+      const contextString = context
+        ? Object.entries(context)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(", ")
+        : "";
+
+      toast({
+        description: contextString
+          ? `${infoMessage}${contextString ? `, ${contextString}` : ""}`
+          : infoMessage,
+        title: `${transactionType.replace("_", " ")} Status`,
+        variant: "info",
+      });
+    },
+    [toast, transactionType],
+  );
+
   const showStatusToast = useCallback(
     (message: string) => {
       toast({
@@ -172,6 +222,7 @@ export const useTransactionToasts = ({
   return {
     dismiss,
     showErrorToast,
+    showInfoToast,
     showStatusToast,
     showStepToast,
     showSuccessToast,

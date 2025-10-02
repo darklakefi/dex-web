@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  buildSubmittedToast,
   getUserFriendlyErrorMessage,
   isWarningMessage,
   signTransactionWithRecovery,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas";
+import type { GetUserLiquidityOutput } from "@dex-web/orpc/schemas/pools/getUserLiquidity.schema";
 import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import {
   convertToDecimal,
@@ -18,7 +20,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
-import BigNumber from "bignumber.js";
+import Decimal from "decimal.js";
 import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
@@ -29,6 +31,11 @@ import {
 } from "../../../_utils/constants";
 import { isSquadsX } from "../../../_utils/isSquadsX";
 import { dismissToast, toast } from "../../../_utils/toast";
+import {
+  calculateWithdrawalDetails,
+  InputType,
+} from "../_utils/calculateWithdrawalDetails";
+import { invalidateLiquidityQueries } from "../_utils/invalidateLiquidityCache";
 
 type WithdrawLiquidityFormSchema = z.infer<typeof withdrawLiquidityFormSchema>;
 
@@ -146,46 +153,32 @@ export function WithdrawLiquidityModal({
       !poolReserves ||
       !withdrawalAmountPercentage ||
       withdrawalAmountPercentage.trim() === "" ||
-      withdrawalAmountPercentage === "0" ||
       poolReserves.totalLpSupply === 0
     ) {
       setCalculationEmpty();
       return;
     }
 
-    let withdrawLpPercentage: BigNumber;
-    try {
-      withdrawLpPercentage = BigNumber(
-        withdrawalAmountPercentage.replace(/,/g, ""),
-      );
-      if (withdrawLpPercentage.isNaN() || withdrawLpPercentage.lte(0)) {
-        setCalculationEmpty();
-        return;
-      }
-    } catch {
-      setCalculationEmpty();
+    const details = calculateWithdrawalDetails({
+      inputType: InputType.Percentage,
+      poolReserves,
+      tokenAAddress: tokenXAddress,
+      tokenAPrice: tokenXPrice ?? { price: 0 },
+      tokenBAddress: tokenYAddress,
+      tokenBPrice: tokenYPrice ?? { price: 0 },
+      userLiquidity,
+      withdrawalAmount: withdrawalAmountPercentage,
+    });
+
+    if (details.percentage <= 0) {
       return;
     }
 
-    const percentage = withdrawLpPercentage.toNumber();
-    const tokenXAmount =
-      (liquidityCalculations.userTokenXAmount * percentage) / 100;
-    const tokenYAmount =
-      (liquidityCalculations.userTokenYAmount * percentage) / 100;
-
-    const tokenXValue = BigNumber(tokenXAmount).multipliedBy(
-      tokenXPrice.price || 0,
-    );
-    const tokenYValue = BigNumber(tokenYAmount).multipliedBy(
-      tokenYPrice.price || 0,
-    );
-    const usdValue = tokenXValue.plus(tokenYValue).toNumber();
-
     setWithdrawalCalculations({
-      percentage,
-      tokenXAmount,
-      tokenYAmount,
-      usdValue,
+      percentage: details.percentage,
+      tokenXAmount: details.tokenAAmount,
+      tokenYAmount: details.tokenBAmount,
+      usdValue: details.usdValue,
     });
   };
 
@@ -265,6 +258,15 @@ export function WithdrawLiquidityModal({
 
       dismissToast();
       const squads = isSquadsX(wallet);
+      const isSubmitted = submitRes.status === "submitted";
+      const submittedToast = buildSubmittedToast({
+        description: submitRes.error
+          ? `${submitRes.error} Transaction: ${submitRes.signature}`
+          : undefined,
+        signature: submitRes.signature,
+        title: "Withdrawal submitted",
+        transactionType: "LIQUIDITY",
+      });
       toast({
         customAction: (
           <Text
@@ -282,63 +284,72 @@ export function WithdrawLiquidityModal({
             <Text.Body2>
               {squads
                 ? `Transaction initiated. You can now cast votes for this proposal on the Squads app.`
-                : `Successfully withdrew ${form.state.values.withdrawalAmount} LP tokens. Transaction: ${submitRes.signature}`}
+                : isSubmitted
+                  ? submittedToast.description
+                  : `Successfully withdrew ${form.state.values.withdrawalAmount} LP tokens. Transaction: ${submitRes.signature}`}
             </Text.Body2>
           </div>
         ),
 
-        title: squads ? "Proposal created" : "Withdrawal complete",
-        variant: "success",
+        title: squads
+          ? "Proposal created"
+          : isSubmitted
+            ? submittedToast.title
+            : "Withdrawal complete",
+        variant: squads
+          ? "success"
+          : isSubmitted
+            ? submittedToast.variant
+            : "success",
       });
 
-      try {
-        const userLiqOpts =
-          tanstackClient.liquidity.getUserLiquidity.queryOptions({
-            input: {
-              ownerAddress: publicKey.toBase58(),
-              tokenXMint: opts.tokenXMint,
-              tokenYMint: opts.tokenYMint,
-            },
-          });
-        const reservesOpts = tanstackClient.pools.getPoolReserves.queryOptions({
-          input: { tokenXMint: opts.tokenXMint, tokenYMint: opts.tokenYMint },
+      const userLiquidityOpts =
+        tanstackClient.liquidity.getUserLiquidity.queryOptions({
+          input: {
+            ownerAddress: publicKey.toBase58(),
+            tokenXMint: opts.tokenXMint,
+            tokenYMint: opts.tokenYMint,
+          },
         });
-        const poolDetailsOpts =
-          tanstackClient.pools.getPoolDetails.queryOptions({
-            input: { tokenXMint: opts.tokenXMint, tokenYMint: opts.tokenYMint },
-          });
 
-        const poolKey = `${opts.tokenXMint}-${opts.tokenYMint}`;
-        const sortedPoolKey = [opts.tokenXMint, opts.tokenYMint]
-          .sort()
-          .join("-");
-
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: userLiqOpts.queryKey }),
-          queryClient.invalidateQueries({ queryKey: reservesOpts.queryKey }),
-          queryClient.invalidateQueries({ queryKey: poolDetailsOpts.queryKey }),
-
-          queryClient.invalidateQueries({
-            queryKey: ["pool-details", poolKey],
-          }),
-          queryClient.invalidateQueries({
-            queryKey: ["pool-details", sortedPoolKey],
-          }),
-
-          queryClient.invalidateQueries({
-            queryKey: ["pool", opts.tokenXMint, opts.tokenYMint],
-          }),
-          queryClient.invalidateQueries({
-            queryKey: ["pool", opts.tokenYMint, opts.tokenXMint],
-          }),
-
-          queryClient.invalidateQueries({
-            queryKey: ["token-accounts", publicKey.toBase58()],
-          }),
-        ]);
-      } catch (error) {
-        console.error("Cache invalidation error:", error);
+      const currentLiquidity = queryClient.getQueryData(
+        userLiquidityOpts.queryKey,
+      );
+      if (
+        currentLiquidity &&
+        (currentLiquidity as GetUserLiquidityOutput).hasLiquidity
+      ) {
+        const withdrawnAmount = new Decimal(opts.lpTokenAmount)
+          .mul(
+            new Decimal(10).pow(
+              (currentLiquidity as GetUserLiquidityOutput).decimals,
+            ),
+          )
+          .toNumber();
+        const newBalance = Math.max(
+          0,
+          (currentLiquidity as GetUserLiquidityOutput).lpTokenBalance -
+            withdrawnAmount,
+        );
+        const optimisticLiquidity = {
+          ...currentLiquidity,
+          hasLiquidity: newBalance > 0,
+          lpTokenBalance: newBalance,
+        };
+        queryClient.setQueryData(
+          userLiquidityOpts.queryKey,
+          optimisticLiquidity,
+        );
       }
+
+      setTimeout(async () => {
+        await invalidateLiquidityQueries({
+          queryClient,
+          tokenXMint: opts.tokenXMint,
+          tokenYMint: opts.tokenYMint,
+          walletPublicKey: publicKey.toBase58(),
+        });
+      }, 2000);
 
       form.reset();
       onClose();
@@ -387,32 +398,49 @@ export function WithdrawLiquidityModal({
     setIsWithdrawing(true);
 
     try {
-      const userLpBalance = convertToDecimal(
-        userLiquidity.lpTokenBalance || 0,
-        userLiquidity.decimals,
+      const userLpBalanceDecimal = new Decimal(
+        convertToDecimal(
+          userLiquidity.lpTokenBalance || 0,
+          userLiquidity.decimals,
+        ).toString(),
       );
 
-      const slippageTolerance = 0.01;
-      const withdrawLpAmountPercentage = BigNumber(
-        form.state.values.withdrawalAmount.replace(/,/g, ""),
-      );
-      const withdrawLpAmount = withdrawLpAmountPercentage
-        .multipliedBy(userLpBalance)
-        .dividedBy(100);
+      const withdrawalDetails = calculateWithdrawalDetails({
+        inputType: InputType.Percentage,
+        poolReserves,
+        tokenAAddress: tokenXAddress,
+        tokenAPrice: tokenXPrice ?? { price: 0 },
+        tokenBAddress: tokenYAddress,
+        tokenBPrice: tokenYPrice ?? { price: 0 },
+        userLiquidity,
+        withdrawalAmount: form.state.values.withdrawalAmount,
+      });
 
-      const withdrawShare = withdrawLpAmount.dividedBy(
-        poolReserves?.totalLpSupply || 1,
-      );
-      const expectedX = withdrawShare.multipliedBy(poolReserves?.reserveX || 0);
-      const expectedY = withdrawShare.multipliedBy(poolReserves?.reserveY || 0);
+      if (withdrawalDetails.percentage <= 0) {
+        throw new Error("Withdrawal amount must be greater than zero");
+      }
+
+      const withdrawPercentage = new Decimal(withdrawalDetails.percentage);
+      const withdrawLpAmount = userLpBalanceDecimal
+        .mul(withdrawPercentage)
+        .div(100);
+
+      if (!withdrawLpAmount.isFinite() || withdrawLpAmount.lte(0)) {
+        throw new Error("Withdrawal amount must be greater than zero");
+      }
+
+      const expectedX = new Decimal(withdrawalDetails.tokenAAmount);
+      const expectedY = new Decimal(withdrawalDetails.tokenBAmount);
+      const slippageTolerance = new Decimal(0.01);
+      const slippageFactor = new Decimal(1).minus(slippageTolerance);
 
       const minXOut = expectedX
-        .multipliedBy(1 - slippageTolerance)
-        .integerValue(BigNumber.ROUND_FLOOR)
+        .mul(slippageFactor)
+        .toDecimalPlaces(0, Decimal.ROUND_FLOOR)
         .toString();
       const minYOut = expectedY
-        .multipliedBy(1 - slippageTolerance)
-        .integerValue(BigNumber.ROUND_FLOOR)
+        .mul(slippageFactor)
+        .toDecimalPlaces(0, Decimal.ROUND_FLOOR)
         .toString();
 
       const response = await client.liquidity.withdrawLiquidity({
@@ -488,7 +516,18 @@ export function WithdrawLiquidityModal({
                       return undefined;
                     }
 
-                    return undefined;
+                    try {
+                      const cleanAmount = value.replace(/,/g, "");
+                      const amountBN = new Decimal(cleanAmount);
+
+                      if (amountBN.isNaN() || amountBN.lte(0)) {
+                        return "Invalid amount";
+                      }
+
+                      return undefined;
+                    } catch {
+                      return "Invalid amount";
+                    }
                   },
                 }}
               >
@@ -514,6 +553,7 @@ export function WithdrawLiquidityModal({
                       </Text.Body2>
                     }
                     currencyCode="%"
+                    error={field.state.meta.errors.join(", ")}
                     maxAmount={100}
                     name={field.name}
                     onBlur={field.handleBlur}
@@ -529,9 +569,19 @@ export function WithdrawLiquidityModal({
 
           {withdrawalCalculations.percentage > 0 && (
             <div className="space-y-2 bg-green-800 p-3">
-              <Text.Body2 className="text-green-300">
-                Total Withdrawal
-              </Text.Body2>
+              <div className="flex items-center justify-between">
+                <Text.Body2 className="text-green-300">
+                  Total Withdrawal
+                </Text.Body2>
+                <Text.Body2 className="text-green-300">
+                  {numberFormatHelper({
+                    decimalScale: 2,
+                    trimTrailingZeros: true,
+                    value: withdrawalCalculations.percentage,
+                  })}
+                  %
+                </Text.Body2>
+              </div>
               <div className="text-green-200 text-lg">
                 <div>
                   {numberFormatHelper({

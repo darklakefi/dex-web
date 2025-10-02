@@ -608,7 +608,7 @@ export function SwapForm() {
       const symbol = sellTokenAccount?.tokenAccounts[0]?.symbol || "";
 
       if (
-        parseAmountBigNumber(inputClean).gt(
+        convertToDecimal(parseAmountBigNumber(inputClean).toString(), 0).gt(
           convertToDecimal(accountAmount, decimal),
         )
       ) {
@@ -644,9 +644,7 @@ export function SwapForm() {
       <div className="mb-4 flex items-center justify-between md:hidden">
         <Text.Heading className="text-green-200">Swap</Text.Heading>
         <div className="flex gap-3">
-          <TokenTransactionSettingsButton
-            onChange={onChangeSlippage}
-          />
+          <TokenTransactionSettingsButton onChange={onChangeSlippage} />
           <SwapPageRefreshButton
             onClick={() => {
               debouncedGetQuote({
@@ -751,18 +749,16 @@ export function SwapForm() {
           </div>
           {quote && (
             <TokenTransactionDetails
+              onChangeSlippage={onChangeSlippage}
               quote={quote}
               slippage={slippage}
               tokenBuyMint={tokenAAddress}
               tokenSellMint={tokenBAddress}
-              onChangeSlippage={onChangeSlippage}
             />
           )}
         </Box>
         <div className="hidden flex-col gap-1 md:flex">
-          <TokenTransactionSettingsButton
-              onChange={onChangeSlippage}
-          />
+          <TokenTransactionSettingsButton onChange={onChangeSlippage} />
           <SwapPageRefreshButton
             isLoading={isLoadingQuote}
             onClick={() => {

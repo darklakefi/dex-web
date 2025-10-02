@@ -33,6 +33,7 @@ export {
   useTransactionStatus,
 } from "./hooks/useTransactionStatus";
 export {
+  buildSubmittedToast,
   type DismissToastFunction,
   type ToastFunction,
   type UseTransactionToastsParams,
@@ -67,6 +68,12 @@ export {
   validateIdlComprehensive,
   validateIdlInstructions,
 } from "./utils/idlValidation";
+export {
+  formatValidationResult,
+  type PreTransactionValidationResult,
+  type ValidationContext,
+  validateWithdrawalTransaction,
+} from "./utils/preTransactionValidation";
 export {
   createDarklakeProgram,
   createLiquidityProgram,

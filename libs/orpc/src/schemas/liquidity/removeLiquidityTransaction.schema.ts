@@ -3,9 +3,9 @@ import { Transaction } from "@solana/web3.js";
 import { z } from "zod/v4";
 
 export const removeLiquidityTransactionInputSchema = z.object({
-  lpTokensToBurn: z.number(),
-  minAmountX: z.number(),
-  minAmountY: z.number(),
+  lpTokensToBurn: z.string(),
+  minAmountX: z.string(),
+  minAmountY: z.string(),
   provider: z.instanceof(AnchorProvider),
   tokenXMint: z.string(),
   tokenXProgramId: z.string(),
