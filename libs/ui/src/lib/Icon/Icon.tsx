@@ -64,7 +64,9 @@ export type IconName =
   | "trending"
   | "x";
 
-function getIconComponent(name: IconName): any {
+function getIconComponent(
+  name: IconName,
+): React.ComponentType<React.SVGProps<SVGSVGElement>> {
   switch (name) {
     case "analytics":
       return AnalyticsIcon;

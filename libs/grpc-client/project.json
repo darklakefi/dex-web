@@ -3,23 +3,5 @@
   "name": "grpc-client",
   "projectType": "library",
   "sourceRoot": "libs/grpc-client/src",
-  "tags": [],
-  "targets": {
-    "build": {
-      "cache": true,
-      "executor": "nx:run-commands",
-      "inputs": [
-        "production",
-        "^production",
-        {
-          "externalDependencies": ["typescript"]
-        }
-      ],
-      "options": {
-        "command": "tsc --build",
-        "cwd": "libs/grpc-client"
-      },
-      "outputs": ["{workspaceRoot}/dist/libs/grpc-client"]
-    }
-  }
+  "tags": ["type:lib", "scope:grpc", "platform:shared"]
 }

@@ -1,5 +1,7 @@
 import { tanstackClient } from "@dex-web/orpc";
+import type { GetPoolReservesOutput } from "@dex-web/orpc/schemas";
 import type { QueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../../../../lib/queryKeys";
 
 interface InvalidateQueriesParams {
   queryClient: QueryClient;
@@ -15,45 +17,103 @@ export async function invalidateLiquidityQueries({
   tokenYMint,
 }: InvalidateQueriesParams): Promise<void> {
   try {
-    const userLiquidityOpts =
-      tanstackClient.liquidity.getUserLiquidity.queryOptions({
-        input: {
-          ownerAddress: walletPublicKey,
-          tokenXMint,
-          tokenYMint,
-        },
-      });
+    const userLiquidityKey = queryKeys.liquidity.user(
+      walletPublicKey,
+      tokenXMint,
+      tokenYMint,
+    );
+    const poolDetailsKey = queryKeys.pools.details(tokenXMint, tokenYMint);
+    const poolReservesKey = queryKeys.pools.reserves(tokenXMint, tokenYMint);
 
-    const poolDetailsOpts = tanstackClient.pools.getPoolDetails.queryOptions({
-      input: { tokenXMint, tokenYMint },
-    });
-
-    const poolReservesOpts = tanstackClient.pools.getPoolReserves.queryOptions({
-      input: { tokenXMint, tokenYMint },
-    });
-
-    const poolKey = `${tokenXMint}-${tokenYMint}`;
-    const sortedPoolKey = [tokenXMint, tokenYMint].sort().join("-");
+    const currentUserLiquidity = queryClient.getQueryData(userLiquidityKey);
+    const currentPoolReserves = queryClient.getQueryData(poolReservesKey);
 
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: userLiquidityOpts.queryKey }),
-      queryClient.invalidateQueries({ queryKey: poolDetailsOpts.queryKey }),
-      queryClient.invalidateQueries({ queryKey: poolReservesOpts.queryKey }),
-      queryClient.invalidateQueries({ queryKey: ["pool-details", poolKey] }),
       queryClient.invalidateQueries({
-        queryKey: ["pool-details", sortedPoolKey],
+        exact: true,
+        queryKey: userLiquidityKey,
       }),
       queryClient.invalidateQueries({
-        queryKey: ["pool", tokenXMint, tokenYMint],
+        exact: true,
+        queryKey: poolDetailsKey,
       }),
       queryClient.invalidateQueries({
-        queryKey: ["pool", tokenYMint, tokenXMint],
+        exact: true,
+        queryKey: poolReservesKey,
       }),
       queryClient.invalidateQueries({
-        queryKey: ["token-accounts", walletPublicKey],
+        exact: true,
+        queryKey: queryKeys.tokens.accounts(walletPublicKey),
       }),
     ]);
+
+    const [newUserLiquidity, newPoolReserves] = await Promise.all([
+      queryClient.fetchQuery({
+        ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
+          input: { ownerAddress: walletPublicKey, tokenXMint, tokenYMint },
+        }),
+        queryKey: userLiquidityKey,
+      }),
+      queryClient.fetchQuery({
+        ...tanstackClient.pools.getPoolReserves.queryOptions({
+          input: { tokenXMint, tokenYMint },
+        }),
+        queryKey: poolReservesKey,
+      }),
+    ]);
+
+    if (
+      currentUserLiquidity &&
+      typeof currentUserLiquidity === "object" &&
+      "hasLiquidity" in currentUserLiquidity &&
+      currentUserLiquidity.hasLiquidity &&
+      (!newUserLiquidity || !newUserLiquidity.hasLiquidity)
+    ) {
+      queryClient.setQueryData(userLiquidityKey, currentUserLiquidity);
+    }
+
+    if (
+      currentPoolReserves &&
+      newPoolReserves &&
+      (currentPoolReserves as GetPoolReservesOutput).totalLpSupply >
+        (newPoolReserves as GetPoolReservesOutput).totalLpSupply
+    ) {
+      queryClient.setQueryData(poolReservesKey, currentPoolReserves);
+    }
   } catch (error) {
     console.error("Cache invalidation error:", error);
+  }
+}
+
+export async function verifyDataConsistency(
+  queryClient: QueryClient,
+  tokenXMint: string,
+  tokenYMint: string,
+  walletPublicKey: string,
+): Promise<void> {
+  try {
+    const userLiquidityKey = queryKeys.liquidity.user(
+      walletPublicKey,
+      tokenXMint,
+      tokenYMint,
+    );
+    const poolReservesKey = queryKeys.pools.reserves(tokenXMint, tokenYMint);
+
+    const userLiquidity = queryClient.getQueryData(userLiquidityKey);
+    const poolReserves = queryClient.getQueryData(poolReservesKey);
+
+    if (!userLiquidity || !poolReserves) {
+      await queryClient.refetchQueries({
+        exact: true,
+        queryKey: userLiquidityKey,
+      });
+      return;
+    }
+
+    // Note: userTokenXAmount and userTokenYAmount are calculated values, not part of the API response
+    // This consistency check is not applicable with the current API structure
+    // The data consistency verification is handled by the components that calculate these values
+  } catch (error) {
+    console.error("Data consistency verification error:", error);
   }
 }

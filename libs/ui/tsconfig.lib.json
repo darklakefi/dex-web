@@ -21,7 +21,8 @@
     "src/**/*.jsx",
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/types/**/*.d.ts"
+    "src/types/**/*.d.ts",
+    "../../types/**/*.d.ts"
   ],
   "references": []
 }

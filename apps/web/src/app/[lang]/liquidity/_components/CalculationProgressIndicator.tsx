@@ -1,7 +1,7 @@
 "use client";
 
 import { Icon } from "@dex-web/ui";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface CalculationProgressIndicatorProps {
   isCalculating: boolean;
@@ -57,35 +57,46 @@ export function CalculationProgressIndicator({
   }, [isCalculating, hasApproximateResult, isWorkerReady, workerError]);
 
   const [animatedProgress, setAnimatedProgress] = useState(0);
+  const previousProgressRef = useRef(0);
 
   useEffect(() => {
     if (progressState.progress === 0) {
+      previousProgressRef.current = 0;
       setAnimatedProgress(0);
       return;
     }
 
-    const startProgress = animatedProgress;
+    const startProgress = previousProgressRef.current;
     const targetProgress = progressState.progress;
     const duration = 300;
     const startTime = Date.now();
+    let frameId: number | null = null;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-
       const easeOut = 1 - (1 - progress) ** 3;
       const currentProgress =
         startProgress + (targetProgress - startProgress) * easeOut;
 
+      previousProgressRef.current = currentProgress;
       setAnimatedProgress(currentProgress);
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        frameId = requestAnimationFrame(animate);
+      } else {
+        previousProgressRef.current = targetProgress;
       }
     };
 
-    requestAnimationFrame(animate);
-  }, [progressState.progress, animatedProgress]);
+    frameId = requestAnimationFrame(animate);
+
+    return () => {
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
+    };
+  }, [progressState.progress]);
 
   const [isVisible, setIsVisible] = useState(false);
 

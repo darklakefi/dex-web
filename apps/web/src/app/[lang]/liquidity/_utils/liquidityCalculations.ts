@@ -1,104 +1,79 @@
-import type { CreateLiquidityTransactionInput } from "@dex-web/orpc/schemas";
-import {
-  parseAmount,
-  parseAmountBigNumber,
-  sortSolanaAddresses,
-} from "@dex-web/utils";
-import type { PublicKey } from "@solana/web3.js";
+import type { GetUserLiquidityOutput } from "@dex-web/orpc/schemas";
+import { parseAmount } from "@dex-web/utils";
 
-interface PoolDetails {
-  tokenXMint?: string;
-  tokenYMint?: string;
-}
-
-interface TokenAmounts {
+export interface LiquidityCalculationParams {
   tokenAAmount: string;
   tokenBAmount: string;
+  poolReserves: {
+    reserveX: number;
+    reserveY: number;
+    totalLpSupply: number;
+  } | null;
 }
 
-interface TokenAddresses {
-  tokenAAddress: string;
-  tokenBAddress: string;
-}
-
-export function calculateLiquidityAmounts(
-  poolDetails: PoolDetails,
-  { tokenAAmount, tokenBAmount }: TokenAmounts,
-  {
-    tokenAAddress: _tokenAAddress,
-    tokenBAddress: _tokenBAddress,
-  }: TokenAddresses,
-): { maxAmountX: number; maxAmountY: number } {
-  const sellAmount = parseAmount(tokenBAmount);
-  const buyAmount = parseAmount(tokenAAmount);
-
-  const isTokenXSell = poolDetails.tokenXMint === _tokenBAddress;
-  const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
-  const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
-
-  return { maxAmountX, maxAmountY };
-}
-
-export function createLiquidityTransactionPayload(params: {
-  tokenAmounts: TokenAmounts;
-  tokenAddresses: TokenAddresses;
-  slippage: string;
-  publicKey: PublicKey;
-  poolDetails: PoolDetails;
-}): CreateLiquidityTransactionInput {
-  const { tokenAmounts, tokenAddresses, slippage, publicKey, poolDetails } =
-    params;
-
-  const sortedTokens = sortSolanaAddresses(
-    tokenAddresses.tokenAAddress,
-    tokenAddresses.tokenBAddress,
-  );
-
-  const { tokenXAddress, tokenYAddress } = sortedTokens;
-
-  if (!tokenXAddress || !tokenYAddress) {
-    throw new Error("Invalid token addresses after sorting");
-  }
-
-  const { maxAmountX, maxAmountY } = calculateLiquidityAmounts(
-    poolDetails,
-    tokenAmounts,
-    tokenAddresses,
-  );
-
-  return {
-    maxAmountX,
-    maxAmountY,
-    slippage: Number(slippage),
-    tokenXMint: tokenXAddress,
-    tokenYMint: tokenYAddress,
-    user: publicKey.toBase58(),
+export interface OptimisticUpdateData {
+  userLiquidity: {
+    hasLiquidity: boolean;
+    lpTokenBalance: number;
+  };
+  poolReserves: {
+    reserveX: number;
+    reserveY: number;
+    totalLpSupply: number;
   };
 }
 
-export function calculateTokenAmountByPrice(
-  inputAmount: string,
-  price: string,
-): string {
-  if (
-    parseAmountBigNumber(inputAmount).gt(0) &&
-    parseAmountBigNumber(price).gt(0)
-  ) {
-    return parseAmountBigNumber(inputAmount).multipliedBy(price).toString();
+export function calculateLpTokensFromDeposit({
+  tokenAAmount,
+  tokenBAmount,
+  poolReserves,
+}: LiquidityCalculationParams): number {
+  if (!poolReserves || poolReserves.totalLpSupply === 0) {
+    return 1;
   }
-  return "0";
+
+  const parsedAmountA = parseAmount(tokenAAmount);
+  const parsedAmountB = parseAmount(tokenBAmount);
+
+  const lpTokensFromTokenA =
+    (parsedAmountA / poolReserves.reserveX) * poolReserves.totalLpSupply;
+  const lpTokensFromTokenB =
+    (parsedAmountB / poolReserves.reserveY) * poolReserves.totalLpSupply;
+
+  return Math.min(lpTokensFromTokenA, lpTokensFromTokenB);
 }
 
-export function determineInputType(
-  type: "buy" | "sell",
-  poolDetails: PoolDetails | null,
-  tokenAAddress: string | null,
-  tokenBAddress: string | null,
-): "tokenX" | "tokenY" {
-  if (!poolDetails) return "tokenX";
+export function createOptimisticLiquidityUpdate(
+  previousLiquidity: GetUserLiquidityOutput | undefined,
+  lpTokensToAdd: number,
+): GetUserLiquidityOutput | undefined {
+  if (!previousLiquidity) return undefined;
 
-  return (type === "sell" && poolDetails.tokenXMint === tokenBAddress) ||
-    (type === "buy" && poolDetails.tokenXMint === tokenAAddress)
-    ? "tokenX"
-    : "tokenY";
+  return {
+    ...previousLiquidity,
+    hasLiquidity: true,
+    lpTokenBalance: previousLiquidity.lpTokenBalance + lpTokensToAdd,
+  };
+}
+
+export function createOptimisticPoolReservesUpdate(
+  previousReserves: unknown,
+  tokenAAmount: number,
+  tokenBAmount: number,
+  lpTokensToAdd: number,
+) {
+  if (!previousReserves) return undefined;
+
+  const reserves = previousReserves as {
+    reserveX: number;
+    reserveY: number;
+    totalLpSupply: number;
+  };
+
+  return {
+    ...previousReserves,
+    reserveX: reserves.reserveX + tokenAAmount,
+    reserveY: reserves.reserveY + tokenBAmount,
+    totalLpSupply: reserves.totalLpSupply + lpTokensToAdd,
+  };
 }

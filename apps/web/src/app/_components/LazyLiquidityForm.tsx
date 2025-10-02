@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { Suspense } from "react";
 import type { PoolData } from "../../hooks/usePoolData";
+import { queryKeys } from "../../lib/queryKeys";
 import { LiquidityForm } from "../[lang]/liquidity/_components/LiquidityForm";
 import { SkeletonForm } from "./SkeletonForm";
 
@@ -50,12 +51,7 @@ export async function LazyLiquidityForm({
             totalLpSupply: result.totalLpSupply,
           };
         },
-        queryKey: [
-          "pool",
-          [tokenXAddress, tokenYAddress].sort().join("-"),
-          tokenXAddress,
-          tokenYAddress,
-        ],
+        queryKey: queryKeys.pools.reserves(tokenXAddress, tokenYAddress),
       });
     } catch (error) {
       console.error("Failed to prefetch pool reserves", error);

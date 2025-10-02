@@ -216,6 +216,7 @@ export function CreatePoolForm() {
       }
 
       createState.reset();
+      form.reset();
       const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
       const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
 

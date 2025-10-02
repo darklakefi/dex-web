@@ -8,7 +8,10 @@ import {
   useTransactionToasts,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
-import type { CreateLiquidityTransactionInput } from "@dex-web/orpc/schemas";
+import type {
+  CreateLiquidityTransactionInput,
+  GetPoolReservesOutput,
+} from "@dex-web/orpc/schemas";
 import type { GetUserLiquidityOutput } from "@dex-web/orpc/schemas/pools/getUserLiquidity.schema";
 import {
   convertToDecimal,
@@ -53,7 +56,10 @@ import { liquidityMachine } from "../_machines/liquidityMachine";
 import type { LiquidityFormValues } from "../_types/liquidity.types";
 import { liquidityFormSchema } from "../_types/liquidity.types";
 import { startCacheCleanup } from "../_utils/calculationCache";
-import { invalidateLiquidityQueries } from "../_utils/invalidateLiquidityCache";
+import {
+  invalidateLiquidityQueries,
+  verifyDataConsistency,
+} from "../_utils/invalidateLiquidityCache";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
 
 const { fieldContext, formContext } = createFormHookContexts();
@@ -210,7 +216,7 @@ export function useLiquidityFormLogic({
         `Finalizing transaction... (${attempt}/${LIQUIDITY_CONSTANTS.MAX_TRANSACTION_ATTEMPTS}) - ${status}`,
       );
     },
-    onSuccess: (result) => {
+    onSuccess: async (result, _context) => {
       if (result.error) {
         const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
         const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
@@ -233,17 +239,8 @@ export function useLiquidityFormLogic({
         return;
       }
 
-      send({ type: "SUCCESS" });
-      const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
-      const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
-
-      trackConfirmed({
-        action: "add",
-        amountA: tokenAAmount,
-        amountB: tokenBAmount,
-        tokenA: tokenAAddress || "",
-        tokenB: tokenBAddress || "",
-        transactionHash: "",
+      await queryClient.cancelQueries({
+        queryKey: ["liquidity", tokenXMint, tokenYMint],
       });
 
       const userLiquidityOpts =
@@ -255,25 +252,71 @@ export function useLiquidityFormLogic({
           },
         });
 
-      const currentLiquidity = queryClient.getQueryData(
+      const previousUserLiquidity = queryClient.getQueryData(
         userLiquidityOpts.queryKey,
       );
+      const previousPoolReserves =
+        queryClient.getQueryData<GetPoolReservesOutput>([
+          "pool-reserves",
+          tokenXMint,
+          tokenYMint,
+        ]);
+
+      const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
+      const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
+
+      const actualLpTokens = previousPoolReserves
+        ? Math.min(
+            (tokenAAmount / previousPoolReserves.reserveX) *
+              previousPoolReserves.totalLpSupply,
+            (tokenBAmount / previousPoolReserves.reserveY) *
+              previousPoolReserves.totalLpSupply,
+          )
+        : 1;
+
       if (
-        currentLiquidity &&
-        typeof currentLiquidity === "object" &&
-        "hasLiquidity" in currentLiquidity
+        previousUserLiquidity &&
+        typeof previousUserLiquidity === "object" &&
+        "hasLiquidity" in previousUserLiquidity
       ) {
         const optimisticLiquidity = {
-          ...currentLiquidity,
+          ...previousUserLiquidity,
           hasLiquidity: true,
           lpTokenBalance:
-            (currentLiquidity as GetUserLiquidityOutput).lpTokenBalance + 1,
+            (previousUserLiquidity as GetUserLiquidityOutput).lpTokenBalance +
+            actualLpTokens,
         };
         queryClient.setQueryData(
           userLiquidityOpts.queryKey,
           optimisticLiquidity,
         );
       }
+
+      if (previousPoolReserves) {
+        const optimisticPoolReserves = {
+          ...previousPoolReserves,
+          reserveX: previousPoolReserves.reserveX + tokenAAmount,
+          reserveY: previousPoolReserves.reserveY + tokenBAmount,
+          totalLpSupply: previousPoolReserves.totalLpSupply + actualLpTokens,
+        };
+        queryClient.setQueryData(
+          ["pool-reserves", tokenXMint, tokenYMint],
+          optimisticPoolReserves,
+        );
+      }
+
+      send({ type: "SUCCESS" });
+
+      trackConfirmed({
+        action: "add",
+        amountA: tokenAAmount,
+        amountB: tokenBAmount,
+        tokenA: tokenAAddress || "",
+        tokenB: tokenBAddress || "",
+        transactionHash: "",
+      });
+
+      form.reset();
 
       const successMessage = !isSquadsX(wallet)
         ? `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
@@ -283,12 +326,27 @@ export function useLiquidityFormLogic({
       tokenAccountsData.refetchBuyTokenAccount();
       tokenAccountsData.refetchSellTokenAccount();
 
-      invalidateLiquidityQueries({
-        queryClient,
-        tokenXMint,
-        tokenYMint,
-        walletPublicKey: walletPublicKey?.toBase58() || "",
-      });
+      setTimeout(async () => {
+        try {
+          await invalidateLiquidityQueries({
+            queryClient,
+            tokenXMint,
+            tokenYMint,
+            walletPublicKey: walletPublicKey?.toBase58() || "",
+          });
+
+          await verifyDataConsistency(
+            queryClient,
+            tokenXMint,
+            tokenYMint,
+            walletPublicKey?.toBase58() || "",
+          );
+        } catch (error) {
+          console.error("Cache invalidation failed:", error);
+        }
+      }, 3000);
+
+      return { previousPoolReserves, previousUserLiquidity };
     },
     onTimeout: () => {
       handleError(

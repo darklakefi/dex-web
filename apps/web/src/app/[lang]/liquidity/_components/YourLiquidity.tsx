@@ -1,5 +1,4 @@
 "use client";
-import { tanstackClient } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas";
 import { Box, Button, Text } from "@dex-web/ui";
 import {
@@ -8,9 +7,17 @@ import {
   sortSolanaAddresses,
   truncate,
 } from "@dex-web/utils";
-import { useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import { useMemo, useState } from "react";
+import { useUserLiquiditySuspense } from "../../../../hooks/queries/useLiquidityQueries";
+import {
+  usePoolDetailsSuspense,
+  usePoolReservesSuspense,
+} from "../../../../hooks/queries/usePoolQueries";
+import {
+  useTokenMetadataSuspense,
+  useTokenPriceSuspense,
+} from "../../../../hooks/queries/useTokenQueries";
 import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import {
   DEFAULT_BUY_TOKEN,
@@ -41,65 +48,26 @@ export function YourLiquidity({
     resolvedTokenAAddress,
     resolvedTokenBAddress,
   );
-  const [
-    { data: userLiquidity },
-    { data: tokenMetadata },
-    { data: poolDetails },
-    { data: poolReserves },
-    { data: tokenXPrice },
-    { data: tokenYPrice },
-  ] = useSuspenseQueries({
-    queries: [
-      {
-        ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
-          enabled: !!walletPublicKey,
-          input: {
-            ownerAddress: walletPublicKey?.toBase58() ?? "",
-            tokenXMint: tokenXAddress,
-            tokenYMint: tokenYAddress,
-          },
-        }),
-      },
-      tanstackClient.tokens.getTokenMetadata.queryOptions({
-        input: {
-          addresses: [tokenXAddress, tokenYAddress],
-          returnAsObject: true,
-        },
-      }),
-      tanstackClient.pools.getPoolDetails.queryOptions({
-        input: {
-          tokenXMint: tokenXAddress,
-          tokenYMint: tokenYAddress,
-        },
-      }),
-      tanstackClient.pools.getPoolReserves.queryOptions({
-        input: {
-          tokenXMint: tokenXAddress,
-          tokenYMint: tokenYAddress,
-        },
-      }),
-      {
-        ...tanstackClient.tokens.getTokenPrice.queryOptions({
-          input: {
-            amount: 1,
-            mint: tokenXAddress,
-            quoteCurrency: "USD",
-          },
-        }),
-        staleTime: 5 * 1000,
-      },
-      {
-        ...tanstackClient.tokens.getTokenPrice.queryOptions({
-          input: {
-            amount: 1,
-            mint: tokenYAddress,
-            quoteCurrency: "USD",
-          },
-        }),
-        staleTime: 5 * 1000,
-      },
-    ],
-  });
+  const { data: userLiquidity, isFetching: isLiquidityFetching } =
+    useUserLiquiditySuspense(
+      walletPublicKey?.toBase58() ?? "",
+      tokenXAddress,
+      tokenYAddress,
+    );
+
+  const { data: tokenMetadata } = useTokenMetadataSuspense([
+    tokenXAddress,
+    tokenYAddress,
+  ]);
+
+  const { data: poolDetails, isFetching: isPoolFetching } =
+    usePoolDetailsSuspense(tokenXAddress, tokenYAddress);
+
+  const { data: poolReserves, isFetching: isReservesFetching } =
+    usePoolReservesSuspense(tokenXAddress, tokenYAddress);
+
+  const { data: tokenXPrice } = useTokenPriceSuspense(tokenXAddress);
+  const { data: tokenYPrice } = useTokenPriceSuspense(tokenYAddress);
 
   const tokenMetadataMap =
     (tokenMetadata as Record<string, Token | undefined>) ?? {};
@@ -158,6 +126,43 @@ export function YourLiquidity({
     };
   }, [userLiquidity, poolReserves, tokenXPrice, tokenYPrice, poolDetails]);
 
+  const isBackgroundFetching =
+    isLiquidityFetching || isPoolFetching || isReservesFetching;
+
+  if (isBackgroundFetching && !userLiquidity?.hasLiquidity) {
+    return (
+      <div className="mt-4 w-full max-w-md">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <Text.Heading className="text-green-200">
+              Your Liquidity
+            </Text.Heading>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+              <Text.Body2 className="text-green-300 uppercase">
+                Loading...
+              </Text.Body2>
+            </div>
+          </div>
+          <Box className="flex flex-row">
+            <div className="flex flex-1 flex-col justify-between gap-2 border-green-500 border-r pr-2">
+              <Text.Body2 className="text-green-200">Loading...</Text.Body2>
+              <Text.Body2 className="text-green-200">Loading...</Text.Body2>
+              <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
+              <Button
+                className="max-w-fit cursor-pointer opacity-50"
+                disabled
+                variant="secondary"
+              >
+                WITHDRAW
+              </Button>
+            </div>
+          </Box>
+        </div>
+      </div>
+    );
+  }
+
   if (!userLiquidity?.hasLiquidity || !poolDetails) {
     return <div className="mt-4 w-full max-w-md" />;
   }
@@ -169,9 +174,14 @@ export function YourLiquidity({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <Text.Heading className="text-green-200">Your Liquidity</Text.Heading>
-          <Text.Body2 className="text-green-300 uppercase">
-            All Positions (1)
-          </Text.Body2>
+          <div className="flex items-center gap-2">
+            {isBackgroundFetching && (
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+            )}
+            <Text.Body2 className="text-green-300 uppercase">
+              All Positions (1)
+            </Text.Body2>
+          </div>
         </div>
 
         <Box className="flex flex-row">

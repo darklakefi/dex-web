@@ -3,14 +3,7 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getFirstConnectedWalletAddress } from "../app/_utils/getFirstConnectedWalletAddress";
-
-export const walletQueryKeys = {
-  adapter: () => [...walletQueryKeys.all, "adapter"] as const,
-  address: () => [...walletQueryKeys.all, "address"] as const,
-  all: ["wallet"] as const,
-  connection: () => [...walletQueryKeys.all, "connection"] as const,
-  publicKey: () => [...walletQueryKeys.all, "publicKey"] as const,
-} as const;
+import { queryKeys } from "../lib/queryKeys";
 
 export function useWalletAddress() {
   const { wallet } = useWallet();
@@ -23,7 +16,7 @@ export function useWalletAddress() {
       if (!wallet?.adapter) return null;
       return getFirstConnectedWalletAddress(wallet.adapter);
     },
-    queryKey: [...walletQueryKeys.address(), wallet?.adapter?.name],
+    queryKey: [...queryKeys.wallet.address(), wallet?.adapter?.name],
     staleTime: 30 * 60 * 1000,
   });
 }
@@ -36,7 +29,7 @@ export function useWalletPublicKey() {
     gcTime: 60 * 60 * 1000,
     placeholderData: (previousData) => previousData,
     queryFn: () => publicKey,
-    queryKey: [...walletQueryKeys.publicKey(), publicKey?.toString()],
+    queryKey: [...queryKeys.wallet.publicKey(), publicKey?.toString()],
     staleTime: 30 * 60 * 1000,
   });
 }
@@ -54,7 +47,7 @@ export function useWalletConnection() {
       wallet,
     }),
     queryKey: [
-      ...walletQueryKeys.connection(),
+      ...queryKeys.wallet.connection(),
       wallet?.adapter?.name,
       connected,
       connecting,
@@ -83,7 +76,7 @@ export function useWalletAdapter() {
         wallet: wallet,
       };
     },
-    queryKey: [...walletQueryKeys.adapter(), wallet?.adapter?.name],
+    queryKey: [...queryKeys.wallet.adapter(), wallet?.adapter?.name],
     staleTime: 30 * 60 * 1000,
   });
 }
@@ -93,15 +86,17 @@ export function useInvalidateWalletCache() {
 
   return {
     invalidateAdapter: () =>
-      queryClient.invalidateQueries({ queryKey: walletQueryKeys.adapter() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.wallet.adapter() }),
     invalidateAddress: () =>
-      queryClient.invalidateQueries({ queryKey: walletQueryKeys.address() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.wallet.address() }),
     invalidateAll: () =>
-      queryClient.invalidateQueries({ queryKey: walletQueryKeys.all }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.wallet.all }),
     invalidateConnection: () =>
-      queryClient.invalidateQueries({ queryKey: walletQueryKeys.connection() }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.wallet.connection(),
+      }),
     invalidatePublicKey: () =>
-      queryClient.invalidateQueries({ queryKey: walletQueryKeys.publicKey() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.wallet.publicKey() }),
   };
 }
 

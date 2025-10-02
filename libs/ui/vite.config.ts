@@ -77,7 +77,7 @@ export const config = mergeConfig(baseConfig, {
     tailwindcss(),
     nxViteTsPaths(),
     svgr({
-      include: "**/*.svg",
+      include: "src/**/*.svg",
       svgrOptions: {
         exportType: "default",
       },
@@ -97,4 +97,21 @@ export const config = mergeConfig(baseConfig, {
   ],
 });
 
-export default defineConfig(config);
+export default defineConfig(({ mode }) => {
+  if (mode === "typecheck") {
+    return {
+      ...config,
+      build: {
+        ...config.build,
+        rollupOptions: {
+          ...config.build?.rollupOptions,
+          output: {
+            format: "es",
+          },
+        },
+        write: false,
+      },
+    };
+  }
+  return config;
+});

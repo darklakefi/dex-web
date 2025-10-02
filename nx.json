@@ -7,6 +7,12 @@
         "linter": "none",
         "style": "tailwind"
       }
+    },
+    "@nx/react": {
+      "component": {
+        "routing": false,
+        "style": "none"
+      }
     }
   },
   "namedInputs": {
@@ -103,6 +109,11 @@
       "plugin": "@nx/storybook/plugin"
     }
   ],
+  "release": {
+    "version": {
+      "preVersionCommand": "pnpm test"
+    }
+  },
   "sync": {
     "applyChanges": true
   },

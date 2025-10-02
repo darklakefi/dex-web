@@ -10,7 +10,17 @@
       }
     ]
   },
-  "exclude": ["node_modules"],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**/*",
+    "**/test/**/*",
+    "**/*.config.ts",
+    "**/*.config.js"
+  ],
   "extends": "../../tsconfig.base.json",
   "files": ["next-env.d.ts"],
   "include": [
