@@ -45,8 +45,14 @@ import { invalidateLiquidityQueries } from "../invalidateLiquidityCache";
 describe("invalidateLiquidityCache - Simple Test", () => {
   it("should work with a simple mock", async () => {
     const mockInvalidateQueries = vi.fn().mockResolvedValue(undefined);
+    const mockFetchQuery = vi
+      .fn()
+      .mockResolvedValue({ hasLiquidity: false, lpTokenBalance: 0 });
+    const mockGetQueryData = vi.fn().mockReturnValue(null);
 
     const queryClient = {
+      fetchQuery: mockFetchQuery,
+      getQueryData: mockGetQueryData,
       invalidateQueries: mockInvalidateQueries,
     };
 

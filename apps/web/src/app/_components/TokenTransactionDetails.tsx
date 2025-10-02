@@ -4,8 +4,8 @@ import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Box, Icon, Text, Tooltip } from "@dex-web/ui";
 import BigNumber from "bignumber.js";
 import { cva, type VariantProps } from "class-variance-authority";
-import { SwapRate } from "../[lang]/(swap)/_components/SwapRate";
 import { useTranslations } from "next-intl";
+import { SwapRate } from "../[lang]/(swap)/_components/SwapRate";
 import { TokenTransactionSettingsButton } from "./TokenTransactionSettingsButton";
 
 function getSwapDetailsIcon(impact: "LOW" | "MEDIUM" | "HIGH") {
@@ -114,16 +114,26 @@ export function TokenTransactionDetails({
           label={i18n("priceImpact")}
           value={`${quote.priceImpactPercentage}%`}
         />
-        <SwapDetailsItem label={
-          <div className="flex items-center gap-1">
-            {i18n("maxSlippage")}
-            <TokenTransactionSettingsButton
-              onChange={onChangeSlippage}
-              trigger={<span className="cursor-pointer hover:opacity-50">[{i18n("edit")}]</span>}
-            />
-          </div>
-        } value={`${slippage}%`} />
-        <SwapDetailsItem label={i18n("receiveAtLeast")} value={minOutputValue} />
+        <SwapDetailsItem
+          label={
+            <div className="flex items-center gap-1">
+              {i18n("maxSlippage")}
+              <TokenTransactionSettingsButton
+                onChange={onChangeSlippage}
+                trigger={
+                  <span className="cursor-pointer hover:opacity-50">
+                    [{i18n("edit")}]
+                  </span>
+                }
+              />
+            </div>
+          }
+          value={`${slippage}%`}
+        />
+        <SwapDetailsItem
+          label={i18n("receiveAtLeast")}
+          value={minOutputValue}
+        />
         <SwapDetailsItem
           label={i18n("mevProtection")}
           tooltip={

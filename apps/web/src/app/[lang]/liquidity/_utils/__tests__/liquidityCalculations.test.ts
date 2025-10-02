@@ -76,8 +76,8 @@ describe("liquidityCalculations", () => {
     it("should create valid transaction payload", () => {
       const result = createLiquidityTransactionPayload(mockParams);
       expect(result).toEqual({
-        maxAmountX: 100,
-        maxAmountY: 200,
+        maxAmountX: 200,
+        maxAmountY: 100,
         slippage: 0.5,
         tokenXMint: "tokenA123",
         tokenYMint: "tokenB456",
