@@ -5,7 +5,7 @@ import { useWallet, type Wallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 import { useAnalytics } from "../../hooks/useAnalytics";
 import { selectedTokensParsers } from "../_utils/searchParams";
@@ -28,7 +28,6 @@ export function SelectWalletModal() {
     try {
       select(wallet.adapter.name);
     } catch (error) {
-      // Track wallet connection failure
       trackWalletConnection({
         success: false,
         wallet: wallet.adapter.name,
