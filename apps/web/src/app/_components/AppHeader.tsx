@@ -27,18 +27,22 @@ export const AppHeader = () => {
       logoSm={<Icon className="h-6 w-auto stroke-none" name="logo-sm" />}
     >
       <Link
-        className={`inline-flex items-baseline justify-center leading-none no-underline ${pathname === "/" ? "text-green-100" : "text-green-300"}`}
+        className={`inline-flex items-baseline justify-center leading-none ${pathname === "/" ? "text-green-100" : "text-green-300"}`}
         data-testid="home-link"
         href="/"
       >
-        <Text variant="link">{tx("swap")}</Text>
+        <Text className="no-underline" variant="link">
+          {tx("swap")}
+        </Text>
       </Link>
       <Link
-        className={`inline-flex items-baseline justify-center leading-none no-underline ${pathname === "/liquidity" ? "text-green-100" : "text-green-300"}`}
+        className={`inline-flex items-baseline justify-center leading-none ${pathname === "/liquidity" ? "text-green-100" : "text-green-300"}`}
         data-testid="liquidity-link"
         href="/liquidity"
       >
-        <Text variant="link">{tx("liquidity")}</Text>
+        <Text className="no-underline" variant="link">
+          {tx("liquidity")}
+        </Text>
       </Link>
       <Text
         as={Link}
