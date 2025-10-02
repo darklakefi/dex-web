@@ -76,9 +76,9 @@ export async function invalidateLiquidityQueries({
       const newLpBalance = newUserLiquidity?.lpTokenBalance || 0;
 
       if (
-        !newUserLiquidity ||
-        !newUserLiquidity.hasLiquidity ||
-        newLpBalance < currentLpBalance
+        newUserLiquidity &&
+        newUserLiquidity.hasLiquidity &&
+        newLpBalance < currentLpBalance * 0.9
       ) {
         queryClient.setQueryData(userLiquidityKey, currentUserLiquidity);
       }

@@ -92,6 +92,8 @@ export function YourLiquidity({
   const liquidityCalculations = useMemo(() => {
     if (
       !userLiquidity?.hasLiquidity ||
+      !userLiquidity?.lpTokenBalance ||
+      userLiquidity.lpTokenBalance === 0 ||
       !poolDetails ||
       !poolReserves ||
       poolReserves.totalLpSupply === 0
@@ -171,7 +173,13 @@ export function YourLiquidity({
     );
   }
 
-  if (!shouldFetchLiquidity || !userLiquidity?.hasLiquidity || !poolDetails) {
+  if (
+    !shouldFetchLiquidity ||
+    !userLiquidity?.hasLiquidity ||
+    !userLiquidity?.lpTokenBalance ||
+    userLiquidity.lpTokenBalance === 0 ||
+    !poolDetails
+  ) {
     return <div className="mt-4 w-full max-w-md" />;
   }
 
