@@ -46,6 +46,12 @@
           "title": "Proposal failed"
         }
       }
-    }
+    },
+    "receiveAtLeast": "Receive at least",
+    "priceImpact": "Price Impact",
+    "maxSlippage": "Max Slippage",
+    "mevProtection": "MEV Protection",
+    "estimatedFees": "Est. Fees",
+    "edit": "edit"
   }
 }

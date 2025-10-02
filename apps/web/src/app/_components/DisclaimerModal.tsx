@@ -66,7 +66,7 @@ export function DisclaimerModal({
   if (!isOpen) return null;
 
   return (
-    <Modal onClose={() => {}}>
+    <Modal onClose={() => {}} className="bg-modal-overlay">
       <DisclaimerModalContent country={country} onAccept={onAccept} />
     </Modal>
   );
