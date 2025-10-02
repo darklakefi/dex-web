@@ -25,9 +25,12 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
 
   const wallets = useMemo(
     () => [
-      new PhantomWalletAdapter(),
       ...(typeof window !== "undefined"
-        ? [new CoinbaseWalletAdapter(), new TrustWalletAdapter()]
+        ? [
+            new PhantomWalletAdapter(),
+            new CoinbaseWalletAdapter(),
+            new TrustWalletAdapter(),
+          ]
         : []),
     ],
     [],
