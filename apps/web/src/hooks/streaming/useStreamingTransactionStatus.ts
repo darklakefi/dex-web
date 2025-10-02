@@ -38,14 +38,18 @@ export function useStreamingTransactionStatus({
     async (): Promise<TransactionStreamData | null> => {
       if (!trackingId) return null;
 
-      const mockStatus: TransactionStreamData = {
-        confirmations: 0,
-        lastUpdate: Date.now(),
-        signature: trackingId,
-        status: "pending",
-      };
-
-      return mockStatus;
+      try {
+        const response = await fetch(`/api/transactions/${trackingId}/status`);
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch transaction status: ${response.statusText}`,
+          );
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Failed to fetch transaction status:", error);
+        return null;
+      }
     };
 
   const sseQuery = useServerSentEvents<TransactionStreamData>(

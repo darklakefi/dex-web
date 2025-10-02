@@ -201,7 +201,16 @@ export function useServerSentEvents<TData>(
   const fallbackQuery = useQuery({
     enabled: enableFallback && !sseManager.isConnected(endpoint, priority),
     queryFn: async (): Promise<TData | null> => {
-      throw new Error("Fallback query function not implemented");
+      try {
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+          throw new Error(`Fallback request failed: ${response.statusText}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Fallback query failed:", error);
+        return null;
+      }
     },
     queryKey: [...queryKey, "fallback"],
     refetchInterval:

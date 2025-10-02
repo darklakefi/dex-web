@@ -20,7 +20,7 @@ import {
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useSuspenseQueries } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -40,6 +40,7 @@ import {
 } from "../../../_utils/searchParams";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getCreatePoolFormButtonMessage } from "../_utils/getCreatePoolFormButtonMessage";
+import { invalidateLiquidityQueries } from "../_utils/invalidateLiquidityCache";
 import { requestCreatePoolTransactionSigning } from "../_utils/requestCreatePoolTransactionSigning";
 import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
 
@@ -66,6 +67,7 @@ const serialize = createSerializer(liquidityPageParsers);
 
 export function CreatePoolForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { publicKey, wallet, signTransaction } = useWallet();
   const { trackLiquidity, trackError } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -216,6 +218,7 @@ export function CreatePoolForm() {
       }
 
       createState.reset();
+      form.reset();
       const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
       const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
 
@@ -235,6 +238,21 @@ export function CreatePoolForm() {
       toasts.showSuccessToast(successMessage);
       refetchBuyTokenAccount();
       refetchSellTokenAccount();
+
+      const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+        tokenAAddress,
+        tokenBAddress,
+      );
+
+      invalidateLiquidityQueries({
+        queryClient,
+        tokenXMint: tokenXAddress,
+        tokenYMint: tokenYAddress,
+        walletPublicKey: publicKey?.toBase58() || "",
+      }).catch((error) => {
+        console.error("Cache invalidation failed:", error);
+      });
+
       const urlWithParams = serialize("liquidity", {
         tokenAAddress,
         tokenBAddress,

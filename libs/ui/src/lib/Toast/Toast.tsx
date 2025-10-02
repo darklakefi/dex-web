@@ -11,7 +11,7 @@ const toastVariants = cva(["flex flex-col gap-2 p-4", "w-xs shadow-sm"], {
   variants: {
     variant: {
       error: "bg-red-950 shadow-red-900",
-      info: "bg-blue-950 shadow-black",
+      info: "border border-green-400 bg-green-600 shadow-green-900",
       loading: "bg-blue-950 shadow-black",
       success: "bg-green-800 shadow-green-600",
       warning: "bg-yellow-950 shadow-yellow-900",
@@ -49,7 +49,7 @@ const iconColorVariants = cva([], {
   variants: {
     variant: {
       error: "text-red-300",
-      info: "text-white",
+      info: "text-green-200",
       loading: "text-white",
       success: "text-green-200",
       warning: "text-yellow-300",

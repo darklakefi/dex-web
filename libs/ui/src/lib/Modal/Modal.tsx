@@ -14,7 +14,10 @@ export function Modal({ children, onClose, className }: ModalProps) {
   return (
     <dialog
       aria-modal="true"
-      className={twMerge("fixed inset-0 z-50 flex h-full w-full items-center justify-center bg-black/50", className)}
+      className={twMerge(
+        "fixed inset-0 z-50 flex h-full w-full items-center justify-center bg-black/50",
+        className,
+      )}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();

@@ -46,33 +46,95 @@ const DUPLICATE_TRANSACTION_PATTERNS = [
   "transaction already exists",
 ];
 
+type ErrorType =
+  | "simulation"
+  | "duplicate"
+  | "sol_balance"
+  | "token_balance"
+  | "compute"
+  | "slippage"
+  | "unknown";
+
+function detectErrorType(message: string): ErrorType {
+  const lowerMessage = message.toLowerCase();
+
+  if (
+    SIMULATION_ERROR_PATTERNS.some((pattern) => lowerMessage.includes(pattern))
+  ) {
+    return "simulation";
+  }
+
+  if (
+    DUPLICATE_TRANSACTION_PATTERNS.some((pattern) =>
+      lowerMessage.includes(pattern),
+    )
+  ) {
+    return "duplicate";
+  }
+
+  if (
+    SOL_BALANCE_ERROR_PATTERNS.some((pattern) => lowerMessage.includes(pattern))
+  ) {
+    return "sol_balance";
+  }
+
+  if (
+    TOKEN_BALANCE_ERROR_PATTERNS.some((pattern) =>
+      lowerMessage.includes(pattern),
+    )
+  ) {
+    return "token_balance";
+  }
+
+  if (
+    COMPUTE_ERROR_PATTERNS.some((pattern) => lowerMessage.includes(pattern))
+  ) {
+    return "compute";
+  }
+
+  if (
+    SLIPPAGE_ERROR_PATTERNS.some((pattern) => lowerMessage.includes(pattern))
+  ) {
+    return "slippage";
+  }
+
+  return "unknown";
+}
+
 export function analyzeTransactionError(error: unknown): TransactionErrorInfo {
   const errorMessage = error instanceof Error ? error.message : String(error);
-  const lowerMessage = errorMessage.toLowerCase();
+  const errorType = detectErrorType(errorMessage);
 
-  const isSimulationError = SIMULATION_ERROR_PATTERNS.some((pattern) =>
-    lowerMessage.includes(pattern),
-  );
+  let isSimulationError = false;
+  let isDuplicateTransaction = false;
+  let isSolBalanceError = false;
+  let isTokenBalanceError = false;
+  let isComputeError = false;
+  let isSlippageError = false;
 
-  const isDuplicateTransaction = DUPLICATE_TRANSACTION_PATTERNS.some(
-    (pattern) => lowerMessage.includes(pattern),
-  );
-
-  const isSolBalanceError = SOL_BALANCE_ERROR_PATTERNS.some((pattern) =>
-    lowerMessage.includes(pattern),
-  );
-
-  const isTokenBalanceError = TOKEN_BALANCE_ERROR_PATTERNS.some((pattern) =>
-    lowerMessage.includes(pattern),
-  );
-
-  const isComputeError = COMPUTE_ERROR_PATTERNS.some((pattern) =>
-    lowerMessage.includes(pattern),
-  );
-
-  const isSlippageError = SLIPPAGE_ERROR_PATTERNS.some((pattern) =>
-    lowerMessage.includes(pattern),
-  );
+  switch (errorType) {
+    case "simulation":
+      isSimulationError = true;
+      break;
+    case "duplicate":
+      isDuplicateTransaction = true;
+      break;
+    case "sol_balance":
+      isSolBalanceError = true;
+      break;
+    case "token_balance":
+      isTokenBalanceError = true;
+      break;
+    case "compute":
+      isComputeError = true;
+      break;
+    case "slippage":
+      isSlippageError = true;
+      break;
+    case "unknown":
+      // No specific error type detected
+      break;
+  }
 
   const canRecover = isSimulationError && isDuplicateTransaction;
   const retryable =
@@ -118,24 +180,25 @@ export function isLikelyFalsePositive(error: unknown): boolean {
   return analysis.canRecover;
 }
 
+function isOrpcErrorRetryable(orpcError: OrpcError): boolean {
+  switch (orpcError.code) {
+    case "NETWORK_ERROR":
+      return orpcError.data?.retryable ?? true;
+    case "SIMULATION_ERROR":
+      return orpcError.data?.recoverable ?? false;
+    case "TRANSACTION_FAILED":
+    case "VALIDATION_ERROR":
+    case "UNAUTHORIZED":
+      return false;
+    default:
+      return false;
+  }
+}
+
 export function isRetryableError(error: unknown): boolean {
   if (error && typeof error === "object" && "code" in error) {
     const orpcError = error as OrpcError;
-
-    switch (orpcError.code) {
-      case "NETWORK_ERROR":
-        return orpcError.data?.retryable ?? true;
-      case "SIMULATION_ERROR":
-        return orpcError.data?.recoverable ?? false;
-      case "TRANSACTION_FAILED":
-        return false;
-      case "VALIDATION_ERROR":
-        return false;
-      case "UNAUTHORIZED":
-        return false;
-      default:
-        return false;
-    }
+    return isOrpcErrorRetryable(orpcError);
   }
 
   const analysis = analyzeTransactionError(error);
@@ -163,36 +226,32 @@ export function extractTransactionSignature(error: unknown): string | null {
   return null;
 }
 
-export function getUserFriendlyErrorMessage(error: unknown): string {
-  if (error && typeof error === "object" && "code" in error) {
-    const orpcError = error as OrpcError;
+function getOrpcErrorMessage(orpcError: OrpcError): string {
+  switch (orpcError.code) {
+    case "SIMULATION_ERROR":
+      if (orpcError.data?.recoverable) {
+        return "Transaction may have succeeded despite the error message. Please check your wallet balance.";
+      }
+      return "Transaction simulation failed. Please try again or check your wallet balance.";
 
-    switch (orpcError.code) {
-      case "SIMULATION_ERROR":
-        if (orpcError.data?.recoverable) {
-          return "Transaction may have succeeded despite the error message. Please check your wallet balance.";
-        }
-        return "Transaction simulation failed. Please try again or check your wallet balance.";
+    case "TRANSACTION_FAILED":
+      return "Transaction failed. Please try again or check your wallet balance.";
 
-      case "TRANSACTION_FAILED":
-        return "Transaction failed. Please try again or check your wallet balance.";
+    case "VALIDATION_ERROR":
+      return `Invalid input: ${orpcError.data?.reason || orpcError.message}`;
 
-      case "VALIDATION_ERROR":
-        return `Invalid input: ${orpcError.data?.reason || orpcError.message}`;
+    case "NETWORK_ERROR":
+      return "Network connection error. Please check your connection and try again.";
 
-      case "NETWORK_ERROR":
-        return "Network connection error. Please check your connection and try again.";
+    case "UNAUTHORIZED":
+      return "Please connect your wallet to continue.";
 
-      case "UNAUTHORIZED":
-        return "Please connect your wallet to continue.";
-
-      default:
-        return orpcError.message || "An unknown error occurred.";
-    }
+    default:
+      return orpcError.message || "An unknown error occurred.";
   }
+}
 
-  const analysis = analyzeTransactionError(error);
-
+function getAnalysisErrorMessage(analysis: TransactionErrorInfo): string {
   if (analysis.canRecover) {
     return "Transaction may have succeeded despite the error message. Please check your wallet balance.";
   }
@@ -225,6 +284,16 @@ export function getUserFriendlyErrorMessage(error: unknown): string {
     analysis.originalError.message ||
     "An unknown error occurred during the transaction."
   );
+}
+
+export function getUserFriendlyErrorMessage(error: unknown): string {
+  if (error && typeof error === "object" && "code" in error) {
+    const orpcError = error as OrpcError;
+    return getOrpcErrorMessage(orpcError);
+  }
+
+  const analysis = analyzeTransactionError(error);
+  return getAnalysisErrorMessage(analysis);
 }
 
 export function isWarningMessage(error: unknown): boolean {

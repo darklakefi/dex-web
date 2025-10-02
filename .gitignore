@@ -59,6 +59,7 @@ storybook-static
 
 # Typescript
 *.tsbuildinfo
+*.d.ts.map
 
 # nix
 .direnv/

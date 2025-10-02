@@ -4,8 +4,7 @@
   "name": "web-e2e",
   "projectType": "application",
   "sourceRoot": "apps/web-e2e/src",
-  "tags": [],
-
+  "tags": ["type:e2e", "scope:web", "platform:web"],
   "targets": {
     "lint": {}
   }

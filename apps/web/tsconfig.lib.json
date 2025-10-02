@@ -16,7 +16,9 @@
     "**/*.spec.ts",
     "**/*.spec.tsx",
     "**/*.test.ts",
-    "**/*.test.tsx"
+    "**/*.test.tsx",
+    "**/__tests__/**/*",
+    "**/test/**/*"
   ],
   "extends": "./tsconfig.json",
   "include": [
