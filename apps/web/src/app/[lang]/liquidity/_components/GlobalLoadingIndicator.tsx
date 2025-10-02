@@ -1,9 +1,21 @@
 "use client";
 
 import { useIsFetching } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 export function GlobalLoadingIndicator() {
   const isFetching = useIsFetching();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Don't render anything until the component is mounted on the client
+  // This prevents hydration mismatch
+  if (!isMounted) {
+    return null;
+  }
 
   return isFetching ? (
     <div className="fixed top-4 right-4 z-50">
