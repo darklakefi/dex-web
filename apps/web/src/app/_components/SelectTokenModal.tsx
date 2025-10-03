@@ -56,13 +56,11 @@ const formConfig = {
 interface SelectTokenModalProps {
   type: "buy" | "sell";
   returnUrl: string;
-  allowList?: string[];
 }
 
 export function SelectTokenModal({
   type,
   returnUrl = "",
-  allowList,
 }: SelectTokenModalProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -148,7 +146,6 @@ export function SelectTokenModal({
   const { data } = useSuspenseQuery(
     tanstackClient.tokens.getTokens.queryOptions({
       input: {
-        allowList,
         limit: 8,
         offset: 0,
         query: debouncedQuery,
