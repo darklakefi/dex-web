@@ -4,6 +4,6 @@ import { baseProcedure } from "../base.procedure";
 
 export const getTokens = baseProcedure
   .input(getTokensInputSchema)
-  .handler(async ({ input }) => {
-    return await getTokensHandler(input);
+  .handler(async ({ input, context }) => {
+    return await getTokensHandler(input, context);
   });
