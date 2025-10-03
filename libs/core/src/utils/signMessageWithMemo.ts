@@ -39,7 +39,11 @@ export async function createMemoTransaction(
 export async function signMessageCompat(
   wallet: Wallet,
   message: string,
-  connection: Connection = new Connection(clusterApiUrl("devnet")),
+  connection: Connection = new Connection(
+    clusterApiUrl(
+      process.env.NEXT_PUBLIC_NETWORK === "2" ? "devnet" : "mainnet-beta",
+    ),
+  ),
 ): Promise<{ signature: string; transaction?: Transaction }> {
   const walletAdapter = wallet.adapter;
   if (!walletAdapter.publicKey) {
