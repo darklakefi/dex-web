@@ -1,4 +1,4 @@
-import { tokensData, tokensDataMainnet } from "@dex-web/orpc/mocks/tokens.mock";
+import { tokensData, tokensDataMainnet } from "../mocks/tokens.mock";
 
 export const getTokensAllowList = () => {
   const list = (
