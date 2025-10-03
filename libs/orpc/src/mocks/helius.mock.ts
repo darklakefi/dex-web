@@ -5,15 +5,11 @@ import { generateMockTokenMetadata } from "./helpers/generateMockTokenMetadata";
 
 export function getHelius() {
   return {
-    rpc: {
-      getAsset: vi.fn(() => Promise.resolve(generateMockTokenMetadata())),
-      getAssetsByOwner: vi.fn(() =>
-        Promise.resolve(generateAssetResponseList()),
-      ),
-      getTokenAccounts: vi.fn(() =>
-        Promise.resolve(generateTokenAccountsResponseList()),
-      ),
-      searchAssets: vi.fn(() => Promise.resolve(generateAssetResponseList())),
-    },
+    getAsset: vi.fn(() => Promise.resolve(generateMockTokenMetadata())),
+    getAssetsByOwner: vi.fn(() => Promise.resolve(generateAssetResponseList())),
+    getTokenAccounts: vi.fn(() =>
+      Promise.resolve(generateTokenAccountsResponseList()),
+    ),
+    searchAssets: vi.fn(() => Promise.resolve(generateAssetResponseList())),
   };
 }

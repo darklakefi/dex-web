@@ -1,8 +1,8 @@
-import type { DAS } from "helius-sdk";
+import type { GetTokenAccountsResponse } from "helius-sdk/types/das";
 import { isDefined } from "remeda";
 
 export function getTokenAccountsFromResponse(
-  response: DAS.GetTokenAccountsResponse,
+  response: GetTokenAccountsResponse,
 ) {
   return response.token_accounts
     ?.map((item) => ({

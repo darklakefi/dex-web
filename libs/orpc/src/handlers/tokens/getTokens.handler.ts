@@ -9,7 +9,7 @@ import type {
 import { getTokenMetadataListHandler } from "../dex-gateway/getTokenMetadataList.handler";
 
 export const getTokensHandler = async (
-  input: GetTokensInput
+  input: GetTokensInput,
 ): Promise<GetTokensOutput> => {
   const { limit = 10, query, offset = 0, allowList } = input;
   const page = Math.floor(offset / limit) + 1;
@@ -17,29 +17,26 @@ export const getTokensHandler = async (
   const localTokensList =
     process.env.NEXT_PUBLIC_NETWORK === "2" ? tokensData : tokensDataMainnet;
 
-  let gatewayTokensList: any[] = [];
+  let gatewayTokensList: typeof localTokensList = [];
 
   if (query) {
     const gatewayInput: GetTokenMetadataListRequest = {
+      $typeName: "darklake.v1.GetTokenMetadataListRequest",
       filterBy:
         query.length > 30
           ? {
               case: "addressesList",
               value: {
-                tokenAddresses: [query],
                 $typeName: "darklake.v1.TokenAddressesList",
+                tokenAddresses: [query],
               },
             }
           : {
-              case: "symbolsList",
-              value: {
-                tokenSymbols: [query],
-                $typeName: "darklake.v1.TokenSymbolsList",
-              },
+              case: "substring",
+              value: query,
             },
       pageNumber: page,
       pageSize: limit,
-      $typeName: "darklake.v1.GetTokenMetadataListRequest",
     };
     const response = await getTokenMetadataListHandler(gatewayInput);
     gatewayTokensList = response.tokens;
@@ -68,7 +65,7 @@ export const getTokensHandler = async (
     .filter(
       (token) =>
         token.address.toUpperCase().includes(query.toUpperCase()) ||
-        token.symbol.toUpperCase().includes(query.toUpperCase())
+        token.symbol.toUpperCase().includes(query.toUpperCase()),
     );
 
   return {

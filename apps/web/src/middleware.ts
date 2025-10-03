@@ -28,11 +28,32 @@ const BLOCKED_COUNTRIES = [
 
 const intlMiddleware = createMiddleware(routing);
 
-export default function middleware(request: NextRequest) {
-  // Get user's country from geolocation
-  const { country } = geolocation(request);
+const countryCache = new Map<string, { country: string; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000;
 
-  // Check if the country is blocked
+export default function middleware(request: NextRequest) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0] ||
+    request.headers.get("x-real-ip") ||
+    "";
+
+  let country: string | undefined;
+  const cached = countryCache.get(ip);
+
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    country = cached.country;
+  } else {
+    try {
+      const geoResult = geolocation(request);
+      country = geoResult.country;
+      if (country && ip) {
+        countryCache.set(ip, { country, timestamp: Date.now() });
+      }
+    } catch {
+      country = undefined;
+    }
+  }
+
   if (country && BLOCKED_COUNTRIES.includes(country)) {
     return new NextResponse(
       "Access denied. This service is not available in your region.",
@@ -45,7 +66,6 @@ export default function middleware(request: NextRequest) {
     );
   }
 
-  // Continue with next-intl middleware if not blocked
   return intlMiddleware(request);
 }
 

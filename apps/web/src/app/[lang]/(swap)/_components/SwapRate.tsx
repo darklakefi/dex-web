@@ -4,18 +4,16 @@ import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
 import { Icon } from "@dex-web/ui";
 import { numberFormatHelper } from "@dex-web/utils";
 import BigNumber from "bignumber.js";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export interface SwapRateProps {
   quote: GetQuoteOutput;
 }
 
 export function SwapRate({ quote }: SwapRateProps) {
-  const [isXtoY, setIsXtoY] = useState(quote.isXtoY);
+  const [isInverted, setIsInverted] = useState(false);
 
-  useEffect(() => {
-    setIsXtoY(quote.isXtoY);
-  }, [quote.isXtoY]);
+  const displayIsXtoY = isInverted ? !quote.isXtoY : quote.isXtoY;
   const rateXtoY = quote.isXtoY
     ? quote.rate
     : BigNumber(1)
@@ -42,12 +40,12 @@ export function SwapRate({ quote }: SwapRateProps) {
   })} ${quote.tokenX.symbol}`;
 
   const handleClick = () => {
-    setIsXtoY(!isXtoY);
+    setIsInverted((current) => !current);
   };
 
   return (
     <div className="flex items-center gap-2">
-      {isXtoY ? priceXtoY : priceYtoX}{" "}
+      {displayIsXtoY ? priceXtoY : priceYtoX}{" "}
       <button
         className="inline-flex cursor-pointer items-center justify-center text-green-300 hover:opacity-80"
         onClick={handleClick}

@@ -1,13 +1,17 @@
 import { randCurrencySymbol, randNumber, randUuid, seed } from "@ngneat/falso";
-import { type DAS, Interface, OwnershipModel } from "helius-sdk";
+import {
+  Interface as AssetInterface,
+  OwnershipModel,
+} from "helius-sdk/types/enums";
+import type { GetAssetResponse } from "helius-sdk/types/types";
 import { FIXED_SEED } from "./constants";
 
-export function generateMockTokenMetadata(): DAS.GetAssetResponse {
+export function generateMockTokenMetadata(): GetAssetResponse {
   seed(FIXED_SEED);
   return {
     burnt: false,
     id: randUuid(),
-    interface: Interface.V1NFT,
+    interface: AssetInterface.V1_NFT,
     mutable: true,
     ownership: {
       delegate: undefined,

@@ -2,6 +2,6 @@ import { createTorqueReferral } from "../procedures/integrations/createTorqueRef
 import { resolveTorqueReferral } from "../procedures/integrations/resolveTorqueReferral.procedure";
 
 export const integrationsRouter = {
-	createTorqueReferral,
-	resolveTorqueReferral,
+  createTorqueReferral,
+  resolveTorqueReferral,
 };

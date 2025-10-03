@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declarationDir": "../../dist/libs/core",
     "outDir": "../../dist/libs/core",
     "types": ["node"]
   },

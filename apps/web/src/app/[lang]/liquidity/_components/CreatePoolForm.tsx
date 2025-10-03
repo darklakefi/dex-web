@@ -2,6 +2,7 @@
 
 import {
   ERROR_MESSAGES,
+  isWarningMessage,
   useLiquidityTracking,
   useTokenAccounts,
   useTransactionState,
@@ -19,7 +20,7 @@ import {
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -39,10 +40,11 @@ import {
 } from "../../../_utils/searchParams";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getCreatePoolFormButtonMessage } from "../_utils/getCreatePoolFormButtonMessage";
+import { invalidateLiquidityQueries } from "../_utils/invalidateLiquidityCache";
 import { requestCreatePoolTransactionSigning } from "../_utils/requestCreatePoolTransactionSigning";
 import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
 
-export const { fieldContext, formContext } = createFormHookContexts();
+const { fieldContext, formContext } = createFormHookContexts();
 
 const liquidityFormSchema = z.object({
   initialPrice: z.string(),
@@ -65,6 +67,7 @@ const serialize = createSerializer(liquidityPageParsers);
 
 export function CreatePoolForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { publicKey, wallet, signTransaction } = useWallet();
   const { trackLiquidity, trackError } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -83,19 +86,33 @@ export function CreatePoolForm() {
 
   const sortedTokenAddresses = isMissingTokens
     ? { tokenXAddress: tokenAAddress, tokenYAddress: tokenBAddress }
-    : sortSolanaAddresses(tokenAAddress, tokenBAddress);
+    : (() => {
+        try {
+          return sortSolanaAddresses(tokenAAddress, tokenBAddress);
+        } catch (_error) {
+          return { tokenXAddress: tokenAAddress, tokenYAddress: tokenBAddress };
+        }
+      })();
 
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
 
-  const { data: poolDetails } = useSuspenseQuery(
-    tanstackClient.pools.getPoolDetails.queryOptions({
-      input: {
-        tokenXMint,
-        tokenYMint,
-      },
-    }),
-  );
+  const [{ data: poolDetails }, { data: tokenMetadata }] = useSuspenseQueries({
+    queries: [
+      tanstackClient.pools.getPoolDetails.queryOptions({
+        input: {
+          tokenXMint,
+          tokenYMint,
+        },
+      }),
+      tanstackClient.tokens.getTokenMetadata.queryOptions({
+        input: {
+          addresses: [tokenXMint, tokenYMint],
+          returnAsObject: true,
+        },
+      }),
+    ],
+  });
 
   const {
     buyTokenAccount,
@@ -109,27 +126,12 @@ export function CreatePoolForm() {
     tokenBAddress,
   });
 
-  const { data: tokenMetadata } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenMetadata.queryOptions({
-      input: {
-        addresses: [tokenXMint, tokenYMint],
-        returnAsObject: true,
-      },
-    }),
-  );
-
   const metadata = tokenMetadata as Record<string, Token>;
   const tokenADetails = metadata[tokenXMint];
   const tokenBDetails = metadata[tokenYMint];
 
-  const {
-    trackInitiated,
-    trackSigned,
-    trackConfirmed,
-    trackFailed,
-    trackError: trackLiquidityError,
-  } = useLiquidityTracking({
-    trackError: (error: unknown, context?: Record<string, any>) => {
+  const { trackSigned, trackConfirmed, trackFailed } = useLiquidityTracking({
+    trackError: (error: unknown, context?: Record<string, unknown>) => {
       trackError({
         context: "liquidity",
         details: context,
@@ -171,19 +173,36 @@ export function CreatePoolForm() {
     maxAttempts: 15,
     onFailure: (result) => {
       createState.reset();
-      toasts.showErrorToast(
-        `Transaction failed: ${result.error || "Unknown error"}`,
-      );
+      toasts.dismiss();
+      const error = new Error(result.error || "Unknown error");
+      const isWarning = isWarningMessage(error);
+      if (isWarning) {
+        toasts.showInfoToast(
+          `Transaction status: ${result.error || "Unknown error"}`,
+        );
+      } else {
+        toasts.showErrorToast(
+          `Transaction failed: ${result.error || "Unknown error"}`,
+        );
+      }
     },
     onStatusUpdate: (status, attempt) => {
+      toasts.dismiss();
       toasts.showStatusToast(
         `Finalizing transaction... (${attempt}/15) - ${status}`,
       );
     },
     onSuccess: (result) => {
+      toasts.dismiss();
       if (result.error) {
         createState.reset();
-        toasts.showErrorToast(`Transaction failed: ${result.error}`);
+        const error = new Error(result.error);
+        const isWarning = isWarningMessage(error);
+        if (isWarning) {
+          toasts.showInfoToast(`Transaction status: ${result.error}`);
+        } else {
+          toasts.showErrorToast(`Transaction failed: ${result.error}`);
+        }
 
         const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
         const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
@@ -199,6 +218,7 @@ export function CreatePoolForm() {
       }
 
       createState.reset();
+      form.reset();
       const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
       const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
 
@@ -218,6 +238,21 @@ export function CreatePoolForm() {
       toasts.showSuccessToast(successMessage);
       refetchBuyTokenAccount();
       refetchSellTokenAccount();
+
+      const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+        tokenAAddress,
+        tokenBAddress,
+      );
+
+      invalidateLiquidityQueries({
+        queryClient,
+        tokenXMint: tokenXAddress,
+        tokenYMint: tokenYAddress,
+        walletPublicKey: publicKey?.toBase58() || "",
+      }).catch((error) => {
+        console.error("Cache invalidation failed:", error);
+      });
+
       const urlWithParams = serialize("liquidity", {
         tokenAAddress,
         tokenBAddress,
@@ -241,13 +276,7 @@ export function CreatePoolForm() {
       tokenAAmount: "0",
       tokenBAmount: "0",
     } satisfies LiquidityFormSchema,
-    onSubmit: async ({
-      value,
-    }: {
-      value: { tokenAAmount: string; tokenBAmount: string };
-    }) => {
-      console.log(value);
-    },
+    onSubmit: async () => {},
     validators: {
       onChange: liquidityFormSchema,
       onDynamic: ({ value }: { value: LiquidityFormSchema }) => {
@@ -264,7 +293,7 @@ export function CreatePoolForm() {
               tokenAccount.decimals || 0,
             );
 
-            if (BigNumber(tokenANumericValue).gt(maxBalance)) {
+            if (BigNumber(tokenANumericValue).gt(maxBalance.toString())) {
               const symbol = tokenAccount.symbol || "token";
               return { tokenAAmount: `Insufficient ${symbol} balance.` };
             }
@@ -321,7 +350,14 @@ export function CreatePoolForm() {
         throw new Error(ERROR_MESSAGES.MISSING_WALLET);
       }
 
-      const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
+      let sortedTokens: { tokenXAddress: string; tokenYAddress: string };
+      try {
+        sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
+      } catch (_error) {
+        throw new Error(
+          `Invalid token addresses: ${tokenAAddress} or ${tokenBAddress} is not a valid Solana public key`,
+        );
+      }
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
       const depositAmountX =
@@ -370,7 +406,6 @@ export function CreatePoolForm() {
         throw new Error("Failed to create pool transaction");
       }
     } catch (error) {
-      console.error("Pool creation error:", error);
       toasts.dismiss();
       toasts.showErrorToast(
         error instanceof Error ? error.message : "Unknown error occurred",
@@ -395,12 +430,10 @@ export function CreatePoolForm() {
       let calculatedTokenA: string;
 
       if (initialPriceTokenOrder === "ab") {
-        // If displaying price as "A per B", then tokenAAmount = tokenBAmount * price
         calculatedTokenA = BigNumber(tokenBAmount)
           .multipliedBy(price)
           .toString();
       } else {
-        // If displaying price as "B per A", then tokenAAmount = tokenBAmount / price
         calculatedTokenA = BigNumber(tokenBAmount).dividedBy(price).toString();
       }
 
@@ -418,17 +451,17 @@ export function CreatePoolForm() {
     if (type === "sell") {
       if (BigNumber(value).gt(0) && BigNumber(price).gt(0)) {
         const calculatedTokenA =
-          initialPriceTokenOrder === "ba"
-            ? BigNumber(value).dividedBy(price).toString()
-            : BigNumber(value).multipliedBy(price).toString();
+          initialPriceTokenOrder === "ab"
+            ? BigNumber(value).multipliedBy(price).toString()
+            : BigNumber(value).dividedBy(price).toString();
         form.setFieldValue("tokenAAmount", calculatedTokenA);
       }
     } else {
       if (BigNumber(value).gt(0) && BigNumber(price).gt(0)) {
         const calculatedTokenB =
-          initialPriceTokenOrder === "ba"
-            ? BigNumber(value).multipliedBy(price).toString()
-            : BigNumber(value).dividedBy(price).toString();
+          initialPriceTokenOrder === "ab"
+            ? BigNumber(value).dividedBy(price).toString()
+            : BigNumber(value).multipliedBy(price).toString();
         form.setFieldValue("tokenBAmount", calculatedTokenB);
       }
     }
@@ -510,11 +543,7 @@ export function CreatePoolForm() {
               >
                 {tokenAAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
               </Text.Body2>
-              <SelectTokenButton
-                // additionalParams={{ type: LIQUIDITY_PAGE_TYPE.CREATE_POOL }}
-                returnUrl="liquidity"
-                type="buy"
-              />
+              <SelectTokenButton returnUrl="liquidity" type="buy" />
             </div>
             <form.Field
               name="tokenAAmount"

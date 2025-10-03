@@ -23,7 +23,7 @@ export function validateHasSufficientBalance({
       tokenAccount.decimals || 0,
     );
 
-    if (BigNumber(tokenANumericValue).gt(maxBalance)) {
+    if (BigNumber(tokenANumericValue).gt(maxBalance.toString())) {
       return `Insufficient ${symbol} balance.`;
     }
   }

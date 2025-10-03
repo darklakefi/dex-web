@@ -13,7 +13,6 @@ const pools = [
     tokenYSymbol: "USDC",
   },
 ] satisfies Pool[];
-
 describe("ShortPoolPanel", () => {
   it("renders title, icon, and pool data", () => {
     render(

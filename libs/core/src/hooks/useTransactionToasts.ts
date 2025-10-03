@@ -2,20 +2,20 @@
 
 import { useCallback } from "react";
 import {
-  TRANSACTION_STEPS,
-  TRANSACTION_DESCRIPTIONS,
   SUCCESS_MESSAGES,
-  type TransactionType
+  TRANSACTION_DESCRIPTIONS,
+  TRANSACTION_STEPS,
+  type TransactionType,
 } from "../constants/toastMessages";
 
 export type ToastFunction = (options: {
-    title: string;
-    description: string;
-    variant: "loading" | "success" | "error";
-    customAction?: React.ReactNode;
-  }) => void
+  title: string;
+  description: string;
+  variant: "loading" | "success" | "error" | "warning" | "info";
+  customAction?: React.ReactNode;
+}) => void;
 
-export type DismissToastFunction = () => void
+export type DismissToastFunction = () => void;
 
 export interface UseTransactionToastsParams {
   toast: ToastFunction;
@@ -37,9 +37,46 @@ export interface UseTransactionToastsParams {
 export interface UseTransactionToastsReturn {
   showStepToast: (step: number) => void;
   showSuccessToast: (message?: string, customAction?: React.ReactNode) => void;
-  showErrorToast: (error: string | Error, context?: Record<string, any>) => void;
+  showErrorToast: (
+    error: string | Error,
+    context?: Record<string, unknown>,
+  ) => void;
+  showWarningToast: (
+    message: string | Error,
+    context?: Record<string, unknown>,
+  ) => void;
+  showInfoToast: (
+    message: string | Error,
+    context?: Record<string, unknown>,
+  ) => void;
   showStatusToast: (message: string) => void;
   dismiss: () => void;
+}
+
+const SUBMITTED_TITLES: Record<TransactionType, string> = {
+  LIQUIDITY: "Liquidity transaction submitted",
+  POOL_CREATION: "Pool creation submitted",
+  SWAP: "Swap submitted",
+};
+
+export function buildSubmittedToast({
+  transactionType,
+  signature,
+  description,
+  title,
+}: {
+  transactionType: TransactionType;
+  signature: string;
+  description?: string;
+  title?: string;
+}) {
+  return {
+    description:
+      description ??
+      `Transaction is awaiting confirmation. Transaction: ${signature}`,
+    title: title ?? SUBMITTED_TITLES[transactionType],
+    variant: "info" as const,
+  };
 }
 
 export const useTransactionToasts = ({
@@ -57,78 +94,125 @@ export const useTransactionToasts = ({
 
       if (stepData && descriptionData) {
         toast({
-          title: stepData[transactionType],
           description: descriptionData[transactionType],
+          title: stepData[transactionType],
           variant: "loading",
         });
       }
     },
-    [toast, transactionType]
+    [toast, transactionType],
   );
 
   const showSuccessToast = useCallback(
     (message?: string, customAction?: React.ReactNode) => {
       if (isSquadsX && customMessages?.squadsXSuccess) {
         toast({
-          title: customMessages.squadsXSuccess.title,
-          description: customMessages.squadsXSuccess.description,
-          variant: "success",
           customAction,
+          description: customMessages.squadsXSuccess.description,
+          title: customMessages.squadsXSuccess.title,
+          variant: "success",
         });
       } else {
-        const defaultMessage = SUCCESS_MESSAGES[
-          transactionType === "SWAP" ? "SWAP_COMPLETE" :
-          transactionType === "LIQUIDITY" ? "LIQUIDITY_ADDED" :
-          transactionType === "POOL_CREATION" ? "POOL_CREATED" :
-          "SWAP_COMPLETE"
-        ];
+        const defaultMessage =
+          SUCCESS_MESSAGES[
+            transactionType === "SWAP"
+              ? "SWAP_COMPLETE"
+              : transactionType === "LIQUIDITY"
+                ? "LIQUIDITY_ADDED"
+                : transactionType === "POOL_CREATION"
+                  ? "POOL_CREATED"
+                  : "SWAP_COMPLETE"
+          ];
 
         toast({
-          title: defaultMessage,
-          description: message || "",
-          variant: "success",
           customAction,
+          description: message || "",
+          title: defaultMessage,
+          variant: "success",
         });
       }
     },
-    [toast, transactionType, isSquadsX, customMessages]
+    [toast, transactionType, isSquadsX, customMessages],
   );
 
   const showErrorToast = useCallback(
-    (error: string | Error, context?: Record<string, any>) => {
+    (error: string | Error, context?: Record<string, unknown>) => {
       const errorMessage = error instanceof Error ? error.message : error;
       const contextString = context
-        ? Object.entries(context).map(([key, value]) => `${key}: ${value}`).join(", ")
+        ? Object.entries(context)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(", ")
         : "";
 
       if (isSquadsX && customMessages?.squadsXFailure) {
         toast({
-          title: customMessages.squadsXFailure.title,
           description: customMessages.squadsXFailure.description,
+          title: customMessages.squadsXFailure.title,
           variant: "error",
         });
       } else {
         toast({
-          title: `${transactionType.replace("_", " ")} Error`,
           description: contextString
             ? `${errorMessage}${contextString ? `, ${contextString}` : ""}`
             : errorMessage,
+          title: `${transactionType.replace("_", " ")} Error`,
           variant: "error",
         });
       }
     },
-    [toast, transactionType, isSquadsX, customMessages]
+    [toast, transactionType, isSquadsX, customMessages],
+  );
+
+  const showWarningToast = useCallback(
+    (message: string | Error, context?: Record<string, unknown>) => {
+      const warningMessage =
+        message instanceof Error ? message.message : message;
+      const contextString = context
+        ? Object.entries(context)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(", ")
+        : "";
+
+      toast({
+        description: contextString
+          ? `${warningMessage}${contextString ? `, ${contextString}` : ""}`
+          : warningMessage,
+        title: `${transactionType.replace("_", " ")} Warning`,
+        variant: "warning",
+      });
+    },
+    [toast, transactionType],
+  );
+
+  const showInfoToast = useCallback(
+    (message: string | Error, context?: Record<string, unknown>) => {
+      const infoMessage = message instanceof Error ? message.message : message;
+      const contextString = context
+        ? Object.entries(context)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(", ")
+        : "";
+
+      toast({
+        description: contextString
+          ? `${infoMessage}${contextString ? `, ${contextString}` : ""}`
+          : infoMessage,
+        title: `${transactionType.replace("_", " ")} Status`,
+        variant: "info",
+      });
+    },
+    [toast, transactionType],
   );
 
   const showStatusToast = useCallback(
     (message: string) => {
       toast({
-        title: `Checking ${transactionType.toLowerCase()} status`,
         description: message,
+        title: `Checking ${transactionType.toLowerCase()} status`,
         variant: "loading",
       });
     },
-    [toast, transactionType]
+    [toast, transactionType],
   );
 
   const dismiss = useCallback(() => {
@@ -136,10 +220,12 @@ export const useTransactionToasts = ({
   }, [dismissToast]);
 
   return {
+    dismiss,
+    showErrorToast,
+    showInfoToast,
+    showStatusToast,
     showStepToast,
     showSuccessToast,
-    showErrorToast,
-    showStatusToast,
-    dismiss,
+    showWarningToast,
   };
 };

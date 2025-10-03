@@ -11,6 +11,8 @@ import { GeolocationAwareDisclaimerProvider } from "./_components/GeolocationAwa
 import { ReferralCodeProvider } from "./_components/ReferralCodeProvider";
 
 const bitsumishiRegular = localFont({
+  display: "swap",
+  preload: true,
   src: "./_fonts/bitsumishi-regular.woff2",
   style: "normal",
   variable: "--font-bitsumishi-regular",
@@ -18,6 +20,8 @@ const bitsumishiRegular = localFont({
 });
 
 const classicConsoleNeue = localFont({
+  display: "swap",
+  preload: false,
   src: "./_fonts/classic-console-neue.woff2",
   style: "normal",
   variable: "--font-classic-console-neue",

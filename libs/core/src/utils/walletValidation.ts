@@ -1,8 +1,16 @@
-import type { PublicKey } from "@solana/web3.js";
+import type {
+  PublicKey,
+  Transaction,
+  VersionedTransaction,
+} from "@solana/web3.js";
 
 export interface WalletSigningCapabilities {
   publicKey?: PublicKey | null;
-  signTransaction?: (transaction: any) => Promise<any>;
+  signTransaction?:
+    | (<T extends VersionedTransaction | Transaction>(
+        transaction: T,
+      ) => Promise<T>)
+    | undefined;
 }
 
 export const validateWalletForSigning = ({
@@ -12,7 +20,7 @@ export const validateWalletForSigning = ({
   if (!publicKey) {
     throw new Error("Wallet not connected!");
   }
-  
+
   if (!signTransaction) {
     throw new Error("Wallet does not support transaction signing!");
   }
@@ -22,6 +30,6 @@ export const isWalletConnected = (publicKey?: PublicKey | null): boolean => {
   return !!publicKey;
 };
 
-export const hasSigningCapability = (signTransaction?: any): boolean => {
+export const hasSigningCapability = (signTransaction?: unknown): boolean => {
   return !!signTransaction;
 };

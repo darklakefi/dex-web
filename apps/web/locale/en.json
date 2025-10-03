@@ -35,6 +35,12 @@
     "swap": "swap"
   },
   "swap": {
+    "edit": "edit",
+    "estimatedFees": "Est. Fees",
+    "maxSlippage": "Max Slippage",
+    "mevProtection": "MEV Protection",
+    "priceImpact": "Price Impact",
+    "receiveAtLeast": "Receive at least",
     "squadsX": {
       "responseStatus": {
         "confirmed": {

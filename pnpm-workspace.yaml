@@ -1,15 +1,21 @@
 packages:
   - apps/*
   - libs/*
-
 onlyBuiltDependencies:
-  - "@parcel/watcher"
-  - "@swc/core"
-  - "@tailwindcss/oxide"
+  - '@parcel/watcher'
+  - '@sentry/cli'
+  - '@swc/core'
+  - '@tailwindcss/oxide'
   - bigint-buffer
+  - blake-hash
   - bufferutil
+  - core-js
   - esbuild
   - lefthook
   - nx
+  - oxc-resolver
+  - protobufjs
   - sharp
+  - tiny-secp256k1
+  - usb
   - utf-8-validate

@@ -3,7 +3,7 @@ import { resolveTorqueReferralInputSchema } from "../../schemas/integrations/res
 import { baseProcedure } from "../base.procedure";
 
 export const resolveTorqueReferral = baseProcedure
-	.input(resolveTorqueReferralInputSchema)
-	.handler(async ({ input }) => {
-		return await resolveTorqueReferralHandler(input);
-	});
+  .input(resolveTorqueReferralInputSchema)
+  .handler(async ({ input }) => {
+    return await resolveTorqueReferralHandler(input);
+  });

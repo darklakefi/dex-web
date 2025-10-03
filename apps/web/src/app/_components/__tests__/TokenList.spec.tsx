@@ -14,7 +14,6 @@ const tokens = [
     value: "SOL",
   },
 ];
-
 describe.skip("TokenList", () => {
   it("renders token symbol, name, and truncated address", () => {
     const onSelect = vi.fn();
@@ -29,7 +28,6 @@ describe.skip("TokenList", () => {
     expect(screen.getAllByText("Solana")[0]).toBeInTheDocument();
     expect(screen.getByText(/So11.*1112/)).toBeInTheDocument();
   });
-
   it("calls onSelect when a token is clicked", () => {
     const onSelect = vi.fn();
     const onUrlUpdate = vi.fn();

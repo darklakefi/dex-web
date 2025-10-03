@@ -1,0 +1,9 @@
+export enum SwapTxStatus {
+  UNSIGNED,
+  SIGNED,
+  CONFIRMED,
+  SETTLED,
+  SLASHED,
+  CANCELLED,
+  FAILED,
+}

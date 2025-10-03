@@ -19,7 +19,7 @@ interface SelectTokenButtonProps {
 export function SelectTokenButton({
   type,
   returnUrl = "",
-  additionalParams = {},
+  additionalParams: _additionalParams = {},
 }: SelectTokenButtonProps) {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
@@ -58,7 +58,7 @@ export function SelectTokenButton({
       as={Link}
       className="mt-1 w-fit items-center justify-between bg-green-700 p-2"
       href={buildHref(type, tokenAAddress, tokenBAddress, returnUrl)}
-      prefetch={true}
+      prefetch
       variant="secondary"
     >
       {tokenAAddress === EMPTY_TOKEN ? (

@@ -2,7 +2,6 @@
   "dependencies": {
     "@sentry/nextjs": "^10.3.0",
     "@vercel/functions": "^2.2.8",
-    "babel-plugin-react-compiler": "19.1.0-rc.2",
     "posthog-js": "^1.259.0"
   },
   "devDependencies": {

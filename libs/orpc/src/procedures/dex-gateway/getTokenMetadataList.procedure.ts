@@ -3,26 +3,29 @@ import { getTokenMetadataListHandler } from "../../handlers/dex-gateway/getToken
 import { baseProcedure } from "../base.procedure";
 
 const getTokenMetadataListInputSchema = z.object({
+  $typeName: z
+    .literal("darklake.v1.GetTokenMetadataListRequest")
+    .default("darklake.v1.GetTokenMetadataListRequest"),
   filterBy: z.discriminatedUnion("case", [
     z.object({
       case: z.literal("addressesList"),
       value: z.object({
-        tokenAddresses: z.array(z.string()),
         $typeName: z.literal("darklake.v1.TokenAddressesList"),
+        tokenAddresses: z.array(z.string()),
       }),
     }),
     z.object({
       case: z.literal("symbolsList"),
       value: z.object({
-        tokenSymbols: z.array(z.string()),
         $typeName: z.literal("darklake.v1.TokenSymbolsList"),
+        tokenSymbols: z.array(z.string()),
       }),
     }),
     z.object({
       case: z.literal("namesList"),
       value: z.object({
-        tokenNames: z.array(z.string()),
         $typeName: z.literal("darklake.v1.TokenNamesList"),
+        tokenNames: z.array(z.string()),
       }),
     }),
     z.object({
@@ -32,9 +35,6 @@ const getTokenMetadataListInputSchema = z.object({
   ]),
   pageNumber: z.number(),
   pageSize: z.number(),
-  $typeName: z
-    .literal("darklake.v1.GetTokenMetadataListRequest")
-    .default("darklake.v1.GetTokenMetadataListRequest"),
 });
 
 export const getTokenMetadataList = baseProcedure
