@@ -4,7 +4,6 @@ import { SelectTokenModal } from "../../../../../_components/SelectTokenModal";
 import { getTokensAllowList } from "../../../../../_utils/getTokensAllowList";
 import { selectedTokensCache } from "../../../../../_utils/searchParams";
 
-const allowList = getTokensAllowList();
 export default async function Page({
   searchParams,
   params,
@@ -13,6 +12,8 @@ export default async function Page({
   params: Promise<{ type: "buy" | "sell" }>;
 }) {
   await selectedTokensCache.parse(searchParams);
+
+  const allowList = getTokensAllowList();
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
