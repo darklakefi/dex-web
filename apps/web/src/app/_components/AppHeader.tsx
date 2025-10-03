@@ -1,10 +1,24 @@
 "use client";
 
 import { Button, Header, Icon, Text } from "@dex-web/ui";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 import { Link, usePathname } from "../../i18n/navigation";
 import { WalletButton } from "./WalletButton";
+
+const BetaLogo = () => {
+  return (
+    <div className="relative h-6 w-50">
+      <Image
+        alt="Beta Logo"
+        className="h-auto w-full object-fill"
+        fill
+        src="/images/logo-beta.svg"
+      />
+    </div>
+  );
+};
 
 export const AppHeader = () => {
   const tx = useTranslations("pages");
@@ -23,8 +37,8 @@ export const AppHeader = () => {
           <WalletButton suppressHydrationWarning={true} />
         </Suspense>
       }
-      logoLg={<Icon className="h-6 w-auto stroke-none" name="logo-lg" />}
-      logoSm={<Icon className="h-6 w-auto stroke-none" name="logo-sm" />}
+      logoLg={<BetaLogo />}
+      logoSm={<BetaLogo />}
     >
       <Link
         className={`inline-flex items-baseline justify-center leading-none ${pathname === "/" ? "text-green-100" : "text-green-300"}`}
