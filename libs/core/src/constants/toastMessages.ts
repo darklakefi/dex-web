@@ -1,6 +1,6 @@
 export const TRANSACTION_STEPS = {
   STEP_1: {
-    LIQUIDITY: "Generating zero-knowledge proof [1/3]",
+    LIQUIDITY: "Depositing into pool [1/3]",
     POOL_CREATION: "Preparing Pool Creation [1/3]",
     SWAP: "Generating zero-knowledge proof [1/3]",
   },
