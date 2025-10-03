@@ -1,4 +1,5 @@
 import { Footer, Icon, type IconName, Text } from "@dex-web/ui";
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -24,7 +25,16 @@ export const AppFooter = () => {
   const tx = useTranslations("common");
   return (
     <Footer
-      logo={<Icon className="h-6 w-auto stroke-none" name="logo-lg" />}
+      logo={
+        <div className="relative h-20 w-50">
+          <Image
+            alt="Beta logo"
+            className="h-auto w-full object-fill"
+            fill
+            src="/images/logo-beta.svg"
+          />
+        </div>
+      }
       socialMediaLinks={[]}
     >
       <div className="flex max-w-md flex-col items-start gap-2">
