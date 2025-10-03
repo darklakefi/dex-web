@@ -6,6 +6,21 @@
   "sourceRoot": "apps/web-e2e/src",
   "tags": ["type:e2e", "scope:web", "platform:web"],
   "targets": {
-    "lint": {}
+    "lint": {},
+    "typecheck": {
+      "cache": true,
+      "executor": "nx:run-commands",
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "options": {
+        "command": "tsc --project tsconfig.json --noEmit",
+        "cwd": "apps/web-e2e"
+      }
+    }
   }
 }
