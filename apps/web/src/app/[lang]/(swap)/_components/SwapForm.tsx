@@ -620,7 +620,7 @@ export function SwapForm() {
 
     if (quote) {
       const slippageImpact = quote.priceImpactPercentage;
-      if (slippageImpact > 0.5) {
+      if (slippageImpact >= 1) {
         return BUTTON_MESSAGES.HIGH_PRICE_IMPACT.replace(
           "{value}",
           slippageImpact.toString(),
