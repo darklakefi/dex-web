@@ -2,6 +2,7 @@
 // @generated from file validate/validate.proto (package validate, syntax proto2)
 /* eslint-disable */
 
+import type { Message } from "@bufbuild/protobuf";
 import type {
   GenEnum,
   GenExtension,
@@ -26,7 +27,6 @@ import {
   file_google_protobuf_duration,
   file_google_protobuf_timestamp,
 } from "@bufbuild/protobuf/wkt";
-import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file validate/validate.proto.
@@ -39,7 +39,7 @@ export const file_validate_validate: GenFile =
       file_google_protobuf_descriptor,
       file_google_protobuf_duration,
       file_google_protobuf_timestamp,
-    ]
+    ],
   );
 
 /**

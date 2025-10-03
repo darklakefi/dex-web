@@ -5,43 +5,6 @@
   "sourceRoot": "libs/orpc/src",
   "tags": [],
   "targets": {
-    "build": {
-      "configurations": {
-        "development": {
-          "minify": false
-        },
-        "production": {
-          "minify": true
-        }
-      },
-      "defaultConfiguration": "production",
-      "executor": "@nx/esbuild:esbuild",
-      "options": {
-        "assets": [
-          {
-            "glob": "libs/orpc/README.md",
-            "input": ".",
-            "output": "."
-          }
-        ],
-        "format": ["cjs"],
-        "main": "libs/orpc/src/index.ts",
-        "outputFileName": "main.js",
-        "outputPath": "dist/libs/orpc",
-        "tsConfig": "libs/orpc/tsconfig.lib.json"
-      },
-      "outputs": ["{options.outputPath}"]
-    },
-    "lint": {},
-    "test": {
-      "cache": true,
-      "dependsOn": [],
-      "executor": "@nx/vite:test",
-      "options": {
-        "config": "libs/orpc/vite.config.ts",
-        "reportsDirectory": "../../coverage/libs/orpc"
-      },
-      "outputs": ["{options.reportsDirectory}"]
-    }
+    "lint": {}
   }
 }

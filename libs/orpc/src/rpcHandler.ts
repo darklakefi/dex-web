@@ -1,5 +1,5 @@
 import { RPCHandler } from "@orpc/server/fetch";
-import { CORSPlugin } from "@orpc/server/plugins";
+import { BatchHandlerPlugin, CORSPlugin } from "@orpc/server/plugins";
 import { appRouter } from "./routers/app.router";
 
 export const rpcHandler = new RPCHandler(appRouter, {
@@ -7,6 +7,12 @@ export const rpcHandler = new RPCHandler(appRouter, {
     new CORSPlugin({
       allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "PATCH"],
       origin: (origin) => origin,
+    }),
+    new BatchHandlerPlugin({
+      headers: (responses) => ({
+        "x-batch-count": responses.length.toString(),
+        "x-batch-timestamp": Date.now().toString(),
+      }),
     }),
   ],
 });

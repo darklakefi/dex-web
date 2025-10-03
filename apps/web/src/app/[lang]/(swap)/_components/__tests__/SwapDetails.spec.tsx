@@ -13,7 +13,6 @@ import {
 
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();
-
 const _wrapper = ({ children }: { children: React.ReactNode }) => (
   <NuqsTestingAdapter
     onUrlUpdate={onUrlUpdate}
@@ -25,10 +24,8 @@ const _wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   </NuqsTestingAdapter>
 );
-
 describe.skip("SwapDetails", () => {
   it("renders", async () => {
-    // render(<SwapDetails />, { wrapper });
     expect(await screen.findByText("Price")).toBeDefined();
     expect(await screen.findByText("Price Impact")).toBeDefined();
     expect(await screen.findByText("Max Slippage")).toBeDefined();

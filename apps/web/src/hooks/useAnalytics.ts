@@ -4,7 +4,7 @@ import { usePostHog } from "posthog-js/react";
 import { useCallback } from "react";
 
 interface TrackEventOptions {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function useAnalytics() {
@@ -19,55 +19,48 @@ export function useAnalytics() {
     [posthog],
   );
 
-  const trackSwap = useCallback(
-    (properties: {
-      fromToken: string;
-      toToken: string;
-      fromAmount: number;
-      toAmount: number;
-      transactionHash?: string;
-      status: "initiated" | "signed" | "submitted" | "confirmed" | "failed";
-    }) => {
-      trackEvent("swap", properties);
-    },
-    [trackEvent],
-  );
+  const trackSwap = (properties: {
+    fromToken: string;
+    toToken: string;
+    fromAmount: number;
+    toAmount: number;
+    transactionHash?: string;
+    status: "initiated" | "signed" | "submitted" | "confirmed" | "failed";
+  }) => {
+    trackEvent("swap", properties);
+  };
 
-  const trackLiquidity = useCallback(
-    (properties: {
-      action: "add" | "remove";
-      tokenA: string;
-      tokenB: string;
-      amountA: number;
-      amountB: number;
-      transactionHash?: string;
-      status: "initiated" | "signed" | "submitted" | "confirmed" | "failed";
-    }) => {
-      trackEvent("liquidity", properties);
-    },
-    [trackEvent],
-  );
+  const trackLiquidity = (properties: {
+    action: "add" | "remove";
+    tokenA: string;
+    tokenB: string;
+    amountA: number;
+    amountB: number;
+    transactionHash?: string;
+    status: "initiated" | "signed" | "submitted" | "confirmed" | "failed";
+  }) => {
+    trackEvent("liquidity", properties);
+  };
 
-  const trackWalletConnection = useCallback(
-    (properties: { wallet: string; success: boolean; address?: string }) => {
-      trackEvent("wallet_connected", properties);
-    },
-    [trackEvent],
-  );
+  const trackWalletConnection = (properties: {
+    wallet: string;
+    success: boolean;
+    address?: string;
+  }) => {
+    trackEvent("wallet_connected", properties);
+  };
 
-  const trackError = useCallback(
-    (properties: { error: string; context: string; details?: any }) => {
-      trackEvent("error", properties);
-    },
-    [trackEvent],
-  );
+  const trackError = (properties: {
+    error: string;
+    context: string;
+    details?: unknown;
+  }) => {
+    trackEvent("error", properties);
+  };
 
-  const trackPageView = useCallback(
-    (properties?: { page?: string; referrer?: string }) => {
-      trackEvent("$pageview", properties);
-    },
-    [trackEvent],
-  );
+  const trackPageView = (properties?: { page?: string; referrer?: string }) => {
+    trackEvent("$pageview", properties);
+  };
 
   const identifyUser = useCallback(
     (userId: string, properties?: TrackEventOptions) => {

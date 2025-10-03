@@ -1,5 +1,6 @@
 "use server";
 
+import { getLpTokenMint } from "@dex-web/core";
 import {
   type Account,
   getAccount,
@@ -13,7 +14,6 @@ import type {
   GetPoolReservesInput,
   GetPoolReservesOutput,
 } from "../../schemas/pools/getPoolReserves.schema";
-import { getLpTokenMint } from "@dex-web/core";
 import { getPoolOnChain, LP_TOKEN_DECIMALS } from "../../utils/solana";
 
 async function detectTokenProgram(
@@ -44,7 +44,6 @@ export async function getPoolReservesHandler({
     const poolData = await getPoolOnChain(tokenXMint, tokenYMint);
 
     if (!poolData) {
-      console.log("Pool does not exist on-chain, returning empty data");
       return {
         exists: false,
         lpMint: "",
@@ -53,11 +52,6 @@ export async function getPoolReservesHandler({
         totalLpSupply: 0,
       };
     }
-
-    console.log("Pool data found:", {
-      reserveX: poolData.reserve_x.toBase58(),
-      reserveY: poolData.reserve_y.toBase58(),
-    });
 
     const lpTokenMint = await getLpTokenMint(tokenXMint, tokenYMint);
     const lpTokenMintString = lpTokenMint.toBase58();
@@ -78,7 +72,6 @@ export async function getPoolReservesHandler({
     );
 
     if (!reserveXAccountInfo || !reserveYAccountInfo) {
-      console.log("Reserve accounts don't exist on-chain yet");
       return {
         exists: false,
         lpMint: lpTokenMintString,
@@ -99,13 +92,6 @@ export async function getPoolReservesHandler({
       connection,
       new PublicKey(tokenYMint),
     );
-
-    console.log("Reserve account owners:", {
-      reserveXOwner: reserveXAccountInfo.owner.toBase58(),
-      reserveYOwner: reserveYAccountInfo.owner.toBase58(),
-      token2022ProgramId: TOKEN_2022_PROGRAM_ID.toBase58(),
-      tokenProgramId: TOKEN_PROGRAM_ID.toBase58(),
-    });
 
     let reserveXAccount: Account | null = null;
     let reserveYAccount: Account | null = null;

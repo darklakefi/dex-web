@@ -20,6 +20,10 @@ export type {
   CreateLiquidityTransactionOutput,
 } from "./liquidity/createLiquidityTransaction.schema";
 export type {
+  GetAddLiquidityReviewInput,
+  GetAddLiquidityReviewOutput,
+} from "./liquidity/getAddLiquidityReview.schema";
+export type {
   RemoveLiquidityTransactionInput,
   RemoveLiquidityTransactionOutput,
 } from "./liquidity/removeLiquidityTransaction.schema";
@@ -31,6 +35,18 @@ export type {
   CreatePoolTransactionInput,
   CreatePoolTransactionOutput,
 } from "./pools/createPoolTransaction.schema";
+export type {
+  GetPoolDetailsInput,
+  GetPoolDetailsOutput,
+} from "./pools/getPoolDetails.schema";
+export type {
+  GetPoolReservesInput,
+  GetPoolReservesOutput,
+} from "./pools/getPoolReserves.schema";
+export type {
+  GetUserLiquidityInput,
+  GetUserLiquidityOutput,
+} from "./pools/getUserLiquidity.schema";
 export type {
   GetQuoteInput,
   GetQuoteOutput,
@@ -48,6 +64,14 @@ export type {
   GetTokenDetailsOutput,
 } from "./tokens/getTokenDetails.schema";
 export { getTokenDetailsInputSchema } from "./tokens/getTokenDetails.schema";
+export type {
+  GetTokenMetadataInput,
+  GetTokenMetadataOutput,
+} from "./tokens/getTokenMetadata.schema";
+export type {
+  GetTokenPriceInput,
+  GetTokenPriceOutput,
+} from "./tokens/getTokenPrice.schema";
 export type {
   GetTokensInput,
   GetTokensOutput,

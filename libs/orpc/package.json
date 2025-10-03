@@ -22,6 +22,6 @@
   },
   "name": "@dex-web/orpc",
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "types": "./src/index.ts",
   "version": "0.0.1"
 }

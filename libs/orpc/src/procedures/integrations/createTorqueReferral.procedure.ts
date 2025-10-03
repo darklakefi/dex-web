@@ -3,7 +3,7 @@ import { createTorqueReferralInputSchema } from "../../schemas/integrations/crea
 import { baseProcedure } from "../base.procedure";
 
 export const createTorqueReferral = baseProcedure
-	.input(createTorqueReferralInputSchema)
-	.handler(async ({ input }) => {
-		return await createTorqueReferralHandler(input);
-	});
+  .input(createTorqueReferralInputSchema)
+  .handler(async ({ input }) => {
+    return await createTorqueReferralHandler(input);
+  });

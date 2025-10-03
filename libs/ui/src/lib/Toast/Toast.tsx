@@ -11,7 +11,7 @@ const toastVariants = cva(["flex flex-col gap-2 p-4", "w-xs shadow-sm"], {
   variants: {
     variant: {
       error: "bg-red-950 shadow-red-900",
-      info: "bg-blue-950 shadow-black",
+      info: "border border-green-400 bg-green-600 shadow-green-900",
       loading: "bg-blue-950 shadow-black",
       success: "bg-green-800 shadow-green-600",
       warning: "bg-yellow-950 shadow-yellow-900",
@@ -49,7 +49,7 @@ const iconColorVariants = cva([], {
   variants: {
     variant: {
       error: "text-red-300",
-      info: "text-blue-300",
+      info: "text-green-200",
       loading: "text-white",
       success: "text-green-200",
       warning: "text-yellow-300",
@@ -81,7 +81,9 @@ export function Toast({
           )}
           name={IconMap[variant || "success"] as IconName}
         />
-        <Text.Body2 className="flex-1 text-white">{title}</Text.Body2>
+        <Text.Body2 as="div" className="flex-1 text-white">
+          {title}
+        </Text.Body2>
         <Icon
           className="ml-auto size-4 cursor-pointer text-white"
           name="times"
@@ -89,7 +91,9 @@ export function Toast({
         />
       </div>
       <div className="flex flex-col gap-4 pr-6 pl-9">
-        <Text.Body3 className="text-white opacity-75">{description}</Text.Body3>
+        <Text.Body3 as="div" className="text-white opacity-75">
+          {description}
+        </Text.Body3>
         {actions && (
           <div className="flex gap-2">
             {actions.map((action) => (

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declarationDir": "../../dist/libs/utils",
     "jsx": "react-jsx",
     "outDir": "../../dist/libs/utils",
     "types": ["node"]

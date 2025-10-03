@@ -4,7 +4,7 @@ import type { SendSignedTransactionRequest } from "@dex-web/grpc-client";
 import { getDexGatewayClient } from "../../dex-gateway";
 
 export async function submitSignedTransactionHandler(
-  input: SendSignedTransactionRequest
+  input: SendSignedTransactionRequest,
 ) {
   const grpcClient = await getDexGatewayClient();
 

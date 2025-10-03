@@ -21,6 +21,9 @@
     "src/**/*.stories.jsx",
     "src/**/*.stories.tsx",
     "src/**/*.stories.mdx",
+    "src/**/*.tsx",
+    "src/**/*.ts",
+    "src/types/**/*.d.ts",
     ".storybook/*.js",
     ".storybook/*.ts"
   ]

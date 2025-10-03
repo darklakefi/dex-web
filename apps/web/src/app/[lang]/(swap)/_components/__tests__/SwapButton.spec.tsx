@@ -5,11 +5,9 @@ import { describe, expect, it, vi } from "vitest";
 import { TokenTransactionButton } from "../../../../_components/TokenTransactionButton";
 
 const onUrlUpdate = vi.fn();
-
 describe("SwapButton", () => {
   it("swaps tokens", async () => {
     const user = userEvent.setup();
-
     render(<TokenTransactionButton onClickTokenTransaction={() => {}} />, {
       wrapper: withNuqsTestingAdapter({
         onUrlUpdate,
@@ -18,7 +16,6 @@ describe("SwapButton", () => {
     });
     const button = screen.getByRole("button");
     await user.click(button);
-
     expect(onUrlUpdate).toHaveBeenCalledWith({
       options: {
         history: "replace",

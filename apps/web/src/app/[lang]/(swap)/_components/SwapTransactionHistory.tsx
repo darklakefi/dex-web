@@ -6,6 +6,7 @@ import { Box, Icon, Text } from "@dex-web/ui";
 import {
   getDateDifference,
   getDateString,
+  getExplorerUrl,
   getTimeString,
   getTimezoneString,
   groupTransactionByDate,
@@ -16,7 +17,6 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { getExplorerUrl } from "@dex-web/utils";
 
 export function SwapTransactionHistory() {
   const { publicKey } = useWallet();
@@ -38,8 +38,8 @@ export function SwapTransactionHistory() {
     setHasMore(response.hasMore);
     setTrades(
       [...trades, ...response.trades].filter(
-        (trade): trade is SwapTransaction => trade !== null
-      ) satisfies SwapTransaction[]
+        (trade): trade is SwapTransaction => trade !== null,
+      ) satisfies SwapTransaction[],
     );
 
     if (response.hasMore) {
@@ -56,7 +56,7 @@ export function SwapTransactionHistory() {
         offset: 0,
         userAddress: publicKey?.toBase58() ?? "",
       },
-    })
+    }),
   );
 
   return data?.trades.length > 0 ? (

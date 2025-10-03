@@ -1,5 +1,6 @@
 "use server";
 
+import { toRawUnits } from "@dex-web/utils";
 import { PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import { getHelius } from "../../getHelius";
@@ -8,7 +9,6 @@ import type {
   GetLPRateOutput,
 } from "../../schemas/pools/getLPRate.schema";
 import type { Token } from "../../schemas/tokens/token.schema";
-import { toRawUnits } from "@dex-web/utils";
 import {
   EXCHANGE_PROGRAM_ID,
   getPoolAccount,
@@ -68,7 +68,10 @@ export async function getLPRateHandler(
     const connection = helius.connection;
 
     // Fetch and parse Pool account
-    const pool = await getPoolAccount(connection, poolPubkey);
+    const pool = await getPoolAccount(connection, poolPubkey).catch((error) => {
+      console.error("Failed to get pool account:", error);
+      throw new Error("Pool not found");
+    });
 
     // Get token balances from reserve accounts
     const reserveXBalance = await getTokenBalance(

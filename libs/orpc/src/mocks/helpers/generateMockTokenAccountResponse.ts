@@ -1,5 +1,9 @@
 import { randNumber, randUuid, seed } from "@ngneat/falso";
-import { type DAS, Interface, OwnershipModel } from "helius-sdk";
+import type { GetTokenAccountsResponse } from "helius-sdk/types/das";
+import {
+  Interface as AssetInterface,
+  OwnershipModel,
+} from "helius-sdk/types/enums";
 import { times } from "remeda";
 import { FIXED_SEED } from "./constants";
 
@@ -7,7 +11,7 @@ export function generateTokenAccountsResponseList({
   count = 10,
 }: {
   count?: number;
-} = {}): DAS.GetTokenAccountsResponse {
+} = {}): GetTokenAccountsResponse {
   seed(FIXED_SEED);
   return {
     limit: 10,
@@ -15,7 +19,7 @@ export function generateTokenAccountsResponseList({
       address: randUuid(),
       amount: randNumber({ max: 1000000, min: 1 }),
       id: randUuid(),
-      interface: Interface.V1NFT,
+      interface: AssetInterface.V1_NFT,
       mint: randUuid(),
       mutable: true,
       ownership: {

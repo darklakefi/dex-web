@@ -1,11 +1,9 @@
-import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
-import { QueryClient } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
+import { LazySwapForm } from "../../_components/LazySwapForm";
 import { selectedTokensCache } from "../../_utils/searchParams";
-import { SwapForm } from "./_components/SwapForm";
-import { SwapTransactionHistory } from "./_components/SwapTransactionHistory";
+import { LazySwapTransactionHistory } from "./_components/LazySwapTransactionHistory";
 
 export default async function Page({
   searchParams,
@@ -13,12 +11,6 @@ export default async function Page({
   searchParams: SearchParams;
 }) {
   await selectedTokensCache.parse(searchParams);
-
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery(
-    tanstackClient.pools.getPinedPool.queryOptions({}),
-  );
 
   return (
     <div className="flex justify-center gap-12">
@@ -47,8 +39,8 @@ export default async function Page({
           </Box>
           <div className="size-9" />
         </section>
-        <SwapForm />
-        <SwapTransactionHistory />
+        <LazySwapForm />
+        <LazySwapTransactionHistory />
       </div>
       <div className="hidden max-w-xs md:block">
         <FeaturesAndTrendingPoolPanel />

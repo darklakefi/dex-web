@@ -3,3 +3,18 @@
 :root {
   --background-image-url: url("/background.png");
 }
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@layer utilities {
+  .animate-shimmer {
+    animation: shimmer 2s infinite ease-in-out;
+  }
+}

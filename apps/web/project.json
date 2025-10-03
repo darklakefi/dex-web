@@ -3,7 +3,7 @@
   "name": "web",
   "projectType": "application",
   "sourceRoot": "apps/web/src",
-  "tags": [],
+  "tags": ["type:app", "scope:web", "platform:web"],
   "targets": {
     "build": {
       "defaultConfiguration": "production",
@@ -14,7 +14,6 @@
       "outputs": ["{options.outputPath}"]
     },
     "lint": {},
-
     "serve": {
       "configurations": {
         "development": {
@@ -38,22 +37,20 @@
         "dev": false
       }
     },
-    "test": {
+    "typecheck": {
       "cache": true,
-      "dependsOn": ["^build"],
-      "executor": "@nx/vite:test",
+      "executor": "nx:run-commands",
       "inputs": [
-        "default",
+        "production",
         "^production",
         {
-          "externalDependencies": ["vitest", "@vitest/ui", "happy-dom"]
+          "externalDependencies": ["typescript"]
         }
       ],
       "options": {
-        "config": "apps/web/vite.config.ts",
-        "reportsDirectory": "../../coverage/apps/web"
-      },
-      "outputs": ["{options.reportsDirectory}"]
+        "command": "tsc --project tsconfig.json --noEmit",
+        "cwd": "apps/web"
+      }
     }
   }
 }

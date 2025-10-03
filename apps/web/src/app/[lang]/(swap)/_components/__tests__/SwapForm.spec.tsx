@@ -15,16 +15,15 @@ import { SwapForm } from "../SwapForm";
 
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 vi.mock("next/navigation", () => ({
+  usePathname: () => "/swap",
   useSearchParams: () =>
     new URLSearchParams({
       tokenAAddress: DEFAULT_BUY_TOKEN,
       tokenBAddress: DEFAULT_SELL_TOKEN,
     }),
 }));
-
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();
-
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <NextIntlClientProvider locale="en" messages={{}}>
     <NuqsTestingAdapter
@@ -38,7 +37,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     </NuqsTestingAdapter>
   </NextIntlClientProvider>
 );
-
 describe.skip("SwapForm", () => {
   it("renders both buy and sell sections", async () => {
     render(<SwapForm />, { wrapper });

@@ -1,46 +1,59 @@
 {
-	"compilerOptions": {
-		"incremental": true,
-		"jsx": "preserve",
-		"noEmit": false,
-		"plugins": [
-			{
-				"name": "next"
-			}
-		]
-	},
-	"extends": "../../tsconfig.base.json",
-	"files": [],
-	"include": [
-		"../../apps/web/dist/dist/types/**/*.ts",
-		"../../dist/.next/types/**/*.ts",
-		"../../types/css.d.ts",
-		"../../types/image.d.ts",
-		"../../types/svg.d.ts",
-		"../../vite.config.base.ts",
-		".next/types/**/*.ts"
-	],
-	"references": [
-		{
-			"path": "../../libs/utils"
-		},
-		{
-			"path": "../../libs/ui"
-		},
-		{
-			"path": "../../libs/orpc"
-		},
-		{
-			"path": "../../libs/grpc-client"
-		},
-		{
-			"path": "../../libs/core"
-		},
-		{
-			"path": "./tsconfig.lib.json"
-		},
-		{
-			"path": "./tsconfig.spec.json"
-		}
-	]
+  "compilerOptions": {
+    "allowJs": true,
+    "incremental": true,
+    "jsx": "preserve",
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**/*",
+    "**/test/**/*",
+    "**/*.config.ts",
+    "**/*.config.js",
+    ".next/types/**/*",
+    "../../dist/.next/**/*"
+  ],
+  "extends": "../../tsconfig.base.json",
+  "files": ["next-env.d.ts"],
+  "include": [
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    ".next/types/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../../libs/utils"
+    },
+    {
+      "path": "../../libs/ui"
+    },
+    {
+      "path": "../../libs/orpc"
+    },
+    {
+      "path": "../../libs/grpc-client"
+    },
+    {
+      "path": "../../libs/core"
+    },
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }

@@ -3,14 +3,8 @@
   "name": "ui",
   "projectType": "library",
   "sourceRoot": "libs/ui/src",
-  "tags": [],
+  "tags": ["type:lib", "scope:ui", "platform:shared"],
   "targets": {
-    "build": {
-      "executor": "@nx/vite:build",
-      "options": {
-        "outputPath": "dist/libs/ui"
-      }
-    },
     "lint": {},
     "storybook": {
       "options": {
@@ -25,6 +19,15 @@
         "reportsDirectory": "../../coverage/libs/ui"
       },
       "outputs": ["{options.reportsDirectory}"]
+    },
+    "typecheck": {
+      "executor": "@nx/vite:build",
+      "options": {
+        "config": "libs/ui/vite.config.ts",
+        "mode": "typecheck",
+        "outputPath": "dist/libs/ui"
+      },
+      "outputs": ["{options.outputPath}"]
     }
   }
 }

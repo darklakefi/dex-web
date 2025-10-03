@@ -1,20 +1,31 @@
 "use client";
-import { tanstackClient } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas";
-import { sortSolanaAddresses } from "@dex-web/utils";
 import { Box, Button, Text } from "@dex-web/ui";
-import { convertToDecimal, numberFormatHelper } from "@dex-web/utils";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  convertToDecimal,
+  numberFormatHelper,
+  sortSolanaAddresses,
+  truncate,
+} from "@dex-web/utils";
 import BigNumber from "bignumber.js";
 import { useMemo, useState } from "react";
+import { useUserLiquidity } from "../../../../hooks/queries/useLiquidityQueries";
+import {
+  usePoolDetailsSuspense,
+  usePoolReservesSuspense,
+} from "../../../../hooks/queries/usePoolQueries";
+import {
+  useTokenMetadataSuspense,
+  useTokenPriceSuspense,
+} from "../../../../hooks/queries/useTokenQueries";
+import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
 } from "../../../_utils/constants";
 import { WithdrawLiquidityModal } from "./WithdrawLiquidityModal";
 
-interface YourLiquidityProps {
+export interface YourLiquidityProps {
   tokenAAddress?: string;
   tokenBAddress?: string;
   onWithdraw?: () => void;
@@ -27,77 +38,62 @@ export function YourLiquidity({
   onWithdraw,
   onClaim,
 }: YourLiquidityProps) {
-  const { publicKey } = useWallet();
+  const { data: walletPublicKey } = useWalletPublicKey();
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
-  const tokenA = tokenAAddress || DEFAULT_BUY_TOKEN;
-  const tokenB = tokenBAddress || DEFAULT_SELL_TOKEN;
-  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(tokenA, tokenB);
-  const { data: userLiquidity } = useSuspenseQuery(
-    tanstackClient.liquidity.getUserLiquidity.queryOptions({
-      enabled: !!publicKey,
-      input: {
-        ownerAddress: publicKey?.toBase58() ?? "",
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
-      },
-    }),
+  const resolvedTokenAAddress = tokenAAddress || DEFAULT_BUY_TOKEN;
+  const resolvedTokenBAddress = tokenBAddress || DEFAULT_SELL_TOKEN;
+
+  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+    resolvedTokenAAddress,
+    resolvedTokenBAddress,
   );
 
-  const { data: tokenMetadata } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenMetadata.queryOptions({
-      input: {
-        addresses: [tokenXAddress, tokenYAddress],
-        returnAsObject: true,
-      },
-    }),
-  );
+  const shouldFetchLiquidity = !!walletPublicKey;
 
-  const metadata = tokenMetadata as Record<string, Token>;
-  const tokenXDetails = metadata[tokenXAddress]!;
-  const tokenYDetails = metadata[tokenYAddress]!;
+  const { data: userLiquidity, isFetching: isLiquidityFetching } =
+    useUserLiquidity(
+      walletPublicKey?.toBase58() ?? "",
+      tokenXAddress,
+      tokenYAddress,
+      { enabled: shouldFetchLiquidity },
+    );
 
-  const { data: poolDetails } = useSuspenseQuery(
-    tanstackClient.pools.getPoolDetails.queryOptions({
-      input: {
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
-      },
-    }),
-  );
+  const { data: tokenMetadata } = useTokenMetadataSuspense([
+    tokenXAddress,
+    tokenYAddress,
+  ]);
 
-  const { data: poolReserves } = useSuspenseQuery(
-    tanstackClient.pools.getPoolReserves.queryOptions({
-      input: {
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
-      },
-    }),
-  );
+  const { data: poolDetails, isFetching: isPoolFetching } =
+    usePoolDetailsSuspense(tokenXAddress, tokenYAddress);
 
-  const { data: tokenXPrice } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenPrice.queryOptions({
-      input: {
-        amount: 1,
-        mint: tokenXAddress,
-        quoteCurrency: "USD",
-      },
-    }),
-  );
+  const { data: poolReserves, isFetching: isReservesFetching } =
+    usePoolReservesSuspense(tokenXAddress, tokenYAddress);
 
-  const { data: tokenYPrice } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenPrice.queryOptions({
-      input: {
-        amount: 1,
-        mint: tokenYAddress,
-        quoteCurrency: "USD",
-      },
-    }),
-  );
+  const { data: tokenXPrice } = useTokenPriceSuspense(tokenXAddress);
+  const { data: tokenYPrice } = useTokenPriceSuspense(tokenYAddress);
+
+  const tokenMetadataMap =
+    (tokenMetadata as Record<string, Token | undefined>) ?? {};
+
+  const createFallbackTokenDetails = (address: string): Token => ({
+    address,
+    decimals: 0,
+    symbol: truncate(address),
+  });
+
+  const tokenXDetails =
+    tokenMetadataMap[tokenXAddress] ??
+    createFallbackTokenDetails(tokenXAddress);
+  const tokenYDetails =
+    tokenMetadataMap[tokenYAddress] ??
+    createFallbackTokenDetails(tokenYAddress);
 
   const liquidityCalculations = useMemo(() => {
     if (
-      !userLiquidity.hasLiquidity ||
+      !userLiquidity?.hasLiquidity ||
+      !userLiquidity?.lpTokenBalance ||
+      userLiquidity.lpTokenBalance === 0 ||
       !poolDetails ||
       !poolReserves ||
       poolReserves.totalLpSupply === 0
@@ -115,16 +111,10 @@ export function YourLiquidity({
       userLiquidity.decimals,
     );
 
-    const userLpShare = BigNumber(userLpBalance).dividedBy(
-      poolReserves.totalLpSupply,
-    );
+    const userLpShare = userLpBalance.dividedBy(poolReserves.totalLpSupply);
 
-    const userTokenYAmount = userLpShare
-      .multipliedBy(poolReserves.reserveY)
-      .toNumber();
-    const userTokenXAmount = userLpShare
-      .multipliedBy(poolReserves.reserveX)
-      .toNumber();
+    const userTokenYAmount = userLpShare.mul(poolReserves.reserveY).toNumber();
+    const userTokenXAmount = userLpShare.mul(poolReserves.reserveX).toNumber();
 
     const tokenYValue = BigNumber(userTokenYAmount).multipliedBy(
       tokenYPrice.price || 0,
@@ -142,8 +132,55 @@ export function YourLiquidity({
     };
   }, [userLiquidity, poolReserves, tokenXPrice, tokenYPrice, poolDetails]);
 
-  if (!userLiquidity?.hasLiquidity || !poolDetails) {
-    return null;
+  const isBackgroundFetching =
+    isLiquidityFetching || isPoolFetching || isReservesFetching;
+
+  if (
+    shouldFetchLiquidity &&
+    isBackgroundFetching &&
+    !userLiquidity?.hasLiquidity
+  ) {
+    return (
+      <div className="mt-4 w-full max-w-md">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <Text.Heading className="text-green-200">
+              Your Liquidity
+            </Text.Heading>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+              <Text.Body2 className="text-green-300 uppercase">
+                Loading...
+              </Text.Body2>
+            </div>
+          </div>
+          <Box className="flex flex-row">
+            <div className="flex flex-1 flex-col justify-between gap-2 border-green-500 border-r pr-2">
+              <Text.Body2 className="text-green-200">Loading...</Text.Body2>
+              <Text.Body2 className="text-green-200">Loading...</Text.Body2>
+              <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
+              <Button
+                className="max-w-fit cursor-pointer opacity-50"
+                disabled
+                variant="secondary"
+              >
+                WITHDRAW
+              </Button>
+            </div>
+          </Box>
+        </div>
+      </div>
+    );
+  }
+
+  if (
+    !shouldFetchLiquidity ||
+    !userLiquidity?.hasLiquidity ||
+    !userLiquidity?.lpTokenBalance ||
+    userLiquidity.lpTokenBalance === 0 ||
+    !poolDetails
+  ) {
+    return <div className="mt-4 w-full max-w-md" />;
   }
 
   const pendingYield = "0.00";
@@ -153,9 +190,14 @@ export function YourLiquidity({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <Text.Heading className="text-green-200">Your Liquidity</Text.Heading>
-          <Text.Body2 className="text-green-300 uppercase">
-            All Positions (1)
-          </Text.Body2>
+          <div className="flex items-center gap-2">
+            {isBackgroundFetching && (
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+            )}
+            <Text.Body2 className="text-green-300 uppercase">
+              All Positions (1)
+            </Text.Body2>
+          </div>
         </div>
 
         <Box className="flex flex-row">
@@ -166,7 +208,7 @@ export function YourLiquidity({
                 trimTrailingZeros: true,
                 value: liquidityCalculations.userTokenXAmount,
               })}{" "}
-              {tokenXDetails?.symbol}
+              {tokenXDetails.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-200">
               {numberFormatHelper({
@@ -174,7 +216,7 @@ export function YourLiquidity({
                 trimTrailingZeros: true,
                 value: liquidityCalculations.userTokenYAmount,
               })}{" "}
-              {tokenYDetails?.symbol}
+              {tokenYDetails.symbol}
             </Text.Body2>
             <Text.Body2 className="text-green-300">DEPOSIT</Text.Body2>
             <Button

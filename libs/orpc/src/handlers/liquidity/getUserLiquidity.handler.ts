@@ -1,11 +1,11 @@
 "use server";
 
+import { getLpTokenMint } from "@dex-web/core";
 import { getHelius } from "../../getHelius";
 import type {
   GetUserLiquidityInput,
   GetUserLiquidityOutput,
 } from "../../schemas/pools/getUserLiquidity.schema";
-import { getLpTokenMint } from "@dex-web/core";
 import { LP_TOKEN_DECIMALS } from "../../utils/solana";
 
 export async function getUserLiquidityHandler({
@@ -16,7 +16,7 @@ export async function getUserLiquidityHandler({
   const helius = getHelius();
 
   try {
-    if (!ownerAddress) {
+    if (!ownerAddress || ownerAddress.trim() === "") {
       console.warn("No owner address provided for liquidity lookup");
       return {
         decimals: LP_TOKEN_DECIMALS,
@@ -29,17 +29,16 @@ export async function getUserLiquidityHandler({
     const lpTokenMint = await getLpTokenMint(tokenXMint, tokenYMint);
     const lpTokenMintString = lpTokenMint.toBase58();
 
-    const lpTokenAccountsResponse = await helius.rpc.getTokenAccounts({
+    const lpTokenAccountsResponse = await helius.getTokenAccounts({
       mint: lpTokenMintString,
       owner: ownerAddress,
-      page: 1,
     });
 
     const lpTokenBalance =
       lpTokenAccountsResponse?.token_accounts?.reduce(
-        (total, account) => total + (account.amount || 0),
+        (total, account) => total + (account?.amount ?? 0),
         0,
-      ) || 0;
+      ) ?? 0;
 
     return {
       decimals: LP_TOKEN_DECIMALS,

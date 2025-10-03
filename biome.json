@@ -1,82 +1,82 @@
 {
-	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-	"assist": {
-		"actions": {
-			"source": {
-				"useSortedAttributes": "on",
-				"useSortedKeys": "on",
-				"useSortedProperties": "on"
-			}
-		},
-		"enabled": true
-	},
-	"files": {
-		"ignoreUnknown": false,
-		"includes": [
-			"**",
-			"!**/dist/**",
-			"!**/node_modules/**",
-			"!**/coverage/**",
-			"!**/storybook-static/**",
-			"!**/tmp/**",
-			"!**/.*/**",
-			"!**/test-results/**"
-		]
-	},
-	"formatter": {
-		"enabled": true,
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedAttributes": "on",
+        "useSortedKeys": "on",
+        "useSortedProperties": "on"
+      }
+    },
+    "enabled": true
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "**",
+      "!**/dist/**",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!**/storybook-static/**",
+      "!**/tmp/**",
+      "!**/.*/**",
+      "!**/test-results/**"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
 
-		"indentStyle": "space",
-		"useEditorconfig": true
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "double"
-		}
-	},
-	"linter": {
-		"enabled": true,
+    "indentStyle": "space",
+    "useEditorconfig": true
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  "linter": {
+    "enabled": true,
 
-		"rules": {
-			"a11y": {
-				"recommended": true
-			},
-			"complexity": {
-				"recommended": true
-			},
-			"correctness": {
-				"recommended": true
-			},
-			"nursery": {
-				"useSortedClasses": {
-					"fix": "safe",
-					"level": "error",
-					"options": {
-						"functions": ["clsx", "cva", "tw"]
-					}
-				}
-			},
-			"performance": {
-				"recommended": true
-			},
-			"recommended": true,
-			"security": {
-				"recommended": true
-			},
-			"style": {
-				"noNonNullAssertion": "off",
-				"recommended": true
-			},
-			"suspicious": {
-				"noDocumentCookie": "off",
-				"recommended": true
-			}
-		}
-	},
-	"vcs": {
-		"clientKind": "git",
-		"defaultBranch": "develop",
-		"enabled": true,
-		"useIgnoreFile": true
-	}
+    "rules": {
+      "a11y": {
+        "recommended": true
+      },
+      "complexity": {
+        "recommended": true
+      },
+      "correctness": {
+        "recommended": true
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "fix": "safe",
+          "level": "error",
+          "options": {
+            "functions": ["clsx", "cva", "tw"]
+          }
+        }
+      },
+      "performance": {
+        "recommended": true
+      },
+      "recommended": true,
+      "security": {
+        "recommended": true
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "recommended": true
+      },
+      "suspicious": {
+        "noDocumentCookie": "off",
+        "recommended": true
+      }
+    }
+  },
+  "vcs": {
+    "clientKind": "git",
+    "defaultBranch": "develop",
+    "enabled": true,
+    "useIgnoreFile": true
+  }
 }

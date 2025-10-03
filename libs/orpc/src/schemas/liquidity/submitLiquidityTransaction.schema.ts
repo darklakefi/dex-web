@@ -6,7 +6,10 @@ export const submitLiquidityTransactionInputSchema = z.object({
 
 export const submitLiquidityTransactionOutputSchema = z.object({
   error_logs: z.string().optional(),
+  error_message: z.string().optional(),
+  error_type: z.string().optional(),
   signature: z.string().optional(),
+  simulation_error: z.string().optional(),
   success: z.boolean(),
 });
 

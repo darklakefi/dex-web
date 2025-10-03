@@ -10,6 +10,7 @@
         "cwd": ".",
         "parallel": false
       }
-    }
+    },
+    "lint": {}
   }
 }

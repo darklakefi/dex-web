@@ -4,7 +4,11 @@ import {
   randUuid,
   seed,
 } from "@ngneat/falso";
-import { type DAS, Interface, OwnershipModel } from "helius-sdk";
+import type { GetAssetResponseList } from "helius-sdk/types/das";
+import {
+  Interface as AssetInterface,
+  OwnershipModel,
+} from "helius-sdk/types/enums";
 import { times } from "remeda";
 import { FIXED_SEED } from "./constants";
 
@@ -12,7 +16,7 @@ export function generateAssetResponseList({
   count = 10,
 }: {
   count?: number;
-} = {}): DAS.GetAssetResponseList {
+} = {}): GetAssetResponseList {
   seed(FIXED_SEED);
   const owner = randUuid();
   return {
@@ -29,7 +33,7 @@ export function generateAssetResponseList({
         },
       },
       id: randUuid(),
-      interface: Interface.V1NFT,
+      interface: AssetInterface.V1_NFT,
       mutable: true,
       ownership: {
         delegate: undefined,

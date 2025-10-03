@@ -4,7 +4,6 @@ import { tanstackClient } from "@dex-web/orpc";
 import { getTokensInputSchema, type Token } from "@dex-web/orpc/schemas";
 import { Box, Button, Modal, TextInput } from "@dex-web/ui";
 import { pasteFromClipboard, useDebouncedValue } from "@dex-web/utils";
-import { useWallet } from "@solana/wallet-adapter-react";
 import {
   type AnyFieldApi,
   createFormHook,
@@ -16,8 +15,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { Suspense } from "react";
 import useLocalStorageState from "use-local-storage-state";
+import { useWalletPublicKey } from "../../hooks/useWalletCache";
+import { logger } from "../../utils/logger";
 import { selectedTokensParsers } from "../_utils/searchParams";
-import type { RouteString } from "../_utils/types";
 import { TokenList } from "../[lang]/(swap)/_components/TokenList";
 import { NoResultFound } from "./NoResultFound";
 
@@ -45,7 +45,7 @@ const formConfig = {
     query: "",
   },
   onSubmit: ({ value }: { value: { query: string } }) => {
-    console.log(value);
+    logger.log(value);
   },
   validators: {
     onChange: ({ value }: { value: { query: string } }) =>
@@ -56,17 +56,15 @@ const formConfig = {
 interface SelectTokenModalProps {
   type: "buy" | "sell";
   returnUrl: string;
-  allowList?: string[];
 }
 
 export function SelectTokenModal({
   type,
   returnUrl = "",
-  allowList,
 }: SelectTokenModalProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { publicKey } = useWallet();
+  const { data: publicKey } = useWalletPublicKey();
   const connectedWalletAddress: string = publicKey?.toBase58() ?? "";
 
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -76,7 +74,7 @@ export function SelectTokenModal({
   const handleClose = () => {
     const from = searchParams.get("from");
     if (from) {
-      router.push(from as RouteString);
+      router.replace(from);
       return;
     }
     router.back();
@@ -114,22 +112,27 @@ export function SelectTokenModal({
     const baseReturn = currentFrom || `/${returnUrl}`;
     const selectedTokenAddress = selectedToken.address;
     setRecentSearches(selectedToken);
+
     if (type === "buy") {
       const sellAddress =
         selectedTokenAddress === tokenBAddress ? tokenAAddress : tokenBAddress;
+
       const urlWithParams = serialize(baseReturn, {
         tokenAAddress: selectedTokenAddress,
         tokenBAddress: sellAddress,
       });
-      router.push(urlWithParams as RouteString);
+
+      router.push(urlWithParams);
     } else {
       const buyAddress =
         selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
+
       const urlWithParams = serialize(baseReturn, {
         tokenAAddress: buyAddress,
         tokenBAddress: selectedTokenAddress,
       });
-      router.push(urlWithParams as RouteString);
+
+      router.push(urlWithParams);
     }
   };
 
@@ -138,12 +141,11 @@ export function SelectTokenModal({
   const rawQuery = useStore(form.store, (state) => state.values.query);
   const isInitialLoad = rawQuery === "";
 
-  const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 300);
+  const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 500);
 
   const { data } = useSuspenseQuery(
     tanstackClient.tokens.getTokens.queryOptions({
       input: {
-        allowList,
         limit: 8,
         offset: 0,
         query: debouncedQuery,

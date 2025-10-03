@@ -1,5 +1,4 @@
 {
-  "compileOnSave": false,
   "compilerOptions": {
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
@@ -10,8 +9,9 @@
     "importHelpers": true,
     "isolatedModules": true,
     "lib": ["es2022", "dom", "dom.iterable"],
-    "module": "preserve",
+    "module": "esnext",
     "moduleDetection": "force",
+    "moduleResolution": "bundler",
     "noUncheckedIndexedAccess": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
@@ -20,13 +20,6 @@
     "target": "es2022",
     "typeRoots": ["types", "node_modules", "node_modules/@types"],
     "types": ["svg", "css", "image"],
-    "verbatimModuleSyntax": true
-  },
-  "exclude": ["node_modules", "tmp", "libs/grpc-client/src/generated/**"],
-  "include": [
-    "vite.config.base.ts",
-    "types/svg.d.ts",
-    "types/css.d.ts",
-    "types/image.d.ts"
-  ]
+    "verbatimModuleSyntax": false
+  }
 }

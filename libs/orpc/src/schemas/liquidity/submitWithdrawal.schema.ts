@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { isSolanaAddress } from "@dex-web/utils";
+import { z } from "zod";
 
 const numericString = z
   .string()
@@ -22,6 +22,7 @@ export const submitWithdrawalInputSchema = z.object({
 export const submitWithdrawalOutputSchema = z.object({
   error: z.string().optional(),
   signature: z.string().optional(),
+  status: z.enum(["confirmed", "submitted"]).optional(),
   success: z.boolean(),
 });
 

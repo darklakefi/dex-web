@@ -53,6 +53,7 @@
   --color-red-900: oklch(0.2143 0.0706 25.45);
   --color-red-950: oklch(0.1517 0.0422 23.6);
 
+  --color-modal-overlay: #010f06e5;
   --drop-shadow-xl: 12px 12px 0px 0px var(--color-green-600);
 
   --font-sans: var(--font-classic-console-neue), ui-sans-serif, system-ui,
