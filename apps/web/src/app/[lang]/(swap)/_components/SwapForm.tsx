@@ -12,13 +12,14 @@ import {
   useTransactionToasts,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
-import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
+import type { GetQuoteOutput, Token } from "@dex-web/orpc/schemas";
 import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import { Box, Button, Text } from "@dex-web/ui";
 import {
   checkInsufficientBalance,
   convertToDecimal,
   formatAmountInput,
+  numberFormatHelper,
   parseAmount,
   parseAmountBigNumber,
   sortSolanaAddresses,
@@ -100,6 +101,19 @@ export function SwapForm() {
     selectedTokensParsers,
   );
   const { incomingReferralCode } = useReferralCode();
+
+  const { data: tokenMetadata } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenMetadata.queryOptions({
+      input: {
+        addresses: [tokenAAddress, tokenBAddress],
+        returnAsObject: true,
+      },
+    }),
+  );
+
+  const metadata = tokenMetadata as Record<string, Token>;
+  const tokenADetails = metadata[tokenAAddress];
+  const tokenBDetails = metadata[tokenBAddress];
 
   const swapState = useTransactionState(0, false, true);
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
@@ -214,9 +228,19 @@ export function SwapForm() {
 
       swapState.reset();
       form.reset();
-      const successMessage = isSquadsX(walletAdapter?.wallet)
+      const successMessage = isSquadsX(wallet)
         ? undefined
-        : `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`;
+        : `SWAPPED ${numberFormatHelper({
+            decimalScale: 5,
+            trimTrailingZeros: true,
+            value: form.state.values.tokenAAmount,
+          })} ${tokenBDetails?.symbol || tokenBAddress} FOR ${numberFormatHelper(
+            {
+              decimalScale: 5,
+              trimTrailingZeros: true,
+              value: form.state.values.tokenBAmount,
+            },
+          )} ${tokenADetails?.symbol || tokenAAddress}. protected from MEV attacks.`;
 
       toasts.dismiss();
 
