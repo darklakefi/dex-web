@@ -12,6 +12,7 @@ import {
   useTransactionToasts,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
+import type { Token } from "@dex-web/orpc/schemas";
 import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import { Box, Button, Text } from "@dex-web/ui";
 import {
@@ -19,6 +20,7 @@ import {
   convertToDecimal,
   formatAmountInput,
   getGatewayTokenAddress,
+  numberFormatHelper,
   parseAmount,
   parseAmountBigNumber,
   sortSolanaAddresses,
@@ -27,7 +29,7 @@ import {
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useDebouncedValue } from "@tanstack/react-pacer";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -103,6 +105,19 @@ export function SwapForm() {
     selectedTokensParsers,
   );
   const { incomingReferralCode } = useReferralCode();
+
+  const { data: tokenMetadata } = useSuspenseQuery(
+    tanstackClient.tokens.getTokenMetadata.queryOptions({
+      input: {
+        addresses: [tokenAAddress, tokenBAddress],
+        returnAsObject: true,
+      },
+    }),
+  );
+
+  const metadata = tokenMetadata as Record<string, Token>;
+  const tokenADetails = metadata[tokenAAddress];
+  const tokenBDetails = metadata[tokenBAddress];
 
   const swapState = useTransactionState(0, false, true);
   const [_trackDetails, setTrackDetails] = useState<{
@@ -218,7 +233,17 @@ export function SwapForm() {
       form.reset();
       const successMessage = isSquadsX(walletAdapter?.wallet)
         ? undefined
-        : `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`;
+        : `SWAPPED ${numberFormatHelper({
+            decimalScale: 5,
+            trimTrailingZeros: true,
+            value: form.state.values.tokenAAmount,
+          })} ${tokenADetails?.symbol || tokenAAddress} FOR ${numberFormatHelper(
+            {
+              decimalScale: 5,
+              trimTrailingZeros: true,
+              value: form.state.values.tokenBAmount,
+            },
+          )} ${tokenBDetails?.symbol || tokenBAddress}. protected from MEV attacks.`;
 
       toasts.dismiss();
 
