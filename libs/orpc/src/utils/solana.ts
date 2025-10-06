@@ -26,11 +26,17 @@ export const MAX_PERCENTAGE = 1000000;
 
 export const LP_TOKEN_DECIMALS = 9;
 
+// SOL native token address
+export const SOL_MINT = "So11111111111111111111111111111111111111111";
+export const WSOL_MINT = "So11111111111111111111111111111111111111112";
+
 export const IDL_CODER = new BorshCoder(IDL as Idl);
 
 export type PoolAccount = {
-  reserve_x: PublicKey;
-  reserve_y: PublicKey;
+  token_mint_x: PublicKey;
+  token_mint_y: PublicKey;
+  reserve_x: PublicKey; // pool token account
+  reserve_y: PublicKey; // pool token account
   locked_x: number;
   locked_y: number;
   user_locked_x: number;

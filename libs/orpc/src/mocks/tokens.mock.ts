@@ -16,6 +16,13 @@ export const tokensData = [
     name: "DukY",
     symbol: "DukY",
   }),
+  create(TokenMetadataPB, {
+    address: "So11111111111111111111111111111111111111111",
+    decimals: 9,
+    logoUri: "",
+    name: "SOL",
+    symbol: "SOL",
+  }),
 ];
 
 export const tokensDataMainnet = [
