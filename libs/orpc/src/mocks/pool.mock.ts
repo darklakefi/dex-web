@@ -6,6 +6,13 @@ export const MOCK_POOLS = [
     tokenYMint: "HXsKnhXPtGr2mq4uTpxbxyy7ZydYWJwx4zMuYPEDukY",
     tokenYSymbol: "DukY",
   },
+  {
+    apr: 0,
+    tokenXMint: "So11111111111111111111111111111111111111111",
+    tokenXSymbol: "SOL",
+    tokenYMint: "DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX",
+    tokenYSymbol: "DuX",
+  },
 ];
 
 export const MAINNET_POOLS = [

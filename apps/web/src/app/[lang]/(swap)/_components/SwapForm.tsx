@@ -21,6 +21,7 @@ import {
   formatAmountInput,
   parseAmount,
   parseAmountBigNumber,
+  replaceSolWithWsol,
   sortSolanaAddresses,
   toRawUnitsBigint,
 } from "@dex-web/utils";
@@ -238,6 +239,8 @@ export function SwapForm() {
       });
 
       if (tokenAAddress && tokenBAddress) {
+        // const replacedTokens = replaceSolWithWsol(tokenAAddress, tokenBAddress);
+
         const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
         const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
           sortedTokens;
@@ -278,11 +281,17 @@ export function SwapForm() {
     ),
   });
 
+  // Apply replaceSolWithWsol to get the correct token addresses for pool details
+  const processedTokens =
+    tokenAAddress && tokenBAddress
+      ? replaceSolWithWsol(tokenAAddress, tokenBAddress)
+      : { tokenAAddress, tokenBAddress };
+
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.pools.getPoolDetails.queryOptions({
       input: {
-        tokenXMint: tokenBAddress,
-        tokenYMint: tokenAAddress,
+        tokenXMint: processedTokens.tokenBAddress,
+        tokenYMint: processedTokens.tokenAAddress,
       },
     }),
   );

@@ -1,6 +1,7 @@
 "use server";
 
 import { ORPCError } from "@orpc/server";
+import { PublicKey } from "@solana/web3.js";
 import { getHelius } from "../../getHelius";
 import type {
   GetTokenAccountsInput,
@@ -8,6 +9,7 @@ import type {
 } from "../../schemas/helius/getTokenAccounts.schema";
 import type { Token } from "../../schemas/tokens";
 import type { TokenAccount } from "../../schemas/tokens/tokenAccount.schema";
+import { SOL_MINT } from "../../utils/solana";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
 export async function getTokenAccountsHandler({
@@ -15,6 +17,26 @@ export async function getTokenAccountsHandler({
   mint,
 }: GetTokenAccountsInput): Promise<GetTokenAccountsOutput> {
   const helius = getHelius();
+
+  if (mint === SOL_MINT) {
+    // Handle SOL native token specially
+    const connection = helius.connection;
+    const publicKey = new PublicKey(ownerAddress);
+    const solBalance = await connection.getBalance(publicKey);
+
+    // SOL has 9 decimals
+    const solTokenAccount: TokenAccount = {
+      address: ownerAddress,
+      amount: solBalance,
+      decimals: 9,
+      mint: SOL_MINT,
+      symbol: "SOL",
+    };
+
+    return {
+      tokenAccounts: [solTokenAccount],
+    };
+  }
 
   const [getTokenAccountsResponse, tokenMetadataResponse] = await Promise.all([
     helius

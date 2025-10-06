@@ -10,6 +10,7 @@ export { getExplorerUrl } from "./blockchain/explorerUrl";
 export { groupTransactionByDate } from "./blockchain/groupTransactionByDate";
 export { isSolanaAddress } from "./blockchain/isSolanaAddress";
 export { isValidSolanaAddress } from "./blockchain/isValidSolanaAddress";
+export { replaceSolWithWsol } from "./blockchain/replaceSolWithWsol";
 export { sortSolanaAddresses } from "./blockchain/sortSolanaAddresses";
 export { pasteFromClipboard } from "./browser/pasteFromClipboard";
 export {
