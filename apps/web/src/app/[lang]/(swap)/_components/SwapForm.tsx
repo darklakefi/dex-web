@@ -239,8 +239,6 @@ export function SwapForm() {
       });
 
       if (tokenAAddress && tokenBAddress) {
-        // const replacedTokens = replaceSolWithWsol(tokenAAddress, tokenBAddress);
-
         const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
         const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
           sortedTokens;
@@ -282,7 +280,7 @@ export function SwapForm() {
   });
 
   // Apply replaceSolWithWsol to get the correct token addresses for pool details
-  const processedTokens =
+  const solReplacedTokens =
     tokenAAddress && tokenBAddress
       ? replaceSolWithWsol(tokenAAddress, tokenBAddress)
       : { tokenAAddress, tokenBAddress };
@@ -290,8 +288,8 @@ export function SwapForm() {
   const { data: poolDetails } = useSuspenseQuery(
     tanstackClient.pools.getPoolDetails.queryOptions({
       input: {
-        tokenXMint: processedTokens.tokenBAddress,
-        tokenYMint: processedTokens.tokenAAddress,
+        tokenXMint: solReplacedTokens.tokenBAddress,
+        tokenYMint: solReplacedTokens.tokenAAddress,
       },
     }),
   );
