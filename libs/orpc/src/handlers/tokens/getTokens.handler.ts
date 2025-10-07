@@ -10,10 +10,18 @@ import type {
 import { getTokensAllowList } from "../../utils/getTokensAllowList";
 import { getTokenMetadataListHandler } from "../dex-gateway/getTokenMetadataList.handler";
 
+interface ContextWithHeaders extends ClientContext {
+  headers?: {
+    referer?: string;
+    referrer?: string;
+  };
+}
+
 const isSwapContext = (context?: ClientContext): boolean => {
   if (!context || typeof context !== "object") return false;
 
-  const headers = (context as any).headers;
+  const contextWithHeaders = context as ContextWithHeaders;
+  const headers = contextWithHeaders.headers;
   if (!headers || typeof headers !== "object") return false;
 
   const referer = headers.referer || headers.referrer;

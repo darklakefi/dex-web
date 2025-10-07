@@ -1,7 +1,7 @@
 import { Connection } from "@solana/web3.js";
 import { createHelius } from "helius-sdk";
 
-type HeliusClientWithConnection = ReturnType<typeof createHelius> & {
+export type HeliusClientWithConnection = ReturnType<typeof createHelius> & {
   connection: Connection;
   endpoint: string;
 };
