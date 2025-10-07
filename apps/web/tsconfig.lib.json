@@ -23,28 +23,13 @@
   "extends": "./tsconfig.json",
   "include": [
     "next-env.d.ts",
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "src/**/*.cts",
     "src/**/*.js",
     "src/**/*.jsx",
     "src/**/*.mts",
-    "src/**/*.cts"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts"
   ],
-  "references": [
-    {
-      "path": "../../libs/utils/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/ui/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/orpc/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/grpc-client/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/core/tsconfig.lib.json"
-    }
-  ]
+  "references": []
 }

@@ -29,6 +29,8 @@ export const LP_TOKEN_DECIMALS = 9;
 export const IDL_CODER = new BorshCoder(IDL as Idl);
 
 export type PoolAccount = {
+  authority: PublicKey;
+  bump: number;
   reserve_x: PublicKey;
   reserve_y: PublicKey;
   locked_x: number;

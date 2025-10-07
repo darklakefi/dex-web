@@ -8,7 +8,8 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",
@@ -21,7 +22,7 @@
     "**/*.config.ts",
     "**/*.config.js",
     ".next/types/**/*",
-    "../../dist/.next/**/*"
+    "../../dist/**/*"
   ],
   "extends": "../../tsconfig.base.json",
   "files": ["next-env.d.ts"],
@@ -32,28 +33,5 @@
     "**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts"
-  ],
-  "references": [
-    {
-      "path": "../../libs/utils"
-    },
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/orpc"
-    },
-    {
-      "path": "../../libs/grpc-client"
-    },
-    {
-      "path": "../../libs/core"
-    },
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
   ]
 }

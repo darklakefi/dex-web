@@ -1,5 +1,5 @@
 import type { Trade } from "@dex-web/grpc-client";
-import BigNumber from "bignumber.js";
+import Decimal from "decimal.js";
 import { z } from "zod";
 import { getTradesListByUserHandler } from "../../handlers/dex-gateway/getTradesListByUser.handler";
 import { baseProcedure } from "../base.procedure";
@@ -9,12 +9,10 @@ const getTradesListByUserInputSchema = z.object({
   offset: z.number().default(0),
   userAddress: z.string(),
 });
-
 export const getTradesListByUser = baseProcedure
   .input(getTradesListByUserInputSchema)
   .handler(async ({ input }) => {
     const { userAddress, limit, offset } = input;
-
     if (!userAddress) {
       return {
         hasMore: false,
@@ -22,32 +20,27 @@ export const getTradesListByUser = baseProcedure
         trades: [],
       };
     }
-
     const response = await getTradesListByUserHandler({
       $typeName: "darklake.v1.GetTradesListByUserRequest",
       pageNumber: offset / limit + 1,
       pageSize: limit,
       userAddress: userAddress,
     });
-
     const items = response?.data?.trades.map((trade: Trade) => {
       const tokenIn = trade.isSwapXToY ? trade.tokenX : trade.tokenY;
       const tokenOut = trade.isSwapXToY ? trade.tokenY : trade.tokenX;
-
       if (!tokenIn || !tokenOut) {
         return null;
       }
-
-      const displayAmountIn = BigNumber(trade.amountIn).div(
-        10 ** tokenIn.decimals,
+      const displayAmountIn = new Decimal(trade.amountIn).div(
+        new Decimal(10).pow(tokenIn.decimals),
       );
-      const displayMinimalAmountOut = BigNumber(trade.minimalAmountOut).div(
-        10 ** tokenOut.decimals,
+      const displayMinimalAmountOut = new Decimal(trade.minimalAmountOut).div(
+        new Decimal(10).pow(tokenOut.decimals),
       );
-
       return {
         amountIn: trade.amountIn,
-        createdAt: BigNumber(trade.createdAt).div(1_000).toNumber(),
+        createdAt: new Decimal(trade.createdAt).div(1_000).toNumber(),
         displayAmountIn: displayAmountIn.toFixed(2).toString(),
         displayMinimalAmountOut: displayMinimalAmountOut.toFixed(2).toString(),
         isSwapXToY: trade.isSwapXToY,
@@ -74,7 +67,6 @@ export const getTradesListByUser = baseProcedure
         userAddress: trade.userAddress,
       };
     });
-
     return {
       hasMore:
         (response?.data?.totalPages ?? 0) > (response?.data?.currentPage ?? 0),

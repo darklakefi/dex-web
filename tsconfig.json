@@ -1,7 +1,4 @@
 {
-  "compilerOptions": {
-    "paths": {}
-  },
   "extends": "./tsconfig.base.json",
   "files": [],
   "references": [
@@ -28,6 +25,9 @@
     },
     {
       "path": "./libs/grpc-client"
+    },
+    {
+      "path": "./libs/liquidity-calculations"
     }
   ]
 }

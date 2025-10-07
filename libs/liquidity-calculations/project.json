@@ -1,0 +1,22 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "liquidity-calculations",
+  "projectType": "library",
+  "sourceRoot": "libs/liquidity-calculations/src",
+  "tags": ["scope:shared", "domain:liquidity", "type:util"],
+  "targets": {
+    "build": {
+      "executor": "nx:noop"
+    },
+    "build-deps": {
+      "executor": "nx:noop"
+    },
+    "lint": {},
+    "nx-release-publish": {
+      "executor": "nx:noop"
+    },
+    "watch-deps": {
+      "executor": "nx:noop"
+    }
+  }
+}

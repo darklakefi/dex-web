@@ -2,7 +2,6 @@
 import { join, resolve } from "node:path";
 
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
-import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig, mergeConfig } from "vite";
@@ -77,7 +76,6 @@ export const config = mergeConfig(baseConfig, {
   plugins: [
     react(),
     tailwindcss(),
-    nxViteTsPaths(),
     svgr({
       include: "src/**/*.svg",
       svgrOptions: {
@@ -87,14 +85,7 @@ export const config = mergeConfig(baseConfig, {
     }),
     nxCopyAssetsPlugin(["*.md", "package.json"]),
     dts({
-      exclude: [
-        "src/**/*.spec.ts",
-        "src/**/*.test.ts",
-        "src/**/*.spec.tsx",
-        "src/**/*.test.tsx",
-      ],
-      include: ["src/**/*"],
-      outDir: "../../dist/libs/ui",
+      entryRoot: "src",
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),
   ],
@@ -128,7 +119,6 @@ export default defineConfig(({ mode }) => {
       plugins: [
         react(),
         tailwindcss(),
-        nxViteTsPaths(),
         svgr({
           include: "src/**/*.svg",
           svgrOptions: {

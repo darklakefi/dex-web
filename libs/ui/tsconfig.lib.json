@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "declarationDir": "../../dist/libs/ui",
-    "outDir": "../../dist/libs/ui"
+    "composite": false,
+    "jsx": "react-jsx",
+    "outDir": "./out-tsc/lib"
   },
   "exclude": [
     "dist",
@@ -15,7 +16,7 @@
     "src/**/*.spec.jsx",
     "src/**/*.test.jsx"
   ],
-  "extends": "./tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*.js",
     "src/**/*.jsx",

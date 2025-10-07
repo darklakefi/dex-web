@@ -21,13 +21,11 @@
       "outputs": ["{options.reportsDirectory}"]
     },
     "typecheck": {
-      "executor": "@nx/vite:build",
+      "executor": "nx:run-commands",
       "options": {
-        "config": "libs/ui/vite.config.ts",
-        "mode": "typecheck",
-        "outputPath": "dist/libs/ui"
-      },
-      "outputs": ["{options.outputPath}"]
+        "command": "tsc --noEmit -p tsconfig.lib.json",
+        "cwd": "libs/ui"
+      }
     }
   }
 }

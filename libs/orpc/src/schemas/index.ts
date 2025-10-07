@@ -32,6 +32,14 @@ export type {
   SubmitLiquidityTransactionOutput,
 } from "./liquidity/submitLiquidityTransaction.schema";
 export type {
+  SubmitWithdrawalInput,
+  SubmitWithdrawalOutput,
+} from "./liquidity/submitWithdrawal.schema";
+export type {
+  WithdrawLiquidityInput,
+  WithdrawLiquidityOutput,
+} from "./liquidity/withdrawLiquidity.schema";
+export type {
   CreatePoolTransactionInput,
   CreatePoolTransactionOutput,
 } from "./pools/createPoolTransaction.schema";

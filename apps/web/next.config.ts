@@ -56,7 +56,7 @@ const nextConfig = {
   typedRoutes: true,
   typescript: {
     ignoreBuildErrors: true,
-    tsconfigPath: "./tsconfig.json",
+    tsconfigPath: "./tsconfig.lib.json",
   },
 
   webpack(config, { isServer }) {

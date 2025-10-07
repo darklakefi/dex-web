@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "../../dist/libs/ui/spec",
+    "outDir": "./out-tsc/spec",
     "types": [
       "vitest/globals",
       "vitest/importMeta",
@@ -9,7 +9,7 @@
       "vitest"
     ]
   },
-  "extends": "./tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "include": [
     "vite.config.ts",
     "vite.config.mts",
@@ -26,5 +26,10 @@
     "src/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    }
   ]
 }

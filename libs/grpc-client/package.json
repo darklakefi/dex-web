@@ -1,19 +1,27 @@
 {
   "dependencies": {
-    "@connectrpc/connect": "^2.1.0",
-    "@connectrpc/connect-node": "^2.1.0",
-    "@connectrpc/connect-web": "^2.1.0"
+    "@connectrpc/connect": "^1.6.1",
+    "@connectrpc/connect-node": "^1.6.1",
+    "@connectrpc/connect-web": "^1.6.1"
   },
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "default": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
     "./server": {
       "default": "./src/client-server.ts",
-      "node": "./src/client-server.ts"
+      "node": "./src/client-server.ts",
+      "types": "./src/client-server.ts"
     },
-    "./types": "./src/types.ts",
+    "./types": {
+      "default": "./src/types.ts",
+      "types": "./src/types.ts"
+    },
     "./web": {
       "browser": "./src/client-web.ts",
-      "default": "./src/client-web.ts"
+      "default": "./src/client-web.ts",
+      "types": "./src/client-web.ts"
     }
   },
   "name": "@dex-web/grpc-client",

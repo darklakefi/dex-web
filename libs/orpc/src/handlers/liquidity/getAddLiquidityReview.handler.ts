@@ -66,10 +66,8 @@ async function getTokenBalance(
   }
 }
 
-// Use Anchor's coder directly for decoding
 const coder = new BorshCoder(IDL as Idl);
 
-// Helper function to fetch and parse Pool account
 async function getPoolAccount(
   connection: Connection,
   poolPubkey: PublicKey,
@@ -80,7 +78,6 @@ async function getPoolAccount(
     throw new Error("Pool not found");
   }
 
-  // Decode the Pool account using Anchor's built-in decoder
   try {
     const pool = coder.accounts.decode("Pool", accountInfo.data);
     return pool;
@@ -118,13 +115,11 @@ export async function getAddLiquidityReviewHandler(
 
     const connection = helius.connection;
 
-    // Fetch and parse Pool account
     const pool = await getPoolAccount(connection, poolPubkey).catch((error) => {
       console.error("Failed to get pool account:", error);
       throw new Error("Pool not found");
     });
 
-    // Get token balances from reserve accounts
     const reserveXBalance = await getTokenBalance(
       connection,
       pool.reserve_x,

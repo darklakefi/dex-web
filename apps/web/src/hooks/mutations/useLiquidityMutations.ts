@@ -2,9 +2,20 @@
 
 import { client } from "@dex-web/orpc";
 import type {
+  CreateLiquidityTransactionInput,
+  CreateLiquidityTransactionOutput,
+  GetUserLiquidityOutput,
+  RemoveLiquidityTransactionInput,
+  RemoveLiquidityTransactionOutput,
+  SubmitLiquidityTransactionInput,
+  SubmitLiquidityTransactionOutput,
   SubmitWithdrawalInput,
   SubmitWithdrawalOutput,
-} from "@dex-web/orpc/schemas/liquidity/submitWithdrawal.schema";
+} from "@dex-web/orpc/schemas";
+import type {
+  WithdrawLiquidityInput,
+  WithdrawLiquidityOutput,
+} from "@dex-web/orpc/schemas/liquidity/withdrawLiquidity.schema";
 import {
   type UseMutationResult,
   useMutation,
@@ -17,16 +28,23 @@ import {
 } from "../../lib/mutationUtils";
 import { queryKeys } from "../../lib/queryKeys";
 
-export function useCreateLiquidityTransaction() {
+export function useCreateLiquidityTransaction(): UseMutationResult<
+  CreateLiquidityTransactionOutput,
+  unknown,
+  CreateLiquidityTransactionInput
+> {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (variables: any) =>
+    mutationFn: (variables: CreateLiquidityTransactionInput) =>
       client.liquidity.createLiquidityTransaction(variables),
     onError: (error: unknown) => {
       handleMutationError(error, "Failed to create liquidity transaction");
     },
-    onSuccess: (_data: unknown, variables: any) => {
+    onSuccess: (
+      _data: CreateLiquidityTransactionOutput,
+      variables: CreateLiquidityTransactionInput,
+    ) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.liquidity.user(
           variables.user,
@@ -45,16 +63,23 @@ export function useCreateLiquidityTransaction() {
   });
 }
 
-export function useSubmitLiquidityTransaction() {
+export function useSubmitLiquidityTransaction(): UseMutationResult<
+  SubmitLiquidityTransactionOutput,
+  unknown,
+  SubmitLiquidityTransactionInput
+> {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (variables: any) =>
+    mutationFn: (variables: SubmitLiquidityTransactionInput) =>
       client.liquidity.submitLiquidityTransaction(variables),
     onError: (error: unknown) => {
       handleMutationError(error, "Failed to submit liquidity transaction");
     },
-    onSuccess: (_data: unknown, _variables: any) => {
+    onSuccess: (
+      _data: SubmitLiquidityTransactionOutput,
+      _variables: SubmitLiquidityTransactionInput,
+    ) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.liquidity.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.pools.all });
       handleMutationSuccess("Liquidity transaction submitted successfully");
@@ -62,13 +87,17 @@ export function useSubmitLiquidityTransaction() {
   });
 }
 
-export function useWithdrawLiquidity() {
+export function useWithdrawLiquidity(): UseMutationResult<
+  WithdrawLiquidityOutput,
+  unknown,
+  WithdrawLiquidityInput
+> {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (variables: any) =>
+    mutationFn: (variables: WithdrawLiquidityInput) =>
       client.liquidity.withdrawLiquidity(variables),
-    onError: (error: unknown, variables: any) => {
+    onError: (error: unknown, variables: WithdrawLiquidityInput) => {
       const userLiquidityKey = queryKeys.liquidity.user(
         variables.ownerAddress,
         variables.tokenXMint,
@@ -80,7 +109,10 @@ export function useWithdrawLiquidity() {
       });
       handleMutationError(error, "Failed to withdraw liquidity");
     },
-    onSuccess: (_data: unknown, variables: any) => {
+    onSuccess: (
+      _data: WithdrawLiquidityOutput,
+      variables: WithdrawLiquidityInput,
+    ) => {
       const userLiquidityKey = queryKeys.liquidity.user(
         variables.ownerAddress,
         variables.tokenXMint,
@@ -104,11 +136,15 @@ export function useWithdrawLiquidity() {
   });
 }
 
-export function useRemoveLiquidityTransaction() {
+export function useRemoveLiquidityTransaction(): UseMutationResult<
+  RemoveLiquidityTransactionOutput,
+  unknown,
+  RemoveLiquidityTransactionInput
+> {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (variables: any) =>
+    mutationFn: (variables: RemoveLiquidityTransactionInput) =>
       client.liquidity.removeLiquidityTransaction(variables),
     onError: (error: unknown) => {
       handleMutationError(
@@ -116,7 +152,10 @@ export function useRemoveLiquidityTransaction() {
         "Failed to create liquidity removal transaction",
       );
     },
-    onSuccess: (_data: unknown, _variables: any) => {
+    onSuccess: (
+      _data: RemoveLiquidityTransactionOutput,
+      _variables: RemoveLiquidityTransactionInput,
+    ) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.liquidity.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.pools.all });
       handleMutationSuccess(
@@ -128,7 +167,7 @@ export function useRemoveLiquidityTransaction() {
 
 export function useSubmitWithdrawal(): UseMutationResult<
   SubmitWithdrawalOutput,
-  Error,
+  unknown,
   SubmitWithdrawalInput
 > {
   const queryClient = useQueryClient();
@@ -139,7 +178,7 @@ export function useSubmitWithdrawal(): UseMutationResult<
     onError: (
       error: unknown,
       variables: SubmitWithdrawalInput,
-      context: any,
+      context?: { previousLiquidity?: GetUserLiquidityOutput },
     ) => {
       const userLiquidityKey = queryKeys.liquidity.user(
         variables.ownerAddress,
@@ -162,14 +201,11 @@ export function useSubmitWithdrawal(): UseMutationResult<
 
       await queryClient.cancelQueries({ queryKey: userLiquidityKey });
 
-      const previousLiquidity = queryClient.getQueryData(userLiquidityKey);
+      const previousLiquidity =
+        queryClient.getQueryData<GetUserLiquidityOutput>(userLiquidityKey);
 
-      if (
-        previousLiquidity &&
-        typeof previousLiquidity === "object" &&
-        "hasLiquidity" in previousLiquidity
-      ) {
-        const currentLiquidity = previousLiquidity as any;
+      if (previousLiquidity) {
+        const currentLiquidity = previousLiquidity;
         if (currentLiquidity.hasLiquidity) {
           const withdrawnAmount = new Decimal(variables.lpTokenAmount)
             .mul(new Decimal(10).pow(currentLiquidity.decimals))
@@ -191,7 +227,10 @@ export function useSubmitWithdrawal(): UseMutationResult<
 
       return { previousLiquidity };
     },
-    onSuccess: (_data: unknown, variables: any) => {
+    onSuccess: (
+      _data: SubmitWithdrawalOutput,
+      variables: SubmitWithdrawalInput,
+    ) => {
       const userLiquidityKey = queryKeys.liquidity.user(
         variables.ownerAddress,
         variables.tokenXMint,

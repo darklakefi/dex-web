@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "declarationDir": "../../dist/libs/grpc-client",
-    "outDir": "../../dist/libs/grpc-client",
+    "noEmit": false,
+    "outDir": "./out-tsc/lib",
     "types": ["node"]
   },
-  "exclude": ["dist", "node_modules", "src/**/*.spec.ts", "src/**/*.test.ts"],
-  "extends": "./tsconfig.json",
-  "include": ["src/**/*.ts"]
+  "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"],
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*.ts"],
+  "references": []
 }

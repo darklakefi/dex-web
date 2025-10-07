@@ -7,18 +7,6 @@
   "include": [],
   "references": [
     {
-      "path": "../grpc-client"
-    },
-    {
-      "path": "../utils"
-    },
-    {
-      "path": "../db"
-    },
-    {
-      "path": "../core"
-    },
-    {
       "path": "./tsconfig.lib.json"
     },
     {

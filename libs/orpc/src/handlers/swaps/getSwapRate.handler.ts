@@ -172,13 +172,13 @@ export async function getSwapRateHandler(
     );
 
     const availableReserveX = reserveXBalance
-      .minus(pool.locked_x)
-      .minus(pool.user_locked_x)
-      .minus(pool.protocol_fee_x);
+      .minus(new BigNumber(pool.locked_x.toString()))
+      .minus(new BigNumber(pool.user_locked_x.toString()))
+      .minus(new BigNumber(pool.protocol_fee_x.toString()));
     const availableReserveY = reserveYBalance
-      .minus(pool.locked_y)
-      .minus(pool.user_locked_y)
-      .minus(pool.protocol_fee_y);
+      .minus(new BigNumber(pool.locked_y.toString()))
+      .minus(new BigNumber(pool.user_locked_y.toString()))
+      .minus(new BigNumber(pool.protocol_fee_y.toString()));
 
     const tokenMetadata = (await getTokenMetadataHandler({
       addresses: [tokenXMint, tokenYMint],

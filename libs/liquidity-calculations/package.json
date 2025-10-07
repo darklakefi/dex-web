@@ -1,0 +1,22 @@
+{
+  "exports": {
+    ".": {
+      "default": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "name": "@dex-web/liquidity-calculations",
+  "nx": {
+    "name": "liquidity-calculations",
+    "tags": [
+      "scope:shared",
+      "domain:liquidity",
+      "type:util"
+    ]
+  },
+  "private": true,
+  "type": "module",
+  "types": "./src/index.ts",
+  "version": "0.0.1"
+}

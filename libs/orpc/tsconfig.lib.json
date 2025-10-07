@@ -27,18 +27,5 @@
     "darklake.ts",
     "darklake-json.ts"
   ],
-  "references": [
-    {
-      "path": "../grpc-client/tsconfig.lib.json"
-    },
-    {
-      "path": "../utils/tsconfig.lib.json"
-    },
-    {
-      "path": "../db/tsconfig.lib.json"
-    },
-    {
-      "path": "../core/tsconfig.lib.json"
-    }
-  ]
+  "references": []
 }

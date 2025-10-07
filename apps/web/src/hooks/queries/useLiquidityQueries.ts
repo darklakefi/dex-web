@@ -6,6 +6,7 @@ import type {
   GetUserLiquidityOutput,
 } from "@dex-web/orpc/schemas";
 import {
+  type UseQueryOptions,
   type UseQueryResult,
   type UseSuspenseQueryResult,
   useQuery,
@@ -13,11 +14,17 @@ import {
 } from "@tanstack/react-query";
 import { queryKeys } from "../../lib/queryKeys";
 
+interface UserLiquidityQueryOptions
+  extends Pick<UseQueryOptions<GetUserLiquidityOutput>, "enabled"> {}
+
+interface AddLiquidityReviewQueryOptions
+  extends Pick<UseQueryOptions<GetAddLiquidityReviewOutput>, "enabled"> {}
+
 export function useUserLiquidity(
   ownerAddress: string,
   tokenXMint: string,
   tokenYMint: string,
-  options?: { enabled?: boolean },
+  options?: UserLiquidityQueryOptions,
 ): UseQueryResult<GetUserLiquidityOutput> {
   return useQuery({
     ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
@@ -46,7 +53,7 @@ export function useAddLiquidityReview(
   tokenYMint: string,
   tokenAmount: number,
   isTokenX: boolean,
-  options?: { enabled?: boolean },
+  options?: AddLiquidityReviewQueryOptions,
 ): UseQueryResult<GetAddLiquidityReviewOutput> {
   return useQuery({
     ...tanstackClient.liquidity.getAddLiquidityReview.queryOptions({
@@ -57,7 +64,7 @@ export function useAddLiquidityReview(
       tokenXMint,
       tokenYMint,
       tokenAmount,
-      isTokenX ? 1 : 0,
+      Number(isTokenX),
     ),
   });
 }
