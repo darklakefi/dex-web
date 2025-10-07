@@ -1,5 +1,3 @@
-"use server";
-
 import { CACHE_CONFIG, LOGGING_CONFIG } from "../../config/constants";
 import { getHelius } from "../../getHelius";
 import type {
@@ -20,19 +18,15 @@ import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 const cacheService = CacheService.getInstance();
 const logger = LoggerService.getInstance();
 const monitoring = MonitoringService.getInstance();
-
 export async function clearPoolsCache() {
   cacheService.invalidatePattern("^pools:");
 }
-
 export async function getAllPoolsHandler(
   input: GetAllPoolsInput,
 ): Promise<GetAllPoolsOutput> {
   const { limit, includeEmpty = false, search } = input;
-
   const cacheKey = `pools:${JSON.stringify({ includeEmpty, search })}`;
   const cached = cacheService.get<GetAllPoolsOutput>(cacheKey);
-
   if (cached) {
     logger.debug("Cache hit for getAllPools", { cacheKey });
     if (limit) {
@@ -43,12 +37,9 @@ export async function getAllPoolsHandler(
     }
     return cached;
   }
-
   const helius = getHelius();
   const connection = helius.connection;
-
   const startTime = performance.now();
-
   try {
     const accounts = await connection.getProgramAccounts(EXCHANGE_PROGRAM_ID, {
       filters: [
@@ -57,9 +48,7 @@ export async function getAllPoolsHandler(
         },
       ],
     });
-
     const searchLower = search?.toLowerCase().trim();
-
     const decodedPools = accounts
       .map((account) => {
         try {
@@ -67,14 +56,11 @@ export async function getAllPoolsHandler(
             "Pool",
             account.account.data,
           );
-
           const lockedX = pool.locked_x.toString();
           const lockedY = pool.locked_y.toString();
-
           if (!includeEmpty && (lockedX === "0" || lockedY === "0")) {
             return null;
           }
-
           return {
             address: account.pubkey.toBase58(),
             lockedX,
@@ -92,26 +78,21 @@ export async function getAllPoolsHandler(
         }
       })
       .filter((pool) => pool !== null);
-
     const uniqueTokenAddresses = Array.from(
       new Set(
         decodedPools.flatMap((pool) => [pool.tokenXMint, pool.tokenYMint]),
       ),
     );
-
     const tokenMetadata = await getTokenMetadataHandler({
       addresses: uniqueTokenAddresses,
       returnAsObject: true,
     });
-
     const tokenMap = tokenMetadata as Record<string, Token>;
-
     const poolsWithSymbols = decodedPools.map((pool) => ({
       ...pool,
       tokenXSymbol: tokenMap[pool.tokenXMint]?.symbol,
       tokenYSymbol: tokenMap[pool.tokenYMint]?.symbol,
     }));
-
     const filteredPools = searchLower
       ? poolsWithSymbols.filter((pool) => {
           const matchesSearch =
@@ -120,13 +101,10 @@ export async function getAllPoolsHandler(
             pool.tokenYMint.toLowerCase().includes(searchLower) ||
             (pool.tokenXSymbol?.toLowerCase() || "").includes(searchLower) ||
             (pool.tokenYSymbol?.toLowerCase() || "").includes(searchLower);
-
           return matchesSearch;
         })
       : poolsWithSymbols;
-
     const duration = performance.now() - startTime;
-
     if (duration > LOGGING_CONFIG.PERFORMANCE_THRESHOLD_MS) {
       logger.performance("getAllPools", duration, {
         includeEmpty,
@@ -134,7 +112,6 @@ export async function getAllPoolsHandler(
         search: search?.length || 0,
       });
     }
-
     monitoring.recordLatency("getAllPools", duration, {
       includeEmpty: includeEmpty.toString(),
       poolCount: filteredPools.length.toString(),
@@ -144,33 +121,27 @@ export async function getAllPoolsHandler(
       includeEmpty: includeEmpty.toString(),
       poolCount: filteredPools.length.toString(),
     });
-
     const result = {
       pools: filteredPools,
       total: filteredPools.length,
     };
-
     cacheService.set(cacheKey, result, CACHE_CONFIG.POOLS_TTL);
-
     if (limit) {
       return {
         pools: filteredPools.slice(0, limit),
         total: filteredPools.length,
       };
     }
-
     return result;
   } catch (error) {
     logger.errorWithStack("Error fetching all pools", error as Error, {
       includeEmpty,
       search,
     });
-
     monitoring.recordError("getAllPools", "UNKNOWN_ERROR", {
       includeEmpty: includeEmpty.toString(),
       searchLength: (search?.length || 0).toString(),
     });
-
     return {
       pools: [],
       total: 0,

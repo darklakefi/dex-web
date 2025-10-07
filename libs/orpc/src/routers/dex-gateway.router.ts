@@ -6,7 +6,6 @@ import { getTradesListByUser } from "../procedures/dex-gateway/getTradesListByUs
 import { initPool } from "../procedures/dex-gateway/initPool.procedure";
 import { removeLiquidity } from "../procedures/dex-gateway/removeLiquidity.procedure";
 import { submitSignedTransaction } from "../procedures/dex-gateway/submitSignedTransaction.procedure";
-
 export const dexGatewayRouter = {
   addLiquidity,
   checkTradeStatus,
@@ -17,5 +16,4 @@ export const dexGatewayRouter = {
   removeLiquidity,
   submitSignedTransaction,
 };
-
 export type DexGatewayRouter = typeof dexGatewayRouter;

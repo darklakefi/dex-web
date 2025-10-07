@@ -1,5 +1,4 @@
 "use server";
-
 import { getLpTokenMint } from "@dex-web/core";
 import {
   type Account,
@@ -32,17 +31,14 @@ async function detectTokenProgram(
     }
   }
 }
-
 export async function getPoolReservesHandler({
   tokenXMint,
   tokenYMint,
 }: GetPoolReservesInput): Promise<GetPoolReservesOutput> {
   const helius = getHelius();
   const connection = helius.connection;
-
   try {
     const poolData = await getPoolOnChain(tokenXMint, tokenYMint);
-
     if (!poolData) {
       return {
         exists: false,
@@ -52,10 +48,8 @@ export async function getPoolReservesHandler({
         totalLpSupply: 0,
       };
     }
-
     const lpTokenMint = await getLpTokenMint(tokenXMint, tokenYMint);
     const lpTokenMintString = lpTokenMint.toBase58();
-
     const lpMintInfo = await getMint(
       connection,
       lpTokenMint,
@@ -63,14 +57,12 @@ export async function getPoolReservesHandler({
       TOKEN_PROGRAM_ID,
     );
     const totalLpSupply = Number(lpMintInfo.supply) / 10 ** LP_TOKEN_DECIMALS;
-
     const reserveXAccountInfo = await connection.getAccountInfo(
       poolData.reserve_x,
     );
     const reserveYAccountInfo = await connection.getAccountInfo(
       poolData.reserve_y,
     );
-
     if (!reserveXAccountInfo || !reserveYAccountInfo) {
       return {
         exists: false,
@@ -80,10 +72,8 @@ export async function getPoolReservesHandler({
         totalLpSupply: 0,
       };
     }
-
     const reserveXProgramId = reserveXAccountInfo.owner;
     const reserveYProgramId = reserveYAccountInfo.owner;
-
     const tokenXProgramId = await detectTokenProgram(
       connection,
       new PublicKey(tokenXMint),
@@ -92,10 +82,8 @@ export async function getPoolReservesHandler({
       connection,
       new PublicKey(tokenYMint),
     );
-
     let reserveXAccount: Account | null = null;
     let reserveYAccount: Account | null = null;
-
     let reserveXBalance = 0;
     try {
       reserveXAccount = await getAccount(
@@ -109,7 +97,6 @@ export async function getPoolReservesHandler({
       console.warn("Could not read reserve X as token account:", error);
       reserveXBalance = 0;
     }
-
     let reserveYBalance = 0;
     try {
       reserveYAccount = await getAccount(
@@ -123,7 +110,6 @@ export async function getPoolReservesHandler({
       console.warn("Could not read reserve Y as token account:", error);
       reserveYBalance = 0;
     }
-
     const tokenXMintInfo = await getMint(
       connection,
       new PublicKey(tokenXMint),
@@ -136,10 +122,8 @@ export async function getPoolReservesHandler({
       "confirmed",
       tokenYProgramId,
     );
-
     const reserveX = reserveXBalance / 10 ** tokenXMintInfo.decimals;
     const reserveY = reserveYBalance / 10 ** tokenYMintInfo.decimals;
-
     const safeReserveX =
       Number.isNaN(reserveX) || !Number.isFinite(reserveX) ? 0 : reserveX;
     const safeReserveY =
@@ -148,7 +132,6 @@ export async function getPoolReservesHandler({
       Number.isNaN(totalLpSupply) || !Number.isFinite(totalLpSupply)
         ? 0
         : totalLpSupply;
-
     const result = {
       exists: true,
       lpMint: lpTokenMintString,
@@ -156,7 +139,6 @@ export async function getPoolReservesHandler({
       reserveY: safeReserveY,
       totalLpSupply: safeTotalLpSupply,
     };
-
     return result;
   } catch (_error) {
     return {

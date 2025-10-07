@@ -1,5 +1,4 @@
 "use client";
-
 import {
   ERROR_MESSAGES,
   isWarningMessage,
@@ -64,7 +63,6 @@ import {
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
 
 const { fieldContext, formContext } = createFormHookContexts();
-
 const { useAppForm } = createFormHook({
   fieldComponents: {
     SwapFormFieldset: FormFieldset,
@@ -73,12 +71,10 @@ const { useAppForm } = createFormHook({
   formComponents: {},
   formContext,
 });
-
 interface UseLiquidityFormLogicProps {
   tokenAAddress: string | null;
   tokenBAddress: string | null;
 }
-
 export function useLiquidityFormLogic({
   tokenAAddress,
   tokenBAddress,
@@ -89,11 +85,9 @@ export function useLiquidityFormLogic({
   const { trackLiquidity, trackError } = useAnalytics();
   const queryClient = useQueryClient();
   const liquidityTranslations = useTranslations("liquidity");
-
   const [slippage, setSlippage] = useState<string>(
     LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
   );
-
   const {
     isReady: _isWorkerReady,
     isCalculating: _isWorkerCalculating,
@@ -103,32 +97,26 @@ export function useLiquidityFormLogic({
     cancelPendingCalculations: _cancelPendingCalculations,
     error: _workerError,
   } = useLiquidityCalculationWorker();
-
   const [_calculationState, _setCalculationState] = useState({
     approximateResult: undefined as string | undefined,
     hasApproximateResult: false,
     isCalculating: false,
     lastCalculationTime: 0,
   });
-
   const cacheCleanupRef = useRef<(() => void) | null>(null);
-
   if (!cacheCleanupRef.current) {
     cacheCleanupRef.current = startCacheCleanup();
   }
-
   const sortedTokenAddresses = sortSolanaAddresses(
     tokenAAddress || "",
     tokenBAddress || "",
   );
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
-
   const poolDataResult = useRealtimePoolData({
     tokenXMint,
     tokenYMint,
   });
-
   const [state, send] = useMachine(liquidityMachine, {
     input: {
       buyTokenAccount: null,
@@ -136,16 +124,13 @@ export function useLiquidityFormLogic({
       sellTokenAccount: null,
     },
   });
-
   const hasRecentTransaction = state.matches("success");
-
   const tokenAccountsData = useRealtimeTokenAccounts({
     hasRecentTransaction,
     publicKey: walletPublicKey || null,
     tokenAAddress: tokenAAddress,
     tokenBAddress: tokenBAddress,
   });
-
   useEffect(() => {
     send({
       buyAccount: tokenAccountsData.buyTokenAccount ?? null,
@@ -157,7 +142,6 @@ export function useLiquidityFormLogic({
     tokenAccountsData.buyTokenAccount,
     tokenAccountsData.sellTokenAccount,
   ]);
-
   const {
     trackInitiated,
     trackSigned,
@@ -174,7 +158,6 @@ export function useLiquidityFormLogic({
     },
     trackLiquidity,
   });
-
   const transactionToasts = useTransactionToasts({
     customMessages: {
       squadsXFailure: {
@@ -195,7 +178,6 @@ export function useLiquidityFormLogic({
     toast,
     transactionType: "LIQUIDITY",
   });
-
   const statusChecker = useTransactionStatus({
     checkStatus: async (signature: string) => {
       const response = await client.liquidity.checkLiquidityTransactionStatus({
@@ -221,14 +203,12 @@ export function useLiquidityFormLogic({
       if (result.error) {
         const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
         const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
-
         handleError(new Error(result.error), {
           amountA: form.state.values.tokenAAmount,
           amountB: form.state.values.tokenBAmount,
           tokenA: tokenAAddress,
           tokenB: tokenBAddress,
         });
-
         trackFailed({
           action: "add",
           amountA: tokenAAmount,
@@ -239,12 +219,10 @@ export function useLiquidityFormLogic({
         });
         return;
       }
-
       await queryClient.cancelQueries({
         queryKey: ["liquidity", tokenXMint, tokenYMint],
       });
-
-      const userLiquidityOpts =
+      const _userLiquidityOpts =
         tanstackClient.liquidity.getUserLiquidity.queryOptions({
           input: {
             ownerAddress: walletPublicKey?.toBase58() || "",
@@ -252,7 +230,6 @@ export function useLiquidityFormLogic({
             tokenYMint,
           },
         });
-
       const userLiquidityQueryKey = queryKeys.liquidity.user(
         walletPublicKey?.toBase58() || "",
         tokenXMint,
@@ -262,16 +239,13 @@ export function useLiquidityFormLogic({
         tokenXMint,
         tokenYMint,
       );
-
       const previousUserLiquidity = queryClient.getQueryData(
         userLiquidityQueryKey,
       );
       const previousPoolReserves =
         queryClient.getQueryData<GetPoolReservesOutput>(poolReservesQueryKey);
-
       const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
       const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
-
       const actualLpTokens = previousPoolReserves
         ? Math.min(
             (tokenAAmount / previousPoolReserves.reserveX) *
@@ -280,7 +254,6 @@ export function useLiquidityFormLogic({
               previousPoolReserves.totalLpSupply,
           )
         : 1;
-
       if (
         previousUserLiquidity &&
         typeof previousUserLiquidity === "object" &&
@@ -303,7 +276,6 @@ export function useLiquidityFormLogic({
         };
         queryClient.setQueryData(userLiquidityQueryKey, optimisticLiquidity);
       }
-
       if (previousPoolReserves) {
         const optimisticPoolReserves = {
           ...previousPoolReserves,
@@ -313,9 +285,7 @@ export function useLiquidityFormLogic({
         };
         queryClient.setQueryData(poolReservesQueryKey, optimisticPoolReserves);
       }
-
       send({ type: "SUCCESS" });
-
       trackConfirmed({
         action: "add",
         amountA: tokenAAmount,
@@ -324,19 +294,14 @@ export function useLiquidityFormLogic({
         tokenB: tokenBAddress || "",
         transactionHash: "",
       });
-
       form.reset();
-
       const successMessage = !isSquadsX(wallet)
         ? `ADDED LIQUIDITY: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
         : undefined;
-
       transactionToasts.showSuccessToast(successMessage);
       tokenAccountsData.refetchBuyTokenAccount();
       tokenAccountsData.refetchSellTokenAccount();
-
       const walletAddress = walletPublicKey?.toBase58() || "";
-
       try {
         await invalidateLiquidityQueries({
           queryClient,
@@ -347,7 +312,6 @@ export function useLiquidityFormLogic({
       } catch (error) {
         console.error("Immediate cache invalidation failed:", error);
       }
-
       setTimeout(async () => {
         try {
           await invalidateLiquidityQueries({
@@ -356,7 +320,6 @@ export function useLiquidityFormLogic({
             tokenYMint,
             walletPublicKey: walletAddress,
           });
-
           await verifyDataConsistency(
             queryClient,
             tokenXMint,
@@ -367,7 +330,6 @@ export function useLiquidityFormLogic({
           console.error("Delayed cache invalidation failed:", error);
         }
       }, 5000);
-
       return { previousPoolReserves, previousUserLiquidity };
     },
     onTimeout: () => {
@@ -380,13 +342,11 @@ export function useLiquidityFormLogic({
     retryDelay: LIQUIDITY_CONSTANTS.TRANSACTION_RETRY_DELAY_MS,
     successStates: ["finalized"],
   });
-
   const defaultValues: LiquidityFormValues = {
     [FORM_FIELD_NAMES.INITIAL_PRICE]: LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE,
     [FORM_FIELD_NAMES.TOKEN_A_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
     [FORM_FIELD_NAMES.TOKEN_B_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
   };
-
   const formConfig = {
     defaultValues,
     onSubmit: async ({ value }: { value: LiquidityFormValues }) => {
@@ -409,7 +369,6 @@ export function useLiquidityFormLogic({
               tokenAccount.amount || 0,
               tokenAccount.decimals || 0,
             );
-
             if (
               parseAmountBigNumber(tokenANumericValue).gt(maxBalance.toString())
             ) {
@@ -421,35 +380,29 @@ export function useLiquidityFormLogic({
       },
     },
   };
-
   const form = useAppForm(formConfig);
-
   const handleError = useCallback(
     (error: unknown, context?: Record<string, unknown>): void => {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       send({ error: errorMessage, type: "ERROR" });
-
       const isWarning = isWarningMessage(error);
       if (isWarning) {
         transactionToasts.showInfoToast(errorMessage, context);
       } else {
         transactionToasts.showErrorToast(errorMessage, context);
       }
-
       if (context) {
         trackLiquidityError(error, context);
       }
     },
     [send, transactionToasts, trackLiquidityError],
   );
-
   const _resetFormToDefaults = useCallback((): void => {
     form.setFieldValue(FORM_FIELD_NAMES.TOKEN_A_AMOUNT, "0");
     form.setFieldValue(FORM_FIELD_NAMES.TOKEN_B_AMOUNT, "0");
     form.setFieldValue(FORM_FIELD_NAMES.INITIAL_PRICE, "1");
   }, [form]);
-
   const calculateTokenAmounts = useCallback(
     async ({
       inputAmount,
@@ -461,24 +414,19 @@ export function useLiquidityFormLogic({
       const amountNumber = parseAmount(inputAmount);
       if (!poolDataResult.data || parseAmountBigNumber(inputAmount).lte(0))
         return;
-
       const reserveX = poolDataResult.data.reserveX;
       const reserveY = poolDataResult.data.reserveY;
-
       if (reserveX <= 0 || reserveY <= 0) return;
-
       const editedTokenAddress =
         editedToken === "tokenA" ? tokenAAddress : tokenBAddress;
       const isEditedTokenX =
         poolDataResult.data.tokenXMint === editedTokenAddress;
-
       let outputAmount: number;
       if (isEditedTokenX) {
         outputAmount = (amountNumber * reserveY) / reserveX;
       } else {
         outputAmount = (amountNumber * reserveX) / reserveY;
       }
-
       startTransition(() => {
         const targetField =
           editedToken === "tokenA" ? "tokenBAmount" : "tokenAAmount";
@@ -488,12 +436,10 @@ export function useLiquidityFormLogic({
     },
     [poolDataResult.data, form, tokenAAddress, tokenBAddress],
   );
-
   const debouncedCalculateTokenAmounts = useDebouncedCallback(
     calculateTokenAmounts,
     LIQUIDITY_CONSTANTS.DEBOUNCE_DELAY_MS,
   );
-
   const clearPendingCalculations = useCallback(() => {
     if (
       "cancel" in debouncedCalculateTokenAmounts &&
@@ -502,16 +448,13 @@ export function useLiquidityFormLogic({
       debouncedCalculateTokenAmounts.cancel();
     }
   }, [debouncedCalculateTokenAmounts]);
-
   const _handleAmountChange = useCallback(
     (
       e: React.ChangeEvent<HTMLInputElement>,
       tokenType: "tokenA" | "tokenB",
     ) => {
       const value = formatAmountInput(e.target.value);
-
       clearPendingCalculations();
-
       if (
         e.isTrusted &&
         poolDataResult.data &&
@@ -545,23 +488,19 @@ export function useLiquidityFormLogic({
       form,
     ],
   );
-
   const checkLiquidityTransactionStatus = useCallback(
     async (signature: string) => {
       await statusChecker.checkTransactionStatus(signature);
     },
     [statusChecker],
   );
-
   const handleDeposit = useCallback(
     async (formValues?: LiquidityFormValues) => {
       if (!walletPublicKey) {
         transactionToasts.showErrorToast(ERROR_MESSAGES.MISSING_WALLET_INFO);
         return;
       }
-
       transactionToasts.showStepToast(1);
-
       const values = formValues || form.state.values;
       const tokenAAmount = parseAmount(values.tokenAAmount);
       const tokenBAmount = parseAmount(values.tokenBAmount);
@@ -572,34 +511,26 @@ export function useLiquidityFormLogic({
         tokenA: tokenAAddress || "",
         tokenB: tokenBAddress || "",
       });
-
       try {
         const trimmedTokenAAddress = tokenAAddress?.trim() || DEFAULT_BUY_TOKEN;
         const trimmedTokenBAddress =
           tokenBAddress?.trim() || DEFAULT_SELL_TOKEN;
-
         const sortedTokens = sortSolanaAddresses(
           trimmedTokenAAddress,
           trimmedTokenBAddress,
         );
-
         const { tokenXAddress, tokenYAddress } = sortedTokens;
-
         if (!walletAdapter?.wallet) {
           throw new Error(ERROR_MESSAGES.MISSING_WALLET);
         }
-
         if (!tokenXAddress || !tokenYAddress) {
           throw new Error("Invalid token addresses after sorting");
         }
-
         const sellAmount = parseAmount(values.tokenBAmount);
         const buyAmount = parseAmount(values.tokenAAmount);
-
         const isTokenXSell = poolDataResult.data?.tokenXMint === tokenBAddress;
         const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
         const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
-
         const requestPayload = {
           maxAmountX: maxAmountX,
           maxAmountY: maxAmountY,
@@ -608,10 +539,8 @@ export function useLiquidityFormLogic({
           tokenYMint: tokenYAddress,
           user: walletPublicKey.toBase58(),
         } satisfies CreateLiquidityTransactionInput;
-
         const response =
           await client.liquidity.createLiquidityTransaction(requestPayload);
-
         if (response.success && response.transaction) {
           trackSigned({
             action: "add",
@@ -620,7 +549,6 @@ export function useLiquidityFormLogic({
             tokenA: tokenAAddress || "",
             tokenB: tokenBAddress || "",
           });
-
           requestLiquidityTransactionSigning({
             checkLiquidityTransactionStatus,
             publicKey: walletPublicKey,
@@ -657,7 +585,6 @@ export function useLiquidityFormLogic({
       handleError,
     ],
   );
-
   useEffect(() => {
     return () => {
       if (cacheCleanupRef.current) {
@@ -666,7 +593,6 @@ export function useLiquidityFormLogic({
       }
     };
   }, []);
-
   const poolDetails = poolDataResult.data
     ? {
         fee: undefined,
@@ -679,7 +605,6 @@ export function useLiquidityFormLogic({
         totalSupply: poolDataResult.data.totalLpSupply,
       }
     : null;
-
   return {
     debouncedCalculateTokenAmounts,
     form,

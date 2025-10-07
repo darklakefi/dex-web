@@ -1,6 +1,4 @@
-/// <reference types='vitest' />
 import { defineConfig } from "vite";
-
 export default defineConfig(() => ({
   cacheDir: "../../node_modules/.vite/libs/liquidity-calculations",
   root: __dirname,

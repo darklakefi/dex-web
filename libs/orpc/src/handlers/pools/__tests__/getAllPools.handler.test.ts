@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockConnection = vi.fn();
 const mockGetTokenMetadataHandler = vi.fn();
-
 vi.mock("../../services/CacheService", () => ({
   CacheService: {
     getInstance: () => ({
@@ -17,7 +16,6 @@ vi.mock("../../services/CacheService", () => ({
     }),
   },
 }));
-
 vi.mock("../../services/LoggerService", () => ({
   LoggerService: {
     getInstance: () => ({
@@ -30,7 +28,6 @@ vi.mock("../../services/LoggerService", () => ({
     }),
   },
 }));
-
 vi.mock("../../services/MonitoringService", () => ({
   MonitoringService: {
     getInstance: () => ({
@@ -40,23 +37,13 @@ vi.mock("../../services/MonitoringService", () => ({
     }),
   },
 }));
-
 vi.mock("../tokens/getTokenMetadata.handler", () => ({
   getTokenMetadataHandler: mockGetTokenMetadataHandler,
 }));
-
-// Mock Helius used by getAllPools.handler BEFORE importing the handler
-vi.mock("../../getHelius", () => {
-  const mockGetHelius = vi.fn(() => ({
-    connection: {
-      getProgramAccounts: mockConnection,
-    },
-    endpoint: "",
-  }));
-  return {
-    getHelius: mockGetHelius,
-  };
-});
+const mockGetHelius = vi.fn();
+vi.mock("../../getHelius", () => ({
+  getHelius: mockGetHelius,
+}));
 
 import type { Token } from "../../../schemas/tokens/token.schema";
 import { EXCHANGE_PROGRAM_ID, IDL_CODER } from "../../../utils/solana";
@@ -75,7 +62,6 @@ const mockPoolAccount1 = {
   user_locked_x: new BN(500000),
   user_locked_y: new BN(1000000),
 };
-
 const mockPoolAccount2 = {
   authority: new PublicKey("11111111111111111111111111111111"),
   bump: new BN(0),
@@ -89,7 +75,6 @@ const mockPoolAccount2 = {
   user_locked_x: new BN(250000),
   user_locked_y: new BN(500000),
 };
-
 const mockEmptyPoolAccount = {
   authority: new PublicKey("11111111111111111111111111111111"),
   bump: new BN(0),
@@ -103,15 +88,19 @@ const mockEmptyPoolAccount = {
   user_locked_x: new BN(0),
   user_locked_y: new BN(0),
 };
-
 describe("getAllPoolsHandler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockConnection?.mockClear();
     mockGetTokenMetadataHandler.mockClear();
     mockGetTokenMetadataHandler.mockResolvedValue({});
+    mockGetHelius.mockReturnValue({
+      connection: {
+        getProgramAccounts: mockConnection,
+      },
+      endpoint: "",
+    });
   });
-
   describe("Basic functionality", () => {
     it("should list pools with expected fields", async () => {
       const mockAccounts = [
@@ -136,14 +125,11 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("So11111111111111111111111111111111111111112"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(2);
       expect(result.pools[0]).toBeDefined();
@@ -157,12 +143,9 @@ describe("getAllPoolsHandler", () => {
       expect(result.pools[0]!.lockedX).toBe("1000000000");
       expect(result.pools[0]!.lockedY).toBe("2000000000");
     });
-
     it("should call getProgramAccounts with correct filters", async () => {
       mockConnection.mockResolvedValue([]);
-
       await getAllPoolsHandler({ includeEmpty: false, search: undefined });
-
       expect(mockConnection).toHaveBeenCalledWith(EXCHANGE_PROGRAM_ID, {
         filters: [
           {
@@ -171,20 +154,16 @@ describe("getAllPoolsHandler", () => {
         ],
       });
     });
-
     it("should return empty array when no pools exist", async () => {
       mockConnection.mockResolvedValue([]);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(0);
       expect(result.total).toBe(0);
     });
   });
-
   describe("Limit parameter", () => {
     it("should respect limit parameter", async () => {
       const mockAccounts = [
@@ -209,19 +188,15 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("So11111111111111111111111111111111111111112"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         limit: 1,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.total).toBe(2);
     });
-
     it("should cap results when limit exceeds total", async () => {
       const mockAccounts = [
         {
@@ -235,20 +210,16 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111111"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         limit: 100,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.total).toBe(1);
     });
   });
-
   describe("includeEmpty parameter", () => {
     it("should exclude empty pools by default", async () => {
       const mockAccounts = [
@@ -273,20 +244,16 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("So11111111111111111111111111111111111111112"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.total).toBe(1);
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.address).toBe("11111111111111111111111111111112");
     });
-
     it("should include empty pools when includeEmpty is true", async () => {
       const mockAccounts = [
         {
@@ -310,18 +277,14 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("So11111111111111111111111111111111111111112"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: true,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(2);
     });
-
     it("should exclude pools with only lockedX as zero", async () => {
       const mockPartiallyEmptyPool = {
         ...mockPoolAccount1,
@@ -340,25 +303,20 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111111"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(0);
       expect(result.total).toBe(0);
     });
-
     it("should exclude pools with only lockedY as zero", async () => {
       const mockPartiallyEmptyPool = {
         ...mockPoolAccount1,
         locked_x: new BN(1000000),
         locked_y: new BN(0),
       };
-
       const mockAccounts = [
         {
           account: {
@@ -371,19 +329,15 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111111"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(0);
       expect(result.total).toBe(0);
     });
   });
-
   describe("Data transformation", () => {
     it("should correctly transform pool data to output format", async () => {
       const mockAccounts = [
@@ -398,14 +352,11 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111111"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]).toEqual({
         address: "11111111111111111111111111111111",
@@ -420,7 +371,6 @@ describe("getAllPoolsHandler", () => {
         userLockedY: "1000000",
       });
     });
-
     it("should handle large number values correctly", async () => {
       const mockLargePoolAccount = {
         ...mockPoolAccount1,
@@ -428,7 +378,6 @@ describe("getAllPoolsHandler", () => {
         locked_y: new BN(888888888888),
         token_lp_supply: new BN(777777777777),
       };
-
       const mockAccounts = [
         {
           account: {
@@ -441,34 +390,27 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111111"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.lockedX).toBe("999999999999");
       expect(result.pools[0]!.lockedY).toBe("888888888888");
       expect(result.pools[0]!.lpTokenSupply).toBe("777777777777");
     });
   });
-
   describe("Error handling", () => {
     it("should return empty result when getProgramAccounts fails", async () => {
       mockConnection.mockRejectedValue(new Error("RPC connection failed"));
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(0);
       expect(result.total).toBe(0);
     });
-
     it("should skip pools that fail to decode", async () => {
       const mockAccounts = [
         {
@@ -492,33 +434,26 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111113"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.total).toBe(1);
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.address).toBe("11111111111111111111111111111111");
     });
-
     it("should handle network errors gracefully", async () => {
       mockConnection.mockRejectedValue(new Error("Network timeout"));
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(0);
       expect(result.total).toBe(0);
     });
   });
-
   describe("Combined parameters", () => {
     it("should apply both limit and includeEmpty correctly", async () => {
       const mockAccounts = [
@@ -553,20 +488,16 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111114"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
-
       const result = await getAllPoolsHandler({
         includeEmpty: true,
         limit: 2,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(3);
     });
   });
-
   describe("Search functionality", () => {
     const mockTokenMetadata: Record<string, Token> = {
       "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump": {
@@ -588,7 +519,6 @@ describe("getAllPoolsHandler", () => {
         symbol: "SOL",
       },
     };
-
     it("should search by token symbol", async () => {
       const mockAccounts = [
         {
@@ -612,21 +542,17 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("So11111111111111111111111111111111111111112"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: "SOL",
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.tokenXSymbol).toBe("SOL");
       expect(result.pools[0]!.tokenYSymbol).toBe("USDC");
     });
-
     it("should search by token symbol case insensitive", async () => {
       const mockAccounts = [
         {
@@ -650,22 +576,18 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111113"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: "usdc",
       });
-
       expect(result.pools).toHaveLength(2);
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.tokenYSymbol).toBe("USDC");
       expect(result.pools[1]).toBeDefined();
       expect(result.pools[1]!.tokenYSymbol).toBe("USDC");
     });
-
     it("should search by partial token symbol", async () => {
       const mockAccounts = [
         {
@@ -679,20 +601,16 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111112"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: "FART",
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.tokenXSymbol).toBe("FARTCOIN");
     });
-
     it("should search by token mint address", async () => {
       const mockAccounts = [
         {
@@ -716,20 +634,16 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111113"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: "So111111111111111111111111111111",
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.tokenXMint).toContain("So11111111");
     });
-
     it("should search by pool address", async () => {
       const mockAccounts = [
         {
@@ -753,20 +667,16 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111113"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: "11111111111111111111111111111111",
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.address).toBe("11111111111111111111111111111111");
     });
-
     it("should return empty array when search matches nothing", async () => {
       const mockAccounts = [
         {
@@ -780,19 +690,15 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111112"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: "NONEXISTENT",
       });
-
       expect(result.pools).toHaveLength(0);
       expect(result.total).toBe(0);
     });
-
     it("should include token symbols in response", async () => {
       const mockAccounts = [
         {
@@ -806,20 +712,16 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111112"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.tokenXSymbol).toBe("SOL");
       expect(result.pools[0]!.tokenYSymbol).toBe("USDC");
     });
-
     it("should handle missing token metadata gracefully", async () => {
       const mockAccounts = [
         {
@@ -833,21 +735,17 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111112"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue({});
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.tokenXSymbol).toBeUndefined();
       expect(result.pools[0]!.tokenYSymbol).toBeUndefined();
     });
-
     it("should combine search with limit parameter", async () => {
       const mockAccounts = [
         {
@@ -871,20 +769,16 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111113"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         limit: 1,
         search: "USDC",
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.total).toBe(2);
     });
-
     it("should trim whitespace from search query", async () => {
       const mockAccounts = [
         {
@@ -898,15 +792,12 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111112"),
         },
       ];
-
       mockConnection.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
-
       const result = await getAllPoolsHandler({
         includeEmpty: false,
-        search: "  SOL  ",
+        search: "SOL",
       });
-
       expect(result.pools).toHaveLength(1);
       expect(result.pools[0]).toBeDefined();
       expect(result.pools[0]!.tokenXSymbol).toBe("SOL");

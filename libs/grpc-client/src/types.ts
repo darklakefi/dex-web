@@ -1,4 +1,3 @@
-// Re-export all types from generated API
 export type {
   AddLiquidityRequest,
   AddLiquidityResponse,
@@ -21,8 +20,6 @@ export type {
   TokenMetadata,
   Trade,
 } from "./generated/api_pb";
-
-// Re-export schemas (these are runtime values but safe for browser)
 export {
   AddLiquidityRequestSchema as AddLiquidityRequestPB,
   AddLiquidityResponseSchema as AddLiquidityResponsePB,

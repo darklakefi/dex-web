@@ -20,7 +20,8 @@
       "!**/storybook-static/**",
       "!**/tmp/**",
       "!**/.*/**",
-      "!**/test-results/**"
+      "!**/test-results/**",
+      "!**/out-tsc/**"
     ]
   },
   "formatter": {

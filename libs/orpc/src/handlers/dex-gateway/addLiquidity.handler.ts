@@ -1,5 +1,4 @@
 "use server";
-
 import type {
   AddLiquidityRequest,
   AddLiquidityResponse,
@@ -11,12 +10,10 @@ import { MonitoringService } from "../../services/MonitoringService";
 
 const logger = LoggerService.getInstance();
 const monitoring = MonitoringService.getInstance();
-
 export async function addLiquidityHandler(
   input: AddLiquidityRequest,
 ): Promise<AddLiquidityResponse> {
   const startTime = performance.now();
-
   try {
     logger.info("Starting addLiquidity request", {
       amountLp: input.amountLp.toString(),
@@ -24,16 +21,13 @@ export async function addLiquidityHandler(
       tokenMintY: input.tokenMintY,
       userAddress: input.userAddress,
     });
-
     const grpcClient = await getDexGatewayClient();
     const response = await grpcClient.addLiquidity(input);
-
     const duration = performance.now() - startTime;
     logger.info("AddLiquidity request completed", {
       duration,
       success: !!response.unsignedTransaction,
     });
-
     monitoring.recordLatency("addLiquidity", duration, {
       success: "true",
       userAddress: input.userAddress,
@@ -41,23 +35,19 @@ export async function addLiquidityHandler(
     monitoring.recordSuccess("addLiquidity", {
       userAddress: input.userAddress,
     });
-
     return response;
   } catch (error) {
     const duration = performance.now() - startTime;
-
     logger.errorWithStack("AddLiquidity gRPC call failed", error as Error, {
       duration,
       tokenMintX: input.tokenMintX,
       tokenMintY: input.tokenMintY,
       userAddress: input.userAddress,
     });
-
     monitoring.recordLatency("addLiquidity", duration, {
       success: "false",
       userAddress: input.userAddress,
     });
-
     if (error instanceof Error) {
       if (error.message.includes("insufficient")) {
         monitoring.recordError("addLiquidity", "INSUFFICIENT_LIQUIDITY", {
@@ -72,7 +62,6 @@ export async function addLiquidityHandler(
           message: "Insufficient liquidity for this operation",
         });
       }
-
       if (error.message.includes("pool not found")) {
         throw new ORPCError("POOL_NOT_FOUND", {
           data: {
@@ -82,7 +71,6 @@ export async function addLiquidityHandler(
           message: "Pool not found for the specified tokens",
         });
       }
-
       if (
         error.message.includes("network") ||
         error.message.includes("timeout")
@@ -96,7 +84,6 @@ export async function addLiquidityHandler(
         });
       }
     }
-
     throw new ORPCError("GRPC_ERROR", {
       data: {
         code: "UNKNOWN",

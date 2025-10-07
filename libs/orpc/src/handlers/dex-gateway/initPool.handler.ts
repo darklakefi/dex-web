@@ -1,8 +1,6 @@
 "use server";
-
 import type { InitPoolRequest, InitPoolResponse } from "@dex-web/grpc-client";
 import { getDexGatewayClient } from "../../dex-gateway";
-
 export async function initPoolHandler(
   input: InitPoolRequest,
 ): Promise<InitPoolResponse> {

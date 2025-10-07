@@ -93,7 +93,7 @@ export function WithdrawLiquidityModal({
   tokenYDetails,
 }: WithdrawLiquidityModalProps) {
   const { publicKey, signTransaction, wallet } = useWallet();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const submitWithdrawalMutation = useSubmitWithdrawal();
   const [withdrawalCalculations, setWithdrawalCalculations] = useState({
     percentage: 0,

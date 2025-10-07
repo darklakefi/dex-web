@@ -4,22 +4,18 @@ interface RateLimitEntry {
   count: number;
   resetTime: number;
 }
-
 class RateLimiterService {
   private static instance: RateLimiterService;
   private limits = new Map<string, RateLimitEntry>();
-
   static getInstance(): RateLimiterService {
     if (!RateLimiterService.instance) {
       RateLimiterService.instance = new RateLimiterService();
     }
     return RateLimiterService.instance;
   }
-
   private getKey(identifier: string, endpoint: string): string {
     return `${identifier}:${endpoint}`;
   }
-
   private cleanup(): void {
     const now = Date.now();
     for (const [key, entry] of this.limits.entries()) {
@@ -28,7 +24,6 @@ class RateLimiterService {
       }
     }
   }
-
   checkLimit(
     identifier: string,
     endpoint: string,
@@ -36,11 +31,9 @@ class RateLimiterService {
     windowMs: number,
   ): { allowed: boolean; remaining: number; resetTime: number } {
     this.cleanup();
-
     const key = this.getKey(identifier, endpoint);
     const now = Date.now();
     const entry = this.limits.get(key);
-
     if (!entry || now > entry.resetTime) {
       this.limits.set(key, {
         count: 1,
@@ -52,7 +45,6 @@ class RateLimiterService {
         resetTime: now + windowMs,
       };
     }
-
     if (entry.count >= maxRequests) {
       return {
         allowed: false,
@@ -60,7 +52,6 @@ class RateLimiterService {
         resetTime: entry.resetTime,
       };
     }
-
     entry.count++;
     return {
       allowed: true,
@@ -68,7 +59,6 @@ class RateLimiterService {
       resetTime: entry.resetTime,
     };
   }
-
   getLiquidityLimit(identifier: string) {
     return this.checkLimit(
       identifier,
@@ -77,7 +67,6 @@ class RateLimiterService {
       RATE_LIMIT_CONFIG.LIQUIDITY_WINDOW_MS,
     );
   }
-
   getPoolsLimit(identifier: string) {
     return this.checkLimit(
       identifier,
@@ -86,7 +75,6 @@ class RateLimiterService {
       RATE_LIMIT_CONFIG.POOLS_WINDOW_MS,
     );
   }
-
   getTokensLimit(identifier: string) {
     return this.checkLimit(
       identifier,
@@ -95,7 +83,6 @@ class RateLimiterService {
       RATE_LIMIT_CONFIG.TOKENS_WINDOW_MS,
     );
   }
-
   getDefaultLimit(identifier: string) {
     return this.checkLimit(
       identifier,
@@ -105,5 +92,4 @@ class RateLimiterService {
     );
   }
 }
-
 export { RateLimiterService };

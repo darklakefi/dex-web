@@ -3,13 +3,11 @@ export enum CircuitState {
   OPEN = "open",
   HALF_OPEN = "half_open",
 }
-
 export interface CircuitBreakerOptions {
   failureThreshold: number;
   recoveryTimeout: number;
   monitoringPeriod: number;
 }
-
 export class CircuitBreakerService {
   private static instance: CircuitBreakerService;
   private circuits = new Map<
@@ -22,20 +20,17 @@ export class CircuitBreakerService {
       options: CircuitBreakerOptions;
     }
   >();
-
   private readonly defaultOptions: CircuitBreakerOptions = {
     failureThreshold: 5,
     monitoringPeriod: 10000,
     recoveryTimeout: 60000,
   };
-
   static getInstance(): CircuitBreakerService {
     if (!CircuitBreakerService.instance) {
       CircuitBreakerService.instance = new CircuitBreakerService();
     }
     return CircuitBreakerService.instance;
   }
-
   private getCircuit(name: string, options?: Partial<CircuitBreakerOptions>) {
     if (!this.circuits.has(name)) {
       this.circuits.set(name, {
@@ -48,14 +43,11 @@ export class CircuitBreakerService {
     }
     return this.circuits.get(name)!;
   }
-
   private canExecute(circuit: ReturnType<typeof this.getCircuit>): boolean {
     const now = Date.now();
-
     switch (circuit.state) {
       case CircuitState.CLOSED:
         return true;
-
       case CircuitState.OPEN:
         if (now - circuit.lastFailureTime > circuit.options.recoveryTimeout) {
           circuit.state = CircuitState.HALF_OPEN;
@@ -63,19 +55,15 @@ export class CircuitBreakerService {
           return true;
         }
         return false;
-
       case CircuitState.HALF_OPEN:
         return true;
-
       default:
         return false;
     }
   }
-
   private onSuccess(circuit: ReturnType<typeof this.getCircuit>): void {
     circuit.failureCount = 0;
     circuit.successCount++;
-
     if (circuit.state === CircuitState.HALF_OPEN) {
       if (circuit.successCount >= 3) {
         circuit.state = CircuitState.CLOSED;
@@ -83,27 +71,22 @@ export class CircuitBreakerService {
       }
     }
   }
-
   private onFailure(circuit: ReturnType<typeof this.getCircuit>): void {
     circuit.failureCount++;
     circuit.lastFailureTime = Date.now();
-
     if (circuit.failureCount >= circuit.options.failureThreshold) {
       circuit.state = CircuitState.OPEN;
     }
   }
-
   async execute<T>(
     name: string,
     operation: () => Promise<T>,
     options?: Partial<CircuitBreakerOptions>,
   ): Promise<T> {
     const circuit = this.getCircuit(name, options);
-
     if (!this.canExecute(circuit)) {
       throw new Error(`Circuit breaker '${name}' is open`);
     }
-
     try {
       const result = await operation();
       this.onSuccess(circuit);
@@ -113,12 +96,10 @@ export class CircuitBreakerService {
       throw error;
     }
   }
-
   getState(name: string): CircuitState | null {
     const circuit = this.circuits.get(name);
     return circuit ? circuit.state : null;
   }
-
   getStats(name: string): {
     state: CircuitState;
     failureCount: number;
@@ -127,7 +108,6 @@ export class CircuitBreakerService {
   } | null {
     const circuit = this.circuits.get(name);
     if (!circuit) return null;
-
     return {
       failureCount: circuit.failureCount,
       lastFailureTime: circuit.lastFailureTime,
@@ -135,7 +115,6 @@ export class CircuitBreakerService {
       successCount: circuit.successCount,
     };
   }
-
   reset(name: string): void {
     const circuit = this.circuits.get(name);
     if (circuit) {
@@ -145,7 +124,6 @@ export class CircuitBreakerService {
       circuit.lastFailureTime = 0;
     }
   }
-
   resetAll(): void {
     this.circuits.clear();
   }

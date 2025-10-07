@@ -21,7 +21,7 @@
     "**/*.config.ts",
     "**/*.config.js",
     ".next/types/**/*",
-    "../../dist/.next/**/*"
+    "../../dist/**/*"
   ],
   "extends": "../../tsconfig.base.json",
   "files": ["next-env.d.ts"],

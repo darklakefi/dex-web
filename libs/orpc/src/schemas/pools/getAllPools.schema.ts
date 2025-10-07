@@ -1,6 +1,5 @@
 import { z } from "zod/v4";
 import { VALIDATION_CONFIG } from "../../config/constants";
-
 export const getAllPoolsInputSchema = z.object({
   includeEmpty: z.boolean().optional().default(false),
   limit: z
@@ -15,7 +14,6 @@ export const getAllPoolsInputSchema = z.object({
     .optional()
     .transform((val) => val?.trim()),
 });
-
 export const poolAccountSchema = z.object({
   address: z.string(),
   lockedX: z.string(),
@@ -30,12 +28,10 @@ export const poolAccountSchema = z.object({
   userLockedX: z.string(),
   userLockedY: z.string(),
 });
-
 export const getAllPoolsOutputSchema = z.object({
   pools: z.array(poolAccountSchema),
   total: z.number(),
 });
-
 export type GetAllPoolsInput = z.infer<typeof getAllPoolsInputSchema>;
 export type PoolAccountData = z.infer<typeof poolAccountSchema>;
 export type GetAllPoolsOutput = z.infer<typeof getAllPoolsOutputSchema>;

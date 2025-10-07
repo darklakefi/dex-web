@@ -1,5 +1,4 @@
 import type { HealthMetrics, PerformanceMetrics } from "../types/ServiceTypes";
-
 export class MetricsService {
   private static instance: MetricsService;
   private metrics = new Map<string, PerformanceMetrics[]>();
@@ -13,28 +12,23 @@ export class MetricsService {
   private startTime = Date.now();
   private errorCount = 0;
   private totalRequests = 0;
-
   static getInstance(): MetricsService {
     if (!MetricsService.instance) {
       MetricsService.instance = new MetricsService();
     }
     return MetricsService.instance;
   }
-
   recordOperation(metrics: PerformanceMetrics): void {
     const operation = metrics.operation;
     if (!this.metrics.has(operation)) {
       this.metrics.set(operation, []);
     }
-
     const operationMetrics = this.metrics.get(operation)!;
     operationMetrics.push(metrics);
-
     if (operationMetrics.length > 1000) {
       operationMetrics.shift();
     }
   }
-
   recordRequest(success: boolean): void {
     this.totalRequests++;
     if (!success) {
@@ -42,7 +36,6 @@ export class MetricsService {
     }
     this.updateHealthMetrics();
   }
-
   private updateHealthMetrics(): void {
     const memUsage = process.memoryUsage();
     this.healthMetrics = {
@@ -54,11 +47,9 @@ export class MetricsService {
       uptime: Date.now() - this.startTime,
     };
   }
-
   private getActiveConnections(): number {
     return 0;
   }
-
   getOperationMetrics(operation: string): {
     count: number;
     averageDuration: number;
@@ -68,7 +59,6 @@ export class MetricsService {
     cacheHitRate: number;
   } {
     const operationMetrics = this.metrics.get(operation) || [];
-
     if (operationMetrics.length === 0) {
       return {
         averageDuration: 0,
@@ -79,7 +69,6 @@ export class MetricsService {
         minDuration: 0,
       };
     }
-
     const durations = operationMetrics.map((m) => m.duration);
     const errorCount = operationMetrics.filter(
       (m) => m.errorCount && m.errorCount > 0,
@@ -93,7 +82,6 @@ export class MetricsService {
       0,
     );
     const totalCacheOperations = cacheHits + cacheMisses;
-
     return {
       averageDuration:
         durations.reduce((sum, d) => sum + d, 0) / durations.length,
@@ -105,32 +93,26 @@ export class MetricsService {
       minDuration: Math.min(...durations),
     };
   }
-
   getAllMetrics(): Record<string, ReturnType<typeof this.getOperationMetrics>> {
     const result: Record<
       string,
       ReturnType<typeof this.getOperationMetrics>
     > = {};
-
     for (const operation of this.metrics.keys()) {
       result[operation] = this.getOperationMetrics(operation);
     }
-
     return result;
   }
-
   getHealthMetrics(): HealthMetrics {
     this.updateHealthMetrics();
     return { ...this.healthMetrics };
   }
-
   getTopSlowOperations(limit = 10): Array<{
     operation: string;
     averageDuration: number;
     count: number;
   }> {
     const allMetrics = this.getAllMetrics();
-
     return Object.entries(allMetrics)
       .map(([operation, metrics]) => ({
         averageDuration: metrics.averageDuration,
@@ -140,14 +122,12 @@ export class MetricsService {
       .sort((a, b) => b.averageDuration - a.averageDuration)
       .slice(0, limit);
   }
-
   getTopErrorOperations(limit = 10): Array<{
     operation: string;
     errorRate: number;
     count: number;
   }> {
     const allMetrics = this.getAllMetrics();
-
     return Object.entries(allMetrics)
       .map(([operation, metrics]) => ({
         count: metrics.count,
@@ -158,7 +138,6 @@ export class MetricsService {
       .sort((a, b) => b.errorRate - a.errorRate)
       .slice(0, limit);
   }
-
   reset(): void {
     this.metrics.clear();
     this.errorCount = 0;

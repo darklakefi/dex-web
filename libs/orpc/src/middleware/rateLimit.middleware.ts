@@ -3,6 +3,16 @@ import { z } from "zod";
 import { RATE_LIMIT_CONFIG } from "../config/constants";
 import { RateLimiterService } from "../services/RateLimiterService";
 
+interface ServerContext {
+  headers?: Record<string, string>;
+  userAddress?: string;
+  ip?: string;
+}
+
+const getIdentifierFromContext = (context: ServerContext): string => {
+  return context.userAddress || context.ip || "anonymous";
+};
+
 const rateLimitErrors = {
   RATE_LIMITED: {
     data: z.object({
@@ -13,16 +23,12 @@ const rateLimitErrors = {
     message: "Rate limit exceeded",
   },
 };
-
 export const rateLimitMiddleware = os
   .errors(rateLimitErrors)
   .middleware(async ({ next, context, errors }) => {
     const rateLimiter = RateLimiterService.getInstance();
-    const identifier =
-      (context as any)?.userAddress || (context as any)?.ip || "anonymous";
-
+    const identifier = getIdentifierFromContext(context as ServerContext);
     const limit = rateLimiter.getDefaultLimit(identifier);
-
     if (!limit.allowed) {
       throw errors.RATE_LIMITED({
         data: {
@@ -33,19 +39,14 @@ export const rateLimitMiddleware = os
         message: "Rate limit exceeded",
       });
     }
-
     return next();
   });
-
 export const liquidityRateLimitMiddleware = os
   .errors(rateLimitErrors)
   .middleware(async ({ next, context, errors }) => {
     const rateLimiter = RateLimiterService.getInstance();
-    const identifier =
-      (context as any)?.userAddress || (context as any)?.ip || "anonymous";
-
+    const identifier = getIdentifierFromContext(context as ServerContext);
     const limit = rateLimiter.getLiquidityLimit(identifier);
-
     if (!limit.allowed) {
       throw errors.RATE_LIMITED({
         data: {
@@ -56,19 +57,14 @@ export const liquidityRateLimitMiddleware = os
         message: "Liquidity rate limit exceeded",
       });
     }
-
     return next();
   });
-
 export const poolsRateLimitMiddleware = os
   .errors(rateLimitErrors)
   .middleware(async ({ next, context, errors }) => {
     const rateLimiter = RateLimiterService.getInstance();
-    const identifier =
-      (context as any)?.userAddress || (context as any)?.ip || "anonymous";
-
+    const identifier = getIdentifierFromContext(context as ServerContext);
     const limit = rateLimiter.getPoolsLimit(identifier);
-
     if (!limit.allowed) {
       throw errors.RATE_LIMITED({
         data: {
@@ -79,19 +75,14 @@ export const poolsRateLimitMiddleware = os
         message: "Pools rate limit exceeded",
       });
     }
-
     return next();
   });
-
 export const tokensRateLimitMiddleware = os
   .errors(rateLimitErrors)
   .middleware(async ({ next, context, errors }) => {
     const rateLimiter = RateLimiterService.getInstance();
-    const identifier =
-      (context as any)?.userAddress || (context as any)?.ip || "anonymous";
-
+    const identifier = getIdentifierFromContext(context as ServerContext);
     const limit = rateLimiter.getTokensLimit(identifier);
-
     if (!limit.allowed) {
       throw errors.RATE_LIMITED({
         data: {
@@ -102,6 +93,5 @@ export const tokensRateLimitMiddleware = os
         message: "Tokens rate limit exceeded",
       });
     }
-
     return next();
   });

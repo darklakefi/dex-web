@@ -3,7 +3,6 @@ import { createSolanaGatewayClient } from "@dex-web/grpc-client/server";
 let dexGatewayClientInstance: Awaited<
   ReturnType<typeof createSolanaGatewayClient>
 > | null = null;
-
 export async function getDexGatewayClient(): Promise<
   Awaited<ReturnType<typeof createSolanaGatewayClient>>
 > {
@@ -12,7 +11,6 @@ export async function getDexGatewayClient(): Promise<
   }
   return dexGatewayClientInstance;
 }
-
 export function closeDexGatewayClient(): void {
   dexGatewayClientInstance = null;
 }

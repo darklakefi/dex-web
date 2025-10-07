@@ -17,14 +17,12 @@ export interface ServiceConfig {
     enablePerformanceLogging: boolean;
   };
 }
-
 export interface ApiResponse<T> {
   data: T;
   success: boolean;
   error?: string;
   timestamp: number;
 }
-
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
@@ -32,25 +30,21 @@ export interface PaginatedResponse<T> {
   limit: number;
   hasMore: boolean;
 }
-
 export interface ErrorResponse {
   error: string;
   code: string;
   details?: Record<string, unknown>;
   timestamp: number;
 }
-
 export type ServiceResult<T> =
   | { success: true; data: T }
   | { success: false; error: string; code?: string };
-
 export interface CacheEntry<T> {
   value: T;
   expiresAt: number;
   createdAt: number;
   hits: number;
 }
-
 export interface PerformanceMetrics {
   operation: string;
   duration: number;
@@ -59,7 +53,6 @@ export interface PerformanceMetrics {
   cacheMisses?: number;
   errorCount?: number;
 }
-
 export interface HealthMetrics {
   uptime: number;
   memoryUsage: number;

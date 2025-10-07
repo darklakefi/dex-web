@@ -15,7 +15,6 @@ const removeLiquidityInputSchema = z.object({
   tokenMintY: z.string(),
   userAddress: z.string(),
 });
-
 export const removeLiquidity = baseProcedure
   .input(removeLiquidityInputSchema)
   .handler(async ({ input }) => {

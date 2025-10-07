@@ -14,7 +14,6 @@ const initPoolInputSchema = z.object({
   tokenMintY: z.string(),
   userAddress: z.string(),
 });
-
 export const initPool = baseProcedure
   .input(initPoolInputSchema)
   .handler(async ({ input }) => {

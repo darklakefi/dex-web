@@ -9,7 +9,6 @@ const solanaAddressSchema = z
   .min(32)
   .max(44)
   .regex(/^[1-9A-HJ-NP-Za-km-z]+$/, "Invalid Solana address format");
-
 const addLiquidityInputSchema = z.object({
   $typeName: z
     .literal("darklake.v1.AddLiquidityRequest")
@@ -32,7 +31,6 @@ const addLiquidityInputSchema = z.object({
   tokenMintY: solanaAddressSchema,
   userAddress: solanaAddressSchema,
 });
-
 export const addLiquidity = baseProcedure
   .use(liquidityRateLimitMiddleware)
   .input(addLiquidityInputSchema)
