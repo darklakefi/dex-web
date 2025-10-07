@@ -28,6 +28,9 @@
     },
     {
       "path": "./libs/grpc-client"
+    },
+    {
+      "path": "./libs/liquidity-calculations"
     }
   ]
 }

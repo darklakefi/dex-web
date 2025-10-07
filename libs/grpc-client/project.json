@@ -5,6 +5,34 @@
   "sourceRoot": "libs/grpc-client/src",
   "tags": ["type:lib", "scope:grpc", "platform:shared"],
   "targets": {
-    "lint": {}
+    "build": {
+      "executor": "nx:noop"
+    },
+    "build-deps": {
+      "executor": "nx:noop"
+    },
+    "lint": {},
+    "nx-release-publish": {
+      "executor": "nx:noop"
+    },
+    "typecheck": {
+      "cache": true,
+      "dependsOn": ["^typecheck"],
+      "executor": "nx:run-commands",
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "options": {
+        "command": "tsc --build --emitDeclarationOnly",
+        "cwd": "libs/grpc-client"
+      }
+    },
+    "watch-deps": {
+      "executor": "nx:noop"
+    }
   }
 }

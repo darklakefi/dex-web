@@ -1,5 +1,5 @@
 import type { Trade } from "@dex-web/grpc-client";
-import BigNumber from "bignumber.js";
+import Decimal from "decimal.js";
 import { z } from "zod";
 import { getTradesListByUserHandler } from "../../handlers/dex-gateway/getTradesListByUser.handler";
 import { baseProcedure } from "../base.procedure";
@@ -38,16 +38,16 @@ export const getTradesListByUser = baseProcedure
         return null;
       }
 
-      const displayAmountIn = BigNumber(trade.amountIn).div(
-        10 ** tokenIn.decimals,
+      const displayAmountIn = new Decimal(trade.amountIn).div(
+        new Decimal(10).pow(tokenIn.decimals),
       );
-      const displayMinimalAmountOut = BigNumber(trade.minimalAmountOut).div(
-        10 ** tokenOut.decimals,
+      const displayMinimalAmountOut = new Decimal(trade.minimalAmountOut).div(
+        new Decimal(10).pow(tokenOut.decimals),
       );
 
       return {
         amountIn: trade.amountIn,
-        createdAt: BigNumber(trade.createdAt).div(1_000).toNumber(),
+        createdAt: new Decimal(trade.createdAt).div(1_000).toNumber(),
         displayAmountIn: displayAmountIn.toFixed(2).toString(),
         displayMinimalAmountOut: displayMinimalAmountOut.toFixed(2).toString(),
         isSwapXToY: trade.isSwapXToY,

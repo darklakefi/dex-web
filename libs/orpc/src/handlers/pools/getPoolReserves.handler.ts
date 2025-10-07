@@ -157,10 +157,8 @@ export async function getPoolReservesHandler({
       totalLpSupply: safeTotalLpSupply,
     };
 
-    console.log("Returning pool reserves result:", result);
     return result;
-  } catch (error) {
-    console.error("Error getting pool reserves:", error);
+  } catch (_error) {
     return {
       exists: false,
       lpMint: "",

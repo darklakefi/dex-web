@@ -1,4 +1,4 @@
-import { createSolanaGatewayClient } from "@dex-web/grpc-client";
+import { createSolanaGatewayClient } from "@dex-web/grpc-client/server";
 
 let dexGatewayClientInstance: Awaited<
   ReturnType<typeof createSolanaGatewayClient>

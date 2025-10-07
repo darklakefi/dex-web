@@ -68,10 +68,11 @@ export async function getLPRateHandler(
     const connection = helius.connection;
 
     // Fetch and parse Pool account
-    const pool = await getPoolAccount(connection, poolPubkey).catch((error) => {
-      console.error("Failed to get pool account:", error);
-      throw new Error("Pool not found");
-    });
+    const pool = await getPoolAccount(connection, poolPubkey).catch(
+      (_error) => {
+        throw new Error("Pool not found");
+      },
+    );
 
     // Get token balances from reserve accounts
     const reserveXBalance = await getTokenBalance(
@@ -137,8 +138,7 @@ export async function getLPRateHandler(
     return {
       estimatedLPTokens: finalEstimatedLP.toString(),
     };
-  } catch (error) {
-    console.error("Failed to get LP rate:", error);
+  } catch (_error) {
     throw new Error("Failed to get LP rate");
   }
 }

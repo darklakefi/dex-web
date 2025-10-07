@@ -1,3 +1,4 @@
+import { BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import { describe, expect, it, vi } from "vitest";
@@ -31,15 +32,17 @@ vi.mock("@dex-web/utils", () => ({
 
 describe("getLPRateHandler", () => {
   const mockPoolAccount = {
-    locked_x: 0,
-    locked_y: 0,
-    protocol_fee_x: 500000,
-    protocol_fee_y: 1000000,
+    authority: new PublicKey("11111111111111111111111111111112"),
+    bump: new BN(0),
+    locked_x: new BN(0),
+    locked_y: new BN(0),
+    protocol_fee_x: new BN(500000),
+    protocol_fee_y: new BN(1000000),
     reserve_x: new PublicKey("11111111111111111111111111111114"),
     reserve_y: new PublicKey("11111111111111111111111111111115"),
-    token_lp_supply: 1000000000,
-    user_locked_x: 1000000,
-    user_locked_y: 2000000,
+    token_lp_supply: new BN(1000000000),
+    user_locked_x: new BN(1000000),
+    user_locked_y: new BN(2000000),
   };
 
   const mockTokenMetadata = {
