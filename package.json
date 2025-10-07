@@ -156,5 +156,9 @@
     "update": "nx migrate latest",
     "workspace-generator": "nx workspace-generator"
   },
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "workspaces": [
+    "apps/*",
+    "libs/*"
+  ]
 }

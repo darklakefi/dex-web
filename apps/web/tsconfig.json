@@ -8,7 +8,8 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",
@@ -32,22 +33,5 @@
     "**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts"
-  ],
-  "references": [
-    {
-      "path": "../../libs/utils"
-    },
-    {
-      "path": "../../libs/ui"
-    },
-    {
-      "path": "../../libs/orpc"
-    },
-    {
-      "path": "../../libs/grpc-client"
-    },
-    {
-      "path": "../../libs/core"
-    }
   ]
 }

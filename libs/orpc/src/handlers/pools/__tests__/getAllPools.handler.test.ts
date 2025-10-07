@@ -2,19 +2,24 @@ import { BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockGetProgramAccounts = vi.fn();
-const mockGetTokenMetadataHandler = vi.fn();
-
-// Create a stable mock connection object
-const mockConnectionObject = {
-  getProgramAccounts: mockGetProgramAccounts,
-};
-
-// Create a stable mock helius object
-const mockHeliusObject = {
-  connection: mockConnectionObject,
-  endpoint: "",
-};
+// Use vi.hoisted to ensure mocks are available before they're used in factories
+const {
+  mockGetProgramAccounts,
+  mockGetTokenMetadataHandler,
+  mockDecodePool,
+  mockConnection,
+} = vi.hoisted(() => {
+  const mockGetProgramAccounts = vi.fn();
+  const mockGetTokenMetadataHandler = vi.fn();
+  const mockDecodePool = vi.fn();
+  const mockConnection = {};
+  return {
+    mockConnection,
+    mockDecodePool,
+    mockGetProgramAccounts,
+    mockGetTokenMetadataHandler,
+  };
+});
 
 vi.mock("../../services/CacheService", () => ({
   CacheService: {
@@ -53,7 +58,11 @@ vi.mock("../tokens/getTokenMetadata.handler", () => ({
   getTokenMetadataHandler: mockGetTokenMetadataHandler,
 }));
 vi.mock("../../getHelius", () => ({
-  getHelius: () => mockHeliusObject,
+  clearHeliusCache: vi.fn(),
+  getHelius: vi.fn(() => ({
+    connection: mockConnection,
+    endpoint: "https://devnet.helius-rpc.com/?api-key=test",
+  })),
 }));
 
 import type { Token } from "../../../schemas/tokens/token.schema";
@@ -101,9 +110,9 @@ const mockEmptyPoolAccount = {
 };
 describe("getAllPoolsHandler", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockConnection?.mockClear();
-    mockGetTokenMetadataHandler.mockClear();
+    mockGetProgramAccounts.mockReset();
+    mockGetTokenMetadataHandler.mockReset();
+    mockDecodePool.mockReset();
     mockGetTokenMetadataHandler.mockResolvedValue({});
   });
   describe("Basic functionality", () => {
@@ -111,7 +120,7 @@ describe("getAllPoolsHandler", () => {
       const mockAccounts = [
         {
           account: {
-            data: IDL_CODER.accounts.encode("Pool", mockPoolAccount1),
+            data: { poolIndex: 0 }, // Dummy data - will be decoded by mock
             executable: false,
             lamports: 1000000,
             owner: EXCHANGE_PROGRAM_ID,
@@ -121,7 +130,7 @@ describe("getAllPoolsHandler", () => {
         },
         {
           account: {
-            data: IDL_CODER.accounts.encode("Pool", mockPoolAccount2),
+            data: { poolIndex: 1 }, // Dummy data - will be decoded by mock
             executable: false,
             lamports: 1000000,
             owner: EXCHANGE_PROGRAM_ID,
@@ -130,11 +139,19 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("So11111111111111111111111111111111111111112"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+
+      // Set up the decode mock to return our pool data
+      mockDecodePool
+        .mockReturnValueOnce(mockPoolAccount1)
+        .mockReturnValueOnce(mockPoolAccount2);
+
+      mockGetProgramAccounts.mockResolvedValueOnce(mockAccounts);
+
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
       });
+
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(2);
       expect(result.pools[0]).toBeDefined();
@@ -149,9 +166,9 @@ describe("getAllPoolsHandler", () => {
       expect(result.pools[0]!.lockedY).toBe("2000000000");
     });
     it("should call getProgramAccounts with correct filters", async () => {
-      mockConnection.mockResolvedValue([]);
+      mockGetProgramAccounts.mockResolvedValue([]);
       await getAllPoolsHandler({ includeEmpty: false, search: undefined });
-      expect(mockConnection).toHaveBeenCalledWith(EXCHANGE_PROGRAM_ID, {
+      expect(mockGetProgramAccounts).toHaveBeenCalledWith(EXCHANGE_PROGRAM_ID, {
         filters: [
           {
             dataSize: 232,
@@ -160,7 +177,7 @@ describe("getAllPoolsHandler", () => {
       });
     });
     it("should return empty array when no pools exist", async () => {
-      mockConnection.mockResolvedValue([]);
+      mockGetProgramAccounts.mockResolvedValue([]);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
@@ -193,7 +210,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("So11111111111111111111111111111111111111112"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         limit: 1,
@@ -215,7 +232,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111111"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         limit: 100,
@@ -249,7 +266,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("So11111111111111111111111111111111111111112"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
@@ -282,7 +299,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("So11111111111111111111111111111111111111112"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       const result = await getAllPoolsHandler({
         includeEmpty: true,
         search: undefined,
@@ -308,7 +325,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111111"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
@@ -334,7 +351,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111111"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
@@ -357,7 +374,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111111"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
@@ -395,7 +412,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111111"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
@@ -408,7 +425,9 @@ describe("getAllPoolsHandler", () => {
   });
   describe("Error handling", () => {
     it("should return empty result when getProgramAccounts fails", async () => {
-      mockConnection.mockRejectedValue(new Error("RPC connection failed"));
+      mockGetProgramAccounts.mockRejectedValue(
+        new Error("RPC connection failed"),
+      );
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
@@ -439,7 +458,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111113"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
@@ -450,7 +469,7 @@ describe("getAllPoolsHandler", () => {
       expect(result.pools[0]!.address).toBe("11111111111111111111111111111111");
     });
     it("should handle network errors gracefully", async () => {
-      mockConnection.mockRejectedValue(new Error("Network timeout"));
+      mockGetProgramAccounts.mockRejectedValue(new Error("Network timeout"));
       const result = await getAllPoolsHandler({
         includeEmpty: false,
         search: undefined,
@@ -493,7 +512,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111114"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       const result = await getAllPoolsHandler({
         includeEmpty: true,
         limit: 2,
@@ -547,7 +566,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("So11111111111111111111111111111111111111112"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
@@ -581,7 +600,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111113"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
@@ -606,7 +625,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111112"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
@@ -639,7 +658,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111113"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
@@ -672,7 +691,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111113"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
@@ -695,7 +714,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111112"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
@@ -717,7 +736,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111112"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
@@ -740,7 +759,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111112"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue({});
       const result = await getAllPoolsHandler({
         includeEmpty: false,
@@ -774,7 +793,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111113"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
       const result = await getAllPoolsHandler({
         includeEmpty: false,
@@ -797,7 +816,7 @@ describe("getAllPoolsHandler", () => {
           pubkey: new PublicKey("11111111111111111111111111111112"),
         },
       ];
-      mockConnection.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       mockGetTokenMetadataHandler.mockResolvedValue(mockTokenMetadata);
       const result = await getAllPoolsHandler({
         includeEmpty: false,

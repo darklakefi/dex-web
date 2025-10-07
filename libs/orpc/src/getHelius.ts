@@ -8,6 +8,10 @@ type HeliusClientWithConnection = ReturnType<typeof createHelius> & {
 
 let cachedHelius: HeliusClientWithConnection | undefined;
 
+export function clearHeliusCache(): void {
+  cachedHelius = undefined;
+}
+
 export function getHelius(): HeliusClientWithConnection {
   if (cachedHelius) {
     return cachedHelius;

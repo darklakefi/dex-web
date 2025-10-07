@@ -48,6 +48,7 @@ export async function getAllPoolsHandler(
         },
       ],
     });
+    console.log("getAllPools: accounts received:", accounts?.length);
     const searchLower = search?.toLowerCase().trim();
     const decodedPools = accounts
       .map((account) => {
@@ -73,11 +74,16 @@ export async function getAllPoolsHandler(
             userLockedX: pool.user_locked_x.toString(),
             userLockedY: pool.user_locked_y.toString(),
           };
-        } catch (_error) {
+        } catch (error) {
+          console.log(
+            "getAllPools: decode error:",
+            error instanceof Error ? error.message : String(error),
+          );
           return null;
         }
       })
       .filter((pool) => pool !== null);
+    console.log("getAllPools: decodedPools length:", decodedPools.length);
     const uniqueTokenAddresses = Array.from(
       new Set(
         decodedPools.flatMap((pool) => [pool.tokenXMint, pool.tokenYMint]),

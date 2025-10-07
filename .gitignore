@@ -51,6 +51,7 @@ storybook-static
 
 *.tsbuildinfo
 *.d.ts.map
+src/**/*.d.ts
 
 .direnv/
 
