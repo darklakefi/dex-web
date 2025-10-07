@@ -137,9 +137,13 @@ export async function getAddLiquidityReviewHandler(
     );
 
     const liquidityReserveX =
-      reserveXBalance - pool.user_locked_x - pool.protocol_fee_x;
+      reserveXBalance -
+      pool.user_locked_x.toNumber() -
+      pool.protocol_fee_x.toNumber();
     const liquidityReserveY =
-      reserveYBalance - pool.user_locked_y - pool.protocol_fee_y;
+      reserveYBalance -
+      pool.user_locked_y.toNumber() -
+      pool.protocol_fee_y.toNumber();
 
     const tokenMetadata = (await getTokenMetadataHandler({
       addresses: [tokenXMint, tokenYMint],

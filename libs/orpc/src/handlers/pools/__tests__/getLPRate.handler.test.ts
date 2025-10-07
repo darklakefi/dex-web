@@ -202,7 +202,7 @@ describe("getLPRateHandler", () => {
     it("should handle zero LP supply", async () => {
       const mockPoolAccountWithZeroSupply = {
         ...mockPoolAccount,
-        token_lp_supply: 0,
+        token_lp_supply: new BN(0),
       };
       vi.mocked(getPoolAccount).mockResolvedValue(
         mockPoolAccountWithZeroSupply,

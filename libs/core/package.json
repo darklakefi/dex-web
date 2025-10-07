@@ -1,7 +1,8 @@
 {
   "exports": {
     ".": {
-      "default": "./src/index.ts"
+      "default": "./src/index.ts",
+      "types": "./src/index.ts"
     }
   },
   "name": "@dex-web/core",

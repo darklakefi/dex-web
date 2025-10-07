@@ -2,8 +2,20 @@ import { BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockConnection = vi.fn();
+const mockGetProgramAccounts = vi.fn();
 const mockGetTokenMetadataHandler = vi.fn();
+
+// Create a stable mock connection object
+const mockConnectionObject = {
+  getProgramAccounts: mockGetProgramAccounts,
+};
+
+// Create a stable mock helius object
+const mockHeliusObject = {
+  connection: mockConnectionObject,
+  endpoint: "",
+};
+
 vi.mock("../../services/CacheService", () => ({
   CacheService: {
     getInstance: () => ({
@@ -40,9 +52,8 @@ vi.mock("../../services/MonitoringService", () => ({
 vi.mock("../tokens/getTokenMetadata.handler", () => ({
   getTokenMetadataHandler: mockGetTokenMetadataHandler,
 }));
-const mockGetHelius = vi.fn();
 vi.mock("../../getHelius", () => ({
-  getHelius: mockGetHelius,
+  getHelius: () => mockHeliusObject,
 }));
 
 import type { Token } from "../../../schemas/tokens/token.schema";
@@ -94,12 +105,6 @@ describe("getAllPoolsHandler", () => {
     mockConnection?.mockClear();
     mockGetTokenMetadataHandler.mockClear();
     mockGetTokenMetadataHandler.mockResolvedValue({});
-    mockGetHelius.mockReturnValue({
-      connection: {
-        getProgramAccounts: mockConnection,
-      },
-      endpoint: "",
-    });
   });
   describe("Basic functionality", () => {
     it("should list pools with expected fields", async () => {

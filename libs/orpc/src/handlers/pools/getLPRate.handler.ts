@@ -73,13 +73,13 @@ export async function getLPRateHandler(
     );
 
     const liquidityReserveX = reserveXBalance
-      .minus(pool.user_locked_x)
-      .minus(pool.protocol_fee_x);
+      .minus(new BigNumber(pool.user_locked_x.toString()))
+      .minus(new BigNumber(pool.protocol_fee_x.toString()));
     const liquidityReserveY = reserveYBalance
-      .minus(pool.user_locked_y)
-      .minus(pool.protocol_fee_y);
+      .minus(new BigNumber(pool.user_locked_y.toString()))
+      .minus(new BigNumber(pool.protocol_fee_y.toString()));
 
-    const poolLPSupply = BigNumber(pool.token_lp_supply);
+    const poolLPSupply = new BigNumber(pool.token_lp_supply.toString());
 
     const tokenMetadata = (await getTokenMetadataHandler({
       addresses: [tokenXMint, tokenYMint],
