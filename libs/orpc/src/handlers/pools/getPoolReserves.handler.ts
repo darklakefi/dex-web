@@ -31,6 +31,11 @@ async function detectTokenProgram(
     }
   }
 }
+/**
+ * Get pool reserves and LP token information.
+ * Returns available reserves (total reserves minus locked amounts and protocol fees)
+ * in human-readable units.
+ */
 export async function getPoolReservesHandler({
   tokenXMint,
   tokenYMint,
@@ -122,12 +127,22 @@ export async function getPoolReservesHandler({
       "confirmed",
       tokenYProgramId,
     );
-    const reserveX = reserveXBalance / 10 ** tokenXMintInfo.decimals;
-    const reserveY = reserveYBalance / 10 ** tokenYMintInfo.decimals;
+    // Calculate available reserves (total - user locked - protocol fees)
+    const availableReserveX =
+      reserveXBalance - poolData.user_locked_x - poolData.protocol_fee_x;
+    const availableReserveY =
+      reserveYBalance - poolData.user_locked_y - poolData.protocol_fee_y;
+
+    const reserveX = availableReserveX / 10 ** tokenXMintInfo.decimals;
+    const reserveY = availableReserveY / 10 ** tokenYMintInfo.decimals;
     const safeReserveX =
-      Number.isNaN(reserveX) || !Number.isFinite(reserveX) ? 0 : reserveX;
+      Number.isNaN(reserveX) || !Number.isFinite(reserveX) || reserveX < 0
+        ? 0
+        : reserveX;
     const safeReserveY =
-      Number.isNaN(reserveY) || !Number.isFinite(reserveY) ? 0 : reserveY;
+      Number.isNaN(reserveY) || !Number.isFinite(reserveY) || reserveY < 0
+        ? 0
+        : reserveY;
     const safeTotalLpSupply =
       Number.isNaN(totalLpSupply) || !Number.isFinite(totalLpSupply)
         ? 0

@@ -2,7 +2,7 @@
 
 import { tanstackClient } from "@dex-web/orpc";
 import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
-import type { TransactionStreamData } from "./streaming/types";
+import type { TransactionStreamData } from "./types";
 
 /**
  * Hook for fetching transaction status data via oRPC.

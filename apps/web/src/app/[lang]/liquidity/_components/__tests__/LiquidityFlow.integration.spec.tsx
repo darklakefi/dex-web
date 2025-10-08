@@ -23,6 +23,7 @@ vi.mock("next/navigation", () => ({
 }));
 const mockSignTransaction = vi.fn();
 const mockWallet = {
+  connected: true,
   publicKey: new PublicKey("11111111111111111111111111111112"),
   signTransaction: mockSignTransaction,
   wallet: { adapter: { name: "Phantom" } },

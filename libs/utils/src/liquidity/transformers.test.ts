@@ -418,5 +418,27 @@ describe("transformToAddLiquidityPayload", () => {
       expect(result.label).toBe("");
       expect(result.refCode).toBe("");
     });
+
+    it("should handle precision issues with slippage calculations", () => {
+      // Test case for the specific error: Amount 41580443.84035831 with 6 decimals results in non-integer
+      const result = transformToAddLiquidityPayload({
+        calculateLpTokens: () => BigInt(1000000000),
+        poolTokenXMint: USDC,
+        slippage: "0.5",
+        tokenAAddress: USDC,
+        tokenAAmount: "41580443.84035831",
+        tokenBAddress: WSOL, // This was causing the precision error
+        tokenBAmount: "1000000",
+        tokenXDecimals: 6,
+        tokenYDecimals: 9,
+        userAddress: "user123",
+      });
+
+      // Should not throw an error and should return valid bigints
+      expect(result.maxAmountX).toBeDefined();
+      expect(result.maxAmountY).toBeDefined();
+      expect(typeof result.maxAmountX).toBe("bigint");
+      expect(typeof result.maxAmountY).toBe("bigint");
+    });
   });
 });

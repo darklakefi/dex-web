@@ -80,6 +80,22 @@ vi.mock("@dex-web/orpc", () => ({
         },
       ),
     },
+    tokens: {
+      getTokenMetadata: {
+        queryOptions: vi.fn(() => ({
+          queryFn: () =>
+            Promise.resolve({
+              "mock-token": {
+                imageUrl: "https://example.com/mock-token.png",
+                name: "Mock Token",
+                symbol: "MOCK",
+              },
+            }),
+          queryKey: ["tokenMetadata", ["mock-token"]],
+          staleTime: 5000,
+        })),
+      },
+    },
   },
 }));
 vi.mock("@dex-web/core", () => ({
@@ -188,7 +204,7 @@ const renderWithWrapper = (
   );
   return render(<LiquidityForm />, { wrapper });
 };
-describe.skip("LiquidityForm Basic Tests", () => {
+describe("LiquidityForm Basic Tests", () => {
   let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
     user = userEvent.setup();

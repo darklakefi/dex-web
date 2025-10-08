@@ -19,14 +19,11 @@ export function useLiquidityTransactionCore({
       },
       actors: {
         submitLiquidity: fromPromise(async ({ input }) => {
-          console.log("submitLiquidity actor called with input:", input);
-          return submitTransaction(input);
+          return submitTransaction({ values: input });
         }),
       },
     }),
   );
-
-  console.log("useLiquidityTransactionCore - current state:", state.value);
 
   const isSubmitting = state.matches("submitting");
   const isSuccess = state.matches("success");

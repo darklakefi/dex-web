@@ -48,6 +48,18 @@ export function mockOrpc() {
         symbol: "SOL",
       }),
     },
+    integrations: {
+      createTorqueReferral: {
+        queryOptions: vi.fn().mockImplementation(() => ({
+          queryFn: () =>
+            Promise.resolve({
+              referralCode: "TEST123",
+              userId: "test-user-id",
+            }),
+          queryKey: ["integrations", "createTorqueReferral"],
+        })),
+      },
+    },
     tanstackClient: {
       getSwapDetails: {
         queryOptions: vi.fn().mockImplementation(() => ({
@@ -144,6 +156,20 @@ export function mockOrpc() {
                 },
               ]),
             queryKey: ["helius", "searchAssets"],
+          })),
+        },
+      },
+      pools: {
+        getPoolDetails: {
+          queryOptions: vi.fn().mockImplementation(() => ({
+            queryFn: () =>
+              Promise.resolve({
+                poolAddress: "mock-pool-address",
+                price: "1.5",
+                tokenXMint: DEFAULT_BUY_TOKEN,
+                tokenYMint: DEFAULT_SELL_TOKEN,
+              }),
+            queryKey: ["pools", "getPoolDetails"],
           })),
         },
       },

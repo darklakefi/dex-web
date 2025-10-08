@@ -58,7 +58,7 @@ const formConfig = {
     logger.log(value);
   },
   validators: {
-    onChange: ({ value }: { value: { query: string } }) =>
+    onBlur: ({ value }: { value: { query: string } }) =>
       selectTokenModalFormSchema.parse(value),
   },
 };

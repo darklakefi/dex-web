@@ -1,3 +1,4 @@
+import BigNumber from "bignumber.js";
 import { sortSolanaAddresses } from "../blockchain/sortSolanaAddresses";
 import { parseAmount } from "../common/amountUtils";
 import { toRawUnitsBigint } from "../common/unitConversion";
@@ -43,15 +44,32 @@ export function transformToAddLiquidityPayload(
 
   const slippageDecimal = parseFloat(params.slippage || "0.5") / 100;
   const slippageFactor = 1 + slippageDecimal;
-  const maxAmountX = baseAmountX * slippageFactor;
-  const maxAmountY = baseAmountY * slippageFactor;
 
-  const maxAmountXRaw = toRawUnitsBigint(maxAmountX, params.tokenXDecimals);
-  const maxAmountYRaw = toRawUnitsBigint(maxAmountY, params.tokenYDecimals);
+  // Round to token decimal precision to avoid precision errors during raw unit conversion
+  const maxAmountX = BigNumber(baseAmountX)
+    .multipliedBy(slippageFactor)
+    .toFixed(params.tokenXDecimals, BigNumber.ROUND_UP);
+  const maxAmountY = BigNumber(baseAmountY)
+    .multipliedBy(slippageFactor)
+    .toFixed(params.tokenYDecimals, BigNumber.ROUND_UP);
+
+  const maxAmountXRaw = toRawUnitsBigint(
+    parseFloat(maxAmountX),
+    params.tokenXDecimals,
+  );
+  const maxAmountYRaw = toRawUnitsBigint(
+    parseFloat(maxAmountY),
+    params.tokenYDecimals,
+  );
 
   const slippageReductionFactor = 1 - slippageDecimal;
-  const lpCalcAmountX = baseAmountX * slippageReductionFactor;
-  const lpCalcAmountY = baseAmountY * slippageReductionFactor;
+  // Round LP calculation amounts to token decimal precision for consistency
+  const lpCalcAmountX = BigNumber(baseAmountX)
+    .multipliedBy(slippageReductionFactor)
+    .toNumber();
+  const lpCalcAmountY = BigNumber(baseAmountY)
+    .multipliedBy(slippageReductionFactor)
+    .toNumber();
   const amountLpRaw = params.calculateLpTokens(lpCalcAmountX, lpCalcAmountY);
 
   return {

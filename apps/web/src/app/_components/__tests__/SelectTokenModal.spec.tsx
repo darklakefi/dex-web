@@ -3,7 +3,6 @@ import "@testing-library/jest-dom";
 import { act, render, screen } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
-import z from "zod/v4";
 import { DEFAULT_BUY_TOKEN } from "../../_utils/constants";
 import { SelectTokenModal } from "../SelectTokenModal";
 
@@ -19,34 +18,61 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 vi.mock("@dex-web/orpc", () => ({
-  getTokensInputSchema: {
-    pick: vi.fn().mockReturnValue(
-      z.object({
-        limit: z.number(),
-        offset: z.number(),
-        query: z.string(),
-      }),
-    ),
-  },
-  tanstackClient: {
-    getTokens: {
-      queryOptions: vi.fn().mockReturnValue({
-        queryFn: () =>
-          Promise.resolve({
-            tokens: [
-              {
-                address: DEFAULT_BUY_TOKEN,
-                imageUrl: "https://example.com/solana.png",
-                name: "Solana",
-                symbol: "SOL",
-                value: "1000",
-              },
-            ],
-          }),
-        queryKey: ["getTokens"],
-      }),
+  QUERY_CONFIG: {
+    tokenSearch: {
+      gcTime: 10 * 60 * 1000,
+      staleTime: 5 * 60 * 1000,
+    },
+    tokens: {
+      gcTime: 5 * 60 * 1000,
+      staleTime: 2 * 60 * 1000,
     },
   },
+  tanstackClient: {
+    tokens: {
+      getTokensWithPools: {
+        queryOptions: vi.fn().mockReturnValue({
+          queryFn: () =>
+            Promise.resolve({
+              hasMore: false,
+              poolTokenAddresses: [],
+              tokens: [
+                {
+                  address: DEFAULT_BUY_TOKEN,
+                  imageUrl: "https://example.com/solana.png",
+                  name: "Solana",
+                  symbol: "SOL",
+                },
+              ],
+              total: 1,
+            }),
+          queryKey: [
+            "tokens",
+            "list",
+            { limit: 8, offset: 0, onlyWithPools: false, query: "" },
+          ],
+        }),
+      },
+    },
+  },
+}));
+vi.mock("@solana/wallet-adapter-react", () => ({
+  useWallet: () => ({
+    publicKey: null,
+  }),
+}));
+vi.mock("../../hooks/useWalletCache", () => ({
+  useWalletPublicKey: () => ({
+    data: {
+      toBase58: () => "mock-public-key",
+    },
+  }),
+}));
+vi.mock("@dex-web/utils", () => ({
+  pasteFromClipboard: vi.fn(),
+}));
+vi.mock("use-local-storage-state", () => ({
+  default: vi.fn().mockReturnValue([[], vi.fn()]),
 }));
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <NuqsTestingAdapter
@@ -56,7 +82,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   </NuqsTestingAdapter>
 );
-describe.skip("SelectTokenModal", () => {
+describe("SelectTokenModal", () => {
   it("renders search input and token list", async () => {
     await act(async () => {
       render(<SelectTokenModal returnUrl="/" type="buy" />, {
@@ -66,7 +92,7 @@ describe.skip("SelectTokenModal", () => {
     expect(
       await screen.findByPlaceholderText("Search for a token"),
     ).toBeDefined();
-    expect(await screen.findAllByText("SOL")).toHaveLength(1);
-    expect(await screen.findAllByText("Solana")).toHaveLength(1);
+    expect(await screen.findByText("SOL")).toBeDefined();
+    expect(await screen.findByText("Solana")).toBeDefined();
   });
 });

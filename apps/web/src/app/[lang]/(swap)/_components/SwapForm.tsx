@@ -85,7 +85,7 @@ const formConfig = {
     logger.log(value);
   },
   validators: {
-    onChange: swapFormSchema,
+    onBlur: swapFormSchema,
   },
 };
 

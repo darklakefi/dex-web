@@ -1,7 +1,7 @@
 "use client";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
 import { LIQUIDITY_CONSTANTS } from "../_constants/liquidityConstants";
@@ -80,13 +80,14 @@ export function useLiquidityFormLogic({
     tokenAAddress,
     tokenBAddress,
   });
-  sendRef.current = transaction.send;
+  sendRef.current = transaction.send as (event: {
+    type: string;
+    data?: unknown;
+  }) => void;
 
   // 4. Form hook: owns field state
   const { form } = useLiquidityFormState({
     onSubmit: ({ value }) => {
-      console.log("Form onSubmit called with value:", value);
-      console.log("Sending event with slippage:", slippage);
       if (transaction.isError) {
         sendRef.current?.({ type: "RETRY" });
       } else {
@@ -108,7 +109,6 @@ export function useLiquidityFormLogic({
   return {
     debouncedCalculateTokenAmounts,
     form,
-    hasError: transaction.isError,
     isCalculating: transaction.isCalculating,
     isError: transaction.isError,
     isPoolLoading: poolDataResult.isLoading,

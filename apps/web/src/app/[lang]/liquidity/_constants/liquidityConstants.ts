@@ -3,6 +3,7 @@ export const LIQUIDITY_CONSTANTS = Object.freeze({
   DEFAULT_AMOUNT: "0",
   DEFAULT_INITIAL_PRICE: "1",
   DEFAULT_SLIPPAGE: "0.5", // 0.5% default slippage for liquidity operations
+  LP_TOKEN_DECIMALS: 9,
   MAX_DECIMAL_PLACES: 5,
   MAX_TRANSACTION_ATTEMPTS: 15,
   POLLING_INTERVAL_MS: 3000,

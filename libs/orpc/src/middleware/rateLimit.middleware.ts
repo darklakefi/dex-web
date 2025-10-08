@@ -59,39 +59,3 @@ export const liquidityRateLimitMiddleware = os
     }
     return next();
   });
-export const poolsRateLimitMiddleware = os
-  .errors(rateLimitErrors)
-  .middleware(async ({ next, context, errors }) => {
-    const rateLimiter = RateLimiterService.getInstance();
-    const identifier = getIdentifierFromContext(context as ServerContext);
-    const limit = rateLimiter.getPoolsLimit(identifier);
-    if (!limit.allowed) {
-      throw errors.RATE_LIMITED({
-        data: {
-          limit: RATE_LIMIT_CONFIG.POOLS_MAX_REQUESTS,
-          remaining: limit.remaining,
-          retryAfter: Math.ceil((limit.resetTime - Date.now()) / 1000),
-        },
-        message: "Pools rate limit exceeded",
-      });
-    }
-    return next();
-  });
-export const tokensRateLimitMiddleware = os
-  .errors(rateLimitErrors)
-  .middleware(async ({ next, context, errors }) => {
-    const rateLimiter = RateLimiterService.getInstance();
-    const identifier = getIdentifierFromContext(context as ServerContext);
-    const limit = rateLimiter.getTokensLimit(identifier);
-    if (!limit.allowed) {
-      throw errors.RATE_LIMITED({
-        data: {
-          limit: RATE_LIMIT_CONFIG.TOKENS_MAX_REQUESTS,
-          remaining: limit.remaining,
-          retryAfter: Math.ceil((limit.resetTime - Date.now()) / 1000),
-        },
-        message: "Tokens rate limit exceeded",
-      });
-    }
-    return next();
-  });

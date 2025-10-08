@@ -11,8 +11,8 @@ describe("LiquidityMachine", () => {
   });
 
   describe("Initial State", () => {
-    it.skip("should start in idle state", () => {
-      expect(actor.getSnapshot().value).toBe("idle");
+    it("should start in idle state", () => {
+      expect(actor.getSnapshot().value).toEqual({ ready: "idle" });
     });
 
     it("should have default context values", () => {
@@ -44,16 +44,16 @@ describe("LiquidityMachine", () => {
   });
 
   describe("State Transitions", () => {
-    it.skip("should transition from idle to calculating on START_CALCULATION", () => {
+    it("should transition from idle to calculating on START_CALCULATION", () => {
       actor.send({ type: "START_CALCULATION" });
-      expect(actor.getSnapshot().value).toBe("calculating");
+      expect(actor.getSnapshot().value).toEqual({ ready: "calculating" });
       expect(actor.getSnapshot().context.isCalculating).toBe(true);
     });
 
-    it.skip("should transition from calculating to idle on FINISH_CALCULATION", () => {
+    it("should transition from calculating to idle on FINISH_CALCULATION", () => {
       actor.send({ type: "START_CALCULATION" });
       actor.send({ type: "FINISH_CALCULATION" });
-      expect(actor.getSnapshot().value).toBe("idle");
+      expect(actor.getSnapshot().value).toEqual({ ready: "idle" });
       expect(actor.getSnapshot().context.isCalculating).toBe(false);
     });
 

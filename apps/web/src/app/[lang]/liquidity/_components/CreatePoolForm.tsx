@@ -163,7 +163,7 @@ export function CreatePoolForm() {
     } satisfies LiquidityFormSchema,
     onSubmit: async () => {},
     validators: {
-      onChange: liquidityFormSchema,
+      onBlur: liquidityFormSchema,
       onDynamic: ({ value }: { value: LiquidityFormSchema }) => {
         if (
           value.tokenAAmount &&

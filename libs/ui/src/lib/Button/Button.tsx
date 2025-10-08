@@ -6,13 +6,6 @@ import { twMerge } from "tailwind-merge";
 import { Icon, type IconName } from "../Icon/Icon";
 import { Text } from "../Text/Text";
 
-export enum ButtonVariantEnum {
-  Primary = "primary",
-  PrimaryDark = "primary-dark",
-  Secondary = "secondary",
-  Tertiary = "tertiary",
-}
-
 const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2",
@@ -111,8 +104,7 @@ export function Button<TElement extends React.ElementType>(
     ...restProps
   } = props;
 
-  const TextComponent =
-    variant === ButtonVariantEnum.Tertiary ? Text.Link : Text.Body2;
+  const TextComponent = variant === "tertiary" ? Text.Link : Text.Body2;
   const ButtonComponent = as;
 
   if (!ButtonComponent) {

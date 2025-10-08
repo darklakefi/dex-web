@@ -1,3 +1,7 @@
+import {
+  TRANSACTION_DESCRIPTIONS,
+  TRANSACTION_STEPS,
+} from "../../../../../../../libs/core/src/constants/toastMessages";
 import { toast } from "../../../_utils/toast";
 
 export interface ShowErrorToastParams {
@@ -11,13 +15,31 @@ export interface ShowInfoToastParams {
 }
 
 export function showErrorToast({ message, context }: ShowErrorToastParams) {
-  toast.error(message, context);
+  toast({
+    description: message,
+    title: "Transaction Error",
+    variant: "error",
+  });
 }
 
 export function showInfoToast({ message, context }: ShowInfoToastParams) {
-  toast.info(message, context);
+  toast({
+    description: message,
+    title: "Transaction Info",
+    variant: "info",
+  });
 }
 
 export function showStepToast(step: number) {
-  toast.step(step);
+  const stepKey = `STEP_${step}` as keyof typeof TRANSACTION_STEPS;
+  const stepData = TRANSACTION_STEPS[stepKey];
+  const descriptionData = TRANSACTION_DESCRIPTIONS[stepKey];
+
+  if (stepData && descriptionData) {
+    toast({
+      description: descriptionData.LIQUIDITY,
+      title: stepData.LIQUIDITY,
+      variant: "loading",
+    });
+  }
 }

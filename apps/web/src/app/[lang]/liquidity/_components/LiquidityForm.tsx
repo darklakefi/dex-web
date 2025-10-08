@@ -122,10 +122,6 @@ export function LiquidityForm() {
                 tokenAccountsData.isLoadingSell
               }
               onSubmit={() => {
-                console.log(
-                  "LiquidityForm - onSubmit called, calling form.handleSubmit()",
-                );
-                console.log("Form state:", form.state);
                 form.handleSubmit();
               }}
               poolDetails={poolDetails}

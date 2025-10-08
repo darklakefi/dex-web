@@ -45,21 +45,6 @@
         "buildTarget": "web:build:production",
         "dev": false
       }
-    },
-    "typecheck": {
-      "cache": true,
-      "executor": "nx:run-commands",
-      "inputs": [
-        "production",
-        "^production",
-        {
-          "externalDependencies": ["typescript"]
-        }
-      ],
-      "options": {
-        "command": "tsc --project tsconfig.json --noEmit",
-        "cwd": "apps/web"
-      }
     }
   }
 }

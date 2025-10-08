@@ -102,9 +102,6 @@ export function LiquidityActionButton({
   const buttonMessage = getButtonMessage(buttonState);
 
   const handleButtonClick = () => {
-    console.log("LiquidityActionButton - handleButtonClick called");
-    console.log("Button state:", buttonState);
-    console.log("Form canSubmit:", formCanSubmit);
     if (shouldShowTransactionPreview(validation)) {
     }
     onSubmit();

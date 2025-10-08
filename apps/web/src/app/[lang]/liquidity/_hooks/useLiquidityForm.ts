@@ -67,7 +67,7 @@ export function useLiquidityForm({
         await onSubmit(value);
       },
       validators: {
-        onChange: liquidityFormSchema,
+        onBlur: liquidityFormSchema,
         onDynamic: ({ value }: { value: LiquidityFormValues }) => {
           if (
             value[FORM_FIELD_NAMES.TOKEN_A_AMOUNT] &&

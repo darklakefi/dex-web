@@ -11,7 +11,7 @@ Decimal.set({
  * Uses Decimal.js for precision (matching @darklakefi/ts-sdk-on-chain approach)
  * @param amountX - Amount of token X to deposit (in human-readable units)
  * @param amountY - Amount of token Y to deposit (in human-readable units)
- * @param reserves - Current pool reserves (in raw units)
+ * @param reserves - Current pool reserves (in human-readable units)
  * @returns LP token amount to mint (in raw units, NOT multiplied by decimals)
  */
 export function calculateLpTokenAmount(
