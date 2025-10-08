@@ -4,9 +4,10 @@ import {
   signTransactionWithRecovery,
 } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
-import {
-  type PublicKey,
-  type Transaction,
+import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
+import type {
+  PublicKey,
+  Transaction,
   VersionedTransaction,
 } from "@solana/web3.js";
 import { dismissToast, toast } from "../../../_utils/toast";
@@ -20,7 +21,11 @@ interface RequestCreatePoolTransactionSigningProps {
     | undefined;
   setCreateStep: (step: number) => void;
   unsignedTransaction: string;
-  checkTransactionStatus: (signature: string) => Promise<void>;
+  trackingId: string;
+  checkTransactionStatus: (
+    tradeId: string,
+    trackingId: string,
+  ) => Promise<void>;
   showCreatePoolStepToast: (step: number) => void;
 }
 export async function requestCreatePoolTransactionSigning({
@@ -28,6 +33,7 @@ export async function requestCreatePoolTransactionSigning({
   signTransaction,
   setCreateStep,
   unsignedTransaction,
+  trackingId,
   checkTransactionStatus,
   showCreatePoolStepToast,
 }: RequestCreatePoolTransactionSigningProps) {
@@ -39,13 +45,7 @@ export async function requestCreatePoolTransactionSigning({
     setCreateStep(2);
     showCreatePoolStepToast(2);
 
-    const unsignedTransactionBuffer = Buffer.from(
-      unsignedTransaction,
-      "base64",
-    );
-    const transaction = VersionedTransaction.deserialize(
-      unsignedTransactionBuffer,
-    );
+    const transaction = deserializeVersionedTransaction(unsignedTransaction);
 
     const signedTransaction = await signTransactionWithRecovery(
       transaction,
@@ -55,23 +55,32 @@ export async function requestCreatePoolTransactionSigning({
       signedTransaction.serialize(),
     ).toString("base64");
 
-    const signedTxRequest = {
-      signed_transaction: signedTransactionBase64,
-    };
+    const signature = signedTransaction.signatures[0];
+    if (!signature) {
+      throw new Error("Transaction signature is missing");
+    }
+    const tradeId = Buffer.from(signature).toString("base64");
 
     setCreateStep(3);
     showCreatePoolStepToast(3);
 
-    const createTxResponse =
-      await client.liquidity.submitLiquidityTransaction(signedTxRequest);
+    const createTxResponse = await client.dexGateway.submitSignedTransaction({
+      signedTransaction: signedTransactionBase64,
+      trackingId,
+      tradeId,
+    });
 
-    if (createTxResponse.success && createTxResponse.signature) {
-      checkTransactionStatus(createTxResponse.signature);
+    if (createTxResponse.success) {
+      checkTransactionStatus(tradeId, trackingId);
     } else {
-      const errorMessage =
-        createTxResponse.error_logs || "Unknown error occurred";
+      const errorLogs = createTxResponse.errorLogs;
+      const errorMessage = Array.isArray(errorLogs)
+        ? errorLogs.join(", ")
+        : typeof errorLogs === "string"
+          ? errorLogs
+          : "Unknown error occurred";
       console.error("Create pool transaction submission failed:", {
-        error_logs: createTxResponse.error_logs,
+        errorLogs: createTxResponse.errorLogs,
         success: createTxResponse.success,
       });
       throw new Error(`Create pool transaction failed: ${errorMessage}`);

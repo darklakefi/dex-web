@@ -29,5 +29,5 @@ export default async function ReferralPage({
   });
 
   const redirectUrl = `/?${urlSearchParams.toString()}`;
-  redirect(redirectUrl);
+  redirect(redirectUrl as never);
 }

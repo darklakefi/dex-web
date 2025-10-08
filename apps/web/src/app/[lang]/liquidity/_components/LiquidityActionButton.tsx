@@ -127,7 +127,7 @@ export function LiquidityActionButton({
     };
   };
 
-  if (!wallet || !connected) {
+  if (!wallet || !connected || !publicKey) {
     return (
       <Button
         aria-label="Connect wallet to add liquidity"
@@ -135,7 +135,7 @@ export function LiquidityActionButton({
         onClick={() => router.push("/select-wallet")}
         variant="primary"
       >
-        {buttonMessage}
+        Connect Wallet
       </Button>
     );
   }

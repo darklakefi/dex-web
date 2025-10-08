@@ -29,10 +29,15 @@ interface LiquidityTokenInputsProps<T extends AnyFormApi> {
   tokenAAddress: string | null;
   tokenBAddress: string | null;
   poolDetails: PoolDetails | null;
-  debouncedCalculateTokenAmounts: (params: {
-    inputAmount: string;
-    editedToken: "tokenA" | "tokenB";
-  }) => void;
+  debouncedCalculateTokenAmounts: (
+    params: {
+      inputAmount: string;
+      editedToken: "tokenA" | "tokenB";
+      tokenAAddress: string | null;
+      tokenBAddress: string | null;
+    },
+    onResult: (outputAmount: number | null) => void,
+  ) => void;
 }
 
 export function LiquidityTokenInputs<T extends AnyFormApi>({
@@ -90,10 +95,23 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
 
       form.setFieldValue(currentFieldName, currentValue);
 
-      debouncedCalculateTokenAmounts({
-        editedToken: tokenType,
-        inputAmount: currentValue,
-      });
+      debouncedCalculateTokenAmounts(
+        {
+          editedToken: tokenType,
+          inputAmount: currentValue,
+          tokenAAddress: _tokenAAddress,
+          tokenBAddress: _tokenBAddress,
+        },
+        (output) => {
+          if (output == null) return;
+          const targetField =
+            tokenType === "tokenA"
+              ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
+              : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
+          form.setFieldValue(targetField, String(output));
+          form.validateAllFields("change");
+        },
+      );
     }
   };
 
@@ -106,10 +124,23 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
     const formattedValue = formatAmountInput(value);
 
     if (poolDetails && parseAmountBigNumber(formattedValue).gt(0)) {
-      debouncedCalculateTokenAmounts({
-        editedToken: tokenType,
-        inputAmount: formattedValue,
-      });
+      debouncedCalculateTokenAmounts(
+        {
+          editedToken: tokenType,
+          inputAmount: formattedValue,
+          tokenAAddress: _tokenAAddress,
+          tokenBAddress: _tokenBAddress,
+        },
+        (output) => {
+          if (output == null) return;
+          const targetField =
+            tokenType === "tokenA"
+              ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
+              : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
+          form.setFieldValue(targetField, String(output));
+          form.validateAllFields("change");
+        },
+      );
     } else if (!poolDetails) {
       if (tokenType === "tokenA") {
         const price = form.state.values.initialPrice || DEFAULT_PRICE;

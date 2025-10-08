@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Icon } from "@dex-web/ui";
+import { Box, Button, Icon, Text } from "@dex-web/ui";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
@@ -37,6 +37,7 @@ export function LiquidityForm() {
     tokenAccountsData,
     publicKey,
     isCalculating,
+    isPoolLoading,
   } = useLiquidityFormLogic({
     tokenAAddress,
     tokenBAddress,
@@ -45,10 +46,19 @@ export function LiquidityForm() {
   const handleSlippageChange = (newSlippage: string) => {
     setSlippage(newSlippage);
     if (form.state.values.tokenBAmount !== "0") {
-      debouncedCalculateTokenAmounts({
-        editedToken: "tokenB",
-        inputAmount: form.state.values.tokenBAmount,
-      });
+      debouncedCalculateTokenAmounts(
+        {
+          editedToken: "tokenB",
+          inputAmount: form.state.values.tokenBAmount,
+          tokenAAddress,
+          tokenBAddress,
+        },
+        (outputAmount) => {
+          if (outputAmount == null) return;
+          form.setFieldValue("tokenAAmount", String(outputAmount));
+          form.validateAllFields("change");
+        },
+      );
     }
   };
 
@@ -67,12 +77,33 @@ export function LiquidityForm() {
   const isInitialLoading =
     !tokenAAddress ||
     !tokenBAddress ||
-    (tokenAccountsData.isLoadingBuy && tokenAccountsData.isLoadingSell);
+    (tokenAccountsData.isLoadingBuy && tokenAccountsData.isLoadingSell) ||
+    isPoolLoading;
 
   if (isInitialLoading) {
     return (
       <LiquidityErrorBoundary>
         <LiquidityFormSkeleton />
+      </LiquidityErrorBoundary>
+    );
+  }
+
+  if (!poolDetails) {
+    return (
+      <LiquidityErrorBoundary>
+        <Box padding="lg">
+          <div className="flex flex-col gap-4">
+            <Text className="text-center text-muted-foreground">
+              No pool exists for the selected token pair.
+            </Text>
+            <Text className="text-center text-muted-foreground text-sm">
+              You need to create a pool before you can add liquidity.
+            </Text>
+            <Button className="w-full" onClick={handleCreatePoolClick}>
+              Create Pool
+            </Button>
+          </div>
+        </Box>
       </LiquidityErrorBoundary>
     );
   }
@@ -103,7 +134,7 @@ export function LiquidityForm() {
             <LiquidityActionButton
               buyTokenAccount={tokenAccountsData.buyTokenAccount}
               form={form}
-              isPoolLoading={false}
+              isPoolLoading={isPoolLoading}
               isTokenAccountsLoading={
                 tokenAccountsData.isLoadingBuy ||
                 tokenAccountsData.isLoadingSell

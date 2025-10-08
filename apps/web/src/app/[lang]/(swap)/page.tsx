@@ -1,14 +1,14 @@
 import { Box, Hero, Text } from "@dex-web/ui";
 import type { SearchParams } from "nuqs/server";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
-import { LazySwapForm } from "../../_components/LazySwapForm";
 import { selectedTokensCache } from "../../_utils/searchParams";
-import { LazySwapTransactionHistory } from "./_components/LazySwapTransactionHistory";
+import { SwapForm } from "./_components/SwapForm";
+import { SwapTransactionHistory } from "./_components/SwapTransactionHistory";
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
   await selectedTokensCache.parse(searchParams);
 
@@ -39,8 +39,8 @@ export default async function Page({
           </Box>
           <div className="size-9" />
         </section>
-        <LazySwapForm />
-        <LazySwapTransactionHistory />
+        <SwapForm />
+        <SwapTransactionHistory />
       </div>
       <div className="hidden max-w-xs md:block">
         <FeaturesAndTrendingPoolPanel />

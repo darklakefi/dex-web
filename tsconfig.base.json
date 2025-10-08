@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
@@ -12,6 +13,19 @@
     "moduleDetection": "force",
     "moduleResolution": "bundler",
     "noUncheckedIndexedAccess": true,
+    "paths": {
+      "@dex-web/core": ["libs/core/src/index.ts"],
+      "@dex-web/db": ["libs/db/src/index.ts"],
+      "@dex-web/grpc-client": ["libs/grpc-client/src/index.ts"],
+      "@dex-web/liquidity-calculations": [
+        "libs/liquidity-calculations/src/index.ts"
+      ],
+      "@dex-web/orpc": ["libs/orpc/src/index.ts"],
+      "@dex-web/orpc/*": ["libs/orpc/src/*"],
+      "@dex-web/ui": ["libs/ui/src/index.ts"],
+      "@dex-web/utils": ["libs/utils/src/index.ts"],
+      "@dex-web/web": ["apps/web/src/index.ts"]
+    },
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,

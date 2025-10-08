@@ -6,10 +6,18 @@
   "tags": ["type:app", "scope:web", "platform:web"],
   "targets": {
     "build": {
+      "configurations": {
+        "development": {
+          "outputPath": "apps/web"
+        },
+        "production": {
+          "generateLockfile": true
+        }
+      },
       "defaultConfiguration": "production",
       "executor": "@nx/next:build",
       "options": {
-        "outputPath": "dist"
+        "outputPath": "dist/apps/web"
       },
       "outputs": ["{options.outputPath}"]
     },
@@ -17,17 +25,18 @@
     "serve": {
       "configurations": {
         "development": {
-          "buildTarget": "web:build:development",
-          "dev": true,
-          "turbo": true
+          "buildTarget": "web:build:development"
+        },
+        "production": {
+          "buildTarget": "web:build:production",
+          "dev": false
         }
       },
       "defaultConfiguration": "development",
       "executor": "@nx/next:server",
       "options": {
         "buildTarget": "web:build",
-        "dev": true,
-        "turbo": true
+        "dev": true
       }
     },
     "start": {

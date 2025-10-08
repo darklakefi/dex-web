@@ -24,12 +24,10 @@ const nextConfig = {
   logging: {
     fetches: {
       fullUrl: true,
-      hmrRefreshes: true,
     },
   },
-  nx: {
-    svgr: false,
-  },
+
+  output: "standalone",
   outputFileTracingRoot: join(__dirname, "../../"),
   serverExternalPackages: [
     "pg",
@@ -37,50 +35,73 @@ const nextConfig = {
     "@grpc/proto-loader",
     "@connectrpc/connect-node",
   ],
-  turbopack: {
-    rules: {
-      "*.svg": {
-        as: "*.js",
-        loaders: [
-          {
-            loader: "@svgr/webpack",
-            options: {
-              icon: true,
-              typescript: true,
-            },
-          },
-        ],
-      },
-    },
-  },
+  transpilePackages: ["@dex-web/ui"],
   typedRoutes: true,
   typescript: {
-    ignoreBuildErrors: true,
     tsconfigPath: "./tsconfig.lib.json",
   },
 
   webpack(config, { isServer }) {
-    config.cache = {
-      maxGenerations: 1,
-      type: "memory",
-    };
-
     config.infrastructureLogging = {
       debug: false,
       level: "warn",
       stream: process.stderr,
     };
 
-    const originalWarn = console.warn;
-    console.warn = (...args) => {
-      if (
-        args[0]?.includes?.("PackFileCacheStrategy") &&
-        args[0]?.includes?.("Serializing big strings")
-      ) {
-        return;
+    config.module.rules.unshift({
+      test: /\.svg$/,
+      use: [
+        {
+          loader: "@svgr/webpack",
+          options: {
+            exportType: "default",
+            svgo: true,
+            svgoConfig: {
+              plugins: [
+                {
+                  name: "preset-default",
+                  params: {
+                    overrides: {
+                      removeViewBox: false,
+                    },
+                  },
+                },
+              ],
+            },
+            titleProp: true,
+          },
+        },
+      ],
+    });
+
+    config.module.rules = config.module.rules.map((rule, index) => {
+      if (!rule || typeof rule !== "object") return rule;
+
+      if (index === 0) return rule;
+
+      if (rule.test instanceof RegExp && rule.test.test(".svg")) {
+        return { ...rule, exclude: /\.svg$/ };
       }
-      originalWarn(...args);
-    };
+
+      if (Array.isArray(rule.oneOf)) {
+        return {
+          ...rule,
+          oneOf: rule.oneOf.map((oneOfRule) => {
+            if (
+              oneOfRule &&
+              typeof oneOfRule === "object" &&
+              oneOfRule.test instanceof RegExp &&
+              oneOfRule.test.test(".svg")
+            ) {
+              return { ...oneOfRule, exclude: /\.svg$/ };
+            }
+            return oneOfRule;
+          }),
+        };
+      }
+
+      return rule;
+    });
 
     if (!isServer) {
       const webpack = require("webpack");
@@ -109,11 +130,6 @@ const nextConfig = {
         zlib: false,
       };
     }
-
-    config.module.rules.push({
-      test: /\.svg$/i,
-      use: ["@svgr/webpack"],
-    });
 
     return config;
   },

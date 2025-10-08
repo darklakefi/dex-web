@@ -3,15 +3,21 @@ import { vi } from "vitest";
 export const mockOrpc = () => {
   vi.mock("@dex-web/orpc", () => ({
     client: {
-      liquidity: {
-        checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
-          error: null,
-          status: "finalized",
+      dexGateway: {
+        addLiquidity: vi.fn().mockResolvedValue({
+          unsignedTransaction: "mock-transaction-base64",
         }),
-        createLiquidityTransaction: vi.fn().mockResolvedValue({
+        checkTradeStatus: vi.fn().mockResolvedValue({
+          status: 0,
+          tradeId: "mock-trade-id",
+        }),
+        submitSignedTransaction: vi.fn().mockResolvedValue({
+          errorLogs: [],
           success: true,
-          transaction: "mock-transaction",
+          tradeId: "mock-trade-id",
         }),
+      },
+      liquidity: {
         getAddLiquidityReview: vi.fn().mockResolvedValue({
           tokenAmount: 50,
         }),

@@ -1,22 +1,75 @@
+import { client } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
+import { sortSolanaAddresses } from "@dex-web/utils";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import type { PoolData } from "apps/web/src/hooks/usePoolData";
+import { queryKeys } from "apps/web/src/lib/queryKeys";
 import type { SearchParams } from "nuqs/server";
+import { Suspense } from "react";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
-import { LazyLiquidityForm } from "../../_components/LazyLiquidityForm";
+import { SkeletonForm } from "../../_components/SkeletonForm";
 import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
 import { liquidityPageCache } from "../../_utils/searchParams";
+import { CreatePoolForm } from "./_components/CreatePoolForm";
 import { GlobalLoadingIndicator } from "./_components/GlobalLoadingIndicator";
-import { LazyCreatePoolForm } from "./_components/LazyCreatePoolForm";
-import { LazyYourLiquidity } from "./_components/LazyYourLiquidity";
+import { LiquidityForm } from "./_components/LiquidityForm";
+import { YourLiquidity } from "./_components/YourLiquidity";
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
   const parsedSearchParams = await liquidityPageCache.parse(searchParams);
 
   const isCreatePoolMode =
     parsedSearchParams.type === LIQUIDITY_PAGE_TYPE.CREATE_POOL;
+
+  // Prefetch pool data for liquidity form
+  const queryClient = new QueryClient();
+  const { tokenAAddress, tokenBAddress } = parsedSearchParams;
+
+  if (tokenAAddress && tokenBAddress && !isCreatePoolMode) {
+    try {
+      const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+        tokenAAddress,
+        tokenBAddress,
+      );
+
+      await queryClient.prefetchQuery({
+        queryFn: async (): Promise<PoolData | null> => {
+          const result = await client.pools.getPoolReserves({
+            tokenXMint: tokenXAddress,
+            tokenYMint: tokenYAddress,
+          });
+
+          if (!result || !result.exists) {
+            return null;
+          }
+
+          return {
+            exists: result.exists,
+            lastUpdate: Date.now(),
+            lpMint: result.lpMint,
+            reserveX: result.reserveX,
+            reserveY: result.reserveY,
+            tokenXMint: tokenXAddress,
+            tokenYMint: tokenYAddress,
+            totalLpSupply: result.totalLpSupply,
+          };
+        },
+        queryKey: queryKeys.pools.reserves(tokenXAddress, tokenYAddress),
+      });
+    } catch (error) {
+      console.error("Failed to prefetch pool reserves", error);
+    }
+  }
+
+  const dehydratedState = dehydrate(queryClient);
 
   return (
     <>
@@ -48,14 +101,15 @@ export default async function Page({
             <div className="size-9" />
           </section>
           {isCreatePoolMode ? (
-            <LazyCreatePoolForm />
+            <CreatePoolForm />
           ) : (
-            <LazyLiquidityForm
-              tokenAAddress={parsedSearchParams.tokenAAddress}
-              tokenBAddress={parsedSearchParams.tokenBAddress}
-            />
+            <HydrationBoundary state={dehydratedState}>
+              <Suspense fallback={<SkeletonForm type="liquidity" />}>
+                <LiquidityForm />
+              </Suspense>
+            </HydrationBoundary>
           )}
-          <LazyYourLiquidity
+          <YourLiquidity
             tokenAAddress={parsedSearchParams.tokenAAddress}
             tokenBAddress={parsedSearchParams.tokenBAddress}
           />

@@ -77,15 +77,21 @@ vi.mock("../../../_components/SkeletonTokenInput", () => ({
 
 vi.mock("@dex-web/orpc", () => ({
   client: {
-    liquidity: {
-      checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
-        error: null,
-        status: "finalized",
+    dexGateway: {
+      addLiquidity: vi.fn().mockResolvedValue({
+        unsignedTransaction: "mock-transaction-base64",
       }),
-      createLiquidityTransaction: vi.fn().mockResolvedValue({
+      checkTradeStatus: vi.fn().mockResolvedValue({
+        status: 0,
+        tradeId: "mock-trade-id",
+      }),
+      submitSignedTransaction: vi.fn().mockResolvedValue({
+        errorLogs: [],
         success: true,
-        transaction: "mock-transaction",
+        tradeId: "mock-trade-id",
       }),
+    },
+    liquidity: {
       getAddLiquidityReview: vi.fn().mockResolvedValue({
         tokenAmount: 50,
       }),
@@ -872,6 +878,51 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       expect(mockPush).toHaveBeenCalledWith(
         expect.stringContaining("liquidity"),
       );
+    });
+
+    it("should show pool not found message when pool does not exist", async () => {
+      // Mock useLiquidityFormLogic to return null poolDetails
+      vi.doMock("../../_hooks/useLiquidityFormLogic", () => ({
+        useLiquidityFormLogic: vi.fn(() => ({
+          debouncedCalculateTokenAmounts: vi.fn(),
+          form: {
+            handleSubmit: vi.fn(),
+            setFieldValue: vi.fn(),
+            state: {
+              values: {
+                initialPrice: "1",
+                tokenAAmount: "0",
+                tokenBAmount: "0",
+              },
+            },
+          }, // No pool exists
+          isCalculating: false,
+          poolDetails: null,
+          publicKey: mockWallet.publicKey,
+          setSlippage: vi.fn(),
+          slippage: "0.5",
+          tokenAccountsData: {
+            buyTokenAccount: null,
+            isLoadingBuy: false,
+            isLoadingSell: false,
+            sellTokenAccount: null,
+          },
+        })),
+      }));
+
+      renderWithWrapper();
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("No pool exists for the selected token pair."),
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            "You need to create a pool before you can add liquidity.",
+          ),
+        ).toBeInTheDocument();
+        expect(screen.getByText("Create Pool")).toBeInTheDocument();
+      });
     });
   });
 });

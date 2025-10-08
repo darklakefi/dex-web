@@ -18,7 +18,7 @@ import {
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import Decimal from "decimal.js";
 import Link from "next/link";
 import { useState } from "react";
@@ -93,7 +93,6 @@ export function WithdrawLiquidityModal({
   tokenYDetails,
 }: WithdrawLiquidityModalProps) {
   const { publicKey, signTransaction, wallet } = useWallet();
-  const _queryClient = useQueryClient();
   const submitWithdrawalMutation = useSubmitWithdrawal();
   const [withdrawalCalculations, setWithdrawalCalculations] = useState({
     percentage: 0,

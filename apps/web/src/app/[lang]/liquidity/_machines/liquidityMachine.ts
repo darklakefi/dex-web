@@ -17,7 +17,7 @@ export interface LiquidityMachineContext {
 }
 
 export type LiquidityMachineEvent =
-  | { type: "UPDATE_POOL_DETAILS"; data: PoolDetails | null }
+  | { type: "POOL_DATA_UPDATED"; data: PoolDetails }
   | {
       type: "UPDATE_TOKEN_ACCOUNTS";
       buyAccount: TokenAccountsData | null;
@@ -39,6 +39,16 @@ export const liquidityMachine = setup({
       async ({ input: _input }: { input: LiquidityFormValues }) => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         return { result: "calculated" };
+      },
+    ),
+    submitLiquidity: fromPromise(
+      async ({
+        input,
+      }: {
+        input: { values: LiquidityFormValues; poolDetails: PoolDetails | null };
+      }) => {
+        // This will be overridden at runtime
+        return { result: "submitted" };
       },
     ),
     submitTransaction: fromPromise(
@@ -64,44 +74,8 @@ export const liquidityMachine = setup({
     transactionSignature: null,
   } as LiquidityMachineContext,
   id: "liquidity",
-  initial: "idle",
+  initial: "loadingInitialData",
   states: {
-    calculating: {
-      invoke: {
-        input: ({ context }) =>
-          context.formData || {
-            initialPrice: "0",
-            tokenAAmount: "0",
-            tokenBAmount: "0",
-          },
-        onDone: {
-          actions: assign({
-            error: null,
-            isCalculating: false,
-          }),
-          target: "idle",
-        },
-        onError: {
-          actions: assign({
-            error: ({ event }) => String(event.error),
-            isCalculating: false,
-          }),
-          target: "error",
-        },
-        src: "calculateLiquidity",
-      },
-      on: {
-        FINISH_CALCULATION: {
-          actions: assign({
-            isCalculating: false,
-          }),
-          target: "idle",
-        },
-        SUBMIT: {
-          target: "submitting",
-        },
-      },
-    },
     error: {
       on: {
         RESET: {
@@ -111,32 +85,27 @@ export const liquidityMachine = setup({
             liquidityStep: 0,
             transactionSignature: null,
           }),
-          target: "idle",
+          target: "ready.idle",
         },
         RETRY: {
           target: "submitting",
         },
       },
     },
-    idle: {
+    loadingInitialData: {
       on: {
-        CALCULATE: {
+        POOL_DATA_UPDATED: {
           actions: assign({
-            formData: ({ event }) => event.data,
-            isCalculating: true,
+            poolDetails: ({ event }) => event.data,
           }),
-          target: "calculating",
+          target: "ready",
         },
-        START_CALCULATION: {
-          actions: assign({
-            isCalculating: true,
-          }),
-          target: "calculating",
-        },
-        SUBMIT: {
-          target: "submitting",
-        },
-        UPDATE_POOL_DETAILS: {
+      },
+    },
+    ready: {
+      initial: "idle",
+      on: {
+        POOL_DATA_UPDATED: {
           actions: assign({
             poolDetails: ({ event }) => event.data,
           }),
@@ -146,6 +115,64 @@ export const liquidityMachine = setup({
             buyTokenAccount: ({ event }) => event.buyAccount,
             sellTokenAccount: ({ event }) => event.sellAccount,
           }),
+        },
+      },
+      states: {
+        calculating: {
+          invoke: {
+            input: ({ context }) =>
+              context.formData || {
+                initialPrice: "0",
+                tokenAAmount: "0",
+                tokenBAmount: "0",
+              },
+            onDone: {
+              actions: assign({
+                error: null,
+                isCalculating: false,
+              }),
+              target: "idle",
+            },
+            onError: {
+              actions: assign({
+                error: ({ event }) => String(event.error),
+                isCalculating: false,
+              }),
+              target: "#liquidity.error",
+            },
+            src: "calculateLiquidity",
+          },
+          on: {
+            FINISH_CALCULATION: {
+              actions: assign({
+                isCalculating: false,
+              }),
+              target: "idle",
+            },
+            SUBMIT: {
+              target: "#liquidity.submitting",
+            },
+          },
+        },
+        idle: {
+          on: {
+            CALCULATE: {
+              actions: assign({
+                formData: ({ event }) => event.data,
+                isCalculating: true,
+              }),
+              target: "calculating",
+            },
+            START_CALCULATION: {
+              actions: assign({
+                isCalculating: true,
+              }),
+              target: "calculating",
+            },
+            SUBMIT: {
+              target: "#liquidity.submitting",
+            },
+          },
         },
       },
     },
@@ -175,21 +202,22 @@ export const liquidityMachine = setup({
         error: null,
         liquidityStep: 1,
       }),
-      on: {
-        ERROR: {
+      invoke: {
+        input: ({ context, event }) => ({
+          poolDetails: context.poolDetails,
+          values: (event as { data: LiquidityFormValues }).data,
+        }),
+        onDone: {
+          target: "success",
+        },
+        onError: {
           actions: assign({
             error: ({ event }) => event.error,
             liquidityStep: 0,
           }),
           target: "error",
         },
-        SIGN_TRANSACTION: {
-          actions: assign({
-            liquidityStep: 2,
-            transactionSignature: ({ event }) => event.signature,
-          }),
-          target: "signing",
-        },
+        src: "submitLiquidity",
       },
     },
     success: {
@@ -201,7 +229,7 @@ export const liquidityMachine = setup({
             liquidityStep: 0,
             transactionSignature: null,
           }),
-          target: "idle",
+          target: "ready.idle",
         },
       },
     },
@@ -211,8 +239,10 @@ export const liquidityMachine = setup({
 export type LiquidityMachine = typeof liquidityMachine;
 
 export type LiquidityState =
-  | "idle"
-  | "calculating"
+  | "loadingInitialData"
+  | "ready"
+  | "ready.idle"
+  | "ready.calculating"
   | "submitting"
   | "signing"
   | "success"
@@ -220,8 +250,10 @@ export type LiquidityState =
 
 export const isLiquidityState = (state: string): state is LiquidityState => {
   return [
-    "idle",
-    "calculating",
+    "loadingInitialData",
+    "ready",
+    "ready.idle",
+    "ready.calculating",
     "submitting",
     "signing",
     "success",

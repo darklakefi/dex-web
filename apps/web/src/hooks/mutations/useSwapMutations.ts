@@ -1,5 +1,6 @@
 "use client";
 
+import type { SendSignedTransactionRequest } from "@dex-web/grpc-client";
 import { client } from "@dex-web/orpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -12,12 +13,12 @@ export function useSubmitSignedTransaction() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (variables: any) =>
+    mutationFn: (variables: SendSignedTransactionRequest) =>
       client.dexGateway.submitSignedTransaction(variables),
     onError: (error: unknown) => {
       handleMutationError(error, "Failed to submit transaction");
     },
-    onSuccess: (_data: unknown, _variables: any) => {
+    onSuccess: (_data: unknown, _variables: SendSignedTransactionRequest) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.pools.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all });
       handleMutationSuccess("Transaction submitted successfully");

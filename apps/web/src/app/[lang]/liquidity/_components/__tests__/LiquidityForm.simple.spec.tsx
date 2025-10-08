@@ -57,10 +57,9 @@ vi.mock("../_hooks/useLiquidityCalculationWorker", () => ({
 
 vi.mock("@dex-web/orpc", () => ({
   client: {
-    liquidity: {
-      createLiquidityTransaction: vi.fn().mockResolvedValue({
-        success: true,
-        transaction: "mock-transaction",
+    dexGateway: {
+      addLiquidity: vi.fn().mockResolvedValue({
+        unsignedTransaction: "mock-transaction-base64",
       }),
     },
   },

@@ -18,7 +18,8 @@ class RateLimiterService {
   }
   private cleanup(): void {
     const now = Date.now();
-    for (const [key, entry] of this.limits.entries()) {
+    const entries = Array.from(this.limits.entries());
+    for (const [key, entry] of entries) {
       if (now > entry.resetTime) {
         this.limits.delete(key);
       }

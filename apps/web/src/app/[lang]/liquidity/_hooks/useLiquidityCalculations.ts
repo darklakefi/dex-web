@@ -3,6 +3,13 @@
 import { client } from "@dex-web/orpc";
 import { parseAmount, parseAmountBigNumber } from "@dex-web/utils";
 import { useCallback, useRef, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
+
+type PoolDataLike = {
+  readonly reserveX: number;
+  readonly reserveY: number;
+  readonly tokenXMint: string;
+} | null;
 
 export interface CalculationParams {
   inputAmount: string;
@@ -103,4 +110,54 @@ export function useLiquidityCalculations() {
     calculate,
     clearCalculations,
   };
+}
+
+export function useLiquidityAmountDebouncer(
+  poolData: PoolDataLike,
+  delayMs: number,
+) {
+  const calculateImmediate = useCallback(
+    ({
+      inputAmount,
+      editedToken,
+      tokenAAddress,
+      tokenBAddress,
+    }: {
+      inputAmount: string;
+      editedToken: "tokenA" | "tokenB";
+      tokenAAddress: string | null;
+      tokenBAddress: string | null;
+    }): number | null => {
+      if (!poolData || parseAmountBigNumber(inputAmount).lte(0)) return null;
+      const reserveX = poolData.reserveX;
+      const reserveY = poolData.reserveY;
+      if (reserveX <= 0 || reserveY <= 0) return null;
+      const editedTokenAddress =
+        editedToken === "tokenA" ? tokenAAddress : tokenBAddress;
+      const isEditedTokenX = poolData.tokenXMint === editedTokenAddress;
+      const amountNumber = Number(inputAmount);
+      return isEditedTokenX
+        ? (amountNumber * reserveY) / reserveX
+        : (amountNumber * reserveX) / reserveY;
+    },
+    [poolData],
+  );
+
+  const debouncedCalculateTokenAmounts = useDebouncedCallback(
+    (
+      params: {
+        inputAmount: string;
+        editedToken: "tokenA" | "tokenB";
+        tokenAAddress: string | null;
+        tokenBAddress: string | null;
+      },
+      onResult: (outputAmount: number | null) => void,
+    ) => {
+      const result = calculateImmediate(params);
+      onResult(result);
+    },
+    delayMs,
+  );
+
+  return { calculateImmediate, debouncedCalculateTokenAmounts } as const;
 }

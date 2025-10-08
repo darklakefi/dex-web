@@ -65,10 +65,7 @@ export async function getPoolAccount(
 }
 
 export async function getPoolPubkey(tokenA: string, tokenB: string) {
-  const { tokenXAddress, tokenYAddress } = await sortSolanaAddresses(
-    tokenA,
-    tokenB,
-  );
+  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(tokenA, tokenB);
 
   const [ammConfigPubkey] = PublicKey.findProgramAddressSync(
     [Buffer.from("amm_config"), new BN(0).toArrayLike(Buffer, "le", 4)],

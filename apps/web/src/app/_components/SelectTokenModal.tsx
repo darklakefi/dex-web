@@ -74,7 +74,7 @@ export function SelectTokenModal({
   const handleClose = () => {
     const from = searchParams.get("from");
     if (from) {
-      router.replace(from);
+      router.replace(from as never);
       return;
     }
     router.back();
@@ -122,7 +122,7 @@ export function SelectTokenModal({
         tokenBAddress: sellAddress,
       });
 
-      router.push(urlWithParams);
+      router.push(urlWithParams as never);
     } else {
       const buyAddress =
         selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
@@ -132,7 +132,7 @@ export function SelectTokenModal({
         tokenBAddress: selectedTokenAddress,
       });
 
-      router.push(urlWithParams);
+      router.push(urlWithParams as never);
     }
   };
 

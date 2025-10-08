@@ -110,7 +110,7 @@ export function calculateLiquidityAmounts(
 ): LiquidityAmountsResult {
   const { tokenAAmount, tokenBAmount } = tokenAmounts;
   const { tokenAAddress, tokenBAddress } = tokenAddresses;
-  const { tokenXMint, tokenYMint } = poolDetails;
+  const { tokenXMint } = poolDetails;
 
   const parsedAmountA = parseAmount(tokenAAmount);
   const parsedAmountB = parseAmount(tokenBAmount);
@@ -219,7 +219,7 @@ export function determineInputType(
     return "tokenY";
   }
 
-  const { tokenXMint, tokenYMint } = poolDetails;
+  const { tokenXMint } = poolDetails;
 
   // For sell: if tokenB matches tokenXMint, return tokenX
   if (action === "sell" && tokenBAddress === tokenXMint) {

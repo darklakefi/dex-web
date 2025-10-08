@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "declarationDir": "./dist/types",
+    "composite": true,
     "incremental": true,
     "jsx": "preserve",
     "noEmit": false,
@@ -22,6 +22,9 @@
   ],
   "extends": "./tsconfig.json",
   "include": [
+    "../../types/**/*.d.ts",
+    "../../types/svg.d.ts",
+    ".next/types/**/*.ts",
     "next-env.d.ts",
     "src/**/*.cts",
     "src/**/*.js",
@@ -29,7 +32,11 @@
     "src/**/*.mts",
     "src/**/*.ts",
     "src/**/*.tsx",
-    ".next/types/**/*.ts"
+    "../../dist/apps/web/.next/types/**/*.ts"
   ],
-  "references": []
+  "references": [
+    {
+      "path": "../../libs/ui/tsconfig.lib.json"
+    }
+  ]
 }

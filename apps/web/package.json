@@ -1,21 +1,13 @@
 {
   "dependencies": {
-    "@sentry/nextjs": "^10.3.0",
-    "@vercel/functions": "^2.2.8",
-    "posthog-js": "^1.259.0"
-  },
-  "devDependencies": {
     "@dex-web/core": "workspace:*",
     "@dex-web/grpc-client": "workspace:*",
     "@dex-web/orpc": "workspace:*",
     "@dex-web/ui": "workspace:*",
-    "@dex-web/utils": "workspace:*"
-  },
-  "exports": {
-    ".": {
-      "import": "./src/index.js",
-      "types": "./scr/index.d.ts"
-    }
+    "@dex-web/utils": "workspace:*",
+    "@sentry/nextjs": "^10.3.0",
+    "@vercel/functions": "^2.2.8",
+    "posthog-js": "^1.259.0"
   },
   "name": "@dex-web/web",
   "private": true,

@@ -89,11 +89,7 @@ export const config = mergeConfig(baseConfig, {
       tsconfigPath: join(__dirname, "tsconfig.lib.json"),
     }),
   ],
-  resolve: {
-    alias: {
-      "*.svg": "*.svg?react",
-    },
-  },
+  resolve: {},
 });
 
 export default defineConfig(({ mode }) => {

@@ -109,13 +109,17 @@ vi.mock("@dex-web/core", () => ({
     showSuccessToast: vi.fn(),
   }),
 }));
-const mockCreateTransaction = vi.fn();
+const mockAddLiquidity = vi.fn();
 const mockCheckStatus = vi.fn();
+const mockSubmitSignedTransaction = vi.fn();
 vi.mock("@dex-web/orpc", () => ({
   client: {
+    dexGateway: {
+      addLiquidity: mockAddLiquidity,
+      checkTradeStatus: mockCheckStatus,
+      submitSignedTransaction: mockSubmitSignedTransaction,
+    },
     liquidity: {
-      checkLiquidityTransactionStatus: mockCheckStatus,
-      createLiquidityTransaction: mockCreateTransaction,
       getAddLiquidityReview: vi.fn().mockResolvedValue({ tokenAmount: 50 }),
     },
     pools: {
@@ -190,13 +194,12 @@ describe.skip("LiquidityFlow Integration Tests", () => {
     user = userEvent.setup();
     vi.clearAllMocks();
     mockSignTransaction.mockResolvedValue({});
-    mockCreateTransaction.mockResolvedValue({
-      success: true,
-      transaction: "mock-unsigned-transaction",
+    mockAddLiquidity.mockResolvedValue({
+      unsignedTransaction: "mock-unsigned-transaction",
     });
     mockCheckStatus.mockResolvedValue({
-      error: null,
-      status: "finalized",
+      status: 0,
+      tradeId: "mock-trade-id",
     });
   });
   afterEach(() => {
@@ -217,14 +220,14 @@ describe.skip("LiquidityFlow Integration Tests", () => {
       });
       const submitButton = screen.getByText("Add Liquidity");
       await user.click(submitButton);
-      expect(mockCreateTransaction).toHaveBeenCalledWith(
+      expect(mockAddLiquidity).toHaveBeenCalledWith(
         expect.objectContaining({
-          maxAmountX: expect.any(Number),
-          maxAmountY: expect.any(Number),
-          slippage: 0.5,
-          tokenXMint: expect.any(String),
-          tokenYMint: expect.any(String),
-          user: mockWallet.publicKey.toBase58(),
+          amountLp: expect.any(BigInt),
+          maxAmountX: expect.any(BigInt),
+          maxAmountY: expect.any(BigInt),
+          tokenMintX: expect.any(String),
+          tokenMintY: expect.any(String),
+          userAddress: mockWallet.publicKey.toBase58(),
         }),
       );
       expect(mockSignTransaction).toHaveBeenCalledWith(
@@ -281,7 +284,7 @@ describe.skip("LiquidityFlow Integration Tests", () => {
   });
   describe("Error Handling Flow", () => {
     it("should handle transaction creation failure", async () => {
-      mockCreateTransaction.mockRejectedValue(new Error("Network error"));
+      mockAddLiquidity.mockRejectedValue(new Error("Network error"));
       renderLiquidityForm();
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
@@ -328,8 +331,8 @@ describe.skip("LiquidityFlow Integration Tests", () => {
     });
     it("should handle transaction status failure", async () => {
       mockCheckStatus.mockResolvedValue({
-        error: "Transaction failed on chain",
-        status: "failed",
+        status: 2,
+        tradeId: "mock-trade-id",
       });
       renderLiquidityForm();
       await waitFor(() => {
@@ -412,17 +415,18 @@ describe.skip("LiquidityFlow Integration Tests", () => {
       });
       const submitButton = screen.getByText("Add Liquidity");
       await user.click(submitButton);
-      expect(mockCreateTransaction).toHaveBeenCalledWith(
+      expect(mockAddLiquidity).toHaveBeenCalledWith(
         expect.objectContaining({
-          maxAmountX: expect.any(Number),
-          maxAmountY: expect.any(Number),
+          amountLp: expect.any(BigInt),
+          maxAmountX: expect.any(BigInt),
+          maxAmountY: expect.any(BigInt),
         }),
       );
     });
   });
   describe("State Persistence Flow", () => {
     it("should maintain form state during error recovery", async () => {
-      mockCreateTransaction.mockRejectedValue(new Error("Network error"));
+      mockAddLiquidity.mockRejectedValue(new Error("Network error"));
       renderLiquidityForm();
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
@@ -437,16 +441,15 @@ describe.skip("LiquidityFlow Integration Tests", () => {
       });
       expect(amountInputs[0]).toHaveValue("0.5");
       expect(amountInputs[1]).toHaveValue("500");
-      mockCreateTransaction.mockResolvedValue({
-        success: true,
-        transaction: "mock-transaction",
+      mockAddLiquidity.mockResolvedValue({
+        unsignedTransaction: "mock-transaction",
       });
       const retryButton = screen.getByText("Retry");
       await user.click(retryButton);
-      expect(mockCreateTransaction).toHaveBeenLastCalledWith(
+      expect(mockAddLiquidity).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          maxAmountX: 500,
-          maxAmountY: 0.5,
+          maxAmountX: expect.any(BigInt),
+          maxAmountY: expect.any(BigInt),
         }),
       );
     });

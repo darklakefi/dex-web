@@ -62,7 +62,7 @@ export async function addLiquidityHandler(
           message: "Insufficient liquidity for this operation",
         });
       }
-      if (error.message.includes("pool not found")) {
+      if (error.message.toLowerCase().includes("pool not found")) {
         throw new ORPCError("POOL_NOT_FOUND", {
           data: {
             tokenX: input.tokenMintX,

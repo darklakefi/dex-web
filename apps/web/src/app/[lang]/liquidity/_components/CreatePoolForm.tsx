@@ -20,7 +20,7 @@ import {
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -33,6 +33,7 @@ import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { WalletButton } from "../../../_components/WalletButton";
 import { EMPTY_TOKEN, LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
+import { generateTrackingId } from "../../../_utils/generateTrackingId";
 import { isSquadsX } from "../../../_utils/isSquadsX";
 import {
   liquidityPageParsers,
@@ -40,7 +41,6 @@ import {
 } from "../../../_utils/searchParams";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getCreatePoolFormButtonMessage } from "../_utils/getCreatePoolFormButtonMessage";
-import { invalidateLiquidityQueries } from "../_utils/invalidateLiquidityCache";
 import { requestCreatePoolTransactionSigning } from "../_utils/requestCreatePoolTransactionSigning";
 import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
 
@@ -67,7 +67,6 @@ const serialize = createSerializer(liquidityPageParsers);
 
 export function CreatePoolForm() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { publicKey, wallet, signTransaction } = useWallet();
   const { trackLiquidity, trackError } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -159,14 +158,18 @@ export function CreatePoolForm() {
   });
 
   const statusChecker = useTransactionStatus({
-    checkStatus: async (signature: string) => {
-      const response = await client.liquidity.checkLiquidityTransactionStatus({
-        signature,
+    checkStatus: async (currentTrackingId: string, tradeId?: string) => {
+      if (!tradeId) {
+        throw new Error("Trade ID is required");
+      }
+      const response = await client.dexGateway.checkTradeStatus({
+        trackingId: currentTrackingId,
+        tradeId,
       });
       return {
         data: response,
-        error: response.error,
-        status: response.status,
+        error: undefined,
+        status: response.status === 0 ? "finalized" : "pending",
       };
     },
     failStates: ["failed"],
@@ -238,20 +241,6 @@ export function CreatePoolForm() {
       toasts.showSuccessToast(successMessage);
       refetchBuyTokenAccount();
       refetchSellTokenAccount();
-
-      const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
-        tokenAAddress,
-        tokenBAddress,
-      );
-
-      invalidateLiquidityQueries({
-        queryClient,
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
-        walletPublicKey: publicKey?.toBase58() || "",
-      }).catch((error) => {
-        console.error("Cache invalidation failed:", error);
-      });
 
       const urlWithParams = serialize("liquidity", {
         tokenAAddress,
@@ -386,6 +375,8 @@ export function CreatePoolForm() {
       } satisfies CreatePoolTransactionInput);
 
       if (response.success && response.transaction) {
+        const newTrackingId = generateTrackingId();
+
         trackSigned({
           action: "add",
           amountA: tokenAAmount,
@@ -400,6 +391,7 @@ export function CreatePoolForm() {
           setCreateStep: createState.setStep,
           showCreatePoolStepToast,
           signTransaction,
+          trackingId: newTrackingId,
           unsignedTransaction: response.transaction,
         });
       } else {
@@ -414,8 +406,11 @@ export function CreatePoolForm() {
     }
   };
 
-  const checkTransactionStatus = async (signature: string) => {
-    await statusChecker.checkTransactionStatus(signature);
+  const checkTransactionStatus = async (
+    tradeId: string,
+    currentTrackingId: string,
+  ) => {
+    await statusChecker.checkTransactionStatus(currentTrackingId, tradeId);
   };
 
   const handleInitialPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -44,7 +44,15 @@ export function usePoolData({
   return useQuery({
     gcTime: 5 * 60 * 1000,
     queryFn: async (): Promise<PoolData | null> => {
+      console.log("🔍 Fetching pool data:", { tokenXMint, tokenYMint });
       const result = await client.pools.getPoolReserves({
+        tokenXMint,
+        tokenYMint,
+      });
+
+      console.log("📊 Pool reserves result:", {
+        exists: result?.exists,
+        result,
         tokenXMint,
         tokenYMint,
       });

@@ -4,9 +4,10 @@ import {
   signTransactionWithRecovery,
 } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
-import {
-  type PublicKey,
-  type Transaction,
+import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
+import type {
+  PublicKey,
+  Transaction,
   VersionedTransaction,
 } from "@solana/web3.js";
 import { dismissToast, toast } from "../../../_utils/toast";
@@ -20,13 +21,18 @@ interface RequestLiquidityTransactionSigningProps {
     | undefined;
   setLiquidityStep: (step: number) => void;
   unsignedTransaction: string;
-  checkLiquidityTransactionStatus: (signature: string) => Promise<void>;
+  trackingId: string;
+  checkLiquidityTransactionStatus: (
+    tradeId: string,
+    trackingId: string,
+  ) => Promise<void>;
 }
 export async function requestLiquidityTransactionSigning({
   publicKey,
   signTransaction,
   setLiquidityStep,
   unsignedTransaction,
+  trackingId,
   checkLiquidityTransactionStatus,
 }: RequestLiquidityTransactionSigningProps) {
   try {
@@ -42,13 +48,7 @@ export async function requestLiquidityTransactionSigning({
       variant: "loading",
     });
 
-    const unsignedTransactionBuffer = Buffer.from(
-      unsignedTransaction,
-      "base64",
-    );
-    const transaction = VersionedTransaction.deserialize(
-      unsignedTransactionBuffer,
-    );
+    const transaction = deserializeVersionedTransaction(unsignedTransaction);
 
     const signedTransaction = await signTransactionWithRecovery(
       transaction,
@@ -58,9 +58,11 @@ export async function requestLiquidityTransactionSigning({
       signedTransaction.serialize(),
     ).toString("base64");
 
-    const signedTxRequest = {
-      signed_transaction: signedTransactionBase64,
-    };
+    const signature = signedTransaction.signatures[0];
+    if (!signature) {
+      throw new Error("Transaction signature is missing");
+    }
+    const tradeId = Buffer.from(signature).toString("base64");
 
     setLiquidityStep(3);
     toast({
@@ -69,16 +71,25 @@ export async function requestLiquidityTransactionSigning({
       variant: "loading",
     });
 
-    const liquidityTxResponse =
-      await client.liquidity.submitLiquidityTransaction(signedTxRequest);
+    const liquidityTxResponse = await client.dexGateway.submitSignedTransaction(
+      {
+        signedTransaction: signedTransactionBase64,
+        trackingId,
+        tradeId,
+      },
+    );
 
-    if (liquidityTxResponse.success && liquidityTxResponse.signature) {
-      checkLiquidityTransactionStatus(liquidityTxResponse.signature);
+    if (liquidityTxResponse.success) {
+      checkLiquidityTransactionStatus(tradeId, trackingId);
     } else {
-      const errorMessage =
-        liquidityTxResponse.error_logs || "Unknown error occurred";
+      const errorLogs = liquidityTxResponse.errorLogs;
+      const errorMessage = Array.isArray(errorLogs)
+        ? errorLogs.join(", ")
+        : typeof errorLogs === "string"
+          ? errorLogs
+          : "Unknown error occurred";
       console.error("Liquidity transaction submission failed:", {
-        error_logs: liquidityTxResponse.error_logs,
+        errorLogs: liquidityTxResponse.errorLogs,
         success: liquidityTxResponse.success,
       });
       throw new Error(`Liquidity transaction failed: ${errorMessage}`);
