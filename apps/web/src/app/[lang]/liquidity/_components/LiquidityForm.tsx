@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Icon, Text } from "@dex-web/ui";
+import { Box, Icon } from "@dex-web/ui";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
@@ -88,26 +88,6 @@ export function LiquidityForm() {
     );
   }
 
-  if (!poolDetails) {
-    return (
-      <LiquidityErrorBoundary>
-        <Box padding="lg">
-          <div className="flex flex-col gap-4">
-            <Text className="text-center text-muted-foreground">
-              No pool exists for the selected token pair.
-            </Text>
-            <Text className="text-center text-muted-foreground text-sm">
-              You need to create a pool before you can add liquidity.
-            </Text>
-            <Button className="w-full" onClick={handleCreatePoolClick}>
-              Create Pool
-            </Button>
-          </div>
-        </Box>
-      </LiquidityErrorBoundary>
-    );
-  }
-
   return (
     <LiquidityErrorBoundary>
       <section className="flex w-full max-w-xl items-start gap-1">
@@ -139,7 +119,8 @@ export function LiquidityForm() {
                 tokenAccountsData.isLoadingBuy ||
                 tokenAccountsData.isLoadingSell
               }
-              onSubmit={() => {
+              onSubmit={(e) => {
+                e?.preventDefault();
                 form.handleSubmit();
               }}
               poolDetails={poolDetails}

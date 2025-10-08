@@ -2,11 +2,9 @@
 
 import {
   ERROR_MESSAGES,
-  isWarningMessage,
   useLiquidityTracking,
   useTokenAccounts,
   useTransactionState,
-  useTransactionStatus,
   useTransactionToasts,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
@@ -129,7 +127,7 @@ export function CreatePoolForm() {
   const tokenADetails = metadata[tokenXMint];
   const tokenBDetails = metadata[tokenYMint];
 
-  const { trackSigned, trackConfirmed, trackFailed } = useLiquidityTracking({
+  const { trackSigned, trackConfirmed } = useLiquidityTracking({
     trackError: (error: unknown, context?: Record<string, unknown>) => {
       trackError({
         context: "liquidity",
@@ -155,108 +153,6 @@ export function CreatePoolForm() {
     isSquadsX: isSquadsX(wallet),
     toast,
     transactionType: "POOL_CREATION",
-  });
-
-  const statusChecker = useTransactionStatus({
-    checkStatus: async (currentTrackingId: string, tradeId?: string) => {
-      if (!tradeId) {
-        throw new Error("Trade ID is required");
-      }
-      const response = await client.dexGateway.checkTradeStatus({
-        trackingId: currentTrackingId,
-        tradeId,
-      });
-      return {
-        data: response,
-        error: undefined,
-        status: response.status === 0 ? "finalized" : "pending",
-      };
-    },
-    failStates: ["failed"],
-    maxAttempts: 15,
-    onFailure: (result) => {
-      createState.reset();
-      toasts.dismiss();
-      const error = new Error(result.error || "Unknown error");
-      const isWarning = isWarningMessage(error);
-      if (isWarning) {
-        toasts.showInfoToast(
-          `Transaction status: ${result.error || "Unknown error"}`,
-        );
-      } else {
-        toasts.showErrorToast(
-          `Transaction failed: ${result.error || "Unknown error"}`,
-        );
-      }
-    },
-    onStatusUpdate: (status, attempt) => {
-      toasts.dismiss();
-      toasts.showStatusToast(
-        `Finalizing transaction... (${attempt}/15) - ${status}`,
-      );
-    },
-    onSuccess: (result) => {
-      toasts.dismiss();
-      if (result.error) {
-        createState.reset();
-        const error = new Error(result.error);
-        const isWarning = isWarningMessage(error);
-        if (isWarning) {
-          toasts.showInfoToast(`Transaction status: ${result.error}`);
-        } else {
-          toasts.showErrorToast(`Transaction failed: ${result.error}`);
-        }
-
-        const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
-        const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
-        trackFailed({
-          action: "add",
-          amountA: tokenAAmount,
-          amountB: tokenBAmount,
-          tokenA: tokenAAddress || "",
-          tokenB: tokenBAddress || "",
-          transactionHash: "",
-        });
-        return;
-      }
-
-      createState.reset();
-      form.reset();
-      const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
-      const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
-
-      trackConfirmed({
-        action: "add",
-        amountA: tokenAAmount,
-        amountB: tokenBAmount,
-        tokenA: tokenAAddress || "",
-        tokenB: tokenBAddress || "",
-        transactionHash: "",
-      });
-
-      const successMessage = !isSquadsX(wallet)
-        ? `CREATED POOL: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
-        : undefined;
-
-      toasts.showSuccessToast(successMessage);
-      refetchBuyTokenAccount();
-      refetchSellTokenAccount();
-
-      const urlWithParams = serialize("liquidity", {
-        tokenAAddress,
-        tokenBAddress,
-        type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
-      });
-      router.push(`/${urlWithParams}`);
-    },
-    onTimeout: () => {
-      createState.reset();
-      toasts.showErrorToast(
-        "Transaction may still be processing. Check explorer for status.",
-      );
-    },
-    retryDelay: 2000,
-    successStates: ["finalized"],
   });
 
   const formConfig = {
@@ -386,7 +282,34 @@ export function CreatePoolForm() {
         });
 
         requestCreatePoolTransactionSigning({
-          checkTransactionStatus,
+          onSuccess: () => {
+            createState.reset();
+            form.reset();
+
+            trackConfirmed({
+              action: "add",
+              amountA: tokenAAmount,
+              amountB: tokenBAmount,
+              tokenA: tokenAAddress || "",
+              tokenB: tokenBAddress || "",
+              transactionHash: newTrackingId,
+            });
+
+            const successMessage = !isSquadsX(wallet)
+              ? `CREATED POOL: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
+              : undefined;
+
+            toasts.showSuccessToast(successMessage);
+            refetchBuyTokenAccount();
+            refetchSellTokenAccount();
+
+            const urlWithParams = serialize("liquidity", {
+              tokenAAddress,
+              tokenBAddress,
+              type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
+            });
+            router.push(`/${urlWithParams}`);
+          },
           publicKey,
           setCreateStep: createState.setStep,
           showCreatePoolStepToast,
@@ -404,13 +327,6 @@ export function CreatePoolForm() {
       );
       createState.reset();
     }
-  };
-
-  const checkTransactionStatus = async (
-    tradeId: string,
-    currentTrackingId: string,
-  ) => {
-    await statusChecker.checkTransactionStatus(currentTrackingId, tradeId);
   };
 
   const handleInitialPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {

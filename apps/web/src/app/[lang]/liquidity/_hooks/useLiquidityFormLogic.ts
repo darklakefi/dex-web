@@ -13,6 +13,14 @@ interface UseLiquidityFormLogicProps {
   tokenAAddress: string | null;
   tokenBAddress: string | null;
 }
+
+/**
+ * Conductor pattern: orchestrates multiple hooks as siblings and wires them together explicitly.
+ * - Query hooks own server state
+ * - Form hook owns field state
+ * - Machine hook owns workflow state
+ * This hook mediates between them without creating nested dependencies.
+ */
 export function useLiquidityFormLogic({
   tokenAAddress,
   tokenBAddress,
@@ -22,6 +30,7 @@ export function useLiquidityFormLogic({
     LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
   );
 
+  // Get sorted addresses for pool lookup
   const sortedTokenAddresses = sortSolanaAddresses(
     tokenAAddress || "",
     tokenBAddress || "",
@@ -29,62 +38,36 @@ export function useLiquidityFormLogic({
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
 
+  // === Call hooks as siblings (conductor pattern) ===
+
+  // 1. Query hook: owns pool data
   const poolDataResult = useRealtimePoolData({ tokenXMint, tokenYMint });
 
-  // Initialize transaction machine (follows reactive event pattern)
+  // Stabilize and transform pool data
+  const poolDetails = useMemo(() => {
+    const data = poolDataResult.data;
+    return data
+      ? {
+          fee: undefined,
+          poolAddress: data.lpMint,
+          price: undefined,
+          tokenXMint: data.tokenXMint,
+          tokenXReserve: data.reserveX,
+          tokenYMint: data.tokenYMint,
+          tokenYReserve: data.reserveY,
+          totalSupply: data.totalLpSupply,
+        }
+      : null;
+  }, [poolDataResult.data]);
+
+  // 2. Machine hook: owns workflow state (pass poolDetails from Query)
   const transaction = useLiquidityTransaction({
+    poolDetails,
     tokenAAddress,
     tokenBAddress,
   });
 
-  // Stabilize pool data reference to prevent infinite re-renders
-  const stablePoolData = useMemo(
-    () => poolDataResult.data,
-    [poolDataResult.data],
-  );
-
-  // Transform pool data to the format expected by the machine
-  const transformedPoolDetails = useMemo(() => {
-    return stablePoolData
-      ? {
-          fee: undefined,
-          poolAddress: stablePoolData.lpMint,
-          price: undefined,
-          tokenXMint: stablePoolData.tokenXMint,
-          tokenXReserve: stablePoolData.reserveX,
-          tokenYMint: stablePoolData.tokenYMint,
-          tokenYReserve: stablePoolData.reserveY,
-          totalSupply: stablePoolData.totalLpSupply,
-        }
-      : null;
-  }, [stablePoolData]);
-
-  // Reactive event pattern: send pool data updates to machine
-  useEffect(() => {
-    console.log("🔍 Pool data update:", {
-      exists: stablePoolData?.exists,
-      stablePoolData,
-      tokenXMint,
-      tokenYMint,
-      transformedPoolDetails,
-    });
-    if (transformedPoolDetails) {
-      console.log("📤 Sending POOL_DATA_UPDATED to machine:", {
-        data: transformedPoolDetails,
-      });
-      transaction.send({
-        data: transformedPoolDetails,
-        type: "POOL_DATA_UPDATED",
-      });
-    }
-  }, [
-    transformedPoolDetails,
-    transaction.send,
-    tokenXMint,
-    tokenYMint,
-    stablePoolData,
-  ]);
-
+  // 3. Token accounts query: owns token balance data
   const hasRecentTransaction = transaction.isSuccess;
   const tokenAccountsData = useRealtimeTokenAccounts({
     hasRecentTransaction,
@@ -93,7 +76,7 @@ export function useLiquidityFormLogic({
     tokenBAddress,
   });
 
-  // Create the TanStack Form in isolation; connect submit to transaction
+  // 4. Form hook: owns field state
   const { form } = useLiquidityFormState({
     onSubmit: ({ value }) => {
       transaction.send({ data: value, type: "SUBMIT" });
@@ -102,37 +85,43 @@ export function useLiquidityFormLogic({
     walletPublicKey: publicKey || null,
   });
 
-  // Debounced derived calculations based on pool reserves
+  // 5. Calculations hook: derives values from pool data
   const { debouncedCalculateTokenAmounts } = useLiquidityAmountDebouncer(
     poolDataResult.data || null,
     LIQUIDITY_CONSTANTS.DEBOUNCE_DELAY_MS,
   );
 
-  // Reset form after a successful transaction (once per success)
+  // === Wire hooks together explicitly with effects ===
+
+  // Effect: Reset machine if it's stuck in success/error state on mount
+  const hasResetOnMount = useRef(false);
+  useEffect(() => {
+    if (
+      !hasResetOnMount.current &&
+      (transaction.isSuccess || transaction.isError)
+    ) {
+      transaction.send({ type: "RESET" });
+      hasResetOnMount.current = true;
+    }
+  }, [transaction.isSuccess, transaction.isError, transaction.send]);
+
+  // Effect: Reset form after successful transaction
   const prevSuccessRef = useRef<boolean>(false);
   useEffect(() => {
     if (transaction.isSuccess && !prevSuccessRef.current) {
       form.reset();
       prevSuccessRef.current = true;
+      // Reset machine after a delay to allow UI to show success
+      setTimeout(() => {
+        transaction.send({ type: "RESET" });
+      }, 1000);
     }
     if (!transaction.isSuccess && prevSuccessRef.current) {
       prevSuccessRef.current = false;
     }
-  }, [transaction.isSuccess, form]);
+  }, [transaction.isSuccess, form, transaction.send]);
 
-  const poolDetails = poolDataResult.data
-    ? {
-        fee: undefined,
-        poolAddress: poolDataResult.data.lpMint,
-        price: undefined,
-        tokenXMint: poolDataResult.data.tokenXMint,
-        tokenXReserve: poolDataResult.data.reserveX,
-        tokenYMint: poolDataResult.data.tokenYMint,
-        tokenYReserve: poolDataResult.data.reserveY,
-        totalSupply: poolDataResult.data.totalLpSupply,
-      }
-    : null;
-
+  // === Return coordinated interface ===
   return {
     debouncedCalculateTokenAmounts,
     form,

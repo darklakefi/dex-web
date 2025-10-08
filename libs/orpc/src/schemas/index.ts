@@ -43,10 +43,7 @@ export type {
   GetUserLiquidityInput,
   GetUserLiquidityOutput,
 } from "./pools/getUserLiquidity.schema";
-export type {
-  GetQuoteInput,
-  GetQuoteOutput,
-} from "./swaps/getQuote.schema";
+export type { GetQuoteInput, GetQuoteOutput } from "./swaps/getQuote.schema";
 export { getQuoteInputSchema } from "./swaps/getQuote.schema";
 export type {
   GetSwapDetailsInput,

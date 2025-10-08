@@ -22,10 +22,7 @@ interface RequestLiquidityTransactionSigningProps {
   setLiquidityStep: (step: number) => void;
   unsignedTransaction: string;
   trackingId: string;
-  checkLiquidityTransactionStatus: (
-    tradeId: string,
-    trackingId: string,
-  ) => Promise<void>;
+  onSuccess: () => void;
 }
 export async function requestLiquidityTransactionSigning({
   publicKey,
@@ -33,7 +30,7 @@ export async function requestLiquidityTransactionSigning({
   setLiquidityStep,
   unsignedTransaction,
   trackingId,
-  checkLiquidityTransactionStatus,
+  onSuccess,
 }: RequestLiquidityTransactionSigningProps) {
   try {
     if (!publicKey) throw new Error("Wallet not connected!");
@@ -58,12 +55,6 @@ export async function requestLiquidityTransactionSigning({
       signedTransaction.serialize(),
     ).toString("base64");
 
-    const signature = signedTransaction.signatures[0];
-    if (!signature) {
-      throw new Error("Transaction signature is missing");
-    }
-    const tradeId = Buffer.from(signature).toString("base64");
-
     setLiquidityStep(3);
     toast({
       description: "Submitting liquidity transaction to Solana network.",
@@ -75,12 +66,18 @@ export async function requestLiquidityTransactionSigning({
       {
         signedTransaction: signedTransactionBase64,
         trackingId,
-        tradeId,
+        tradeId: "", // Empty tradeId for liquidity operations (no trade record exists)
       },
     );
 
     if (liquidityTxResponse.success) {
-      checkLiquidityTransactionStatus(tradeId, trackingId);
+      dismissToast();
+      toast({
+        description: "Liquidity added successfully!",
+        title: "Success",
+        variant: "success",
+      });
+      onSuccess();
     } else {
       const errorLogs = liquidityTxResponse.errorLogs;
       const errorMessage = Array.isArray(errorLogs)

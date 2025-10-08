@@ -1,31 +1,21 @@
 import { assign, fromPromise, setup } from "xstate";
-import type {
-  LiquidityFormValues,
-  PoolDetails,
-  TokenAccountsData,
-} from "../_types/liquidity.types";
+import type { LiquidityFormValues } from "../_types/liquidity.types";
 
+/**
+ * Machine context follows best practice: only workflow state, no server data.
+ * TanStack Query owns all server state (poolDetails, tokenAccounts).
+ * TanStack Form owns all form state.
+ */
 export interface LiquidityMachineContext {
-  poolDetails: PoolDetails | null;
-  buyTokenAccount: TokenAccountsData | null;
-  sellTokenAccount: TokenAccountsData | null;
   error: string | null;
   transactionSignature: string | null;
   liquidityStep: number;
-  formData: LiquidityFormValues | null;
   isCalculating: boolean;
 }
 
 export type LiquidityMachineEvent =
-  | { type: "POOL_DATA_UPDATED"; data: PoolDetails }
-  | {
-      type: "UPDATE_TOKEN_ACCOUNTS";
-      buyAccount: TokenAccountsData | null;
-      sellAccount: TokenAccountsData | null;
-    }
   | { type: "START_CALCULATION" }
   | { type: "FINISH_CALCULATION" }
-  | { type: "CALCULATE"; data: LiquidityFormValues }
   | { type: "SUBMIT"; data: LiquidityFormValues }
   | { type: "SIGN_TRANSACTION"; signature: string }
   | { type: "SUCCESS" }
@@ -35,26 +25,11 @@ export type LiquidityMachineEvent =
 
 export const liquidityMachine = setup({
   actors: {
-    calculateLiquidity: fromPromise(
-      async ({ input: _input }: { input: LiquidityFormValues }) => {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        return { result: "calculated" };
-      },
-    ),
     submitLiquidity: fromPromise(
-      async ({
-        input,
-      }: {
-        input: { values: LiquidityFormValues; poolDetails: PoolDetails | null };
-      }) => {
-        // This will be overridden at runtime
+      // biome-ignore lint/correctness/noUnusedFunctionParameters: input is required by xstate actor signature
+      async ({ input }: { input: { values: LiquidityFormValues } }) => {
+        // This will be provided at runtime by useLiquidityTransaction
         return { result: "submitted" };
-      },
-    ),
-    submitTransaction: fromPromise(
-      async ({ input: _input }: { input: LiquidityFormValues }) => {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        return { signature: "mock-signature" };
       },
     ),
   },
@@ -64,17 +39,13 @@ export const liquidityMachine = setup({
   },
 }).createMachine({
   context: {
-    buyTokenAccount: null,
     error: null,
-    formData: null,
     isCalculating: false,
     liquidityStep: 0,
-    poolDetails: null,
-    sellTokenAccount: null,
     transactionSignature: null,
   } as LiquidityMachineContext,
   id: "liquidity",
-  initial: "loadingInitialData",
+  initial: "ready",
   states: {
     error: {
       on: {
@@ -92,56 +63,13 @@ export const liquidityMachine = setup({
         },
       },
     },
-    loadingInitialData: {
-      on: {
-        POOL_DATA_UPDATED: {
-          actions: assign({
-            poolDetails: ({ event }) => event.data,
-          }),
-          target: "ready",
-        },
-      },
-    },
     ready: {
       initial: "idle",
-      on: {
-        POOL_DATA_UPDATED: {
-          actions: assign({
-            poolDetails: ({ event }) => event.data,
-          }),
-        },
-        UPDATE_TOKEN_ACCOUNTS: {
-          actions: assign({
-            buyTokenAccount: ({ event }) => event.buyAccount,
-            sellTokenAccount: ({ event }) => event.sellAccount,
-          }),
-        },
-      },
       states: {
         calculating: {
-          invoke: {
-            input: ({ context }) =>
-              context.formData || {
-                initialPrice: "0",
-                tokenAAmount: "0",
-                tokenBAmount: "0",
-              },
-            onDone: {
-              actions: assign({
-                error: null,
-                isCalculating: false,
-              }),
-              target: "idle",
-            },
-            onError: {
-              actions: assign({
-                error: ({ event }) => String(event.error),
-                isCalculating: false,
-              }),
-              target: "#liquidity.error",
-            },
-            src: "calculateLiquidity",
-          },
+          entry: assign({
+            isCalculating: true,
+          }),
           on: {
             FINISH_CALCULATION: {
               actions: assign({
@@ -156,17 +84,7 @@ export const liquidityMachine = setup({
         },
         idle: {
           on: {
-            CALCULATE: {
-              actions: assign({
-                formData: ({ event }) => event.data,
-                isCalculating: true,
-              }),
-              target: "calculating",
-            },
             START_CALCULATION: {
-              actions: assign({
-                isCalculating: true,
-              }),
               target: "calculating",
             },
             SUBMIT: {
@@ -203,8 +121,7 @@ export const liquidityMachine = setup({
         liquidityStep: 1,
       }),
       invoke: {
-        input: ({ context, event }) => ({
-          poolDetails: context.poolDetails,
+        input: ({ event }) => ({
           values: (event as { data: LiquidityFormValues }).data,
         }),
         onDone: {
@@ -212,7 +129,7 @@ export const liquidityMachine = setup({
         },
         onError: {
           actions: assign({
-            error: ({ event }) => event.error,
+            error: ({ event }) => String(event.error),
             liquidityStep: 0,
           }),
           target: "error",
@@ -239,7 +156,6 @@ export const liquidityMachine = setup({
 export type LiquidityMachine = typeof liquidityMachine;
 
 export type LiquidityState =
-  | "loadingInitialData"
   | "ready"
   | "ready.idle"
   | "ready.calculating"
@@ -250,7 +166,6 @@ export type LiquidityState =
 
 export const isLiquidityState = (state: string): state is LiquidityState => {
   return [
-    "loadingInitialData",
     "ready",
     "ready.idle",
     "ready.calculating",

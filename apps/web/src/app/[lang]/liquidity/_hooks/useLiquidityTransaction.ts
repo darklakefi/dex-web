@@ -4,12 +4,8 @@ import {
   ERROR_MESSAGES,
   isWarningMessage,
   useLiquidityTracking,
-  useTransactionStatus,
   useTransactionToasts,
 } from "@dex-web/core";
-import { client } from "@dex-web/orpc";
-import type { GetPoolReservesOutput } from "@dex-web/orpc/schemas";
-import type { GetUserLiquidityOutput } from "@dex-web/orpc/schemas/pools/getUserLiquidity.schema";
 import { parseAmount, sortSolanaAddresses } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +13,7 @@ import { useMachine } from "@xstate/react";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useRef } from "react";
 import { fromPromise } from "xstate";
+import { useAddLiquidityMutation } from "../../../../hooks/mutations/useAddLiquidityMutation";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import {
   useWalletAdapter,
@@ -40,11 +37,13 @@ import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTr
 interface UseLiquidityTransactionParams {
   readonly tokenAAddress: string | null;
   readonly tokenBAddress: string | null;
+  readonly poolDetails: PoolDetails | null;
 }
 
 export function useLiquidityTransaction({
   tokenAAddress,
   tokenBAddress,
+  poolDetails,
 }: UseLiquidityTransactionParams) {
   const { signTransaction, wallet, publicKey } = useWallet();
   const { data: walletAdapter } = useWalletAdapter();
@@ -53,11 +52,16 @@ export function useLiquidityTransaction({
   const queryClient = useQueryClient();
   const liquidityTranslations = useTranslations("liquidity");
 
+  // Use TanStack Query mutation for optimistic updates
+  const addLiquidityMutation = useAddLiquidityMutation();
+
+  // Store submitted values for tracking
+  const lastSubmittedValuesRef = useRef<LiquidityFormValues | null>(null);
+
   const {
     trackInitiated,
     trackSigned,
     trackConfirmed,
-    trackFailed,
     trackError: trackLiquidityError,
   } = useLiquidityTracking({
     trackError: (error: unknown, context?: Record<string, unknown>) => {
@@ -91,163 +95,183 @@ export function useLiquidityTransaction({
     transactionType: "LIQUIDITY",
   });
 
-  const [state, send] = useMachine(liquidityMachine, {
-    actors: {
-      submitLiquidity: fromPromise(
-        async ({
-          input,
-        }: {
-          input: {
-            values: LiquidityFormValues;
-            poolDetails: PoolDetails | null;
-          };
-        }) => {
-          // Inline handleDeposit logic to avoid circular dependencies
-          const { values, poolDetails } = input;
-
-          console.log("🚀 Attempting liquidity deposit:", {
-            poolDetails,
-            tokenAAddress,
-            tokenBAddress,
-            values,
-          });
-
-          const effectivePublicKey = publicKey || wallet?.adapter?.publicKey;
-
-          if (
-            !effectivePublicKey ||
-            !walletAdapter?.wallet ||
-            !wallet?.adapter?.publicKey
-          ) {
-            transactionToasts.showErrorToast(
-              ERROR_MESSAGES.MISSING_WALLET_INFO,
-            );
-            return;
-          }
-          if (!poolDetails) {
-            console.error("❌ Pool data missing:", {
-              poolDetails,
-              tokenAAddress,
-              tokenBAddress,
-            });
-            transactionToasts.showErrorToast(
-              "Pool not found for the selected token pair. Please create a pool first.",
-            );
-            return;
-          }
-          transactionToasts.showStepToast(1);
-
-          const tokenAAmount = parseAmount(values.tokenAAmount);
-          const tokenBAmount = parseAmount(values.tokenBAmount);
-          trackInitiated({
-            action: "add",
-            amountA: tokenAAmount,
-            amountB: tokenBAmount,
-            tokenA: tokenAAddress || "",
-            tokenB: tokenBAddress || "",
-          });
-          try {
-            const trimmedTokenAAddress = (tokenAAddress || "").trim();
-            const trimmedTokenBAddress = (tokenBAddress || "").trim();
-            const sortedTokens = sortSolanaAddresses(
-              trimmedTokenAAddress,
-              trimmedTokenBAddress,
-            );
-            const { tokenXAddress, tokenYAddress } = sortedTokens;
-            if (!walletAdapter?.wallet) {
-              throw new Error(ERROR_MESSAGES.MISSING_WALLET);
-            }
-            if (!tokenXAddress || !tokenYAddress) {
-              throw new Error("Invalid token addresses after sorting");
-            }
-            const sellAmount = parseAmount(values.tokenBAmount);
-            const buyAmount = parseAmount(values.tokenAAmount);
-            const isTokenXSell = poolDetails?.tokenXMint === tokenBAddress;
-            const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
-            const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
-
-            const newTrackingId = generateTrackingId();
-
-            const amountLp = calculateLpTokenAmount(maxAmountX, maxAmountY, {
-              reserveX: poolDetails?.tokenXReserve || 0,
-              reserveY: poolDetails?.tokenYReserve || 0,
-              totalLpSupply: poolDetails?.totalSupply || 0,
-            });
-
-            const requestPayload = {
-              amountLp: amountLp,
-              label: "",
-              maxAmountX: convertToLamports(maxAmountX),
-              maxAmountY: convertToLamports(maxAmountY),
-              refCode: "",
-              tokenMintX: tokenXAddress,
-              tokenMintY: tokenYAddress,
-              userAddress: effectivePublicKey.toBase58(),
+  const [state, send] = useMachine(
+    liquidityMachine.provide({
+      actors: {
+        submitLiquidity: fromPromise(
+          async ({
+            input,
+          }: {
+            input: {
+              values: LiquidityFormValues;
             };
+          }) => {
+            // Query owns poolDetails - read it fresh from the hook parameter
+            const currentPoolData = poolDetails;
+            const { values } = input;
 
-            const response =
-              await client.dexGateway.addLiquidity(requestPayload);
+            // Store values for tracking
+            lastSubmittedValuesRef.current = values;
 
-            if (response.unsignedTransaction) {
-              trackSigned({
-                action: "add",
-                amountA: buyAmount,
-                amountB: sellAmount,
-                tokenA: tokenAAddress || "",
-                tokenB: tokenBAddress || "",
-              });
-              requestLiquidityTransactionSigning({
-                checkLiquidityTransactionStatus: async (
-                  tradeId: string,
-                  currentTrackingId: string,
-                ) => {
-                  await statusChecker.checkTransactionStatus(
-                    currentTrackingId,
-                    tradeId,
-                  );
-                },
-                publicKey: effectivePublicKey,
-                setLiquidityStep: () => {},
-                signTransaction,
-                trackingId: newTrackingId,
-                unsignedTransaction: response.unsignedTransaction,
-              });
-            } else {
-              throw new Error("Failed to create liquidity transaction");
+            const effectivePublicKey = publicKey || wallet?.adapter?.publicKey;
+
+            if (
+              !effectivePublicKey ||
+              !walletAdapter?.wallet ||
+              !wallet?.adapter?.publicKey
+            ) {
+              transactionToasts.showErrorToast(
+                ERROR_MESSAGES.MISSING_WALLET_INFO,
+              );
+              throw new Error(ERROR_MESSAGES.MISSING_WALLET_INFO);
             }
-          } catch (error) {
-            const errorMessage =
-              error instanceof Error ? error.message : String(error);
-            send({ error: errorMessage, type: "ERROR" });
-            const isWarning = isWarningMessage(error);
-            if (isWarning) {
-              transactionToasts.showInfoToast(errorMessage, {
-                amountA: values.tokenAAmount,
-                amountB: values.tokenBAmount,
-                tokenA: tokenAAddress,
-                tokenB: tokenBAddress,
-              });
-            } else {
-              transactionToasts.showErrorToast(errorMessage, {
-                amountA: values.tokenAAmount,
-                amountB: values.tokenBAmount,
-                tokenA: tokenAAddress,
-                tokenB: tokenBAddress,
-              });
+            if (!currentPoolData) {
+              const errorMsg =
+                "Pool not found for the selected token pair. Please create a pool first.";
+              transactionToasts.showErrorToast(errorMsg);
+              throw new Error(errorMsg);
             }
-            trackLiquidityError(error, {
-              amountA: values.tokenAAmount,
-              amountB: values.tokenBAmount,
-              tokenA: tokenAAddress,
-              tokenB: tokenBAddress,
+            transactionToasts.showStepToast(1);
+
+            const tokenAAmount = parseAmount(values.tokenAAmount);
+            const tokenBAmount = parseAmount(values.tokenBAmount);
+            trackInitiated({
+              action: "add",
+              amountA: tokenAAmount,
+              amountB: tokenBAmount,
+              tokenA: tokenAAddress || "",
+              tokenB: tokenBAddress || "",
             });
-          }
-        },
-      ),
-    },
-  });
+            try {
+              const trimmedTokenAAddress = (tokenAAddress || "").trim();
+              const trimmedTokenBAddress = (tokenBAddress || "").trim();
+              const sortedTokens = sortSolanaAddresses(
+                trimmedTokenAAddress,
+                trimmedTokenBAddress,
+              );
+              const { tokenXAddress, tokenYAddress } = sortedTokens;
+              if (!walletAdapter?.wallet) {
+                throw new Error(ERROR_MESSAGES.MISSING_WALLET);
+              }
+              if (!tokenXAddress || !tokenYAddress) {
+                throw new Error("Invalid token addresses after sorting");
+              }
+              const sellAmount = parseAmount(values.tokenBAmount);
+              const buyAmount = parseAmount(values.tokenAAmount);
+              const isTokenXSell =
+                currentPoolData?.tokenXMint === tokenBAddress;
+              const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
+              const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
 
-  const handleError = useCallback(
+              const newTrackingId = generateTrackingId();
+
+              const amountLp = calculateLpTokenAmount(maxAmountX, maxAmountY, {
+                reserveX: currentPoolData?.tokenXReserve || 0,
+                reserveY: currentPoolData?.tokenYReserve || 0,
+                totalLpSupply: currentPoolData?.totalSupply || 0,
+              });
+
+              const requestPayload = {
+                amountLp: amountLp,
+                label: "",
+                maxAmountX: convertToLamports(maxAmountX),
+                maxAmountY: convertToLamports(maxAmountY),
+                refCode: "",
+                tokenMintX: tokenXAddress,
+                tokenMintY: tokenYAddress,
+                userAddress: effectivePublicKey.toBase58(),
+              };
+
+              // Use mutation for optimistic updates
+              const response =
+                await addLiquidityMutation.mutateAsync(requestPayload);
+
+              if (response.unsignedTransaction) {
+                trackSigned({
+                  action: "add",
+                  amountA: buyAmount,
+                  amountB: sellAmount,
+                  tokenA: tokenAAddress || "",
+                  tokenB: tokenBAddress || "",
+                });
+                await requestLiquidityTransactionSigning({
+                  onSuccess: async () => {
+                    // Invalidate queries to ensure fresh data from server
+                    if (poolDetails && walletPublicKey) {
+                      await queryClient.invalidateQueries({
+                        queryKey: queryKeys.liquidity.user(
+                          walletPublicKey.toBase58(),
+                          poolDetails.tokenXMint,
+                          poolDetails.tokenYMint,
+                        ),
+                      });
+                      await queryClient.invalidateQueries({
+                        queryKey: queryKeys.pools.reserves(
+                          poolDetails.tokenXMint,
+                          poolDetails.tokenYMint,
+                        ),
+                      });
+                      await queryClient.invalidateQueries({
+                        queryKey: queryKeys.tokens.accounts(
+                          walletPublicKey.toBase58(),
+                        ),
+                      });
+                    }
+
+                    // Track confirmation
+                    trackConfirmed({
+                      action: "add",
+                      amountA: buyAmount,
+                      amountB: sellAmount,
+                      tokenA: tokenAAddress || "",
+                      tokenB: tokenBAddress || "",
+                      transactionHash: newTrackingId,
+                    });
+                  },
+                  publicKey: effectivePublicKey,
+                  setLiquidityStep: () => {},
+                  signTransaction,
+                  trackingId: newTrackingId,
+                  unsignedTransaction: response.unsignedTransaction,
+                });
+              } else {
+                throw new Error("Failed to create liquidity transaction");
+              }
+            } catch (error) {
+              const errorMessage =
+                error instanceof Error ? error.message : String(error);
+              const isWarning = isWarningMessage(error);
+              if (isWarning) {
+                transactionToasts.showInfoToast(errorMessage, {
+                  amountA: values.tokenAAmount,
+                  amountB: values.tokenBAmount,
+                  tokenA: tokenAAddress,
+                  tokenB: tokenBAddress,
+                });
+              } else {
+                transactionToasts.showErrorToast(errorMessage, {
+                  amountA: values.tokenAAmount,
+                  amountB: values.tokenBAmount,
+                  tokenA: tokenAAddress,
+                  tokenB: tokenBAddress,
+                });
+              }
+              trackLiquidityError(error, {
+                amountA: values.tokenAAmount,
+                amountB: values.tokenBAmount,
+                tokenA: tokenAAddress,
+                tokenB: tokenBAddress,
+              });
+              // Re-throw to trigger machine error state
+              throw error;
+            }
+          },
+        ),
+      },
+    }),
+  );
+
+  const _handleError = useCallback(
     (error: unknown, context?: Record<string, unknown>): void => {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -265,156 +289,10 @@ export function useLiquidityTransaction({
     [send, transactionToasts, trackLiquidityError],
   );
 
-  const statusChecker = useTransactionStatus({
-    checkStatus: async (currentTrackingId: string, tradeId?: string) => {
-      if (!tradeId) {
-        throw new Error("Trade ID is required");
-      }
-      const response = await client.dexGateway.checkTradeStatus({
-        trackingId: currentTrackingId,
-        tradeId,
-      });
-      return {
-        data: response,
-        error: undefined,
-        status: response.status === 0 ? "finalized" : "pending",
-      } as const;
-    },
-    failStates: ["failed"],
-    maxAttempts: 10,
-    onFailure: (result) => {
-      handleError(new Error(result.error || "Unknown error"));
-    },
-    onStatusUpdate: (status, attempt) => {
-      transactionToasts.showStatusToast(
-        `Finalizing transaction... (${attempt}/10) - ${status}`,
-      );
-    },
-    onSuccess: async (result) => {
-      if (result.error) {
-        const v = lastSubmittedValuesRef.current;
-        handleError(new Error(result.error), {
-          amountA: v?.tokenAAmount,
-          amountB: v?.tokenBAmount,
-          tokenA: tokenAAddress,
-          tokenB: tokenBAddress,
-        });
-        trackFailed({
-          action: "add",
-          amountA: v ? parseAmount(v.tokenAAmount) : 0,
-          amountB: v ? parseAmount(v.tokenBAmount) : 0,
-          tokenA: tokenAAddress || "",
-          tokenB: tokenBAddress || "",
-          transactionHash: "",
-        });
-        return;
-      }
-
-      const currentPoolData = currentPoolDetails;
-      const effectivePublicKey = publicKey || wallet?.adapter?.publicKey;
-      if (!currentPoolData || !effectivePublicKey || !walletPublicKey) return;
-
-      await queryClient.cancelQueries({
-        queryKey: [
-          "liquidity",
-          currentPoolData.tokenXMint,
-          currentPoolData.tokenYMint,
-        ],
-      });
-
-      const userLiquidityQueryKey = queryKeys.liquidity.user(
-        walletPublicKey.toBase58(),
-        currentPoolData.tokenXMint,
-        currentPoolData.tokenYMint,
-      );
-      const poolReservesQueryKey = queryKeys.pools.reserves(
-        currentPoolData.tokenXMint,
-        currentPoolData.tokenYMint,
-      );
-
-      const previousUserLiquidity = queryClient.getQueryData(
-        userLiquidityQueryKey,
-      );
-      const previousPoolReserves =
-        queryClient.getQueryData<GetPoolReservesOutput>(poolReservesQueryKey);
-
-      const tokenAAmount = parseAmount(
-        lastSubmittedValuesRef.current?.tokenAAmount || "0",
-      );
-      const tokenBAmount = parseAmount(
-        lastSubmittedValuesRef.current?.tokenBAmount || "0",
-      );
-
-      const actualLpTokens = previousPoolReserves
-        ? Math.min(
-            (tokenAAmount / previousPoolReserves.reserveX) *
-              previousPoolReserves.totalLpSupply,
-            (tokenBAmount / previousPoolReserves.reserveY) *
-              previousPoolReserves.totalLpSupply,
-          )
-        : 1;
-
-      if (
-        previousUserLiquidity &&
-        typeof previousUserLiquidity === "object" &&
-        "hasLiquidity" in previousUserLiquidity
-      ) {
-        const optimisticLiquidity = {
-          ...previousUserLiquidity,
-          hasLiquidity: true,
-          lpTokenBalance:
-            (previousUserLiquidity as GetUserLiquidityOutput).lpTokenBalance +
-            actualLpTokens,
-        };
-        queryClient.setQueryData(userLiquidityQueryKey, optimisticLiquidity);
-      } else if (!previousUserLiquidity) {
-        const optimisticLiquidity: GetUserLiquidityOutput = {
-          decimals: 6,
-          hasLiquidity: true,
-          lpTokenBalance: actualLpTokens,
-          lpTokenMint: currentPoolData.tokenXMint,
-        };
-        queryClient.setQueryData(userLiquidityQueryKey, optimisticLiquidity);
-      }
-      if (previousPoolReserves) {
-        const optimisticPoolReserves = {
-          ...previousPoolReserves,
-          reserveX: previousPoolReserves.reserveX + tokenAAmount,
-          reserveY: previousPoolReserves.reserveY + tokenBAmount,
-          totalLpSupply: previousPoolReserves.totalLpSupply + actualLpTokens,
-        };
-        queryClient.setQueryData(poolReservesQueryKey, optimisticPoolReserves);
-      }
-
-      send({ type: "SUCCESS" });
-      // Tracking confirmation
-      trackConfirmed({
-        action: "add",
-        amountA: tokenAAmount,
-        amountB: tokenBAmount,
-        tokenA: tokenAAddress || "",
-        tokenB: tokenBAddress || "",
-        transactionHash: "",
-      });
-    },
-    onTimeout: () => {
-      handleError(
-        new Error(
-          "Transaction may still be processing. Check explorer for status.",
-        ),
-      );
-    },
-    retryDelay: 3_000,
-    successStates: ["finalized"],
-  });
-
-  const lastSubmittedValuesRef = useRef<LiquidityFormValues | null>(null);
-
   const isSubmitting = state.matches("submitting");
   const isSuccess = state.matches("success");
   const isError = state.matches("error");
   const isCalculating = state.matches({ ready: "calculating" });
-  const isLoadingInitialData = state.matches("loadingInitialData");
   const isReady = state.matches("ready");
 
   const publicKeyMemo = useMemo(
@@ -425,7 +303,6 @@ export function useLiquidityTransaction({
   return {
     isCalculating,
     isError,
-    isLoadingInitialData,
     isReady,
     isSubmitting,
     isSuccess,

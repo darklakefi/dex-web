@@ -22,10 +22,7 @@ interface RequestCreatePoolTransactionSigningProps {
   setCreateStep: (step: number) => void;
   unsignedTransaction: string;
   trackingId: string;
-  checkTransactionStatus: (
-    tradeId: string,
-    trackingId: string,
-  ) => Promise<void>;
+  onSuccess: () => void;
   showCreatePoolStepToast: (step: number) => void;
 }
 export async function requestCreatePoolTransactionSigning({
@@ -34,7 +31,7 @@ export async function requestCreatePoolTransactionSigning({
   setCreateStep,
   unsignedTransaction,
   trackingId,
-  checkTransactionStatus,
+  onSuccess,
   showCreatePoolStepToast,
 }: RequestCreatePoolTransactionSigningProps) {
   try {
@@ -55,23 +52,23 @@ export async function requestCreatePoolTransactionSigning({
       signedTransaction.serialize(),
     ).toString("base64");
 
-    const signature = signedTransaction.signatures[0];
-    if (!signature) {
-      throw new Error("Transaction signature is missing");
-    }
-    const tradeId = Buffer.from(signature).toString("base64");
-
     setCreateStep(3);
     showCreatePoolStepToast(3);
 
     const createTxResponse = await client.dexGateway.submitSignedTransaction({
       signedTransaction: signedTransactionBase64,
       trackingId,
-      tradeId,
+      tradeId: "", // Empty tradeId for pool creation (no trade record exists)
     });
 
     if (createTxResponse.success) {
-      checkTransactionStatus(tradeId, trackingId);
+      dismissToast();
+      toast({
+        description: "Pool created successfully!",
+        title: "Success",
+        variant: "success",
+      });
+      onSuccess();
     } else {
       const errorLogs = createTxResponse.errorLogs;
       const errorMessage = Array.isArray(errorLogs)
