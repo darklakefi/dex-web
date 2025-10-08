@@ -1,11 +1,16 @@
 "use client";
 
-import { DEFI_STREAM_CONFIGS, type DeFiStreamConfig } from "./types";
+import { tanstackClient } from "@dex-web/orpc";
+import {
+  DEFI_STREAM_CONFIGS,
+  type DeFiStreamConfig,
+  type TransactionStreamData,
+} from "./types";
 import { useServerSentEvents } from "./useServerSentEvents";
 
 /**
  * Hook for managing streaming and polling configuration for transaction status.
- * Handles SSE connections for cache invalidation and provides polling config.
+ * Handles SSE connections alongside polling configuration.
  */
 
 interface UseTransactionStreamingParams {
@@ -23,23 +28,32 @@ export function useTransactionStreaming({
   enableSSE = true,
   priority = "critical",
 }: UseTransactionStreamingParams) {
-  const queryKey = ["transaction-status-stream", trackingId, tradeId];
-
+  const hasTrackingId = Boolean(trackingId);
   const config = DEFI_STREAM_CONFIGS[priority];
 
-  // Use SSE for invalidation if enabled
-  const sse = useServerSentEvents(
-    enableSSE
+  const endpoint =
+    enableSSE && hasTrackingId
       ? `/api/streams/transactions/${trackingId}${tradeId ? `?tradeId=${tradeId}` : ""}`
-      : "",
-    queryKey,
-    { priority },
+      : "";
+
+  const queryOptions =
+    tanstackClient.dexGateway.getTransactionStatus.queryOptions({
+      input: { trackingId: trackingId || "", tradeId },
+    });
+
+  const sse = useServerSentEvents<TransactionStreamData>(
+    endpoint,
+    queryOptions.queryKey,
+    {
+      enabled: enableSSE && hasTrackingId,
+      priority,
+    },
   );
 
   return {
     config,
-    isStreaming: sse.isStreaming || enableStreaming,
-    queryKey,
+    isStreaming: (enableSSE && sse.isStreaming) || enableStreaming,
+    queryKey: queryOptions.queryKey,
     sse,
   };
 }

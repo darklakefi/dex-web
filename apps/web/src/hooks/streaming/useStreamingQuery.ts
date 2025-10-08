@@ -1,6 +1,10 @@
 "use client";
 
-import { type QueryKey, useQueryClient } from "@tanstack/react-query";
+import {
+  type QueryKey,
+  type UseQueryOptions,
+  useQuery,
+} from "@tanstack/react-query";
 import { DEFI_STREAM_CONFIGS, type DeFiStreamConfig } from "./types";
 
 interface StreamSubscriptionManager {
@@ -9,9 +13,7 @@ interface StreamSubscriptionManager {
   isSubscribed: (key: string) => boolean;
 }
 
-class InvalidationBasedSubscriptionManager
-  implements StreamSubscriptionManager
-{
+class QueryBasedSubscriptionManager implements StreamSubscriptionManager {
   private subscriptions = new Map<string, (() => void)[]>();
   private intervals = new Map<string, NodeJS.Timeout>();
 
@@ -65,24 +67,25 @@ class InvalidationBasedSubscriptionManager
   }
 }
 
-const subscriptionManager = new InvalidationBasedSubscriptionManager();
+const subscriptionManager = new QueryBasedSubscriptionManager();
 
-interface UseStreamingQueryOptions {
+interface UseStreamingQueryOptions<TData, TError = Error>
+  extends Omit<UseQueryOptions<TData, TError>, "queryKey" | "refetchInterval"> {
   priority?: DeFiStreamConfig["priority"];
   enableStreaming?: boolean;
-  enabled?: boolean;
+  fallbackToPolling?: boolean;
 }
 
-export function useStreamingQuery<TData = unknown, TError = Error>(
+export function useStreamingQuery<TData, TError = Error>(
   queryKey: QueryKey,
-  queryFn?: () => Promise<TData>,
-  options: UseStreamingQueryOptions = {},
+  queryFn: () => Promise<TData>,
+  options: UseStreamingQueryOptions<TData, TError> = {},
 ) {
-  const queryClient = useQueryClient();
   const {
     priority = "normal",
     enableStreaming = true,
-    enabled = true,
+    fallbackToPolling: _fallbackToPolling = true,
+    ...restOptions
   } = options;
 
   const config = DEFI_STREAM_CONFIGS[priority];
@@ -90,26 +93,21 @@ export function useStreamingQuery<TData = unknown, TError = Error>(
     ? queryKey.join(":")
     : String(queryKey);
 
-  // Trigger invalidation instead of managing data
-  const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey });
-  };
+  const query = useQuery({
+    queryFn,
+    queryKey,
+    refetchInterval: enableStreaming ? config.refreshInterval : false,
+    refetchIntervalInBackground: config.refetchInBackground,
+    refetchOnWindowFocus: config.refetchOnWindowFocus,
+    staleTime: config.staleTime,
+    ...restOptions,
+  });
 
-  // Set up interval-based invalidation if streaming is enabled
-  if (enableStreaming && enabled) {
-    // Note: Interval logic can be implemented if needed, but for now we rely on external triggers
-  }
-
-  // Return mock properties for backward compatibility
   return {
-    data: undefined,
-    error: null,
-    invalidate,
-    isLoading: false,
+    ...query,
     isStreaming: enableStreaming,
     isSubscribed: subscriptionManager.isSubscribed(subscriptionKey),
     priority,
-    refetch: invalidate,
     streamConfig: config,
   };
 }

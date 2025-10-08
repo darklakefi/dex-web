@@ -127,11 +127,35 @@ export async function getPoolReservesHandler({
       "confirmed",
       tokenYProgramId,
     );
-    // Calculate available reserves (total - user locked - protocol fees)
+    // Calculate available reserves (total - user locked - locked - protocol fees)
+    // This matches the SDK's calculation for available liquidity
+    // See @darklakefi/ts-sdk-on-chain math.ts quote() function
+    // BN objects have a toNumber() method that should be used
+    const toNum = (val: any): number => {
+      if (!val) return 0;
+      if (typeof val === "number") return val;
+      // BN object has toNumber() method
+      if (typeof val.toNumber === "function") return val.toNumber();
+      if (typeof val === "string") {
+        // Try parsing as regular number first
+        const num = Number(val);
+        if (!Number.isNaN(num)) return num;
+        // If that fails, it might be hex
+        return parseInt(val, 16);
+      }
+      return 0;
+    };
+
     const availableReserveX =
-      reserveXBalance - poolData.user_locked_x - poolData.protocol_fee_x;
+      reserveXBalance -
+      toNum(poolData.user_locked_x) -
+      toNum(poolData.locked_x) -
+      toNum(poolData.protocol_fee_x);
     const availableReserveY =
-      reserveYBalance - poolData.user_locked_y - poolData.protocol_fee_y;
+      reserveYBalance -
+      toNum(poolData.user_locked_y) -
+      toNum(poolData.locked_y) -
+      toNum(poolData.protocol_fee_y);
 
     const reserveX = availableReserveX / 10 ** tokenXMintInfo.decimals;
     const reserveY = availableReserveY / 10 ** tokenYMintInfo.decimals;
@@ -147,6 +171,32 @@ export async function getPoolReservesHandler({
       Number.isNaN(totalLpSupply) || !Number.isFinite(totalLpSupply)
         ? 0
         : totalLpSupply;
+
+    // Debug logging - show both raw and converted values
+    console.log("Pool Reserves Calculation:", {
+      availableReserveX: safeReserveX,
+      availableReserveXRaw: availableReserveX,
+      availableReserveY: safeReserveY,
+      availableReserveYRaw: availableReserveY,
+      lockedX_num: toNum(poolData.locked_x),
+      lockedX_raw: poolData.locked_x,
+      lockedY_num: toNum(poolData.locked_y),
+      lockedY_raw: poolData.locked_y,
+      protocolFeeX_num: toNum(poolData.protocol_fee_x),
+      protocolFeeX_raw: poolData.protocol_fee_x,
+      protocolFeeY_num: toNum(poolData.protocol_fee_y),
+      protocolFeeY_raw: poolData.protocol_fee_y,
+      tokenXMint,
+      tokenYMint,
+      totalLpSupply: safeTotalLpSupply,
+      totalReserveX: reserveXBalance,
+      totalReserveY: reserveYBalance,
+      userLockedX_num: toNum(poolData.user_locked_x),
+      userLockedX_raw: poolData.user_locked_x,
+      userLockedY_num: toNum(poolData.user_locked_y),
+      userLockedY_raw: poolData.user_locked_y,
+    });
+
     const result = {
       exists: true,
       lpMint: lpTokenMintString,

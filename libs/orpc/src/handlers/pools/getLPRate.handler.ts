@@ -72,12 +72,16 @@ export async function getLPRateHandler(
       "Reserve Y",
     );
 
+    // Calculate available reserves matching SDK's approach
+    // Ensure all values are converted to BigNumber properly
     const liquidityReserveX = reserveXBalance
-      .minus(new BigNumber(pool.user_locked_x.toString()))
-      .minus(new BigNumber(pool.protocol_fee_x.toString()));
+      .minus(new BigNumber((pool.user_locked_x || 0).toString()))
+      .minus(new BigNumber((pool.locked_x || 0).toString()))
+      .minus(new BigNumber((pool.protocol_fee_x || 0).toString()));
     const liquidityReserveY = reserveYBalance
-      .minus(new BigNumber(pool.user_locked_y.toString()))
-      .minus(new BigNumber(pool.protocol_fee_y.toString()));
+      .minus(new BigNumber((pool.user_locked_y || 0).toString()))
+      .minus(new BigNumber((pool.locked_y || 0).toString()))
+      .minus(new BigNumber((pool.protocol_fee_y || 0).toString()));
 
     const poolLPSupply = new BigNumber(pool.token_lp_supply.toString());
 

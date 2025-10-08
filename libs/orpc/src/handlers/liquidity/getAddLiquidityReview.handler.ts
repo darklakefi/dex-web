@@ -131,10 +131,34 @@ export async function getAddLiquidityReviewHandler(
       "Reserve Y",
     );
 
+    // Calculate available reserves matching SDK's approach
+    // Must subtract user_locked, locked, and protocol_fee from total reserves
+    // BN objects have a toNumber() method that should be used
+    const toNum = (val: any): number => {
+      if (!val) return 0;
+      if (typeof val === "number") return val;
+      // BN object has toNumber() method
+      if (typeof val.toNumber === "function") return val.toNumber();
+      if (typeof val === "string") {
+        // Try parsing as regular number first
+        const num = Number(val);
+        if (!Number.isNaN(num)) return num;
+        // If that fails, it might be hex
+        return parseInt(val, 16);
+      }
+      return 0;
+    };
+
     const liquidityReserveX =
-      reserveXBalance - pool.user_locked_x - pool.protocol_fee_x;
+      reserveXBalance -
+      toNum(pool.user_locked_x) -
+      toNum(pool.locked_x) -
+      toNum(pool.protocol_fee_x);
     const liquidityReserveY =
-      reserveYBalance - pool.user_locked_y - pool.protocol_fee_y;
+      reserveYBalance -
+      toNum(pool.user_locked_y) -
+      toNum(pool.locked_y) -
+      toNum(pool.protocol_fee_y);
 
     const tokenMetadata = (await getTokenMetadataHandler({
       addresses: [tokenXMint, tokenYMint],

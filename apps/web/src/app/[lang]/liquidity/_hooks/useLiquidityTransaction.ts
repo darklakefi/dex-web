@@ -18,7 +18,6 @@ import type {
   LiquidityFormValues,
   PoolDetails,
 } from "../_types/liquidity.types";
-import { calculateLpTokenAmount } from "../_utils/calculateLpTokens";
 import {
   trackConfirmed,
   trackInitiated,
@@ -106,16 +105,17 @@ function buildRequestPayload({
   values: LiquidityFormValues;
   effectivePublicKey: PublicKey;
 }) {
+  // Use available reserves for LP calculations (excluding locked amounts and protocol fees)
+  // These reserves represent the actual liquidity available in the pool
+  const poolReserves = {
+    reserveX: currentPoolData.tokenXReserve || 0,
+    reserveY: currentPoolData.tokenYReserve || 0,
+    totalLpSupply: currentPoolData.totalSupply || 0,
+  };
+
   return transformToAddLiquidityPayload({
-    calculateLpTokens: (amountX: number, amountY: number) => {
-      const amountLp = calculateLpTokenAmount(amountX, amountY, {
-        reserveX: currentPoolData.tokenXReserve || 0,
-        reserveY: currentPoolData.tokenYReserve || 0,
-        totalLpSupply: currentPoolData.totalSupply || 0,
-      });
-      const multiplier = BigInt(10 ** LIQUIDITY_CONSTANTS.LP_TOKEN_DECIMALS);
-      return amountLp * multiplier;
-    },
+    lpTokenDecimals: LIQUIDITY_CONSTANTS.LP_TOKEN_DECIMALS,
+    poolReserves,
     poolTokenXMint: currentPoolData.tokenXMint,
     slippage: values.slippage || "0.5",
     tokenAAddress: trimmedTokenAAddress,

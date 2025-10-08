@@ -45,6 +45,15 @@ export {
 } from "./date";
 export { useDebouncedValue } from "./hooks/useDebouncedValue";
 export {
+  applySlippage,
+  calculateLpTokensToMint,
+  calculatePoolShare,
+  calculateTokenAmountForRatio,
+  calculateTokensFromLpBurn,
+  type PoolReserves,
+  toRawUnitsBigint as toRawUnitsBigintDecimal,
+} from "./liquidity/liquidityMath";
+export {
   type AddLiquidityPayload,
   type AddLiquidityTransformParams,
   transformToAddLiquidityPayload,
