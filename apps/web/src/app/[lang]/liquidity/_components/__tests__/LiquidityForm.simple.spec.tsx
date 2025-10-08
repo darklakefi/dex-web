@@ -5,7 +5,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
 
-// Mock all the complex dependencies
 vi.mock("next/navigation", () => ({
   usePathname: () => "/liquidity",
   useRouter: () => ({ push: vi.fn() }),
@@ -57,8 +56,6 @@ vi.mock("@dex-web/orpc", () => ({
     },
   },
 }));
-
-// Simple test component that renders the button logic
 function TestLiquidityButton({ publicKey }: { publicKey: PublicKey | null }) {
   if (!publicKey) {
     return <button type="button">Connect Wallet</button>;

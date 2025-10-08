@@ -128,7 +128,7 @@ function toRawUnits(amount: Decimal, decimals: number): bigint {
  * @param reserves - Current pool reserves in raw units (bigint for precision)
  * @returns LP tokens to be minted in raw units
  */
-function calculateLpTokensToReceive(
+function _calculateLpTokensToReceive(
   amountX: bigint,
   amountY: bigint,
   reserves: { reserveX: bigint; reserveY: bigint; totalLpSupply: bigint },
@@ -344,23 +344,19 @@ export function transformAddLiquidityInput(
   // Debug logging
   console.log("🔍 Add Liquidity Transformer Debug:", {
     calculations: {
-      ceilingAmountXRaw:
-        ceilingAmountXRaw.toString() + " (ROUND_UP - matches Rust)",
-      ceilingAmountYRaw:
-        ceilingAmountYRaw.toString() + " (ROUND_UP - matches Rust)",
-      exactAmountXNeededRaw:
-        exactAmountXNeededRaw.toFixed(0) + " (before ceiling)",
-      exactAmountYNeededRaw:
-        exactAmountYNeededRaw.toFixed(0) + " (before ceiling)",
+      ceilingAmountXRaw: `${ceilingAmountXRaw.toString()} (ROUND_UP - matches Rust)`,
+      ceilingAmountYRaw: `${ceilingAmountYRaw.toString()} (ROUND_UP - matches Rust)`,
+      exactAmountXNeededRaw: `${exactAmountXNeededRaw.toFixed(0)} (before ceiling)`,
+      exactAmountYNeededRaw: `${exactAmountYNeededRaw.toFixed(0)} (before ceiling)`,
       lpFromX: lpFromX.toString(),
       lpFromY: lpFromY.toString(),
-      lpTokensRaw: lpTokensRaw.toString() + " (min of lpFromX and lpFromY)",
+      lpTokensRaw: `${lpTokensRaw.toString()} (min of lpFromX and lpFromY)`,
       note: "All amounts in RAW UNITS. LP tokens use MIN ratio, amounts rounded UP to match RoundDirection::Ceiling",
       userAmountXRaw: amountXRaw.toString(),
       userAmountYRaw: amountYRaw.toString(),
     },
     inputs: {
-      slippage: validated.slippage + "%",
+      slippage: `${validated.slippage}%`,
       tokenAAmount: validated.tokenAAmount,
       tokenADecimals: validated.tokenADecimals,
       tokenBAmount: validated.tokenBAmount,
@@ -372,7 +368,7 @@ export function transformAddLiquidityInput(
       maxAmountXRaw: maxAmountXRaw.toString(),
       maxAmountYRaw: maxAmountYRaw.toString(),
       note: "maxAmounts = userInput * (1 + slippage)",
-      slippage: slippagePercent.toString() + "%",
+      slippage: `${slippagePercent.toString()}%`,
     },
     poolReserves: {
       reserveX: validated.poolReserves.reserveX.toString(),

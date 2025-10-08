@@ -44,7 +44,6 @@ export function LiquidityForm() {
     tokenBAddress,
   });
 
-  // Auto-calculate proportional amount based on pool ratio
   const debouncedCalculateTokenAmounts = (
     params: {
       inputAmount: string;

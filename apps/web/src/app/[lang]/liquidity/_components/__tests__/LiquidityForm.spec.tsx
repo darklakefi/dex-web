@@ -196,7 +196,6 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
   });
   describe("Story 1: Default state — wallet disconnected", () => {
     it("should render safely with no wallet and guide user to connect", async () => {
-      // Ensure wallet is disconnected
       setWalletState({
         publicKey: null,
         signTransaction: vi.fn(),
