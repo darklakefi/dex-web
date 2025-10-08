@@ -1,6 +1,7 @@
 "use client";
 
-import { client } from "@dex-web/orpc";
+import { tanstackClient } from "@dex-web/orpc";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import { useQuery } from "@tanstack/react-query";
 
 interface UsePoolDataParams {
@@ -42,34 +43,10 @@ export function usePoolData({
   const poolKey = createSortedPoolKey(tokenXMint, tokenYMint);
 
   return useQuery({
+    ...tanstackClient.pools.getPoolReserves.queryOptions({
+      input: { tokenXMint, tokenYMint },
+    }),
     gcTime: 5 * 60 * 1000,
-    queryFn: async (): Promise<PoolData | null> => {
-      console.log("🔍 Fetching pool data:", { tokenXMint, tokenYMint });
-      const result = await client.pools.getPoolReserves({
-        tokenXMint,
-        tokenYMint,
-      });
-
-      console.log("📊 Pool reserves result:", {
-        exists: result?.exists,
-        result,
-        tokenXMint,
-        tokenYMint,
-      });
-
-      if (!result || !result.exists) return null;
-
-      return {
-        exists: result.exists,
-        lastUpdate: Date.now(),
-        lpMint: result.lpMint,
-        reserveX: result.reserveX,
-        reserveY: result.reserveY,
-        tokenXMint,
-        tokenYMint,
-        totalLpSupply: result.totalLpSupply,
-      };
-    },
     queryKey: ["pool", poolKey, tokenXMint, tokenYMint],
     refetchInterval: REFETCH_INTERVAL_CONFIG[priority],
     refetchIntervalInBackground: true,
@@ -80,13 +57,30 @@ export function usePoolData({
       return failureCount < maxRetries;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    select: (data) => {
+      if (!data || !data.exists) return null;
+
+      return {
+        exists: data.exists,
+        lastUpdate: Date.now(),
+        lpMint: data.lpMint,
+        reserveX: data.reserveX,
+        reserveY: data.reserveY,
+        tokenXMint,
+        tokenYMint,
+        totalLpSupply: data.totalLpSupply,
+      };
+    },
     staleTime: STALE_TIME_CONFIG[priority],
   });
 }
 
 function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {
-  const [tokenA, tokenB] = [tokenXMint, tokenYMint].sort();
-  return `${tokenA}-${tokenB}`;
+  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+    tokenXMint,
+    tokenYMint,
+  );
+  return `${tokenXAddress}-${tokenYAddress}`;
 }
 
 export type { PoolData, UsePoolDataParams };

@@ -1,5 +1,6 @@
 import { BN, type Idl, type Program, web3 } from "@coral-xyz/anchor";
 import { createLiquidityProgram } from "@dex-web/core";
+import { sortTokenPublicKeys } from "@dex-web/utils";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
@@ -29,15 +30,7 @@ async function removeLiquidity(
   minAmountY: string,
   lpTokensToBurn: string,
 ): Promise<Transaction> {
-  const sortedMints = [tokenXMint, tokenYMint].sort((a, b) =>
-    a.toBuffer().compare(b.toBuffer()),
-  );
-  const mintA = sortedMints[0];
-  const mintB = sortedMints[1];
-
-  if (!mintA || !mintB) {
-    throw new Error("Invalid mint addresses");
-  }
+  const [mintA, mintB] = sortTokenPublicKeys(tokenXMint, tokenYMint);
 
   const [ammConfig] = PublicKey.findProgramAddressSync(
     [Buffer.from(AMM_CONFIG_SEED), new BN(0).toArrayLike(Buffer, "le", 4)],

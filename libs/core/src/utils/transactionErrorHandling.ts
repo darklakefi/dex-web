@@ -36,8 +36,11 @@ const COMPUTE_ERROR_PATTERNS = [
 
 const SLIPPAGE_ERROR_PATTERNS = [
   "slippage tolerance exceeded",
+  "slippageexceeded",
   "price impact too high",
   "minimum amount not met",
+  "custom program error: 0x1775", // Hex for error code 6005
+  "error code: 6005",
 ];
 
 const DUPLICATE_TRANSACTION_PATTERNS = [
@@ -138,7 +141,10 @@ export function analyzeTransactionError(error: unknown): TransactionErrorInfo {
 
   const canRecover = isSimulationError && isDuplicateTransaction;
   const retryable =
-    isSimulationError || isDuplicateTransaction || isComputeError;
+    isSimulationError ||
+    isDuplicateTransaction ||
+    isComputeError ||
+    isSlippageError;
 
   return {
     canRecover,

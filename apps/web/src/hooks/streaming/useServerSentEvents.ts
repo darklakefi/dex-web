@@ -1,15 +1,11 @@
 "use client";
 
-import { type QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";
-import { DEFI_STREAM_CONFIGS, type DeFiStreamConfig } from "./types";
+import { type QueryKey, useQueryClient } from "@tanstack/react-query";
+import type { DeFiStreamConfig } from "./types";
 
 interface SSEOptions {
   priority?: DeFiStreamConfig["priority"];
-
-  enableFallback?: boolean;
-
   maxReconnectAttempts?: number;
-
   reconnectDelay?: number;
 }
 
@@ -24,10 +20,10 @@ class SSEManager {
   private connections = new Map<string, SSEConnection>();
   private subscribers = new Map<string, Set<QueryKey>>();
 
-  createConnection<TData>(
+  createConnection(
     endpoint: string,
     queryKey: QueryKey,
-    onMessage: (data: TData) => void,
+    onInvalidate: () => void,
     options: SSEOptions = {},
   ): () => void {
     const {
@@ -37,7 +33,6 @@ class SSEManager {
     } = options;
 
     const connectionKey = this.getConnectionKey(endpoint, priority);
-    const _queryKeyString = JSON.stringify(queryKey);
 
     if (!this.subscribers.has(connectionKey)) {
       this.subscribers.set(connectionKey, new Set());
@@ -63,14 +58,9 @@ class SSEManager {
 
     const connection = this.connections.get(connectionKey)!;
     if (connection.eventSource) {
-      connection.eventSource.addEventListener("message", (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          connection.lastEventTime = Date.now();
-          onMessage(data);
-        } catch (error) {
-          console.error("Failed to parse SSE message:", error);
-        }
+      connection.eventSource.addEventListener("message", () => {
+        connection.lastEventTime = Date.now();
+        onInvalidate();
       });
     }
 
@@ -166,68 +156,34 @@ class SSEManager {
 
 const sseManager = new SSEManager();
 
-export function useServerSentEvents<TData>(
+export function useServerSentEvents(
   endpoint: string,
   queryKey: QueryKey,
   options: SSEOptions = {},
 ) {
   const queryClient = useQueryClient();
-  const { priority = "normal", enableFallback = true } = options;
-  const config = DEFI_STREAM_CONFIGS[priority];
+  const { priority = "normal" } = options;
 
-  const query = useQuery({
-    enabled: true,
-    queryFn: async (): Promise<TData | null> => {
-      return new Promise((resolve) => {
-        const cleanup = sseManager.createConnection<TData>(
-          endpoint,
-          queryKey,
-          (data: TData) => {
-            queryClient.setQueryData(queryKey, data);
-            resolve(data);
-          },
-          options,
-        );
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey });
+  };
 
-        queryClient.setQueryData([...queryKey, "sse", "cleanup"], cleanup);
-      });
-    },
-    queryKey: [...queryKey, "sse"],
-    refetchInterval: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
-  });
+  if (!endpoint) {
+    return {
+      invalidate,
+      isStreaming: false,
+      priority,
+    };
+  }
 
-  const fallbackQuery = useQuery({
-    enabled: enableFallback && !sseManager.isConnected(endpoint, priority),
-    queryFn: async (): Promise<TData | null> => {
-      try {
-        const response = await fetch(endpoint);
-        if (!response.ok) {
-          throw new Error(`Fallback request failed: ${response.statusText}`);
-        }
-        return await response.json();
-      } catch (error) {
-        console.error("Fallback query failed:", error);
-        return null;
-      }
-    },
-    queryKey: [...queryKey, "fallback"],
-    refetchInterval:
-      enableFallback && !sseManager.isConnected(endpoint, priority)
-        ? config.refreshInterval
-        : false,
-    staleTime: config.staleTime,
-  });
+  // Establish connection and invalidate on messages
+  sseManager.createConnection(endpoint, queryKey, invalidate, options);
 
   const isConnected = sseManager.isConnected(endpoint, priority);
 
   return {
-    data: query.data || fallbackQuery.data,
-    error: query.error || fallbackQuery.error,
-    isFallback: !isConnected && enableFallback,
-    isLoading: query.isLoading || fallbackQuery.isLoading,
+    invalidate,
     isStreaming: isConnected,
-    refetch: query.refetch,
+    priority,
   };
 }

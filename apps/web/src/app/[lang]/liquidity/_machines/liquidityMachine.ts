@@ -11,6 +11,7 @@ export interface LiquidityMachineContext {
   transactionSignature: string | null;
   liquidityStep: number;
   isCalculating: boolean;
+  lastValues: LiquidityFormValues | null;
 }
 
 export type LiquidityMachineEvent =
@@ -24,6 +25,9 @@ export type LiquidityMachineEvent =
   | { type: "RESET" };
 
 export const liquidityMachine = setup({
+  actions: {
+    resetForm: () => {},
+  },
   actors: {
     submitLiquidity: fromPromise(
       // biome-ignore lint/correctness/noUnusedFunctionParameters: input is required by xstate actor signature
@@ -41,6 +45,7 @@ export const liquidityMachine = setup({
   context: {
     error: null,
     isCalculating: false,
+    lastValues: null,
     liquidityStep: 0,
     transactionSignature: null,
   } as LiquidityMachineContext,
@@ -48,11 +53,24 @@ export const liquidityMachine = setup({
   initial: "ready",
   states: {
     error: {
+      after: {
+        5000: {
+          actions: assign({
+            error: null,
+            isCalculating: false,
+            lastValues: null,
+            liquidityStep: 0,
+            transactionSignature: null,
+          }),
+          target: "ready.idle",
+        },
+      },
       on: {
         RESET: {
           actions: assign({
             error: null,
             isCalculating: false,
+            lastValues: null,
             liquidityStep: 0,
             transactionSignature: null,
           }),
@@ -78,6 +96,10 @@ export const liquidityMachine = setup({
               target: "idle",
             },
             SUBMIT: {
+              actions: assign({
+                lastValues: ({ event }) =>
+                  (event as { data: LiquidityFormValues }).data,
+              }),
               target: "#liquidity.submitting",
             },
           },
@@ -88,6 +110,10 @@ export const liquidityMachine = setup({
               target: "calculating",
             },
             SUBMIT: {
+              actions: assign({
+                lastValues: ({ event }) =>
+                  (event as { data: LiquidityFormValues }).data,
+              }),
               target: "#liquidity.submitting",
             },
           },
@@ -121,8 +147,10 @@ export const liquidityMachine = setup({
         liquidityStep: 1,
       }),
       invoke: {
-        input: ({ event }) => ({
-          values: (event as { data: LiquidityFormValues }).data,
+        input: ({ context, event }) => ({
+          values:
+            (event as { data?: LiquidityFormValues }).data ||
+            context.lastValues,
         }),
         onDone: {
           target: "success",
@@ -138,11 +166,27 @@ export const liquidityMachine = setup({
       },
     },
     success: {
+      after: {
+        1000: {
+          actions: [
+            assign({
+              error: null,
+              isCalculating: false,
+              lastValues: null,
+              liquidityStep: 0,
+              transactionSignature: null,
+            }),
+            "resetForm",
+          ],
+          target: "ready.idle",
+        },
+      },
       on: {
         RESET: {
           actions: assign({
             error: null,
             isCalculating: false,
+            lastValues: null,
             liquidityStep: 0,
             transactionSignature: null,
           }),

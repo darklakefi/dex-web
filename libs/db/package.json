@@ -1,9 +1,7 @@
 {
   "exports": {
     ".": "./src/index.ts",
-    "./mocks": "./src/mocks/index.ts",
     "./mocks/*": "./src/mocks/*.ts",
-    "./schemas": "./src/schemas/index.ts",
     "./schemas/*": "./src/schemas/*.ts"
   },
   "name": "@dex-web/db",

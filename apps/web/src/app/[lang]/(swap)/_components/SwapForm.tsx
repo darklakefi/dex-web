@@ -238,18 +238,13 @@ export function SwapForm() {
       });
 
       if (tokenAAddress && tokenBAddress) {
-        const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
         const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
-          sortedTokens;
+          sortSolanaAddresses(tokenAAddress, tokenBAddress);
 
         const poolKey = `${tokenXMint}-${tokenYMint}`;
-        const sortedPoolKey = [tokenXMint, tokenYMint].sort().join("-");
 
         queryClient.invalidateQueries({
           queryKey: ["pool-details", poolKey],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["pool-details", sortedPoolKey],
         });
 
         const poolDetailsOpts =

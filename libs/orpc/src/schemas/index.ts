@@ -1,4 +1,8 @@
 export type {
+  GetTransactionStatusInput,
+  GetTransactionStatusOutput,
+} from "./dex-gateway";
+export type {
   GetTokenAccountsInput,
   GetTokenAccountsOutput,
 } from "./helius/getTokenAccounts.schema";
@@ -19,6 +23,10 @@ export type {
   RemoveLiquidityTransactionInput,
   RemoveLiquidityTransactionOutput,
 } from "./liquidity/removeLiquidityTransaction.schema";
+export type {
+  SubmitAddLiquidityInput,
+  SubmitAddLiquidityOutput,
+} from "./liquidity/submitAddLiquidity.schema";
 export type {
   SubmitWithdrawalInput,
   SubmitWithdrawalOutput,
@@ -70,6 +78,11 @@ export type {
   GetTokensOutput,
 } from "./tokens/getTokens.schema";
 export { getTokensInputSchema } from "./tokens/getTokens.schema";
+export type {
+  GetTokensWithPoolsInput,
+  GetTokensWithPoolsOutput,
+} from "./tokens/getTokensWithPools.schema";
+export { getTokensWithPoolsInputSchema } from "./tokens/getTokensWithPools.schema";
 export type { Token } from "./tokens/token.schema";
 export { tokenSchema } from "./tokens/token.schema";
 export type { TokenAccount } from "./tokens/tokenAccount.schema";

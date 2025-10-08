@@ -1,10 +1,10 @@
 "use client";
 
 import type { StatusCheckResult } from "@dex-web/core";
-import { useQueryClient } from "@tanstack/react-query";
 import type { TransactionStreamData } from "./types";
-import { useServerSentEvents } from "./useServerSentEvents";
-import { useStreamingQuery } from "./useStreamingQuery";
+import { useTransactionMonitoring } from "./useTransactionMonitoring";
+import { useTransactionStatusQuery } from "./useTransactionStatusQuery";
+import { useTransactionStreaming } from "./useTransactionStreaming";
 
 interface UseStreamingTransactionStatusParams {
   trackingId: string | null;
@@ -31,97 +31,55 @@ export function useStreamingTransactionStatus({
   onFailure,
   onFinalized,
 }: UseStreamingTransactionStatusParams) {
-  const _queryClient = useQueryClient();
-  const queryKey = ["transaction-status-stream", trackingId, tradeId];
-
-  const fetchTransactionStatus =
-    async (): Promise<TransactionStreamData | null> => {
-      if (!trackingId) return null;
-
-      try {
-        const response = await fetch(`/api/transactions/${trackingId}/status`);
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch transaction status: ${response.statusText}`,
-          );
-        }
-        return await response.json();
-      } catch (error) {
-        console.error("Failed to fetch transaction status:", error);
-        return null;
-      }
-    };
-
-  const sseQuery = useServerSentEvents<TransactionStreamData>(
-    `/api/streams/transactions/${trackingId}${tradeId ? `?tradeId=${tradeId}` : ""}`,
-    queryKey,
-    {
-      enableFallback: true,
-      priority: "critical",
-    },
-  );
-
-  const streamingQuery = useStreamingQuery(queryKey, fetchTransactionStatus, {
-    enabled: !!trackingId,
-    enableStreaming: enableStreaming && !enableSSE,
+  const streaming = useTransactionStreaming({
+    enableSSE,
+    enableStreaming,
     priority: "critical",
+    trackingId,
+    tradeId,
   });
 
-  const activeQuery = enableSSE ? sseQuery : streamingQuery;
-  const transactionData = activeQuery.data;
+  const query = useTransactionStatusQuery({
+    options: {
+      refetchInterval:
+        enableStreaming && !enableSSE
+          ? streaming.config.refreshInterval
+          : false,
+      refetchIntervalInBackground: streaming.config.refetchInBackground,
+      refetchOnWindowFocus: streaming.config.refetchOnWindowFocus,
+      staleTime: streaming.config.staleTime,
+    },
+    trackingId,
+    tradeId,
+  });
+  const transactionData = query.data;
 
-  if (transactionData && onStatusUpdate) {
-    onStatusUpdate(transactionData.status, transactionData);
-  }
-
-  if (transactionData) {
-    const { status } = transactionData;
-
-    if (successStates.includes(status) && onSuccess) {
-      onSuccess({
-        data: transactionData,
-        status,
-      });
-    }
-
-    if (failStates.includes(status) && onFailure) {
-      onFailure({
-        data: transactionData,
-        error: transactionData.error,
-        status,
-      });
-    }
-
-    if (status === "finalized" && onFinalized) {
-      onFinalized({
-        data: transactionData,
-        status,
-      });
-    }
-  }
-
-  const isTerminal =
-    transactionData &&
-    (successStates.includes(transactionData.status) ||
-      failStates.includes(transactionData.status) ||
-      transactionData.status === "finalized");
+  const monitoring = useTransactionMonitoring({
+    failStates,
+    onFailure,
+    onFinalized,
+    onStatusUpdate,
+    onSuccess,
+    successStates,
+    transactionData,
+  });
 
   return {
     confirmations: transactionData?.confirmations || 0,
-    error: transactionData?.error || activeQuery.error?.message,
+    error: transactionData?.error || query.error?.message,
     isFailed: transactionData
       ? failStates.includes(transactionData.status)
       : false,
-    isFallback: enableSSE ? sseQuery.isFallback : false,
+    isFallback: false, // No fallback since using oRPC
     isFinalized: transactionData?.status === "finalized",
-    isLoading: activeQuery.isLoading && !transactionData,
-    isStreaming: enableSSE ? sseQuery.isStreaming : streamingQuery.isStreaming,
+    isLoading: query.isLoading && !transactionData,
+    isStreaming: streaming.isStreaming,
     isSuccess: transactionData
       ? successStates.includes(transactionData.status)
       : false,
-    isTerminal,
+    isTerminal: monitoring.isTerminal,
     lastUpdate: transactionData?.lastUpdate || 0,
-    refetch: activeQuery.refetch,
+    refetch: query.refetch,
     signature: transactionData?.signature || trackingId || "",
     status: transactionData?.status || "unknown",
   };

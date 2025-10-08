@@ -1,9 +1,9 @@
-import { tanstackClient } from "@dex-web/orpc";
+import { QUERY_CONFIG, tanstackClient } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas";
 import { Button, Text } from "@dex-web/ui";
 import { isValidSolanaAddress, truncate } from "@dex-web/utils";
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { twMerge } from "tailwind-merge";
 
@@ -23,17 +23,23 @@ export function NoResultFound({
   handleSelect,
   allowUnknownTokens = false,
 }: NoResultFoundProps) {
-  const { data: tokenOwner } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenOwner.queryOptions({
+  // Only query if the search is a valid Solana address and unknown tokens are allowed
+  const shouldQueryOwner = allowUnknownTokens && isValidSolanaAddress(search);
+
+  const { data: tokenOwner } = useQuery({
+    ...tanstackClient.tokens.getTokenOwner.queryOptions({
       input: {
         address: search,
       },
     }),
-  );
+    enabled: shouldQueryOwner,
+    gcTime: QUERY_CONFIG.tokenOwner.gcTime,
+    staleTime: QUERY_CONFIG.tokenOwner.staleTime,
+  });
 
   const isTokenAddress =
-    tokenOwner.owner === TOKEN_PROGRAM_ID.toString() ||
-    tokenOwner.owner === TOKEN_2022_PROGRAM_ID.toString();
+    tokenOwner?.owner === TOKEN_PROGRAM_ID.toString() ||
+    tokenOwner?.owner === TOKEN_2022_PROGRAM_ID.toString();
 
   return (
     <div

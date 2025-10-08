@@ -37,6 +37,7 @@ export function LiquidityForm() {
     tokenAccountsData,
     publicKey,
     isCalculating,
+    isError,
     isPoolLoading,
   } = useLiquidityFormLogic({
     tokenAAddress,
@@ -114,13 +115,17 @@ export function LiquidityForm() {
             <LiquidityActionButton
               buyTokenAccount={tokenAccountsData.buyTokenAccount}
               form={form}
+              isError={isError}
               isPoolLoading={isPoolLoading}
               isTokenAccountsLoading={
                 tokenAccountsData.isLoadingBuy ||
                 tokenAccountsData.isLoadingSell
               }
-              onSubmit={(e) => {
-                e?.preventDefault();
+              onSubmit={() => {
+                console.log(
+                  "LiquidityForm - onSubmit called, calling form.handleSubmit()",
+                );
+                console.log("Form state:", form.state);
                 form.handleSubmit();
               }}
               poolDetails={poolDetails}

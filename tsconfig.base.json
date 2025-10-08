@@ -17,9 +17,6 @@
       "@dex-web/core": ["libs/core/src/index.ts"],
       "@dex-web/db": ["libs/db/src/index.ts"],
       "@dex-web/grpc-client": ["libs/grpc-client/src/index.ts"],
-      "@dex-web/liquidity-calculations": [
-        "libs/liquidity-calculations/src/index.ts"
-      ],
       "@dex-web/orpc": ["libs/orpc/src/index.ts"],
       "@dex-web/orpc/*": ["libs/orpc/src/*"],
       "@dex-web/ui": ["libs/ui/src/index.ts"],

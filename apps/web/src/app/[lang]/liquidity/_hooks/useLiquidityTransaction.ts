@@ -1,313 +1,237 @@
 "use client";
 
-import {
-  ERROR_MESSAGES,
-  isWarningMessage,
-  useLiquidityTracking,
-  useTransactionToasts,
-} from "@dex-web/core";
-import { parseAmount, sortSolanaAddresses } from "@dex-web/utils";
+import { ERROR_MESSAGES, isWarningMessage } from "@dex-web/core";
+import { client } from "@dex-web/orpc";
+import { parseAmount, transformToAddLiquidityPayload } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useMachine } from "@xstate/react";
-import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useRef } from "react";
-import { fromPromise } from "xstate";
-import { useAddLiquidityMutation } from "../../../../hooks/mutations/useAddLiquidityMutation";
+import { useCallback, useRef } from "react";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import {
   useWalletAdapter,
   useWalletPublicKey,
 } from "../../../../hooks/useWalletCache";
-import { queryKeys } from "../../../../lib/queryKeys";
 import { generateTrackingId } from "../../../_utils/generateTrackingId";
-import { isSquadsX } from "../../../_utils/isSquadsX";
-import { dismissToast, toast } from "../../../_utils/toast";
-import { liquidityMachine } from "../_machines/liquidityMachine";
 import type {
   LiquidityFormValues,
   PoolDetails,
 } from "../_types/liquidity.types";
+import { calculateLpTokenAmount } from "../_utils/calculateLpTokens";
 import {
-  calculateLpTokenAmount,
-  convertToLamports,
-} from "../_utils/calculateLpTokens";
+  trackConfirmed,
+  trackInitiated,
+  trackLiquidityError,
+  trackSigned,
+} from "../_utils/liquidityTransactionAnalytics";
+import {
+  showErrorToast,
+  showInfoToast,
+  showStepToast,
+} from "../_utils/liquidityTransactionToasts";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
+import { useLiquidityTransactionCore } from "./useLiquidityTransactionCore";
+import { useLiquidityTransactionQueries } from "./useLiquidityTransactionQueries";
 
 interface UseLiquidityTransactionParams {
   readonly tokenAAddress: string | null;
   readonly tokenBAddress: string | null;
   readonly poolDetails: PoolDetails | null;
+  readonly form?: { reset: () => void } | null;
 }
 
 export function useLiquidityTransaction({
   tokenAAddress,
   tokenBAddress,
   poolDetails,
+  form,
 }: UseLiquidityTransactionParams) {
   const { signTransaction, wallet, publicKey } = useWallet();
   const { data: walletAdapter } = useWalletAdapter();
   const { data: walletPublicKey } = useWalletPublicKey();
   const { trackLiquidity, trackError } = useAnalytics();
-  const queryClient = useQueryClient();
-  const liquidityTranslations = useTranslations("liquidity");
 
-  // Use TanStack Query mutation for optimistic updates
-  const addLiquidityMutation = useAddLiquidityMutation();
+  const { addLiquidityMutation, invalidateQueries } =
+    useLiquidityTransactionQueries();
 
-  // Store submitted values for tracking
   const lastSubmittedValuesRef = useRef<LiquidityFormValues | null>(null);
 
-  const {
-    trackInitiated,
-    trackSigned,
-    trackConfirmed,
-    trackError: trackLiquidityError,
-  } = useLiquidityTracking({
-    trackError: (error: unknown, context?: Record<string, unknown>) => {
-      trackError({
-        context: "liquidity",
-        details: context,
-        error: error instanceof Error ? error.message : String(error),
+  const submitTransaction = useCallback(
+    async ({ values }: { values: LiquidityFormValues }) => {
+      const currentPoolData = poolDetails;
+      lastSubmittedValuesRef.current = values;
+
+      const effectivePublicKey = publicKey || wallet?.adapter?.publicKey;
+
+      if (
+        !effectivePublicKey ||
+        !walletAdapter?.wallet ||
+        !wallet?.adapter?.publicKey
+      ) {
+        showErrorToast({ message: ERROR_MESSAGES.MISSING_WALLET_INFO });
+        throw new Error(ERROR_MESSAGES.MISSING_WALLET_INFO);
+      }
+      if (!currentPoolData) {
+        const errorMsg =
+          "Pool not found for the selected token pair. Please create a pool first.";
+        showErrorToast({ message: errorMsg });
+        throw new Error(errorMsg);
+      }
+      showStepToast(1);
+
+      const tokenAAmount = parseAmount(values.tokenAAmount);
+      const tokenBAmount = parseAmount(values.tokenBAmount);
+      trackInitiated(trackLiquidity, {
+        action: "add",
+        amountA: tokenAAmount,
+        amountB: tokenBAmount,
+        tokenA: tokenAAddress || "",
+        tokenB: tokenBAddress || "",
       });
-    },
-    trackLiquidity,
-  });
+      try {
+        const trimmedTokenAAddress = (tokenAAddress || "").trim();
+        const trimmedTokenBAddress = (tokenBAddress || "").trim();
 
-  const transactionToasts = useTransactionToasts({
-    customMessages: {
-      squadsXFailure: {
-        description: liquidityTranslations(
-          "squadsX.responseStatus.failed.description",
-        ),
-        title: liquidityTranslations("squadsX.responseStatus.failed.title"),
-      },
-      squadsXSuccess: {
-        description: liquidityTranslations(
-          "squadsX.responseStatus.confirmed.description",
-        ),
-        title: liquidityTranslations("squadsX.responseStatus.confirmed.title"),
-      },
-    },
-    dismissToast,
-    isSquadsX: isSquadsX(wallet),
-    toast,
-    transactionType: "LIQUIDITY",
-  });
+        if (!walletAdapter?.wallet) {
+          throw new Error(ERROR_MESSAGES.MISSING_WALLET);
+        }
 
-  const [state, send] = useMachine(
-    liquidityMachine.provide({
-      actors: {
-        submitLiquidity: fromPromise(
-          async ({
-            input,
-          }: {
-            input: {
-              values: LiquidityFormValues;
-            };
-          }) => {
-            // Query owns poolDetails - read it fresh from the hook parameter
-            const currentPoolData = poolDetails;
-            const { values } = input;
+        const tokenMetadata = await client.tokens.getTokenMetadata({
+          addresses: [trimmedTokenAAddress, trimmedTokenBAddress],
+          returnAsObject: true,
+        });
 
-            // Store values for tracking
-            lastSubmittedValuesRef.current = values;
+        if (
+          !tokenMetadata ||
+          typeof tokenMetadata !== "object" ||
+          Array.isArray(tokenMetadata)
+        ) {
+          throw new Error("Invalid token metadata response");
+        }
 
-            const effectivePublicKey = publicKey || wallet?.adapter?.publicKey;
+        const tokenAMeta = tokenMetadata[trimmedTokenAAddress];
+        const tokenBMeta = tokenMetadata[trimmedTokenBAddress];
 
-            if (
-              !effectivePublicKey ||
-              !walletAdapter?.wallet ||
-              !wallet?.adapter?.publicKey
-            ) {
-              transactionToasts.showErrorToast(
-                ERROR_MESSAGES.MISSING_WALLET_INFO,
-              );
-              throw new Error(ERROR_MESSAGES.MISSING_WALLET_INFO);
-            }
-            if (!currentPoolData) {
-              const errorMsg =
-                "Pool not found for the selected token pair. Please create a pool first.";
-              transactionToasts.showErrorToast(errorMsg);
-              throw new Error(errorMsg);
-            }
-            transactionToasts.showStepToast(1);
+        if (!tokenAMeta || !tokenBMeta) {
+          throw new Error("Failed to fetch token metadata for decimals");
+        }
 
-            const tokenAAmount = parseAmount(values.tokenAAmount);
-            const tokenBAmount = parseAmount(values.tokenBAmount);
-            trackInitiated({
-              action: "add",
-              amountA: tokenAAmount,
-              amountB: tokenBAmount,
-              tokenA: tokenAAddress || "",
-              tokenB: tokenBAddress || "",
+        const newTrackingId = generateTrackingId();
+
+        const requestPayload = transformToAddLiquidityPayload({
+          calculateLpTokens: (amountX: number, amountY: number) => {
+            const amountLp = calculateLpTokenAmount(amountX, amountY, {
+              reserveX: currentPoolData.tokenXReserve || 0,
+              reserveY: currentPoolData.tokenYReserve || 0,
+              totalLpSupply: currentPoolData.totalSupply || 0,
             });
-            try {
-              const trimmedTokenAAddress = (tokenAAddress || "").trim();
-              const trimmedTokenBAddress = (tokenBAddress || "").trim();
-              const sortedTokens = sortSolanaAddresses(
-                trimmedTokenAAddress,
-                trimmedTokenBAddress,
-              );
-              const { tokenXAddress, tokenYAddress } = sortedTokens;
-              if (!walletAdapter?.wallet) {
-                throw new Error(ERROR_MESSAGES.MISSING_WALLET);
-              }
-              if (!tokenXAddress || !tokenYAddress) {
-                throw new Error("Invalid token addresses after sorting");
-              }
-              const sellAmount = parseAmount(values.tokenBAmount);
-              const buyAmount = parseAmount(values.tokenAAmount);
-              const isTokenXSell =
-                currentPoolData?.tokenXMint === tokenBAddress;
-              const maxAmountX = isTokenXSell ? sellAmount : buyAmount;
-              const maxAmountY = isTokenXSell ? buyAmount : sellAmount;
-
-              const newTrackingId = generateTrackingId();
-
-              const amountLp = calculateLpTokenAmount(maxAmountX, maxAmountY, {
-                reserveX: currentPoolData?.tokenXReserve || 0,
-                reserveY: currentPoolData?.tokenYReserve || 0,
-                totalLpSupply: currentPoolData?.totalSupply || 0,
-              });
-
-              const requestPayload = {
-                amountLp: amountLp,
-                label: "",
-                maxAmountX: convertToLamports(maxAmountX),
-                maxAmountY: convertToLamports(maxAmountY),
-                refCode: "",
-                tokenMintX: tokenXAddress,
-                tokenMintY: tokenYAddress,
-                userAddress: effectivePublicKey.toBase58(),
-              };
-
-              // Use mutation for optimistic updates
-              const response =
-                await addLiquidityMutation.mutateAsync(requestPayload);
-
-              if (response.unsignedTransaction) {
-                trackSigned({
-                  action: "add",
-                  amountA: buyAmount,
-                  amountB: sellAmount,
-                  tokenA: tokenAAddress || "",
-                  tokenB: tokenBAddress || "",
-                });
-                await requestLiquidityTransactionSigning({
-                  onSuccess: async () => {
-                    // Invalidate queries to ensure fresh data from server
-                    if (poolDetails && walletPublicKey) {
-                      await queryClient.invalidateQueries({
-                        queryKey: queryKeys.liquidity.user(
-                          walletPublicKey.toBase58(),
-                          poolDetails.tokenXMint,
-                          poolDetails.tokenYMint,
-                        ),
-                      });
-                      await queryClient.invalidateQueries({
-                        queryKey: queryKeys.pools.reserves(
-                          poolDetails.tokenXMint,
-                          poolDetails.tokenYMint,
-                        ),
-                      });
-                      await queryClient.invalidateQueries({
-                        queryKey: queryKeys.tokens.accounts(
-                          walletPublicKey.toBase58(),
-                        ),
-                      });
-                    }
-
-                    // Track confirmation
-                    trackConfirmed({
-                      action: "add",
-                      amountA: buyAmount,
-                      amountB: sellAmount,
-                      tokenA: tokenAAddress || "",
-                      tokenB: tokenBAddress || "",
-                      transactionHash: newTrackingId,
-                    });
-                  },
-                  publicKey: effectivePublicKey,
-                  setLiquidityStep: () => {},
-                  signTransaction,
-                  trackingId: newTrackingId,
-                  unsignedTransaction: response.unsignedTransaction,
-                });
-              } else {
-                throw new Error("Failed to create liquidity transaction");
-              }
-            } catch (error) {
-              const errorMessage =
-                error instanceof Error ? error.message : String(error);
-              const isWarning = isWarningMessage(error);
-              if (isWarning) {
-                transactionToasts.showInfoToast(errorMessage, {
-                  amountA: values.tokenAAmount,
-                  amountB: values.tokenBAmount,
-                  tokenA: tokenAAddress,
-                  tokenB: tokenBAddress,
-                });
-              } else {
-                transactionToasts.showErrorToast(errorMessage, {
-                  amountA: values.tokenAAmount,
-                  amountB: values.tokenBAmount,
-                  tokenA: tokenAAddress,
-                  tokenB: tokenBAddress,
-                });
-              }
-              trackLiquidityError(error, {
-                amountA: values.tokenAAmount,
-                amountB: values.tokenBAmount,
-                tokenA: tokenAAddress,
-                tokenB: tokenBAddress,
-              });
-              // Re-throw to trigger machine error state
-              throw error;
-            }
+            // calculateLpTokenAmount returns raw LP tokens (already a bigint)
+            // We need to multiply by 10^9 to convert to the correct decimal representation
+            const LP_TOKEN_DECIMALS = 9;
+            const multiplier = BigInt(10 ** LP_TOKEN_DECIMALS);
+            return amountLp * multiplier;
           },
-        ),
-      },
-    }),
-  );
+          poolTokenXMint: currentPoolData.tokenXMint,
+          slippage: values.slippage || "0.5",
+          tokenAAddress: trimmedTokenAAddress,
+          tokenAAmount: values.tokenAAmount,
+          tokenBAddress: trimmedTokenBAddress,
+          tokenBAmount: values.tokenBAmount,
+          tokenXDecimals: tokenAMeta.decimals,
+          tokenYDecimals: tokenBMeta.decimals,
+          userAddress: effectivePublicKey.toBase58(),
+        });
 
-  const _handleError = useCallback(
-    (error: unknown, context?: Record<string, unknown>): void => {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      send({ error: errorMessage, type: "ERROR" });
-      const isWarning = isWarningMessage(error);
-      if (isWarning) {
-        transactionToasts.showInfoToast(errorMessage, context);
-      } else {
-        transactionToasts.showErrorToast(errorMessage, context);
-      }
-      if (context) {
-        trackLiquidityError(error, context);
+        const response = await addLiquidityMutation.mutateAsync(requestPayload);
+
+        if (response.unsignedTransaction) {
+          trackSigned(trackLiquidity, {
+            action: "add",
+            amountA: tokenAAmount,
+            amountB: tokenBAmount,
+            tokenA: tokenAAddress || "",
+            tokenB: tokenBAddress || "",
+          });
+          await requestLiquidityTransactionSigning({
+            onSuccess: async () => {
+              if (poolDetails && walletPublicKey) {
+                await invalidateQueries(walletPublicKey, poolDetails);
+              }
+
+              trackConfirmed(trackLiquidity, {
+                amountA: tokenAAmount,
+                amountB: tokenBAmount,
+                tokenA: tokenAAddress || "",
+                tokenB: tokenBAddress || "",
+                transactionHash: newTrackingId,
+              });
+            },
+            publicKey: effectivePublicKey,
+            setLiquidityStep: () => {},
+            signTransaction,
+            tokenXMint: requestPayload.tokenMintX,
+            tokenYMint: requestPayload.tokenMintY,
+            trackingId: newTrackingId,
+            unsignedTransaction: response.unsignedTransaction,
+          });
+        } else {
+          throw new Error("Failed to create liquidity transaction");
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        const isWarning = isWarningMessage(error);
+        if (isWarning) {
+          showInfoToast({
+            context: {
+              amountA: values.tokenAAmount,
+              amountB: values.tokenBAmount,
+              tokenA: tokenAAddress,
+              tokenB: tokenBAddress,
+            },
+            message: errorMessage,
+          });
+        } else {
+          showErrorToast({
+            context: {
+              amountA: values.tokenAAmount,
+              amountB: values.tokenBAmount,
+              tokenA: tokenAAddress,
+              tokenB: tokenBAddress,
+            },
+            message: errorMessage,
+          });
+        }
+        trackLiquidityError(trackError, error, {
+          amountA: values.tokenAAmount,
+          amountB: values.tokenBAmount,
+          tokenA: tokenAAddress,
+          tokenB: tokenBAddress,
+        });
+        throw error;
       }
     },
-    [send, transactionToasts, trackLiquidityError],
+    [
+      poolDetails,
+      publicKey,
+      wallet,
+      walletAdapter,
+      tokenAAddress,
+      tokenBAddress,
+      trackLiquidity,
+      addLiquidityMutation,
+      walletPublicKey,
+      invalidateQueries,
+      trackError,
+      signTransaction,
+    ],
   );
 
-  const isSubmitting = state.matches("submitting");
-  const isSuccess = state.matches("success");
-  const isError = state.matches("error");
-  const isCalculating = state.matches({ ready: "calculating" });
-  const isReady = state.matches("ready");
-
-  const publicKeyMemo = useMemo(
-    () => publicKey || wallet?.adapter?.publicKey || null,
-    [publicKey, wallet?.adapter?.publicKey],
-  );
+  const transaction = useLiquidityTransactionCore({
+    form,
+    submitTransaction,
+  });
 
   return {
-    isCalculating,
-    isError,
-    isReady,
-    isSubmitting,
-    isSuccess,
-    publicKey: publicKeyMemo,
-    send,
-    state,
-  } as const;
+    ...transaction,
+    publicKey: publicKey || wallet?.adapter?.publicKey || null,
+  };
 }

@@ -31,6 +31,7 @@ interface LiquidityActionButtonProps {
   tokenBAddress: string | null;
   isPoolLoading: boolean;
   isTokenAccountsLoading: boolean;
+  isError: boolean;
   onSubmit: () => void;
 }
 
@@ -46,6 +47,7 @@ export function LiquidityActionButton({
   tokenBAddress,
   isPoolLoading,
   isTokenAccountsLoading,
+  isError,
   onSubmit,
 }: LiquidityActionButtonProps) {
   const router = useRouter();
@@ -65,6 +67,7 @@ export function LiquidityActionButton({
   );
   const formValues: LiquidityFormValues = {
     initialPrice,
+    slippage: undefined,
     tokenAAmount,
     tokenBAmount,
   };
@@ -88,6 +91,7 @@ export function LiquidityActionButton({
     hasAnyAmount,
     hasWallet: !!publicKey,
     isCalculating: isFormSubmitting,
+    isError,
     isFormSubmitting,
     isPoolLoading,
     isTokenAccountsLoading,
@@ -98,6 +102,9 @@ export function LiquidityActionButton({
   const buttonMessage = getButtonMessage(buttonState);
 
   const handleButtonClick = () => {
+    console.log("LiquidityActionButton - handleButtonClick called");
+    console.log("Button state:", buttonState);
+    console.log("Form canSubmit:", formCanSubmit);
     if (shouldShowTransactionPreview(validation)) {
     }
     onSubmit();
@@ -207,6 +214,7 @@ function _getButtonVariant(
     case "INSUFFICIENT_BALANCE":
     case "SAME_TOKENS":
     case "INVALID_PRICE":
+    case "ERROR":
       return "danger";
     case "CREATE_POOL":
       return "secondary";
@@ -226,6 +234,7 @@ function _getAriaLabel(
     DISABLED: "Action not available",
     ENTER_AMOUNT: "Enter an amount to add liquidity",
     ENTER_AMOUNTS: "Enter token amounts to continue",
+    ERROR: "Transaction failed, click to retry",
     INSUFFICIENT_BALANCE: "Cannot proceed due to insufficient token balance",
     INVALID_PRICE: "Cannot proceed - invalid initial price",
     LOADING: "Loading pool information",

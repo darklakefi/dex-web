@@ -1,33 +1,5 @@
 {
   "extends": "./tsconfig.base.json",
   "files": [],
-  "references": [
-    {
-      "path": "./apps/web"
-    },
-    {
-      "path": "./libs/ui"
-    },
-    {
-      "path": "./libs/utils"
-    },
-    {
-      "path": "./libs/core"
-    },
-    {
-      "path": "./apps/web-e2e"
-    },
-    {
-      "path": "./libs/orpc"
-    },
-    {
-      "path": "./libs/db"
-    },
-    {
-      "path": "./libs/grpc-client"
-    },
-    {
-      "path": "./libs/liquidity-calculations"
-    }
-  ]
+  "references": []
 }

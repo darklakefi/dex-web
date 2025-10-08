@@ -53,6 +53,7 @@ export interface LiquidityFormValues {
   readonly tokenAAmount: string;
   readonly tokenBAmount: string;
   readonly initialPrice: string;
+  readonly slippage?: string;
 }
 
 export interface WalletAdapter {

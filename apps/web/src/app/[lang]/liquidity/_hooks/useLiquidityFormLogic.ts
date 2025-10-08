@@ -1,7 +1,7 @@
 "use client";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
 import { LIQUIDITY_CONSTANTS } from "../_constants/liquidityConstants";
@@ -60,66 +60,49 @@ export function useLiquidityFormLogic({
       : null;
   }, [poolDataResult.data]);
 
-  // 2. Machine hook: owns workflow state (pass poolDetails from Query)
-  const transaction = useLiquidityTransaction({
-    poolDetails,
-    tokenAAddress,
-    tokenBAddress,
-  });
-
-  // 3. Token accounts query: owns token balance data
-  const hasRecentTransaction = transaction.isSuccess;
+  // 2. Token accounts query: owns token balance data
   const tokenAccountsData = useRealtimeTokenAccounts({
-    hasRecentTransaction,
+    hasRecentTransaction: false,
     publicKey: publicKey || null,
     tokenAAddress,
     tokenBAddress,
   });
 
+  // 3. Machine hook: owns workflow state (pass poolDetails from Query)
+  // Note: We'll get token decimals from tokenAccountsData below
+  const sendRef = useRef<
+    ((event: { type: string; data?: unknown }) => void) | null
+  >(null);
+  const formRef = useRef<{ reset: () => void } | null>(null);
+  const transaction = useLiquidityTransaction({
+    form: formRef.current,
+    poolDetails,
+    tokenAAddress,
+    tokenBAddress,
+  });
+  sendRef.current = transaction.send;
+
   // 4. Form hook: owns field state
   const { form } = useLiquidityFormState({
     onSubmit: ({ value }) => {
-      transaction.send({ data: value, type: "SUBMIT" });
+      console.log("Form onSubmit called with value:", value);
+      console.log("Sending event with slippage:", slippage);
+      if (transaction.isError) {
+        sendRef.current?.({ type: "RETRY" });
+      } else {
+        sendRef.current?.({ data: { ...value, slippage }, type: "SUBMIT" });
+      }
     },
     tokenAccountsData,
     walletPublicKey: publicKey || null,
   });
+  formRef.current = form;
 
   // 5. Calculations hook: derives values from pool data
   const { debouncedCalculateTokenAmounts } = useLiquidityAmountDebouncer(
     poolDataResult.data || null,
     LIQUIDITY_CONSTANTS.DEBOUNCE_DELAY_MS,
   );
-
-  // === Wire hooks together explicitly with effects ===
-
-  // Effect: Reset machine if it's stuck in success/error state on mount
-  const hasResetOnMount = useRef(false);
-  useEffect(() => {
-    if (
-      !hasResetOnMount.current &&
-      (transaction.isSuccess || transaction.isError)
-    ) {
-      transaction.send({ type: "RESET" });
-      hasResetOnMount.current = true;
-    }
-  }, [transaction.isSuccess, transaction.isError, transaction.send]);
-
-  // Effect: Reset form after successful transaction
-  const prevSuccessRef = useRef<boolean>(false);
-  useEffect(() => {
-    if (transaction.isSuccess && !prevSuccessRef.current) {
-      form.reset();
-      prevSuccessRef.current = true;
-      // Reset machine after a delay to allow UI to show success
-      setTimeout(() => {
-        transaction.send({ type: "RESET" });
-      }, 1000);
-    }
-    if (!transaction.isSuccess && prevSuccessRef.current) {
-      prevSuccessRef.current = false;
-    }
-  }, [transaction.isSuccess, form, transaction.send]);
 
   // === Return coordinated interface ===
   return {

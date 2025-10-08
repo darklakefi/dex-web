@@ -1,10 +1,11 @@
 "use client";
 
 import { tanstackClient } from "@dex-web/orpc";
-import { useQueryClient } from "@tanstack/react-query";
+import { sortSolanaAddresses } from "@dex-web/utils";
+import { useQuery } from "@tanstack/react-query";
 import type { DeFiStreamConfig, PoolStreamData } from "./types";
+import { DEFI_STREAM_CONFIGS } from "./types";
 import { useServerSentEvents } from "./useServerSentEvents";
-import { useStreamingQuery } from "./useStreamingQuery";
 
 interface UseStreamingPoolDataParams {
   tokenXMint: string;
@@ -21,53 +22,41 @@ export function useStreamingPoolData({
   enableStreaming = true,
   enableSSE = false,
 }: UseStreamingPoolDataParams) {
-  const queryClient = useQueryClient();
-
   const poolKey = createSortedPoolKey(tokenXMint, tokenYMint);
   const queryKey = ["pool-stream", poolKey];
 
-  const fetchPoolData = async () => {
-    const queryOptions = tanstackClient.pools.getPoolDetails.queryOptions({
+  const config = DEFI_STREAM_CONFIGS[priority];
+
+  const query = useQuery({
+    ...tanstackClient.pools.getPoolDetails.queryOptions({
       input: { tokenXMint, tokenYMint },
-    });
-    const result = await queryOptions.queryFn({
-      client: queryClient,
-      meta: undefined,
-      queryKey: queryOptions.queryKey,
-      signal: new AbortController().signal,
-    });
-
-    return result ? transformPoolDataToStream(result) : null;
-  };
-
-  const sseQuery = useServerSentEvents<PoolStreamData>(
-    `/api/streams/pools/${poolKey}`,
+    }),
     queryKey,
-    {
-      enableFallback: true,
-      priority,
-    },
-  );
-
-  const streamingQuery = useStreamingQuery(queryKey, fetchPoolData, {
-    enableStreaming: enableStreaming && !enableSSE,
-    priority,
+    refetchInterval:
+      enableStreaming && !enableSSE ? config.refreshInterval : false,
+    refetchIntervalInBackground: config.refetchInBackground,
+    refetchOnWindowFocus: config.refetchOnWindowFocus,
+    select: (data) => (data ? transformPoolDataToStream(data) : null),
+    staleTime: config.staleTime,
   });
 
-  const activeQuery = enableSSE ? sseQuery : streamingQuery;
+  // Use SSE for invalidation if enabled
+  const sse = useServerSentEvents(
+    enableSSE ? `/api/streams/pools/${poolKey}` : "",
+    queryKey,
+    { priority },
+  );
 
   return {
-    error: activeQuery.error,
-    isLoading: activeQuery.isLoading,
-    isRealtime: true,
-    isStreaming: enableSSE ? sseQuery.isStreaming : streamingQuery.isStreaming,
-    isSubscribed: enableSSE
-      ? sseQuery.isStreaming
-      : streamingQuery.isSubscribed,
-    lastUpdate: activeQuery.data?.lastUpdate || 0,
-    poolDetails: activeQuery.data,
+    error: query.error,
+    isLoading: query.isLoading,
+    isRealtime: enableStreaming,
+    isStreaming: sse.isStreaming || (enableStreaming && !enableSSE),
+    isSubscribed: enableStreaming,
+    lastUpdate: query.data?.lastUpdate || 0,
+    poolDetails: query.data,
     priority,
-    refetch: activeQuery.refetch,
+    refetch: query.refetch,
     streamType: enableSSE ? "sse" : "polling",
   };
 }
@@ -85,8 +74,11 @@ function transformPoolDataToStream(
 }
 
 function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {
-  const [tokenA, tokenB] = [tokenXMint, tokenYMint].sort();
-  return `${tokenA}-${tokenB}`;
+  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+    tokenXMint,
+    tokenYMint,
+  );
+  return `${tokenXAddress}-${tokenYAddress}`;
 }
 
 export function useHighFrequencyPoolData({

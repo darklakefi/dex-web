@@ -21,16 +21,20 @@ interface RequestLiquidityTransactionSigningProps {
     | undefined;
   setLiquidityStep: (step: number) => void;
   unsignedTransaction: string;
-  trackingId: string;
+  tokenXMint: string;
+  tokenYMint: string;
   onSuccess: () => void;
+  trackingId: string;
 }
 export async function requestLiquidityTransactionSigning({
   publicKey,
   signTransaction,
   setLiquidityStep,
   unsignedTransaction,
-  trackingId,
+  tokenXMint,
+  tokenYMint,
   onSuccess,
+  trackingId: _trackingId,
 }: RequestLiquidityTransactionSigningProps) {
   try {
     if (!publicKey) throw new Error("Wallet not connected!");
@@ -62,13 +66,12 @@ export async function requestLiquidityTransactionSigning({
       variant: "loading",
     });
 
-    const liquidityTxResponse = await client.dexGateway.submitSignedTransaction(
-      {
-        signedTransaction: signedTransactionBase64,
-        trackingId,
-        tradeId: "", // Empty tradeId for liquidity operations (no trade record exists)
-      },
-    );
+    const liquidityTxResponse = await client.liquidity.submitAddLiquidity({
+      signedTransaction: signedTransactionBase64,
+      tokenXMint,
+      tokenYMint,
+      userAddress: publicKey.toBase58(),
+    });
 
     if (liquidityTxResponse.success) {
       dismissToast();
@@ -79,14 +82,11 @@ export async function requestLiquidityTransactionSigning({
       });
       onSuccess();
     } else {
-      const errorLogs = liquidityTxResponse.errorLogs;
-      const errorMessage = Array.isArray(errorLogs)
-        ? errorLogs.join(", ")
-        : typeof errorLogs === "string"
-          ? errorLogs
-          : "Unknown error occurred";
+      const errorMessage =
+        liquidityTxResponse.error || "Unknown error occurred";
       console.error("Liquidity transaction submission failed:", {
-        errorLogs: liquidityTxResponse.errorLogs,
+        error: liquidityTxResponse.error,
+        signature: liquidityTxResponse.signature,
         success: liquidityTxResponse.success,
       });
       throw new Error(`Liquidity transaction failed: ${errorMessage}`);

@@ -2,6 +2,7 @@ import type { Token } from "@dex-web/orpc/schemas";
 import { Text } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
 import Image from "next/image";
+import { memo } from "react";
 
 interface TokenListProps {
   tokens: Token[];
@@ -9,7 +10,7 @@ interface TokenListProps {
   title?: string;
 }
 
-export function TokenList({ tokens, onSelect, title }: TokenListProps) {
+function TokenListComponent({ tokens, onSelect, title }: TokenListProps) {
   return (
     <div className="flex flex-col gap-4">
       {title && <Text.Body2 className="text-green-300">{title}</Text.Body2>}
@@ -55,3 +56,21 @@ export function TokenList({ tokens, onSelect, title }: TokenListProps) {
     </div>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+// Only re-render if tokens array reference, onSelect callback, or title changes
+export const TokenList = memo(TokenListComponent, (prevProps, nextProps) => {
+  // Custom comparison function for better performance
+  if (prevProps.title !== nextProps.title) return false;
+  if (prevProps.onSelect !== nextProps.onSelect) return false;
+  if (prevProps.tokens.length !== nextProps.tokens.length) return false;
+
+  // Check if token addresses are the same (shallow comparison)
+  for (let i = 0; i < prevProps.tokens.length; i++) {
+    if (prevProps.tokens[i]!.address !== nextProps.tokens[i]!.address) {
+      return false;
+    }
+  }
+
+  return true;
+});

@@ -28,6 +28,11 @@ export interface OptimisticUpdateData {
   };
 }
 
+/**
+ * @deprecated Use calculateLpTokenAmount from calculateLpTokens.ts instead
+ * This function uses basic JS math which can have precision issues.
+ * The new implementation uses Decimal.js matching @darklakefi/ts-sdk-on-chain
+ */
 export function calculateLpTokensFromDeposit({
   tokenAAmount,
   tokenBAmount,

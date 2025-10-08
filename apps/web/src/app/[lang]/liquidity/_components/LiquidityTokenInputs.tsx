@@ -29,6 +29,7 @@ interface LiquidityTokenInputsProps<T extends AnyFormApi> {
   tokenAAddress: string | null;
   tokenBAddress: string | null;
   poolDetails: PoolDetails | null;
+  onSubmit?: () => void;
   debouncedCalculateTokenAmounts: (
     params: {
       inputAmount: string;
@@ -51,6 +52,7 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
   tokenAAddress: _tokenAAddress,
   tokenBAddress: _tokenBAddress,
   poolDetails,
+  onSubmit: _onSubmit,
   debouncedCalculateTokenAmounts,
 }: LiquidityTokenInputsProps<T>) {
   const { clearCalculations, isCalculating } = useLiquidityCalculations();

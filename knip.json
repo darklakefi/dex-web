@@ -1,0 +1,33 @@
+{
+  "ignore": ["**/generated/**"],
+  "workspaces": {
+    "apps/web": {
+      "entry": [
+        "src/app/**/*.tsx",
+        "src/app/**/*.ts",
+        "src/hooks/**/*.ts",
+        "src/utils/**/*.ts",
+        "src/lib/**/*.ts",
+        "src/i18n/**/*.ts"
+      ],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "apps/web-e2e": {
+      "entry": ["e2e/**/*.spec.ts"],
+      "project": ["e2e/**/*.ts", "helpers/**/*.ts"]
+    },
+    "libs/db": {
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/grpc-client": {
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/orpc": {
+      "entry": ["src/client.ts", "src/server.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/ui": {
+      "project": ["src/**/*.{ts,tsx}"]
+    }
+  }
+}

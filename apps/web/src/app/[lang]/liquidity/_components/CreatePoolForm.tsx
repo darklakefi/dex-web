@@ -314,6 +314,8 @@ export function CreatePoolForm() {
           setCreateStep: createState.setStep,
           showCreatePoolStepToast,
           signTransaction,
+          tokenXMint: tokenXAddress,
+          tokenYMint: tokenYAddress,
           trackingId: newTrackingId,
           unsignedTransaction: response.transaction,
         });

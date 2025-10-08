@@ -21,18 +21,22 @@ interface RequestCreatePoolTransactionSigningProps {
     | undefined;
   setCreateStep: (step: number) => void;
   unsignedTransaction: string;
-  trackingId: string;
+  tokenXMint: string;
+  tokenYMint: string;
   onSuccess: () => void;
   showCreatePoolStepToast: (step: number) => void;
+  trackingId: string;
 }
 export async function requestCreatePoolTransactionSigning({
   publicKey,
   signTransaction,
   setCreateStep,
   unsignedTransaction,
-  trackingId,
+  tokenXMint,
+  tokenYMint,
   onSuccess,
   showCreatePoolStepToast,
+  trackingId: _trackingId,
 }: RequestCreatePoolTransactionSigningProps) {
   try {
     if (!publicKey) throw new Error("Wallet not connected!");
@@ -55,10 +59,11 @@ export async function requestCreatePoolTransactionSigning({
     setCreateStep(3);
     showCreatePoolStepToast(3);
 
-    const createTxResponse = await client.dexGateway.submitSignedTransaction({
+    const createTxResponse = await client.liquidity.submitAddLiquidity({
       signedTransaction: signedTransactionBase64,
-      trackingId,
-      tradeId: "", // Empty tradeId for pool creation (no trade record exists)
+      tokenXMint,
+      tokenYMint,
+      userAddress: publicKey.toBase58(),
     });
 
     if (createTxResponse.success) {
@@ -70,14 +75,10 @@ export async function requestCreatePoolTransactionSigning({
       });
       onSuccess();
     } else {
-      const errorLogs = createTxResponse.errorLogs;
-      const errorMessage = Array.isArray(errorLogs)
-        ? errorLogs.join(", ")
-        : typeof errorLogs === "string"
-          ? errorLogs
-          : "Unknown error occurred";
+      const errorMessage = createTxResponse.error || "Unknown error occurred";
       console.error("Create pool transaction submission failed:", {
-        errorLogs: createTxResponse.errorLogs,
+        error: createTxResponse.error,
+        signature: createTxResponse.signature,
         success: createTxResponse.success,
       });
       throw new Error(`Create pool transaction failed: ${errorMessage}`);

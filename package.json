@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
+    "@darklakefi/ts-sdk-on-chain": "^0.2.0",
     "@grpc/grpc-js": "^1.14.0",
     "@grpc/proto-loader": "^0.8.0",
     "@headlessui/react": "^2.2.9",
