@@ -48,13 +48,6 @@ vi.mock("../../../../hooks/useRealtimeTokenAccounts", () => ({
   }),
 }));
 
-vi.mock("../_hooks/useLiquidityCalculationWorker", () => ({
-  useLiquidityCalculationWorker: () => ({
-    calculateLiquidity: vi.fn(),
-    isCalculating: false,
-  }),
-}));
-
 vi.mock("@dex-web/orpc", () => ({
   client: {
     dexGateway: {

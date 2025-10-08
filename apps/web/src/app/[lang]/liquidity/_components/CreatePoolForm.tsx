@@ -11,7 +11,6 @@ import { client, tanstackClient } from "@dex-web/orpc";
 import type { CreatePoolTransactionInput, Token } from "@dex-web/orpc/schemas";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import {
-  convertToDecimal,
   numberFormatHelper,
   parseAmount,
   sortSolanaAddresses,
@@ -164,27 +163,6 @@ export function CreatePoolForm() {
     onSubmit: async () => {},
     validators: {
       onBlur: liquidityFormSchema,
-      onDynamic: ({ value }: { value: LiquidityFormSchema }) => {
-        if (
-          value.tokenAAmount &&
-          publicKey &&
-          buyTokenAccount?.tokenAccounts?.[0]
-        ) {
-          const tokenANumericValue = value.tokenAAmount.replace(/,/g, "");
-          if (BigNumber(tokenANumericValue).gt(0)) {
-            const tokenAccount = buyTokenAccount.tokenAccounts[0];
-            const maxBalance = convertToDecimal(
-              tokenAccount.amount || 0,
-              tokenAccount.decimals || 0,
-            );
-
-            if (BigNumber(tokenANumericValue).gt(maxBalance.toString())) {
-              const symbol = tokenAccount.symbol || "token";
-              return { tokenAAmount: `Insufficient ${symbol} balance.` };
-            }
-          }
-        }
-      },
     },
   };
 

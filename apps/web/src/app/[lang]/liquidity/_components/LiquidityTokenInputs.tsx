@@ -8,11 +8,11 @@ import {
   validateHasSufficientBalance,
 } from "@dex-web/utils";
 import { type AnyFormApi, Field } from "@tanstack/react-form";
+import { useState } from "react";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { SkeletonTokenInput } from "../../../_components/SkeletonTokenInput";
 import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
-import { useLiquidityCalculations } from "../_hooks/useLiquidityCalculations";
 import type { PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
 
 const MAX_DECIMALS = 5;
@@ -55,7 +55,7 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
   onSubmit: _onSubmit,
   debouncedCalculateTokenAmounts,
 }: LiquidityTokenInputsProps<T>) {
-  const { clearCalculations, isCalculating } = useLiquidityCalculations();
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const clearPendingCalculations = () => {
     if (
@@ -64,7 +64,7 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
     ) {
       debouncedCalculateTokenAmounts.cancel();
     }
-    clearCalculations();
+    setIsCalculating(false);
   };
 
   const handleHalfMaxClick = (

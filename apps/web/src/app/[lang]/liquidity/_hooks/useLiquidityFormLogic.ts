@@ -5,7 +5,6 @@ import { useMemo, useRef, useState } from "react";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
 import { LIQUIDITY_CONSTANTS } from "../_constants/liquidityConstants";
-import { useLiquidityAmountDebouncer } from "./useLiquidityCalculations";
 import { useLiquidityFormState } from "./useLiquidityFormState";
 import { useLiquidityTransaction } from "./useLiquidityTransaction";
 
@@ -53,9 +52,12 @@ export function useLiquidityFormLogic({
           price: undefined,
           tokenXMint: data.tokenXMint,
           tokenXReserve: data.reserveX,
+          tokenXReserveRaw: data.reserveXRaw,
           tokenYMint: data.tokenYMint,
           tokenYReserve: data.reserveY,
+          tokenYReserveRaw: data.reserveYRaw,
           totalSupply: data.totalLpSupply,
+          totalSupplyRaw: data.totalLpSupplyRaw,
         }
       : null;
   }, [poolDataResult.data]);
@@ -99,15 +101,8 @@ export function useLiquidityFormLogic({
   });
   formRef.current = form;
 
-  // 5. Calculations hook: derives values from pool data
-  const { debouncedCalculateTokenAmounts } = useLiquidityAmountDebouncer(
-    poolDataResult.data || null,
-    LIQUIDITY_CONSTANTS.DEBOUNCE_DELAY_MS,
-  );
-
   // === Return coordinated interface ===
   return {
-    debouncedCalculateTokenAmounts,
     form,
     isCalculating: transaction.isCalculating,
     isError: transaction.isError,

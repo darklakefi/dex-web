@@ -1,16 +1,9 @@
-import {
-  getUserFriendlyErrorMessage,
-  isWarningMessage,
-  signTransactionWithRecovery,
-} from "@dex-web/core";
-import { client } from "@dex-web/orpc";
-import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import type {
   PublicKey,
   Transaction,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { dismissToast, toast } from "../../../_utils/toast";
+import { requestTransactionSigning } from "../../../_utils/requestTransactionSigning";
 
 interface RequestLiquidityTransactionSigningProps {
   publicKey: PublicKey;
@@ -26,6 +19,11 @@ interface RequestLiquidityTransactionSigningProps {
   onSuccess: () => void;
   trackingId: string;
 }
+
+/**
+ * Liquidity-specific wrapper for transaction signing.
+ * Uses the generic requestTransactionSigning utility with liquidity-specific configuration.
+ */
 export async function requestLiquidityTransactionSigning({
   publicKey,
   signTransaction,
@@ -34,75 +32,18 @@ export async function requestLiquidityTransactionSigning({
   tokenXMint,
   tokenYMint,
   onSuccess,
-  trackingId: _trackingId,
-}: RequestLiquidityTransactionSigningProps) {
-  try {
-    if (!publicKey) throw new Error("Wallet not connected!");
-    if (!signTransaction)
-      throw new Error("Wallet does not support transaction signing!");
-
-    setLiquidityStep(2);
-    toast({
-      description:
-        "Tokens will be secured until slippage verification completes.",
-      title: "Confirm liquidity [2/3]",
-      variant: "loading",
-    });
-
-    const transaction = deserializeVersionedTransaction(unsignedTransaction);
-
-    const signedTransaction = await signTransactionWithRecovery(
-      transaction,
-      signTransaction,
-    );
-    const signedTransactionBase64 = Buffer.from(
-      signedTransaction.serialize(),
-    ).toString("base64");
-
-    setLiquidityStep(3);
-    toast({
-      description: "Submitting liquidity transaction to Solana network.",
-      title: "Confirming transaction [3/3]",
-      variant: "loading",
-    });
-
-    const liquidityTxResponse = await client.liquidity.submitAddLiquidity({
-      signedTransaction: signedTransactionBase64,
-      tokenXMint,
-      tokenYMint,
-      userAddress: publicKey.toBase58(),
-    });
-
-    if (liquidityTxResponse.success) {
-      dismissToast();
-      toast({
-        description: "Liquidity added successfully!",
-        title: "Success",
-        variant: "success",
-      });
-      onSuccess();
-    } else {
-      const errorMessage =
-        liquidityTxResponse.error || "Unknown error occurred";
-      console.error("Liquidity transaction submission failed:", {
-        error: liquidityTxResponse.error,
-        signature: liquidityTxResponse.signature,
-        success: liquidityTxResponse.success,
-      });
-      throw new Error(`Liquidity transaction failed: ${errorMessage}`);
-    }
-  } catch (error) {
-    console.error("Signing error:", error);
-    dismissToast();
-
-    const userMessage = getUserFriendlyErrorMessage(error);
-    const isWarning = isWarningMessage(error);
-
-    toast({
-      description: userMessage,
-      title: isWarning ? "Transaction Warning" : "Signing Error",
-      variant: isWarning ? "warning" : "error",
-    });
-    setLiquidityStep(0);
-  }
+  trackingId,
+}: RequestLiquidityTransactionSigningProps): Promise<void> {
+  return requestTransactionSigning({
+    onSuccess,
+    publicKey,
+    setStep: setLiquidityStep,
+    signTransaction,
+    tokenXMint,
+    tokenYMint,
+    trackingId,
+    transactionType: "addLiquidity",
+    unsignedTransaction,
+    userAddress: publicKey.toBase58(),
+  });
 }

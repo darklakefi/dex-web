@@ -1,16 +1,9 @@
-import {
-  getUserFriendlyErrorMessage,
-  isWarningMessage,
-  signTransactionWithRecovery,
-} from "@dex-web/core";
-import { client } from "@dex-web/orpc";
-import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import type {
   PublicKey,
   Transaction,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { dismissToast, toast } from "../../../_utils/toast";
+import { requestTransactionSigning } from "../../../_utils/requestTransactionSigning";
 
 interface RequestCreatePoolTransactionSigningProps {
   publicKey: PublicKey;
@@ -27,6 +20,14 @@ interface RequestCreatePoolTransactionSigningProps {
   showCreatePoolStepToast: (step: number) => void;
   trackingId: string;
 }
+
+/**
+ * Create pool-specific wrapper for transaction signing.
+ * Uses the generic requestTransactionSigning utility with create pool-specific configuration.
+ *
+ * Note: showCreatePoolStepToast is called before the generic setStep to show
+ * custom toast messages for the create pool flow.
+ */
 export async function requestCreatePoolTransactionSigning({
   publicKey,
   signTransaction,
@@ -36,65 +37,26 @@ export async function requestCreatePoolTransactionSigning({
   tokenYMint,
   onSuccess,
   showCreatePoolStepToast,
-  trackingId: _trackingId,
-}: RequestCreatePoolTransactionSigningProps) {
-  try {
-    if (!publicKey) throw new Error("Wallet not connected!");
-    if (!signTransaction)
-      throw new Error("Wallet does not support transaction signing!");
-
-    setCreateStep(2);
-    showCreatePoolStepToast(2);
-
-    const transaction = deserializeVersionedTransaction(unsignedTransaction);
-
-    const signedTransaction = await signTransactionWithRecovery(
-      transaction,
-      signTransaction,
-    );
-    const signedTransactionBase64 = Buffer.from(
-      signedTransaction.serialize(),
-    ).toString("base64");
-
-    setCreateStep(3);
-    showCreatePoolStepToast(3);
-
-    const createTxResponse = await client.liquidity.submitAddLiquidity({
-      signedTransaction: signedTransactionBase64,
-      tokenXMint,
-      tokenYMint,
-      userAddress: publicKey.toBase58(),
-    });
-
-    if (createTxResponse.success) {
-      dismissToast();
-      toast({
-        description: "Pool created successfully!",
-        title: "Success",
-        variant: "success",
-      });
-      onSuccess();
-    } else {
-      const errorMessage = createTxResponse.error || "Unknown error occurred";
-      console.error("Create pool transaction submission failed:", {
-        error: createTxResponse.error,
-        signature: createTxResponse.signature,
-        success: createTxResponse.success,
-      });
-      throw new Error(`Create pool transaction failed: ${errorMessage}`);
+  trackingId,
+}: RequestCreatePoolTransactionSigningProps): Promise<void> {
+  // Wrapper to call both custom toast and step setter
+  const setStepWithToast = (step: number) => {
+    setCreateStep(step);
+    if (step > 1) {
+      showCreatePoolStepToast(step);
     }
-  } catch (error) {
-    console.error("Signing error:", error);
-    dismissToast();
+  };
 
-    const userMessage = getUserFriendlyErrorMessage(error);
-    const isWarning = isWarningMessage(error);
-
-    toast({
-      description: userMessage,
-      title: isWarning ? "Transaction Warning" : "Signing Error",
-      variant: isWarning ? "warning" : "error",
-    });
-    setCreateStep(0);
-  }
+  return requestTransactionSigning({
+    onSuccess,
+    publicKey,
+    setStep: setStepWithToast,
+    signTransaction,
+    tokenXMint,
+    tokenYMint,
+    trackingId,
+    transactionType: "createPool",
+    unsignedTransaction,
+    userAddress: publicKey.toBase58(),
+  });
 }

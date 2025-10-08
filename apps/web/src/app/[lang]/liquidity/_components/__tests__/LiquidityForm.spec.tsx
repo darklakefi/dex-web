@@ -38,12 +38,6 @@ vi.mock("@solana/wallet-adapter-react", () => ({
   useWallet: () => mockWallet,
 }));
 
-vi.mock("../_hooks/useLiquidityCalculationWorker", () => ({
-  useLiquidityCalculationWorker: () => ({
-    calculateLiquidity: vi.fn(),
-    isCalculating: false,
-  }),
-}));
 vi.mock("../../../../hooks/useAnalytics", () => ({
   useAnalytics: () => ({
     trackError: vi.fn(),

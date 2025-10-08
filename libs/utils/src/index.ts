@@ -45,6 +45,13 @@ export {
 } from "./date";
 export { useDebouncedValue } from "./hooks/useDebouncedValue";
 export {
+  type AddLiquidityInput,
+  type AddLiquidityPayload,
+  addLiquidityInputSchema,
+  addLiquidityPayloadSchema,
+  transformAddLiquidityInput,
+} from "./liquidity/addLiquidityTransformer";
+export {
   applySlippage,
   calculateLpTokensToMint,
   calculatePoolShare,
@@ -53,11 +60,6 @@ export {
   type PoolReserves,
   toRawUnitsBigint as toRawUnitsBigintDecimal,
 } from "./liquidity/liquidityMath";
-export {
-  type AddLiquidityPayload,
-  type AddLiquidityTransformParams,
-  transformToAddLiquidityPayload,
-} from "./liquidity/transformers";
 export {
   convertToDecimal,
   convertToWholeNumber,

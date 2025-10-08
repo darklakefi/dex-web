@@ -17,9 +17,18 @@ export async function addLiquidityHandler(
   try {
     logger.info("Starting addLiquidity request", {
       amountLp: input.amountLp.toString(),
+      maxAmountX: input.maxAmountX.toString(),
+      maxAmountY: input.maxAmountY.toString(),
       tokenMintX: input.tokenMintX,
       tokenMintY: input.tokenMintY,
       userAddress: input.userAddress,
+    });
+    console.log("📤 Backend addLiquidity input:", {
+      amountLp: input.amountLp.toString(),
+      maxAmountX: input.maxAmountX.toString(),
+      maxAmountY: input.maxAmountY.toString(),
+      tokenMintX: input.tokenMintX,
+      tokenMintY: input.tokenMintY,
     });
     const grpcClient = await getDexGatewayClient();
     const response = await grpcClient.addLiquidity(input);

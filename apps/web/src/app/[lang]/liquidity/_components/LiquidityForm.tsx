@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Icon } from "@dex-web/ui";
+import { Decimal } from "decimal.js";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
@@ -33,7 +34,6 @@ export function LiquidityForm() {
     poolDetails,
     slippage,
     setSlippage,
-    debouncedCalculateTokenAmounts,
     tokenAccountsData,
     publicKey,
     isCalculating,
@@ -44,23 +44,65 @@ export function LiquidityForm() {
     tokenBAddress,
   });
 
+  // Auto-calculate proportional amount based on pool ratio
+  const debouncedCalculateTokenAmounts = (
+    params: {
+      inputAmount: string;
+      editedToken: "tokenA" | "tokenB";
+      tokenAAddress: string | null;
+      tokenBAddress: string | null;
+    },
+    onResult: (outputAmount: string | null) => void,
+  ) => {
+    if (
+      !poolDetails ||
+      !poolDetails.tokenXReserve ||
+      !poolDetails.tokenYReserve
+    ) {
+      onResult(null);
+      return;
+    }
+
+    try {
+      const amount = new Decimal(params.inputAmount);
+      if (amount.isNaN() || amount.lte(0)) {
+        onResult(null);
+        return;
+      }
+
+      // Determine if tokenA corresponds to tokenX
+      const tokenAIsX = params.tokenAAddress === poolDetails.tokenXMint;
+
+      const reserveX = new Decimal(poolDetails.tokenXReserve);
+      const reserveY = new Decimal(poolDetails.tokenYReserve);
+
+      let result: Decimal;
+
+      if (params.editedToken === "tokenA") {
+        // User entered tokenA, calculate tokenB proportionally
+        result = tokenAIsX
+          ? amount
+              .mul(reserveY)
+              .div(reserveX) // tokenA is X, calculate Y
+          : amount.mul(reserveX).div(reserveY); // tokenA is Y, calculate X
+      } else {
+        // User entered tokenB, calculate tokenA proportionally
+        result = tokenAIsX
+          ? amount
+              .mul(reserveX)
+              .div(reserveY) // tokenB is Y, calculate X
+          : amount.mul(reserveY).div(reserveX); // tokenB is X, calculate Y
+      }
+
+      onResult(result.toFixed(6, Decimal.ROUND_DOWN));
+    } catch (error) {
+      console.error("Error calculating proportional amount:", error);
+      onResult(null);
+    }
+  };
+
   const handleSlippageChange = (newSlippage: string) => {
     setSlippage(newSlippage);
-    if (form.state.values.tokenBAmount !== "0") {
-      debouncedCalculateTokenAmounts(
-        {
-          editedToken: "tokenB",
-          inputAmount: form.state.values.tokenBAmount,
-          tokenAAddress,
-          tokenBAddress,
-        },
-        (outputAmount) => {
-          if (outputAmount == null) return;
-          form.setFieldValue("tokenAAmount", String(outputAmount));
-          form.validateAllFields("change");
-        },
-      );
-    }
   };
 
   const handleCreatePoolClick = () => {

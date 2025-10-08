@@ -112,6 +112,12 @@ export async function submitAddLiquidityHandler({
       errorMessage.includes("6005"); // Decimal error code
 
     if (isSlippageError) {
+      console.error("🚨 Slippage error details:", {
+        errorMessage,
+        fullError: error,
+        note: "This means the on-chain program rejected the transaction during simulation/execution",
+        signature,
+      });
       return {
         error:
           "Slippage tolerance exceeded. Pool reserves changed during transaction. Please try again with a higher slippage tolerance or wait for better market conditions.",

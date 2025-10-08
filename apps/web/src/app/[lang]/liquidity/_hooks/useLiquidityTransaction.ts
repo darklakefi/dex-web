@@ -2,7 +2,11 @@
 
 import { ERROR_MESSAGES, isWarningMessage } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
-import { parseAmount, transformToAddLiquidityPayload } from "@dex-web/utils";
+import {
+  addLiquidityInputSchema,
+  parseAmount,
+  transformAddLiquidityInput,
+} from "@dex-web/utils";
 import type { Wallet } from "@solana/wallet-adapter-react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
@@ -105,27 +109,53 @@ function buildRequestPayload({
   values: LiquidityFormValues;
   effectivePublicKey: PublicKey;
 }) {
-  // Use available reserves for LP calculations (excluding locked amounts and protocol fees)
-  // These reserves represent the actual liquidity available in the pool
+  // CRITICAL: The on-chain program uses AVAILABLE reserves for LP calculations.
+  // From add_liquidity.rs:149-157: reserve.amount - protocol_fee - user_locked
+  // The handler returns AVAILABLE reserves in reserveXRaw/reserveYRaw.
+  // We MUST use the same reserves the program uses, otherwise we get slippage errors.
+  //
+  // reserveXRaw/reserveYRaw = AVAILABLE reserves (excluding locked/fees)
+  // reserveX/reserveY = AVAILABLE balances in human-readable units
   const poolReserves = {
-    reserveX: currentPoolData.tokenXReserve || 0,
-    reserveY: currentPoolData.tokenYReserve || 0,
-    totalLpSupply: currentPoolData.totalSupply || 0,
+    reserveX: String(currentPoolData.tokenXReserveRaw || 0),
+    reserveY: String(currentPoolData.tokenYReserveRaw || 0),
+    totalLpSupply: String(currentPoolData.totalSupplyRaw || 0),
   };
 
-  return transformToAddLiquidityPayload({
-    lpTokenDecimals: LIQUIDITY_CONSTANTS.LP_TOKEN_DECIMALS,
+  console.log("🔍 Pool Data Debug (Frontend):", {
+    humanReadable: {
+      availableReserveX: currentPoolData.tokenXReserve,
+      availableReserveY: currentPoolData.tokenYReserve,
+      totalLpSupply: currentPoolData.totalSupply,
+    },
+    note: "Using TOTAL reserves from handler (reserveXRaw/reserveYRaw)",
+    rawForCalculation: poolReserves,
+    tokenXMint: currentPoolData.tokenXMint,
+    tokenYMint: currentPoolData.tokenYMint,
+    userInput: {
+      slippage: values.slippage,
+      tokenAAddress: trimmedTokenAAddress,
+      tokenAAmount: values.tokenAAmount,
+      tokenBAddress: trimmedTokenBAddress,
+      tokenBAmount: values.tokenBAmount,
+    },
+  });
+
+  // Validate input before transformation
+  const transformInput = addLiquidityInputSchema.parse({
     poolReserves,
-    poolTokenXMint: currentPoolData.tokenXMint,
-    slippage: values.slippage || "0.5",
+    slippage: values.slippage || LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
     tokenAAddress: trimmedTokenAAddress,
     tokenAAmount: values.tokenAAmount,
+    tokenADecimals: tokenAMeta.decimals,
     tokenBAddress: trimmedTokenBAddress,
     tokenBAmount: values.tokenBAmount,
-    tokenXDecimals: tokenAMeta.decimals,
-    tokenYDecimals: tokenBMeta.decimals,
+    tokenBDecimals: tokenBMeta.decimals,
     userAddress: effectivePublicKey.toBase58(),
   });
+
+  // Transform with correct logic matching IDL
+  return transformAddLiquidityInput(transformInput);
 }
 
 function handleTransactionError({
@@ -227,10 +257,40 @@ export function useLiquidityTransaction({
           trimmedTokenBAddress,
         });
 
+        // CRITICAL: Fetch fresh pool reserves immediately before building payload
+        // This prevents slippage errors caused by stale cached data from TanStack Query
+        console.log("🔄 Fetching fresh pool reserves before transaction...");
+        const freshPoolData = await client.pools.getPoolReserves({
+          tokenXMint: currentPoolData.tokenXMint,
+          tokenYMint: currentPoolData.tokenYMint,
+        });
+
+        if (!freshPoolData || !freshPoolData.exists) {
+          throw new Error("Failed to fetch fresh pool reserves");
+        }
+
+        // Use fresh reserves for calculation
+        const poolDataForCalculation = {
+          ...currentPoolData,
+          tokenXReserveRaw: freshPoolData.reserveXRaw,
+          tokenYReserveRaw: freshPoolData.reserveYRaw,
+          totalSupplyRaw: freshPoolData.totalLpSupplyRaw,
+        };
+
+        console.log("✅ Using fresh pool reserves:", {
+          lpMint: freshPoolData.lpMint,
+          note: "These are AVAILABLE reserves (matches add_liquidity.rs), fetched just-in-time",
+          rustSource: "reserve.amount - protocol_fee - user_locked",
+          tokenXReserveRaw: freshPoolData.reserveXRaw,
+          tokenYReserveRaw: freshPoolData.reserveYRaw,
+          totalLpSupplyRaw: freshPoolData.totalLpSupplyRaw,
+          warning: "⚠️ If values don't match backend, there's a timing issue!",
+        });
+
         const newTrackingId = generateTrackingId();
 
         const requestPayload = buildRequestPayload({
-          currentPoolData,
+          currentPoolData: poolDataForCalculation,
           effectivePublicKey,
           tokenAMeta,
           tokenBMeta,

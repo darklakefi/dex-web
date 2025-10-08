@@ -14,8 +14,11 @@ interface PoolData {
   exists: boolean;
   lpMint: string;
   reserveX: number;
+  reserveXRaw?: number;
   reserveY: number;
+  reserveYRaw?: number;
   totalLpSupply: number;
+  totalLpSupplyRaw?: number;
   tokenXMint: string;
   tokenYMint: string;
   lastUpdate: number;
@@ -65,10 +68,13 @@ export function usePoolData({
         lastUpdate: Date.now(),
         lpMint: data.lpMint,
         reserveX: data.reserveX,
+        reserveXRaw: data.reserveXRaw,
         reserveY: data.reserveY,
+        reserveYRaw: data.reserveYRaw,
         tokenXMint,
         tokenYMint,
         totalLpSupply: data.totalLpSupply,
+        totalLpSupplyRaw: data.totalLpSupplyRaw,
       };
     },
     staleTime: STALE_TIME_CONFIG[priority],

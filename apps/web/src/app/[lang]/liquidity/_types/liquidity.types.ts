@@ -42,9 +42,12 @@ export interface PoolDetails {
   readonly poolAddress?: string;
   readonly tokenXMint: string;
   readonly tokenYMint: string;
-  readonly tokenXReserve?: number;
-  readonly tokenYReserve?: number;
-  readonly totalSupply?: number;
+  readonly tokenXReserve?: number; // Human-readable units
+  readonly tokenXReserveRaw?: number; // Raw units for LP calculations
+  readonly tokenYReserve?: number; // Human-readable units
+  readonly tokenYReserveRaw?: number; // Raw units for LP calculations
+  readonly totalSupply?: number; // Human-readable LP supply
+  readonly totalSupplyRaw?: number; // Raw LP supply for calculations
   readonly fee?: number;
   readonly price?: string;
 }
