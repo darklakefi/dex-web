@@ -268,8 +268,10 @@ export function getOrderMapping(context: TokenOrderContext): OrderMapping {
  * - Checking if two different orderings refer to the same liquidity pool
  * - Query key deduplication
  *
- * @param pair1 - First token pair (can be UI or Protocol order)
- * @param pair2 - Second token pair (can be UI or Protocol order)
+ * Note: Accepts plain string pairs for flexibility (branded types are erased at runtime).
+ *
+ * @param pair1 - First token pair (can be UI or Protocol order, or plain strings)
+ * @param pair2 - Second token pair (can be UI or Protocol order, or plain strings)
  * @returns True if both pairs represent the same pool
  *
  * @example
@@ -289,8 +291,16 @@ export function getOrderMapping(context: TokenOrderContext): OrderMapping {
  * ```
  */
 export function areTokenPairsEquivalent(
-  pair1: TokenPairUI | TokenPairProtocol,
-  pair2: TokenPairUI | TokenPairProtocol,
+  pair1:
+    | TokenPairUI
+    | TokenPairProtocol
+    | { tokenA: string; tokenB: string }
+    | { tokenX: string; tokenY: string },
+  pair2:
+    | TokenPairUI
+    | TokenPairProtocol
+    | { tokenA: string; tokenB: string }
+    | { tokenX: string; tokenY: string },
 ): boolean {
   const addrs1 = [
     "tokenA" in pair1 ? pair1.tokenA : pair1.tokenX,
