@@ -1,31 +1,47 @@
 import { Box, Icon, Text } from "@dex-web/ui";
 import { numberFormatHelper } from "@dex-web/utils";
+import { useStore } from "@tanstack/react-form";
 import BigNumber from "bignumber.js";
 import { useState } from "react";
+import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
+import type { LiquidityFormApi } from "../_hooks/useLiquidityFormState";
 
 export type AddLiquidityDetailsProps = {
-  tokenBAmount: string;
+  form: LiquidityFormApi;
   tokenBSymbol: string;
-  tokenAAmount: string;
   tokenASymbol: string;
-  slippage: string;
   tokenXReserve?: number;
   tokenYReserve?: number;
   tokenXMint?: string;
   tokenBAddress?: string;
+  estimatedLPTokens?: string;
+  isLPEstimationLoading?: boolean;
 };
 
 export function AddLiquidityDetails({
-  tokenBAmount,
+  form,
   tokenBSymbol,
-  tokenAAmount,
   tokenASymbol,
-  slippage,
   tokenXReserve,
   tokenYReserve,
   tokenXMint,
   tokenBAddress,
+  estimatedLPTokens,
+  isLPEstimationLoading,
 }: AddLiquidityDetailsProps) {
+  const tokenAAmount = useStore(
+    form.store,
+    (state) => state.values[FORM_FIELD_NAMES.TOKEN_A_AMOUNT] || "",
+  );
+  const tokenBAmount = useStore(
+    form.store,
+    (state) => state.values[FORM_FIELD_NAMES.TOKEN_B_AMOUNT] || "",
+  );
+  const slippage = useStore(
+    form.store,
+    (state) => state.values[FORM_FIELD_NAMES.SLIPPAGE] || "0.5",
+  );
+
   const [isAtoB, setIsAtoB] = useState(true);
 
   let rateBtoA: BigNumber;
@@ -59,6 +75,10 @@ export function AddLiquidityDetails({
     rateAtoB = BigNumber(0);
   }
 
+  const hasValues =
+    (tokenAAmount && BigNumber(tokenAAmount).gt(0)) ||
+    (tokenBAmount && BigNumber(tokenBAmount).gt(0));
+
   const priceAtoB = `1 ${tokenASymbol} ≈ ${numberFormatHelper({
     decimalScale: 5,
     thousandSeparator: true,
@@ -83,20 +103,24 @@ export function AddLiquidityDetails({
         <Text.Body2 className="text-green-300">Total Deposit</Text.Body2>
         <div className="text-right">
           <Text.Body2 className="text-green-200">
-            {numberFormatHelper({
-              decimalScale: 5,
-              trimTrailingZeros: true,
-              value: tokenBAmount,
-            })}{" "}
-            {tokenBSymbol}
+            {tokenBAmount && BigNumber(tokenBAmount).gt(0)
+              ? numberFormatHelper({
+                  decimalScale: 5,
+                  trimTrailingZeros: true,
+                  value: tokenBAmount,
+                })
+              : "0"}{" "}
+            {tokenBSymbol || "—"}
           </Text.Body2>
           <Text.Body2 className="text-green-200">
-            {numberFormatHelper({
-              decimalScale: 5,
-              trimTrailingZeros: true,
-              value: tokenAAmount,
-            })}{" "}
-            {tokenASymbol}
+            {tokenAAmount && BigNumber(tokenAAmount).gt(0)
+              ? numberFormatHelper({
+                  decimalScale: 5,
+                  trimTrailingZeros: true,
+                  value: tokenAAmount,
+                })
+              : "0"}{" "}
+            {tokenASymbol || "—"}
           </Text.Body2>
         </div>
       </div>
@@ -106,21 +130,40 @@ export function AddLiquidityDetails({
           <Text.Body2 className="text-green-300">Pool Price</Text.Body2>
           <div className="flex items-center gap-1">
             <Text.Body2 className="text-green-200">
-              {isAtoB ? priceAtoB : priceBtoA}{" "}
+              {hasValues ? (isAtoB ? priceAtoB : priceBtoA) : "—"}
             </Text.Body2>
-            <button
-              className="inline-flex cursor-pointer items-center justify-center text-green-300 hover:opacity-80"
-              onClick={handleClick}
-              type="button"
-            >
-              <Icon className="size-6 rotate-90" name="swap" />
-            </button>
+            {hasValues && (
+              <button
+                className="inline-flex cursor-pointer items-center justify-center text-green-300 hover:opacity-80"
+                onClick={handleClick}
+                type="button"
+              >
+                <Icon className="size-6 rotate-90" name="swap" />
+              </button>
+            )}
           </div>
         </div>
 
         <div className="flex items-center justify-between">
           <Text.Body2 className="text-green-300">Slippage Tolerance</Text.Body2>
           <Text.Body2 className="text-green-200">{slippage}%</Text.Body2>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Text.Body2 className="text-green-300">
+            Estimated LP Tokens
+          </Text.Body2>
+          <Text.Body2 className="text-green-200">
+            {isLPEstimationLoading
+              ? "Calculating..."
+              : estimatedLPTokens
+                ? numberFormatHelper({
+                    decimalScale: 6,
+                    trimTrailingZeros: true,
+                    value: estimatedLPTokens,
+                  })
+                : "—"}
+          </Text.Body2>
         </div>
       </div>
     </Box>

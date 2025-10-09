@@ -40,7 +40,7 @@ export function FeaturesAndTrendingPoolPanel() {
           title="Trending Pools"
         />
       )}
-      {/* <Button className="w-fit" text="explore all pools" variant="tertiary" /> */}
+      {}
     </div>
   );
 }

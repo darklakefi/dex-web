@@ -1,3 +1,5 @@
+"use client";
+
 import { toast } from "sonner";
 
 export function handleMutationError(error: unknown, context?: string) {

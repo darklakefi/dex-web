@@ -3,7 +3,7 @@ import type {
   GetTokensOutput,
   Swap,
   TokenAccount,
-} from "@dex-web/orpc/schemas";
+} from "@dex-web/orpc/schemas/index";
 import type { GetTokenPriceOutput } from "@dex-web/orpc/schemas/tokens/getTokenPrice.schema";
 import { vi } from "vitest";
 import {
@@ -144,6 +144,32 @@ export function mockOrpc() {
                 },
               ]),
             queryKey: ["helius", "searchAssets"],
+          })),
+        },
+      },
+      integrations: {
+        createTorqueReferral: {
+          queryOptions: vi.fn().mockImplementation(() => ({
+            queryFn: () =>
+              Promise.resolve({
+                referralCode: "TEST123",
+                userId: "test-user-id",
+              }),
+            queryKey: ["integrations", "createTorqueReferral"],
+          })),
+        },
+      },
+      pools: {
+        getPoolDetails: {
+          queryOptions: vi.fn().mockImplementation(() => ({
+            queryFn: () =>
+              Promise.resolve({
+                poolAddress: "mock-pool-address",
+                price: "1.5",
+                tokenXMint: DEFAULT_BUY_TOKEN,
+                tokenYMint: DEFAULT_SELL_TOKEN,
+              }),
+            queryKey: ["pools", "getPoolDetails"],
           })),
         },
       },

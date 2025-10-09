@@ -2,37 +2,39 @@
 
 import {
   ERROR_MESSAGES,
-  isWarningMessage,
   useLiquidityTracking,
   useTokenAccounts,
   useTransactionState,
-  useTransactionStatus,
   useTransactionToasts,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
-import type { CreatePoolTransactionInput, Token } from "@dex-web/orpc/schemas";
+import type {
+  CreatePoolTransactionInput,
+  Token,
+} from "@dex-web/orpc/schemas/index";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import {
-  convertToDecimal,
   numberFormatHelper,
   parseAmount,
   sortSolanaAddresses,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
+import { useSuspenseQueries } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
-import { z } from "zod";
+import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
+import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { WalletButton } from "../../../_components/WalletButton";
 import { EMPTY_TOKEN, LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
+import { generateTrackingId } from "../../../_utils/generateTrackingId";
 import { isSquadsX } from "../../../_utils/isSquadsX";
 import {
   liquidityPageParsers,
@@ -40,7 +42,6 @@ import {
 } from "../../../_utils/searchParams";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getCreatePoolFormButtonMessage } from "../_utils/getCreatePoolFormButtonMessage";
-import { invalidateLiquidityQueries } from "../_utils/invalidateLiquidityCache";
 import { requestCreatePoolTransactionSigning } from "../_utils/requestCreatePoolTransactionSigning";
 import { validateHasSufficientBalance } from "../_utils/validateHasSufficientBalance";
 
@@ -67,7 +68,6 @@ const serialize = createSerializer(liquidityPageParsers);
 
 export function CreatePoolForm() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { publicKey, wallet, signTransaction } = useWallet();
   const { trackLiquidity, trackError } = useAnalytics();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
@@ -126,11 +126,16 @@ export function CreatePoolForm() {
     tokenBAddress,
   });
 
+  const { prices: tokenPrices } = useTokenPricesMap([
+    tokenAAddress,
+    tokenBAddress,
+  ]);
+
   const metadata = tokenMetadata as Record<string, Token>;
   const tokenADetails = metadata[tokenXMint];
   const tokenBDetails = metadata[tokenYMint];
 
-  const { trackSigned, trackConfirmed, trackFailed } = useLiquidityTracking({
+  const { trackSigned, trackConfirmed } = useLiquidityTracking({
     trackError: (error: unknown, context?: Record<string, unknown>) => {
       trackError({
         context: "liquidity",
@@ -158,118 +163,6 @@ export function CreatePoolForm() {
     transactionType: "POOL_CREATION",
   });
 
-  const statusChecker = useTransactionStatus({
-    checkStatus: async (signature: string) => {
-      const response = await client.liquidity.checkLiquidityTransactionStatus({
-        signature,
-      });
-      return {
-        data: response,
-        error: response.error,
-        status: response.status,
-      };
-    },
-    failStates: ["failed"],
-    maxAttempts: 15,
-    onFailure: (result) => {
-      createState.reset();
-      toasts.dismiss();
-      const error = new Error(result.error || "Unknown error");
-      const isWarning = isWarningMessage(error);
-      if (isWarning) {
-        toasts.showInfoToast(
-          `Transaction status: ${result.error || "Unknown error"}`,
-        );
-      } else {
-        toasts.showErrorToast(
-          `Transaction failed: ${result.error || "Unknown error"}`,
-        );
-      }
-    },
-    onStatusUpdate: (status, attempt) => {
-      toasts.dismiss();
-      toasts.showStatusToast(
-        `Finalizing transaction... (${attempt}/15) - ${status}`,
-      );
-    },
-    onSuccess: (result) => {
-      toasts.dismiss();
-      if (result.error) {
-        createState.reset();
-        const error = new Error(result.error);
-        const isWarning = isWarningMessage(error);
-        if (isWarning) {
-          toasts.showInfoToast(`Transaction status: ${result.error}`);
-        } else {
-          toasts.showErrorToast(`Transaction failed: ${result.error}`);
-        }
-
-        const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
-        const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
-        trackFailed({
-          action: "add",
-          amountA: tokenAAmount,
-          amountB: tokenBAmount,
-          tokenA: tokenAAddress || "",
-          tokenB: tokenBAddress || "",
-          transactionHash: "",
-        });
-        return;
-      }
-
-      createState.reset();
-      form.reset();
-      const tokenAAmount = parseAmount(form.state.values.tokenAAmount);
-      const tokenBAmount = parseAmount(form.state.values.tokenBAmount);
-
-      trackConfirmed({
-        action: "add",
-        amountA: tokenAAmount,
-        amountB: tokenBAmount,
-        tokenA: tokenAAddress || "",
-        tokenB: tokenBAddress || "",
-        transactionHash: "",
-      });
-
-      const successMessage = !isSquadsX(wallet)
-        ? `CREATED POOL: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
-        : undefined;
-
-      toasts.showSuccessToast(successMessage);
-      refetchBuyTokenAccount();
-      refetchSellTokenAccount();
-
-      const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
-        tokenAAddress,
-        tokenBAddress,
-      );
-
-      invalidateLiquidityQueries({
-        queryClient,
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
-        walletPublicKey: publicKey?.toBase58() || "",
-      }).catch((error) => {
-        console.error("Cache invalidation failed:", error);
-      });
-
-      const urlWithParams = serialize("liquidity", {
-        tokenAAddress,
-        tokenBAddress,
-        type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
-      });
-      router.push(`/${urlWithParams}`);
-    },
-    onTimeout: () => {
-      createState.reset();
-      toasts.showErrorToast(
-        "Transaction may still be processing. Check explorer for status.",
-      );
-    },
-    retryDelay: 2000,
-    successStates: ["finalized"],
-  });
-
   const formConfig = {
     defaultValues: {
       initialPrice: "1",
@@ -278,28 +171,7 @@ export function CreatePoolForm() {
     } satisfies LiquidityFormSchema,
     onSubmit: async () => {},
     validators: {
-      onChange: liquidityFormSchema,
-      onDynamic: ({ value }: { value: LiquidityFormSchema }) => {
-        if (
-          value.tokenAAmount &&
-          publicKey &&
-          buyTokenAccount?.tokenAccounts?.[0]
-        ) {
-          const tokenANumericValue = value.tokenAAmount.replace(/,/g, "");
-          if (BigNumber(tokenANumericValue).gt(0)) {
-            const tokenAccount = buyTokenAccount.tokenAccounts[0];
-            const maxBalance = convertToDecimal(
-              tokenAccount.amount || 0,
-              tokenAccount.decimals || 0,
-            );
-
-            if (BigNumber(tokenANumericValue).gt(maxBalance.toString())) {
-              const symbol = tokenAccount.symbol || "token";
-              return { tokenAAmount: `Insufficient ${symbol} balance.` };
-            }
-          }
-        }
-      },
+      onBlur: liquidityFormSchema,
     },
   };
 
@@ -386,6 +258,8 @@ export function CreatePoolForm() {
       } satisfies CreatePoolTransactionInput);
 
       if (response.success && response.transaction) {
+        const newTrackingId = generateTrackingId();
+
         trackSigned({
           action: "add",
           amountA: tokenAAmount,
@@ -395,12 +269,44 @@ export function CreatePoolForm() {
         });
 
         requestCreatePoolTransactionSigning({
-          checkTransactionStatus,
+          onSuccess: () => {
+            createState.reset();
+            form.reset();
+
+            trackConfirmed({
+              action: "add",
+              amountA: tokenAAmount,
+              amountB: tokenBAmount,
+              tokenA: tokenAAddress || "",
+              tokenB: tokenBAddress || "",
+              transactionHash: newTrackingId,
+            });
+
+            const successMessage = !isSquadsX(wallet)
+              ? `CREATED POOL: ${form.state.values.tokenAAmount} ${tokenBAddress} + ${form.state.values.tokenBAmount} ${tokenAAddress}`
+              : undefined;
+
+            toasts.showSuccessToast(successMessage);
+            refetchBuyTokenAccount();
+            refetchSellTokenAccount();
+
+            const urlWithParams = serialize("liquidity", {
+              tokenAAddress,
+              tokenBAddress,
+              type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
+            });
+            router.push(`/${urlWithParams}`);
+          },
           publicKey,
           setCreateStep: createState.setStep,
           showCreatePoolStepToast,
           signTransaction,
+          toasts,
+          tokenXMint: tokenXAddress,
+          tokenYMint: tokenYAddress,
+          trackingId: newTrackingId,
           unsignedTransaction: response.transaction,
+          wallet,
         });
       } else {
         throw new Error("Failed to create pool transaction");
@@ -411,59 +317,6 @@ export function CreatePoolForm() {
         error instanceof Error ? error.message : "Unknown error occurred",
       );
       createState.reset();
-    }
-  };
-
-  const checkTransactionStatus = async (signature: string) => {
-    await statusChecker.checkTransactionStatus(signature);
-  };
-
-  const handleInitialPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const price = e.target.value;
-    const tokenBAmount = form.state.values.tokenBAmount.replace(/,/g, "");
-    if (
-      price &&
-      tokenBAmount &&
-      BigNumber(price).gt(0) &&
-      BigNumber(tokenBAmount).gt(0)
-    ) {
-      let calculatedTokenA: string;
-
-      if (initialPriceTokenOrder === "ab") {
-        calculatedTokenA = BigNumber(tokenBAmount)
-          .multipliedBy(price)
-          .toString();
-      } else {
-        calculatedTokenA = BigNumber(tokenBAmount).dividedBy(price).toString();
-      }
-
-      form.setFieldValue("tokenAAmount", calculatedTokenA);
-    }
-  };
-
-  const handleAmountChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "buy" | "sell",
-  ) => {
-    const value = e.target.value.replace(/,/g, "");
-    const price = form.state.values.initialPrice || "1";
-
-    if (type === "sell") {
-      if (BigNumber(value).gt(0) && BigNumber(price).gt(0)) {
-        const calculatedTokenA =
-          initialPriceTokenOrder === "ab"
-            ? BigNumber(value).multipliedBy(price).toString()
-            : BigNumber(value).dividedBy(price).toString();
-        form.setFieldValue("tokenAAmount", calculatedTokenA);
-      }
-    } else {
-      if (BigNumber(value).gt(0) && BigNumber(price).gt(0)) {
-        const calculatedTokenB =
-          initialPriceTokenOrder === "ab"
-            ? BigNumber(value).dividedBy(price).toString()
-            : BigNumber(value).multipliedBy(price).toString();
-        form.setFieldValue("tokenBAmount", calculatedTokenB);
-      }
     }
   };
 
@@ -502,6 +355,23 @@ export function CreatePoolForm() {
               <SelectTokenButton returnUrl="liquidity" type="sell" />
             </div>
             <form.Field
+              listeners={{
+                onChange: ({ value, fieldApi }) => {
+                  const cleanValue = value.replace(/,/g, "");
+                  const price = fieldApi.form.state.values.initialPrice || "1";
+
+                  if (BigNumber(cleanValue).gt(0) && BigNumber(price).gt(0)) {
+                    const calculatedTokenA =
+                      initialPriceTokenOrder === "ab"
+                        ? BigNumber(cleanValue).multipliedBy(price).toString()
+                        : BigNumber(cleanValue).dividedBy(price).toString();
+                    fieldApi.form.setFieldValue(
+                      "tokenAAmount",
+                      calculatedTokenA,
+                    );
+                  }
+                },
+              }}
               name="tokenBAmount"
               validators={{
                 onChange: ({ value }) => {
@@ -510,7 +380,6 @@ export function CreatePoolForm() {
                     tokenAccount: sellTokenAccount?.tokenAccounts[0],
                   });
                 },
-                onChangeListenTo: ["tokenAAmount"],
               }}
             >
               {(field) => (
@@ -519,10 +388,10 @@ export function CreatePoolForm() {
                   name={field.name}
                   onBlur={field.handleBlur}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "sell");
                     field.handleChange(e.target.value);
                   }}
                   tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                  tokenPrice={tokenBAddress ? tokenPrices[tokenBAddress] : null}
                   value={field.state.value}
                 />
               )}
@@ -546,6 +415,23 @@ export function CreatePoolForm() {
               <SelectTokenButton returnUrl="liquidity" type="buy" />
             </div>
             <form.Field
+              listeners={{
+                onChange: ({ value, fieldApi }) => {
+                  const cleanValue = value.replace(/,/g, "");
+                  const price = fieldApi.form.state.values.initialPrice || "1";
+
+                  if (BigNumber(cleanValue).gt(0) && BigNumber(price).gt(0)) {
+                    const calculatedTokenB =
+                      initialPriceTokenOrder === "ab"
+                        ? BigNumber(cleanValue).dividedBy(price).toString()
+                        : BigNumber(cleanValue).multipliedBy(price).toString();
+                    fieldApi.form.setFieldValue(
+                      "tokenBAmount",
+                      calculatedTokenB,
+                    );
+                  }
+                },
+              }}
               name="tokenAAmount"
               validators={{
                 onChange: ({ value }) => {
@@ -554,7 +440,6 @@ export function CreatePoolForm() {
                     tokenAccount: buyTokenAccount?.tokenAccounts[0],
                   });
                 },
-                onChangeListenTo: ["tokenBAmount"],
               }}
             >
               {(field) => (
@@ -563,10 +448,10 @@ export function CreatePoolForm() {
                   name={field.name}
                   onBlur={field.handleBlur}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "buy");
                     field.handleChange(e.target.value);
                   }}
                   tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                  tokenPrice={tokenAAddress ? tokenPrices[tokenAAddress] : null}
                   value={field.state.value}
                 />
               )}
@@ -604,7 +489,38 @@ export function CreatePoolForm() {
                     </Text.Body2>
                   </div>
                 </div>
-                <form.Field name="initialPrice">
+                <form.Field
+                  listeners={{
+                    onChange: ({ value, fieldApi }) => {
+                      const tokenBAmount =
+                        fieldApi.form.state.values.tokenBAmount.replace(
+                          /,/g,
+                          "",
+                        );
+                      if (
+                        value &&
+                        tokenBAmount &&
+                        BigNumber(value).gt(0) &&
+                        BigNumber(tokenBAmount).gt(0)
+                      ) {
+                        const calculatedTokenA =
+                          initialPriceTokenOrder === "ab"
+                            ? BigNumber(tokenBAmount)
+                                .multipliedBy(value)
+                                .toString()
+                            : BigNumber(tokenBAmount)
+                                .dividedBy(value)
+                                .toString();
+
+                        fieldApi.form.setFieldValue(
+                          "tokenAAmount",
+                          calculatedTokenA,
+                        );
+                      }
+                    },
+                  }}
+                  name="initialPrice"
+                >
                   {(field) => (
                     <FormFieldset
                       controls={
@@ -620,7 +536,6 @@ export function CreatePoolForm() {
                       name={field.name}
                       onBlur={field.handleBlur}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        handleInitialPriceChange(e);
                         field.handleChange(e.target.value);
                       }}
                       value={field.state.value}

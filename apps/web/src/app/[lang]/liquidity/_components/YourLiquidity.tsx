@@ -1,5 +1,5 @@
 "use client";
-import type { Token } from "@dex-web/orpc/schemas";
+import type { Token } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Text } from "@dex-web/ui";
 import {
   convertToDecimal,
@@ -8,16 +8,11 @@ import {
   truncate,
 } from "@dex-web/utils";
 import BigNumber from "bignumber.js";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useUserLiquidity } from "../../../../hooks/queries/useLiquidityQueries";
-import {
-  usePoolDetailsSuspense,
-  usePoolReservesSuspense,
-} from "../../../../hooks/queries/usePoolQueries";
-import {
-  useTokenMetadataSuspense,
-  useTokenPriceSuspense,
-} from "../../../../hooks/queries/useTokenQueries";
+import { usePoolReserves } from "../../../../hooks/queries/usePoolQueries";
+import { useTokenMetadataSuspense } from "../../../../hooks/queries/useTokenQueries";
+import { useTokenPricesBatch } from "../../../../hooks/useTokenPrices";
 import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import {
   DEFAULT_BUY_TOKEN,
@@ -64,82 +59,73 @@ export function YourLiquidity({
     tokenYAddress,
   ]);
 
-  const { data: poolDetails, isFetching: isPoolFetching } =
-    usePoolDetailsSuspense(tokenXAddress, tokenYAddress);
+  const { data: poolReserves, isFetching: isPoolReservesFetching } =
+    usePoolReserves(tokenXAddress, tokenYAddress, {
+      enabled: shouldFetchLiquidity,
+    });
 
-  const { data: poolReserves, isFetching: isReservesFetching } =
-    usePoolReservesSuspense(tokenXAddress, tokenYAddress);
-
-  const { data: tokenXPrice } = useTokenPriceSuspense(tokenXAddress);
-  const { data: tokenYPrice } = useTokenPriceSuspense(tokenYAddress);
+  const priceResults = useTokenPricesBatch([tokenXAddress, tokenYAddress]);
+  const tokenXPrice = priceResults[0]?.data;
+  const tokenYPrice = priceResults[1]?.data;
 
   const tokenMetadataMap =
     (tokenMetadata as Record<string, Token | undefined>) ?? {};
 
-  const createFallbackTokenDetails = (address: string): Token => ({
-    address,
+  const tokenXDetails: Token = tokenMetadataMap[tokenXAddress] ?? {
+    address: tokenXAddress,
     decimals: 0,
-    symbol: truncate(address),
-  });
+    symbol: truncate(tokenXAddress),
+  };
 
-  const tokenXDetails =
-    tokenMetadataMap[tokenXAddress] ??
-    createFallbackTokenDetails(tokenXAddress);
-  const tokenYDetails =
-    tokenMetadataMap[tokenYAddress] ??
-    createFallbackTokenDetails(tokenYAddress);
+  const tokenYDetails: Token = tokenMetadataMap[tokenYAddress] ?? {
+    address: tokenYAddress,
+    decimals: 0,
+    symbol: truncate(tokenYAddress),
+  };
 
-  const liquidityCalculations = useMemo(() => {
-    if (
-      !userLiquidity?.hasLiquidity ||
-      !userLiquidity?.lpTokenBalance ||
-      userLiquidity.lpTokenBalance === 0 ||
-      !poolDetails ||
-      !poolReserves ||
-      poolReserves.totalLpSupply === 0
-    ) {
-      return {
-        totalUsdValue: 0,
-        userLpShare: 0,
-        userTokenXAmount: 0,
-        userTokenYAmount: 0,
-      };
-    }
+  let liquidityCalculations = {
+    totalUsdValue: 0,
+    userLpShare: 0,
+    userTokenXAmount: 0,
+    userTokenYAmount: 0,
+  };
 
+  if (
+    userLiquidity?.lpTokenBalance &&
+    poolReserves?.exists &&
+    poolReserves.totalLpSupply
+  ) {
     const userLpBalance = convertToDecimal(
       userLiquidity.lpTokenBalance,
       userLiquidity.decimals,
     );
-
     const userLpShare = userLpBalance.dividedBy(poolReserves.totalLpSupply);
-
-    const userTokenYAmount = userLpShare.mul(poolReserves.reserveY).toNumber();
     const userTokenXAmount = userLpShare.mul(poolReserves.reserveX).toNumber();
+    const userTokenYAmount = userLpShare.mul(poolReserves.reserveY).toNumber();
 
-    const tokenYValue = BigNumber(userTokenYAmount).multipliedBy(
-      tokenYPrice.price || 0,
-    );
     const tokenXValue = BigNumber(userTokenXAmount).multipliedBy(
-      tokenXPrice.price || 0,
+      tokenXPrice?.price || 0,
     );
-    const totalUsdValue = tokenYValue.plus(tokenXValue).toNumber();
+    const tokenYValue = BigNumber(userTokenYAmount).multipliedBy(
+      tokenYPrice?.price || 0,
+    );
 
-    return {
-      totalUsdValue,
+    liquidityCalculations = {
+      totalUsdValue: tokenXValue.plus(tokenYValue).toNumber(),
       userLpShare: userLpShare.toNumber(),
       userTokenXAmount,
       userTokenYAmount,
     };
-  }, [userLiquidity, poolReserves, tokenXPrice, tokenYPrice, poolDetails]);
+  }
 
-  const isBackgroundFetching =
-    isLiquidityFetching || isPoolFetching || isReservesFetching;
+  const isBackgroundFetching = isLiquidityFetching || isPoolReservesFetching;
 
-  if (
+  const isInitialLoading =
     shouldFetchLiquidity &&
-    isBackgroundFetching &&
-    !userLiquidity?.hasLiquidity
-  ) {
+    (isLiquidityFetching || isPoolReservesFetching) &&
+    !userLiquidity;
+
+  if (isInitialLoading) {
     return (
       <div className="mt-4 w-full max-w-md">
         <div className="flex flex-col gap-4">
@@ -173,13 +159,12 @@ export function YourLiquidity({
     );
   }
 
-  if (
-    !shouldFetchLiquidity ||
-    !userLiquidity?.hasLiquidity ||
-    !userLiquidity?.lpTokenBalance ||
-    userLiquidity.lpTokenBalance === 0 ||
-    !poolDetails
-  ) {
+  const hasLiquidity =
+    shouldFetchLiquidity &&
+    userLiquidity?.hasLiquidity &&
+    userLiquidity.lpTokenBalance > 0;
+
+  if (!hasLiquidity) {
     return <div className="mt-4 w-full max-w-md" />;
   }
 
@@ -259,8 +244,14 @@ export function YourLiquidity({
         poolReserves={poolReserves}
         tokenXAddress={tokenXAddress}
         tokenXDetails={tokenXDetails}
+        tokenXPrice={
+          tokenXPrice || { mint: tokenXAddress, price: 0, quoteCurrency: "USD" }
+        }
         tokenYAddress={tokenYAddress}
         tokenYDetails={tokenYDetails}
+        tokenYPrice={
+          tokenYPrice || { mint: tokenYAddress, price: 0, quoteCurrency: "USD" }
+        }
         userLiquidity={userLiquidity}
       />
     </div>

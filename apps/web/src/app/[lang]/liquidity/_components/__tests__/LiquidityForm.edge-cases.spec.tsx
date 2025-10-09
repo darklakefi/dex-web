@@ -31,15 +31,21 @@ vi.mock("../../../_components/SkeletonTokenInput", () => ({
 }));
 vi.mock("@dex-web/orpc", () => ({
   client: {
-    liquidity: {
-      checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
-        error: null,
-        status: "finalized",
+    dexGateway: {
+      addLiquidity: vi.fn().mockResolvedValue({
+        unsignedTransaction: "mock-transaction-base64",
       }),
-      createLiquidityTransaction: vi.fn().mockResolvedValue({
+      checkTradeStatus: vi.fn().mockResolvedValue({
+        status: 0,
+        tradeId: "mock-trade-id",
+      }),
+      submitSignedTransaction: vi.fn().mockResolvedValue({
+        errorLogs: [],
         success: true,
-        transaction: "mock-transaction",
+        tradeId: "mock-trade-id",
       }),
+    },
+    liquidity: {
       getAddLiquidityReview: vi.fn().mockResolvedValue({ tokenAmount: 50 }),
     },
     pools: {
@@ -228,9 +234,8 @@ describe.skip("LiquidityForm Edge Cases", () => {
           },
         }),
       }));
-      vi.mocked(client.liquidity.createLiquidityTransaction).mockResolvedValue({
-        success: true,
-        transaction: "mock-transaction",
+      vi.mocked(client.dexGateway.addLiquidity).mockResolvedValue({
+        unsignedTransaction: "mock-transaction-base64",
       });
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
       await waitFor(() => {
@@ -275,15 +280,12 @@ describe.skip("LiquidityForm Edge Cases", () => {
         }),
       }));
       let callCount = 0;
-      vi.mocked(client.liquidity.createLiquidityTransaction).mockImplementation(
-        () => {
-          callCount++;
-          return Promise.resolve({
-            success: true,
-            transaction: `mock-transaction-${callCount}`,
-          });
-        },
-      );
+      vi.mocked(client.dexGateway.addLiquidity).mockImplementation(() => {
+        callCount++;
+        return Promise.resolve({
+          unsignedTransaction: `mock-transaction-${callCount}`,
+        });
+      });
       render(<LiquidityForm />, { wrapper: createTestWrapper() });
       await waitFor(() => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
@@ -295,9 +297,7 @@ describe.skip("LiquidityForm Edge Cases", () => {
       await user.click(submitButton);
       await user.click(submitButton);
       await user.click(submitButton);
-      expect(client.liquidity.createLiquidityTransaction).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(client.dexGateway.addLiquidity).toHaveBeenCalledTimes(1);
     });
   });
   describe("Memory Management", () => {

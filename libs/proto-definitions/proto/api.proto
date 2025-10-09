@@ -106,6 +106,7 @@ message CreateUnsignedTransactionResponse {
     string unsigned_transaction = 1;
     string order_id             = 2;
     string trade_id             = 3;
+    string ref_code             = 4;
 }
 
 message SendSignedTransactionRequest {
@@ -320,6 +321,113 @@ message GetCustomTokenResponse {
     TokenMetadata token_metadata = 1;
 }
 
+message InitPoolRequest {
+    string token_mint_x = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    string token_mint_y = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    string user_address = 3 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    uint64 amount_x = 4 [(validate.rules).uint64.gt = 0];
+    uint64 amount_y = 5 [(validate.rules).uint64.gt = 0];
+    string ref_code = 6;
+    string label = 7;
+}
+
+message InitPoolResponse {
+    // Base64 encoded transaction
+    string unsigned_transaction = 1;
+}
+
+
+message AddLiquidityRequest {
+    string token_mint_x = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    string token_mint_y = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    string user_address = 3 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    uint64 amount_lp = 4 [(validate.rules).uint64.gt = 0];
+    uint64 max_amount_x = 5 [(validate.rules).uint64.gt = 0];
+    uint64 max_amount_y = 6 [(validate.rules).uint64.gt = 0];
+    string ref_code = 7;
+    string label = 8;
+}
+
+message AddLiquidityResponse {
+    // Base64 encoded transaction
+    string unsigned_transaction = 1;
+}
+
+message RemoveLiquidityRequest {
+    string token_mint_x = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    string token_mint_y = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    string user_address = 3 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    uint64 amount_lp = 4 [(validate.rules).uint64.gt = 0];
+    uint64 min_amount_x = 5 [(validate.rules).uint64.gt = 0];
+    uint64 min_amount_y = 6 [(validate.rules).uint64.gt = 0];
+    string ref_code = 7;
+    string label = 8;
+}
+
+message RemoveLiquidityResponse {
+    // Base64 encoded transaction
+    string unsigned_transaction = 1;
+}
+
+message QuoteAddLiquidityRequest {
+    string token_mint_x = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+
+    string token_mint_y = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    uint64 token_x_amount = 3 [(validate.rules).uint64.gt = 0];
+    uint64 token_y_amount = 4 [(validate.rules).uint64.gt = 0];
+    uint64 slippage_tolerance = 5 [(validate.rules).uint64.gte = 0, (validate.rules).uint64.lt = 1000000];
+}
+
+message QuoteAddLiquidityResponse {
+    uint64 lp_token_amount = 1;
+    uint64 lp_token_decimals = 2;
+    double lp_token_amount_display = 3;
+}
+
 
 service SolanaGatewayService {
     rpc CreateUnsignedTransaction(CreateUnsignedTransactionRequest)
@@ -354,6 +462,21 @@ service SolanaGatewayService {
 
     rpc GetCustomToken(GetCustomTokenRequest)
         returns (GetCustomTokenResponse);
+
+    rpc InitPool(InitPoolRequest)
+        returns (InitPoolResponse);
+
+    rpc AddLiquidity(AddLiquidityRequest)
+        returns (AddLiquidityResponse);
+
+    rpc RemoveLiquidity(RemoveLiquidityRequest)
+        returns (RemoveLiquidityResponse);
+
+    rpc Quote(QuoteRequest)
+        returns (QuoteResponse);
+
+    rpc QuoteAddLiquidity(QuoteAddLiquidityRequest)
+        returns (QuoteAddLiquidityResponse);
 }
 
 
@@ -373,6 +496,17 @@ service DarklakeIntegrationsService {
     rpc GetTradesListByUser(GetTradesListByUserRequest)
         returns (GetTradesListByUserResponse);
 
-}
+    rpc InitPool(InitPoolRequest)
+        returns (InitPoolResponse);
 
+    rpc AddLiquidity(AddLiquidityRequest)
+        returns (AddLiquidityResponse);
+
+    rpc RemoveLiquidity(RemoveLiquidityRequest)
+        returns (RemoveLiquidityResponse);
+
+    rpc QuoteAddLiquidity(QuoteAddLiquidityRequest)
+        returns (QuoteAddLiquidityResponse);
+
+}
 

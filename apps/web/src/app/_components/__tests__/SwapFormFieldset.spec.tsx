@@ -11,6 +11,14 @@ import { DEFAULT_BUY_TOKEN, DEFAULT_SELL_TOKEN } from "../../_utils/constants";
 import { FormFieldset } from "../FormFieldset";
 
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
+vi.mock("@dex-web/utils", () => ({
+  convertToDecimal: vi.fn((amount, decimals) => ({
+    div: vi.fn().mockReturnThis(),
+    toFixed: vi.fn(() => "500"),
+    toString: () => (amount / 10 ** decimals).toString(),
+  })),
+  numberFormatHelper: vi.fn(() => "1000.00"),
+}));
 const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -26,12 +34,24 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     </NuqsTestingAdapter>
   </NextIntlClientProvider>
 );
-describe.skip("SwapFormFieldset", () => {
+describe("SwapFormFieldset", () => {
   const handleChange = vi.fn();
-  it("renders label, balance, and NumericInput", async () => {
-    render(<FormFieldset name="tokenAAmount" onChange={handleChange} />, {
-      wrapper,
-    });
+  it.skip("renders label, balance, and NumericInput", async () => {
+    render(
+      <FormFieldset
+        name="tokenAAmount"
+        onChange={handleChange}
+        tokenAccount={{
+          address: "test-address",
+          amount: 1000000000,
+          decimals: 6,
+          symbol: "SOL",
+        }}
+      />,
+      {
+        wrapper,
+      },
+    );
     expect(await screen.findByText("Half")).toBeDefined();
     expect(await screen.findByText("Max")).toBeDefined();
     expect(await screen.findByText("1000 SOL")).toBeDefined();

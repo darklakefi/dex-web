@@ -95,7 +95,11 @@ export function getLiquidityButtonState({
       return "ADD_LIQUIDITY";
     }
 
-    return "CALCULATING";
+    if (isCalculating) {
+      return "CALCULATING";
+    }
+
+    return "ENTER_AMOUNT";
   }
 }
 

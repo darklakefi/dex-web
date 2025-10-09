@@ -1,6 +1,6 @@
 "use client";
 
-import { convertToDecimal } from "@dex-web/utils";
+import { exceedsBalance } from "@dex-web/utils";
 import BigNumber from "bignumber.js";
 import { useMemo } from "react";
 import type {
@@ -64,11 +64,13 @@ export function useLiquidityValidation({
     if (hasWallet && sellAmount && BigNumber(sellAmount).gt(0)) {
       const sellTokenAcc = sellTokenAccount?.tokenAccounts?.[0];
       if (sellTokenAcc) {
-        const maxBalance = convertToDecimal(
-          sellTokenAcc.amount || 0,
-          sellTokenAcc.decimals || 0,
-        );
-        if (BigNumber(sellAmount).gt(maxBalance.toString())) {
+        if (
+          exceedsBalance(
+            sellAmount,
+            sellTokenAcc.amount || 0,
+            sellTokenAcc.decimals || 0,
+          )
+        ) {
           errors.tokenBAmount = `Insufficient ${sellTokenAcc.symbol || "token"} balance`;
           hasInsufficientBalance = true;
         }
@@ -78,11 +80,13 @@ export function useLiquidityValidation({
     if (hasWallet && buyAmount && BigNumber(buyAmount).gt(0)) {
       const buyTokenAcc = buyTokenAccount?.tokenAccounts?.[0];
       if (buyTokenAcc) {
-        const maxBalance = convertToDecimal(
-          buyTokenAcc.amount || 0,
-          buyTokenAcc.decimals || 0,
-        );
-        if (BigNumber(buyAmount).gt(maxBalance.toString())) {
+        if (
+          exceedsBalance(
+            buyAmount,
+            buyTokenAcc.amount || 0,
+            buyTokenAcc.decimals || 0,
+          )
+        ) {
           errors.tokenAAmount = `Insufficient ${buyTokenAcc.symbol || "token"} balance`;
           hasInsufficientBalance = true;
         }

@@ -1,6 +1,9 @@
 "use client";
 
-import { client } from "@dex-web/orpc";
+import type { GetPoolReservesOutput } from "@dex-web/orpc";
+import { tanstackClient } from "@dex-web/orpc";
+import { sortSolanaAddresses } from "@dex-web/utils";
+import type { UseQueryResult } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
 interface UsePoolDataParams {
@@ -9,16 +12,11 @@ interface UsePoolDataParams {
   priority?: "low" | "normal" | "high" | "critical";
 }
 
-interface PoolData {
-  exists: boolean;
-  lpMint: string;
-  reserveX: number;
-  reserveY: number;
-  totalLpSupply: number;
-  tokenXMint: string;
-  tokenYMint: string;
-  lastUpdate: number;
-}
+/**
+ * Raw pool data returned from the API.
+ * This is the base type that features can transform into their own shapes.
+ */
+export type PoolData = GetPoolReservesOutput;
 
 const STALE_TIME_CONFIG = {
   critical: 3_000,
@@ -34,34 +32,41 @@ const REFETCH_INTERVAL_CONFIG = {
   normal: 30_000,
 } as const;
 
-export function usePoolData({
-  tokenXMint,
-  tokenYMint,
-  priority = "normal",
-}: UsePoolDataParams) {
+/**
+ * Generic hook to fetch pool data. Returns raw API data by default.
+ * Consumers can provide a select function to transform the data to their feature-specific types.
+ *
+ * Following Implementation Answer #3: Shared hooks should not depend on feature types.
+ * This pattern keeps the hook reusable while allowing features to define their own transformations.
+ *
+ * @example
+ * // Use raw data
+ * const { data } = usePoolData({ tokenXMint, tokenYMint });
+ *
+ * @example
+ * // Transform to feature-specific type
+ * const { data } = usePoolData<PoolDetails>({
+ *   tokenXMint,
+ *   tokenYMint,
+ *   select: transformToPoolDetails,
+ * });
+ *
+ * @param params - tokenXMint, tokenYMint, optional priority, and optional select function
+ * @returns TanStack Query result with either raw PoolData or transformed TData
+ */
+export function usePoolData<TData = PoolData>(
+  params: UsePoolDataParams & {
+    select?: (data: PoolData) => TData;
+  },
+): UseQueryResult<TData, Error> {
+  const { tokenXMint, tokenYMint, priority = "normal", select } = params;
   const poolKey = createSortedPoolKey(tokenXMint, tokenYMint);
 
   return useQuery({
+    ...tanstackClient.pools.getPoolReserves.queryOptions({
+      input: { tokenXMint, tokenYMint },
+    }),
     gcTime: 5 * 60 * 1000,
-    queryFn: async (): Promise<PoolData | null> => {
-      const result = await client.pools.getPoolReserves({
-        tokenXMint,
-        tokenYMint,
-      });
-
-      if (!result || !result.exists) return null;
-
-      return {
-        exists: result.exists,
-        lastUpdate: Date.now(),
-        lpMint: result.lpMint,
-        reserveX: result.reserveX,
-        reserveY: result.reserveY,
-        tokenXMint,
-        tokenYMint,
-        totalLpSupply: result.totalLpSupply,
-      };
-    },
     queryKey: ["pool", poolKey, tokenXMint, tokenYMint],
     refetchInterval: REFETCH_INTERVAL_CONFIG[priority],
     refetchIntervalInBackground: true,
@@ -72,13 +77,17 @@ export function usePoolData({
       return failureCount < maxRetries;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    select,
     staleTime: STALE_TIME_CONFIG[priority],
   });
 }
 
 function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {
-  const [tokenA, tokenB] = [tokenXMint, tokenYMint].sort();
-  return `${tokenA}-${tokenB}`;
+  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+    tokenXMint,
+    tokenYMint,
+  );
+  return `${tokenXAddress}-${tokenYAddress}`;
 }
 
-export type { PoolData, UsePoolDataParams };
+export type { UsePoolDataParams };

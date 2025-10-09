@@ -21,7 +21,7 @@ const bitsumishiRegular = localFont({
 
 const classicConsoleNeue = localFont({
   display: "swap",
-  preload: false,
+  preload: true,
   src: "./_fonts/classic-console-neue.woff2",
   style: "normal",
   variable: "--font-classic-console-neue",
@@ -41,9 +41,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
   modal: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale?: string }>;
 }) {
-  const { locale } = await params;
+  const resolvedParams = await params;
+  const locale = resolvedParams.locale || "en";
 
   return (
     <html
@@ -57,7 +58,9 @@ export default async function RootLayout({
               <GeolocationAwareDisclaimerProvider />
               <Toaster expand={true} position="top-right" visibleToasts={5} />
               <PageLayout
-                backgroundImageUrl={backgroundImage.src}
+                backgroundImageUrl={
+                  (backgroundImage as unknown as { src: string }).src
+                }
                 footer={<AppFooter />}
                 header={<AppHeader />}
               >

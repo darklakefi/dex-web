@@ -1,4 +1,4 @@
-import { tokens } from "@dex-web/db/schemas";
+import { tokens } from "@dex-web/db";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { tokenSchema } from "./token.schema";
@@ -7,7 +7,6 @@ export const tokenSelectSchema = createSelectSchema(tokens);
 
 export const getTokensInputSchema = z
   .object({
-    allowList: z.array(z.string()).optional(),
     limit: z.number().int().min(1).max(100).default(50),
     offset: z.number().int().min(0).default(0),
     query: z.string().optional(),

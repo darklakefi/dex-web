@@ -4,7 +4,7 @@ import { tanstackClient } from "@dex-web/orpc";
 import type {
   GetAddLiquidityReviewOutput,
   GetUserLiquidityOutput,
-} from "@dex-web/orpc/schemas";
+} from "@dex-web/orpc/schemas/index";
 import {
   type UseQueryOptions,
   type UseQueryResult,
@@ -29,9 +29,12 @@ export function useUserLiquidity(
   return useQuery({
     ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
       input: { ownerAddress, tokenXMint, tokenYMint },
-      ...options,
     }),
     queryKey: queryKeys.liquidity.user(ownerAddress, tokenXMint, tokenYMint),
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 30_000,
+    ...options,
   });
 }
 

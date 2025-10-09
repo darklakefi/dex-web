@@ -38,7 +38,6 @@ export function LiquidityFormSkeleton({
   testId = "liquidity-form-skeleton",
   "aria-label": ariaLabel = "Loading liquidity form",
 }: LiquidityFormSkeletonProps = {}) {
-  // Suppress unused parameter warnings for accessibility props
   void testId;
   void ariaLabel;
   return (

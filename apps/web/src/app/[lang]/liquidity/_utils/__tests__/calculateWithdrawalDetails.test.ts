@@ -1,22 +1,5 @@
-import Decimal from "decimal.js";
-import { describe, expect, it, vi } from "vitest";
-import {
-  calculateWithdrawalDetails,
-  InputType,
-} from "../calculateWithdrawalDetails";
-
-vi.mock("@dex-web/utils", () => ({
-  convertToDecimal: vi.fn((amount: number, decimals: number) => {
-    return new Decimal(amount).div(new Decimal(10).pow(decimals));
-  }),
-  sortSolanaAddresses: vi.fn((tokenA: string, tokenB: string) => {
-    const sorted = [tokenA, tokenB].sort();
-    return {
-      tokenXAddress: sorted[0],
-      tokenYAddress: sorted[1],
-    };
-  }),
-}));
+import { calculateWithdrawalDetails, InputType } from "@dex-web/utils";
+import { describe, expect, it } from "vitest";
 
 describe("calculateWithdrawalDetails - Fixed Tests", () => {
   const mockUserLiquidity = {

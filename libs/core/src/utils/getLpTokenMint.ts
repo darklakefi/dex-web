@@ -14,16 +14,12 @@ export async function getLpTokenMint(
   tokenAMint: string,
   tokenBMint: string,
 ): Promise<PublicKey> {
-  const mints = [new PublicKey(tokenAMint), new PublicKey(tokenBMint)].sort(
-    (a, b) => a.toBuffer().compare(b.toBuffer()),
-  );
+  const mintAKey = new PublicKey(tokenAMint);
+  const mintBKey = new PublicKey(tokenBMint);
 
-  if (mints.length !== 2) {
-    throw new Error("Invalid number of mints provided");
-  }
-
-  const mintA = mints[0]!;
-  const mintB = mints[1]!;
+  const comparison = mintAKey.toBuffer().compare(mintBKey.toBuffer());
+  const [mintA, mintB] =
+    comparison <= 0 ? [mintAKey, mintBKey] : [mintBKey, mintAKey];
 
   const [ammConfig] = PublicKey.findProgramAddressSync(
     [Buffer.from(AMM_CONFIG_SEED), new BN(0).toArrayLike(Buffer, "le", 4)],

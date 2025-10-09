@@ -43,9 +43,6 @@ export async function validateWithdrawalTransaction(
       );
     }
 
-    const _tokenXMint = new PublicKey(context.tokenXMint);
-    const _tokenYMint = new PublicKey(context.tokenYMint);
-
     const tokenXAccount = await getAccount(
       context.connection,
       userPublicKey,

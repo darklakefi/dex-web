@@ -1,7 +1,6 @@
 "use client";
 
-import { tanstackClient } from "@dex-web/orpc";
-import { getTokensInputSchema, type Token } from "@dex-web/orpc/schemas";
+import type { Token } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Modal, TextInput } from "@dex-web/ui";
 import { pasteFromClipboard, useDebouncedValue } from "@dex-web/utils";
 import {
@@ -10,19 +9,17 @@ import {
   createFormHookContexts,
   useStore,
 } from "@tanstack/react-form";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
-import { Suspense } from "react";
-import useLocalStorageState from "use-local-storage-state";
-import { useWalletPublicKey } from "../../hooks/useWalletCache";
-import { logger } from "../../utils/logger";
+import { Suspense, useCallback, useState } from "react";
+import * as z from "zod";
 import { selectedTokensParsers } from "../_utils/searchParams";
-import { TokenList } from "../[lang]/(swap)/_components/TokenList";
-import { NoResultFound } from "./NoResultFound";
+import { TokenSelectorContent } from "./_hooks/TokenSelectorContent";
+import { useRecentTokens } from "./_hooks/useRecentTokens";
+import { useTokenPrefetching } from "./_hooks/useTokenPrefetching";
 
-const selectTokenModalFormSchema = getTokensInputSchema.pick({
-  query: true,
+const selectTokenModalFormSchema = z.object({
+  query: z.string().default(""),
 });
 
 const { fieldContext, formContext } = createFormHookContexts();
@@ -36,19 +33,15 @@ const { useAppForm } = createFormHook({
   formContext,
 });
 
-const allowUnknownTokenReturnUrls = ["liquidity"];
-
 const serialize = createSerializer(selectedTokensParsers);
 
 const formConfig = {
   defaultValues: {
     query: "",
   },
-  onSubmit: ({ value }: { value: { query: string } }) => {
-    logger.log(value);
-  },
+  onSubmit: () => {},
   validators: {
-    onChange: ({ value }: { value: { query: string } }) =>
+    onBlur: ({ value }: { value: { query: string } }) =>
       selectTokenModalFormSchema.parse(value),
   },
 };
@@ -64,100 +57,92 @@ export function SelectTokenModal({
 }: SelectTokenModalProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: publicKey } = useWalletPublicKey();
-  const connectedWalletAddress: string = publicKey?.toBase58() ?? "";
 
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
-  const handleClose = () => {
-    const from = searchParams.get("from");
-    if (from) {
-      router.replace(from);
-      return;
-    }
-    router.back();
-  };
+  const [isClosing, setIsClosing] = useState(false);
 
-  const [searchedTokens, setSearchedTokens] = useLocalStorageState<{
-    [key: string]: Token[];
-  }>("tokenSearched", {
-    defaultValue: {},
-  });
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
 
-  const walletRecentSearches = searchedTokens[connectedWalletAddress] ?? [];
+    setTimeout(() => {
+      const from = searchParams.get("from");
+      if (from) {
+        router.replace(from as never);
+        return;
+      }
+      router.back();
+    }, 0);
+  }, [searchParams, router]);
 
-  const setRecentSearches = (token: Token) => {
-    if (connectedWalletAddress) {
-      const currentSearches = searchedTokens[connectedWalletAddress] || [];
-      const updatedSearches = [
-        token,
-        ...currentSearches.filter((t) => t.address !== token.address),
-      ].slice(0, 10);
-      setSearchedTokens({
-        ...searchedTokens,
-        [connectedWalletAddress]: updatedSearches,
-      });
-    }
-  };
+  const { recentTokens, addRecentToken } = useRecentTokens();
 
-  const handleSelectToken = (
-    selectedToken: Token,
-    e: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    e.preventDefault();
+  const handleSelectToken = useCallback(
+    (selectedToken: Token, e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
 
-    const currentFrom = searchParams.get("from");
-    const baseReturn = currentFrom || `/${returnUrl}`;
-    const selectedTokenAddress = selectedToken.address;
-    setRecentSearches(selectedToken);
+      const currentFrom = searchParams.get("from");
+      const baseReturn = currentFrom || `/${returnUrl}`;
+      const selectedTokenAddress = selectedToken.address;
+      addRecentToken(selectedToken);
 
-    if (type === "buy") {
-      const sellAddress =
-        selectedTokenAddress === tokenBAddress ? tokenAAddress : tokenBAddress;
+      if (type === "buy") {
+        const sellAddress =
+          selectedTokenAddress === tokenBAddress
+            ? tokenAAddress
+            : tokenBAddress;
 
-      const urlWithParams = serialize(baseReturn, {
-        tokenAAddress: selectedTokenAddress,
-        tokenBAddress: sellAddress,
-      });
+        const urlWithParams = serialize(baseReturn, {
+          tokenAAddress: selectedTokenAddress,
+          tokenBAddress: sellAddress,
+        });
 
-      router.push(urlWithParams);
-    } else {
-      const buyAddress =
-        selectedTokenAddress === tokenAAddress ? tokenBAddress : tokenAAddress;
+        router.push(urlWithParams as never);
+      } else {
+        const buyAddress =
+          selectedTokenAddress === tokenAAddress
+            ? tokenBAddress
+            : tokenAAddress;
 
-      const urlWithParams = serialize(baseReturn, {
-        tokenAAddress: buyAddress,
-        tokenBAddress: selectedTokenAddress,
-      });
+        const urlWithParams = serialize(baseReturn, {
+          tokenAAddress: buyAddress,
+          tokenBAddress: selectedTokenAddress,
+        });
 
-      router.push(urlWithParams);
-    }
-  };
+        router.push(urlWithParams as never);
+      }
+    },
+    [
+      searchParams,
+      returnUrl,
+      addRecentToken,
+      type,
+      tokenBAddress,
+      tokenAAddress,
+      router,
+    ],
+  );
 
   const form = useAppForm(formConfig);
 
   const rawQuery = useStore(form.store, (state) => state.values.query);
   const isInitialLoad = rawQuery === "";
 
-  const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 500);
+  const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 300);
 
-  const { data } = useSuspenseQuery(
-    tanstackClient.tokens.getTokens.queryOptions({
-      input: {
-        limit: 8,
-        offset: 0,
-        query: debouncedQuery,
-      },
-    }),
-  );
+  useTokenPrefetching(rawQuery, isClosing);
 
-  const handlePaste = (field: AnyFieldApi) => {
+  const handlePaste = useCallback((field: AnyFieldApi) => {
     pasteFromClipboard((pasted: string) => {
       field.handleChange(pasted.trim());
     });
-  };
+  }, []);
+
+  if (isClosing) {
+    return null;
+  }
 
   return (
     <Modal onClose={handleClose}>
@@ -196,37 +181,13 @@ export function SelectTokenModal({
         <Suspense
           fallback={<div className="h-32 animate-pulse rounded bg-green-600" />}
         >
-          {isInitialLoad && (
-            <>
-              {walletRecentSearches.length > 0 && (
-                <TokenList
-                  onSelect={handleSelectToken}
-                  title="Recently Searches"
-                  tokens={walletRecentSearches}
-                />
-              )}
-              <TokenList
-                onSelect={handleSelectToken}
-                title="tokens by 24h volume"
-                tokens={data.tokens}
-              />
-            </>
-          )}
-
-          {!isInitialLoad ? (
-            data.tokens.length > 0 ? (
-              <TokenList onSelect={handleSelectToken} tokens={data.tokens} />
-            ) : (
-              <NoResultFound
-                allowUnknownTokens={allowUnknownTokenReturnUrls.includes(
-                  returnUrl,
-                )}
-                className="py-20"
-                handleSelect={handleSelectToken}
-                search={debouncedQuery}
-              />
-            )
-          ) : null}
+          <TokenSelectorContent
+            debouncedQuery={debouncedQuery}
+            isInitialLoad={isInitialLoad}
+            onSelectToken={handleSelectToken}
+            recentTokens={recentTokens}
+            returnUrl={returnUrl}
+          />
         </Suspense>
       </Box>
     </Modal>

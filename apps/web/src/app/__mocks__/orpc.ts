@@ -2,6 +2,25 @@ import Decimal from "decimal.js";
 import { vi } from "vitest";
 
 export const mockTanstackClient = {
+  dexGateway: {
+    quoteAddLiquidity: {
+      query: vi.fn().mockResolvedValue({
+        lpTokenAmount: 1000000000n,
+        lpTokenAmountDisplay: 1000,
+        lpTokenDecimals: 9n,
+      }),
+      queryOptions: vi.fn(() => ({
+        queryFn: () =>
+          Promise.resolve({
+            lpTokenAmount: 1000000000n,
+            lpTokenAmountDisplay: 1000,
+            lpTokenDecimals: 9n,
+          }),
+        queryKey: ["quoteAddLiquidity"],
+        staleTime: 30000,
+      })),
+    },
+  },
   liquidity: {
     createLiquidityTransaction: {
       mutate: vi.fn(),
@@ -77,24 +96,32 @@ vi.mock("@solana/wallet-adapter-react", () => ({
   useWallet: () => mockWalletAdapter,
 }));
 
-vi.mock("@dex-web/utils", () => ({
-  convertToDecimal: vi.fn((amount: number, decimals: number) => {
-    if (typeof amount === "number" && typeof decimals === "number") {
-      return new Decimal(amount).div(new Decimal(10).pow(decimals));
-    }
-    return new Decimal(0);
-  }),
-  formatValueWithThousandSeparator: vi.fn((value) => {
-    if (typeof value === "number") {
-      return value.toLocaleString();
-    }
-    return value;
-  }),
-  sortSolanaAddresses: vi.fn((addrA, addrB) => ({
-    tokenXAddress: addrA || "mock-token-x",
-    tokenYAddress: addrB || "mock-token-y",
-  })),
-}));
+vi.mock("@dex-web/utils", async () => {
+  const actual =
+    await vi.importActual<typeof import("@dex-web/utils")>("@dex-web/utils");
+  return {
+    ...actual,
+    convertToDecimal: vi.fn((amount: number, decimals: number) => {
+      if (typeof amount === "number" && typeof decimals === "number") {
+        return new Decimal(amount).div(new Decimal(10).pow(decimals));
+      }
+      return new Decimal(0);
+    }),
+    formatValueWithThousandSeparator: vi.fn((value) => {
+      if (typeof value === "number") {
+        return value.toLocaleString();
+      }
+      return value;
+    }),
+    sortSolanaAddresses: vi.fn((addrA, addrB) => {
+      const sorted = [addrA, addrB].sort();
+      return {
+        tokenXAddress: sorted[0] || "mock-token-x",
+        tokenYAddress: sorted[1] || "mock-token-y",
+      };
+    }),
+  };
+});
 
 vi.mock("@solana/web3.js", () => ({
   PublicKey: vi.fn().mockImplementation((key) => ({

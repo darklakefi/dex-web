@@ -1,28 +1,45 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `apps/web` is the Next.js App Router entry; group features under `apps/web/src/app`.
-- Shared libraries live in `libs/` (`core`, `transaction-core`, `solana-utils`, `ui`, etc.) and should expose a minimal API from `src/index.ts`.
-- Playwright suites sit in `apps/web-e2e/e2e`; public assets live under `apps/web/public`.
-- Generated outputs (`dist/`, `coverage/`, `storybook-static/`) are disposable and stay out of version control.
+
+- `apps/web` is the Next.js App Router entry; features are grouped under `apps/web/src/app`.
+- Shared libraries are in `libs/` (`core`, `db`, `orpc`, `grpc-client`, `ui`, `utils`) and must expose a minimal API from `src/index.ts`.
+- Playwright suites are in `apps/web-e2e/e2e`. Public assets are in `apps/web/public`.
+- Generated outputs (`dist/`, `.next/`, `coverage/`, `storybook-static/`) are disposable and excluded from version control.
 
 ## Build, Test, and Development Commands
-- `pnpm start` – Next dev server with Turbopack.
-- `pnpm build` – production bundle written to `apps/web/dist`.
-- `pnpm test` – Vitest + Testing Library; append `--watch` when iterating.
-- `pnpm e2e` – Playwright specs (install browsers via `npx playwright install`).
-- `pnpm lint` / `pnpm format` – Nx lint plus Biome formatting.
-- Database utilities: `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:studio`.
-- Extras: `pnpm dep-graph` for dependency maps, `pnpm build-storybook` for UI docs.
+
+- `pnpm start`: Starts the Next.js dev server.
+- `pnpm build`: Creates a production bundle in `dist/apps/web`.
+- `pnpm test`: Runs Vitest unit tests. Append `--watch` for interactive mode.
+- `pnpm e2e`: Runs Playwright E2E tests (install browsers via `npx playwright install`).
+- `pnpm format`: Formats code using Biome.
+- Database commands: `pnpm db:migrate`, `pnpm db:seed`, `pnpm db:studio`.
+- Monorepo commands: `pnpm dep-graph`, `pnpm build-storybook`.
 
 ## Coding Style & Naming Conventions
-Biome enforces two-space indentation, LF endings, double quotes, and sorted Tailwind classes (triggered by Lefthook). Stick to `PascalCase` for components, `useCamelCase` for hooks, and `camelCase` utilities. Colocate route code within the matching folder in `app/`, keep Tailwind tokens in `tailwind.css`, and funnel public exports through each library’s `index.ts` to preserve stable module boundaries.
+
+- Biome enforces code style (2-space indent, LF endings, double quotes). Lefthook triggers formatting on pre-commit.
+- Naming: `PascalCase` for components, `useCamelCase` for hooks, `camelCase` for utilities.
+- Module Boundaries: All public exports must go through a library's `index.ts`.
+- API Communication: All backend communication must use the typed, generated oRPC and gRPC clients. Direct `fetch` calls are disallowed.
 
 ## Testing Guidelines
-Vitest with `happy-dom` powers unit and integration tests; colocate specs in `__tests__` directories using the `*.test.ts(x)` suffix. Generate coverage with `pnpm test -- --coverage` (outputs to `coverage/apps/web`). Extend Playwright flows in `apps/web-e2e/e2e/*.spec.ts` and run `pnpm e2e -- --headed` before you open a PR.
+
+- Unit/integration tests use Vitest with `happy-dom`. Co-locate specs in `__tests__` directories with a `*.test.ts(x)` suffix.
+- Generate test coverage with `pnpm test -- --coverage`.
+- E2E tests are in `apps/web-e2e/e2e/*.spec.ts`. Run with `pnpm e2e -- --headed` during development.
 
 ## Commit & Pull Request Guidelines
-Commits must follow Conventional Commits (see `commitlint.config.ts`) and be GPG/SSH signed. Stage only intentional changes so Lefthook can auto-run Biome. Before pushing, run `pnpm lint`, `pnpm test`, and the relevant Playwright suites; note any coverage or migration impacts in the PR. Describe scope, reference tickets, call out env changes, and include screenshots or Storybook links for UI work. Wait for CircleCI and Nx Cloud checks before requesting review.
+
+- Commits must follow Conventional Commits and be GPG/SSH signed.
+- Before pushing, run `pnpm format`, `pnpm test`, and relevant E2E tests.
+- PR descriptions must detail scope, reference tickets, and include visual proof (screenshots, Storybook links) for UI changes.
+- Wait for all CircleCI and Nx Cloud checks to pass before requesting a review.
 
 ## Tooling & Automation
-Use `pnpm affected:<task>` to limit work to touched projects. Regenerate gRPC types with `pnpm nx run proto-definitions:generate` when editing `libs/proto-definitions/proto`. Keep Drizzle migrations in `libs/db` and document run order in the PR. Secrets load from `.env*`; rely on the examples in `DEVELOPMENT.md` and never commit real credentials.
+
+- Use `pnpm affected:<task>` to run commands only on projects affected by your changes.
+- Regenerate RPC clients with `pnpm nx run proto-definitions:generate` after modifying any `.proto` file in `libs/proto-definitions/proto`.
+- Drizzle migration files are generated in `libs/db`. Document any required migration order in PRs.
+- Environment variables are loaded from `.env` files. Never commit credentials.

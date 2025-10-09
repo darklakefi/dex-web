@@ -1,6 +1,6 @@
 "use client";
 import { tanstackClient } from "@dex-web/orpc";
-import type { Token } from "@dex-web/orpc/schemas";
+import type { Token } from "@dex-web/orpc/schemas/index";
 import { Button, Icon } from "@dex-web/ui";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import { EMPTY_TOKEN } from "../_utils/constants";
 import { selectedTokensParsers } from "../_utils/searchParams";
+import { TokenImage } from "./TokenImage";
 
 interface SelectTokenButtonProps {
   type: "buy" | "sell";
@@ -70,15 +71,13 @@ export function SelectTokenButton({
           src={"/images/token-placeholder.png"}
           width={24}
         />
-      ) : tokenDetails?.imageUrl ? (
-        <Image
-          alt={tokenDetails.symbol}
-          className="size-8 overflow-hidden rounded-full"
-          height={24}
+      ) : tokenDetails ? (
+        <TokenImage
+          address={tokenDetails.address}
+          imageUrl={tokenDetails.imageUrl}
           priority
-          src={tokenDetails.imageUrl}
-          unoptimized
-          width={24}
+          size={32}
+          symbol={tokenDetails.symbol}
         />
       ) : (
         <Icon name="seedlings" />

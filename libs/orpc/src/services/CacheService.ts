@@ -56,7 +56,7 @@ export class CacheService {
   invalidatePattern(pattern: string): number {
     const regex = new RegExp(pattern);
     let deletedCount = 0;
-    for (const key of this.cache.keys()) {
+    for (const key of Array.from(this.cache.keys())) {
       if (regex.test(key)) {
         this.cache.delete(key);
         deletedCount++;
@@ -86,9 +86,8 @@ export class CacheService {
     };
   }
   cleanup(): number {
-    const _now = Date.now();
     let deletedCount = 0;
-    for (const [key, entry] of this.cache.entries()) {
+    for (const [key, entry] of Array.from(this.cache.entries())) {
       if (this.isExpired(entry)) {
         this.cache.delete(key);
         deletedCount++;

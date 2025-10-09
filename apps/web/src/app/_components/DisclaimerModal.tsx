@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getCookie, setCookie } from "../_utils/cookies";
 
 const DISCLAIMER_COOKIE_NAME = "disclaimer_accepted";
-const DISCLAIMER_COOKIE_EXPIRY_DAYS = 365; // 1 year
+const DISCLAIMER_COOKIE_EXPIRY_DAYS = 365;
 
 interface DisclaimerModalProps {
   isOpen: boolean;
@@ -76,7 +76,6 @@ export function useDisclaimerModal() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Check if disclaimer has been accepted
     const hasAccepted = getCookie(DISCLAIMER_COOKIE_NAME);
     if (!hasAccepted) {
       setIsModalOpen(true);
@@ -84,7 +83,6 @@ export function useDisclaimerModal() {
   }, []);
 
   const handleAccept = () => {
-    // Set cookie to remember acceptance
     setCookie(DISCLAIMER_COOKIE_NAME, "true", {
       expires: DISCLAIMER_COOKIE_EXPIRY_DAYS,
       path: "/",

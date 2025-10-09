@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import { submitSignedTransactionHandler } from "../../handlers/dex-gateway/submitSignedTransaction.handler";
 import { baseProcedure } from "../base.procedure";
 

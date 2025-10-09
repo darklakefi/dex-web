@@ -38,12 +38,6 @@ vi.mock("@solana/wallet-adapter-react", () => ({
   useWallet: () => mockWallet,
 }));
 
-vi.mock("../_hooks/useLiquidityCalculationWorker", () => ({
-  useLiquidityCalculationWorker: () => ({
-    calculateLiquidity: vi.fn(),
-    isCalculating: false,
-  }),
-}));
 vi.mock("../../../../hooks/useAnalytics", () => ({
   useAnalytics: () => ({
     trackError: vi.fn(),
@@ -77,15 +71,21 @@ vi.mock("../../../_components/SkeletonTokenInput", () => ({
 
 vi.mock("@dex-web/orpc", () => ({
   client: {
-    liquidity: {
-      checkLiquidityTransactionStatus: vi.fn().mockResolvedValue({
-        error: null,
-        status: "finalized",
+    dexGateway: {
+      addLiquidity: vi.fn().mockResolvedValue({
+        unsignedTransaction: "mock-transaction-base64",
       }),
-      createLiquidityTransaction: vi.fn().mockResolvedValue({
+      checkTradeStatus: vi.fn().mockResolvedValue({
+        status: 0,
+        tradeId: "mock-trade-id",
+      }),
+      submitSignedTransaction: vi.fn().mockResolvedValue({
+        errorLogs: [],
         success: true,
-        transaction: "mock-transaction",
+        tradeId: "mock-trade-id",
       }),
+    },
+    liquidity: {
       getAddLiquidityReview: vi.fn().mockResolvedValue({
         tokenAmount: 50,
       }),
@@ -196,7 +196,6 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
   });
   describe("Story 1: Default state — wallet disconnected", () => {
     it("should render safely with no wallet and guide user to connect", async () => {
-      // Ensure wallet is disconnected
       setWalletState({
         publicKey: null,
         signTransaction: vi.fn(),
@@ -208,17 +207,14 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
 
-      // Look for the Connect Wallet button
       const connectButton = screen.getByText("Connect Wallet");
       expect(connectButton).toBeInTheDocument();
       expect(connectButton.closest("button")).not.toHaveAttribute("disabled");
 
-      // Check that amount inputs are present
       const amountInputs = screen.getAllByRole("textbox");
       expect(amountInputs).toHaveLength(2);
     });
     it("should not trigger submission when wallet disconnected", async () => {
-      // Ensure wallet is disconnected
       setWalletState({
         publicKey: null,
         signTransaction: vi.fn(),
@@ -237,7 +233,6 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       ).not.toBeInTheDocument();
     });
     it("should preserve disconnected state on refresh", async () => {
-      // Ensure wallet is disconnected
       setWalletState({
         publicKey: null,
         signTransaction: vi.fn(),
@@ -550,24 +545,6 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
       expect(screen.getByText("Connect Wallet")).toBeInTheDocument();
-    });
-    it("should show 'Create Pool' when no pool exists", async () => {
-      setWalletState({
-        publicKey: new PublicKey("11111111111111111111111111111112"),
-        signTransaction: vi.fn(),
-        wallet: { adapter: { name: "Phantom" } },
-      });
-      vi.doMock("../../../../hooks/useRealtimePoolData", () => ({
-        useRealtimePoolData: () => ({
-          isRealtime: true,
-          poolDetails: null,
-        }),
-      }));
-      renderWithWrapper();
-      await waitFor(() => {
-        expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
-      });
-      expect(screen.getByText("Create Pool")).toBeInTheDocument();
     });
     it("should show 'Add Liquidity' with valid inputs and existing pool", async () => {
       setWalletState({

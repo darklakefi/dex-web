@@ -2,18 +2,19 @@ import { BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CACHE_CONFIG } from "../../../config/constants";
-import type { HeliusClientWithConnection } from "../../../getHelius";
 import { CacheService } from "../../../services/CacheService";
 import { LoggerService } from "../../../services/LoggerService";
 import { MonitoringService } from "../../../services/MonitoringService";
 import { IDL_CODER } from "../../../utils/solana";
-import { getTokenMetadataHandler } from "../../tokens/getTokenMetadata.handler";
-import { clearPoolsCache, getAllPoolsHandler } from "../getAllPools.handler";
+
+const { mockGetProgramAccounts } = vi.hoisted(() => ({
+  mockGetProgramAccounts: vi.fn(),
+}));
 
 vi.mock("../../getHelius", () => ({
   getHelius: vi.fn(() => ({
     connection: {
-      getProgramAccounts: vi.fn(),
+      getProgramAccounts: mockGetProgramAccounts,
     },
   })),
 }));
@@ -34,52 +35,64 @@ vi.mock("../../../utils/solana", async () => {
   };
 });
 
+import { getTokenMetadataHandler } from "../../tokens/getTokenMetadata.handler";
+import { clearPoolsCache, getAllPoolsHandler } from "../getAllPools.handler";
+
 describe("getAllPoolsHandler", () => {
   let cacheService: CacheService;
   let loggerService: LoggerService;
   let monitoringService: MonitoringService;
-  let mockConnection: {
-    getProgramAccounts: ReturnType<typeof vi.fn>;
-  };
 
   const mockPoolAccount1 = {
-    authority: new PublicKey("11111111111111111111111111111112"),
+    amm_config: new PublicKey("11111111111111111111111111111113"),
     bump: new BN(1),
+    creator: new PublicKey("11111111111111111111111111111112"),
     locked_x: new BN(1000000),
     locked_y: new BN(2000000),
+    padding: [],
     protocol_fee_x: new BN(500),
     protocol_fee_y: new BN(1000),
-    reserve_x: new PublicKey("111111111111111111111111111111125"),
-    reserve_y: new PublicKey("111111111111111111111111111111126"),
+    reserve_x: new PublicKey("111111111111111111111111111111135"),
+    reserve_y: new PublicKey("111111111111111111111111111111136"),
     token_lp_supply: new BN(5000000),
+    token_mint_x: new PublicKey("111111111111111111111111111111125"),
+    token_mint_y: new PublicKey("111111111111111111111111111111126"),
     user_locked_x: new BN(100000),
     user_locked_y: new BN(200000),
   };
 
   const mockPoolAccount2 = {
-    authority: new PublicKey("11111111111111111111111111111113"),
+    amm_config: new PublicKey("11111111111111111111111111111115"),
     bump: new BN(1),
+    creator: new PublicKey("11111111111111111111111111111114"),
     locked_x: new BN(3000000),
     locked_y: new BN(4000000),
+    padding: [],
     protocol_fee_x: new BN(600),
     protocol_fee_y: new BN(1200),
-    reserve_x: new PublicKey("111111111111111111111111111111127"),
-    reserve_y: new PublicKey("111111111111111111111111111111128"),
+    reserve_x: new PublicKey("111111111111111111111111111111137"),
+    reserve_y: new PublicKey("111111111111111111111111111111138"),
     token_lp_supply: new BN(7000000),
+    token_mint_x: new PublicKey("111111111111111111111111111111127"),
+    token_mint_y: new PublicKey("111111111111111111111111111111128"),
     user_locked_x: new BN(150000),
     user_locked_y: new BN(250000),
   };
 
   const mockPoolAccountEmpty = {
-    authority: new PublicKey("11111111111111111111111111111114"),
+    amm_config: new PublicKey("11111111111111111111111111111117"),
     bump: new BN(1),
+    creator: new PublicKey("11111111111111111111111111111116"),
     locked_x: new BN(0),
     locked_y: new BN(0),
+    padding: [],
     protocol_fee_x: new BN(0),
     protocol_fee_y: new BN(0),
-    reserve_x: new PublicKey("111111111111111111111111111111129"),
-    reserve_y: new PublicKey("111111111111111111111111111111131"),
+    reserve_x: new PublicKey("111111111111111111111111111111139"),
+    reserve_y: new PublicKey("111111111111111111111111111111141"),
     token_lp_supply: new BN(0),
+    token_mint_x: new PublicKey("111111111111111111111111111111129"),
+    token_mint_y: new PublicKey("111111111111111111111111111111131"),
     user_locked_x: new BN(0),
     user_locked_y: new BN(0),
   };
@@ -117,7 +130,7 @@ describe("getAllPoolsHandler", () => {
     },
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
 
     cacheService = CacheService.getInstance();
@@ -125,14 +138,6 @@ describe("getAllPoolsHandler", () => {
 
     loggerService = LoggerService.getInstance();
     monitoringService = MonitoringService.getInstance();
-
-    const { getHelius } = vi.mocked(await import("../../getHelius"));
-    mockConnection = {
-      getProgramAccounts: vi.fn(),
-    };
-    getHelius.mockReturnValue({
-      connection: mockConnection,
-    } as HeliusClientWithConnection);
 
     vi.mocked(getTokenMetadataHandler).mockResolvedValue(mockTokenMetadata);
   });
@@ -150,7 +155,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)
@@ -196,7 +201,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)
@@ -224,13 +229,16 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)
         .mockReturnValueOnce(mockPoolAccountEmpty);
 
-      const result = await getAllPoolsHandler({ includeEmpty: true });
+      const result = await getAllPoolsHandler({
+        includeEmpty: true,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(2);
@@ -240,7 +248,7 @@ describe("getAllPoolsHandler", () => {
     });
 
     it("should return empty array when no pools exist", async () => {
-      mockConnection.getProgramAccounts.mockResolvedValue([]);
+      mockGetProgramAccounts.mockResolvedValue([]);
 
       const result = await getAllPoolsHandler({});
 
@@ -266,14 +274,18 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)
         .mockReturnValueOnce(mockPoolAccount2)
         .mockReturnValueOnce(mockPoolAccount1);
 
-      const result = await getAllPoolsHandler({ limit: 2 });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        limit: 2,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(3);
@@ -287,13 +299,17 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValueOnce(
         mockPoolAccount1,
       );
 
-      const result = await getAllPoolsHandler({ limit: 100 });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        limit: 100,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(1);
       expect(result.total).toBe(1);
@@ -313,7 +329,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValue(mockPoolAccount1)
@@ -325,47 +341,58 @@ describe("getAllPoolsHandler", () => {
       const result = await getAllPoolsHandler({ search: "SOL" });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].tokenXSymbol).toBe("SOL");
+      expect(result.pools[0]?.tokenXSymbol).toBe("SOL");
     });
 
     it("should filter pools by pool address", async () => {
       const result = await getAllPoolsHandler({
+        includeEmpty: false,
         search: "111111111111111111111111111111121",
       });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].address).toContain(
+      expect(result.pools[0]?.address).toContain(
         "111111111111111111111111111111121",
       );
     });
 
     it("should filter pools by token mint address", async () => {
       const result = await getAllPoolsHandler({
+        includeEmpty: false,
         search: "111111111111111111111111111111125",
       });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].tokenXMint).toBe(
+      expect(result.pools[0]?.tokenXMint).toBe(
         "111111111111111111111111111111125",
       );
     });
 
     it("should be case insensitive", async () => {
-      const result = await getAllPoolsHandler({ search: "sol" });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: "sol",
+      });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].tokenXSymbol).toBe("SOL");
+      expect(result.pools[0]?.tokenXSymbol).toBe("SOL");
     });
 
     it("should trim search query", async () => {
-      const result = await getAllPoolsHandler({ search: "  SOL  " });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: "  SOL  ",
+      });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].tokenXSymbol).toBe("SOL");
+      expect(result.pools[0]?.tokenXSymbol).toBe("SOL");
     });
 
     it("should return empty array when no matches found", async () => {
-      const result = await getAllPoolsHandler({ search: "NONEXISTENT" });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: "NONEXISTENT",
+      });
 
       expect(result.pools).toHaveLength(0);
       expect(result.total).toBe(0);
@@ -381,25 +408,25 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
     });
 
     it("should cache results", async () => {
       await getAllPoolsHandler({});
 
-      expect(mockConnection.getProgramAccounts).toHaveBeenCalledTimes(1);
+      expect(mockGetProgramAccounts).toHaveBeenCalledTimes(1);
 
       await getAllPoolsHandler({});
 
-      expect(mockConnection.getProgramAccounts).toHaveBeenCalledTimes(1);
+      expect(mockGetProgramAccounts).toHaveBeenCalledTimes(1);
     });
 
     it("should use different cache keys for different parameters", async () => {
       await getAllPoolsHandler({ includeEmpty: false });
-      await getAllPoolsHandler({ includeEmpty: true });
+      await getAllPoolsHandler({ includeEmpty: true, search: undefined });
 
-      expect(mockConnection.getProgramAccounts).toHaveBeenCalledTimes(2);
+      expect(mockGetProgramAccounts).toHaveBeenCalledTimes(2);
     });
 
     it("should cache with correct TTL", async () => {
@@ -430,24 +457,26 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
 
       await getAllPoolsHandler({});
 
-      const result = await getAllPoolsHandler({ limit: 2 });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        limit: 2,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(3);
-      expect(mockConnection.getProgramAccounts).toHaveBeenCalledTimes(1);
+      expect(mockGetProgramAccounts).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("Error handling", () => {
     it("should handle connection errors gracefully", async () => {
-      mockConnection.getProgramAccounts.mockRejectedValue(
-        new Error("Connection failed"),
-      );
+      mockGetProgramAccounts.mockRejectedValue(new Error("Connection failed"));
 
       const result = await getAllPoolsHandler({});
 
@@ -467,7 +496,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockImplementationOnce(() => {
@@ -489,7 +518,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
       vi.mocked(getTokenMetadataHandler).mockRejectedValue(
         new Error("Token metadata fetch failed"),
@@ -511,7 +540,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
     });
 
@@ -537,9 +566,7 @@ describe("getAllPoolsHandler", () => {
 
     it("should record error metrics on failure", async () => {
       const spy = vi.spyOn(monitoringService, "recordError");
-      mockConnection.getProgramAccounts.mockRejectedValue(
-        new Error("Test error"),
-      );
+      mockGetProgramAccounts.mockRejectedValue(new Error("Test error"));
 
       await getAllPoolsHandler({});
 
@@ -569,9 +596,7 @@ describe("getAllPoolsHandler", () => {
 
     it("should log errors with stack trace", async () => {
       const spy = vi.spyOn(loggerService, "errorWithStack");
-      mockConnection.getProgramAccounts.mockRejectedValue(
-        new Error("Test error"),
-      );
+      mockGetProgramAccounts.mockRejectedValue(new Error("Test error"));
 
       await getAllPoolsHandler({});
 
@@ -621,14 +646,17 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(largePoolAccount);
 
-      const result = await getAllPoolsHandler({});
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].lockedX).toBe("999999999999999999");
-      expect(result.pools[0].lockedY).toBe("999999999999999999");
+      expect(result.pools[0]?.lockedX).toBe("999999999999999999");
+      expect(result.pools[0]?.lockedY).toBe("999999999999999999");
     });
 
     it("should handle pools with missing token symbols", async () => {
@@ -639,15 +667,18 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
       vi.mocked(getTokenMetadataHandler).mockResolvedValue({});
 
-      const result = await getAllPoolsHandler({});
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].tokenXSymbol).toBeUndefined();
-      expect(result.pools[0].tokenYSymbol).toBeUndefined();
+      expect(result.pools[0]?.tokenXSymbol).toBeUndefined();
+      expect(result.pools[0]?.tokenYSymbol).toBeUndefined();
     });
 
     it("should handle empty search string", async () => {
@@ -658,7 +689,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
 
       const result = await getAllPoolsHandler({ search: "" });
@@ -674,10 +705,13 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
 
-      const result = await getAllPoolsHandler({ search: "   " });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: "   ",
+      });
 
       expect(result.pools).toHaveLength(1);
     });
@@ -696,7 +730,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(partiallyEmptyPool);
 
       const result = await getAllPoolsHandler({ includeEmpty: false });
@@ -716,7 +750,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)
         .mockReturnValueOnce(mockPoolAccount1);

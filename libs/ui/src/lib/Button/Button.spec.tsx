@@ -44,7 +44,6 @@ describe("Button", () => {
         "items-center",
         "gap-2",
       );
-      // Check for icon presence by looking for elements that contain SVG content
       const iconElement =
         container.querySelector("svg") ||
         container.querySelector("[data-testid='mocked-svg']") ||
@@ -66,7 +65,6 @@ describe("Button", () => {
         "items-center",
         "gap-2",
       );
-      // Check for icon presence by looking for elements that contain SVG content
       const iconElement =
         container.querySelector("svg") ||
         container.querySelector("[data-testid='mocked-svg']") ||
@@ -82,7 +80,6 @@ describe("Button", () => {
         <Button icon="external-link" variant="primary" />,
       );
       expect(container.querySelector("button")).toHaveClass("p-2.5");
-      // Check for icon presence by looking for elements that contain SVG content
       const iconElement =
         container.querySelector("svg") ||
         container.querySelector("[data-testid='mocked-svg']") ||
@@ -99,7 +96,6 @@ describe("Button", () => {
           Loading Button
         </Button>,
       );
-      // Check for loading icon presence by looking for elements that contain SVG content
       const iconElement =
         container.querySelector("svg") ||
         container.querySelector("[data-testid='mocked-svg']") ||
@@ -107,7 +103,6 @@ describe("Button", () => {
         container.querySelector("[class*='size-4']") ||
         container.querySelector("[role='img']");
       expect(iconElement).toBeTruthy();
-      // Check for loading animation class on the icon or button
       const loadingElement =
         container.querySelector(".animate-spin-pause") ||
         container.querySelector("button");

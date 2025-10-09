@@ -2,7 +2,7 @@
 
 import { BigDecimal } from "effect";
 import { useFormatter } from "next-intl";
-import { z } from "zod";
+import * as z from "zod";
 
 const useFormatPriceSchema = z.object({
   exchangeRate: z.number().nonnegative(),

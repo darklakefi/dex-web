@@ -1,6 +1,6 @@
 "use client";
 
-import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
+import type { GetQuoteOutput } from "@dex-web/orpc/schemas/index";
 import { Box, Icon, Text, Tooltip } from "@dex-web/ui";
 import BigNumber from "bignumber.js";
 import { cva, type VariantProps } from "class-variance-authority";

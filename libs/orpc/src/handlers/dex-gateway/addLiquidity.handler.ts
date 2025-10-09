@@ -17,10 +17,13 @@ export async function addLiquidityHandler(
   try {
     logger.info("Starting addLiquidity request", {
       amountLp: input.amountLp.toString(),
+      maxAmountX: input.maxAmountX.toString(),
+      maxAmountY: input.maxAmountY.toString(),
       tokenMintX: input.tokenMintX,
       tokenMintY: input.tokenMintY,
       userAddress: input.userAddress,
     });
+
     const grpcClient = await getDexGatewayClient();
     const response = await grpcClient.addLiquidity(input);
     const duration = performance.now() - startTime;
@@ -62,7 +65,7 @@ export async function addLiquidityHandler(
           message: "Insufficient liquidity for this operation",
         });
       }
-      if (error.message.includes("pool not found")) {
+      if (error.message.toLowerCase().includes("pool not found")) {
         throw new ORPCError("POOL_NOT_FOUND", {
           data: {
             tokenX: input.tokenMintX,

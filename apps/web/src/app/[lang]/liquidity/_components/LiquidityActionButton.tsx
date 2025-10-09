@@ -3,13 +3,14 @@
 import { Button } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
-import type { AnyFormApi } from "@tanstack/react-form";
 import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { liquidityPageParsers } from "../../../_utils/searchParams";
+import type { LiquidityFormApi } from "../_hooks/useLiquidityFormState";
 import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
+import type { LiquidityMachineEvent } from "../_machines/liquidityMachine";
 import type {
   LiquidityFormValues,
   PoolDetails,
@@ -22,7 +23,7 @@ import {
 } from "../_utils/liquidityButtonState";
 
 interface LiquidityActionButtonProps {
-  form: AnyFormApi;
+  form: LiquidityFormApi;
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
@@ -31,7 +32,9 @@ interface LiquidityActionButtonProps {
   tokenBAddress: string | null;
   isPoolLoading: boolean;
   isTokenAccountsLoading: boolean;
-  onSubmit: () => void;
+  isCalculating: boolean;
+  isSubmitting: boolean;
+  send: (event: LiquidityMachineEvent) => void;
 }
 
 const serialize = createSerializer(liquidityPageParsers);
@@ -46,7 +49,8 @@ export function LiquidityActionButton({
   tokenBAddress,
   isPoolLoading,
   isTokenAccountsLoading,
-  onSubmit,
+  isCalculating,
+  isSubmitting,
 }: LiquidityActionButtonProps) {
   const router = useRouter();
   const { wallet, connected } = useWallet();
@@ -63,14 +67,15 @@ export function LiquidityActionButton({
     form.store,
     (state) => state.values.initialPrice,
   );
+  const slippage = useStore(form.store, (state) => state.values.slippage);
   const formValues: LiquidityFormValues = {
     initialPrice,
+    slippage,
     tokenAAmount,
     tokenBAmount,
   };
   const hasAnyAmount =
     isPositiveNumber(tokenAAmount) || isPositiveNumber(tokenBAmount);
-  const isFormSubmitting = useStore(form.store, (state) => state.isSubmitting);
   const formCanSubmit = useStore(form.store, (state) => state.canSubmit);
 
   const validation = useLiquidityValidation({
@@ -87,8 +92,8 @@ export function LiquidityActionButton({
     formCanSubmit,
     hasAnyAmount,
     hasWallet: !!publicKey,
-    isCalculating: isFormSubmitting,
-    isFormSubmitting,
+    isCalculating,
+    isFormSubmitting: isSubmitting,
     isPoolLoading,
     isTokenAccountsLoading,
     poolDetails,
@@ -96,12 +101,6 @@ export function LiquidityActionButton({
   });
 
   const buttonMessage = getButtonMessage(buttonState);
-
-  const handleButtonClick = () => {
-    if (shouldShowTransactionPreview(validation)) {
-    }
-    onSubmit();
-  };
 
   const getButtonProps = (buttonState: ButtonState) => {
     const isDisabled =
@@ -120,14 +119,14 @@ export function LiquidityActionButton({
       "aria-describedby": isDisabled
         ? `${buttonState.toLowerCase()}-help`
         : undefined,
-      "aria-label": _getAriaLabel(buttonState, getButtonMessage(buttonState)),
+      "aria-label": getAriaLabel(buttonState, getButtonMessage(buttonState)),
       isDisabled,
       isLoading,
-      variant: _getButtonVariant(buttonState),
+      variant: getButtonVariant(buttonState),
     };
   };
 
-  if (!wallet || !connected) {
+  if (!wallet || !connected || !publicKey) {
     return (
       <Button
         aria-label="Connect wallet to add liquidity"
@@ -135,7 +134,7 @@ export function LiquidityActionButton({
         onClick={() => router.push("/select-wallet")}
         variant="primary"
       >
-        {buttonMessage}
+        Connect Wallet
       </Button>
     );
   }
@@ -181,15 +180,13 @@ export function LiquidityActionButton({
         data-testid="liquidity-action-button"
         disabled={enhancedButtonProps.isDisabled}
         loading={enhancedButtonProps.isLoading}
-        onClick={handleButtonClick}
+        type="submit"
         variant={enhancedButtonProps.variant}
       >
         {buttonMessage}
       </Button>
 
-      {shouldShowSecurityWarning(validation, buttonState) && (
-        <SecurityWarning buttonState={buttonState} validation={validation} />
-      )}
+      {shouldShowSecurityWarning() && <SecurityWarning />}
     </>
   );
 }
@@ -200,7 +197,7 @@ function isPositiveNumber(value: string): boolean {
   return Number.isFinite(parsed) && parsed > 0;
 }
 
-function _getButtonVariant(
+function getButtonVariant(
   buttonState: ButtonState,
 ): "primary" | "secondary" | "danger" {
   switch (buttonState) {
@@ -215,10 +212,7 @@ function _getButtonVariant(
   }
 }
 
-function _getAriaLabel(
-  buttonState: ButtonState,
-  buttonMessage: string,
-): string {
+function getAriaLabel(buttonState: ButtonState, buttonMessage: string): string {
   const stateDescriptions: Record<ButtonState, string> = {
     ADD_LIQUIDITY: "Add liquidity to existing pool",
     CALCULATING: "Calculating optimal amounts, please wait",
@@ -236,13 +230,7 @@ function _getAriaLabel(
   return stateDescriptions[buttonState] || buttonMessage;
 }
 
-function SecurityWarning({
-  validation: _validation,
-  buttonState: _buttonState,
-}: {
-  validation: unknown;
-  buttonState: ButtonState;
-}) {
+function SecurityWarning() {
   return (
     <div className="mt-2 rounded-md border border-yellow-200 bg-yellow-50 p-3">
       <div className="flex">
@@ -254,13 +242,6 @@ function SecurityWarning({
   );
 }
 
-function shouldShowSecurityWarning(
-  _validation: unknown,
-  _buttonState: ButtonState,
-): boolean {
-  return false;
-}
-
-function shouldShowTransactionPreview(_validation: unknown): boolean {
+function shouldShowSecurityWarning(): boolean {
   return false;
 }

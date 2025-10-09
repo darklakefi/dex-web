@@ -1,4 +1,4 @@
-import type { TokenAccount } from "@dex-web/orpc/schemas";
+import type { TokenAccount } from "@dex-web/orpc/schemas/index";
 import { convertToDecimal } from "@dex-web/utils";
 import BigNumber from "bignumber.js";
 

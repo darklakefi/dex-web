@@ -9,7 +9,7 @@ import {
 import type { PublicKey } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useCallback, useMemo } from "react";
-import { z } from "zod";
+import * as z from "zod";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import {
   FORM_FIELD_NAMES,
@@ -67,7 +67,7 @@ export function useLiquidityForm({
         await onSubmit(value);
       },
       validators: {
-        onChange: liquidityFormSchema,
+        onBlur: liquidityFormSchema,
         onDynamic: ({ value }: { value: LiquidityFormValues }) => {
           if (
             value[FORM_FIELD_NAMES.TOKEN_A_AMOUNT] &&

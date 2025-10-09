@@ -1,5 +1,5 @@
 import { os } from "@orpc/server";
-import { z } from "zod";
+import * as z from "zod";
 
 export const baseProcedure = os.errors({
   NETWORK_ERROR: {

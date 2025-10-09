@@ -8,6 +8,15 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
   experimental: {
+    optimizePackageImports: [
+      "@dex-web/ui",
+      "@dex-web/core",
+      "@solana/wallet-adapter-react",
+      "@solana/web3.js",
+      "@tanstack/react-query",
+      "bignumber.js",
+      "date-fns",
+    ],
     reactCompiler: true,
     webpackBuildWorker: true,
   },
@@ -19,17 +28,58 @@ const nextConfig = {
     formats: ["image/webp", "image/avif"],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30,
+
+    remotePatterns: [
+      {
+        hostname: "raw.githubusercontent.com",
+        protocol: "https",
+      },
+      {
+        hostname: "*.arweave.net",
+        protocol: "https",
+      },
+      {
+        hostname: "arweave.net",
+        protocol: "https",
+      },
+      {
+        hostname: "*.ipfs.nftstorage.link",
+        protocol: "https",
+      },
+      {
+        hostname: "ipfs.io",
+        protocol: "https",
+      },
+      {
+        hostname: "shdw-drive.genesysgo.net",
+        protocol: "https",
+      },
+      {
+        hostname: "*.helius-rpc.com",
+        protocol: "https",
+      },
+      {
+        hostname: "cdn.helius-rpc.com",
+        protocol: "https",
+      },
+      {
+        hostname: "*.amazonaws.com",
+        protocol: "https",
+      },
+      {
+        hostname: "*.cloudfront.net",
+        protocol: "https",
+      },
+    ],
     unoptimized: false,
   },
   logging: {
     fetches: {
       fullUrl: true,
-      hmrRefreshes: true,
     },
   },
-  nx: {
-    svgr: false,
-  },
+
+  output: "standalone",
   outputFileTracingRoot: join(__dirname, "../../"),
   serverExternalPackages: [
     "pg",
@@ -37,50 +87,73 @@ const nextConfig = {
     "@grpc/proto-loader",
     "@connectrpc/connect-node",
   ],
-  turbopack: {
-    rules: {
-      "*.svg": {
-        as: "*.js",
-        loaders: [
-          {
-            loader: "@svgr/webpack",
-            options: {
-              icon: true,
-              typescript: true,
-            },
-          },
-        ],
-      },
-    },
-  },
+  transpilePackages: ["@dex-web/ui", "@dex-web/core"],
   typedRoutes: true,
   typescript: {
-    ignoreBuildErrors: true,
     tsconfigPath: "./tsconfig.lib.json",
   },
 
   webpack(config, { isServer }) {
-    config.cache = {
-      maxGenerations: 1,
-      type: "memory",
-    };
-
     config.infrastructureLogging = {
       debug: false,
       level: "warn",
       stream: process.stderr,
     };
 
-    const originalWarn = console.warn;
-    console.warn = (...args) => {
-      if (
-        args[0]?.includes?.("PackFileCacheStrategy") &&
-        args[0]?.includes?.("Serializing big strings")
-      ) {
-        return;
+    config.module.rules.unshift({
+      test: /\.svg$/,
+      use: [
+        {
+          loader: "@svgr/webpack",
+          options: {
+            exportType: "default",
+            svgo: true,
+            svgoConfig: {
+              plugins: [
+                {
+                  name: "preset-default",
+                  params: {
+                    overrides: {
+                      removeViewBox: false,
+                    },
+                  },
+                },
+              ],
+            },
+            titleProp: true,
+          },
+        },
+      ],
+    });
+
+    config.module.rules = config.module.rules.map((rule, index) => {
+      if (!rule || typeof rule !== "object") return rule;
+
+      if (index === 0) return rule;
+
+      if (rule.test instanceof RegExp && rule.test.test(".svg")) {
+        return { ...rule, exclude: /\.svg$/ };
       }
-      originalWarn(...args);
-    };
+
+      if (Array.isArray(rule.oneOf)) {
+        return {
+          ...rule,
+          oneOf: rule.oneOf.map((oneOfRule) => {
+            if (
+              oneOfRule &&
+              typeof oneOfRule === "object" &&
+              oneOfRule.test instanceof RegExp &&
+              oneOfRule.test.test(".svg")
+            ) {
+              return { ...oneOfRule, exclude: /\.svg$/ };
+            }
+            return oneOfRule;
+          }),
+        };
+      }
+
+      return rule;
+    });
 
     if (!isServer) {
       const webpack = require("webpack");
@@ -109,11 +182,6 @@ const nextConfig = {
         zlib: false,
       };
     }
-
-    config.module.rules.push({
-      test: /\.svg$/i,
-      use: ["@svgr/webpack"],
-    });
 
     return config;
   },

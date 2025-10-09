@@ -1,9 +1,12 @@
+export type { SendSignedTransactionRequest } from "@dex-web/grpc-client";
 export {
   type ClientContext,
   client,
   createClientWithContext,
   tanstackClient,
 } from "./client";
+export { QUERY_CONFIG, tokenQueryKeys } from "./lib/queryKeys";
 export { type AppRouter, appRouter } from "./routers/app.router";
 export { rpcHandler } from "./rpcHandler";
+export * from "./schemas";
 export { batchClients, createBatchClient } from "./utils/batchClient";

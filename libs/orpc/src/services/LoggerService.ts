@@ -51,7 +51,7 @@ export class LoggerService {
   }
   info(message: string, context?: LogContext): void {
     if (this.shouldLog(LogLevel.INFO)) {
-      console.log(this.formatMessage(LogLevel.INFO, message, context));
+      console.info(this.formatMessage(LogLevel.INFO, message, context));
     }
   }
   debug(message: string, context?: LogContext): void {

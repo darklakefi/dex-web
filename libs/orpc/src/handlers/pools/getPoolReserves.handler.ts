@@ -1,7 +1,6 @@
 "use server";
 import { getLpTokenMint } from "@dex-web/core";
 import {
-  type Account,
   getAccount,
   getMint,
   TOKEN_2022_PROGRAM_ID,
@@ -31,49 +30,72 @@ async function detectTokenProgram(
     }
   }
 }
+
+function toNumber(value: unknown): number {
+  if (!value) return 0;
+  if (typeof value === "number") return value;
+
+  if (
+    typeof value === "object" &&
+    "toNumber" in value &&
+    typeof value.toNumber === "function"
+  ) {
+    return value.toNumber();
+  }
+
+  if (typeof value === "string") {
+    const decimal = Number(value);
+    if (!Number.isNaN(decimal)) return decimal;
+    return parseInt(value, 16);
+  }
+
+  return 0;
+}
+
+async function getReserveBalance(
+  connection: Connection,
+  reserveAddress: PublicKey,
+  programId: PublicKey,
+): Promise<number> {
+  try {
+    const account = await getAccount(
+      connection,
+      reserveAddress,
+      "confirmed",
+      programId,
+    );
+    return Number(account.amount);
+  } catch (error) {
+    console.warn(`Could not read reserve ${reserveAddress.toBase58()}:`, error);
+    return 0;
+  }
+}
+
 export async function getPoolReservesHandler({
   tokenXMint,
   tokenYMint,
 }: GetPoolReservesInput): Promise<GetPoolReservesOutput> {
   const helius = getHelius();
   const connection = helius.connection;
+
+  const emptyResult: GetPoolReservesOutput = {
+    exists: false,
+    lpMint: "",
+    reserveX: 0,
+    reserveY: 0,
+    totalLpSupply: 0,
+  };
+
   try {
     const poolData = await getPoolOnChain(tokenXMint, tokenYMint);
     if (!poolData) {
-      return {
-        exists: false,
-        lpMint: "",
-        reserveX: 0,
-        reserveY: 0,
-        totalLpSupply: 0,
-      };
+      return emptyResult;
     }
+
     const lpTokenMint = await getLpTokenMint(tokenXMint, tokenYMint);
-    const lpTokenMintString = lpTokenMint.toBase58();
-    const lpMintInfo = await getMint(
-      connection,
-      lpTokenMint,
-      "confirmed",
-      TOKEN_PROGRAM_ID,
-    );
-    const totalLpSupply = Number(lpMintInfo.supply) / 10 ** LP_TOKEN_DECIMALS;
-    const reserveXAccountInfo = await connection.getAccountInfo(
-      poolData.reserve_x,
-    );
-    const reserveYAccountInfo = await connection.getAccountInfo(
-      poolData.reserve_y,
-    );
-    if (!reserveXAccountInfo || !reserveYAccountInfo) {
-      return {
-        exists: false,
-        lpMint: lpTokenMintString,
-        reserveX: 0,
-        reserveY: 0,
-        totalLpSupply: 0,
-      };
-    }
-    const reserveXProgramId = reserveXAccountInfo.owner;
-    const reserveYProgramId = reserveYAccountInfo.owner;
+    const totalLpSupplyRaw = toNumber(poolData.token_lp_supply);
+    const totalLpSupply = totalLpSupplyRaw / 10 ** LP_TOKEN_DECIMALS;
+
     const tokenXProgramId = await detectTokenProgram(
       connection,
       new PublicKey(tokenXMint),
@@ -82,34 +104,7 @@ export async function getPoolReservesHandler({
       connection,
       new PublicKey(tokenYMint),
     );
-    let reserveXAccount: Account | null = null;
-    let reserveYAccount: Account | null = null;
-    let reserveXBalance = 0;
-    try {
-      reserveXAccount = await getAccount(
-        connection,
-        poolData.reserve_x,
-        "confirmed",
-        reserveXProgramId,
-      );
-      reserveXBalance = Number(reserveXAccount.amount);
-    } catch (error) {
-      console.warn("Could not read reserve X as token account:", error);
-      reserveXBalance = 0;
-    }
-    let reserveYBalance = 0;
-    try {
-      reserveYAccount = await getAccount(
-        connection,
-        poolData.reserve_y,
-        "confirmed",
-        reserveYProgramId,
-      );
-      reserveYBalance = Number(reserveYAccount.amount);
-    } catch (error) {
-      console.warn("Could not read reserve Y as token account:", error);
-      reserveYBalance = 0;
-    }
+
     const tokenXMintInfo = await getMint(
       connection,
       new PublicKey(tokenXMint),
@@ -122,31 +117,65 @@ export async function getPoolReservesHandler({
       "confirmed",
       tokenYProgramId,
     );
-    const reserveX = reserveXBalance / 10 ** tokenXMintInfo.decimals;
-    const reserveY = reserveYBalance / 10 ** tokenYMintInfo.decimals;
-    const safeReserveX =
-      Number.isNaN(reserveX) || !Number.isFinite(reserveX) ? 0 : reserveX;
-    const safeReserveY =
-      Number.isNaN(reserveY) || !Number.isFinite(reserveY) ? 0 : reserveY;
-    const safeTotalLpSupply =
-      Number.isNaN(totalLpSupply) || !Number.isFinite(totalLpSupply)
-        ? 0
-        : totalLpSupply;
-    const result = {
+
+    const reserveXAccountInfo = await connection.getAccountInfo(
+      poolData.reserve_x,
+    );
+    const reserveYAccountInfo = await connection.getAccountInfo(
+      poolData.reserve_y,
+    );
+
+    if (!reserveXAccountInfo || !reserveYAccountInfo) {
+      return { ...emptyResult, lpMint: lpTokenMint.toBase58() };
+    }
+
+    const totalReserveXRaw = await getReserveBalance(
+      connection,
+      poolData.reserve_x,
+      reserveXAccountInfo.owner,
+    );
+    const totalReserveYRaw = await getReserveBalance(
+      connection,
+      poolData.reserve_y,
+      reserveYAccountInfo.owner,
+    );
+
+    const availableReserveXRaw =
+      totalReserveXRaw -
+      toNumber(poolData.protocol_fee_x) -
+      toNumber(poolData.user_locked_x);
+
+    const availableReserveYRaw =
+      totalReserveYRaw -
+      toNumber(poolData.protocol_fee_y) -
+      toNumber(poolData.user_locked_y);
+
+    const reserveX = availableReserveXRaw / 10 ** tokenXMintInfo.decimals;
+    const reserveY = availableReserveYRaw / 10 ** tokenYMintInfo.decimals;
+
+    const result: GetPoolReservesOutput = {
       exists: true,
-      lpMint: lpTokenMintString,
-      reserveX: safeReserveX,
-      reserveY: safeReserveY,
-      totalLpSupply: safeTotalLpSupply,
+      lpMint: lpTokenMint.toBase58(),
+      protocolFeeX: toNumber(poolData.protocol_fee_x),
+      protocolFeeY: toNumber(poolData.protocol_fee_y),
+      reserveX: Number.isFinite(reserveX) && reserveX >= 0 ? reserveX : 0,
+      reserveXRaw: availableReserveXRaw,
+      reserveY: Number.isFinite(reserveY) && reserveY >= 0 ? reserveY : 0,
+      reserveYRaw: availableReserveYRaw,
+      totalLpSupply:
+        Number.isFinite(totalLpSupply) && totalLpSupply >= 0
+          ? totalLpSupply
+          : 0,
+      totalLpSupplyRaw,
+      totalReserveXRaw,
+      totalReserveYRaw,
+      userLockedX: toNumber(poolData.user_locked_x),
+      userLockedY: toNumber(poolData.user_locked_y),
     };
+
     return result;
-  } catch (_error) {
-    return {
-      exists: false,
-      lpMint: "",
-      reserveX: 0,
-      reserveY: 0,
-      totalLpSupply: 0,
-    };
+  } catch (error) {
+    console.error("Error fetching pool reserves:", error);
+    return emptyResult;
   }
 }

@@ -3,6 +3,7 @@
   "assist": {
     "actions": {
       "source": {
+        "recommended": true,
         "useSortedAttributes": "on",
         "useSortedKeys": "on",
         "useSortedProperties": "on"
@@ -14,30 +15,47 @@
     "ignoreUnknown": false,
     "includes": [
       "**",
+      "!**/.next/**",
       "!**/dist/**",
       "!**/node_modules/**",
       "!**/coverage/**",
       "!**/storybook-static/**",
-      "!**/tmp/**",
-      "!**/.*/**",
-      "!**/test-results/**",
-      "!**/out-tsc/**"
-    ]
+      "!**/out-tsc/**",
+      "!**/test-results/**"
+    ],
+    "maxSize": 10485760
   },
   "formatter": {
     "enabled": true,
-
     "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
     "useEditorconfig": true
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double"
+      "arrowParentheses": "always",
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    },
+    "jsxRuntime": "transparent"
+  },
+  "json": {
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "trailingCommas": "none"
+    },
+    "parser": {
+      "allowComments": false,
+      "allowTrailingCommas": false
     }
   },
   "linter": {
     "enabled": true,
-
     "rules": {
       "a11y": {
         "recommended": true
@@ -74,10 +92,75 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["package.json", "**/package.json"],
+      "json": {
+        "formatter": {
+          "expand": "always"
+        }
+      }
+    },
+    {
+      "includes": ["tsconfig*.json", "**/tsconfig*.json"],
+      "json": {
+        "parser": {
+          "allowComments": true,
+          "allowTrailingCommas": true
+        }
+      }
+    },
+    {
+      "includes": [".vscode/**/*.json"],
+      "json": {
+        "parser": {
+          "allowComments": true,
+          "allowTrailingCommas": true
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/__tests__/**",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    },
+    {
+      "formatter": {
+        "enabled": false
+      },
+      "includes": ["**/generated/**", "**/*_pb.ts", "**/*.generated.ts"],
+      "linter": {
+        "enabled": false
+      }
+    },
+    {
+      "includes": [
+        "apps/web/src/app/**/page.tsx",
+        "apps/web/src/app/**/layout.tsx"
+      ],
+      "javascript": {
+        "formatter": {
+          "lineWidth": 100
+        }
+      }
+    }
+  ],
   "vcs": {
     "clientKind": "git",
     "defaultBranch": "develop",
     "enabled": true,
+    "root": ".",
     "useIgnoreFile": true
   }
 }

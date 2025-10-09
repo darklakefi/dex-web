@@ -1,6 +1,6 @@
 "use server";
 
-import { toRawUnits } from "@dex-web/utils";
+import { toRawUnitsBigNumber } from "@dex-web/utils";
 import { type Connection, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import { getHelius } from "../../getHelius";
@@ -188,7 +188,7 @@ export async function getSwapRateHandler(
     const tokenX = tokenMetadata[tokenXMint]!;
     const tokenY = tokenMetadata[tokenYMint]!;
 
-    const scaledInput = toRawUnits(
+    const scaledInput = toRawUnitsBigNumber(
       amountIn,
       isXtoY ? tokenX.decimals : tokenY.decimals,
     );
@@ -207,7 +207,7 @@ export async function getSwapRateHandler(
     const amountOutBigDecimal = swapResult.destinationAmount;
 
     const amountOut = amountOutBigDecimal.dividedBy(
-      toRawUnits(1, isXtoY ? tokenY.decimals : tokenX.decimals),
+      toRawUnitsBigNumber(1, isXtoY ? tokenY.decimals : tokenX.decimals),
     );
 
     const decDiff = Math.abs(tokenX.decimals - tokenY.decimals);
@@ -215,15 +215,23 @@ export async function getSwapRateHandler(
     let adjustedRate = swapResult.rate;
     if (isXtoY) {
       if (tokenX.decimals < tokenY.decimals) {
-        adjustedRate = swapResult.rate.dividedBy(toRawUnits(1, decDiff));
+        adjustedRate = swapResult.rate.dividedBy(
+          toRawUnitsBigNumber(1, decDiff),
+        );
       } else if (tokenX.decimals > tokenY.decimals) {
-        adjustedRate = swapResult.rate.multipliedBy(toRawUnits(1, decDiff));
+        adjustedRate = swapResult.rate.multipliedBy(
+          toRawUnitsBigNumber(1, decDiff),
+        );
       }
     } else {
       if (tokenY.decimals < tokenX.decimals) {
-        adjustedRate = swapResult.rate.dividedBy(toRawUnits(1, decDiff));
+        adjustedRate = swapResult.rate.dividedBy(
+          toRawUnitsBigNumber(1, decDiff),
+        );
       } else if (tokenY.decimals > tokenX.decimals) {
-        adjustedRate = swapResult.rate.multipliedBy(toRawUnits(1, decDiff));
+        adjustedRate = swapResult.rate.multipliedBy(
+          toRawUnitsBigNumber(1, decDiff),
+        );
       }
     }
 

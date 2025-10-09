@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
-    "declarationDir": "./dist/types",
+    "composite": true,
     "incremental": true,
     "jsx": "preserve",
-    "noEmit": false,
+    "noEmit": true,
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "target": "es2022"
   },
   "exclude": [
     "../../dist",
@@ -22,6 +23,8 @@
   ],
   "extends": "./tsconfig.json",
   "include": [
+    "../../types/**/*.d.ts",
+    ".next/types/**/*.ts",
     "next-env.d.ts",
     "src/**/*.cts",
     "src/**/*.js",
@@ -29,7 +32,20 @@
     "src/**/*.mts",
     "src/**/*.ts",
     "src/**/*.tsx",
-    ".next/types/**/*.ts"
+    "../../dist/apps/web/.next/types/**/*.ts"
   ],
-  "references": []
+  "references": [
+    {
+      "path": "../../libs/utils/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/ui/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/orpc/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/core/tsconfig.lib.json"
+    }
+  ]
 }

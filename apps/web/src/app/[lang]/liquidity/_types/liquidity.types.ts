@@ -4,7 +4,7 @@ import type {
   FormAsyncValidateOrFn,
   FormValidateOrFn,
 } from "@tanstack/react-form";
-import { z } from "zod";
+import * as z from "zod";
 
 export const numericStringSchema = z
   .string()
@@ -20,11 +20,14 @@ export const positiveNumericStringSchema = numericStringSchema.refine(
 
 export const liquidityFormSchema = z.object({
   initialPrice: positiveNumericStringSchema,
+  slippage: numericStringSchema,
   tokenAAmount: numericStringSchema,
   tokenBAmount: numericStringSchema,
 });
 
-export type LiquidityFormSchema = z.infer<typeof liquidityFormSchema>;
+export type LiquidityFormValues = z.infer<typeof liquidityFormSchema>;
+
+export type LiquidityFormSchema = LiquidityFormValues;
 
 export interface TokenAccount {
   readonly address?: string;
@@ -43,16 +46,21 @@ export interface PoolDetails {
   readonly tokenXMint: string;
   readonly tokenYMint: string;
   readonly tokenXReserve?: number;
+  readonly tokenXReserveRaw?: number;
   readonly tokenYReserve?: number;
+  readonly tokenYReserveRaw?: number;
   readonly totalSupply?: number;
+  readonly totalSupplyRaw?: number;
   readonly fee?: number;
   readonly price?: string;
-}
-
-export interface LiquidityFormValues {
-  readonly tokenAAmount: string;
-  readonly tokenBAmount: string;
-  readonly initialPrice: string;
+  readonly totalReserveXRaw?: number;
+  readonly totalReserveYRaw?: number;
+  readonly protocolFeeX?: number;
+  readonly protocolFeeY?: number;
+  readonly userLockedX?: number;
+  readonly userLockedY?: number;
+  readonly lockedX?: number;
+  readonly lockedY?: number;
 }
 
 export interface WalletAdapter {

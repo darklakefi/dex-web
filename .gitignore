@@ -52,6 +52,7 @@ storybook-static
 *.tsbuildinfo
 *.d.ts.map
 src/**/*.d.ts
+apps/web/src/**/*.d.ts
 
 .direnv/
 
@@ -71,3 +72,4 @@ result
 man
 
 .pre-commit-config.yaml
+*.local.md

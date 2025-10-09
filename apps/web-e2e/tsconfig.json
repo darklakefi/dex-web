@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "../../dist/apps/web-e2e",
-    "tsBuildInfoFile": "./dist/tsconfig.lib.tsbuildinfo",
+    "noEmit": true,
     "types": ["node"]
   },
   "exclude": ["dist", "node_modules", "../../dist/**/*"],
@@ -18,5 +17,9 @@
     "src/**/*.test.js",
     "src/**/*.d.ts"
   ],
-  "references": []
+  "references": [
+    {
+      "path": "../../libs/orpc"
+    }
+  ]
 }

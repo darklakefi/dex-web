@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { z } from "zod";
+import * as z from "zod";
 
 const SolanaAddressSchema = z.string().refine(
   (value) => {

@@ -1,17 +1,15 @@
 "use client";
 
-import { tanstackClient } from "@dex-web/orpc";
+import type { GetTokenPriceOutput } from "@dex-web/orpc/schemas/index";
 import { NumericInput, type NumericInputProps, Text } from "@dex-web/ui";
 import {
+  calculateSafeMaxAmount,
   convertToDecimal,
   formatValueWithThousandSeparator,
   isValidNumberFormat,
   numberFormatHelper,
 } from "@dex-web/utils";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useQueryStates } from "nuqs";
 import { useRef } from "react";
-import { selectedTokensParsers } from "../_utils/searchParams";
 import { useFormatPrice } from "../_utils/useFormatPrice";
 import { SkeletonLoader } from "./SkeletonLoader";
 
@@ -33,6 +31,11 @@ interface FormFieldsetProps extends NumericInputProps {
   onClearPendingCalculations?: () => void;
   onHalfMaxClick?: (type: "half" | "max") => void;
   error?: string;
+  /**
+   * Optional price data to avoid suspense waterfall.
+   * If not provided, price display will be hidden.
+   */
+  tokenPrice?: GetTokenPriceOutput | null;
 }
 const QUOTE_CURRENCY = "USD" as const;
 
@@ -51,26 +54,12 @@ export function FormFieldset({
   onClearPendingCalculations,
   onHalfMaxClick,
   error,
+  tokenPrice,
   ...rest
 }: FormFieldsetProps) {
-  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
-    selectedTokensParsers,
-  );
-
-  const { data: usdExchangeRate } = useSuspenseQuery({
-    ...tanstackClient.tokens.getTokenPrice.queryOptions({
-      input: {
-        amount: 1,
-        mint: name === "tokenAAmount" ? tokenAAddress : tokenBAddress,
-        quoteCurrency: QUOTE_CURRENCY,
-      },
-    }),
-    staleTime: 5 * 1000,
-  });
-
   const formattedPrice = useFormatPrice(
     value,
-    usdExchangeRate.price,
+    tokenPrice?.price ?? 0,
     QUOTE_CURRENCY,
   );
 
@@ -84,10 +73,12 @@ export function FormFieldset({
 
     onClearPendingCalculations?.();
 
-    const halfAmount = convertToDecimal(amount, decimals)
-      .div(2)
-      .toFixed(5)
-      .toString();
+    const halfAtomicAmount = Math.floor(amount / 2);
+    const halfAmount = calculateSafeMaxAmount({
+      atomicAmount: halfAtomicAmount,
+      decimals,
+      maxDecimals,
+    });
 
     if (inputRef.current) {
       inputRef.current.value = halfAmount;
@@ -107,7 +98,11 @@ export function FormFieldset({
 
     onClearPendingCalculations?.();
 
-    const maxAmount = convertToDecimal(amount, decimals).toFixed(5).toString();
+    const maxAmount = calculateSafeMaxAmount({
+      atomicAmount: amount,
+      decimals,
+      maxDecimals,
+    });
 
     if (inputRef.current) {
       inputRef.current.value = maxAmount;
@@ -237,9 +232,11 @@ export function FormFieldset({
             </Text.Body2>
           )}
         </div>
-        <Text.Body2 className="text-green-300 uppercase">
-          {formattedPrice}
-        </Text.Body2>
+        {tokenPrice && (
+          <Text.Body2 className="text-green-300 uppercase">
+            {formattedPrice}
+          </Text.Body2>
+        )}
         {error && <Text.Body2 className="text-red-500">{error}</Text.Body2>}
       </div>
     </fieldset>

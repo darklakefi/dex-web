@@ -21,7 +21,6 @@ export const EXCHANGE_PROGRAM_ID = new PublicKey(
     "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
 );
 
-// 100% = 1000000, 0.0001% = 1
 export const MAX_PERCENTAGE = 1000000;
 
 export const LP_TOKEN_DECIMALS = 9;
@@ -29,17 +28,21 @@ export const LP_TOKEN_DECIMALS = 9;
 export const IDL_CODER = new BorshCoder(IDL as Idl);
 
 export type PoolAccount = {
-  authority: PublicKey;
-  bump: number;
+  creator: PublicKey;
+  amm_config: PublicKey;
+  token_mint_x: PublicKey;
+  token_mint_y: PublicKey;
   reserve_x: PublicKey;
   reserve_y: PublicKey;
+  token_lp_supply: number;
+  protocol_fee_x: number;
+  protocol_fee_y: number;
   locked_x: number;
   locked_y: number;
   user_locked_x: number;
   user_locked_y: number;
-  protocol_fee_x: number;
-  protocol_fee_y: number;
-  token_lp_supply: number;
+  bump: number;
+  padding: number[];
 };
 
 export async function getPoolAccount(
@@ -65,10 +68,7 @@ export async function getPoolAccount(
 }
 
 export async function getPoolPubkey(tokenA: string, tokenB: string) {
-  const { tokenXAddress, tokenYAddress } = await sortSolanaAddresses(
-    tokenA,
-    tokenB,
-  );
+  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(tokenA, tokenB);
 
   const [ammConfigPubkey] = PublicKey.findProgramAddressSync(
     [Buffer.from("amm_config"), new BN(0).toArrayLike(Buffer, "le", 4)],
@@ -101,8 +101,6 @@ export async function getPoolOnChain(tokenXMint: string, tokenYMint: string) {
   }
 }
 
-// Helper function to determine token program ID
-// THIS CAN ALSO BE FETCHED FROM TOKEN HANDLER (token program never changes)
 export async function getTokenProgramId(
   connection: Connection,
   accountPubkey: PublicKey,
@@ -113,7 +111,6 @@ export async function getTokenProgramId(
       throw new Error("Account not found");
     }
 
-    // Check if the account owner is TOKEN_2022_PROGRAM_ID
     if (accountInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
       return TOKEN_2022_PROGRAM_ID;
     } else if (accountInfo.owner.equals(TOKEN_PROGRAM_ID)) {
@@ -123,7 +120,6 @@ export async function getTokenProgramId(
     }
   } catch (error) {
     console.error("Failed to determine token program ID:", error);
-    // Default to legacy program
     return TOKEN_PROGRAM_ID;
   }
 }

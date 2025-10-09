@@ -5,7 +5,7 @@
  */
 
 export interface CookieOptions {
-  expires?: Date | number; // Date object or days from now
+  expires?: Date | number;
   path?: string;
   domain?: string;
   secure?: boolean;
@@ -20,7 +20,7 @@ export function setCookie(
   value: string,
   options: CookieOptions = {},
 ): void {
-  if (typeof document === "undefined") return; // SSR safety
+  if (typeof document === "undefined") return;
 
   const {
     expires,
@@ -37,7 +37,6 @@ export function setCookie(
     if (expires instanceof Date) {
       expiresString = expires.toUTCString();
     } else {
-      // expires is number of days from now
       const date = new Date();
       date.setTime(date.getTime() + expires * 24 * 60 * 60 * 1000);
       expiresString = date.toUTCString();
@@ -66,7 +65,7 @@ export function setCookie(
  * Get a cookie value by name
  */
 export function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null; // SSR safety
+  if (typeof document === "undefined") return null;
 
   const nameEQ = `${encodeURIComponent(name)}=`;
   const cookies = document.cookie.split(";");

@@ -66,7 +66,7 @@ export const Default: StoryObj<typeof Modal> = {
         <Button text="Close" variant="primary" />
       </Box>
     ),
-    onClose: () => console.log("Modal close triggered"),
+    onClose: () => {},
   },
   parameters: {
     layout: "fullscreen",

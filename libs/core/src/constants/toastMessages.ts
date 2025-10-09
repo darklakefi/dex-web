@@ -1,18 +1,18 @@
 export const TRANSACTION_STEPS = {
   STEP_1: {
-    LIQUIDITY: "Depositing into pool [1/3]",
-    POOL_CREATION: "Preparing Pool Creation [1/3]",
-    SWAP: "Generating zero-knowledge proof [1/3]",
+    LIQUIDITY: "Depositing into pool",
+    POOL_CREATION: "Preparing Pool Creation",
+    SWAP: "Generating zero-knowledge proof",
   },
   STEP_2: {
-    LIQUIDITY: "Confirm liquidity transaction [2/3]",
-    POOL_CREATION: "Confirm Pool Creation [2/3]",
-    SWAP: "Confirm trade [2/3]",
+    LIQUIDITY: "Confirm liquidity transaction",
+    POOL_CREATION: "Confirm Pool Creation",
+    SWAP: "Confirm trade",
   },
   STEP_3: {
-    LIQUIDITY: "Processing liquidity transaction [3/3]",
-    POOL_CREATION: "Creating Pool [3/3]",
-    SWAP: "Verify slippage requirements [3/3]",
+    LIQUIDITY: "Processing liquidity transaction",
+    POOL_CREATION: "Creating Pool",
+    SWAP: "Verify slippage requirements",
   },
 } as const;
 

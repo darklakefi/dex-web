@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import { checkTradeStatusHandler } from "../../handlers/dex-gateway/checkTradeStatus.handler";
 import { baseProcedure } from "../base.procedure";
 

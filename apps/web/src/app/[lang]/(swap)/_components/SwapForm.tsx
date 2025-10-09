@@ -12,7 +12,7 @@ import {
   useTransactionToasts,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
-import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
+import type { GetQuoteOutput } from "@dex-web/orpc/schemas/index";
 import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import { Box, Button, Text } from "@dex-web/ui";
 import {
@@ -22,7 +22,7 @@ import {
   parseAmount,
   parseAmountBigNumber,
   sortSolanaAddresses,
-  toRawUnitsBigint,
+  toRawUnitsBigNumberAsBigInt,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
@@ -33,8 +33,9 @@ import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { z } from "zod";
+import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
+import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import {
   useWalletAdapter,
   useWalletPublicKey,
@@ -85,7 +86,7 @@ const formConfig = {
     logger.log(value);
   },
   validators: {
-    onChange: swapFormSchema,
+    onBlur: swapFormSchema,
   },
 };
 
@@ -238,18 +239,13 @@ export function SwapForm() {
       });
 
       if (tokenAAddress && tokenBAddress) {
-        const sortedTokens = sortSolanaAddresses(tokenAAddress, tokenBAddress);
         const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
-          sortedTokens;
+          sortSolanaAddresses(tokenAAddress, tokenBAddress);
 
         const poolKey = `${tokenXMint}-${tokenYMint}`;
-        const sortedPoolKey = [tokenXMint, tokenYMint].sort().join("-");
 
         queryClient.invalidateQueries({
           queryKey: ["pool-details", poolKey],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["pool-details", sortedPoolKey],
         });
 
         const poolDetailsOpts =
@@ -298,6 +294,11 @@ export function SwapForm() {
     tokenAAddress,
     tokenBAddress,
   });
+
+  const { prices: tokenPrices } = useTokenPricesMap([
+    tokenAAddress,
+    tokenBAddress,
+  ]);
 
   const [quote, setQuote] = useState<GetQuoteOutput | null>(null);
 
@@ -425,7 +426,10 @@ export function SwapForm() {
         sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
       const buyTokenDecimals = buyTokenAccount?.tokenAccounts[0]?.decimals || 0;
 
-      const buyAmountRaw = toRawUnitsBigint(buyAmount, buyTokenDecimals);
+      const buyAmountRaw = toRawUnitsBigNumberAsBigInt(
+        buyAmount,
+        buyTokenDecimals,
+      );
       const slippageFactor = BigNumber(1).minus(
         BigNumber(slippage || 0).dividedBy(100),
       );
@@ -433,8 +437,8 @@ export function SwapForm() {
         .multipliedBy(slippageFactor)
         .integerValue(BigNumber.ROUND_DOWN);
 
-      const response = await client.dexGateway.getSwap({
-        amountIn: toRawUnitsBigint(sellAmount, sellTokenDecimals),
+      const response = await client.dexGateway.createUnsignedTransaction({
+        amountIn: toRawUnitsBigNumberAsBigInt(sellAmount, sellTokenDecimals),
         isSwapXToY: isXtoY,
         minOut: BigInt(minOutRaw.toString()),
         refCode: incomingReferralCode || "",
@@ -448,7 +452,7 @@ export function SwapForm() {
         requestSigning(
           response.unsignedTransaction,
           response.tradeId,
-          response.trackingId,
+          response.trackingId || `swap-${Date.now()}`,
         );
       } else {
         throw new Error("Failed to create swap transaction");
@@ -684,6 +688,9 @@ export function SwapForm() {
                       field.handleChange(e.target.value);
                     }}
                     tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                    tokenPrice={
+                      tokenAAddress ? tokenPrices[tokenAAddress] : null
+                    }
                     value={field.state.value}
                   />
                 )}
@@ -716,6 +723,9 @@ export function SwapForm() {
                       field.handleChange(e.target.value);
                     }}
                     tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                    tokenPrice={
+                      tokenBAddress ? tokenPrices[tokenBAddress] : null
+                    }
                     value={field.state.value}
                   />
                 )}

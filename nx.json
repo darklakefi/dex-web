@@ -34,7 +34,9 @@
       "!{projectRoot}/biome.json",
       "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
       "!{projectRoot}/.storybook/**/*",
-      "!{projectRoot}/tsconfig.storybook.json"
+      "!{projectRoot}/tsconfig.storybook.json",
+      "!{projectRoot}/**/__tests__/**/*",
+      "!{projectRoot}/**/__mocks__/**/*"
     ],
     "sharedGlobals": [
       "{workspaceRoot}/.circleci/config.yml",
@@ -66,6 +68,7 @@
         "buildTargetName": "build",
         "devTargetName": "dev",
         "serveStaticTargetName": "serve-static",
+        "serveTargetName": "serve",
         "startTargetName": "start",
         "typecheckTargetName": "typecheck",
         "watchDepsTargetName": "watch-deps"
@@ -124,8 +127,35 @@
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     },
+    "@nx/next:build": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "externalDependencies": ["next"]
+        }
+      ],
+      "outputs": ["{options.outputPath}"]
+    },
+    "@nx/next:server": {
+      "configurations": {
+        "development": {
+          "buildLibsFromSource": true,
+          "turbo": true
+        },
+        "production": {
+          "buildLibsFromSource": false
+        }
+      },
+      "options": {
+        "port": 4200
+      }
+    },
     "@nx/vite:build": {
       "cache": true,
+      "dependsOn": ["^build"],
       "inputs": [
         "production",
         "^production",
@@ -137,6 +167,7 @@
     },
     "@nx/vite:test": {
       "cache": true,
+      "dependsOn": ["^build"],
       "inputs": [
         "default",
         "^production",
@@ -181,7 +212,7 @@
     },
     "typecheck": {
       "cache": true,
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["^build"]
     }
   }
 }

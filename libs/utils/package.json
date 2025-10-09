@@ -3,10 +3,16 @@
     ".": {
       "default": "./src/index.ts",
       "types": "./src/index.ts"
-    }
+    },
+    "./blockchain": "./src/blockchain/index.ts",
+    "./browser": "./src/browser/index.ts",
+    "./common": "./src/common/index.ts",
+    "./hooks": "./src/hooks/index.ts",
+    "./liquidity": "./src/liquidity/index.ts"
   },
   "main": "./src/index.ts",
   "name": "@dex-web/utils",
+  "sideEffects": false,
   "types": "./src/index.ts",
   "version": "0.0.1"
 }

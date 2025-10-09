@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import { VALIDATION_CONFIG } from "../../config/constants";
 import { addLiquidityHandler } from "../../handlers/dex-gateway/addLiquidity.handler";
 import { liquidityRateLimitMiddleware } from "../../middleware/rateLimit.middleware";

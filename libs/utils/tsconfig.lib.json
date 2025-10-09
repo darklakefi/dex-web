@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "declarationDir": "../../dist/libs/utils",
     "jsx": "react-jsx",
     "outDir": "../../dist/libs/utils",

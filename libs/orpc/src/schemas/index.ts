@@ -1,4 +1,8 @@
 export type {
+  GetTransactionStatusInput,
+  GetTransactionStatusOutput,
+} from "./dex-gateway";
+export type {
   GetTokenAccountsInput,
   GetTokenAccountsOutput,
 } from "./helius/getTokenAccounts.schema";
@@ -12,25 +16,22 @@ export type {
 } from "./helius/searchAssets.schema";
 export { searchAssetsInputSchema } from "./helius/searchAssets.schema";
 export type {
-  CheckLiquidityTransactionStatusInput,
-  CheckLiquidityTransactionStatusOutput,
-} from "./liquidity/checkLiquidityTransactionStatus.schema";
-export type {
-  CreateLiquidityTransactionInput,
-  CreateLiquidityTransactionOutput,
-} from "./liquidity/createLiquidityTransaction.schema";
-export type {
   GetAddLiquidityReviewInput,
   GetAddLiquidityReviewOutput,
 } from "./liquidity/getAddLiquidityReview.schema";
+export type {
+  GetAllUserLiquidityInput,
+  GetAllUserLiquidityOutput,
+  UserLiquidityPosition,
+} from "./liquidity/getAllUserLiquidity.schema";
 export type {
   RemoveLiquidityTransactionInput,
   RemoveLiquidityTransactionOutput,
 } from "./liquidity/removeLiquidityTransaction.schema";
 export type {
-  SubmitLiquidityTransactionInput,
-  SubmitLiquidityTransactionOutput,
-} from "./liquidity/submitLiquidityTransaction.schema";
+  SubmitAddLiquidityInput,
+  SubmitAddLiquidityOutput,
+} from "./liquidity/submitAddLiquidity.schema";
 export type {
   SubmitWithdrawalInput,
   SubmitWithdrawalOutput,
@@ -55,10 +56,7 @@ export type {
   GetUserLiquidityInput,
   GetUserLiquidityOutput,
 } from "./pools/getUserLiquidity.schema";
-export type {
-  GetQuoteInput,
-  GetQuoteOutput,
-} from "./swaps/getQuote.schema";
+export type { GetQuoteInput, GetQuoteOutput } from "./swaps/getQuote.schema";
 export { getQuoteInputSchema } from "./swaps/getQuote.schema";
 export type {
   GetSwapDetailsInput,

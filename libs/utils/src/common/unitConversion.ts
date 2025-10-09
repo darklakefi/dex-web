@@ -1,10 +1,30 @@
 import BigNumber from "bignumber.js";
 
-export const toRawUnits = (amount: number, decimals: number) => {
+/**
+ * Convert amount to raw units using BigNumber (for server-side orpc handlers).
+ * Returns BigNumber for further calculations.
+ *
+ * @param amount - Amount in human-readable units
+ * @param decimals - Number of decimal places
+ * @returns Raw units as BigNumber
+ */
+export const toRawUnitsBigNumber = (amount: number, decimals: number) => {
   return BigNumber(amount).multipliedBy(BigNumber(10 ** decimals));
 };
 
-export const toRawUnitsBigint = (amount: number, decimals: number): bigint => {
+/**
+ * Convert amount to raw units using BigNumber, returned as bigint (for server-side orpc handlers).
+ * Validates that result is an integer and within u64 range.
+ *
+ * @param amount - Amount in human-readable units
+ * @param decimals - Number of decimal places
+ * @returns Raw units as bigint
+ * @throws {Error} If result is not an integer or exceeds u64 maximum
+ */
+export const toRawUnitsBigNumberAsBigInt = (
+  amount: number,
+  decimals: number,
+): bigint => {
   const result = BigNumber(amount).multipliedBy(BigNumber(10 ** decimals));
 
   if (!result.isInteger()) {
@@ -21,6 +41,16 @@ export const toRawUnitsBigint = (amount: number, decimals: number): bigint => {
   return BigInt(result.toString());
 };
 
-export const toDecimals = (amount: number | BigNumber, decimals: number) => {
+/**
+ * Convert raw units to human-readable decimals using BigNumber (for server-side orpc handlers).
+ *
+ * @param amount - Amount in raw units (number or BigNumber)
+ * @param decimals - Number of decimal places
+ * @returns Amount in human-readable units as BigNumber
+ */
+export const toDecimalsBigNumber = (
+  amount: number | BigNumber,
+  decimals: number,
+) => {
   return BigNumber(amount).dividedBy(BigNumber(10 ** decimals));
 };

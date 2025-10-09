@@ -131,10 +131,40 @@ export async function getAddLiquidityReviewHandler(
       "Reserve Y",
     );
 
+    /**
+     * Converts various numeric formats from the on-chain pool account to a JavaScript number.
+     * The pool account may contain BN (BigNumber from anchor), number, or string representations.
+     */
+    const toNum = (
+      val: number | string | { toNumber?: () => number } | null | undefined,
+    ): number => {
+      if (!val) return 0;
+      if (typeof val === "number") return val;
+      if (
+        typeof val === "object" &&
+        "toNumber" in val &&
+        typeof val.toNumber === "function"
+      ) {
+        return val.toNumber();
+      }
+      if (typeof val === "string") {
+        const num = Number(val);
+        if (!Number.isNaN(num)) return num;
+        return parseInt(val, 16);
+      }
+      return 0;
+    };
+
     const liquidityReserveX =
-      reserveXBalance - pool.user_locked_x - pool.protocol_fee_x;
+      reserveXBalance -
+      toNum(pool.user_locked_x) -
+      toNum(pool.locked_x) -
+      toNum(pool.protocol_fee_x);
     const liquidityReserveY =
-      reserveYBalance - pool.user_locked_y - pool.protocol_fee_y;
+      reserveYBalance -
+      toNum(pool.user_locked_y) -
+      toNum(pool.locked_y) -
+      toNum(pool.protocol_fee_y);
 
     const tokenMetadata = (await getTokenMetadataHandler({
       addresses: [tokenXMint, tokenYMint],

@@ -7,6 +7,7 @@ import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
+import { ReferralCodeProvider } from "../../../../_components/ReferralCodeProvider";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
@@ -26,19 +27,23 @@ const queryClient = new QueryClient();
 const onUrlUpdate = vi.fn();
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <NextIntlClientProvider locale="en" messages={{}}>
-    <NuqsTestingAdapter
-      onUrlUpdate={onUrlUpdate}
-      searchParams={{
-        tokenAAddress: DEFAULT_BUY_TOKEN,
-        tokenBAddress: DEFAULT_SELL_TOKEN,
-      }}
-    >
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </NuqsTestingAdapter>
+    <ReferralCodeProvider>
+      <NuqsTestingAdapter
+        onUrlUpdate={onUrlUpdate}
+        searchParams={{
+          tokenAAddress: DEFAULT_BUY_TOKEN,
+          tokenBAddress: DEFAULT_SELL_TOKEN,
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </NuqsTestingAdapter>
+    </ReferralCodeProvider>
   </NextIntlClientProvider>
 );
-describe.skip("SwapForm", () => {
-  it("renders both buy and sell sections", async () => {
+describe("SwapForm", () => {
+  it.skip("renders both buy and sell sections", async () => {
     render(<SwapForm />, { wrapper });
     expect(await screen.findByText("Buying")).toBeDefined();
     expect(await screen.findByText("Selling")).toBeDefined();

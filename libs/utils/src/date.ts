@@ -38,7 +38,6 @@ export const getDateDifference = (dateString: string): string => {
     return "Today";
   }
 
-  // Calculate difference in days
   const diffTime = Math.abs(today.getTime() - oldDate.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 

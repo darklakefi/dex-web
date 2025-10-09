@@ -6,23 +6,24 @@ import {
   isWarningMessage,
   signTransactionWithRecovery,
 } from "@dex-web/core";
-import { client, tanstackClient } from "@dex-web/orpc";
-import type { Token } from "@dex-web/orpc/schemas";
+import { client } from "@dex-web/orpc";
+import type { GetTokenPriceOutput, Token } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import {
+  calculateWithdrawalDetails,
   convertToDecimal,
   getExplorerUrl,
+  InputType,
   numberFormatHelper,
   truncate,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import Decimal from "decimal.js";
 import Link from "next/link";
 import { useState } from "react";
-import { z } from "zod";
+import * as z from "zod";
 import { useSubmitWithdrawal } from "../../../../hooks/mutations/useLiquidityMutations";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import {
@@ -31,10 +32,6 @@ import {
 } from "../../../_utils/constants";
 import { isSquadsX } from "../../../_utils/isSquadsX";
 import { dismissToast, toast } from "../../../_utils/toast";
-import {
-  calculateWithdrawalDetails,
-  InputType,
-} from "../_utils/calculateWithdrawalDetails";
 
 type WithdrawLiquidityFormSchema = z.infer<typeof withdrawLiquidityFormSchema>;
 
@@ -79,6 +76,11 @@ interface WithdrawLiquidityModalProps {
   };
   tokenXDetails?: Token;
   tokenYDetails?: Token;
+  /**
+   * Token prices passed from parent to avoid suspense waterfall
+   */
+  tokenXPrice: GetTokenPriceOutput;
+  tokenYPrice: GetTokenPriceOutput;
 }
 
 export function WithdrawLiquidityModal({
@@ -91,9 +93,10 @@ export function WithdrawLiquidityModal({
   liquidityCalculations,
   tokenXDetails,
   tokenYDetails,
+  tokenXPrice,
+  tokenYPrice,
 }: WithdrawLiquidityModalProps) {
   const { publicKey, signTransaction, wallet } = useWallet();
-  const _queryClient = useQueryClient();
   const submitWithdrawalMutation = useSubmitWithdrawal();
   const [withdrawalCalculations, setWithdrawalCalculations] = useState({
     percentage: 0,
@@ -112,31 +115,6 @@ export function WithdrawLiquidityModal({
 
   const tokenXSymbol = tokenXDetails?.symbol ?? truncate(tokenXAddress);
   const tokenYSymbol = tokenYDetails?.symbol ?? truncate(tokenYAddress);
-
-  const [{ data: tokenXPrice }, { data: tokenYPrice }] = useSuspenseQueries({
-    queries: [
-      {
-        ...tanstackClient.tokens.getTokenPrice.queryOptions({
-          input: {
-            amount: 1,
-            mint: tokenXAddress || DEFAULT_BUY_TOKEN,
-            quoteCurrency: "USD",
-          },
-        }),
-        staleTime: 5 * 1000,
-      },
-      {
-        ...tanstackClient.tokens.getTokenPrice.queryOptions({
-          input: {
-            amount: 1,
-            mint: tokenYAddress || DEFAULT_SELL_TOKEN,
-            quoteCurrency: "USD",
-          },
-        }),
-        staleTime: 5 * 1000,
-      },
-    ],
-  });
 
   const setCalculationEmpty = () => {
     setWithdrawalCalculations({
@@ -160,6 +138,8 @@ export function WithdrawLiquidityModal({
     }
 
     const details = calculateWithdrawalDetails({
+      defaultBuyToken: DEFAULT_BUY_TOKEN,
+      defaultSellToken: DEFAULT_SELL_TOKEN,
       inputType: InputType.Percentage,
       poolReserves,
       tokenAAddress: tokenXAddress,
@@ -216,7 +196,7 @@ export function WithdrawLiquidityModal({
       setIsWithdrawing(true);
       toast({
         description: "Please confirm the transaction in your wallet.",
-        title: "Confirm withdrawal [2/3]",
+        title: "Confirm withdrawal",
         variant: "loading",
       });
 
@@ -234,7 +214,7 @@ export function WithdrawLiquidityModal({
       setWithdrawStep(3);
       toast({
         description: "Submitting transaction to the blockchain...",
-        title: "Processing withdrawal [3/3]",
+        title: "Processing withdrawal",
         variant: "loading",
       });
 
@@ -343,7 +323,7 @@ export function WithdrawLiquidityModal({
 
     toast({
       description: "Building withdrawal transaction...",
-      title: "Preparing withdrawal [1/3]",
+      title: "Preparing withdrawal",
       variant: "loading",
     });
     setWithdrawStep(1);
@@ -358,6 +338,8 @@ export function WithdrawLiquidityModal({
       );
 
       const withdrawalDetails = calculateWithdrawalDetails({
+        defaultBuyToken: DEFAULT_BUY_TOKEN,
+        defaultSellToken: DEFAULT_SELL_TOKEN,
         inputType: InputType.Percentage,
         poolReserves,
         tokenAAddress: tokenXAddress,
@@ -609,11 +591,11 @@ export function WithdrawLiquidityModal({
                   variant={!isDisabled ? "primary" : "secondary"}
                 >
                   {withdrawStep === 1
-                    ? "PREPARING WITHDRAWAL [1/3]"
+                    ? "PREPARING WITHDRAWAL"
                     : withdrawStep === 2
-                      ? "CONFIRM TRANSACTION IN WALLET [2/3]"
+                      ? "CONFIRM TRANSACTION IN WALLET"
                       : withdrawStep === 3
-                        ? "PROCESSING WITHDRAWAL [3/3]"
+                        ? "PROCESSING WITHDRAWAL"
                         : !hasEnteredValue
                           ? "SELECT OR ENTER AMOUNT"
                           : "WITHDRAW LIQUIDITY"}
