@@ -99,7 +99,6 @@ export function TokenImage({
     );
   }
 
-  // For unknown domains, use custom loader that proxies through our API
   const useCustomLoader =
     !imageUrl.startsWith("/") && !isKnownSafeDomain(imageUrl);
 

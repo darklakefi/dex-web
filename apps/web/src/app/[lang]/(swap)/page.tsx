@@ -43,6 +43,16 @@ export default async function Page({
       tanstackClient.pools.getPinedPool.queryOptions({}),
     ),
 
+    queryClient.prefetchQuery({
+      ...tanstackClient.pools.getAllPools.queryOptions({
+        input: {
+          includeEmpty: true,
+        },
+      }),
+      gcTime: 10 * 60 * 1000,
+      staleTime: 2 * 60 * 1000,
+    }),
+
     params.tokenAAddress
       ? queryClient.prefetchQuery({
           ...tanstackClient.tokens.getTokenPrice.queryOptions({

@@ -27,7 +27,7 @@ export function TokenSelectorContent({
   debouncedQuery,
   isInitialLoad,
   onSelectToken,
-  recentTokens,
+  recentTokens: _recentTokens,
   returnUrl,
 }: TokenSelectorContentProps) {
   const { data } = useTokenSearch(debouncedQuery);

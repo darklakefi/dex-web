@@ -45,7 +45,7 @@ export async function requestTransactionSigning({
   transactionType: _transactionType,
   setStep,
   trackingId: _trackingId,
-  wallet,
+  wallet: _wallet,
   toasts,
 }: RequestTransactionSigningParams): Promise<void> {
   try {

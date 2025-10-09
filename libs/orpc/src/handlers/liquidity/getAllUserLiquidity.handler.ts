@@ -28,18 +28,11 @@ export async function getAllUserLiquidityHandler({
       };
     }
 
-    console.log("📡 Fetching all pools...");
     const poolsResult = await getAllPoolsHandler({
       includeEmpty: false,
     });
-    console.log("📦 Pools result:", {
-      firstPool: poolsResult.pools[0],
-      poolCount: poolsResult.pools.length,
-      total: poolsResult.total,
-    });
 
     const allPools = poolsResult.pools;
-    console.log(`Checking ${allPools.length} pools for user liquidity`);
 
     const liquidityPositions: UserLiquidityPosition[] = [];
 
@@ -80,8 +73,6 @@ export async function getAllUserLiquidityHandler({
         );
       }
     }
-
-    console.log(`Found ${liquidityPositions.length} liquidity positions`);
 
     return {
       positions: liquidityPositions,

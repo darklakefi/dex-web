@@ -123,11 +123,43 @@ export default async function Page({
       queryClient.prefetchQuery(
         tanstackClient.pools.getPinedPool.queryOptions({}),
       ),
+
+      queryClient.prefetchQuery({
+        ...tanstackClient.pools.getAllPools.queryOptions({
+          input: {
+            includeEmpty: true,
+          },
+        }),
+        gcTime: 10 * 60 * 1000,
+        staleTime: 2 * 60 * 1000,
+      }),
     ]);
   } else if (isCreatePoolMode) {
-    await queryClient.prefetchQuery(
-      tanstackClient.pools.getPinedPool.queryOptions({}),
-    );
+    await Promise.allSettled([
+      queryClient.prefetchQuery(
+        tanstackClient.pools.getPinedPool.queryOptions({}),
+      ),
+
+      queryClient.prefetchQuery({
+        ...tanstackClient.pools.getAllPools.queryOptions({
+          input: {
+            includeEmpty: true,
+          },
+        }),
+        gcTime: 10 * 60 * 1000,
+        staleTime: 2 * 60 * 1000,
+      }),
+    ]);
+  } else {
+    await queryClient.prefetchQuery({
+      ...tanstackClient.pools.getAllPools.queryOptions({
+        input: {
+          includeEmpty: true,
+        },
+      }),
+      gcTime: 10 * 60 * 1000,
+      staleTime: 2 * 60 * 1000,
+    });
   }
 
   const dehydratedState = dehydrate(queryClient);
