@@ -21,13 +21,6 @@ interface RequestCreatePoolTransactionSigningProps {
   trackingId: string;
 }
 
-/**
- * Create pool-specific wrapper for transaction signing.
- * Uses the generic requestTransactionSigning utility with create pool-specific configuration.
- *
- * Note: showCreatePoolStepToast is called before the generic setStep to show
- * custom toast messages for the create pool flow.
- */
 export async function requestCreatePoolTransactionSigning({
   publicKey,
   signTransaction,
@@ -39,7 +32,6 @@ export async function requestCreatePoolTransactionSigning({
   showCreatePoolStepToast,
   trackingId,
 }: RequestCreatePoolTransactionSigningProps): Promise<void> {
-  // Wrapper to call both custom toast and step setter
   const setStepWithToast = (step: number) => {
     setCreateStep(step);
     if (step > 1) {

@@ -62,20 +62,6 @@ interface RequestTransactionSigningParams {
   trackingId?: string;
 }
 
-/**
- * Generic transaction signing utility for Solana transactions.
- * Handles the common flow of:
- * 1. Deserializing the unsigned transaction
- * 2. Signing with the wallet
- * 3. Submitting to the Solana network
- * 4. Handling success/error states with toasts
- *
- * Used by liquidity operations (add liquidity, create pool) and can be extended
- * for other transaction types.
- *
- * @param params - Transaction signing parameters
- * @throws Error if wallet is not connected or signing fails
- */
 export async function requestTransactionSigning({
   publicKey,
   signTransaction,
@@ -90,18 +76,15 @@ export async function requestTransactionSigning({
   trackingId: _trackingId,
 }: RequestTransactionSigningParams): Promise<void> {
   try {
-    // Validate wallet connection
     if (!publicKey) throw new Error("Wallet not connected!");
     if (!signTransaction)
       throw new Error("Wallet does not support transaction signing!");
 
-    // Get messages (custom or default)
     const messages = {
       ...DEFAULT_MESSAGES[transactionType],
       ...customMessages,
     };
 
-    // Step 2: Request signature from wallet
     setStep?.(2);
     toast({
       description: messages.step2Description,
@@ -118,7 +101,6 @@ export async function requestTransactionSigning({
       signedTransaction.serialize(),
     ).toString("base64");
 
-    // Step 3: Submit to network
     setStep?.(3);
     toast({
       description: messages.step3Description,
@@ -133,7 +115,6 @@ export async function requestTransactionSigning({
       userAddress,
     });
 
-    // Handle response
     if (response.success) {
       dismissToast();
       toast({

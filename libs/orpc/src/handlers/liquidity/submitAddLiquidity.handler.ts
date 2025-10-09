@@ -103,29 +103,6 @@ export async function submitAddLiquidityHandler({
       success: true,
     };
   } catch (error) {
-    // Check for slippage error - check multiple possible error formats
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const isSlippageError =
-      errorMessage.includes("SlippageExceeded") ||
-      errorMessage.includes("slippage tolerance exceeded") ||
-      errorMessage.includes("0x1775") || // Hex for error code 6005
-      errorMessage.includes("6005"); // Decimal error code
-
-    if (isSlippageError) {
-      console.error("🚨 Slippage error details:", {
-        errorMessage,
-        fullError: error,
-        note: "This means the on-chain program rejected the transaction during simulation/execution",
-        signature,
-      });
-      return {
-        error:
-          "Slippage tolerance exceeded. Pool reserves changed during transaction. Please try again with a higher slippage tolerance or wait for better market conditions.",
-        signature: signature || undefined,
-        success: false,
-      };
-    }
-
     const recovery = await attemptTransactionRecovery(
       error,
       connection,

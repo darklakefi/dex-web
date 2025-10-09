@@ -20,10 +20,6 @@ interface RequestLiquidityTransactionSigningProps {
   trackingId: string;
 }
 
-/**
- * Liquidity-specific wrapper for transaction signing.
- * Uses the generic requestTransactionSigning utility with liquidity-specific configuration.
- */
 export async function requestLiquidityTransactionSigning({
   publicKey,
   signTransaction,

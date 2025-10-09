@@ -69,7 +69,6 @@ export function LiquidityForm() {
         return;
       }
 
-      // Determine if tokenA corresponds to tokenX
       const tokenAIsX = params.tokenAAddress === poolDetails.tokenXMint;
 
       const reserveX = new Decimal(poolDetails.tokenXReserve);
@@ -78,19 +77,13 @@ export function LiquidityForm() {
       let result: Decimal;
 
       if (params.editedToken === "tokenA") {
-        // User entered tokenA, calculate tokenB proportionally
         result = tokenAIsX
-          ? amount
-              .mul(reserveY)
-              .div(reserveX) // tokenA is X, calculate Y
-          : amount.mul(reserveX).div(reserveY); // tokenA is Y, calculate X
+          ? amount.mul(reserveY).div(reserveX)
+          : amount.mul(reserveX).div(reserveY);
       } else {
-        // User entered tokenB, calculate tokenA proportionally
         result = tokenAIsX
-          ? amount
-              .mul(reserveX)
-              .div(reserveY) // tokenB is Y, calculate X
-          : amount.mul(reserveY).div(reserveX); // tokenB is X, calculate Y
+          ? amount.mul(reserveX).div(reserveY)
+          : amount.mul(reserveY).div(reserveX);
       }
 
       onResult(result.toFixed(6, Decimal.ROUND_DOWN));

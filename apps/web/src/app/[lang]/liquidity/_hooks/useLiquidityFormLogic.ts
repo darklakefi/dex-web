@@ -13,13 +13,6 @@ interface UseLiquidityFormLogicProps {
   tokenBAddress: string | null;
 }
 
-/**
- * Conductor pattern: orchestrates multiple hooks as siblings and wires them together explicitly.
- * - Query hooks own server state
- * - Form hook owns field state
- * - Machine hook owns workflow state
- * This hook mediates between them without creating nested dependencies.
- */
 export function useLiquidityFormLogic({
   tokenAAddress,
   tokenBAddress,
@@ -29,7 +22,6 @@ export function useLiquidityFormLogic({
     LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
   );
 
-  // Get sorted addresses for pool lookup
   const sortedTokenAddresses = sortSolanaAddresses(
     tokenAAddress || "",
     tokenBAddress || "",
@@ -37,12 +29,8 @@ export function useLiquidityFormLogic({
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
 
-  // === Call hooks as siblings (conductor pattern) ===
-
-  // 1. Query hook: owns pool data
   const poolDataResult = useRealtimePoolData({ tokenXMint, tokenYMint });
 
-  // Stabilize and transform pool data
   const poolDetails = useMemo(() => {
     const data = poolDataResult.data;
     return data
@@ -62,7 +50,6 @@ export function useLiquidityFormLogic({
       : null;
   }, [poolDataResult.data]);
 
-  // 2. Token accounts query: owns token balance data
   const tokenAccountsData = useRealtimeTokenAccounts({
     hasRecentTransaction: false,
     publicKey: publicKey || null,
@@ -70,8 +57,6 @@ export function useLiquidityFormLogic({
     tokenBAddress,
   });
 
-  // 3. Machine hook: owns workflow state (pass poolDetails from Query)
-  // Note: We'll get token decimals from tokenAccountsData below
   const sendRef = useRef<
     ((event: { type: string; data?: unknown }) => void) | null
   >(null);
@@ -87,7 +72,6 @@ export function useLiquidityFormLogic({
     data?: unknown;
   }) => void;
 
-  // 4. Form hook: owns field state
   const { form } = useLiquidityFormState({
     onSubmit: ({ value }) => {
       if (transaction.isError) {
@@ -101,7 +85,6 @@ export function useLiquidityFormLogic({
   });
   formRef.current = form;
 
-  // === Return coordinated interface ===
   return {
     form,
     isCalculating: transaction.isCalculating,

@@ -207,17 +207,14 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
         expect(screen.queryByText("Initializing...")).not.toBeInTheDocument();
       });
 
-      // Look for the Connect Wallet button
       const connectButton = screen.getByText("Connect Wallet");
       expect(connectButton).toBeInTheDocument();
       expect(connectButton.closest("button")).not.toHaveAttribute("disabled");
 
-      // Check that amount inputs are present
       const amountInputs = screen.getAllByRole("textbox");
       expect(amountInputs).toHaveLength(2);
     });
     it("should not trigger submission when wallet disconnected", async () => {
-      // Ensure wallet is disconnected
       setWalletState({
         publicKey: null,
         signTransaction: vi.fn(),
@@ -236,7 +233,6 @@ describe.skip("LiquidityForm - Critical Path User Stories", () => {
       ).not.toBeInTheDocument();
     });
     it("should preserve disconnected state on refresh", async () => {
-      // Ensure wallet is disconnected
       setWalletState({
         publicKey: null,
         signTransaction: vi.fn(),

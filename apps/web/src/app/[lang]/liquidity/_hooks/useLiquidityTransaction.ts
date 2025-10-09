@@ -109,13 +109,6 @@ function buildRequestPayload({
   values: LiquidityFormValues;
   effectivePublicKey: PublicKey;
 }) {
-  // CRITICAL: The on-chain program uses AVAILABLE reserves for LP calculations.
-  // From add_liquidity.rs:149-157: reserve.amount - protocol_fee - user_locked
-  // The handler returns AVAILABLE reserves in reserveXRaw/reserveYRaw.
-  // We MUST use the same reserves the program uses, otherwise we get slippage errors.
-  //
-  // reserveXRaw/reserveYRaw = AVAILABLE reserves (excluding locked/fees)
-  // reserveX/reserveY = AVAILABLE balances in human-readable units
   const poolReserves = {
     reserveX: String(currentPoolData.tokenXReserveRaw || 0),
     reserveY: String(currentPoolData.tokenYReserveRaw || 0),
@@ -141,7 +134,6 @@ function buildRequestPayload({
     },
   });
 
-  // Validate input before transformation
   const transformInput = addLiquidityInputSchema.parse({
     poolReserves,
     slippage: values.slippage || LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
@@ -154,7 +146,6 @@ function buildRequestPayload({
     userAddress: effectivePublicKey.toBase58(),
   });
 
-  // Transform with correct logic matching IDL
   return transformAddLiquidityInput(transformInput);
 }
 
@@ -257,8 +248,6 @@ export function useLiquidityTransaction({
           trimmedTokenBAddress,
         });
 
-        // CRITICAL: Fetch fresh pool reserves immediately before building payload
-        // This prevents slippage errors caused by stale cached data from TanStack Query
         console.log("🔄 Fetching fresh pool reserves before transaction...");
         const freshPoolData = await client.pools.getPoolReserves({
           tokenXMint: currentPoolData.tokenXMint,
@@ -269,7 +258,6 @@ export function useLiquidityTransaction({
           throw new Error("Failed to fetch fresh pool reserves");
         }
 
-        // Use fresh reserves for calculation
         const poolDataForCalculation = {
           ...currentPoolData,
           tokenXReserveRaw: freshPoolData.reserveXRaw,

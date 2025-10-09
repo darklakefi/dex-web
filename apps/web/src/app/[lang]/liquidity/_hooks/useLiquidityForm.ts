@@ -1,15 +1,5 @@
 "use client";
 
-/**
- * @deprecated This hook is deprecated and will be removed in a future version.
- * Use `useLiquidityFormState` from "./useLiquidityFormState" instead.
- *
- * Reason: Replaced by useLiquidityFormState which follows the conductor pattern
- * and properly separates concerns between TanStack Form, TanStack Query, and XState.
- *
- * Migration: Replace usages with useLiquidityFormState and adjust props accordingly.
- */
-
 import {
   convertToDecimal,
   formatAmountInput,
@@ -60,9 +50,6 @@ const { useAppForm } = createFormHook({
   formContext,
 });
 
-/**
- * @deprecated Use useLiquidityFormState instead
- */
 export function useLiquidityForm({
   publicKey,
   buyTokenAccount,

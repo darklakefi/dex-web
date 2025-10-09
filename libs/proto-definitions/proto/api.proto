@@ -4,7 +4,7 @@ package darklake.v1;
 
 import "validate/validate.proto";
 
-// --------------------------------- ENUMS
+
 
 enum Network {
     MAINNET_BETA = 0;
@@ -22,7 +22,7 @@ enum TradeStatus {
     FAILED    = 6;
 }
 
-// --------------------------------- MESSAGES
+
 message TokenMetadata {
     string name     = 1;
     string symbol   = 2;
@@ -102,7 +102,7 @@ message CreateUnsignedTransactionRequest {
 }
 
 message CreateUnsignedTransactionResponse {
-    // Base64 encoded transaction
+    
     string unsigned_transaction = 1;
     string order_id             = 2;
     string trade_id             = 3;
@@ -235,7 +235,7 @@ message GetTokenMetadataListResponse {
     int32 current_page            = 3;
 }
 
-// Custom Token Management Messages
+
 message CreateCustomTokenRequest {
     string name = 1 [
         (validate.rules).string.min_len = 1,
@@ -344,7 +344,7 @@ message InitPoolRequest {
 }
 
 message InitPoolResponse {
-    // Base64 encoded transaction
+    
     string unsigned_transaction = 1;
 }
 
@@ -373,7 +373,7 @@ message AddLiquidityRequest {
 }
 
 message AddLiquidityResponse {
-    // Base64 encoded transaction
+    
     string unsigned_transaction = 1;
 }
 
@@ -401,7 +401,7 @@ message RemoveLiquidityRequest {
 }
 
 message RemoveLiquidityResponse {
-    // Base64 encoded transaction
+    
     string unsigned_transaction = 1;
 }
 
