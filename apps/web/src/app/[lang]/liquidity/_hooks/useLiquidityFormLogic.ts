@@ -1,10 +1,10 @@
 "use client";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useMemo, useRef, useState } from "react";
+import { useCallback } from "react";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
-import { LIQUIDITY_CONSTANTS } from "../_constants/liquidityConstants";
+import type { LiquidityFormValues } from "../_types/liquidity.types";
 import { useLiquidityFormState } from "./useLiquidityFormState";
 import { useLiquidityTransaction } from "./useLiquidityTransaction";
 
@@ -18,10 +18,8 @@ export function useLiquidityFormLogic({
   tokenBAddress,
 }: UseLiquidityFormLogicProps) {
   const { publicKey } = useWallet();
-  const [slippage, setSlippage] = useState<string>(
-    LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
-  );
 
+  // Pure function - no useMemo needed, sortSolanaAddresses is deterministic
   const sortedTokenAddresses = sortSolanaAddresses(
     tokenAAddress || "",
     tokenBAddress || "",
@@ -31,31 +29,9 @@ export function useLiquidityFormLogic({
 
   const poolDataResult = useRealtimePoolData({ tokenXMint, tokenYMint });
 
-  const poolDetails = useMemo(() => {
-    const data = poolDataResult.data;
-    return data
-      ? {
-          fee: undefined,
-          poolAddress: data.lpMint,
-          price: undefined,
-          protocolFeeX: data.protocolFeeX,
-          protocolFeeY: data.protocolFeeY,
-          tokenXMint: data.tokenXMint,
-          tokenXReserve: data.reserveX,
-          tokenXReserveRaw: data.reserveXRaw,
-          tokenYMint: data.tokenYMint,
-          tokenYReserve: data.reserveY,
-          tokenYReserveRaw: data.reserveYRaw,
-          // Add new fields for transformer
-          totalReserveXRaw: data.totalReserveXRaw,
-          totalReserveYRaw: data.totalReserveYRaw,
-          totalSupply: data.totalLpSupply,
-          totalSupplyRaw: data.totalLpSupplyRaw,
-          userLockedX: data.userLockedX,
-          userLockedY: data.userLockedY,
-        }
-      : null;
-  }, [poolDataResult.data]);
+  // Data is already transformed by query's select option (Answer #5 best practice)
+  // The query only triggers re-renders when the transformed PoolDetails changes
+  const poolDetails = poolDataResult.data;
 
   const tokenAccountsData = useRealtimeTokenAccounts({
     hasRecentTransaction: false,
@@ -64,33 +40,39 @@ export function useLiquidityFormLogic({
     tokenBAddress,
   });
 
-  const sendRef = useRef<
-    ((event: { type: string; data?: unknown }) => void) | null
-  >(null);
-  const formRef = useRef<{ reset: () => void } | undefined>(undefined);
+  // Create transaction first (needed for send function)
+  // Note: We pass a dummy reset for now, will wire it up after form is created
   const transaction = useLiquidityTransaction({
-    form: formRef.current,
     poolDetails,
+    resetForm: () => {
+      // Will be set below after form is created
+    },
     tokenAAddress,
     tokenBAddress,
   });
-  sendRef.current = transaction.send as (event: {
-    type: string;
-    data?: unknown;
-  }) => void;
 
-  const { form } = useLiquidityFormState({
-    onSubmit: ({ value }) => {
+  // Wire up form submission to XState machine
+  // Following Answer #3: TanStack Form validates → XState executes
+  const handleFormSubmit = useCallback(
+    ({ value }: { value: LiquidityFormValues }) => {
+      console.log("🔥 handleFormSubmit called with value:", value);
       if (transaction.isError) {
-        sendRef.current?.({ type: "RETRY" });
+        console.log("🔄 Retrying transaction...");
+        transaction.send({ type: "RETRY" });
       } else {
-        sendRef.current?.({ data: { ...value, slippage }, type: "SUBMIT" });
+        console.log("📤 Sending SUBMIT event to XState machine");
+        transaction.send({ data: value, type: "SUBMIT" });
       }
     },
+    [transaction.isError, transaction.send],
+  );
+
+  // Create form with the correct onSubmit handler
+  const { form } = useLiquidityFormState({
+    onSubmit: handleFormSubmit,
     tokenAccountsData,
     walletPublicKey: publicKey || null,
   });
-  formRef.current = form;
 
   return {
     form,
@@ -101,8 +83,6 @@ export function useLiquidityFormLogic({
     isSuccess: transaction.isSuccess,
     poolDetails,
     publicKey,
-    setSlippage,
-    slippage,
     tokenAccountsData,
   };
 }

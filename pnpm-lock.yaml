@@ -403,8 +403,6 @@ importers:
 
   libs/grpc-client: {}
 
-  libs/liquidity-calculations: {}
-
   libs/orpc:
     devDependencies:
       '@dex-web/core':

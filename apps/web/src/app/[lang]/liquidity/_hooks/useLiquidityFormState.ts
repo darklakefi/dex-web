@@ -34,6 +34,13 @@ interface UseLiquidityFormStateOptions {
   }) => void | Promise<void>;
 }
 
+/**
+ * TanStack Form state management for liquidity forms.
+ *
+ * Following Answer #3: Form validates → XState executes
+ * The form's responsibility ends when the user clicks submit and data is valid.
+ * After that, XState takes over the submission workflow.
+ */
 export function useLiquidityFormState({
   onSubmit,
   tokenAccountsData,
@@ -41,6 +48,7 @@ export function useLiquidityFormState({
 }: UseLiquidityFormStateOptions) {
   const defaultValues: LiquidityFormValues = {
     [FORM_FIELD_NAMES.INITIAL_PRICE]: LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE,
+    [FORM_FIELD_NAMES.SLIPPAGE]: LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
     [FORM_FIELD_NAMES.TOKEN_A_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
     [FORM_FIELD_NAMES.TOKEN_B_AMOUNT]: LIQUIDITY_CONSTANTS.DEFAULT_AMOUNT,
   };
@@ -48,6 +56,7 @@ export function useLiquidityFormState({
   const form = useAppForm({
     defaultValues,
     onSubmit: async ({ value }: { value: LiquidityFormValues }) => {
+      // Form validation has passed - hand off to XState machine
       if (onSubmit) await onSubmit({ value });
     },
     validators: {

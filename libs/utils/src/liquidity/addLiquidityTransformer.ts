@@ -1,229 +1,140 @@
 import { Decimal } from "decimal.js";
-import { z } from "zod";
 import { sortSolanaAddresses } from "../blockchain/sortSolanaAddresses";
+import "./decimalConfig";
+import { calculateLpTokensToReceive } from "./liquidityCalculations";
+import {
+  applySlippageToMax,
+  parseAmountSafe,
+  toRawUnits,
+} from "./liquidityParsers";
+import {
+  type AddLiquidityInput,
+  type AddLiquidityPayload,
+  addLiquidityInputSchema,
+  addLiquidityPayloadSchema,
+} from "./liquiditySchemas";
 
-Decimal.set({
-  precision: 40,
-  rounding: Decimal.ROUND_DOWN,
-});
+// Re-export schemas and types for backward compatibility
+export {
+  type AddLiquidityInput,
+  type AddLiquidityPayload,
+  addLiquidityInputSchema,
+  addLiquidityPayloadSchema,
+} from "./liquiditySchemas";
 
-const solanaAddressSchema = z
-  .string()
-  .min(32)
-  .max(44)
-  .regex(/^[1-9A-HJ-NP-Za-km-z]+$/, "Invalid Solana address format");
-
-const numericStringSchema = z.string().refine((val) => {
-  const cleaned = val.replace(/,/g, "");
-  return !Number.isNaN(Number(cleaned)) && Number(cleaned) > 0;
-}, "Must be a valid positive number");
-
-const toBigIntSafe = (fieldName: string) =>
-  z
-    .union([z.number().nonnegative(), z.bigint().nonnegative(), z.string()])
-    .transform((val) => {
-      if (typeof val === "bigint") return val;
-      if (typeof val === "string") return BigInt(val);
-
-      if (val > Number.MAX_SAFE_INTEGER) {
-        throw new Error(
-          `${fieldName} ${val} exceeds safe integer range. Please use bigint or string.`,
-        );
-      }
-      return BigInt(Math.floor(val));
-    });
-
-const poolReservesSchema = z.object({
-  protocolFeeX: toBigIntSafe("protocolFeeX").optional().default(BigInt(0)),
-  protocolFeeY: toBigIntSafe("protocolFeeY").optional().default(BigInt(0)),
-  reserveX: toBigIntSafe("reserveX"),
-  reserveY: toBigIntSafe("reserveY"),
-  totalLpSupply: toBigIntSafe("totalLpSupply"),
-  userLockedX: toBigIntSafe("userLockedX").optional().default(BigInt(0)),
-  userLockedY: toBigIntSafe("userLockedY").optional().default(BigInt(0)),
-});
-
-export const addLiquidityInputSchema = z.object({
-  poolReserves: poolReservesSchema,
-  slippage: numericStringSchema,
-  tokenAAddress: solanaAddressSchema,
-  tokenAAmount: numericStringSchema,
-  tokenADecimals: z.number().int().min(0).max(18),
-  tokenBAddress: solanaAddressSchema,
-  tokenBAmount: numericStringSchema,
-  tokenBDecimals: z.number().int().min(0).max(18),
-  userAddress: solanaAddressSchema,
-});
-
-export type AddLiquidityInput = z.infer<typeof addLiquidityInputSchema>;
-
-export const addLiquidityPayloadSchema = z.object({
-  $typeName: z.literal("darklake.v1.AddLiquidityRequest").optional(),
-  amountLp: z.bigint().positive(),
-  label: z.string().default(""),
-  maxAmountX: z.bigint().positive(),
-  maxAmountY: z.bigint().positive(),
-  refCode: z.string().default(""),
-  tokenMintX: solanaAddressSchema,
-  tokenMintY: solanaAddressSchema,
-  userAddress: solanaAddressSchema,
-});
-
-export type AddLiquidityPayload = z.infer<typeof addLiquidityPayloadSchema>;
-
-function parseAmountSafe(value: string): Decimal {
-  const cleaned = value.replace(/,/g, "").trim();
-  const decimal = new Decimal(cleaned);
-
-  if (decimal.isNaN() || decimal.lte(0)) {
-    throw new Error(`Invalid amount: ${value}`);
-  }
-
-  return decimal;
+interface TokenMapping {
+  readonly amountXDecimal: Decimal;
+  readonly amountYDecimal: Decimal;
+  readonly decimalsX: number;
+  readonly decimalsY: number;
 }
 
-function toRawUnits(amount: Decimal, decimals: number): bigint {
-  const multiplier = new Decimal(10).pow(decimals);
-  const rawAmount = amount.mul(multiplier);
-  return BigInt(rawAmount.toFixed(0, Decimal.ROUND_DOWN));
-}
-
-function _calculateLpTokensToReceive(
-  amountX: bigint,
-  amountY: bigint,
-  reserves: {
-    availableReserveX: bigint;
-    availableReserveY: bigint;
-    totalLpSupply: bigint;
-  },
-): bigint {
-  if (
-    reserves.totalLpSupply === BigInt(0) ||
-    reserves.availableReserveX === BigInt(0) ||
-    reserves.availableReserveY === BigInt(0)
-  ) {
-    const amountXDecimal = new Decimal(amountX.toString());
-    const amountYDecimal = new Decimal(amountY.toString());
-    const product = amountXDecimal.mul(amountYDecimal);
-    const sqrtProduct = product.sqrt();
-    return BigInt(sqrtProduct.toFixed(0, Decimal.ROUND_DOWN));
-  }
-
-  const amountXDecimal = new Decimal(amountX.toString());
-  const amountYDecimal = new Decimal(amountY.toString());
-  const reserveXDecimal = new Decimal(reserves.availableReserveX.toString());
-  const reserveYDecimal = new Decimal(reserves.availableReserveY.toString());
-  const totalLpSupplyDecimal = new Decimal(reserves.totalLpSupply.toString());
-
-  const lpFromX = amountXDecimal.mul(totalLpSupplyDecimal).div(reserveXDecimal);
-
-  const lpFromY = amountYDecimal.mul(totalLpSupplyDecimal).div(reserveYDecimal);
-
-  const lpTokens = Decimal.min(lpFromX, lpFromY);
-
-  return BigInt(lpTokens.toFixed(0, Decimal.ROUND_DOWN));
-}
-
-function calculateAvailableReserves(reserves: {
-  reserveX: bigint;
-  reserveY: bigint;
-  protocolFeeX: bigint;
-  protocolFeeY: bigint;
-  userLockedX: bigint;
-  userLockedY: bigint;
-}): { availableReserveX: bigint; availableReserveY: bigint } {
-  // Calculate available reserves by subtracting fees and locked amounts
-  // This matches the Rust implementation:
-  // total_token_x_amount = pool_token_reserve_x.amount - protocol_fee_x - user_locked_x
-  const availableReserveX =
-    reserves.reserveX - reserves.protocolFeeX - reserves.userLockedX;
-  const availableReserveY =
-    reserves.reserveY - reserves.protocolFeeY - reserves.userLockedY;
-
-  // Ensure we don't have negative reserves
-  if (availableReserveX < BigInt(0) || availableReserveY < BigInt(0)) {
-    throw new Error(
-      "Available reserves cannot be negative after subtracting fees and locked amounts",
-    );
+/**
+ * Map token A/B inputs to sorted X/Y tokens based on address ordering.
+ * @internal
+ */
+function mapTokensToSortedOrder(
+  validated: AddLiquidityInput,
+  tokenXAddress: string,
+  tokenAAmountDecimal: Decimal,
+  tokenBAmountDecimal: Decimal,
+): TokenMapping {
+  if (validated.tokenAAddress === tokenXAddress) {
+    return {
+      amountXDecimal: tokenAAmountDecimal,
+      amountYDecimal: tokenBAmountDecimal,
+      decimalsX: validated.tokenADecimals,
+      decimalsY: validated.tokenBDecimals,
+    };
   }
 
   return {
-    availableReserveX,
-    availableReserveY,
+    amountXDecimal: tokenBAmountDecimal,
+    amountYDecimal: tokenAAmountDecimal,
+    decimalsX: validated.tokenBDecimals,
+    decimalsY: validated.tokenADecimals,
   };
 }
 
-function applySlippageToMax(
-  amount: Decimal,
-  slippagePercent: Decimal,
-): Decimal {
-  const slippageFactor = slippagePercent.div(100);
-  return amount.mul(new Decimal(1).add(slippageFactor));
-}
-
+/**
+ * Transform user input into a validated AddLiquidityPayload ready for transaction submission.
+ *
+ * This function:
+ * 1. Validates all inputs using Zod schemas
+ * 2. Sorts token addresses to maintain X/Y ordering convention
+ * 3. Calculates LP tokens to receive based on pool reserves
+ * 4. Applies slippage tolerance to create max amounts
+ * 5. Returns a validated payload for the protocol
+ *
+ * @param input - User input for adding liquidity
+ * @returns Validated payload ready for transaction submission
+ * @throws {Error} If validation fails or calculations produce invalid results
+ *
+ * @example
+ * ```typescript
+ * const payload = transformAddLiquidityInput({
+ *   tokenAAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+ *   tokenAAmount: "100",
+ *   tokenADecimals: 6,
+ *   tokenBAddress: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+ *   tokenBAmount: "200",
+ *   tokenBDecimals: 6,
+ *   slippage: "0.5",
+ *   poolReserves: {
+ *     reserveX: 1000000000n,
+ *     reserveY: 2000000000n,
+ *     totalLpSupply: 1414213562n,
+ *     protocolFeeX: 0n,
+ *     protocolFeeY: 0n,
+ *     userLockedX: 0n,
+ *     userLockedY: 0n,
+ *   },
+ *   userAddress: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+ * });
+ * ```
+ */
 export function transformAddLiquidityInput(
   input: AddLiquidityInput,
 ): AddLiquidityPayload {
+  // Step 1: Validate input
   const validated = addLiquidityInputSchema.parse(input);
 
+  // Step 2: Sort token addresses to maintain X/Y convention
   const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
     validated.tokenAAddress,
     validated.tokenBAddress,
   );
 
+  // Step 3: Parse amounts and slippage
   const tokenAAmountDecimal = parseAmountSafe(validated.tokenAAmount);
   const tokenBAmountDecimal = parseAmountSafe(validated.tokenBAmount);
   const slippagePercent = parseAmountSafe(validated.slippage);
 
-  let amountXDecimal: Decimal;
-  let amountYDecimal: Decimal;
-  let decimalsX: number;
-  let decimalsY: number;
+  // Step 4: Map tokens to sorted X/Y order
+  const { amountXDecimal, amountYDecimal, decimalsX, decimalsY } =
+    mapTokensToSortedOrder(
+      validated,
+      tokenXAddress,
+      tokenAAmountDecimal,
+      tokenBAmountDecimal,
+    );
 
-  if (validated.tokenAAddress === tokenXAddress) {
-    amountXDecimal = tokenAAmountDecimal;
-    amountYDecimal = tokenBAmountDecimal;
-    decimalsX = validated.tokenADecimals;
-    decimalsY = validated.tokenBDecimals;
-  } else {
-    amountXDecimal = tokenBAmountDecimal;
-    amountYDecimal = tokenAAmountDecimal;
-    decimalsX = validated.tokenBDecimals;
-    decimalsY = validated.tokenADecimals;
-  }
-
+  // Step 5: Convert to raw units
   const amountXRaw = toRawUnits(amountXDecimal, decimalsX);
   const amountYRaw = toRawUnits(amountYDecimal, decimalsY);
 
-  const { availableReserveX, availableReserveY } = calculateAvailableReserves({
-    protocolFeeX: validated.poolReserves.protocolFeeX,
-    protocolFeeY: validated.poolReserves.protocolFeeY,
-    reserveX: validated.poolReserves.reserveX,
-    reserveY: validated.poolReserves.reserveY,
-    userLockedX: validated.poolReserves.userLockedX,
-    userLockedY: validated.poolReserves.userLockedY,
+  // Step 6: Calculate LP tokens
+  // Note: Pool reserves are already "available" reserves from the handler
+  // (handler subtracts protocol fees and locked amounts)
+  const lpTokensRaw = calculateLpTokensToReceive({
+    amountX: amountXRaw,
+    amountY: amountYRaw,
+    availableReserveX: validated.poolReserves.reserveX,
+    availableReserveY: validated.poolReserves.reserveY,
+    totalLpSupply: validated.poolReserves.totalLpSupply,
   });
 
-  const reserveXDecimal = new Decimal(availableReserveX.toString());
-  const reserveYDecimal = new Decimal(availableReserveY.toString());
-  const totalLpSupplyDecimal = new Decimal(
-    validated.poolReserves.totalLpSupply.toString(),
-  );
-
-  const amountXDecimalForCalc = new Decimal(amountXRaw.toString());
-  const amountYDecimalForCalc = new Decimal(amountYRaw.toString());
-
-  const lpFromX = amountXDecimalForCalc
-    .mul(totalLpSupplyDecimal)
-    .div(reserveXDecimal);
-  const lpFromY = amountYDecimalForCalc
-    .mul(totalLpSupplyDecimal)
-    .div(reserveYDecimal);
-
-  const lpTokensDecimal = Decimal.min(lpFromX, lpFromY);
-
-  const lpTokensRaw = BigInt(lpTokensDecimal.toFixed(0, Decimal.ROUND_DOWN));
-
+  // Step 7: Apply slippage to create max amounts
   const userAmountXDecimal = new Decimal(amountXRaw.toString());
   const userAmountYDecimal = new Decimal(amountYRaw.toString());
 
@@ -243,6 +154,7 @@ export function transformAddLiquidityInput(
     maxAmountYRawWithSlippage.toFixed(0, Decimal.ROUND_UP),
   );
 
+  // Step 8: Build and validate payload
   const payload: AddLiquidityPayload = {
     $typeName: "darklake.v1.AddLiquidityRequest",
     amountLp: lpTokensRaw,

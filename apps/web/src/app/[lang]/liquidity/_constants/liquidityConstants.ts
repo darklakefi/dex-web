@@ -12,6 +12,7 @@ export const LIQUIDITY_CONSTANTS = Object.freeze({
 
 export const FORM_FIELD_NAMES = Object.freeze({
   INITIAL_PRICE: "initialPrice",
+  SLIPPAGE: "slippage",
   TOKEN_A_AMOUNT: "tokenAAmount",
   TOKEN_B_AMOUNT: "tokenBAmount",
 } as const);

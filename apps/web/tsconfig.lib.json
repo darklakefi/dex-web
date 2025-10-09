@@ -30,7 +30,8 @@
     "src/**/*.jsx",
     "src/**/*.mts",
     "src/**/*.ts",
-    "src/**/*.tsx"
+    "src/**/*.tsx",
+    "../../dist/apps/web/.next/types/**/*.ts"
   ],
   "references": [
     {

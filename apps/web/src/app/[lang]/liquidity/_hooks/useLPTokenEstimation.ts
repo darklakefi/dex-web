@@ -3,7 +3,6 @@
 import { tanstackClient } from "@dex-web/orpc";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 interface LPEstimationData {
   estimatedLPTokens: string | undefined;
@@ -19,6 +18,12 @@ interface UseLPTokenEstimationParams {
   enabled?: boolean;
 }
 
+/**
+ * Hook to estimate LP tokens for a liquidity position.
+ *
+ * Following Answer #5: Only use useMemo for necessary memoization.
+ * Simple derivations are computed inline - React Query handles the expensive parts.
+ */
 export function useLPTokenEstimation({
   tokenAAddress,
   tokenBAddress,
@@ -27,50 +32,35 @@ export function useLPTokenEstimation({
   slippage = "0.5",
   enabled = true,
 }: UseLPTokenEstimationParams) {
+  // Pure function call - no useMemo needed for deterministic operations
   const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
-    useMemo(() => {
-      if (!tokenAAddress || !tokenBAddress) {
-        return { tokenXAddress: "", tokenYAddress: "" };
+    tokenAAddress && tokenBAddress
+      ? sortSolanaAddresses(tokenAAddress, tokenBAddress)
+      : { tokenXAddress: "", tokenYAddress: "" };
+
+  // Simple boolean logic - computed inline
+  const shouldFetch =
+    enabled &&
+    tokenAAddress &&
+    tokenBAddress &&
+    tokenAAmount &&
+    tokenBAmount &&
+    Number(tokenAAmount) > 0 &&
+    Number(tokenBAmount) > 0 &&
+    !Number.isNaN(Number(tokenAAmount)) &&
+    !Number.isNaN(Number(tokenBAmount));
+
+  // Build query input inline - TanStack Query's queryKey handles stability
+  const tokenAIsX = tokenAAddress === tokenXMint;
+  const queryInput = shouldFetch
+    ? {
+        slippage: Number(slippage),
+        tokenXAmount: Number(tokenAIsX ? tokenAAmount : tokenBAmount),
+        tokenXMint,
+        tokenYAmount: Number(tokenAIsX ? tokenBAmount : tokenAAmount),
+        tokenYMint,
       }
-      return sortSolanaAddresses(tokenAAddress, tokenBAddress);
-    }, [tokenAAddress, tokenBAddress]);
-
-  const shouldFetch = useMemo(() => {
-    return (
-      enabled &&
-      tokenAAddress &&
-      tokenBAddress &&
-      tokenAAmount &&
-      tokenBAmount &&
-      Number(tokenAAmount) > 0 &&
-      Number(tokenBAmount) > 0 &&
-      !Number.isNaN(Number(tokenAAmount)) &&
-      !Number.isNaN(Number(tokenBAmount))
-    );
-  }, [enabled, tokenAAddress, tokenBAddress, tokenAAmount, tokenBAmount]);
-
-  const queryInput = useMemo(() => {
-    if (!shouldFetch) return null;
-
-    // Determine which token is X and which is Y based on sorted addresses
-    const tokenAIsX = tokenAAddress === tokenXMint;
-
-    return {
-      slippage: Number(slippage),
-      tokenXAmount: Number(tokenAIsX ? tokenAAmount : tokenBAmount),
-      tokenXMint,
-      tokenYAmount: Number(tokenAIsX ? tokenBAmount : tokenAAmount),
-      tokenYMint,
-    };
-  }, [
-    shouldFetch,
-    tokenXMint,
-    tokenYMint,
-    tokenAAddress,
-    tokenAAmount,
-    tokenBAmount,
-    slippage,
-  ]);
+    : null;
 
   return useQuery({
     ...tanstackClient.pools.getLPRate.queryOptions({

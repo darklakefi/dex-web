@@ -1,7 +1,11 @@
 "use client";
 
 import { Box, Icon } from "@dex-web/ui";
-import { Decimal } from "decimal.js";
+import {
+  type CalculateProportionalAmountParams,
+  calculateProportionalAmount,
+} from "@dex-web/utils";
+import { Field } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
@@ -10,8 +14,13 @@ import {
   liquidityPageParsers,
   selectedTokensParsers,
 } from "../../../_utils/searchParams";
+import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
 import { useLiquidityFormLogic } from "../_hooks/useLiquidityFormLogic";
 import { useLPTokenEstimation } from "../_hooks/useLPTokenEstimation";
+import {
+  createPoolUrl,
+  selectLiquidityViewState,
+} from "../_utils/liquiditySelectors";
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
 import { CalculationLoadingIndicator } from "./CalculationLoadingIndicator";
 import { LiquidityActionButton } from "./LiquidityActionButton";
@@ -33,8 +42,6 @@ export function LiquidityForm() {
   const {
     form,
     poolDetails,
-    slippage,
-    setSlippage,
     tokenAccountsData,
     publicKey,
     isCalculating,
@@ -45,88 +52,28 @@ export function LiquidityForm() {
     tokenBAddress,
   });
 
+  // Derive view state using pure selector function
+  const viewState = selectLiquidityViewState(
+    poolDetails,
+    form.state.values.tokenAAmount,
+    form.state.values.tokenBAmount,
+    tokenAAddress,
+    tokenBAddress,
+    tokenAccountsData,
+    isPoolLoading,
+  );
+
   // Use LP estimation hook for accurate calculations with fee/locked amount exclusions
   const lpEstimation = useLPTokenEstimation({
     enabled: Boolean(poolDetails && tokenAAddress && tokenBAddress),
-    slippage,
+    slippage: form.state.values.slippage,
     tokenAAddress,
     tokenAAmount: form.state.values.tokenAAmount || "0",
     tokenBAddress,
     tokenBAmount: form.state.values.tokenBAmount || "0",
   });
 
-  const debouncedCalculateTokenAmounts = (
-    params: {
-      inputAmount: string;
-      editedToken: "tokenA" | "tokenB";
-      tokenAAddress: string | null;
-      tokenBAddress: string | null;
-    },
-    onResult: (outputAmount: number | null) => void,
-  ) => {
-    if (
-      !poolDetails ||
-      !poolDetails.tokenXReserve ||
-      !poolDetails.tokenYReserve
-    ) {
-      onResult(null);
-      return;
-    }
-
-    try {
-      const amount = new Decimal(params.inputAmount);
-      if (amount.isNaN() || amount.lte(0)) {
-        onResult(null);
-        return;
-      }
-
-      const tokenAIsX = params.tokenAAddress === poolDetails.tokenXMint;
-
-      const reserveX = new Decimal(poolDetails.tokenXReserve);
-      const reserveY = new Decimal(poolDetails.tokenYReserve);
-
-      let result: Decimal;
-
-      if (params.editedToken === "tokenA") {
-        result = tokenAIsX
-          ? amount.mul(reserveY).div(reserveX)
-          : amount.mul(reserveX).div(reserveY);
-      } else {
-        result = tokenAIsX
-          ? amount.mul(reserveX).div(reserveY)
-          : amount.mul(reserveY).div(reserveX);
-      }
-
-      onResult(Number(result.toFixed(6, Decimal.ROUND_DOWN)));
-    } catch (error) {
-      console.error("Error calculating proportional amount:", error);
-      onResult(null);
-    }
-  };
-
-  const handleSlippageChange = (newSlippage: string) => {
-    setSlippage(newSlippage);
-  };
-
-  const handleCreatePoolClick = () => {
-    const urlWithParams = serialize("liquidity", {
-      type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
-    });
-    router.push(`/${urlWithParams}`);
-  };
-
-  const shouldShowAddLiquidityDetails =
-    poolDetails &&
-    form.state.values.tokenBAmount !== "0" &&
-    form.state.values.tokenAAmount !== "0";
-
-  const isInitialLoading =
-    !tokenAAddress ||
-    !tokenBAddress ||
-    (tokenAccountsData.isLoadingBuy && tokenAccountsData.isLoadingSell) ||
-    isPoolLoading;
-
-  if (isInitialLoading) {
+  if (viewState.isInitialLoading) {
     return (
       <LiquidityErrorBoundary>
         <LiquidityFormSkeleton />
@@ -140,44 +87,63 @@ export function LiquidityForm() {
         <div className="size-9" />
 
         <Box padding="lg">
-          <div className="flex flex-col gap-4">
-            <LiquidityTokenInputs
-              buyTokenAccount={tokenAccountsData.buyTokenAccount}
-              debouncedCalculateTokenAmounts={debouncedCalculateTokenAmounts}
-              form={form}
-              isLoadingBuy={tokenAccountsData.isLoadingBuy}
-              isLoadingSell={tokenAccountsData.isLoadingSell}
-              isRefreshingBuy={tokenAccountsData.isRefreshingBuy}
-              isRefreshingSell={tokenAccountsData.isRefreshingSell}
-              poolDetails={poolDetails}
-              sellTokenAccount={tokenAccountsData.sellTokenAccount}
-              tokenAAddress={tokenAAddress}
-              tokenBAddress={tokenBAddress}
-            />
+          <form
+            onSubmit={(e) => {
+              console.log("🎯 Form onSubmit event fired");
+              e.preventDefault();
+              e.stopPropagation();
+              console.log("📋 Calling form.handleSubmit()");
+              form.handleSubmit();
+              console.log("✅ form.handleSubmit() completed");
+            }}
+          >
+            <div className="flex flex-col gap-4">
+              <LiquidityTokenInputs
+                buyTokenAccount={tokenAccountsData.buyTokenAccount}
+                calculateProportionalAmount={(
+                  params: Omit<
+                    CalculateProportionalAmountParams,
+                    "poolDetails"
+                  >,
+                ) => {
+                  if (!poolDetails) return null;
+                  return calculateProportionalAmount({
+                    ...params,
+                    poolDetails,
+                  });
+                }}
+                form={form}
+                isLoadingBuy={tokenAccountsData.isLoadingBuy}
+                isLoadingSell={tokenAccountsData.isLoadingSell}
+                isRefreshingBuy={tokenAccountsData.isRefreshingBuy}
+                isRefreshingSell={tokenAccountsData.isRefreshingSell}
+                poolDetails={poolDetails}
+                sellTokenAccount={tokenAccountsData.sellTokenAccount}
+                tokenAAddress={tokenAAddress}
+                tokenBAddress={tokenBAddress}
+              />
 
-            {isCalculating && <CalculationLoadingIndicator />}
+              {isCalculating && <CalculationLoadingIndicator />}
 
-            <LiquidityActionButton
-              buyTokenAccount={tokenAccountsData.buyTokenAccount}
-              form={form}
-              isError={isError}
-              isPoolLoading={isPoolLoading}
-              isTokenAccountsLoading={
-                tokenAccountsData.isLoadingBuy ||
-                tokenAccountsData.isLoadingSell
-              }
-              onSubmit={() => {
-                form.handleSubmit();
-              }}
-              poolDetails={poolDetails}
-              publicKey={publicKey}
-              sellTokenAccount={tokenAccountsData.sellTokenAccount}
-              tokenAAddress={tokenAAddress}
-              tokenBAddress={tokenBAddress}
-            />
-          </div>
+              <LiquidityActionButton
+                buyTokenAccount={tokenAccountsData.buyTokenAccount}
+                form={form}
+                isError={isError}
+                isPoolLoading={isPoolLoading}
+                isTokenAccountsLoading={
+                  tokenAccountsData.isLoadingBuy ||
+                  tokenAccountsData.isLoadingSell
+                }
+                poolDetails={poolDetails}
+                publicKey={publicKey}
+                sellTokenAccount={tokenAccountsData.sellTokenAccount}
+                tokenAAddress={tokenAAddress}
+                tokenBAddress={tokenBAddress}
+              />
+            </div>
+          </form>
 
-          {shouldShowAddLiquidityDetails &&
+          {viewState.shouldShowAddLiquidityDetails &&
             (isCalculating ? (
               <PoolDetailsSkeleton />
             ) : (
@@ -186,7 +152,7 @@ export function LiquidityForm() {
                   lpEstimation.data?.estimatedLPTokens || undefined
                 }
                 isLPEstimationLoading={lpEstimation.isLoading}
-                slippage={slippage}
+                slippage={form.state.values.slippage}
                 tokenAAmount={form.state.values.tokenAAmount}
                 tokenASymbol={
                   tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
@@ -206,12 +172,22 @@ export function LiquidityForm() {
         </Box>
 
         <div className="flex flex-col gap-1">
-          <TokenTransactionSettingsButton onChange={handleSlippageChange} />
+          <Field form={form} name={FORM_FIELD_NAMES.SLIPPAGE}>
+            {(field) => (
+              <TokenTransactionSettingsButton
+                onChange={(newSlippage) => field.handleChange(newSlippage)}
+              />
+            )}
+          </Field>
 
           <button
             aria-label="change mode"
             className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
-            onClick={handleCreatePoolClick}
+            onClick={() =>
+              router.push(
+                createPoolUrl(serialize, LIQUIDITY_PAGE_TYPE.CREATE_POOL),
+              )
+            }
             type="button"
           >
             <Icon className={`size-5`} name="plus-circle" />

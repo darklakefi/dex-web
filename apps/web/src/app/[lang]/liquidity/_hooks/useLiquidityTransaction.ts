@@ -1,15 +1,9 @@
 "use client";
 
-import { ERROR_MESSAGES, isWarningMessage } from "@dex-web/core";
+import { ERROR_MESSAGES } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
-import {
-  addLiquidityInputSchema,
-  parseAmount,
-  transformAddLiquidityInput,
-} from "@dex-web/utils";
-import type { Wallet } from "@solana/wallet-adapter-react";
+import { parseAmount } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import type { PublicKey } from "@solana/web3.js";
 import { useCallback, useRef } from "react";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import {
@@ -17,7 +11,6 @@ import {
   useWalletPublicKey,
 } from "../../../../hooks/useWalletCache";
 import { generateTrackingId } from "../../../_utils/generateTrackingId";
-import { LIQUIDITY_CONSTANTS } from "../_constants/liquidityConstants";
 import type {
   LiquidityFormValues,
   PoolDetails,
@@ -28,175 +21,14 @@ import {
   trackLiquidityError,
   trackSigned,
 } from "../_utils/liquidityTransactionAnalytics";
-import {
-  showErrorToast,
-  showInfoToast,
-  showStepToast,
-} from "../_utils/liquidityTransactionToasts";
+import { showStepToast } from "../_utils/liquidityTransactionToasts";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
-
-function validateTransactionInputs({
-  effectivePublicKey,
-  walletAdapter,
-  wallet,
-  currentPoolData,
-}: {
-  effectivePublicKey: PublicKey | null | undefined;
-  walletAdapter:
-    | {
-        wallet: unknown;
-      }
-    | null
-    | undefined;
-  wallet: Wallet | null;
-  currentPoolData: PoolDetails | null;
-}) {
-  if (
-    !effectivePublicKey ||
-    !walletAdapter?.wallet ||
-    !wallet?.adapter?.publicKey
-  ) {
-    showErrorToast({ message: ERROR_MESSAGES.MISSING_WALLET_INFO });
-    throw new Error(ERROR_MESSAGES.MISSING_WALLET_INFO);
-  }
-  if (!currentPoolData) {
-    const errorMsg =
-      "Pool not found for the selected token pair. Please create a pool first.";
-    showErrorToast({ message: errorMsg });
-    throw new Error(errorMsg);
-  }
-}
-
-async function fetchTokenMetadata({
-  trimmedTokenAAddress,
-  trimmedTokenBAddress,
-}: {
-  trimmedTokenAAddress: string;
-  trimmedTokenBAddress: string;
-}) {
-  const tokenMetadata = await client.tokens.getTokenMetadata({
-    addresses: [trimmedTokenAAddress, trimmedTokenBAddress],
-    returnAsObject: true,
-  });
-
-  if (
-    !tokenMetadata ||
-    typeof tokenMetadata !== "object" ||
-    Array.isArray(tokenMetadata)
-  ) {
-    throw new Error("Invalid token metadata response");
-  }
-
-  const tokenAMeta = tokenMetadata[trimmedTokenAAddress];
-  const tokenBMeta = tokenMetadata[trimmedTokenBAddress];
-
-  if (!tokenAMeta || !tokenBMeta) {
-    throw new Error("Failed to fetch token metadata for decimals");
-  }
-
-  return { tokenAMeta, tokenBMeta };
-}
-
-function buildRequestPayload({
-  currentPoolData,
-  trimmedTokenAAddress,
-  trimmedTokenBAddress,
-  tokenAMeta,
-  tokenBMeta,
-  values,
-  effectivePublicKey,
-}: {
-  currentPoolData: PoolDetails;
-  trimmedTokenAAddress: string;
-  trimmedTokenBAddress: string;
-  tokenAMeta: { decimals: number };
-  tokenBMeta: { decimals: number };
-  values: LiquidityFormValues;
-  effectivePublicKey: PublicKey;
-}) {
-  const poolReserves = {
-    protocolFeeX: String(currentPoolData.protocolFeeX || 0),
-    protocolFeeY: String(currentPoolData.protocolFeeY || 0),
-    reserveX: String(
-      currentPoolData.totalReserveXRaw || currentPoolData.tokenXReserveRaw || 0,
-    ),
-    reserveY: String(
-      currentPoolData.totalReserveYRaw || currentPoolData.tokenYReserveRaw || 0,
-    ),
-    totalLpSupply: String(currentPoolData.totalSupplyRaw || 0),
-    userLockedX: String(currentPoolData.userLockedX || 0),
-    userLockedY: String(currentPoolData.userLockedY || 0),
-  };
-
-  console.log("🔍 Pool Data Debug (Frontend):", {
-    humanReadable: {
-      availableReserveX: currentPoolData.tokenXReserve,
-      availableReserveY: currentPoolData.tokenYReserve,
-      totalLpSupply: currentPoolData.totalSupply,
-    },
-    note: "Using TOTAL reserves from handler (reserveXRaw/reserveYRaw)",
-    rawForCalculation: poolReserves,
-    tokenXMint: currentPoolData.tokenXMint,
-    tokenYMint: currentPoolData.tokenYMint,
-    userInput: {
-      slippage: values.slippage,
-      tokenAAddress: trimmedTokenAAddress,
-      tokenAAmount: values.tokenAAmount,
-      tokenBAddress: trimmedTokenBAddress,
-      tokenBAmount: values.tokenBAmount,
-    },
-  });
-
-  const transformInput = addLiquidityInputSchema.parse({
-    poolReserves,
-    slippage: values.slippage || LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
-    tokenAAddress: trimmedTokenAAddress,
-    tokenAAmount: values.tokenAAmount,
-    tokenADecimals: tokenAMeta.decimals,
-    tokenBAddress: trimmedTokenBAddress,
-    tokenBAmount: values.tokenBAmount,
-    tokenBDecimals: tokenBMeta.decimals,
-    userAddress: effectivePublicKey.toBase58(),
-  });
-
-  return transformAddLiquidityInput(transformInput);
-}
-
-function handleTransactionError({
-  error,
-  values,
-  tokenAAddress,
-  tokenBAddress,
-}: {
-  error: unknown;
-  values: LiquidityFormValues;
-  tokenAAddress: string | null;
-  tokenBAddress: string | null;
-}) {
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  const isWarning = isWarningMessage(error);
-  if (isWarning) {
-    showInfoToast({
-      context: {
-        amountA: values.tokenAAmount,
-        amountB: values.tokenBAmount,
-        tokenA: tokenAAddress,
-        tokenB: tokenBAddress,
-      },
-      message: errorMessage,
-    });
-  } else {
-    showErrorToast({
-      context: {
-        amountA: values.tokenAAmount,
-        amountB: values.tokenBAmount,
-        tokenA: tokenAAddress,
-        tokenB: tokenBAddress,
-      },
-      message: errorMessage,
-    });
-  }
-}
+import {
+  buildRequestPayload,
+  fetchTokenMetadata,
+  handleTransactionError,
+  validateTransactionInputs,
+} from "../_utils/transactionHelpers";
 
 import { useLiquidityTransactionCore } from "./useLiquidityTransactionCore";
 import { useLiquidityTransactionQueries } from "./useLiquidityTransactionQueries";
@@ -205,14 +37,14 @@ interface UseLiquidityTransactionParams {
   readonly tokenAAddress: string | null;
   readonly tokenBAddress: string | null;
   readonly poolDetails: PoolDetails | null;
-  readonly form?: { reset: () => void };
+  readonly resetForm?: () => void;
 }
 
 export function useLiquidityTransaction({
   tokenAAddress,
   tokenBAddress,
   poolDetails,
-  form,
+  resetForm,
 }: UseLiquidityTransactionParams) {
   const { signTransaction, wallet, publicKey } = useWallet();
   const { data: walletAdapter } = useWalletAdapter();
@@ -351,8 +183,9 @@ export function useLiquidityTransaction({
         handleTransactionError({
           error,
           tokenAAddress,
+          tokenAAmount: values.tokenAAmount,
           tokenBAddress,
-          values,
+          tokenBAmount: values.tokenBAmount,
         });
         trackLiquidityError(trackError, error, {
           amountA: values.tokenAAmount,
@@ -380,7 +213,7 @@ export function useLiquidityTransaction({
   );
 
   const transaction = useLiquidityTransactionCore({
-    form,
+    resetForm,
     submitTransaction,
   });
 

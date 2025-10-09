@@ -20,11 +20,16 @@ export const positiveNumericStringSchema = numericStringSchema.refine(
 
 export const liquidityFormSchema = z.object({
   initialPrice: positiveNumericStringSchema,
+  slippage: numericStringSchema.optional(),
   tokenAAmount: numericStringSchema,
   tokenBAmount: numericStringSchema,
 });
 
-export type LiquidityFormSchema = z.infer<typeof liquidityFormSchema>;
+// Zod schema is the single source of truth for form values
+export type LiquidityFormValues = z.infer<typeof liquidityFormSchema>;
+
+// Legacy alias for backward compatibility (will be removed in future)
+export type LiquidityFormSchema = LiquidityFormValues;
 
 export interface TokenAccount {
   readonly address?: string;
@@ -58,14 +63,12 @@ export interface PoolDetails {
   readonly protocolFeeY?: number;
   readonly userLockedX?: number;
   readonly userLockedY?: number;
+  readonly lockedX?: number;
+  readonly lockedY?: number;
 }
 
-export interface LiquidityFormValues {
-  readonly tokenAAmount: string;
-  readonly tokenBAmount: string;
-  readonly initialPrice: string;
-  readonly slippage?: string;
-}
+// Removed: LiquidityFormValues is now inferred from liquidityFormSchema above
+// This ensures types and validation never drift out of sync
 
 export interface WalletAdapter {
   readonly wallet: {

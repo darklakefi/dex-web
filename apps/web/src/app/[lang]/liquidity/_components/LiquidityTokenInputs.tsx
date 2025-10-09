@@ -8,7 +8,6 @@ import {
   validateHasSufficientBalance,
 } from "@dex-web/utils";
 import { type AnyFormApi, Field } from "@tanstack/react-form";
-import { useState } from "react";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { SkeletonTokenInput } from "../../../_components/SkeletonTokenInput";
@@ -30,15 +29,12 @@ interface LiquidityTokenInputsProps<T extends AnyFormApi> {
   tokenBAddress: string | null;
   poolDetails: PoolDetails | null;
   onSubmit?: () => void;
-  debouncedCalculateTokenAmounts: (
-    params: {
-      inputAmount: string;
-      editedToken: "tokenA" | "tokenB";
-      tokenAAddress: string | null;
-      tokenBAddress: string | null;
-    },
-    onResult: (outputAmount: number | null) => void,
-  ) => void;
+  calculateProportionalAmount: (params: {
+    inputAmount: string;
+    editedToken: "tokenA" | "tokenB";
+    tokenAAddress: string;
+    tokenBAddress: string;
+  }) => number | null;
 }
 
 export function LiquidityTokenInputs<T extends AnyFormApi>({
@@ -53,20 +49,8 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
   tokenBAddress: _tokenBAddress,
   poolDetails,
   onSubmit: _onSubmit,
-  debouncedCalculateTokenAmounts,
+  calculateProportionalAmount,
 }: LiquidityTokenInputsProps<T>) {
-  const [isCalculating, setIsCalculating] = useState(false);
-
-  const clearPendingCalculations = () => {
-    if (
-      "cancel" in debouncedCalculateTokenAmounts &&
-      typeof debouncedCalculateTokenAmounts.cancel === "function"
-    ) {
-      debouncedCalculateTokenAmounts.cancel();
-    }
-    setIsCalculating(false);
-  };
-
   const handleHalfMaxClick = (
     type: "half" | "max",
     tokenType: "tokenA" | "tokenB",
@@ -75,6 +59,7 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
       tokenType === "tokenA" ? buyTokenAccount : sellTokenAccount;
 
     if (!currentTokenAccount?.tokenAccounts?.[0]) return;
+    if (!_tokenAAddress || !_tokenBAddress) return;
 
     const currentAmount = currentTokenAccount.tokenAccounts[0].amount;
     const currentDecimals = currentTokenAccount.tokenAccounts[0].decimals;
@@ -97,23 +82,21 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
 
       form.setFieldValue(currentFieldName, currentValue);
 
-      debouncedCalculateTokenAmounts(
-        {
-          editedToken: tokenType,
-          inputAmount: currentValue,
-          tokenAAddress: _tokenAAddress,
-          tokenBAddress: _tokenBAddress,
-        },
-        (output) => {
-          if (output == null) return;
-          const targetField =
-            tokenType === "tokenA"
-              ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
-              : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
-          form.setFieldValue(targetField, String(output));
-          form.validateAllFields("change");
-        },
-      );
+      const output = calculateProportionalAmount({
+        editedToken: tokenType,
+        inputAmount: currentValue,
+        tokenAAddress: _tokenAAddress,
+        tokenBAddress: _tokenBAddress,
+      });
+
+      if (output != null) {
+        const targetField =
+          tokenType === "tokenA"
+            ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
+            : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
+        form.setFieldValue(targetField, String(output));
+        form.validateAllFields("change");
+      }
     }
   };
 
@@ -121,28 +104,29 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
     value: string,
     tokenType: "tokenA" | "tokenB",
   ) => {
-    clearPendingCalculations();
-
     const formattedValue = formatAmountInput(value);
 
-    if (poolDetails && parseAmountBigNumber(formattedValue).gt(0)) {
-      debouncedCalculateTokenAmounts(
-        {
-          editedToken: tokenType,
-          inputAmount: formattedValue,
-          tokenAAddress: _tokenAAddress,
-          tokenBAddress: _tokenBAddress,
-        },
-        (output) => {
-          if (output == null) return;
-          const targetField =
-            tokenType === "tokenA"
-              ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
-              : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
-          form.setFieldValue(targetField, String(output));
-          form.validateAllFields("change");
-        },
-      );
+    if (
+      poolDetails &&
+      parseAmountBigNumber(formattedValue).gt(0) &&
+      _tokenAAddress &&
+      _tokenBAddress
+    ) {
+      const output = calculateProportionalAmount({
+        editedToken: tokenType,
+        inputAmount: formattedValue,
+        tokenAAddress: _tokenAAddress,
+        tokenBAddress: _tokenBAddress,
+      });
+
+      if (output != null) {
+        const targetField =
+          tokenType === "tokenA"
+            ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
+            : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
+        form.setFieldValue(targetField, String(output));
+        form.validateAllFields("change");
+      }
     } else if (!poolDetails) {
       if (tokenType === "tokenA") {
         const price = form.state.values.initialPrice || DEFAULT_PRICE;
@@ -213,8 +197,8 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
                     : undefined
                 }
                 aria-labelledby="sell-token-label"
-                isLoading={isLoadingSell || isCalculating}
-                isRefreshing={isRefreshingSell || isCalculating}
+                isLoading={isLoadingSell}
+                isRefreshing={isRefreshingSell}
                 maxDecimals={MAX_DECIMALS}
                 name={field.name}
                 onBlur={field.handleBlur}
@@ -223,7 +207,6 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
                   handleAmountChange(value, "tokenB");
                   field.handleChange(value);
                 }}
-                onClearPendingCalculations={clearPendingCalculations}
                 onHalfMaxClick={(type) => handleHalfMaxClick(type, "tokenB")}
                 tokenAccount={
                   sellTokenAccount?.tokenAccounts?.[0]
@@ -302,8 +285,8 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
                     : undefined
                 }
                 aria-labelledby="buy-token-label"
-                isLoading={isLoadingBuy || isCalculating}
-                isRefreshing={isRefreshingBuy || isCalculating}
+                isLoading={isLoadingBuy}
+                isRefreshing={isRefreshingBuy}
                 maxDecimals={MAX_DECIMALS}
                 name={field.name}
                 onBlur={field.handleBlur}
@@ -312,7 +295,6 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
                   handleAmountChange(value, "tokenA");
                   field.handleChange(value);
                 }}
-                onClearPendingCalculations={clearPendingCalculations}
                 onHalfMaxClick={(type) => handleHalfMaxClick(type, "tokenA")}
                 tokenAccount={
                   buyTokenAccount?.tokenAccounts?.[0]

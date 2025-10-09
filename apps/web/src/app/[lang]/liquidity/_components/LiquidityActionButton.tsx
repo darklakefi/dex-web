@@ -32,7 +32,6 @@ interface LiquidityActionButtonProps {
   isPoolLoading: boolean;
   isTokenAccountsLoading: boolean;
   isError: boolean;
-  onSubmit: () => void;
 }
 
 const serialize = createSerializer(liquidityPageParsers);
@@ -48,7 +47,6 @@ export function LiquidityActionButton({
   isPoolLoading,
   isTokenAccountsLoading,
   isError,
-  onSubmit,
 }: LiquidityActionButtonProps) {
   const router = useRouter();
   const { wallet, connected } = useWallet();
@@ -100,12 +98,6 @@ export function LiquidityActionButton({
   });
 
   const buttonMessage = getButtonMessage(buttonState);
-
-  const handleButtonClick = () => {
-    if (shouldShowTransactionPreview(validation)) {
-    }
-    onSubmit();
-  };
 
   const getButtonProps = (buttonState: ButtonState) => {
     const isDisabled =
@@ -185,7 +177,7 @@ export function LiquidityActionButton({
         data-testid="liquidity-action-button"
         disabled={enhancedButtonProps.isDisabled}
         loading={enhancedButtonProps.isLoading}
-        onClick={handleButtonClick}
+        type="submit"
         variant={enhancedButtonProps.variant}
       >
         {buttonMessage}
@@ -264,9 +256,5 @@ function shouldShowSecurityWarning(
   _validation: unknown,
   _buttonState: ButtonState,
 ): boolean {
-  return false;
-}
-
-function shouldShowTransactionPreview(_validation: unknown): boolean {
   return false;
 }

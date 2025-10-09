@@ -52,6 +52,10 @@ export {
   transformAddLiquidityInput,
 } from "./liquidity/addLiquidityTransformer";
 export {
+  type CalculateProportionalAmountParams,
+  calculateProportionalAmount,
+} from "./liquidity/calculateProportionalAmount";
+export {
   applySlippage,
   calculateLpTokensToMint,
   calculatePoolShare,

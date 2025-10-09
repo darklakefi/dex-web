@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "noEmit": false,
+    "noEmit": true,
     "types": [
       "vitest/globals",
       "vitest/importMeta",
