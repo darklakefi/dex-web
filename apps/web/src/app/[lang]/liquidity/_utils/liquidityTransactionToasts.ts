@@ -6,13 +6,23 @@ import { toast } from "../../../_utils/toast";
 
 export interface ShowErrorToastParams {
   message: string;
+  context?: Record<string, unknown>;
 }
 
 export interface ShowInfoToastParams {
   message: string;
+  context?: Record<string, unknown>;
 }
 
-export function showErrorToast({ message }: ShowErrorToastParams) {
+/**
+ * Shows an error toast notification.
+ * @param message - The error message to display
+ * @param _context - Optional context for logging/tracking (reserved for future use)
+ */
+export function showErrorToast({
+  message,
+  context: _context,
+}: ShowErrorToastParams) {
   toast({
     description: message,
     title: "Transaction Error",
@@ -20,7 +30,15 @@ export function showErrorToast({ message }: ShowErrorToastParams) {
   });
 }
 
-export function showInfoToast({ message }: ShowInfoToastParams) {
+/**
+ * Shows an info toast notification.
+ * @param message - The info message to display
+ * @param _context - Optional context for logging/tracking (reserved for future use)
+ */
+export function showInfoToast({
+  message,
+  context: _context,
+}: ShowInfoToastParams) {
   toast({
     description: message,
     title: "Transaction Info",
