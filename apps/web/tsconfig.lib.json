@@ -23,7 +23,6 @@
   "extends": "./tsconfig.json",
   "include": [
     "../../types/**/*.d.ts",
-    "../../types/svg.d.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
     "src/**/*.cts",
@@ -31,8 +30,7 @@
     "src/**/*.jsx",
     "src/**/*.mts",
     "src/**/*.ts",
-    "src/**/*.tsx",
-    "../../dist/apps/web/.next/types/**/*.ts"
+    "src/**/*.tsx"
   ],
   "references": [
     {

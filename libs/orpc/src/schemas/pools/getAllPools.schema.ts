@@ -1,7 +1,7 @@
 import { z } from "zod/v4";
 import { VALIDATION_CONFIG } from "../../config/constants";
 export const getAllPoolsInputSchema = z.object({
-  includeEmpty: z.boolean().optional().default(false),
+  includeEmpty: z.boolean().default(false).optional(),
   limit: z
     .number()
     .int()
@@ -11,8 +11,8 @@ export const getAllPoolsInputSchema = z.object({
   search: z
     .string()
     .max(VALIDATION_CONFIG.MAX_SEARCH_LENGTH)
-    .optional()
-    .transform((val) => val?.trim()),
+    .transform((val) => val?.trim())
+    .optional(),
 });
 export const poolAccountSchema = z.object({
   address: z.string(),

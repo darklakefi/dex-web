@@ -1,14 +1,41 @@
 {
-  "ignore": ["**/generated/**"],
+  "ignore": [
+    "**/generated/**",
+    "**/*.d.ts",
+    "**/__tests__/**",
+    "**/__mocks__/**",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ],
+  "ignoreDependencies": [
+    "@dex-web/core",
+    "@dex-web/grpc-client",
+    "@dex-web/orpc",
+    "@dex-web/ui",
+    "@dex-web/utils"
+  ],
   "workspaces": {
     "apps/web": {
       "entry": [
-        "src/app/**/*.tsx",
-        "src/app/**/*.ts",
-        "src/hooks/**/*.ts",
-        "src/utils/**/*.ts",
-        "src/lib/**/*.ts",
-        "src/i18n/**/*.ts"
+        "next.config.ts",
+        "middleware.ts",
+        "instrumentation.ts",
+        "instrumentation-client.ts",
+        "src/app/**/page.{ts,tsx}",
+        "src/app/**/layout.{ts,tsx}",
+        "src/app/**/route.{ts,tsx}",
+        "src/app/**/default.{ts,tsx}",
+        "src/app/**/global-error.{ts,tsx}",
+        "src/app/**/error.{ts,tsx}",
+        "src/app/**/loading.{ts,tsx}",
+        "src/app/**/not-found.{ts,tsx}",
+        "src/app/**/template.{ts,tsx}",
+        "src/i18n/request.ts",
+        "src/i18n/routing.ts",
+        "vite.config.ts",
+        "vitest.setup.ts"
       ],
       "project": ["src/**/*.{ts,tsx}"]
     },
@@ -16,10 +43,16 @@
       "entry": ["e2e/**/*.spec.ts"],
       "project": ["e2e/**/*.ts", "helpers/**/*.ts"]
     },
+    "libs/core": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
     "libs/db": {
+      "entry": ["src/index.ts"],
       "project": ["src/**/*.{ts,tsx}"]
     },
     "libs/grpc-client": {
+      "entry": ["src/index.ts"],
       "project": ["src/**/*.{ts,tsx}"]
     },
     "libs/orpc": {
@@ -27,6 +60,11 @@
       "project": ["src/**/*.{ts,tsx}"]
     },
     "libs/ui": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "libs/utils": {
+      "entry": ["src/index.ts"],
       "project": ["src/**/*.{ts,tsx}"]
     }
   }

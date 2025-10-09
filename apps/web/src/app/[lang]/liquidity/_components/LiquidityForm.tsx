@@ -11,6 +11,7 @@ import {
   selectedTokensParsers,
 } from "../../../_utils/searchParams";
 import { useLiquidityFormLogic } from "../_hooks/useLiquidityFormLogic";
+import { useLPTokenEstimation } from "../_hooks/useLPTokenEstimation";
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
 import { CalculationLoadingIndicator } from "./CalculationLoadingIndicator";
 import { LiquidityActionButton } from "./LiquidityActionButton";
@@ -42,6 +43,16 @@ export function LiquidityForm() {
   } = useLiquidityFormLogic({
     tokenAAddress,
     tokenBAddress,
+  });
+
+  // Use LP estimation hook for accurate calculations with fee/locked amount exclusions
+  const lpEstimation = useLPTokenEstimation({
+    enabled: Boolean(poolDetails && tokenAAddress && tokenBAddress),
+    slippage,
+    tokenAAddress,
+    tokenAAmount: form.state.values.tokenAAmount || "0",
+    tokenBAddress,
+    tokenBAmount: form.state.values.tokenBAmount || "0",
   });
 
   const debouncedCalculateTokenAmounts = (
@@ -171,6 +182,10 @@ export function LiquidityForm() {
               <PoolDetailsSkeleton />
             ) : (
               <AddLiquidityDetails
+                estimatedLPTokens={
+                  lpEstimation.data?.estimatedLPTokens || undefined
+                }
+                isLPEstimationLoading={lpEstimation.isLoading}
                 slippage={slippage}
                 tokenAAmount={form.state.values.tokenAAmount}
                 tokenASymbol={

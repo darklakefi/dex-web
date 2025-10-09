@@ -10,16 +10,11 @@
         "name": "next"
       }
     ],
-    "target": "es5"
+    "target": "es2022"
   },
   "exclude": ["node_modules", ".next"],
   "extends": "../../tsconfig.base.json",
   "files": [],
-  "include": [
-    ".next/types/**/*.ts",
-    "../../types/**/*.d.ts",
-    "../../types/svg.d.ts"
-  ],
   "references": [
     {
       "path": "../../libs/utils"

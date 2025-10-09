@@ -13,6 +13,9 @@ export type AddLiquidityDetailsProps = {
   tokenYReserve?: number;
   tokenXMint?: string;
   tokenBAddress?: string;
+  // LP token estimation
+  estimatedLPTokens?: string;
+  isLPEstimationLoading?: boolean;
 };
 
 export function AddLiquidityDetails({
@@ -25,6 +28,8 @@ export function AddLiquidityDetails({
   tokenYReserve,
   tokenXMint,
   tokenBAddress,
+  estimatedLPTokens,
+  isLPEstimationLoading,
 }: AddLiquidityDetailsProps) {
   const [isAtoB, setIsAtoB] = useState(true);
 
@@ -121,6 +126,23 @@ export function AddLiquidityDetails({
         <div className="flex items-center justify-between">
           <Text.Body2 className="text-green-300">Slippage Tolerance</Text.Body2>
           <Text.Body2 className="text-green-200">{slippage}%</Text.Body2>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Text.Body2 className="text-green-300">
+            Estimated LP Tokens
+          </Text.Body2>
+          <Text.Body2 className="text-green-200">
+            {isLPEstimationLoading
+              ? "Calculating..."
+              : estimatedLPTokens
+                ? numberFormatHelper({
+                    decimalScale: 6,
+                    trimTrailingZeros: true,
+                    value: estimatedLPTokens,
+                  })
+                : "—"}
+          </Text.Body2>
         </div>
       </div>
     </Box>
