@@ -20,7 +20,6 @@ export const Default = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // NumericInput uses type="text" which has role="textbox", not "spinbutton"
     const input = canvas.getByRole("textbox");
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute("inputMode", "numeric");
@@ -67,14 +66,12 @@ export const Interactive = {
         return value;
       }
 
-      // Split the number into integer and decimal parts
       const parts = cleanValue.split(".");
       let integerPart = parts[0]?.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       if (integerPart?.length && integerPart?.length >= 2) {
         integerPart = integerPart?.replace(/^0+/, "");
       }
 
-      // If there's a decimal part, keep it as is without adding commas
       if (parts.length > 1) {
         return `${integerPart}.${parts[1]}`;
       }
@@ -85,7 +82,6 @@ export const Interactive = {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value;
 
-      // if the last character is a comma, replace it with a dot
       if (value.endsWith(",")) {
         value = `${value.slice(0, -1)}.`;
       }

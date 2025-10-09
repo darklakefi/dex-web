@@ -11,5 +11,4 @@ export function configureDecimal(): void {
   });
 }
 
-// Configure immediately on module load
 configureDecimal();

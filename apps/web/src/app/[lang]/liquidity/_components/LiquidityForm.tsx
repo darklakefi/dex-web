@@ -49,6 +49,7 @@ export function LiquidityForm() {
     isPoolLoading,
     isSubmitting,
     isSuccess,
+    send,
   } = useLiquidityFormLogic({
     tokenAAddress,
     tokenBAddress,
@@ -113,6 +114,7 @@ export function LiquidityForm() {
                   });
                 }}
                 form={form}
+                isDisabled={isSuccess || isError}
                 isLoadingBuy={tokenAccountsData.isLoadingBuy}
                 isLoadingSell={tokenAccountsData.isLoadingSell}
                 isRefreshingBuy={tokenAccountsData.isRefreshingBuy}
@@ -137,6 +139,7 @@ export function LiquidityForm() {
                   tokenAccountsData.isLoadingBuy ||
                   tokenAccountsData.isLoadingSell
                 }
+                onReset={() => send({ type: "RESET" })}
                 poolDetails={poolDetails}
                 publicKey={publicKey}
                 sellTokenAccount={tokenAccountsData.sellTokenAccount}

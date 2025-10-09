@@ -80,15 +80,11 @@ export function createTokenOrderContext(
   tokenA: string,
   tokenB: string,
 ): TokenOrderContext {
-  // Sort addresses to get protocol order
-  // This is the ONLY place in the liquidity flow where we call sortSolanaAddresses
   const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(tokenA, tokenB);
 
-  // Determine mapping: does tokenA map to tokenX or tokenY?
   const tokenAIsX = tokenA === tokenXAddress;
   const tokenBIsY = tokenB === tokenYAddress;
 
-  // Build immutable context
   return {
     mapping: {
       tokenAIsX,
@@ -114,6 +110,29 @@ export function createTokenOrderContext(
  * @param amounts - Amounts in UI order (as entered by user)
  * @param context - Token order context from createTokenOrderContext
  * @returns Amounts mapped to Protocol order (ready for transaction)
+ *
+ * @example Using with React Query
+ * ```typescript
+ * function LPEstimationComponent() {
+ *   const orderContext = useTokenOrder();
+ *   const [formData] = useForm();
+ *
+ *   const protocolAmounts = orderContext
+ *     ? mapAmountsToProtocol({
+ *         tokenA: orderContext.ui.tokenA,
+ *         tokenB: orderContext.ui.tokenB,
+ *         amountA: formData.amountA,
+ *         amountB: formData.amountB,
+ *       }, orderContext)
+ *     : null;
+ *
+ *   const { data } = useQuery({
+ *     queryKey: ['lp', protocolAmounts?.amountX, protocolAmounts?.amountY],
+ *     queryFn: () => estimateLP(protocolAmounts!.amountX, protocolAmounts!.amountY),
+ *     enabled: !!protocolAmounts,
+ *   });
+ * }
+ * ```
  *
  * @example
  * ```typescript
@@ -172,6 +191,31 @@ export function mapAmountsToProtocol(
  * @param amounts - Amounts in Protocol order (from protocol calculation)
  * @param context - Token order context from createTokenOrderContext
  * @returns Amounts mapped to UI order (for display to user)
+ *
+ * @example Displaying protocol results
+ * ```typescript
+ * function ProportionalAmountDisplay() {
+ *   const orderContext = useTokenOrder();
+ *
+ *   // Protocol calculated amounts in X/Y order
+ *   const protocolResult = {
+ *     tokenX: orderContext.protocol.tokenX,
+ *     tokenY: orderContext.protocol.tokenY,
+ *     amountX: "100",
+ *     amountY: "200",
+ *   };
+ *
+ *   // Map back to UI order for display
+ *   const uiAmounts = mapAmountsToUI(protocolResult, orderContext);
+ *
+ *   return (
+ *     <div>
+ *       <p>You need {uiAmounts.amountA} of Token A</p>
+ *       <p>You need {uiAmounts.amountB} of Token B</p>
+ *     </div>
+ *   );
+ * }
+ * ```
  *
  * @example
  * ```typescript
@@ -248,7 +292,6 @@ export function areTokenPairsEquivalent(
   pair1: TokenPairUI | TokenPairProtocol,
   pair2: TokenPairUI | TokenPairProtocol,
 ): boolean {
-  // Extract addresses and sort them for comparison
   const addrs1 = [
     "tokenA" in pair1 ? pair1.tokenA : pair1.tokenX,
     "tokenB" in pair1 ? pair1.tokenB : pair1.tokenY,

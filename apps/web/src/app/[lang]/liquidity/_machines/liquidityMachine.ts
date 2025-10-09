@@ -22,7 +22,8 @@ export type LiquidityMachineEvent =
   | { type: "SUCCESS" }
   | { type: "ERROR"; error: string }
   | { type: "RETRY" }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "DISMISS" };
 
 export const liquidityMachine = setup({
   actions: {
@@ -59,13 +60,11 @@ export const liquidityMachine = setup({
   initial: "ready",
   states: {
     error: {
-      after: {
-        5000: {
+      on: {
+        DISMISS: {
           actions: "resetState",
           target: "ready.idle",
         },
-      },
-      on: {
         RESET: {
           actions: "resetState",
           target: "ready.idle",
@@ -167,9 +166,6 @@ export const liquidityMachine = setup({
       },
     },
     success: {
-      // Following Implementation Answer #9: User-controlled form reset
-      // For financial applications, users should explicitly control when to start a new transaction
-      // Form fields remain populated and disabled, allowing users to review their inputs
       on: {
         RESET: {
           actions: ["resetState", "resetForm"],

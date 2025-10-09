@@ -14,7 +14,6 @@ import {
   addLiquidityPayloadSchema,
 } from "./liquiditySchemas";
 
-// Re-export schemas and types for backward compatibility
 export {
   type AddLiquidityInput,
   type AddLiquidityPayload,
@@ -96,21 +95,17 @@ function mapTokensToSortedOrder(
 export function transformAddLiquidityInput(
   input: AddLiquidityInput,
 ): AddLiquidityPayload {
-  // Step 1: Validate input
   const validated = addLiquidityInputSchema.parse(input);
 
-  // Step 2: Sort token addresses to maintain X/Y convention
   const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
     validated.tokenAAddress,
     validated.tokenBAddress,
   );
 
-  // Step 3: Parse amounts and slippage
   const tokenAAmountDecimal = parseAmountSafe(validated.tokenAAmount);
   const tokenBAmountDecimal = parseAmountSafe(validated.tokenBAmount);
   const slippagePercent = parseAmountSafe(validated.slippage);
 
-  // Step 4: Map tokens to sorted X/Y order
   const { amountXDecimal, amountYDecimal, decimalsX, decimalsY } =
     mapTokensToSortedOrder(
       validated,
@@ -119,13 +114,9 @@ export function transformAddLiquidityInput(
       tokenBAmountDecimal,
     );
 
-  // Step 5: Convert to raw units
   const amountXRaw = toRawUnits(amountXDecimal, decimalsX);
   const amountYRaw = toRawUnits(amountYDecimal, decimalsY);
 
-  // Step 6: Calculate LP tokens
-  // Note: Pool reserves are already "available" reserves from the handler
-  // (handler subtracts protocol fees and locked amounts)
   const lpTokensRaw = calculateLpTokensToReceive({
     amountX: amountXRaw,
     amountY: amountYRaw,
@@ -134,7 +125,6 @@ export function transformAddLiquidityInput(
     totalLpSupply: validated.poolReserves.totalLpSupply,
   });
 
-  // Step 7: Apply slippage to create max amounts
   const userAmountXDecimal = new Decimal(amountXRaw.toString());
   const userAmountYDecimal = new Decimal(amountYRaw.toString());
 
@@ -154,7 +144,6 @@ export function transformAddLiquidityInput(
     maxAmountYRawWithSlippage.toFixed(0, Decimal.ROUND_UP),
   );
 
-  // Step 8: Build and validate payload
   const payload: AddLiquidityPayload = {
     $typeName: "darklake.v1.AddLiquidityRequest",
     amountLp: lpTokensRaw,

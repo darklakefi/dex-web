@@ -167,7 +167,6 @@ export async function getPoolReservesHandler({
           ? totalLpSupply
           : 0,
       totalLpSupplyRaw,
-      // Add total reserves and fee/locked amounts for transformer
       totalReserveXRaw,
       totalReserveYRaw,
       userLockedX: toNumber(poolData.user_locked_x),

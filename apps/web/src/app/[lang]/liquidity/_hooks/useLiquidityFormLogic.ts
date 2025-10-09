@@ -78,7 +78,6 @@ export function useLiquidityFormLogic({
     isSuccess: transaction.isSuccess,
     poolDetails,
     publicKey,
-    // Expose send function so components can send events (like RESET) to XState machine
     send: transaction.send,
     tokenAccountsData,
   };

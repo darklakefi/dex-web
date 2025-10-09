@@ -21,7 +21,6 @@ export const EXCHANGE_PROGRAM_ID = new PublicKey(
     "darkr3FB87qAZmgLwKov6Hk9Yiah5UT4rUYu8Zhthw1",
 );
 
-// 100% = 1000000, 0.0001% = 1
 export const MAX_PERCENTAGE = 1000000;
 
 export const LP_TOKEN_DECIMALS = 9;
@@ -98,8 +97,6 @@ export async function getPoolOnChain(tokenXMint: string, tokenYMint: string) {
   }
 }
 
-// Helper function to determine token program ID
-// THIS CAN ALSO BE FETCHED FROM TOKEN HANDLER (token program never changes)
 export async function getTokenProgramId(
   connection: Connection,
   accountPubkey: PublicKey,
@@ -110,7 +107,6 @@ export async function getTokenProgramId(
       throw new Error("Account not found");
     }
 
-    // Check if the account owner is TOKEN_2022_PROGRAM_ID
     if (accountInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
       return TOKEN_2022_PROGRAM_ID;
     } else if (accountInfo.owner.equals(TOKEN_PROGRAM_ID)) {
@@ -120,7 +116,6 @@ export async function getTokenProgramId(
     }
   } catch (error) {
     console.error("Failed to determine token program ID:", error);
-    // Default to legacy program
     return TOKEN_PROGRAM_ID;
   }
 }

@@ -15,7 +15,6 @@ import {
   mapAmountsToUI,
 } from "../tokenOrder";
 
-// Test token addresses (real Solana addresses)
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const SOL = "So11111111111111111111111111111111111111112";
 const USDT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
@@ -23,35 +22,27 @@ const USDT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
 describe("tokenOrder", () => {
   describe("createTokenOrderContext", () => {
     it("creates correct context when tokenA sorts first (A=X)", () => {
-      // USDC sorts before SOL alphabetically
       const context = createTokenOrderContext(USDC, SOL);
 
-      // UI order matches input
       expect(context.ui.tokenA).toBe(USDC);
       expect(context.ui.tokenB).toBe(SOL);
 
-      // Protocol order is sorted
       expect(context.protocol.tokenX).toBe(USDC);
       expect(context.protocol.tokenY).toBe(SOL);
 
-      // Mapping is straightforward (A→X, B→Y)
       expect(context.mapping.tokenAIsX).toBe(true);
       expect(context.mapping.tokenBIsY).toBe(true);
     });
 
     it("creates correct context when tokenA sorts second (A=Y)", () => {
-      // SOL sorts after USDC alphabetically
       const context = createTokenOrderContext(SOL, USDC);
 
-      // UI order matches input (reversed from above)
       expect(context.ui.tokenA).toBe(SOL);
       expect(context.ui.tokenB).toBe(USDC);
 
-      // Protocol order is still sorted (USDC before SOL)
       expect(context.protocol.tokenX).toBe(USDC);
       expect(context.protocol.tokenY).toBe(SOL);
 
-      // Mapping is swapped (A→Y, B→X)
       expect(context.mapping.tokenAIsX).toBe(false);
       expect(context.mapping.tokenBIsY).toBe(false);
     });
@@ -64,7 +55,6 @@ describe("tokenOrder", () => {
     });
 
     it("handles same token address twice", () => {
-      // Edge case: user somehow selects same token for both
       const context = createTokenOrderContext(USDC, USDC);
 
       expect(context.ui.tokenA).toBe(USDC);
@@ -81,23 +71,19 @@ describe("tokenOrder", () => {
     });
 
     it("produces consistent results for all token orderings", () => {
-      // Test with three different tokens in all orderings
       const tokens = [USDC, SOL, USDT];
 
       for (const tokenA of tokens) {
         for (const tokenB of tokens) {
           const context = createTokenOrderContext(tokenA, tokenB);
 
-          // Protocol order should always be sorted regardless of input order
           const addresses = [context.protocol.tokenX, context.protocol.tokenY];
           const sortedAddresses = [...addresses].sort();
           expect(addresses).toEqual(sortedAddresses);
 
-          // UI order should match input
           expect(context.ui.tokenA).toBe(tokenA);
           expect(context.ui.tokenB).toBe(tokenB);
 
-          // Mapping should be consistent
           if (context.mapping.tokenAIsX) {
             expect(context.ui.tokenA).toBe(context.protocol.tokenX);
             expect(context.ui.tokenB).toBe(context.protocol.tokenY);
@@ -113,7 +99,6 @@ describe("tokenOrder", () => {
   describe("mapAmountsToProtocol", () => {
     it("maps amounts correctly when A=X (no swap needed)", () => {
       const context = createTokenOrderContext(USDC, SOL);
-      // context.mapping.tokenAIsX = true
 
       const uiAmounts = {
         amountA: "100",
@@ -132,7 +117,6 @@ describe("tokenOrder", () => {
 
     it("maps amounts correctly when A=Y (swap needed)", () => {
       const context = createTokenOrderContext(SOL, USDC);
-      // context.mapping.tokenAIsX = false
 
       const uiAmounts = {
         amountA: "200",
@@ -143,11 +127,10 @@ describe("tokenOrder", () => {
 
       const protocolAmounts = mapAmountsToProtocol(uiAmounts, context);
 
-      // Amounts should be swapped to match protocol order
       expect(protocolAmounts.tokenX).toBe(USDC);
       expect(protocolAmounts.tokenY).toBe(SOL);
-      expect(protocolAmounts.amountX).toBe("100"); // Was amountB
-      expect(protocolAmounts.amountY).toBe("200"); // Was amountA
+      expect(protocolAmounts.amountX).toBe("100");
+      expect(protocolAmounts.amountY).toBe("200");
     });
 
     it("handles zero amounts", () => {
@@ -178,7 +161,6 @@ describe("tokenOrder", () => {
 
       const protocolAmounts = mapAmountsToProtocol(uiAmounts, context);
 
-      // Should preserve exact string values
       expect(protocolAmounts.amountX).toBe("987.654321");
       expect(protocolAmounts.amountY).toBe("123.456789");
     });
@@ -230,11 +212,10 @@ describe("tokenOrder", () => {
 
       const uiAmounts = mapAmountsToUI(protocolAmounts, context);
 
-      // Amounts should be swapped to match UI order
       expect(uiAmounts.tokenA).toBe(SOL);
       expect(uiAmounts.tokenB).toBe(USDC);
-      expect(uiAmounts.amountA).toBe("200"); // Was amountY
-      expect(uiAmounts.amountB).toBe("100"); // Was amountX
+      expect(uiAmounts.amountA).toBe("200");
+      expect(uiAmounts.amountB).toBe("100");
     });
 
     it("is invertible with mapAmountsToProtocol (round trip)", () => {
@@ -284,7 +265,6 @@ describe("tokenOrder", () => {
       const context = createTokenOrderContext(USDC, SOL);
       const mapping = getOrderMapping(context);
 
-      // TypeScript should prevent this, but verify at runtime too
       expect(() => {
         // @ts-expect-error - testing immutability
         mapping.tokenAIsX = false;
@@ -338,41 +318,33 @@ describe("tokenOrder", () => {
 
   describe("integration - full flow", () => {
     it("maintains correctness through complete UI→Protocol→UI cycle", () => {
-      // Simulate user selecting SOL first, USDC second
       const context = createTokenOrderContext(SOL, USDC);
 
-      // User enters amounts
       const userInput = {
         amountA: "5.5",
         amountB: "100",
-        tokenA: context.ui.tokenA, // 5.5 SOL
-        tokenB: context.ui.tokenB, // 100 USDC
+        tokenA: context.ui.tokenA,
+        tokenB: context.ui.tokenB,
       };
 
-      // Convert to protocol order for transaction
       const forProtocol = mapAmountsToProtocol(userInput, context);
 
-      // Protocol sees correctly sorted amounts
       expect(forProtocol.tokenX).toBe(USDC);
       expect(forProtocol.tokenY).toBe(SOL);
       expect(forProtocol.amountX).toBe("100");
       expect(forProtocol.amountY).toBe("5.5");
 
-      // Convert back to UI order for display
       const forDisplay = mapAmountsToUI(forProtocol, context);
 
-      // User sees amounts in their original order
       expect(forDisplay.tokenA).toBe(SOL);
       expect(forDisplay.tokenB).toBe(USDC);
       expect(forDisplay.amountA).toBe("5.5");
       expect(forDisplay.amountB).toBe("100");
 
-      // Round trip is perfect
       expect(forDisplay).toEqual(userInput);
     });
 
     it("produces identical protocol payloads regardless of UI order", () => {
-      // User selects USDC/SOL
       const context1 = createTokenOrderContext(USDC, SOL);
       const amounts1 = {
         amountA: "100",
@@ -382,7 +354,6 @@ describe("tokenOrder", () => {
       };
       const protocol1 = mapAmountsToProtocol(amounts1, context1);
 
-      // User selects SOL/USDC (reversed)
       const context2 = createTokenOrderContext(SOL, USDC);
       const amounts2 = {
         amountA: "5.5",
@@ -392,7 +363,6 @@ describe("tokenOrder", () => {
       };
       const protocol2 = mapAmountsToProtocol(amounts2, context2);
 
-      // Both produce identical protocol payloads
       expect(protocol1.tokenX).toBe(protocol2.tokenX);
       expect(protocol1.tokenY).toBe(protocol2.tokenY);
       expect(protocol1.amountX).toBe(protocol2.amountX);

@@ -5,9 +5,8 @@ import { Decimal } from "decimal.js";
  * These functions handle LP token calculations for adding/removing liquidity
  */
 
-// Configure Decimal.js for precision (matching SDK)
 Decimal.set({
-  precision: 40, // Higher precision for intermediate calculations
+  precision: 40,
   rounding: Decimal.ROUND_DOWN,
 });
 
@@ -36,7 +35,6 @@ export function calculateLpTokensToMint(
   amountY: number,
   reserves: PoolReserves,
 ): Decimal {
-  // For a new pool with no liquidity, return 1 LP token
   if (
     reserves.totalLpSupply === 0 ||
     reserves.reserveX === 0 ||
@@ -45,22 +43,16 @@ export function calculateLpTokensToMint(
     return new Decimal(1);
   }
 
-  // Convert to Decimal for precise calculations
   const decimalAmountX = new Decimal(amountX);
   const decimalAmountY = new Decimal(amountY);
   const decimalReserveX = new Decimal(reserves.reserveX);
   const decimalReserveY = new Decimal(reserves.reserveY);
   const decimalTotalLpSupply = new Decimal(reserves.totalLpSupply);
 
-  // Calculate LP tokens based on the proportion of liquidity added
-  // lpFromX = (amountX / reserveX) * totalLpSupply
   const lpFromX = decimalAmountX.mul(decimalTotalLpSupply).div(decimalReserveX);
 
-  // lpFromY = (amountY / reserveY) * totalLpSupply
   const lpFromY = decimalAmountY.mul(decimalTotalLpSupply).div(decimalReserveY);
 
-  // Use the minimum to ensure both amounts are satisfied
-  // This maintains the pool's ratio
   return Decimal.min(lpFromX, lpFromY);
 }
 
@@ -87,12 +79,10 @@ export function calculateTokensFromLpBurn(
   const decimalReserveY = new Decimal(reserves.reserveY);
   const decimalTotalLpSupply = new Decimal(reserves.totalLpSupply);
 
-  // amountX = (lpTokenAmount / totalLpSupply) * reserveX
   const amountX = decimalLpAmount
     .mul(decimalReserveX)
     .div(decimalTotalLpSupply);
 
-  // amountY = (lpTokenAmount / totalLpSupply) * reserveY
   const amountY = decimalLpAmount
     .mul(decimalReserveY)
     .div(decimalTotalLpSupply);
@@ -122,10 +112,8 @@ export function calculateTokenAmountForRatio(
   const decimalReserveY = new Decimal(reserves.reserveY);
 
   if (isTokenX) {
-    // Calculate Y amount: (inputX * reserveY) / reserveX
     return decimalInputAmount.mul(decimalReserveY).div(decimalReserveX);
   } else {
-    // Calculate X amount: (inputY * reserveX) / reserveY
     return decimalInputAmount.mul(decimalReserveX).div(decimalReserveY);
   }
 }
@@ -167,10 +155,8 @@ export function applySlippage(
   const slippageFactor = new Decimal(slippagePercent).div(100);
 
   if (isMax) {
-    // For max amounts, add slippage
     return amount.mul(new Decimal(1).add(slippageFactor));
   } else {
-    // For min amounts, subtract slippage
     return amount.mul(new Decimal(1).sub(slippageFactor));
   }
 }
@@ -192,6 +178,5 @@ export function toRawUnitsBigint(
   const multiplier = new Decimal(10).pow(decimals);
   const rawAmount = decimalAmount.mul(multiplier);
 
-  // Round down to ensure we get an integer
   return BigInt(rawAmount.toFixed(0, Decimal.ROUND_DOWN));
 }

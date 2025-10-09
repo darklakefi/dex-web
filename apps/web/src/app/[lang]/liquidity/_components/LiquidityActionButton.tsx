@@ -3,7 +3,7 @@
 import { Button } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
-import type { AnyFormApi } from "@tanstack/react-form";
+import type { FormApi } from "@tanstack/react-form";
 import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
@@ -22,7 +22,9 @@ import {
 } from "../_utils/liquidityButtonState";
 
 interface LiquidityActionButtonProps {
-  form: AnyFormApi;
+  // Use specific FormApi type for better type safety
+  // This ensures the component can only be used with forms managing LiquidityFormValues
+  form: FormApi<LiquidityFormValues, unknown>;
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
@@ -35,7 +37,6 @@ interface LiquidityActionButtonProps {
   isError: boolean;
   isSubmitting: boolean;
   isSuccess: boolean;
-  // Function to send RESET event to XState machine
   onReset: () => void;
 }
 
@@ -171,8 +172,6 @@ export function LiquidityActionButton({
     );
   }
 
-  // Following Implementation Answer #9: User-controlled form reset for financial apps
-  // On success, show "Start New Transaction" button instead of auto-resetting
   if (isSuccess) {
     return (
       <div className="flex flex-col gap-3">
@@ -199,6 +198,50 @@ export function LiquidityActionButton({
         >
           Start New Transaction
         </Button>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="rounded-md border border-red-200 bg-red-50 p-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">⚠️</span>
+            <div className="font-medium text-red-800 text-sm">
+              Transaction Failed
+            </div>
+          </div>
+          <div className="mt-1 text-red-700 text-xs">
+            Please review the error and try again.
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            aria-label="Retry the transaction with the same values"
+            className="flex-1 cursor-pointer py-3 leading-6"
+            onClick={() => {
+              console.log("🔄 User clicked 'Retry'");
+              onReset(); // TODO: Send RETRY event instead of RESET
+            }}
+            type="button"
+            variant="primary"
+          >
+            Retry
+          </Button>
+          <Button
+            aria-label="Dismiss error and return to form"
+            className="flex-1 cursor-pointer py-3 leading-6"
+            onClick={() => {
+              console.log("❌ User clicked 'Dismiss'");
+              onReset(); // TODO: Send DISMISS event
+            }}
+            type="button"
+            variant="secondary"
+          >
+            Dismiss
+          </Button>
+        </div>
       </div>
     );
   }

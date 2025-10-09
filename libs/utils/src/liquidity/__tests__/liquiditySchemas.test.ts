@@ -28,7 +28,7 @@ describe("liquiditySchemas", () => {
         solanaAddressSchema.parse(
           "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyT0t1v",
         ),
-      ).toThrow(); // Contains '0' which is invalid
+      ).toThrow();
     });
   });
 

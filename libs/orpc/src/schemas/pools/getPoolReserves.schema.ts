@@ -8,7 +8,6 @@ export const getPoolReservesInputSchema = z.object({
 export const getPoolReservesOutputSchema = z.object({
   exists: z.boolean(),
   lpMint: z.string(),
-  // Fee and locked amounts
   protocolFeeX: z.number().optional(),
   protocolFeeY: z.number().optional(),
   reserveX: z.number(),
@@ -17,7 +16,6 @@ export const getPoolReservesOutputSchema = z.object({
   reserveYRaw: z.number().optional(),
   totalLpSupply: z.number(),
   totalLpSupplyRaw: z.number().optional(),
-  // Total reserves (before subtracting fees and locked amounts)
   totalReserveXRaw: z.number().optional(),
   totalReserveYRaw: z.number().optional(),
   userLockedX: z.number().optional(),

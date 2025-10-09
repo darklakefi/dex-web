@@ -130,7 +130,6 @@ export const getTokensWithPoolsHandler = async (
   }));
 
   if (trimmedQuery.length > 0) {
-    // If searching for "SOL" and it's not in the results, fetch it explicitly
     const lowerQuery = trimmedQuery.toLowerCase();
     const hasWSolToken = gatewayTokens.some(
       (t) => t.address === WSOL_ADDRESS || t.symbol.toLowerCase() === "sol",

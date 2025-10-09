@@ -16,8 +16,8 @@ describe("liquidityCalculations", () => {
         userLockedY: 10n,
       });
 
-      expect(result.availableReserveX).toBe(985n); // 1000 - 10 - 5
-      expect(result.availableReserveY).toBe(1970n); // 2000 - 20 - 10
+      expect(result.availableReserveX).toBe(985n);
+      expect(result.availableReserveY).toBe(1970n);
     });
 
     it("should handle zero fees and locked amounts", () => {
@@ -73,7 +73,6 @@ describe("liquidityCalculations", () => {
           totalLpSupply: 0n,
         });
 
-        // sqrt(100 * 100) = 100
         expect(result).toBe(100n);
       });
 
@@ -86,7 +85,6 @@ describe("liquidityCalculations", () => {
           totalLpSupply: 0n,
         });
 
-        // sqrt(100 * 400) = 200
         expect(result).toBe(200n);
       });
 
@@ -99,7 +97,6 @@ describe("liquidityCalculations", () => {
           totalLpSupply: 0n,
         });
 
-        // sqrt(1e9 * 1e9) = 1e9
         expect(result).toBe(1000000000n);
       });
     });
@@ -114,9 +111,6 @@ describe("liquidityCalculations", () => {
           totalLpSupply: 1000n,
         });
 
-        // lpFromX = (100 / 1000) * 1000 = 100
-        // lpFromY = (200 / 2000) * 1000 = 100
-        // min(100, 100) = 100
         expect(result).toBe(100n);
       });
 
@@ -129,9 +123,6 @@ describe("liquidityCalculations", () => {
           totalLpSupply: 1000n,
         });
 
-        // lpFromX = (100 / 1000) * 1000 = 100
-        // lpFromY = (150 / 2000) * 1000 = 75
-        // min(100, 75) = 75
         expect(result).toBe(75n);
       });
 
@@ -144,9 +135,6 @@ describe("liquidityCalculations", () => {
           totalLpSupply: 2000n,
         });
 
-        // lpFromX = (200 / 1000) * 2000 = 400
-        // lpFromY = (100 / 1000) * 2000 = 200
-        // min(400, 200) = 200
         expect(result).toBe(200n);
       });
 
@@ -159,24 +147,18 @@ describe("liquidityCalculations", () => {
           totalLpSupply: 1000n,
         });
 
-        // lpFromX = (333 / 1000) * 1000 = 333
-        // lpFromY = (333 / 1000) * 1000 = 333
-        // Should be 333 (rounded down)
         expect(result).toBe(333n);
       });
 
       it("should handle large reserve pools", () => {
         const result = calculateLpTokensToReceive({
-          amountX: 1000000000n, // 1 billion
-          amountY: 2000000000n, // 2 billion
-          availableReserveX: 10000000000n, // 10 billion
-          availableReserveY: 20000000000n, // 20 billion
-          totalLpSupply: 14142135623n, // sqrt(10e9 * 20e9)
+          amountX: 1000000000n,
+          amountY: 2000000000n,
+          availableReserveX: 10000000000n,
+          availableReserveY: 20000000000n,
+          totalLpSupply: 14142135623n,
         });
 
-        // lpFromX = (1e9 / 10e9) * 14142135623 = 1414213562.3
-        // lpFromY = (2e9 / 20e9) * 14142135623 = 1414213562.3
-        // min(1414213562, 1414213562) = 1414213562
         expect(result).toBe(1414213562n);
       });
     });
@@ -191,7 +173,6 @@ describe("liquidityCalculations", () => {
           totalLpSupply: 0n,
         });
 
-        // Treated as new pool: sqrt(100 * 100) = 100
         expect(result).toBe(100n);
       });
 
@@ -204,7 +185,6 @@ describe("liquidityCalculations", () => {
           totalLpSupply: 1000n,
         });
 
-        // Treated as new pool: sqrt(100 * 100) = 100
         expect(result).toBe(100n);
       });
     });
