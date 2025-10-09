@@ -1,5 +1,5 @@
 "use client";
-import type { Token } from "@dex-web/orpc/schemas";
+import type { Token } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Text } from "@dex-web/ui";
 import {
   convertToDecimal,

@@ -1,7 +1,7 @@
 "use client";
 
 import { client } from "@dex-web/orpc";
-import type { GetPoolReservesOutput } from "@dex-web/orpc/schemas";
+import type { GetPoolReservesOutput } from "@dex-web/orpc/schemas/index";
 import type { GetUserLiquidityOutput } from "@dex-web/orpc/schemas/pools/getUserLiquidity.schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../lib/queryKeys";

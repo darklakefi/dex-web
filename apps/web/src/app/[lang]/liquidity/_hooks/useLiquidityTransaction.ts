@@ -104,8 +104,8 @@ export function useLiquidityTransaction({
 
         console.log("🔄 Fetching fresh pool reserves before transaction...");
         const freshPoolData = await client.pools.getPoolReserves({
-          tokenXMint: currentPoolData.tokenXMint,
-          tokenYMint: currentPoolData.tokenYMint,
+          tokenXMint: currentPoolData!.tokenXMint,
+          tokenYMint: currentPoolData!.tokenYMint,
         });
 
         if (!freshPoolData || !freshPoolData.exists) {
@@ -135,7 +135,7 @@ export function useLiquidityTransaction({
 
         const requestPayload = buildRequestPayload({
           currentPoolData: poolDataForCalculation,
-          effectivePublicKey,
+          effectivePublicKey: effectivePublicKey!,
           tokenAMeta,
           tokenBMeta,
           trimmedTokenAAddress,
@@ -167,7 +167,7 @@ export function useLiquidityTransaction({
                 transactionHash: newTrackingId,
               });
             },
-            publicKey: effectivePublicKey,
+            publicKey: effectivePublicKey!,
             setLiquidityStep: () => {},
             signTransaction,
             tokenXMint: requestPayload.tokenMintX,

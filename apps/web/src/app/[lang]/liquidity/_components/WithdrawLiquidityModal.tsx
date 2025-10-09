@@ -7,7 +7,7 @@ import {
   signTransactionWithRecovery,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
-import type { Token } from "@dex-web/orpc/schemas";
+import type { Token } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import {
   convertToDecimal,

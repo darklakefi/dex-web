@@ -12,7 +12,7 @@ import {
   useTransactionToasts,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
-import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
+import type { GetQuoteOutput } from "@dex-web/orpc/schemas/index";
 import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import { Box, Button, Text } from "@dex-web/ui";
 import {

@@ -1,6 +1,6 @@
 "use client";
 
-import type { GetQuoteOutput } from "@dex-web/orpc/schemas";
+import type { GetQuoteOutput } from "@dex-web/orpc/schemas/index";
 import { Icon } from "@dex-web/ui";
 import { numberFormatHelper } from "@dex-web/utils";
 import BigNumber from "bignumber.js";

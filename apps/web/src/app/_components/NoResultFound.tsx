@@ -1,5 +1,5 @@
 import { QUERY_CONFIG, tanstackClient } from "@dex-web/orpc";
-import type { Token } from "@dex-web/orpc/schemas";
+import type { Token } from "@dex-web/orpc/schemas/index";
 import { Button, Text } from "@dex-web/ui";
 import { isValidSolanaAddress, truncate } from "@dex-web/utils";
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@solana/spl-token";

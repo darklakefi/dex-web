@@ -4,7 +4,7 @@ import { QUERY_CONFIG, tanstackClient } from "@dex-web/orpc";
 import {
   getTokensWithPoolsInputSchema,
   type Token,
-} from "@dex-web/orpc/schemas";
+} from "@dex-web/orpc/schemas/index";
 import { Box, Button, Modal, TextInput } from "@dex-web/ui";
 import { pasteFromClipboard, useDebouncedValue } from "@dex-web/utils";
 import {

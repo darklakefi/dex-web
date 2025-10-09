@@ -8,7 +8,10 @@ import {
   useTransactionToasts,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
-import type { CreatePoolTransactionInput, Token } from "@dex-web/orpc/schemas";
+import type {
+  CreatePoolTransactionInput,
+  Token,
+} from "@dex-web/orpc/schemas/index";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import {
   numberFormatHelper,

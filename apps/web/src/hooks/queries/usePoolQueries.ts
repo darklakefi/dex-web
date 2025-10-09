@@ -4,7 +4,7 @@ import { tanstackClient } from "@dex-web/orpc";
 import type {
   GetPoolDetailsOutput,
   GetPoolReservesOutput,
-} from "@dex-web/orpc/schemas";
+} from "@dex-web/orpc/schemas/index";
 import {
   type UseQueryResult,
   type UseSuspenseQueryResult,

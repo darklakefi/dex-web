@@ -3,7 +3,7 @@ import type {
   GetTokensOutput,
   Swap,
   TokenAccount,
-} from "@dex-web/orpc/schemas";
+} from "@dex-web/orpc/schemas/index";
 import type { GetTokenPriceOutput } from "@dex-web/orpc/schemas/tokens/getTokenPrice.schema";
 import { vi } from "vitest";
 import {

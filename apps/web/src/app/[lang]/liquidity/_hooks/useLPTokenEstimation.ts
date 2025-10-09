@@ -31,7 +31,7 @@ export function useLPTokenEstimation({
   tokenBAmount,
   slippage = "0.5",
   enabled = true,
-}: UseLPTokenEstimationParams) {
+}: UseLPTokenEstimationParams): any {
   // Pure function call - no useMemo needed for deterministic operations
   const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
     tokenAAddress && tokenBAddress
@@ -66,7 +66,7 @@ export function useLPTokenEstimation({
     ...tanstackClient.pools.getLPRate.queryOptions({
       input: queryInput!,
     }),
-    enabled: shouldFetch && queryInput !== null,
+    enabled: Boolean(shouldFetch && queryInput !== null),
     queryKey: [
       "lp-estimation",
       tokenXMint,

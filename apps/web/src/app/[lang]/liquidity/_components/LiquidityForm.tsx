@@ -152,7 +152,7 @@ export function LiquidityForm() {
                   lpEstimation.data?.estimatedLPTokens || undefined
                 }
                 isLPEstimationLoading={lpEstimation.isLoading}
-                slippage={form.state.values.slippage}
+                slippage={form.state.values.slippage || "0.5"}
                 tokenAAmount={form.state.values.tokenAAmount}
                 tokenASymbol={
                   tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
@@ -185,7 +185,10 @@ export function LiquidityForm() {
             className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
             onClick={() =>
               router.push(
-                createPoolUrl(serialize, LIQUIDITY_PAGE_TYPE.CREATE_POOL),
+                createPoolUrl(
+                  serialize,
+                  LIQUIDITY_PAGE_TYPE.CREATE_POOL,
+                ) as any,
               )
             }
             type="button"

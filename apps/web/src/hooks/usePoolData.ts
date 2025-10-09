@@ -60,7 +60,7 @@ export function usePoolData({
   tokenXMint,
   tokenYMint,
   priority = "normal",
-}: UsePoolDataParams) {
+}: UsePoolDataParams): any {
   const poolKey = createSortedPoolKey(tokenXMint, tokenYMint);
 
   return useQuery({
