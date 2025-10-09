@@ -10,7 +10,7 @@ import { IDL_CODER } from "../../../utils/solana";
 import { getTokenMetadataHandler } from "../../tokens/getTokenMetadata.handler";
 import { clearPoolsCache, getAllPoolsHandler } from "../getAllPools.handler";
 
-vi.mock("../../getHelius", () => ({
+vi.mock("../../../getHelius", () => ({
   getHelius: vi.fn(() => ({
     connection: {
       getProgramAccounts: vi.fn(),
@@ -126,13 +126,13 @@ describe("getAllPoolsHandler", () => {
     loggerService = LoggerService.getInstance();
     monitoringService = MonitoringService.getInstance();
 
-    const { getHelius } = vi.mocked(await import("../../getHelius"));
+    const { getHelius } = vi.mocked(await import("../../../getHelius"));
     mockConnection = {
       getProgramAccounts: vi.fn(),
     };
     getHelius.mockReturnValue({
       connection: mockConnection,
-    } as HeliusClientWithConnection);
+    } as unknown as HeliusClientWithConnection);
 
     vi.mocked(getTokenMetadataHandler).mockResolvedValue(mockTokenMetadata);
   });
@@ -230,7 +230,10 @@ describe("getAllPoolsHandler", () => {
         .mockReturnValueOnce(mockPoolAccount1)
         .mockReturnValueOnce(mockPoolAccountEmpty);
 
-      const result = await getAllPoolsHandler({ includeEmpty: true });
+      const result = await getAllPoolsHandler({
+        includeEmpty: true,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(2);
@@ -273,7 +276,11 @@ describe("getAllPoolsHandler", () => {
         .mockReturnValueOnce(mockPoolAccount2)
         .mockReturnValueOnce(mockPoolAccount1);
 
-      const result = await getAllPoolsHandler({ limit: 2 });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        limit: 2,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(3);
@@ -293,7 +300,11 @@ describe("getAllPoolsHandler", () => {
         mockPoolAccount1,
       );
 
-      const result = await getAllPoolsHandler({ limit: 100 });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        limit: 100,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(1);
       expect(result.total).toBe(1);
@@ -325,47 +336,58 @@ describe("getAllPoolsHandler", () => {
       const result = await getAllPoolsHandler({ search: "SOL" });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].tokenXSymbol).toBe("SOL");
+      expect(result.pools[0]?.tokenXSymbol).toBe("SOL");
     });
 
     it("should filter pools by pool address", async () => {
       const result = await getAllPoolsHandler({
+        includeEmpty: false,
         search: "111111111111111111111111111111121",
       });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].address).toContain(
+      expect(result.pools[0]?.address).toContain(
         "111111111111111111111111111111121",
       );
     });
 
     it("should filter pools by token mint address", async () => {
       const result = await getAllPoolsHandler({
+        includeEmpty: false,
         search: "111111111111111111111111111111125",
       });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].tokenXMint).toBe(
+      expect(result.pools[0]?.tokenXMint).toBe(
         "111111111111111111111111111111125",
       );
     });
 
     it("should be case insensitive", async () => {
-      const result = await getAllPoolsHandler({ search: "sol" });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: "sol",
+      });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].tokenXSymbol).toBe("SOL");
+      expect(result.pools[0]?.tokenXSymbol).toBe("SOL");
     });
 
     it("should trim search query", async () => {
-      const result = await getAllPoolsHandler({ search: "  SOL  " });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: "  SOL  ",
+      });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].tokenXSymbol).toBe("SOL");
+      expect(result.pools[0]?.tokenXSymbol).toBe("SOL");
     });
 
     it("should return empty array when no matches found", async () => {
-      const result = await getAllPoolsHandler({ search: "NONEXISTENT" });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: "NONEXISTENT",
+      });
 
       expect(result.pools).toHaveLength(0);
       expect(result.total).toBe(0);
@@ -397,7 +419,7 @@ describe("getAllPoolsHandler", () => {
 
     it("should use different cache keys for different parameters", async () => {
       await getAllPoolsHandler({ includeEmpty: false });
-      await getAllPoolsHandler({ includeEmpty: true });
+      await getAllPoolsHandler({ includeEmpty: true, search: undefined });
 
       expect(mockConnection.getProgramAccounts).toHaveBeenCalledTimes(2);
     });
@@ -435,7 +457,11 @@ describe("getAllPoolsHandler", () => {
 
       await getAllPoolsHandler({});
 
-      const result = await getAllPoolsHandler({ limit: 2 });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        limit: 2,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(3);
@@ -624,11 +650,14 @@ describe("getAllPoolsHandler", () => {
       mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(largePoolAccount);
 
-      const result = await getAllPoolsHandler({});
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].lockedX).toBe("999999999999999999");
-      expect(result.pools[0].lockedY).toBe("999999999999999999");
+      expect(result.pools[0]?.lockedX).toBe("999999999999999999");
+      expect(result.pools[0]?.lockedY).toBe("999999999999999999");
     });
 
     it("should handle pools with missing token symbols", async () => {
@@ -643,11 +672,14 @@ describe("getAllPoolsHandler", () => {
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
       vi.mocked(getTokenMetadataHandler).mockResolvedValue({});
 
-      const result = await getAllPoolsHandler({});
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: undefined,
+      });
 
       expect(result.pools).toHaveLength(1);
-      expect(result.pools[0].tokenXSymbol).toBeUndefined();
-      expect(result.pools[0].tokenYSymbol).toBeUndefined();
+      expect(result.pools[0]?.tokenXSymbol).toBeUndefined();
+      expect(result.pools[0]?.tokenYSymbol).toBeUndefined();
     });
 
     it("should handle empty search string", async () => {
@@ -677,7 +709,10 @@ describe("getAllPoolsHandler", () => {
       mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
 
-      const result = await getAllPoolsHandler({ search: "   " });
+      const result = await getAllPoolsHandler({
+        includeEmpty: false,
+        search: "   ",
+      });
 
       expect(result.pools).toHaveLength(1);
     });

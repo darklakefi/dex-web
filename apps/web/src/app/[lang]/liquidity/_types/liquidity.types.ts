@@ -50,6 +50,14 @@ export interface PoolDetails {
   readonly totalSupplyRaw?: number;
   readonly fee?: number;
   readonly price?: string;
+  // Total reserves (before subtracting fees and locked amounts)
+  readonly totalReserveXRaw?: number;
+  readonly totalReserveYRaw?: number;
+  // Fee and locked amounts
+  readonly protocolFeeX?: number;
+  readonly protocolFeeY?: number;
+  readonly userLockedX?: number;
+  readonly userLockedY?: number;
 }
 
 export interface LiquidityFormValues {

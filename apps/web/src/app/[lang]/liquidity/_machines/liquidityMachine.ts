@@ -24,27 +24,21 @@ export type LiquidityMachineEvent =
   | { type: "RETRY" }
   | { type: "RESET" };
 
-const resetState = assign({
-  error: null,
-  isCalculating: false,
-  lastValues: null,
-  liquidityStep: 0,
-  transactionSignature: null,
-});
-
 export const liquidityMachine = setup({
   actions: {
     resetForm: () => {},
-    resetState,
+    resetState: assign({
+      error: null,
+      isCalculating: false,
+      lastValues: null,
+      liquidityStep: 0,
+      transactionSignature: null,
+    }),
   },
   actors: {
     submitLiquidity: fromPromise(
       // biome-ignore lint/correctness/noUnusedFunctionParameters: input is required by xstate actor signature
-      async ({
-        input,
-      }: {
-        input: { tokenAAmount: string; tokenBAmount: string };
-      }) => {
+      async ({ input }: { input: LiquidityFormValues }) => {
         // This will be provided at runtime by useLiquidityTransaction
         return { result: "submitted" };
       },

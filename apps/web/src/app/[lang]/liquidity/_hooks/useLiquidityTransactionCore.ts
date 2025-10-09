@@ -19,7 +19,8 @@ export function useLiquidityTransactionCore({
       },
       actors: {
         submitLiquidity: fromPromise(async ({ input }) => {
-          return submitTransaction({ values: input });
+          await submitTransaction({ values: input });
+          return { result: "submitted" };
         }),
       },
     }),

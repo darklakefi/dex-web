@@ -22,6 +22,13 @@ interface PoolData {
   tokenXMint: string;
   tokenYMint: string;
   lastUpdate: number;
+  // Add new fields for transformer
+  totalReserveXRaw?: number;
+  totalReserveYRaw?: number;
+  protocolFeeX?: number;
+  protocolFeeY?: number;
+  userLockedX?: number;
+  userLockedY?: number;
 }
 
 const STALE_TIME_CONFIG = {
@@ -67,6 +74,8 @@ export function usePoolData({
         exists: data.exists,
         lastUpdate: Date.now(),
         lpMint: data.lpMint,
+        protocolFeeX: data.protocolFeeX,
+        protocolFeeY: data.protocolFeeY,
         reserveX: data.reserveX,
         reserveXRaw: data.reserveXRaw,
         reserveY: data.reserveY,
@@ -75,6 +84,11 @@ export function usePoolData({
         tokenYMint,
         totalLpSupply: data.totalLpSupply,
         totalLpSupplyRaw: data.totalLpSupplyRaw,
+        // Add new fields for transformer
+        totalReserveXRaw: data.totalReserveXRaw,
+        totalReserveYRaw: data.totalReserveYRaw,
+        userLockedX: data.userLockedX,
+        userLockedY: data.userLockedY,
       };
     },
     staleTime: STALE_TIME_CONFIG[priority],

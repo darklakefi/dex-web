@@ -48,18 +48,6 @@ export function mockOrpc() {
         symbol: "SOL",
       }),
     },
-    integrations: {
-      createTorqueReferral: {
-        queryOptions: vi.fn().mockImplementation(() => ({
-          queryFn: () =>
-            Promise.resolve({
-              referralCode: "TEST123",
-              userId: "test-user-id",
-            }),
-          queryKey: ["integrations", "createTorqueReferral"],
-        })),
-      },
-    },
     tanstackClient: {
       getSwapDetails: {
         queryOptions: vi.fn().mockImplementation(() => ({
@@ -156,6 +144,18 @@ export function mockOrpc() {
                 },
               ]),
             queryKey: ["helius", "searchAssets"],
+          })),
+        },
+      },
+      integrations: {
+        createTorqueReferral: {
+          queryOptions: vi.fn().mockImplementation(() => ({
+            queryFn: () =>
+              Promise.resolve({
+                referralCode: "TEST123",
+                userId: "test-user-id",
+              }),
+            queryKey: ["integrations", "createTorqueReferral"],
           })),
         },
       },

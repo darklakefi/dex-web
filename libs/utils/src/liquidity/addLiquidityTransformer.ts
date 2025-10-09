@@ -34,9 +34,13 @@ const toBigIntSafe = (fieldName: string) =>
     });
 
 const poolReservesSchema = z.object({
+  protocolFeeX: toBigIntSafe("protocolFeeX").optional().default(BigInt(0)),
+  protocolFeeY: toBigIntSafe("protocolFeeY").optional().default(BigInt(0)),
   reserveX: toBigIntSafe("reserveX"),
   reserveY: toBigIntSafe("reserveY"),
   totalLpSupply: toBigIntSafe("totalLpSupply"),
+  userLockedX: toBigIntSafe("userLockedX").optional().default(BigInt(0)),
+  userLockedY: toBigIntSafe("userLockedY").optional().default(BigInt(0)),
 });
 
 export const addLiquidityInputSchema = z.object({
@@ -87,12 +91,16 @@ function toRawUnits(amount: Decimal, decimals: number): bigint {
 function _calculateLpTokensToReceive(
   amountX: bigint,
   amountY: bigint,
-  reserves: { reserveX: bigint; reserveY: bigint; totalLpSupply: bigint },
+  reserves: {
+    availableReserveX: bigint;
+    availableReserveY: bigint;
+    totalLpSupply: bigint;
+  },
 ): bigint {
   if (
     reserves.totalLpSupply === BigInt(0) ||
-    reserves.reserveX === BigInt(0) ||
-    reserves.reserveY === BigInt(0)
+    reserves.availableReserveX === BigInt(0) ||
+    reserves.availableReserveY === BigInt(0)
   ) {
     const amountXDecimal = new Decimal(amountX.toString());
     const amountYDecimal = new Decimal(amountY.toString());
@@ -103,8 +111,8 @@ function _calculateLpTokensToReceive(
 
   const amountXDecimal = new Decimal(amountX.toString());
   const amountYDecimal = new Decimal(amountY.toString());
-  const reserveXDecimal = new Decimal(reserves.reserveX.toString());
-  const reserveYDecimal = new Decimal(reserves.reserveY.toString());
+  const reserveXDecimal = new Decimal(reserves.availableReserveX.toString());
+  const reserveYDecimal = new Decimal(reserves.availableReserveY.toString());
   const totalLpSupplyDecimal = new Decimal(reserves.totalLpSupply.toString());
 
   const lpFromX = amountXDecimal.mul(totalLpSupplyDecimal).div(reserveXDecimal);
@@ -114,6 +122,35 @@ function _calculateLpTokensToReceive(
   const lpTokens = Decimal.min(lpFromX, lpFromY);
 
   return BigInt(lpTokens.toFixed(0, Decimal.ROUND_DOWN));
+}
+
+function calculateAvailableReserves(reserves: {
+  reserveX: bigint;
+  reserveY: bigint;
+  protocolFeeX: bigint;
+  protocolFeeY: bigint;
+  userLockedX: bigint;
+  userLockedY: bigint;
+}): { availableReserveX: bigint; availableReserveY: bigint } {
+  // Calculate available reserves by subtracting fees and locked amounts
+  // This matches the Rust implementation:
+  // total_token_x_amount = pool_token_reserve_x.amount - protocol_fee_x - user_locked_x
+  const availableReserveX =
+    reserves.reserveX - reserves.protocolFeeX - reserves.userLockedX;
+  const availableReserveY =
+    reserves.reserveY - reserves.protocolFeeY - reserves.userLockedY;
+
+  // Ensure we don't have negative reserves
+  if (availableReserveX < BigInt(0) || availableReserveY < BigInt(0)) {
+    throw new Error(
+      "Available reserves cannot be negative after subtracting fees and locked amounts",
+    );
+  }
+
+  return {
+    availableReserveX,
+    availableReserveY,
+  };
 }
 
 function applySlippageToMax(
@@ -158,12 +195,17 @@ export function transformAddLiquidityInput(
   const amountXRaw = toRawUnits(amountXDecimal, decimalsX);
   const amountYRaw = toRawUnits(amountYDecimal, decimalsY);
 
-  const reserveXDecimal = new Decimal(
-    validated.poolReserves.reserveX.toString(),
-  );
-  const reserveYDecimal = new Decimal(
-    validated.poolReserves.reserveY.toString(),
-  );
+  const { availableReserveX, availableReserveY } = calculateAvailableReserves({
+    protocolFeeX: validated.poolReserves.protocolFeeX,
+    protocolFeeY: validated.poolReserves.protocolFeeY,
+    reserveX: validated.poolReserves.reserveX,
+    reserveY: validated.poolReserves.reserveY,
+    userLockedX: validated.poolReserves.userLockedX,
+    userLockedY: validated.poolReserves.userLockedY,
+  });
+
+  const reserveXDecimal = new Decimal(availableReserveX.toString());
+  const reserveYDecimal = new Decimal(availableReserveY.toString());
   const totalLpSupplyDecimal = new Decimal(
     validated.poolReserves.totalLpSupply.toString(),
   );

@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "composite": true,
     "incremental": true,
     "jsx": "preserve",
-    "noEmit": false,
+    "noEmit": true,
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "target": "es2022"
   },
   "exclude": [
     "../../dist",
@@ -36,7 +36,19 @@
   ],
   "references": [
     {
+      "path": "../../libs/utils/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/ui/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/orpc/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/grpc-client/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/core/tsconfig.lib.json"
     }
   ]
 }

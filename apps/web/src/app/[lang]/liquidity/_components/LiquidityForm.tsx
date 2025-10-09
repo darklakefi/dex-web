@@ -51,7 +51,7 @@ export function LiquidityForm() {
       tokenAAddress: string | null;
       tokenBAddress: string | null;
     },
-    onResult: (outputAmount: string | null) => void,
+    onResult: (outputAmount: number | null) => void,
   ) => {
     if (
       !poolDetails ||
@@ -86,7 +86,7 @@ export function LiquidityForm() {
           : amount.mul(reserveY).div(reserveX);
       }
 
-      onResult(result.toFixed(6, Decimal.ROUND_DOWN));
+      onResult(Number(result.toFixed(6, Decimal.ROUND_DOWN)));
     } catch (error) {
       console.error("Error calculating proportional amount:", error);
       onResult(null);

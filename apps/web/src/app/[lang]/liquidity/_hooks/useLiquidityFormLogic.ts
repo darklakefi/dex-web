@@ -38,14 +38,21 @@ export function useLiquidityFormLogic({
           fee: undefined,
           poolAddress: data.lpMint,
           price: undefined,
+          protocolFeeX: data.protocolFeeX,
+          protocolFeeY: data.protocolFeeY,
           tokenXMint: data.tokenXMint,
           tokenXReserve: data.reserveX,
           tokenXReserveRaw: data.reserveXRaw,
           tokenYMint: data.tokenYMint,
           tokenYReserve: data.reserveY,
           tokenYReserveRaw: data.reserveYRaw,
+          // Add new fields for transformer
+          totalReserveXRaw: data.totalReserveXRaw,
+          totalReserveYRaw: data.totalReserveYRaw,
           totalSupply: data.totalLpSupply,
           totalSupplyRaw: data.totalLpSupplyRaw,
+          userLockedX: data.userLockedX,
+          userLockedY: data.userLockedY,
         }
       : null;
   }, [poolDataResult.data]);
@@ -60,7 +67,7 @@ export function useLiquidityFormLogic({
   const sendRef = useRef<
     ((event: { type: string; data?: unknown }) => void) | null
   >(null);
-  const formRef = useRef<{ reset: () => void } | null>(null);
+  const formRef = useRef<{ reset: () => void } | undefined>(undefined);
   const transaction = useLiquidityTransaction({
     form: formRef.current,
     poolDetails,

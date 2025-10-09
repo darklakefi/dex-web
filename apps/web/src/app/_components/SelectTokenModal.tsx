@@ -189,16 +189,14 @@ export function SelectTokenModal({
     [debouncedQuery],
   );
 
-  // Main query with optimized configuration and placeholderData for smooth transitions
-  const { data, isPlaceholderData } = useSuspenseQuery({
+  // Main query with optimized configuration
+  const { data } = useSuspenseQuery({
     ...tanstackClient.tokens.getTokensWithPools.queryOptions({
       input: queryInput,
     }),
     gcTime: debouncedQuery
       ? QUERY_CONFIG.tokenSearch.gcTime
       : QUERY_CONFIG.tokens.gcTime,
-    // Keep previous data visible while fetching new results
-    placeholderData: (previousData) => previousData,
     staleTime: debouncedQuery
       ? QUERY_CONFIG.tokenSearch.staleTime
       : QUERY_CONFIG.tokens.staleTime,
@@ -224,7 +222,7 @@ export function SelectTokenModal({
   }, [queryClient, isClosing]);
 
   // Prefetch next likely query as user types (predictive prefetching)
-  const prefetchTimerRef = useRef<NodeJS.Timeout>();
+  const prefetchTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     // Clear any existing timer
@@ -278,14 +276,7 @@ export function SelectTokenModal({
         onClick={handleClose}
         variant="secondary"
       ></Button>
-      <Box
-        className="flex max-h-full w-full max-w-sm drop-shadow-xl"
-        style={{
-          opacity: isPlaceholderData ? 0.6 : 1,
-          pointerEvents: isPlaceholderData ? "none" : "auto",
-          transition: "opacity 150ms ease-in-out",
-        }}
-      >
+      <Box className="flex max-h-full w-full max-w-sm drop-shadow-xl">
         <form.Field name="query">
           {(field) => (
             <TextInput

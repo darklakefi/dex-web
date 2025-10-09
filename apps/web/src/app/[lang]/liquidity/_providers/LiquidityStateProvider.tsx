@@ -1,7 +1,7 @@
 "use client";
 
 import { useMachine } from "@xstate/react";
-import { createContext, type ReactNode, useContext, useEffect } from "react";
+import { createContext, type ReactNode, useContext } from "react";
 import type { LiquidityMachineEvent } from "../_machines/liquidityMachine";
 import { liquidityMachine } from "../_machines/liquidityMachine";
 import { usePoolData } from "./LiquidityDataProvider";
@@ -29,36 +29,11 @@ export function LiquidityStateProvider({
 }: LiquidityStateProviderProps) {
   const { poolDetails, tokenAccountsData } = usePoolData();
 
-  const [state, send] = useMachine(liquidityMachine, {
-    input: {
-      buyTokenAccount: null,
-      poolDetails: poolDetails,
-      sellTokenAccount: null,
-    },
-  });
-
-  useEffect(() => {
-    send({
-      data: poolDetails,
-      type: "UPDATE_POOL_DETAILS",
-    });
-  }, [send, poolDetails]);
-
-  useEffect(() => {
-    send({
-      buyAccount: tokenAccountsData.buyTokenAccount ?? null,
-      sellAccount: tokenAccountsData.sellTokenAccount ?? null,
-      type: "UPDATE_TOKEN_ACCOUNTS",
-    });
-  }, [
-    send,
-    tokenAccountsData.buyTokenAccount,
-    tokenAccountsData.sellTokenAccount,
-  ]);
+  const [state, send] = useMachine(liquidityMachine);
 
   const value: LiquidityStateContextValue = {
     error: state.context.error,
-    isCalculating: state.matches("calculating"),
+    isCalculating: state.matches({ ready: "calculating" }),
     isError: state.matches("error"),
     isSubmitting: state.matches("submitting"),
     isSuccess: state.matches("success"),

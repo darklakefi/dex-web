@@ -22,6 +22,21 @@
   ],
   "references": [
     {
+      "path": "../../libs/utils"
+    },
+    {
+      "path": "../../libs/ui"
+    },
+    {
+      "path": "../../libs/orpc"
+    },
+    {
+      "path": "../../libs/grpc-client"
+    },
+    {
+      "path": "../../libs/core"
+    },
+    {
       "path": "./tsconfig.lib.json"
     },
     {

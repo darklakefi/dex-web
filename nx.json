@@ -206,8 +206,7 @@
       "outputs": ["{options.reportsDirectory}"]
     },
     "typecheck": {
-      "cache": true,
-      "dependsOn": ["^typecheck"]
+      "cache": true
     }
   }
 }

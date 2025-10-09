@@ -41,8 +41,13 @@ function validateTransactionInputs({
   wallet,
   currentPoolData,
 }: {
-  effectivePublicKey: PublicKey | null;
-  walletAdapter: unknown;
+  effectivePublicKey: PublicKey | null | undefined;
+  walletAdapter:
+    | {
+        wallet: unknown;
+      }
+    | null
+    | undefined;
   wallet: Wallet | null;
   currentPoolData: PoolDetails | null;
 }) {
@@ -110,9 +115,17 @@ function buildRequestPayload({
   effectivePublicKey: PublicKey;
 }) {
   const poolReserves = {
-    reserveX: String(currentPoolData.tokenXReserveRaw || 0),
-    reserveY: String(currentPoolData.tokenYReserveRaw || 0),
+    protocolFeeX: String(currentPoolData.protocolFeeX || 0),
+    protocolFeeY: String(currentPoolData.protocolFeeY || 0),
+    reserveX: String(
+      currentPoolData.totalReserveXRaw || currentPoolData.tokenXReserveRaw || 0,
+    ),
+    reserveY: String(
+      currentPoolData.totalReserveYRaw || currentPoolData.tokenYReserveRaw || 0,
+    ),
     totalLpSupply: String(currentPoolData.totalSupplyRaw || 0),
+    userLockedX: String(currentPoolData.userLockedX || 0),
+    userLockedY: String(currentPoolData.userLockedY || 0),
   };
 
   console.log("🔍 Pool Data Debug (Frontend):", {
@@ -192,7 +205,7 @@ interface UseLiquidityTransactionParams {
   readonly tokenAAddress: string | null;
   readonly tokenBAddress: string | null;
   readonly poolDetails: PoolDetails | null;
-  readonly form?: { reset: () => void } | null;
+  readonly form?: { reset: () => void };
 }
 
 export function useLiquidityTransaction({
@@ -224,6 +237,15 @@ export function useLiquidityTransaction({
         wallet,
         walletAdapter,
       });
+
+      if (!effectivePublicKey) {
+        throw new Error(ERROR_MESSAGES.MISSING_WALLET_INFO);
+      }
+
+      if (!currentPoolData) {
+        throw new Error("Pool data is required");
+      }
+
       showStepToast(1);
 
       const tokenAAmount = parseAmount(values.tokenAAmount);
@@ -258,9 +280,11 @@ export function useLiquidityTransaction({
           throw new Error("Failed to fetch fresh pool reserves");
         }
 
-        const poolDataForCalculation = {
+        const poolDataForCalculation: PoolDetails = {
           ...currentPoolData,
+          tokenXMint: currentPoolData.tokenXMint,
           tokenXReserveRaw: freshPoolData.reserveXRaw,
+          tokenYMint: currentPoolData.tokenYMint,
           tokenYReserveRaw: freshPoolData.reserveYRaw,
           totalSupplyRaw: freshPoolData.totalLpSupplyRaw,
         };

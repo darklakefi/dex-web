@@ -156,6 +156,8 @@ export async function getPoolReservesHandler({
     const result: GetPoolReservesOutput = {
       exists: true,
       lpMint: lpTokenMint.toBase58(),
+      protocolFeeX: toNumber(poolData.protocol_fee_x),
+      protocolFeeY: toNumber(poolData.protocol_fee_y),
       reserveX: Number.isFinite(reserveX) && reserveX >= 0 ? reserveX : 0,
       reserveXRaw: availableReserveXRaw,
       reserveY: Number.isFinite(reserveY) && reserveY >= 0 ? reserveY : 0,
@@ -165,6 +167,11 @@ export async function getPoolReservesHandler({
           ? totalLpSupply
           : 0,
       totalLpSupplyRaw,
+      // Add total reserves and fee/locked amounts for transformer
+      totalReserveXRaw,
+      totalReserveYRaw,
+      userLockedX: toNumber(poolData.user_locked_x),
+      userLockedY: toNumber(poolData.user_locked_y),
     };
 
     console.log("✅ Pool Reserves Handler Result:", {

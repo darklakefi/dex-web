@@ -87,8 +87,8 @@ export async function requestTransactionSigning({
 
     setStep?.(2);
     toast({
-      description: messages.step2Description,
-      title: messages.step2Title,
+      description: messages.step2Description ?? "",
+      title: messages.step2Title ?? "Confirm transaction",
       variant: "loading",
     });
 
@@ -103,8 +103,8 @@ export async function requestTransactionSigning({
 
     setStep?.(3);
     toast({
-      description: messages.step3Description,
-      title: messages.step3Title,
+      description: messages.step3Description ?? "",
+      title: messages.step3Title ?? "Confirming transaction",
       variant: "loading",
     });
 
@@ -118,8 +118,8 @@ export async function requestTransactionSigning({
     if (response.success) {
       dismissToast();
       toast({
-        description: messages.successDescription,
-        title: messages.successTitle,
+        description: messages.successDescription ?? "",
+        title: messages.successTitle ?? "Success",
         variant: "success",
       });
       onSuccess();

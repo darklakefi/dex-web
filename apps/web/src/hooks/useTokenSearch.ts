@@ -38,8 +38,6 @@ export function useTokenSearch({
     gcTime: isSearchQuery
       ? QUERY_CONFIG.tokenSearch.gcTime
       : QUERY_CONFIG.tokens.gcTime,
-    // Keep previous data while fetching new results for smooth UX
-    placeholderData: (previousData) => previousData,
     staleTime: isSearchQuery
       ? QUERY_CONFIG.tokenSearch.staleTime
       : QUERY_CONFIG.tokens.staleTime,

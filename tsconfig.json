@@ -1,5 +1,30 @@
 {
   "extends": "./tsconfig.base.json",
   "files": [],
-  "references": []
+  "references": [
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./apps/web-e2e"
+    },
+    {
+      "path": "./libs/core"
+    },
+    {
+      "path": "./libs/db"
+    },
+    {
+      "path": "./libs/grpc-client"
+    },
+    {
+      "path": "./libs/orpc"
+    },
+    {
+      "path": "./libs/ui"
+    },
+    {
+      "path": "./libs/utils"
+    }
+  ]
 }
