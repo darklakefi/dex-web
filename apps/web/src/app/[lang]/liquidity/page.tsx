@@ -12,9 +12,7 @@ import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
 import { SkeletonForm } from "../../_components/SkeletonForm";
-import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
 import { liquidityPageCache } from "../../_utils/searchParams";
-import { CreatePoolForm } from "./_components/CreatePoolForm";
 import { GlobalLoadingIndicator } from "./_components/GlobalLoadingIndicator";
 import { LiquidityForm } from "./_components/LiquidityForm";
 import { YourLiquidity } from "./_components/YourLiquidity";
@@ -26,13 +24,10 @@ export default async function Page({
 }) {
   const parsedSearchParams = await liquidityPageCache.parse(searchParams);
 
-  const isCreatePoolMode =
-    parsedSearchParams.type === LIQUIDITY_PAGE_TYPE.CREATE_POOL;
-
   const queryClient = new QueryClient();
   const { tokenAAddress, tokenBAddress } = parsedSearchParams;
 
-  if (tokenAAddress && tokenBAddress && !isCreatePoolMode) {
+  if (tokenAAddress && tokenBAddress) {
     try {
       const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
         tokenAAddress,
@@ -99,15 +94,11 @@ export default async function Page({
             </Box>
             <div className="size-9" />
           </section>
-          {isCreatePoolMode ? (
-            <CreatePoolForm />
-          ) : (
-            <HydrationBoundary state={dehydratedState}>
-              <Suspense fallback={<SkeletonForm type="liquidity" />}>
-                <LiquidityForm />
-              </Suspense>
-            </HydrationBoundary>
-          )}
+          <HydrationBoundary state={dehydratedState}>
+            <Suspense fallback={<SkeletonForm type="liquidity" />}>
+              <LiquidityForm />
+            </Suspense>
+          </HydrationBoundary>
           <YourLiquidity
             tokenAAddress={parsedSearchParams.tokenAAddress}
             tokenBAddress={parsedSearchParams.tokenBAddress}

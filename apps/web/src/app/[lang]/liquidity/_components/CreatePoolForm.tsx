@@ -533,21 +533,6 @@ export function CreatePoolForm() {
           <div className="w-full">
             {!publicKey ? (
               <WalletButton className="w-full py-3" />
-            ) : poolDetails ? (
-              <Button
-                className="w-full cursor-pointer py-3 leading-6"
-                onClick={() => {
-                  const urlWithParams = serialize("liquidity", {
-                    tokenAAddress,
-                    tokenBAddress,
-                    type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
-                  });
-                  router.push(`/${urlWithParams}`);
-                  return;
-                }}
-              >
-                {tx("createPool.poolExists")}
-              </Button>
             ) : (
               <form.Subscribe selector={(state) => state.values}>
                 {(values) => (

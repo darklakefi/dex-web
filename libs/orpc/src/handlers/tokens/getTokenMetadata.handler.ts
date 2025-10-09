@@ -119,13 +119,15 @@ async function fetchTokenMetadataFromHelius(addresses: string[]) {
 
   try {
     const assets = await helius.getAssetBatch({ ids: addresses });
-    return assets.map((token: Asset) => ({
-      address: token.id,
-      decimals: token.token_info?.decimals || 0,
-      imageUrl: "",
-      name: token.content?.metadata?.name || token.id.slice(-4),
-      symbol: token.token_info?.symbol || token.id.slice(0, 4),
-    }));
+    return assets
+      .filter((token): token is Asset => token !== null && token !== undefined)
+      .map((token) => ({
+        address: token.id,
+        decimals: token.token_info?.decimals || 0,
+        imageUrl: "",
+        name: token.content?.metadata?.name || token.id.slice(-4),
+        symbol: token.token_info?.symbol || token.id.slice(0, 4),
+      }));
   } catch (error) {
     console.error("Error with RPC: ", error);
     return [];

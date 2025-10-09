@@ -3,7 +3,10 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useRef } from "react";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
-import type { LiquidityFormValues } from "../_types/liquidity.types";
+import type {
+  LiquidityFormValues,
+  PoolDetails,
+} from "../_types/liquidity.types";
 import { useLiquidityFormState } from "./useLiquidityFormState";
 import { useLiquidityTransaction } from "./useLiquidityTransaction";
 import { useTokenOrder } from "./useTokenOrder";
@@ -38,7 +41,7 @@ export function useLiquidityFormLogic({
 
   const poolDataResult = useRealtimePoolData({ tokenXMint, tokenYMint });
 
-  const poolDetails = poolDataResult.data;
+  const poolDetails = poolDataResult.data as PoolDetails | null | undefined;
 
   const tokenAccountsData = useRealtimeTokenAccounts({
     hasRecentTransaction: false,
@@ -61,7 +64,7 @@ export function useLiquidityFormLogic({
 
   const transaction = useLiquidityTransaction({
     orderContext,
-    poolDetails,
+    poolDetails: poolDetails || null,
     resetForm: () => form.reset(),
     tokenAAddress,
     tokenBAddress,

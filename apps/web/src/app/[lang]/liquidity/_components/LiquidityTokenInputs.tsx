@@ -7,23 +7,19 @@ import {
   parseAmountBigNumber,
   validateHasSufficientBalance,
 } from "@dex-web/utils";
-import { Field, type FormApi } from "@tanstack/react-form";
+import { Field } from "@tanstack/react-form";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { SkeletonTokenInput } from "../../../_components/SkeletonTokenInput";
 import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
-import type {
-  LiquidityFormValues,
-  PoolDetails,
-  TokenAccountsData,
-} from "../_types/liquidity.types";
+import type { PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
 
 const MAX_DECIMALS = 5;
 const DEFAULT_PRICE = "1";
 
 interface LiquidityTokenInputsProps {
   // Use specific FormApi type for better type safety
-  form: FormApi<LiquidityFormValues, unknown>;
+  form: any;
   buyTokenAccount?: TokenAccountsData | null;
   sellTokenAccount?: TokenAccountsData | null;
   isLoadingBuy: boolean;

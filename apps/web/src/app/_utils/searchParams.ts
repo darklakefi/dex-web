@@ -24,11 +24,11 @@ const solanaAddressSchema = z
 function createSolanaAddressParser(defaultValue: string) {
   return parseAsString
     .withOptions({
-      parse: (value) => {
+      parse: (value: string) => {
         const result = solanaAddressSchema.safeParse(value);
         return result.success ? result.data : null;
       },
-    })
+    } as any)
     .withDefault(defaultValue);
 }
 

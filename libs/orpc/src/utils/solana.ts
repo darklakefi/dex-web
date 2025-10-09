@@ -32,13 +32,13 @@ export type PoolAccount = {
   bump: number;
   reserve_x: PublicKey;
   reserve_y: PublicKey;
-  locked_x: number;
-  locked_y: number;
-  user_locked_x: number;
-  user_locked_y: number;
-  protocol_fee_x: number;
-  protocol_fee_y: number;
-  token_lp_supply: number;
+  locked_x: BN | number;
+  locked_y: BN | number;
+  user_locked_x: BN | number;
+  user_locked_y: BN | number;
+  protocol_fee_x: BN | number;
+  protocol_fee_y: BN | number;
+  token_lp_supply: BN | number;
 };
 
 export async function getPoolAccount(

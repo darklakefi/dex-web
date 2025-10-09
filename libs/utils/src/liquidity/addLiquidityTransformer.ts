@@ -117,23 +117,88 @@ export function transformAddLiquidityInput(
   const amountXRaw = toRawUnits(amountXDecimal, decimalsX);
   const amountYRaw = toRawUnits(amountYDecimal, decimalsY);
 
+  // IMPORTANT: validated.poolReserves.reserveX/Y are ALREADY available reserves!
+  // The backend already subtracted protocol fees and locked amounts.
+  // DO NOT subtract them again or we'll double-subtract!
+  const availableReserveX = validated.poolReserves.reserveX;
+  const availableReserveY = validated.poolReserves.reserveY;
+
+  console.log("🔧 ===== ADD LIQUIDITY CALCULATION DEBUG =====");
+  console.log(
+    "📊 Pool Reserves (RAW - already AVAILABLE, fees pre-subtracted):",
+    {
+      protocolFeeX: validated.poolReserves.protocolFeeX.toString(),
+      protocolFeeY: validated.poolReserves.protocolFeeY.toString(),
+      reserveX: validated.poolReserves.reserveX.toString(),
+      reserveY: validated.poolReserves.reserveY.toString(),
+      totalLpSupply: validated.poolReserves.totalLpSupply.toString(),
+      userLockedX: validated.poolReserves.userLockedX.toString(),
+      userLockedY: validated.poolReserves.userLockedY.toString(),
+    },
+  );
+  console.log("📊 Available reserves (no additional subtraction needed):", {
+    availableReserveX: availableReserveX.toString(),
+    availableReserveY: availableReserveY.toString(),
+  });
+  console.log("💰 User Input Amounts (raw):", {
+    amountX: amountXRaw.toString(),
+    amountY: amountYRaw.toString(),
+    decimalsX,
+    decimalsY,
+  });
+
   const lpTokensRaw = calculateLpTokensToReceive({
     amountX: amountXRaw,
     amountY: amountYRaw,
-    availableReserveX: validated.poolReserves.reserveX,
-    availableReserveY: validated.poolReserves.reserveY,
+    availableReserveX: availableReserveX,
+    availableReserveY: availableReserveY,
     totalLpSupply: validated.poolReserves.totalLpSupply,
   });
 
-  const userAmountXDecimal = new Decimal(amountXRaw.toString());
-  const userAmountYDecimal = new Decimal(amountYRaw.toString());
+  console.log("🪙 LP Tokens to receive:", lpTokensRaw.toString());
+
+  // Calculate what Solana will ACTUALLY need using Rust-parity logic (CEILING rounding)
+  // This matches add_liquidity.rs lines 139-147
+  const lpTokenAmount = BigInt(lpTokensRaw.toString());
+  const lpTokenSupply = BigInt(validated.poolReserves.totalLpSupply.toString());
+  const reserveXBigInt = BigInt(availableReserveX.toString());
+  const reserveYBigInt = BigInt(availableReserveY.toString());
+
+  // Direct port of Rust's lp_tokens_to_trading_tokens with CEILING
+  let solanaTokenX = (lpTokenAmount * reserveXBigInt) / lpTokenSupply;
+  let solanaTokenY = (lpTokenAmount * reserveYBigInt) / lpTokenSupply;
+
+  // Apply CEILING rounding (add 1 if there's a remainder)
+  const tokenXRemainder = (lpTokenAmount * reserveXBigInt) % lpTokenSupply;
+  if (tokenXRemainder > 0n && solanaTokenX > 0n) {
+    solanaTokenX += 1n;
+  }
+
+  const tokenYRemainder = (lpTokenAmount * reserveYBigInt) % lpTokenSupply;
+  if (tokenYRemainder > 0n && solanaTokenY > 0n) {
+    solanaTokenY += 1n;
+  }
+
+  console.log("🔮 Solana will calculate (Rust-parity CEILING):", {
+    diffX: (solanaTokenX - amountXRaw).toString(),
+    diffY: (solanaTokenY - amountYRaw).toString(),
+    tokenX: solanaTokenX.toString(),
+    tokenY: solanaTokenY.toString(),
+    userProvidedX: amountXRaw.toString(),
+    userProvidedY: amountYRaw.toString(),
+  });
+
+  // Apply slippage to SOLANA'S calculated amounts, not user input
+  // This ensures maxAmounts cover what Solana will actually need
+  const solanaTokenXDecimal = new Decimal(solanaTokenX.toString());
+  const solanaTokenYDecimal = new Decimal(solanaTokenY.toString());
 
   const maxAmountXRawWithSlippage = applySlippageToMax(
-    userAmountXDecimal,
+    solanaTokenXDecimal,
     slippagePercent,
   );
   const maxAmountYRawWithSlippage = applySlippageToMax(
-    userAmountYDecimal,
+    solanaTokenYDecimal,
     slippagePercent,
   );
 
@@ -143,6 +208,18 @@ export function transformAddLiquidityInput(
   const maxAmountYRaw = BigInt(
     maxAmountYRawWithSlippage.toFixed(0, Decimal.ROUND_UP),
   );
+
+  console.log("📈 Slippage calculation:", {
+    finalMaxAmountX: maxAmountXRaw.toString(),
+    finalMaxAmountY: maxAmountYRaw.toString(),
+    maxAmountXWithSlippage: maxAmountXRawWithSlippage.toString(),
+    maxAmountYWithSlippage: maxAmountYRawWithSlippage.toString(),
+    slippagePercent: slippagePercent.toString(),
+    solanaCalculatedX: solanaTokenXDecimal.toString(),
+    solanaCalculatedY: solanaTokenYDecimal.toString(),
+  });
+  console.log("⚠️ NOTE: maxAmounts include slippage but NOT transfer fees!");
+  console.log("🔧 ===== END DEBUG =====\n");
 
   const payload: AddLiquidityPayload = {
     $typeName: "darklake.v1.AddLiquidityRequest",

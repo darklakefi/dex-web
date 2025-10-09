@@ -43,8 +43,6 @@ async function seed() {
     await database.insert(tokenMetadata).values(mockTokenMetadataData);
 
     console.log("🥪 Seeding sandwich events...");
-    await database.insert(sandwichEvents).values(mockSandwichEventsData);
-
     const batchSize = 50;
     for (let i = 0; i < mockSandwichEventsData.length; i += batchSize) {
       const batch = mockSandwichEventsData.slice(i, i + batchSize);

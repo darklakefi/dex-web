@@ -56,7 +56,7 @@ export function LiquidityForm() {
   });
 
   const viewState = selectLiquidityViewState(
-    poolDetails,
+    poolDetails || null,
     form.state.values.tokenAAmount,
     form.state.values.tokenBAmount,
     tokenAAddress,
@@ -119,7 +119,7 @@ export function LiquidityForm() {
                 isLoadingSell={tokenAccountsData.isLoadingSell}
                 isRefreshingBuy={tokenAccountsData.isRefreshingBuy}
                 isRefreshingSell={tokenAccountsData.isRefreshingSell}
-                poolDetails={poolDetails}
+                poolDetails={poolDetails || null}
                 sellTokenAccount={tokenAccountsData.sellTokenAccount}
                 tokenAAddress={tokenAAddress}
                 tokenBAddress={tokenBAddress}
@@ -140,7 +140,7 @@ export function LiquidityForm() {
                   tokenAccountsData.isLoadingSell
                 }
                 onReset={() => send({ type: "RESET" })}
-                poolDetails={poolDetails}
+                poolDetails={poolDetails || null}
                 publicKey={publicKey}
                 sellTokenAccount={tokenAccountsData.sellTokenAccount}
                 tokenAAddress={tokenAAddress}

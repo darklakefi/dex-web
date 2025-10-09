@@ -2,7 +2,6 @@
 
 import { tanstackClient } from "@dex-web/orpc";
 import { sortSolanaAddresses } from "@dex-web/utils";
-import type { UseQueryOptions } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
 interface UsePoolDataParams {
@@ -88,15 +87,16 @@ export function usePoolData<TData = PoolData>(
     refetchInterval: REFETCH_INTERVAL_CONFIG[priority],
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: priority === "critical" || priority === "high",
-    retry: (failureCount, _error) => {
+    retry: (failureCount: number, _error: Error) => {
       const maxRetries =
         priority === "critical" ? 3 : priority === "high" ? 2 : 1;
       return failureCount < maxRetries;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex: number) =>
+      Math.min(1000 * 2 ** attemptIndex, 30000),
     select,
     staleTime: STALE_TIME_CONFIG[priority],
-  } as UseQueryOptions<PoolData, Error, TData>);
+  } as any);
 }
 
 function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {
@@ -107,4 +107,4 @@ function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {
   return `${tokenXAddress}-${tokenYAddress}`;
 }
 
-export type { PoolData, UsePoolDataParams };
+export type { UsePoolDataParams };

@@ -27,10 +27,11 @@ export default defineConfig(() => {
         json: "./test-results/test-output.json",
         junit: "../../test-results/libs-orpc/junit.xml",
       },
-      pool: "forks" as const,
+      // Use threads pool with a single worker to play nicely in sandbox
+      pool: "threads" as const,
       poolOptions: {
-        forks: {
-          singleFork: true,
+        threads: {
+          singleThread: true,
         },
       },
       reporters: ["default", "junit"],

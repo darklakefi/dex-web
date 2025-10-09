@@ -35,7 +35,7 @@ export function useLPTokenEstimation({
   tokenBAmount,
   slippage = "0.5",
   enabled = true,
-}: UseLPTokenEstimationParams) {
+}: UseLPTokenEstimationParams): any {
   const orderContext = useTokenOrder();
 
   const tokenXMint = orderContext?.protocol.tokenX || "";
@@ -81,7 +81,7 @@ export function useLPTokenEstimation({
     ...tanstackClient.pools.getLPRate.queryOptions({
       input: queryInput!,
     }),
-    enabled: shouldFetch && queryInput !== null,
+    enabled: Boolean(shouldFetch && queryInput !== null),
     queryKey: [
       "lp-estimation",
       tokenXMint,

@@ -127,23 +127,66 @@ export function useLiquidityTransaction({
           throw new Error("Failed to fetch fresh pool reserves");
         }
 
+        console.log("📊 ===== POOL RESERVES COMPARISON =====");
+        console.log("Frontend cached pool data:", {
+          protocolFeeX: currentPoolData.protocolFeeX?.toString(),
+          protocolFeeY: currentPoolData.protocolFeeY?.toString(),
+          tokenXReserveRaw: currentPoolData.tokenXReserveRaw?.toString(),
+          tokenYReserveRaw: currentPoolData.tokenYReserveRaw?.toString(),
+          totalSupplyRaw: currentPoolData.totalSupplyRaw?.toString(),
+          userLockedX: currentPoolData.userLockedX?.toString(),
+          userLockedY: currentPoolData.userLockedY?.toString(),
+        });
+        console.log("Fresh on-chain pool data:", {
+          protocolFeeXRaw: freshPoolData.protocolFeeXRaw?.toString(),
+          protocolFeeYRaw: freshPoolData.protocolFeeYRaw?.toString(),
+          reserveXRaw: freshPoolData.reserveXRaw?.toString(),
+          reserveYRaw: freshPoolData.reserveYRaw?.toString(),
+          totalLpSupplyRaw: freshPoolData.totalLpSupplyRaw?.toString(),
+          userLockedXRaw: freshPoolData.userLockedXRaw?.toString(),
+          userLockedYRaw: freshPoolData.userLockedYRaw?.toString(),
+        });
+        console.log(
+          "Available reserves (reserve - protocol_fee - user_locked):",
+        );
+        const reserveX = BigInt(freshPoolData.reserveXRaw || 0);
+        const reserveY = BigInt(freshPoolData.reserveYRaw || 0);
+        const protocolFeeX = BigInt(freshPoolData.protocolFeeXRaw || 0);
+        const protocolFeeY = BigInt(freshPoolData.protocolFeeYRaw || 0);
+        const userLockedX = BigInt(freshPoolData.userLockedXRaw || 0);
+        const userLockedY = BigInt(freshPoolData.userLockedYRaw || 0);
+
+        const availableX = reserveX - protocolFeeX - userLockedX;
+        const availableY = reserveY - protocolFeeY - userLockedY;
+        console.log({
+          availableReserveX: availableX.toString(),
+          availableReserveY: availableY.toString(),
+        });
+        console.log("📊 ===== END COMPARISON =====\n");
+
         const poolDataForCalculation: PoolDetails = {
           ...currentPoolData,
+          // Use fresh data if available, otherwise fallback to cached
+          protocolFeeX:
+            freshPoolData.protocolFeeXRaw ?? currentPoolData.protocolFeeX,
+          protocolFeeY:
+            freshPoolData.protocolFeeYRaw ?? currentPoolData.protocolFeeY,
           tokenXMint: currentPoolData.tokenXMint,
           tokenXReserveRaw: freshPoolData.reserveXRaw,
           tokenYMint: currentPoolData.tokenYMint,
           tokenYReserveRaw: freshPoolData.reserveYRaw,
           totalSupplyRaw: freshPoolData.totalLpSupplyRaw,
+          userLockedX:
+            freshPoolData.userLockedXRaw ?? currentPoolData.userLockedX,
+          userLockedY:
+            freshPoolData.userLockedYRaw ?? currentPoolData.userLockedY,
         };
 
-        console.log("✅ Using fresh pool reserves:", {
-          lpMint: freshPoolData.lpMint,
-          note: "These are AVAILABLE reserves (matches add_liquidity.rs), fetched just-in-time",
-          rustSource: "reserve.amount - protocol_fee - user_locked",
-          tokenXReserveRaw: freshPoolData.reserveXRaw,
-          tokenYReserveRaw: freshPoolData.reserveYRaw,
-          totalLpSupplyRaw: freshPoolData.totalLpSupplyRaw,
-          warning: "⚠️ If values don't match backend, there's a timing issue!",
+        console.log("⚠️ Using these values for calculation:", {
+          protocolFeeX: poolDataForCalculation.protocolFeeX?.toString(),
+          protocolFeeY: poolDataForCalculation.protocolFeeY?.toString(),
+          userLockedX: poolDataForCalculation.userLockedX?.toString(),
+          userLockedY: poolDataForCalculation.userLockedY?.toString(),
         });
 
         const newTrackingId = generateTrackingId();
@@ -162,6 +205,23 @@ export function useLiquidityTransaction({
           trimmedTokenBAddress,
           values,
         });
+
+        console.log("📤 ===== REQUEST PAYLOAD TO SOLANA PROGRAM =====");
+        console.log("🎯 Transaction Parameters:", {
+          amountLp: requestPayload.amountLp.toString(),
+          maxAmountX: requestPayload.maxAmountX.toString(),
+          maxAmountY: requestPayload.maxAmountY.toString(),
+          tokenMintX: requestPayload.tokenMintX,
+          tokenMintY: requestPayload.tokenMintY,
+          userAddress: requestPayload.userAddress,
+        });
+        console.log(
+          "⚠️ CRITICAL: Solana program will ADD transfer fees to these amounts!",
+        );
+        console.log(
+          "⚠️ If transfer fees exist, the program will need MORE than maxAmount!",
+        );
+        console.log("📤 ===== END REQUEST PAYLOAD =====\n");
 
         const response = await addLiquidityMutation.mutateAsync(requestPayload);
 

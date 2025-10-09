@@ -28,10 +28,11 @@ const baseConfig = {
       json: "./test-results/test-output.json",
       junit: "../../test-results/libs-utils/junit.xml",
     },
-    pool: "forks" as const,
+    // Use threads pool with a single worker to play nicely with sandboxed CI
+    pool: "threads" as const,
     poolOptions: {
-      forks: {
-        singleFork: true,
+      threads: {
+        singleThread: true,
       },
     },
     reporters: ["default", "junit"],

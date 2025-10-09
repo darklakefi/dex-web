@@ -4,6 +4,8 @@ import { client } from "@dex-web/orpc";
 import type { GetPoolReservesOutput } from "@dex-web/orpc/schemas/index";
 import type { GetUserLiquidityOutput } from "@dex-web/orpc/schemas/pools/getUserLiquidity.schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Decimal from "decimal.js";
+import { LIQUIDITY_CONSTANTS } from "../../app/[lang]/liquidity/_constants/liquidityConstants";
 import { queryKeys } from "../../lib/queryKeys";
 
 export interface AddLiquidityVariables {
@@ -77,22 +79,26 @@ export function useAddLiquidityMutation() {
       const previousPoolReserves =
         queryClient.getQueryData<GetPoolReservesOutput>(poolReservesQueryKey);
 
-      const maxAmountXNumber = Number(variables.maxAmountX);
-      const maxAmountYNumber = Number(variables.maxAmountY);
-
       if (previousUserLiquidity) {
         const optimisticLiquidity: GetUserLiquidityOutput = {
           ...previousUserLiquidity,
           hasLiquidity: true,
+          // Convert raw LP delta (bigint) to human-readable using LP token decimals for optimistic UI
           lpTokenBalance:
-            previousUserLiquidity.lpTokenBalance + Number(variables.amountLp),
+            previousUserLiquidity.lpTokenBalance +
+            new Decimal(variables.amountLp.toString())
+              .div(new Decimal(10).pow(LIQUIDITY_CONSTANTS.LP_TOKEN_DECIMALS))
+              .toNumber(),
         };
         queryClient.setQueryData(userLiquidityQueryKey, optimisticLiquidity);
       } else {
         const optimisticLiquidity: GetUserLiquidityOutput = {
-          decimals: 6,
+          // LP token decimals are fixed at 9
+          decimals: LIQUIDITY_CONSTANTS.LP_TOKEN_DECIMALS,
           hasLiquidity: true,
-          lpTokenBalance: Number(variables.amountLp),
+          lpTokenBalance: new Decimal(variables.amountLp.toString())
+            .div(new Decimal(10).pow(LIQUIDITY_CONSTANTS.LP_TOKEN_DECIMALS))
+            .toNumber(),
           lpTokenMint: variables.tokenMintX,
         };
         queryClient.setQueryData(userLiquidityQueryKey, optimisticLiquidity);
@@ -101,10 +107,13 @@ export function useAddLiquidityMutation() {
       if (previousPoolReserves) {
         const optimisticPoolReserves: GetPoolReservesOutput = {
           ...previousPoolReserves,
-          reserveX: previousPoolReserves.reserveX + maxAmountXNumber,
-          reserveY: previousPoolReserves.reserveY + maxAmountYNumber,
+          // Avoid optimistic reserveX/Y adjustments without knowing token decimals
+          // Update only LP supply using known LP decimals (9)
           totalLpSupply:
-            previousPoolReserves.totalLpSupply + Number(variables.amountLp),
+            previousPoolReserves.totalLpSupply +
+            new Decimal(variables.amountLp.toString())
+              .div(new Decimal(10).pow(LIQUIDITY_CONSTANTS.LP_TOKEN_DECIMALS))
+              .toNumber(),
         };
         queryClient.setQueryData(poolReservesQueryKey, optimisticPoolReserves);
       }

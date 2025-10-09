@@ -69,9 +69,9 @@ export class TokenOrderErrorBoundary extends Component<
       return (
         <Box className="flex flex-col items-center gap-4 p-8">
           <div className="flex flex-col items-center gap-2 text-center">
-            <Text.H3 className="text-green-300">
+            <Text.Heading className="text-green-300">
               Select Tokens to Continue
-            </Text.H3>
+            </Text.Heading>
             <Text.Body1 className="text-green-400">
               To add liquidity, you need to select two tokens. Click below to
               choose your token pair.

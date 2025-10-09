@@ -7,6 +7,8 @@ import { ORPCError } from "@orpc/server";
 import { getDexGatewayClient } from "../../dex-gateway";
 import { LoggerService } from "../../services/LoggerService";
 import { MonitoringService } from "../../services/MonitoringService";
+import { tryDecodeAddLiquidity } from "../../utils/decodeAddLiquidity";
+import { deserializeVersionedTransaction } from "../../utils/solana";
 
 const logger = LoggerService.getInstance();
 const monitoring = MonitoringService.getInstance();
@@ -31,7 +33,61 @@ export async function addLiquidityHandler(
       tokenMintY: input.tokenMintY,
     });
     const grpcClient = await getDexGatewayClient();
-    const response = await grpcClient.addLiquidity(input);
+
+    // Temporary hack: gateway rotates (amountLp, maxX, maxY) => (maxY, amountLp, maxX)
+    // Invert it here until gateway is fixed, then verify by decoding the txn
+    const hackEnabled =
+      process.env.ORPC_FIX_GATEWAY_ADD_LIQUIDITY_ROTATION !== "0";
+    const rotatedInput: AddLiquidityRequest = hackEnabled
+      ? {
+          ...input,
+          amountLp: input.maxAmountX,
+          maxAmountX: input.maxAmountY,
+          maxAmountY: input.amountLp,
+        }
+      : input;
+
+    if (hackEnabled) {
+      console.warn("Applying gateway rotation hack for addLiquidity args");
+    }
+
+    let response = await grpcClient.addLiquidity(rotatedInput);
+
+    // Validate the unsigned txn encodes the intended args; if not, fallback to original
+    try {
+      if (response.unsignedTransaction) {
+        const tx = deserializeVersionedTransaction(
+          response.unsignedTransaction,
+        );
+        const ix0 = (tx.message as any).compiledInstructions?.[0];
+        if (ix0?.data) {
+          const decoded = tryDecodeAddLiquidity(
+            Buffer.from(ix0.data, "base64"),
+          );
+          const ok =
+            decoded &&
+            decoded.amount_lp.toString() === input.amountLp.toString() &&
+            decoded.max_amount_x.toString() === input.maxAmountX.toString() &&
+            decoded.max_amount_y.toString() === input.maxAmountY.toString();
+          if (!ok) {
+            console.warn(
+              "Gateway rotation hack validation failed; retrying without rotation",
+              {
+                decoded,
+                expected: {
+                  amount_lp: input.amountLp.toString(),
+                  max_amount_x: input.maxAmountX.toString(),
+                  max_amount_y: input.maxAmountY.toString(),
+                },
+              },
+            );
+            response = await grpcClient.addLiquidity(input);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not validate or decode unsigned transaction:", e);
+    }
     const duration = performance.now() - startTime;
     logger.info("AddLiquidity request completed", {
       duration,

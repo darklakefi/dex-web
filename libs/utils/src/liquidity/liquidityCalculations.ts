@@ -86,5 +86,17 @@ export function calculateLpTokensToReceive(input: LpCalculationInput): bigint {
 
   const lpTokens = Decimal.min(lpFromX, lpFromY);
 
+  console.log("🔍 LP Calculation Detail:", {
+    lpFromX: lpFromX.toString(),
+    lpFromY: lpFromY.toString(),
+    lpRoundedDown: lpTokens.toFixed(0, Decimal.ROUND_DOWN),
+    minLp: lpTokens.toString(),
+    reserveX: input.availableReserveX.toString(),
+    reserveY: input.availableReserveY.toString(),
+    totalLpSupply: input.totalLpSupply.toString(),
+  });
+
+  // IMPORTANT: Round DOWN to ensure we request LESS LP than the amounts would give
+  // This prevents slippage errors when Solana rounds UP to convert LP back to token amounts
   return BigInt(lpTokens.toFixed(0, Decimal.ROUND_DOWN));
 }

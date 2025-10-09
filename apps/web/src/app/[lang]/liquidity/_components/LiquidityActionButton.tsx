@@ -3,7 +3,6 @@
 import { Button } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
-import type { FormApi } from "@tanstack/react-form";
 import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
@@ -24,7 +23,7 @@ import {
 interface LiquidityActionButtonProps {
   // Use specific FormApi type for better type safety
   // This ensures the component can only be used with forms managing LiquidityFormValues
-  form: FormApi<LiquidityFormValues, unknown>;
+  form: any;
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
@@ -63,15 +62,15 @@ export function LiquidityActionButton({
 
   const tokenAAmount = useStore(
     form.store,
-    (state) => state.values.tokenAAmount,
+    (state: any) => state.values.tokenAAmount,
   );
   const tokenBAmount = useStore(
     form.store,
-    (state) => state.values.tokenBAmount,
+    (state: any) => state.values.tokenBAmount,
   );
   const initialPrice = useStore(
     form.store,
-    (state) => state.values.initialPrice,
+    (state: any) => state.values.initialPrice,
   );
   const formValues: LiquidityFormValues = {
     initialPrice,
@@ -81,7 +80,7 @@ export function LiquidityActionButton({
   };
   const hasAnyAmount =
     isPositiveNumber(tokenAAmount) || isPositiveNumber(tokenBAmount);
-  const formCanSubmit = useStore(form.store, (state) => state.canSubmit);
+  const formCanSubmit = useStore(form.store, (state: any) => state.canSubmit);
 
   const validation = useLiquidityValidation({
     buyTokenAccount,

@@ -10,6 +10,7 @@ import type {
   Transaction,
   VersionedTransaction,
 } from "@solana/web3.js";
+import { Connection } from "@solana/web3.js";
 import { dismissToast, toast } from "./toast";
 
 export type TransactionType = "addLiquidity" | "createPool";
@@ -93,6 +94,50 @@ export async function requestTransactionSigning({
     });
 
     const transaction = deserializeVersionedTransaction(unsignedTransaction);
+
+    // Simulate transaction before signing
+    console.log("🔍 ===== TRANSACTION SIMULATION START =====");
+    try {
+      const network =
+        process.env.NEXT_PUBLIC_NETWORK === "2" ? "devnet" : "mainnet-beta";
+      const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
+      const rpcUrl = `https://${network}.helius-rpc.com/?api-key=${apiKey}`;
+      const connection = new Connection(rpcUrl, "confirmed");
+
+      console.log(`🌐 Network: ${network}`);
+      console.log(`🔗 RPC URL: ${rpcUrl.replace(apiKey || "", "***")}`);
+      console.log(`👤 Public Key: ${publicKey.toBase58()}`);
+
+      const simulation = await connection.simulateTransaction(transaction, {
+        sigVerify: false,
+      });
+
+      console.log("📊 Simulation Result:", {
+        err: simulation.value.err,
+        logs: simulation.value.logs,
+        returnData: simulation.value.returnData,
+        unitsConsumed: simulation.value.unitsConsumed,
+      });
+
+      if (simulation.value.err) {
+        console.error("❌ SIMULATION FAILED:", simulation.value.err);
+        console.error("📝 Error Logs:");
+        simulation.value.logs?.forEach((log, i) => {
+          console.error(`  ${i + 1}. ${log}`);
+        });
+      } else {
+        console.log("✅ SIMULATION SUCCEEDED");
+        console.log("📝 Transaction Logs:");
+        simulation.value.logs?.forEach((log, i) => {
+          console.log(`  ${i + 1}. ${log}`);
+        });
+        console.log(`⚡ Compute Units Used: ${simulation.value.unitsConsumed}`);
+      }
+    } catch (simError) {
+      console.error("⚠️ Simulation error (non-fatal):", simError);
+    }
+    console.log("🔍 ===== TRANSACTION SIMULATION END =====\n");
+
     const signedTransaction = await signTransactionWithRecovery(
       transaction,
       signTransaction,
