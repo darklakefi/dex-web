@@ -9,7 +9,7 @@ import {
 import type { PublicKey } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useCallback, useMemo } from "react";
-import { z } from "zod";
+import * as z from "zod";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import {
   FORM_FIELD_NAMES,

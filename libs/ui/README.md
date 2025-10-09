@@ -25,7 +25,7 @@ This library provides reusable React components built with Tailwind CSS. All com
 ## Usage
 
 ```typescript
-import { 
+import {
   Button,
   Modal,
   NumericInput,
@@ -37,7 +37,7 @@ function MyComponent() {
   return (
     <div>
       <Button onClick={handleClick}>Click me</Button>
-      <NumericInput 
+      <NumericInput
         value={amount}
         onChange={setAmount}
         placeholder="0.00"

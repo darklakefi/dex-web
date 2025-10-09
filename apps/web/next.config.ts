@@ -35,7 +35,7 @@ const nextConfig = {
     "@grpc/proto-loader",
     "@connectrpc/connect-node",
   ],
-  transpilePackages: ["@dex-web/ui"],
+  transpilePackages: ["@dex-web/ui", "@dex-web/core"],
   typedRoutes: true,
   typescript: {
     tsconfigPath: "./tsconfig.lib.json",

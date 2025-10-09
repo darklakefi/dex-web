@@ -28,6 +28,7 @@
 This repository is managed as an [Nx](https://nx.dev/) monorepo. It contains the entire frontend platform for the DEX, including the main Next.js application, shared libraries, and E2E tests.
 
 The architecture is built on a strong separation of concerns, featuring:
+
 - **A Hybrid API Layer:** Using oRPC for application data and gRPC for high-performance blockchain operations.
 - **Layered State Management:** A clear hierarchy using TanStack Query for server state, TanStack Form for forms, and XState for complex workflows.
 - **Library-First Structure:** Code is organized into modular, reusable libraries with stable APIs.
@@ -37,15 +38,18 @@ The architecture is built on a strong separation of concerns, featuring:
 To contribute effectively, you must understand and respect these core principles.
 
 ### 1. API: Use the Right Tool for the Job
+
 - **oRPC (Application Data):** Use the oRPC client via TanStack Query hooks for fetching data like token lists, pool info, etc. It's optimized for batching and caching.
 - **gRPC (Blockchain Actions):** Use the gRPC client for executing transactions, trades, or liquidity operations. It's built for high-performance, critical actions.
 
 ### 2. State Management: A Clear Hierarchy
+
 - **TanStack Query:** Manages **all** server state. Never use `useState`/`useEffect` for data fetching.
 - **TanStack Form:** Manages **all** form state and validation.
 - **XState:** Reserved **exclusively** for complex, multi-step user flows that can be modeled as a state machine (e.g., a transaction lifecycle).
 
 ### 3. Monorepo: Think in Libraries
+
 - All shared logic, UI components, and utilities **must** reside in a `libs/` library.
 - The `apps/web` project should primarily compose features from these libraries.
 - Respect library boundaries by only importing from a library's public API (`index.ts`).
@@ -83,11 +87,13 @@ Before you begin, make sure you have the following installed **on your local mac
 This project uses PostgreSQL with Drizzle ORM.
 
 ### 1. Start PostgreSQL Server
+
 ```sh
 docker-compose up -d postgres
 ```
 
 ### 2. Environment Configuration
+
 Create a `.env` file in the project root with your database connection string:
 
 ```bash
@@ -100,6 +106,7 @@ DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST
 ```
 
 ### 3. Database Schema & Migrations
+
 The database schema is defined in `libs/db/src/schema.ts`. For local development, you can push schema changes directly.
 
 Run database migrations:
@@ -117,6 +124,7 @@ pnpm nx run db:generate
 ```
 
 ### 4. Seeding the Database
+
 Populate your database with sample data using the seed script.
 
 ```bash
@@ -126,6 +134,7 @@ pnpm db:seed
 The seeding logic is defined in `libs/db/src/seed.ts`.
 
 ### 5. Open Drizzle Studio
+
 To browse and edit your database, open Drizzle Studio:
 
 ```bash
@@ -135,6 +144,7 @@ pnpm db:studio
 This opens a web interface at http://localhost:4983.
 
 ### 6. Reset the database (removes all data):
+
 ```bash
 docker-compose down --volumes
 docker-compose up -d postgres
@@ -160,18 +170,19 @@ All commits to this repository must be signed. Unsigned commits will be rejected
 
 ## Common Nx Commands
 
-| Script | Description |
-|--------|-------------|
-| `pnpm start` | Start the dev server |
-| `pnpm build` | Build the web app |
-| `pnpm test` | Run tests |
-| `pnpm lint` | Lint the codebase |
-| `pnpm e2e` | Run E2E tests |
-| `pnpm format` | Format the codebase |
-| `pnpm dep-graph` | Visualize project dependencies |
-| `pnpm db:migrate` | Apply database schema changes |
-| `pnpm db:seed` | Seed the database with sample data |
-| `pnpm db:studio` | Open the Drizzle Studio web UI |
+| Script            | Description                        |
+| ----------------- | ---------------------------------- |
+| `pnpm start`      | Start the dev server               |
+| `pnpm build`      | Build the web app                  |
+| `pnpm test`       | Run tests                          |
+| `pnpm lint`       | Lint the codebase                  |
+| `pnpm e2e`        | Run E2E tests                      |
+| `pnpm format`     | Format the codebase                |
+| `pnpm dep-graph`  | Visualize project dependencies     |
+| `pnpm db:migrate` | Apply database schema changes      |
+| `pnpm db:seed`    | Seed the database with sample data |
+| `pnpm db:studio`  | Open the Drizzle Studio web UI     |
+
 ## Storybook
 
 Storybook is used for developing UI components in isolation.
@@ -196,16 +207,16 @@ Run this before submitting a PR to help keep the codebase tidy.
 
 ## Recommended Extensions
 
-*This section would typically include IDE extensions and tools that are recommended for development.*
+_This section would typically include IDE extensions and tools that are recommended for development._
 
 ## Troubleshooting
 
-*This section would typically include common issues and their solutions.*
+_This section would typically include common issues and their solutions._
 
 ## Further Reading
 
-*This section would typically include links to additional documentation and resources.*
+_This section would typically include links to additional documentation and resources._
 
 ## Contact & Support
 
-*This section would typically include information on how to get help or contact the team.*
+_This section would typically include information on how to get help or contact the team._

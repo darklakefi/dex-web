@@ -117,7 +117,6 @@ export function useLiquidityTransaction({
           trimmedTokenBAddress,
         });
 
-        console.log("🔄 Fetching fresh pool reserves before transaction...");
         const freshPoolData = await client.pools.getPoolReserves({
           tokenXMint: currentPoolData.tokenXMint,
           tokenYMint: currentPoolData.tokenYMint,
@@ -135,16 +134,6 @@ export function useLiquidityTransaction({
           tokenYReserveRaw: freshPoolData.reserveYRaw,
           totalSupplyRaw: freshPoolData.totalLpSupplyRaw,
         };
-
-        console.log("✅ Using fresh pool reserves:", {
-          lpMint: freshPoolData.lpMint,
-          note: "These are AVAILABLE reserves (matches add_liquidity.rs), fetched just-in-time",
-          rustSource: "reserve.amount - protocol_fee - user_locked",
-          tokenXReserveRaw: freshPoolData.reserveXRaw,
-          tokenYReserveRaw: freshPoolData.reserveYRaw,
-          totalLpSupplyRaw: freshPoolData.totalLpSupplyRaw,
-          warning: "⚠️ If values don't match backend, there's a timing issue!",
-        });
 
         const newTrackingId = generateTrackingId();
 
@@ -255,12 +244,9 @@ export function useLiquidityTransaction({
 
   const handleFormSubmit = useCallback(
     ({ value }: { value: LiquidityFormValues }) => {
-      console.log("🔥 handleFormSubmit called with value:", value);
       if (transaction.isError) {
-        console.log("🔄 Retrying transaction...");
         transaction.send({ type: "RETRY" });
       } else {
-        console.log("📤 Sending SUBMIT event to XState machine");
         transaction.send({ data: value, type: "SUBMIT" });
       }
     },

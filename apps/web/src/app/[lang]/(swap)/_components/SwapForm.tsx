@@ -33,7 +33,7 @@ import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { z } from "zod";
+import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import {
   useWalletAdapter,

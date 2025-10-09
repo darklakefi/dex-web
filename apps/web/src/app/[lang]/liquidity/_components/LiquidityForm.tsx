@@ -90,12 +90,9 @@ export function LiquidityForm() {
         <Box padding="lg">
           <form
             onSubmit={(e) => {
-              console.log("🎯 Form onSubmit event fired");
               e.preventDefault();
               e.stopPropagation();
-              console.log("📋 Calling form.handleSubmit()");
               form.handleSubmit();
-              console.log("✅ form.handleSubmit() completed");
             }}
           >
             <div className="flex flex-col gap-4">
@@ -104,13 +101,23 @@ export function LiquidityForm() {
                 calculateProportionalAmount={(
                   params: Omit<
                     CalculateProportionalAmountParams,
-                    "poolDetails"
+                    "poolDetails" | "tokenADecimals" | "tokenBDecimals"
                   >,
                 ) => {
                   if (!poolDetails) return null;
+
+                  const tokenADecimals =
+                    tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
+                      ?.decimals ?? 0;
+                  const tokenBDecimals =
+                    tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]
+                      ?.decimals ?? 0;
+
                   return calculateProportionalAmount({
                     ...params,
                     poolDetails,
+                    tokenADecimals,
+                    tokenBDecimals,
                   });
                 }}
                 form={form}
@@ -188,14 +195,13 @@ export function LiquidityForm() {
           <button
             aria-label="change mode"
             className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
-            onClick={() =>
-              router.push(
-                createPoolUrl(
-                  serialize,
-                  LIQUIDITY_PAGE_TYPE.CREATE_POOL,
-                ) as any,
-              )
-            }
+            onClick={() => {
+              const url = createPoolUrl(
+                serialize,
+                LIQUIDITY_PAGE_TYPE.CREATE_POOL,
+              );
+              router.push(url as Parameters<typeof router.push>[0]);
+            }}
             type="button"
           >
             <Icon className={`size-5`} name="plus-circle" />

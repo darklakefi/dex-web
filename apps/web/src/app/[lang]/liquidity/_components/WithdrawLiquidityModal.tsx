@@ -24,7 +24,7 @@ import { useSuspenseQueries } from "@tanstack/react-query";
 import Decimal from "decimal.js";
 import Link from "next/link";
 import { useState } from "react";
-import { z } from "zod";
+import * as z from "zod";
 import { useSubmitWithdrawal } from "../../../../hooks/mutations/useLiquidityMutations";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import {

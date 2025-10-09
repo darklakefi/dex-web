@@ -192,7 +192,6 @@ export function LiquidityActionButton({
           aria-label="Start a new liquidity transaction"
           className="w-full cursor-pointer py-3 leading-6"
           onClick={() => {
-            console.log("🔄 User clicked 'Start New Transaction'");
             onReset();
           }}
           type="button"
@@ -223,7 +222,6 @@ export function LiquidityActionButton({
             aria-label="Retry the transaction with the same values"
             className="flex-1 cursor-pointer py-3 leading-6"
             onClick={() => {
-              console.log("🔄 User clicked 'Retry'");
               send({ type: "RETRY" });
             }}
             type="button"
@@ -235,7 +233,6 @@ export function LiquidityActionButton({
             aria-label="Dismiss error and return to form"
             className="flex-1 cursor-pointer py-3 leading-6"
             onClick={() => {
-              console.log("❌ User clicked 'Dismiss'");
               send({ type: "DISMISS" });
             }}
             type="button"

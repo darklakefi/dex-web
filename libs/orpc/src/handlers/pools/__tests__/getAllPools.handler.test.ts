@@ -11,15 +11,12 @@ const { mockGetProgramAccounts } = vi.hoisted(() => ({
   mockGetProgramAccounts: vi.fn(),
 }));
 
-vi.mock("../../../getHelius.ts", () => ({
-  getHelius: () => {
-    console.log("getHelius mock called!");
-    return {
-      connection: {
-        getProgramAccounts: mockGetProgramAccounts,
-      },
-    };
-  },
+vi.mock("../../getHelius", () => ({
+  getHelius: vi.fn(() => ({
+    connection: {
+      getProgramAccounts: mockGetProgramAccounts,
+    },
+  })),
 }));
 
 vi.mock("../../tokens/getTokenMetadata.handler", () => ({
@@ -147,10 +144,6 @@ describe("getAllPoolsHandler", () => {
       ];
 
       mockGetProgramAccounts.mockResolvedValue(mockAccounts);
-      console.log(
-        "Mock setup done, mockGetProgramAccounts:",
-        mockGetProgramAccounts,
-      );
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)

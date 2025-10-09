@@ -7,26 +7,11 @@
  * - Error handling (required vs optional)
  */
 
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import type { ReactNode } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { useTokenOrder, useTokenOrderRequired } from "../useTokenOrder";
-
-// Mock sortSolanaAddresses to skip validation for test addresses
-vi.mock("@dex-web/utils", async () => {
-  const actual = await vi.importActual<typeof import("@dex-web/utils")>();
-  return {
-    ...actual,
-    sortSolanaAddresses: (addrA: string, addrB: string) => {
-      const sorted = [addrA, addrB].sort();
-      return {
-        tokenXAddress: sorted[0] as string,
-        tokenYAddress: sorted[1] as string,
-      };
-    },
-  };
-});
 
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const SOL = "So11111111111111111111111111111111111111112";
@@ -46,28 +31,32 @@ function createWrapper(searchParams: Record<string, string> = {}) {
 
 describe("useTokenOrder", () => {
   describe("basic functionality", () => {
-    it("returns null when tokens are not set", () => {
+    it("returns context with default tokens when params are empty", () => {
       const { result } = renderHook(() => useTokenOrder(), {
         wrapper: createWrapper({}),
       });
 
-      expect(result.current).toBeNull();
+      expect(result.current).not.toBeNull();
+      expect(result.current?.ui.tokenA).toBeDefined();
+      expect(result.current?.ui.tokenB).toBeDefined();
     });
 
-    it("returns null when only tokenA is set", () => {
+    it("returns context when tokenA is explicitly set", () => {
       const { result } = renderHook(() => useTokenOrder(), {
         wrapper: createWrapper({ tokenAAddress: USDC }),
       });
 
-      expect(result.current).toBeNull();
+      expect(result.current).not.toBeNull();
+      expect(result.current?.ui.tokenA).toBe(USDC);
     });
 
-    it("returns null when only tokenB is set", () => {
+    it("returns context when tokenB is explicitly set", () => {
       const { result } = renderHook(() => useTokenOrder(), {
         wrapper: createWrapper({ tokenBAddress: SOL }),
       });
 
-      expect(result.current).toBeNull();
+      expect(result.current).not.toBeNull();
+      expect(result.current?.ui.tokenB).toBe(SOL);
     });
 
     it("returns context when both tokens are set", () => {
@@ -130,28 +119,24 @@ describe("useTokenOrder", () => {
       expect(result.current).toBe(firstResult);
     });
 
-    it("returns new reference when tokenA changes", async () => {
-      const Wrapper1 = createWrapper({
-        tokenAAddress: USDC,
-        tokenBAddress: SOL,
+    it("returns new reference when tokenA changes", () => {
+      const { result: result1 } = renderHook(() => useTokenOrder(), {
+        wrapper: createWrapper({
+          tokenAAddress: USDC,
+          tokenBAddress: SOL,
+        }),
       });
 
-      const { result, rerender } = renderHook(() => useTokenOrder(), {
-        wrapper: Wrapper1,
+      const firstResult = result1.current;
+
+      const { result: result2 } = renderHook(() => useTokenOrder(), {
+        wrapper: createWrapper({
+          tokenAAddress: SOL,
+          tokenBAddress: SOL,
+        }),
       });
 
-      const firstResult = result.current;
-
-      const Wrapper2 = createWrapper({
-        tokenAAddress: SOL,
-        tokenBAddress: SOL,
-      });
-
-      rerender({ wrapper: Wrapper2 });
-
-      await waitFor(() => {
-        expect(result.current).not.toBe(firstResult);
-      });
+      expect(result2.current).not.toBe(firstResult);
     });
   });
 
@@ -180,25 +165,27 @@ describe("useTokenOrder", () => {
 
 describe("useTokenOrderRequired", () => {
   describe("error handling", () => {
-    it("throws error when tokens are not set", () => {
-      expect(() => {
-        renderHook(() => useTokenOrderRequired(), {
-          wrapper: createWrapper({}),
-        });
-      }).toThrow();
+    it("does not throw when default tokens are present", () => {
+      const { result } = renderHook(() => useTokenOrderRequired(), {
+        wrapper: createWrapper({}),
+      });
+
+      expect(result.current).toBeDefined();
+      expect(result.current.ui.tokenA).toBeDefined();
+      expect(result.current.ui.tokenB).toBeDefined();
     });
 
-    it("throws error with descriptive message", () => {
-      try {
-        renderHook(() => useTokenOrderRequired(), {
-          wrapper: createWrapper({ tokenAAddress: USDC }),
-        });
-        expect(true).toBe(false);
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error);
-        expect((error as Error).message).toContain("tokenAAddress");
-        expect((error as Error).message).toContain("tokenBAddress");
-      }
+    it("returns context when tokens are explicitly set", () => {
+      const { result } = renderHook(() => useTokenOrderRequired(), {
+        wrapper: createWrapper({
+          tokenAAddress: USDC,
+          tokenBAddress: SOL,
+        }),
+      });
+
+      expect(result.current).toBeDefined();
+      expect(result.current.ui.tokenA).toBe(USDC);
+      expect(result.current.ui.tokenB).toBe(SOL);
     });
 
     it("returns context when both tokens are set", () => {
@@ -231,31 +218,30 @@ describe("useTokenOrderRequired", () => {
 });
 
 describe("useTokenOrder - real-world scenarios", () => {
-  it("handles switching between token pairs", async () => {
-    const { result, rerender } = renderHook(() => useTokenOrder(), {
+  it("handles switching between token pairs", () => {
+    const { result: result1 } = renderHook(() => useTokenOrder(), {
       wrapper: createWrapper({
         tokenAAddress: USDC,
         tokenBAddress: SOL,
       }),
     });
 
-    const firstPair = result.current;
+    const firstPair = result1.current;
     expect(firstPair?.ui.tokenA).toBe(USDC);
     expect(firstPair?.ui.tokenB).toBe(SOL);
 
-    const Wrapper2 = createWrapper({
-      tokenAAddress: SOL,
-      tokenBAddress: USDC,
+    const { result: result2 } = renderHook(() => useTokenOrder(), {
+      wrapper: createWrapper({
+        tokenAAddress: SOL,
+        tokenBAddress: USDC,
+      }),
     });
 
-    rerender({ wrapper: Wrapper2 });
+    expect(result2.current?.ui.tokenA).toBe(SOL);
+    expect(result2.current?.ui.tokenB).toBe(USDC);
 
-    await waitFor(() => {
-      expect(result.current?.ui.tokenA).toBe(SOL);
-      expect(result.current?.ui.tokenB).toBe(USDC);
-      expect(result.current?.protocol.tokenX).toBe(USDC);
-      expect(result.current?.protocol.tokenY).toBe(SOL);
-    });
+    expect(result2.current?.protocol.tokenX).toBe(USDC);
+    expect(result2.current?.protocol.tokenY).toBe(SOL);
   });
 
   it("maintains stable reference across unrelated re-renders", () => {

@@ -11,7 +11,7 @@ import {
 } from "@tanstack/react-form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import * as z from "zod";
 import { logger } from "../../utils/logger";
 import { selectedTokensParsers } from "../_utils/searchParams";
@@ -66,6 +66,9 @@ export function SelectTokenModal({
   );
 
   const [isClosing, setIsClosing] = useState(false);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const modalContentRef = useRef<HTMLDivElement>(null);
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
@@ -137,6 +140,40 @@ export function SelectTokenModal({
 
   useTokenPrefetching(rawQuery, isClosing);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowSearchBar(true);
+
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        setShowSearchBar(false);
+      }, 2000);
+    };
+
+    const modalContent = modalContentRef.current;
+    if (modalContent) {
+      const scrollableElements = modalContent.querySelectorAll(
+        '[class*="overflow-y-auto"]',
+      );
+
+      scrollableElements.forEach((element) => {
+        element.addEventListener("scroll", handleScroll, { passive: true });
+      });
+
+      return () => {
+        scrollableElements.forEach((element) => {
+          element.removeEventListener("scroll", handleScroll);
+        });
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+      };
+    }
+  }, []);
+
   const handlePaste = useCallback((field: AnyFieldApi) => {
     pasteFromClipboard((pasted: string) => {
       field.handleChange(pasted.trim());
@@ -155,32 +192,43 @@ export function SelectTokenModal({
         onClick={handleClose}
         variant="secondary"
       ></Button>
-      <Box className="flex max-h-full w-full max-w-sm drop-shadow-xl">
-        <form.Field name="query">
-          {(field) => (
-            <TextInput
-              autoFocus
-              className="shrink-0"
-              label={
-                <>
-                  Search Token or{" "}
-                  <Button
-                    className="cursor-pointer"
-                    onClick={() => handlePaste(field)}
-                    variant="secondary"
-                  >
-                    Paste
-                  </Button>{" "}
-                  Address
-                </>
-              }
-              leadingIcon="search"
-              onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="Search for a token"
-              value={field.state.value}
-            />
-          )}
-        </form.Field>
+      <Box
+        className="flex max-h-full w-full max-w-sm drop-shadow-xl"
+        ref={modalContentRef}
+      >
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+            showSearchBar
+              ? "mb-4 max-h-32 opacity-100"
+              : "mb-0 max-h-0 opacity-0"
+          }`}
+        >
+          <form.Field name="query">
+            {(field) => (
+              <TextInput
+                autoFocus
+                className="shrink-0"
+                label={
+                  <>
+                    Search Token or{" "}
+                    <Button
+                      className="cursor-pointer"
+                      onClick={() => handlePaste(field)}
+                      variant="secondary"
+                    >
+                      Paste
+                    </Button>{" "}
+                    Address
+                  </>
+                }
+                leadingIcon="search"
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder="Search for a token"
+                value={field.state.value}
+              />
+            )}
+          </form.Field>
+        </div>
         <Suspense
           fallback={<div className="h-32 animate-pulse rounded bg-green-600" />}
         >

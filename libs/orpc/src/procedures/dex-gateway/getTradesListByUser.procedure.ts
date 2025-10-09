@@ -1,6 +1,6 @@
 import type { Trade } from "@dex-web/grpc-client";
 import Decimal from "decimal.js";
-import { z } from "zod";
+import * as z from "zod";
 import { getTradesListByUserHandler } from "../../handlers/dex-gateway/getTradesListByUser.handler";
 import { baseProcedure } from "../base.procedure";
 

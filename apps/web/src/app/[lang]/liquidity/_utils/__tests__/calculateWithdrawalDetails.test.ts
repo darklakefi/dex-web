@@ -1,20 +1,5 @@
 import { calculateWithdrawalDetails, InputType } from "@dex-web/utils";
-import { describe, expect, it, vi } from "vitest";
-
-// Mock sortSolanaAddresses to skip validation for test addresses
-vi.mock("@dex-web/utils", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@dex-web/utils")>();
-  return {
-    ...actual,
-    sortSolanaAddresses: (addrA: string, addrB: string) => {
-      const sorted = [addrA, addrB].sort();
-      return {
-        tokenXAddress: sorted[0] as string,
-        tokenYAddress: sorted[1] as string,
-      };
-    },
-  };
-});
+import { describe, expect, it } from "vitest";
 
 describe("calculateWithdrawalDetails - Fixed Tests", () => {
   const mockUserLiquidity = {

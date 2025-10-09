@@ -7,6 +7,7 @@ This module manages the critical distinction between **UI Order** (how users sel
 ## The Core Problem
 
 When a user adds liquidity to a pool:
+
 1. They select Token A and Token B in their preferred order
 2. Solana's protocol requires tokens in a **deterministic sorted order**
 3. We must correctly map between these two representations
@@ -27,7 +28,7 @@ const tokens = ["EPjFW...(USDC)", "So111...(SOL)"].sort();
 // ✅ CORRECT: Solana buffer comparison
 const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
-  "So11111111111111111111111111111111111111112"   // SOL
+  "So11111111111111111111111111111111111111112", // SOL
 );
 // Result: tokenX = SOL, tokenY = USDC  ← CORRECT!
 ```
@@ -35,10 +36,10 @@ const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
 ### Real-World Token Sorting
 
 | Token | Address Prefix | String Sort Position | Buffer Sort Position |
-|-------|---------------|---------------------|---------------------|
-| USDC  | `EPjF...`     | 1st (E < S)        | **3rd** ⚠️          |
-| USDT  | `Es9v...`     | 2nd (E < S)        | **2nd** ⚠️          |
-| SOL   | `So11...`     | 3rd (S last)       | **1st** ⚠️          |
+| ----- | -------------- | -------------------- | -------------------- |
+| USDC  | `EPjF...`      | 1st (E < S)          | **3rd** ⚠️           |
+| USDT  | `Es9v...`      | 2nd (E < S)          | **2nd** ⚠️           |
+| SOL   | `So11...`      | 3rd (S last)         | **1st** ⚠️           |
 
 ## Architecture
 
@@ -51,6 +52,7 @@ const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
 ### Key Functions
 
 #### `createTokenOrderContext()`
+
 Creates the single source of truth for token ordering. Call this ONCE per token pair.
 
 ```typescript
@@ -61,17 +63,16 @@ const context = createTokenOrderContext(userTokenA, userTokenB);
 ```
 
 #### `mapAmountsToProtocol()`
+
 Converts user input amounts to protocol-ready payload.
 
 ```typescript
-const protocolPayload = mapAmountsToProtocol(
-  { amountA: "100", amountB: "200", ...uiTokens },
-  context
-);
+const protocolPayload = mapAmountsToProtocol({ amountA: "100", amountB: "200", ...uiTokens }, context);
 // Ready to send to blockchain
 ```
 
 #### `mapAmountsToUI()`
+
 Converts protocol response back to user's original order.
 
 ```typescript
@@ -104,7 +105,9 @@ const sort2 = sortSolanaAddresses(tokenA, tokenB); // Redundant!
 const sorted = [tokenA, tokenB].sort(); // Wrong order!
 
 // ❌ DON'T: Manually swap logic
-if (tokenA > tokenB) { /* manual swap */ } // Incorrect comparison!
+if (tokenA > tokenB) {
+  /* manual swap */
+} // Incorrect comparison!
 ```
 
 ## Testing Philosophy
@@ -157,13 +160,13 @@ const { amountX, amountY } = mapAmountsToProtocol(uiAmounts, context);
 function LiquidityForm() {
   // 1. Get context from URL params
   const context = useTokenOrder(); // Custom hook wrapping createTokenOrderContext
-  
+
   // 2. Use for queries
   const { data } = usePoolData({
     tokenX: context?.protocol.tokenX,
     tokenY: context?.protocol.tokenY,
   });
-  
+
   // 3. Transform for submission
   const onSubmit = (formData) => {
     const protocolPayload = mapAmountsToProtocol(formData, context);
@@ -175,6 +178,7 @@ function LiquidityForm() {
 ## Performance Considerations
 
 All functions are:
+
 - **Pure** - No side effects, safe to memoize
 - **Fast** - O(1) operations, no sorting after initial context creation
 - **Cacheable** - Same inputs = same outputs (referential equality with React.useMemo)

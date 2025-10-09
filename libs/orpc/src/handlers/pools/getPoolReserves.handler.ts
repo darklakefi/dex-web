@@ -173,32 +173,6 @@ export async function getPoolReservesHandler({
       userLockedY: toNumber(poolData.user_locked_y),
     };
 
-    console.log("✅ Pool Reserves Handler Result:", {
-      availableReserveXRaw,
-      availableReserveYRaw,
-      difference: {
-        xDiff: totalReserveXRaw - availableReserveXRaw,
-        yDiff: totalReserveYRaw - availableReserveYRaw,
-      },
-      lpSupplyNote:
-        "totalLpSupplyRaw is from pool.token_lp_supply (NOT LP mint supply!)",
-      note: "⚠️ CRITICAL: reserveXRaw/reserveYRaw = AVAILABLE reserves (matches add_liquidity.rs:149-157)",
-      poolTokenLpSupply: poolData.token_lp_supply,
-      returnedReserveXRaw: result.reserveXRaw,
-      returnedReserveYRaw: result.reserveYRaw,
-      rustSource:
-        "add_liquidity.rs:163 uses pool.token_lp_supply for calculations",
-      tokenXDecimals: tokenXMintInfo.decimals,
-      tokenXMint,
-      tokenYDecimals: tokenYMintInfo.decimals,
-      tokenYMint,
-      totalLpSupply: result.totalLpSupply,
-      totalLpSupplyRaw: result.totalLpSupplyRaw,
-      totalReserveXRaw,
-      totalReserveYRaw,
-      usingAvailable: true,
-    });
-
     return result;
   } catch (error) {
     console.error("Error fetching pool reserves:", error);

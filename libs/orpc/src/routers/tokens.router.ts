@@ -3,7 +3,6 @@ import { getTokenMetadata } from "../procedures/tokens/getTokenMetadata.procedur
 import { getTokenOwner } from "../procedures/tokens/getTokenOwner.procedure";
 import { getTokenPrice } from "../procedures/tokens/getTokenPrice.procedure";
 import { getTokens } from "../procedures/tokens/getTokens.procedure";
-import { getTokensWithPools } from "../procedures/tokens/getTokensWithPools.procedure";
 
 export const tokensRouter = {
   getTokenDetails,
@@ -11,7 +10,6 @@ export const tokensRouter = {
   getTokenOwner,
   getTokenPrice,
   getTokens,
-  getTokensWithPools,
 };
 
 export type TokensRouter = typeof tokensRouter;

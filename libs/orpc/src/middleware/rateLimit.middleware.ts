@@ -1,5 +1,5 @@
 import { os } from "@orpc/server";
-import { z } from "zod";
+import * as z from "zod";
 import { RATE_LIMIT_CONFIG } from "../config/constants";
 import { RateLimiterService } from "../services/RateLimiterService";
 

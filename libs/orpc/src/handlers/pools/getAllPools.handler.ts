@@ -48,7 +48,6 @@ export async function getAllPoolsHandler(
         },
       ],
     });
-    console.log("getAllPools: accounts received:", accounts?.length);
     const searchLower = search?.toLowerCase().trim();
     const decodedPools = accounts
       .map((account) => {
@@ -75,7 +74,7 @@ export async function getAllPoolsHandler(
             userLockedY: pool.user_locked_y.toString(),
           };
         } catch (error) {
-          console.log(
+          console.error(
             "getAllPools: decode error:",
             error instanceof Error ? error.message : String(error),
           );
@@ -83,7 +82,6 @@ export async function getAllPoolsHandler(
         }
       })
       .filter((pool) => pool !== null);
-    console.log("getAllPools: decodedPools length:", decodedPools.length);
     const uniqueTokenAddresses = Array.from(
       new Set(
         decodedPools.flatMap((pool) => [pool.tokenXMint, pool.tokenYMint]),
@@ -99,6 +97,7 @@ export async function getAllPoolsHandler(
       tokenXSymbol: tokenMap[pool.tokenXMint]?.symbol,
       tokenYSymbol: tokenMap[pool.tokenYMint]?.symbol,
     }));
+
     const filteredPools = searchLower
       ? poolsWithSymbols.filter((pool) => {
           const matchesSearch =
@@ -110,6 +109,7 @@ export async function getAllPoolsHandler(
           return matchesSearch;
         })
       : poolsWithSymbols;
+
     const duration = performance.now() - startTime;
     if (duration > LOGGING_CONFIG.PERFORMANCE_THRESHOLD_MS) {
       logger.performance("getAllPools", duration, {

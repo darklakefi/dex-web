@@ -39,6 +39,11 @@ export default defineConfig(() => {
       teardownTimeout: 10000,
       testTimeout: 30000,
       watch: false,
+      server: {
+        deps: {
+          inline: ["@dex-web/utils"],
+        },
+      },
     },
   };
 

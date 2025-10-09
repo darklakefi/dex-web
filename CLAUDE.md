@@ -1,11 +1,13 @@
 # Claude Code Assistant Documentation
 
 ## Project Overview
+
 This is a Solana DEX web application built with Next.js, using a monorepo structure with NX.
 
 ## Internationalization (i18n) Strategy
 
 ### Current Setup
+
 - **Framework**: next-intl
 - **Supported Languages**: English (en), French (fr)
 - **Routing Strategy**: Dynamic routes with `[lang]` parameter
@@ -15,6 +17,7 @@ This is a Solana DEX web application built with Next.js, using a monorepo struct
 ### Implementation Patterns
 
 #### 1. Client Components
+
 ```typescript
 "use client";
 import { useTranslations } from "next-intl";
@@ -26,6 +29,7 @@ export function ComponentName() {
 ```
 
 #### 2. Server Components
+
 ```typescript
 import { getTranslations } from "next-intl/server";
 
@@ -36,6 +40,7 @@ export async function ComponentName() {
 ```
 
 #### 3. Dynamic Values (Interpolation)
+
 ```json
 // In translation file
 {
@@ -43,14 +48,17 @@ export async function ComponentName() {
   "priceImpact": "Price impact: {value}%"
 }
 ```
+
 ```typescript
 // In component
-t("message", { name: "Alice" })
-t("priceImpact", { value: slippage.toString() })
+t("message", { name: "Alice" });
+t("priceImpact", { value: slippage.toString() });
 ```
 
 #### 4. BUTTON_MESSAGE Pattern
+
 For components with multiple button states, maintain the existing BUTTON_MESSAGE pattern:
+
 ```typescript
 const t = useTranslations("swap");
 const tCommon = useTranslations("common");
@@ -64,28 +72,29 @@ const BUTTON_MESSAGE = {
 ```
 
 ### Translation File Structure
+
 ```json
 {
   "common": {
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success",
+    "success": "Success"
     // Common UI elements
   },
   "wallet": {
     "connectWallet": "Connect Wallet",
-    "disconnect": "Disconnect",
+    "disconnect": "Disconnect"
     // Wallet-related strings
   },
   "swap": {
     "swap": "Swap",
     "enterAmount": "Enter an amount",
-    "highPriceImpact": "CONFIRM SWAP WITH {value}% PRICE IMPACT",
+    "highPriceImpact": "CONFIRM SWAP WITH {value}% PRICE IMPACT"
     // Swap-specific strings
   },
   "liquidity": {
     "addLiquidity": "Add Liquidity",
-    "createPool": "Create Pool",
+    "createPool": "Create Pool"
     // Liquidity-specific strings
   },
   "pages": {
@@ -97,6 +106,7 @@ const BUTTON_MESSAGE = {
 ### Components Requiring i18n
 
 #### High Priority (User-facing, frequently used)
+
 1. **SwapForm** (`/app/[lang]/(swap)/_components/SwapForm.tsx`)
    - BUTTON_MESSAGE object
    - Toast messages
@@ -116,6 +126,7 @@ const BUTTON_MESSAGE = {
    - Form labels
 
 #### Medium Priority
+
 5. **SelectTokenModal** (`/app/_components/SelectTokenModal.tsx`)
    - "Search for a token" placeholder
    - "No token found" message
@@ -132,11 +143,13 @@ const BUTTON_MESSAGE = {
    - Success/error messages
 
 #### Low Priority
+
 9. **NoResultFound** (`/app/_components/NoResultFound.tsx`)
 10. **Various pool panels** (Featured/Trending pools labels)
 11. **Form validation messages**
 
 ### Implementation Steps
+
 1. **Phase 1**: Expand translation files with all necessary keys
 2. **Phase 2**: Update high-priority components (SwapForm, Wallet, Footer)
 3. **Phase 3**: Update medium-priority components
@@ -145,6 +158,7 @@ const BUTTON_MESSAGE = {
 6. **Phase 6**: Testing and refinement
 
 ### Testing Checklist
+
 - [ ] Language switcher works correctly
 - [ ] All hardcoded strings are replaced
 - [ ] Dynamic values interpolate correctly
@@ -154,6 +168,7 @@ const BUTTON_MESSAGE = {
 - [ ] RTL support (if needed in future)
 
 ### Notes
+
 - Keep brand names (wallet names, "Darklake", etc.) untranslated
 - Use consistent terminology across translations
 - Consider cultural context for French translations

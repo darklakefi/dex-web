@@ -45,9 +45,6 @@
       "path": "../../libs/orpc/tsconfig.lib.json"
     },
     {
-      "path": "../../libs/grpc-client/tsconfig.lib.json"
-    },
-    {
       "path": "../../libs/core/tsconfig.lib.json"
     }
   ]

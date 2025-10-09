@@ -16,24 +16,14 @@ This library provides type-safe RPC communication using oRPC. It defines API rou
 ## Key Exports
 
 ```typescript
-import { 
-  client,
-  tanstackClient,
-  createClientWithContext,
-  appRouter,
-  rpcHandler,
-  tokenQueryKeys,
-  QUERY_CONFIG,
-  batchClients,
-  createBatchClient,
-} from '@dex-web/orpc';
+import { client, tanstackClient, createClientWithContext, appRouter, rpcHandler, tokenQueryKeys, QUERY_CONFIG, batchClients, createBatchClient } from "@dex-web/orpc";
 ```
 
 ## Usage
 
 ```typescript
 // Create a client with context
-const rpcClient = createClientWithContext({ userId: '123' });
+const rpcClient = createClientWithContext({ userId: "123" });
 
 // Use with TanStack Query
 const { data } = useQuery({

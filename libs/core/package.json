@@ -11,6 +11,10 @@
     "./utils": "./src/utils/index.ts"
   },
   "name": "@dex-web/core",
+  "peerDependencies": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
   "sideEffects": false,
   "types": "./src/index.ts",
   "version": "0.0.1"

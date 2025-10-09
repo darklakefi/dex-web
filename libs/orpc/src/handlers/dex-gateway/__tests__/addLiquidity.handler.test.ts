@@ -29,7 +29,6 @@ vi.mock("../../../services/MonitoringService", () => ({
   },
 }));
 
-// Helper to create a mock gRPC client with all required methods
 function createMockGrpcClient(overrides: { addLiquidity?: Mock } = {}) {
   return {
     addLiquidity: vi.fn(),

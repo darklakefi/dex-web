@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
-import { z } from "zod";
+import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";

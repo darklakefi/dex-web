@@ -16,7 +16,7 @@ This library provides database schemas, migrations, and data access utilities. I
 ## Key Exports
 
 ```typescript
-import { tokens } from '@dex-web/db';
+import { tokens } from "@dex-web/db";
 ```
 
 ## Development

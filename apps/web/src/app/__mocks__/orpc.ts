@@ -11,6 +11,16 @@ export const mockTanstackClient = {
     },
   },
   pools: {
+    getLPRate: {
+      queryOptions: vi.fn(() => ({
+        queryFn: () =>
+          Promise.resolve({
+            estimatedLPTokens: "100",
+          }),
+        queryKey: ["getLPRate"],
+        staleTime: 5000,
+      })),
+    },
     getPoolDetails: {
       queryOptions: vi.fn(() => ({
         queryFn: () =>
@@ -77,24 +87,32 @@ vi.mock("@solana/wallet-adapter-react", () => ({
   useWallet: () => mockWalletAdapter,
 }));
 
-vi.mock("@dex-web/utils", () => ({
-  convertToDecimal: vi.fn((amount: number, decimals: number) => {
-    if (typeof amount === "number" && typeof decimals === "number") {
-      return new Decimal(amount).div(new Decimal(10).pow(decimals));
-    }
-    return new Decimal(0);
-  }),
-  formatValueWithThousandSeparator: vi.fn((value) => {
-    if (typeof value === "number") {
-      return value.toLocaleString();
-    }
-    return value;
-  }),
-  sortSolanaAddresses: vi.fn((addrA, addrB) => ({
-    tokenXAddress: addrA || "mock-token-x",
-    tokenYAddress: addrB || "mock-token-y",
-  })),
-}));
+vi.mock("@dex-web/utils", async () => {
+  const actual =
+    await vi.importActual<typeof import("@dex-web/utils")>("@dex-web/utils");
+  return {
+    ...actual,
+    convertToDecimal: vi.fn((amount: number, decimals: number) => {
+      if (typeof amount === "number" && typeof decimals === "number") {
+        return new Decimal(amount).div(new Decimal(10).pow(decimals));
+      }
+      return new Decimal(0);
+    }),
+    formatValueWithThousandSeparator: vi.fn((value) => {
+      if (typeof value === "number") {
+        return value.toLocaleString();
+      }
+      return value;
+    }),
+    sortSolanaAddresses: vi.fn((addrA, addrB) => {
+      const sorted = [addrA, addrB].sort();
+      return {
+        tokenXAddress: sorted[0] || "mock-token-x",
+        tokenYAddress: sorted[1] || "mock-token-y",
+      };
+    }),
+  };
+});
 
 vi.mock("@solana/web3.js", () => ({
   PublicKey: vi.fn().mockImplementation((key) => ({

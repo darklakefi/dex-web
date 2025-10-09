@@ -19,12 +19,7 @@ This library provides pure, testable utility functions for common operations inc
 ### Amount Utilities
 
 ```typescript
-import { 
-  parseAmountSafe,
-  formatAmount,
-  toRawUnits,
-  fromRawUnits,
-} from '@dex-web/utils';
+import { parseAmountSafe, formatAmount, toRawUnits, fromRawUnits } from "@dex-web/utils";
 
 // Parse user input
 const amount = parseAmountSafe("100.5"); // Decimal(100.5)
@@ -39,10 +34,7 @@ const raw = toRawUnits(amount, 6); // 100500000n
 ### Liquidity Calculations
 
 ```typescript
-import { 
-  transformAddLiquidityInput,
-  calculateLpTokensToReceive,
-} from '@dex-web/utils';
+import { transformAddLiquidityInput, calculateLpTokensToReceive } from "@dex-web/utils";
 
 // Transform user input to protocol payload
 const payload = transformAddLiquidityInput({
@@ -53,7 +45,9 @@ const payload = transformAddLiquidityInput({
   tokenBAmount: "200",
   tokenBDecimals: 6,
   slippage: "0.5",
-  poolReserves: { /* ... */ },
+  poolReserves: {
+    /* ... */
+  },
   userAddress: "9WzDX...",
 });
 ```
@@ -61,10 +55,7 @@ const payload = transformAddLiquidityInput({
 ### Blockchain Utilities
 
 ```typescript
-import { 
-  sortSolanaAddresses,
-  isValidSolanaAddress,
-} from '@dex-web/utils';
+import { sortSolanaAddresses, isValidSolanaAddress } from "@dex-web/utils";
 
 // Sort addresses for X/Y convention
 const [addressX, addressY] = sortSolanaAddresses(addressA, addressB);

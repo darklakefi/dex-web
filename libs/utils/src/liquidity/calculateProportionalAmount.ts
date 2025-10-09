@@ -13,6 +13,8 @@ export interface CalculateProportionalAmountParams {
   readonly tokenAAddress: string;
   readonly tokenBAddress: string;
   readonly poolDetails: PoolDetails;
+  readonly tokenADecimals: number;
+  readonly tokenBDecimals: number;
 }
 
 /**
@@ -25,7 +27,14 @@ export interface CalculateProportionalAmountParams {
 export function calculateProportionalAmount(
   params: CalculateProportionalAmountParams,
 ): number | null {
-  const { inputAmount, editedToken, tokenAAddress, poolDetails } = params;
+  const {
+    inputAmount,
+    editedToken,
+    tokenAAddress,
+    poolDetails,
+    tokenADecimals,
+    tokenBDecimals,
+  } = params;
 
   if (!poolDetails.tokenXReserve || !poolDetails.tokenYReserve) {
     return null;
@@ -53,7 +62,9 @@ export function calculateProportionalAmount(
         : amount.mul(reserveY).div(reserveX);
     }
 
-    return Number(result.toFixed(6, Decimal.ROUND_DOWN));
+    const outputTokenDecimals =
+      editedToken === "tokenA" ? tokenBDecimals : tokenADecimals;
+    return Number(result.toFixed(outputTokenDecimals, Decimal.ROUND_DOWN));
   } catch (error) {
     console.error("Error calculating proportional amount:", error);
     return null;

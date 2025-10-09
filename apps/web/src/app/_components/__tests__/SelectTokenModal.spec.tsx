@@ -29,27 +29,31 @@ vi.mock("@dex-web/orpc", () => ({
     },
   },
   tanstackClient: {
-    tokens: {
-      getTokensWithPools: {
+    dexGateway: {
+      getTokenMetadataList: {
         queryOptions: vi.fn().mockReturnValue({
           queryFn: () =>
             Promise.resolve({
-              hasMore: false,
-              poolTokenAddresses: [],
+              currentPage: 1,
               tokens: [
                 {
                   address: DEFAULT_BUY_TOKEN,
-                  imageUrl: "https://example.com/solana.png",
+                  decimals: 9,
+                  logoUri: "https://example.com/solana.png",
                   name: "Solana",
                   symbol: "SOL",
                 },
               ],
-              total: 1,
+              totalPages: 1,
             }),
           queryKey: [
-            "tokens",
-            "list",
-            { limit: 8, offset: 0, onlyWithPools: false, query: "" },
+            "dexGateway",
+            "getTokenMetadataList",
+            {
+              $typeName: "darklake.v1.GetTokenMetadataListRequest",
+              pageNumber: 1,
+              pageSize: 8,
+            },
           ],
         }),
       },

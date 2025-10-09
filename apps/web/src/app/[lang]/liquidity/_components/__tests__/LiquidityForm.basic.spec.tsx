@@ -10,21 +10,6 @@ import {
   DEFAULT_SELL_TOKEN,
 } from "../../../../_utils/constants";
 
-// Mock sortSolanaAddresses to skip validation for test addresses
-vi.mock("@dex-web/utils", async () => {
-  const actual = await vi.importActual<typeof import("@dex-web/utils")>();
-  return {
-    ...actual,
-    sortSolanaAddresses: (addrA: string, addrB: string) => {
-      const sorted = [addrA, addrB].sort();
-      return {
-        tokenXAddress: sorted[0] as string,
-        tokenYAddress: sorted[1] as string,
-      };
-    },
-  };
-});
-
 vi.mock("next/navigation", () => ({
   usePathname: () => "/liquidity",
   useRouter: () => ({ push: vi.fn() }),
@@ -76,6 +61,16 @@ vi.mock("@dex-web/orpc", () => ({
       },
     },
     pools: {
+      getLPRate: {
+        queryOptions: vi.fn(() => ({
+          queryFn: () =>
+            Promise.resolve({
+              estimatedLPTokens: "100",
+            }),
+          queryKey: ["getLPRate"],
+          staleTime: 5000,
+        })),
+      },
       getPoolDetails: Object.assign(
         vi.fn().mockResolvedValue({
           poolAddress: "mock-pool",

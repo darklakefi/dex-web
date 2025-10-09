@@ -1,3 +1,4 @@
+export type { SendSignedTransactionRequest } from "@dex-web/grpc-client";
 export {
   type ClientContext,
   client,

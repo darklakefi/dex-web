@@ -18,23 +18,13 @@ This library provides essential hooks, utilities, constants, and data models use
 
 ```typescript
 // Transaction status
-import { SwapTxStatus } from '@dex-web/core';
+import { SwapTxStatus } from "@dex-web/core";
 
 // Toast messages
-import { 
-  BUTTON_MESSAGES,
-  ERROR_MESSAGES,
-  SUCCESS_MESSAGES,
-  TRANSACTION_DESCRIPTIONS,
-  TRANSACTION_STEPS,
-} from '@dex-web/core';
+import { BUTTON_MESSAGES, ERROR_MESSAGES, SUCCESS_MESSAGES, TRANSACTION_DESCRIPTIONS, TRANSACTION_STEPS } from "@dex-web/core";
 
 // Hooks
-import { 
-  useTokenAccounts,
-  useTransactionSigning,
-  useWallet,
-} from '@dex-web/core';
+import { useTokenAccounts, useTransactionSigning, useWallet } from "@dex-web/core";
 ```
 
 ## Development

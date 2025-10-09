@@ -1,7 +1,6 @@
 "use client";
 
-import type { SendSignedTransactionRequest } from "@dex-web/grpc-client";
-import { client } from "@dex-web/orpc";
+import { client, type SendSignedTransactionRequest } from "@dex-web/orpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   handleMutationError,

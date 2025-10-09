@@ -4,7 +4,7 @@ import type {
   FormAsyncValidateOrFn,
   FormValidateOrFn,
 } from "@tanstack/react-form";
-import { z } from "zod";
+import * as z from "zod";
 
 export const numericStringSchema = z
   .string()
