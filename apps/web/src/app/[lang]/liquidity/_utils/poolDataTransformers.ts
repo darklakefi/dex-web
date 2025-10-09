@@ -1,84 +1,42 @@
+import type { PoolData } from "../../../../hooks/usePoolData";
 import type { PoolDetails } from "../_types/liquidity.types";
 
 /**
- * Type representing the raw pool data from the API
- */
-export interface RawPoolData {
-  readonly exists: boolean;
-  readonly lpMint: string;
-  readonly reserveX: number;
-  readonly reserveXRaw?: number;
-  readonly reserveY: number;
-  readonly reserveYRaw?: number;
-  readonly totalLpSupply: number;
-  readonly totalLpSupplyRaw?: number;
-  readonly tokenXMint: string;
-  readonly tokenYMint: string;
-  readonly lastUpdate: number;
-  readonly totalReserveXRaw?: number;
-  readonly totalReserveYRaw?: number;
-  readonly protocolFeeX?: number;
-  readonly protocolFeeY?: number;
-  readonly userLockedX?: number;
-  readonly userLockedY?: number;
-}
-
-/**
- * Pure function to transform raw pool data from the API into the PoolDetails format
- * used by the liquidity form.
+ * Transforms raw pool data from the API to the PoolDetails format used by liquidity forms.
+ * This is a pure function that can be easily tested.
  *
- * @param rawPoolData - Raw pool data from useRealtimePoolData or null
- * @returns Transformed PoolDetails object or null if no data
+ * Following Implementation Answer #3: Feature-specific transformations should live in the feature,
+ * not in shared hooks. This keeps module boundaries clean.
+ *
+ * @param data - Raw pool data from API (or null)
+ * @param tokenXMint - Token X mint address for the query
+ * @param tokenYMint - Token Y mint address for the query
+ * @returns PoolDetails or null if pool doesn't exist
  */
-export function transformPoolData(
-  rawPoolData: RawPoolData | null | undefined,
+export function transformToPoolDetails(
+  data: PoolData | null,
+  tokenXMint: string,
+  tokenYMint: string,
 ): PoolDetails | null {
-  if (!rawPoolData) {
-    return null;
-  }
+  if (!data || !data.exists) return null;
 
   return {
     fee: undefined,
-    poolAddress: rawPoolData.lpMint,
+    poolAddress: data.lpMint,
     price: undefined,
-    protocolFeeX: rawPoolData.protocolFeeX,
-    protocolFeeY: rawPoolData.protocolFeeY,
-    tokenXMint: rawPoolData.tokenXMint,
-    tokenXReserve: rawPoolData.reserveX,
-    tokenXReserveRaw: rawPoolData.reserveXRaw,
-    tokenYMint: rawPoolData.tokenYMint,
-    tokenYReserve: rawPoolData.reserveY,
-    tokenYReserveRaw: rawPoolData.reserveYRaw,
-    totalReserveXRaw: rawPoolData.totalReserveXRaw,
-    totalReserveYRaw: rawPoolData.totalReserveYRaw,
-    totalSupply: rawPoolData.totalLpSupply,
-    totalSupplyRaw: rawPoolData.totalLpSupplyRaw,
-    userLockedX: rawPoolData.userLockedX,
-    userLockedY: rawPoolData.userLockedY,
-  };
-}
-
-/**
- * Pure function to sort token addresses for consistent pool key generation.
- * This ensures that Token A and Token B always map to Token X and Token Y
- * in a predictable way.
- *
- * @param tokenAAddress - First token address
- * @param tokenBAddress - Second token address
- * @returns Object with sorted tokenXAddress and tokenYAddress
- */
-export function getSortedTokenAddresses(
-  tokenAAddress: string,
-  tokenBAddress: string,
-): { tokenXAddress: string; tokenYAddress: string } {
-  // Lexicographic comparison for deterministic ordering
-  const [tokenX, tokenY] =
-    tokenAAddress.localeCompare(tokenBAddress) < 0
-      ? [tokenAAddress, tokenBAddress]
-      : [tokenBAddress, tokenAAddress];
-
-  return {
-    tokenXAddress: tokenX,
-    tokenYAddress: tokenY,
+    protocolFeeX: data.protocolFeeX,
+    protocolFeeY: data.protocolFeeY,
+    tokenXMint,
+    tokenXReserve: data.reserveX,
+    tokenXReserveRaw: data.reserveXRaw,
+    tokenYMint,
+    tokenYReserve: data.reserveY,
+    tokenYReserveRaw: data.reserveYRaw,
+    totalReserveXRaw: data.totalReserveXRaw,
+    totalReserveYRaw: data.totalReserveYRaw,
+    totalSupply: data.totalLpSupply,
+    totalSupplyRaw: data.totalLpSupplyRaw,
+    userLockedX: data.userLockedX,
+    userLockedY: data.userLockedY,
   };
 }

@@ -2,6 +2,8 @@ import { ERROR_MESSAGES, isWarningMessage } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
 import {
   addLiquidityInputSchema,
+  mapAmountsToProtocol,
+  type TokenOrderContext,
   transformAddLiquidityInput,
 } from "@dex-web/utils";
 import type { Wallet } from "@solana/wallet-adapter-react";
@@ -11,14 +13,12 @@ import type {
   LiquidityFormValues,
   PoolDetails,
 } from "../_types/liquidity.types";
-import {
-  showErrorToast,
-  showInfoToast,
-} from "../_utils/liquidityTransactionToasts";
-import { mapTokensUIToProtocol } from "./tokenMapping";
 
 /**
- * Pure validation function to check if transaction inputs are valid
+ * Pure validation function that throws errors without side effects.
+ *
+ * Following Implementation Answer #7: Pure functions should only throw errors,
+ * not perform side effects like showing toasts. The calling hook handles side effects.
  */
 export function validateTransactionInputs(params: {
   effectivePublicKey: PublicKey | null | undefined;
@@ -36,27 +36,40 @@ export function validateTransactionInputs(params: {
     !params.walletAdapter?.wallet ||
     !params.wallet?.adapter?.publicKey
   ) {
-    showErrorToast({ message: ERROR_MESSAGES.MISSING_WALLET_INFO });
     throw new Error(ERROR_MESSAGES.MISSING_WALLET_INFO);
   }
   if (!params.currentPoolData) {
-    const errorMsg =
-      "Pool not found for the selected token pair. Please create a pool first.";
-    showErrorToast({ message: errorMsg });
-    throw new Error(errorMsg);
+    throw new Error(
+      "Pool not found for the selected token pair. Please create a pool first.",
+    );
   }
 }
 
 /**
- * Pure function to handle transaction errors
+ * Pure function to classify and format transaction errors.
+ * Returns error information without performing side effects.
+ *
+ * Following Implementation Answer #7: Helper functions are pure.
+ * The calling hook decides how to display the error (toast, etc.).
+ *
+ * @returns Object with error message, type (warning/error), and context
  */
-export function handleTransactionError(params: {
+export function classifyTransactionError(params: {
   error: unknown;
   tokenAAddress: string | null;
   tokenBAddress: string | null;
   tokenAAmount: string;
   tokenBAmount: string;
-}): void {
+}): {
+  message: string;
+  isWarning: boolean;
+  context: {
+    tokenA: string | null;
+    tokenB: string | null;
+    amountA: string;
+    amountB: string;
+  };
+} {
   const errorMessage =
     params.error instanceof Error ? params.error.message : String(params.error);
   const isWarning = isWarningMessage(params.error);
@@ -68,17 +81,11 @@ export function handleTransactionError(params: {
     tokenB: params.tokenBAddress,
   };
 
-  if (isWarning) {
-    showInfoToast({
-      context,
-      message: errorMessage,
-    });
-  } else {
-    showErrorToast({
-      context,
-      message: errorMessage,
-    });
-  }
+  return {
+    context,
+    isWarning,
+    message: errorMessage,
+  };
 }
 
 /**
@@ -117,8 +124,9 @@ export async function fetchTokenMetadata(params: {
 /**
  * Pure function to build the add liquidity request payload.
  *
- * Uses the central token mapping utility to ensure tokens are correctly
+ * Uses the TokenOrderContext to ensure tokens are correctly
  * mapped from UI order (A/B) to protocol order (X/Y) with the right decimals.
+ * This eliminates duplicate sorting and ensures consistency throughout the flow.
  */
 export function buildRequestPayload(params: {
   currentPoolData: PoolDetails;
@@ -128,23 +136,19 @@ export function buildRequestPayload(params: {
   tokenBMeta: { decimals: number };
   values: LiquidityFormValues;
   effectivePublicKey: PublicKey;
+  orderContext: TokenOrderContext;
 }) {
-  // Step 1: Create immutable token pair in UI order
-  const tokenPairUI = {
-    tokenA: {
-      address: params.trimmedTokenAAddress,
-      decimals: params.tokenAMeta.decimals,
-    },
-    tokenB: {
-      address: params.trimmedTokenBAddress,
-      decimals: params.tokenBMeta.decimals,
-    },
+  const { orderContext } = params;
+
+  const uiAmounts = {
+    amountA: params.values.tokenAAmount,
+    amountB: params.values.tokenBAmount,
+    tokenA: orderContext.ui.tokenA,
+    tokenB: orderContext.ui.tokenB,
   };
 
-  // Step 2: Map to protocol order (X/Y) - this is our source of truth
-  const protocolMapping = mapTokensUIToProtocol(tokenPairUI);
+  const protocolAmounts = mapAmountsToProtocol(uiAmounts, orderContext);
 
-  // Step 3: Build pool reserves
   const poolReserves = {
     protocolFeeX: String(params.currentPoolData.protocolFeeX || 0),
     protocolFeeY: String(params.currentPoolData.protocolFeeY || 0),
@@ -155,21 +159,21 @@ export function buildRequestPayload(params: {
     userLockedY: String(params.currentPoolData.userLockedY || 0),
   };
 
-  // Step 4: Build transform input using the mapped tokens
-  // IMPORTANT: We pass tokenA/B in UI order, but with CORRECT decimals from the mapping
   const transformInput = addLiquidityInputSchema.parse({
     poolReserves,
     slippage: params.values.slippage || LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
-    tokenAAddress: params.trimmedTokenAAddress,
-    tokenAAmount: params.values.tokenAAmount,
-    tokenADecimals: tokenPairUI.tokenA.decimals,
-    tokenBAddress: params.trimmedTokenBAddress,
-    tokenBAmount: params.values.tokenBAmount,
-    tokenBDecimals: tokenPairUI.tokenB.decimals,
+    tokenAAddress: protocolAmounts.tokenX,
+    tokenAAmount: protocolAmounts.amountX,
+    tokenADecimals: orderContext.mapping.tokenAIsX
+      ? params.tokenAMeta.decimals
+      : params.tokenBMeta.decimals,
+    tokenBAddress: protocolAmounts.tokenY,
+    tokenBAmount: protocolAmounts.amountY,
+    tokenBDecimals: orderContext.mapping.tokenAIsX
+      ? params.tokenBMeta.decimals
+      : params.tokenAMeta.decimals,
     userAddress: params.effectivePublicKey.toBase58(),
   });
 
-  // Step 5: Transform to final payload
-  // The transformer will internally sort and map everything correctly
   return transformAddLiquidityInput(transformInput);
 }

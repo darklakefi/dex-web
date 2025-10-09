@@ -47,12 +47,13 @@ export function LiquidityForm() {
     isCalculating,
     isError,
     isPoolLoading,
+    isSubmitting,
+    isSuccess,
   } = useLiquidityFormLogic({
     tokenAAddress,
     tokenBAddress,
   });
 
-  // Derive view state using pure selector function
   const viewState = selectLiquidityViewState(
     poolDetails,
     form.state.values.tokenAAmount,
@@ -63,7 +64,6 @@ export function LiquidityForm() {
     isPoolLoading,
   );
 
-  // Use LP estimation hook for accurate calculations with fee/locked amount exclusions
   const lpEstimation = useLPTokenEstimation({
     enabled: Boolean(poolDetails && tokenAAddress && tokenBAddress),
     slippage: form.state.values.slippage,
@@ -128,8 +128,11 @@ export function LiquidityForm() {
               <LiquidityActionButton
                 buyTokenAccount={tokenAccountsData.buyTokenAccount}
                 form={form}
+                isCalculating={isCalculating}
                 isError={isError}
                 isPoolLoading={isPoolLoading}
+                isSubmitting={isSubmitting}
+                isSuccess={isSuccess}
                 isTokenAccountsLoading={
                   tokenAccountsData.isLoadingBuy ||
                   tokenAccountsData.isLoadingSell

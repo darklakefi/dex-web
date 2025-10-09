@@ -7,7 +7,6 @@ import {
 } from "../tokenMapping";
 
 describe("tokenMapping", () => {
-  // Real token addresses from your system
   const DUX_ADDRESS = "DdLxrGFs2sKYbbqVk76eVx9268ASUdTMAhrsqphqDuX";
   const DUKY_ADDRESS = "HXsKnhXPtGr2mq4uTpxbxyy7ZydYWJwx4zMuYPEDukY";
 
@@ -20,7 +19,6 @@ describe("tokenMapping", () => {
 
       const result = mapTokensUIToProtocol(tokenPairUI);
 
-      // DUX sorts before DUKY, so tokenA is tokenX
       expect(result.tokenAIsX).toBe(true);
       expect(result.tokenX.address).toBe(DUX_ADDRESS);
       expect(result.tokenX.decimals).toBe(6);
@@ -36,8 +34,7 @@ describe("tokenMapping", () => {
 
       const result = mapTokensUIToProtocol(tokenPairUI);
 
-      // DUX (tokenB) sorts before DUKY (tokenA), so tokenB is tokenX
-      expect(result.tokenAIsX).toBe(false); // tokenA (DUKY) is NOT tokenX
+      expect(result.tokenAIsX).toBe(false);
       expect(result.tokenX.address).toBe(DUX_ADDRESS);
       expect(result.tokenX.decimals).toBe(6);
       expect(result.tokenY.address).toBe(DUKY_ADDRESS);
@@ -130,7 +127,6 @@ describe("tokenMapping", () => {
     it("should be the inverse of mapAmountsUIToProtocol", () => {
       const originalAmounts = { amountA: "100", amountB: "200" };
 
-      // Map UI → Protocol → UI
       const protocolAmounts = mapAmountsUIToProtocol(originalAmounts, true);
       const backToUI = mapAmountsProtocolToUI(protocolAmounts, true);
 
@@ -140,56 +136,49 @@ describe("tokenMapping", () => {
 
   describe("integration tests", () => {
     it("should handle the original bug scenario correctly", () => {
-      // Original bug: UI showed DUKY/DUX but addresses were actually DUX/DUKY
       const tokenPairUI: TokenPairUI = {
-        tokenA: { address: DUX_ADDRESS, decimals: 6 }, // Actually DuX
-        tokenB: { address: DUKY_ADDRESS, decimals: 9 }, // Actually DukY
+        tokenA: { address: DUX_ADDRESS, decimals: 6 },
+        tokenB: { address: DUKY_ADDRESS, decimals: 9 },
       };
 
       const protocolMapping = mapTokensUIToProtocol(tokenPairUI);
 
-      // Verify correct mapping
-      expect(protocolMapping.tokenX.decimals).toBe(6); // DuX
-      expect(protocolMapping.tokenY.decimals).toBe(9); // DukY
+      expect(protocolMapping.tokenX.decimals).toBe(6);
+      expect(protocolMapping.tokenY.decimals).toBe(9);
       expect(protocolMapping.tokenAIsX).toBe(true);
 
-      // Map amounts
       const amounts = { amountA: "10", amountB: "2269.54326" };
       const protocolAmounts = mapAmountsUIToProtocol(
         amounts,
         protocolMapping.tokenAIsX,
       );
 
-      expect(protocolAmounts.amountX).toBe("10"); // DuX amount
-      expect(protocolAmounts.amountY).toBe("2269.54326"); // DukY amount
+      expect(protocolAmounts.amountX).toBe("10");
+      expect(protocolAmounts.amountY).toBe("2269.54326");
     });
 
     it("should handle reversed UI order correctly", () => {
-      // If UI shows tokens in opposite order
       const tokenPairUI: TokenPairUI = {
-        tokenA: { address: DUKY_ADDRESS, decimals: 9 }, // DukY first in UI
-        tokenB: { address: DUX_ADDRESS, decimals: 6 }, // DuX second in UI
+        tokenA: { address: DUKY_ADDRESS, decimals: 9 },
+        tokenB: { address: DUX_ADDRESS, decimals: 6 },
       };
 
       const protocolMapping = mapTokensUIToProtocol(tokenPairUI);
 
-      // Protocol order should still be DuX (X), DukY (Y)
-      // DUX is tokenB, and it sorts first, so it's tokenX
       expect(protocolMapping.tokenX.address).toBe(DUX_ADDRESS);
-      expect(protocolMapping.tokenX.decimals).toBe(6); // DuX
+      expect(protocolMapping.tokenX.decimals).toBe(6);
       expect(protocolMapping.tokenY.address).toBe(DUKY_ADDRESS);
-      expect(protocolMapping.tokenY.decimals).toBe(9); // DukY
-      expect(protocolMapping.tokenAIsX).toBe(false); // tokenA is DUKY, which is Y
+      expect(protocolMapping.tokenY.decimals).toBe(9);
+      expect(protocolMapping.tokenAIsX).toBe(false);
 
-      // Map amounts
       const amounts = { amountA: "2269.54326", amountB: "10" };
       const protocolAmounts = mapAmountsUIToProtocol(
         amounts,
         protocolMapping.tokenAIsX,
       );
 
-      expect(protocolAmounts.amountX).toBe("10"); // DuX amount (from B)
-      expect(protocolAmounts.amountY).toBe("2269.54326"); // DukY amount (from A)
+      expect(protocolAmounts.amountX).toBe("10");
+      expect(protocolAmounts.amountY).toBe("2269.54326");
     });
   });
 });

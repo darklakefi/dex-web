@@ -139,7 +139,6 @@ export function isSelfReferral(
   return incomingCode === userReferralCode;
 }
 
-// Export as namespace for backward compatibility
 export const ReferralStorage = {
   clearReferralCode,
   getIncomingReferralCode,

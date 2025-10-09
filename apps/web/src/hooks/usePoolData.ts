@@ -2,8 +2,8 @@
 
 import { tanstackClient } from "@dex-web/orpc";
 import { sortSolanaAddresses } from "@dex-web/utils";
+import type { UseQueryOptions } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
-import type { PoolDetails } from "../app/[lang]/liquidity/_types/liquidity.types";
 
 interface UsePoolDataParams {
   tokenXMint: string;
@@ -11,7 +11,11 @@ interface UsePoolDataParams {
   priority?: "low" | "normal" | "high" | "critical";
 }
 
-interface PoolData {
+/**
+ * Raw pool data returned from the API.
+ * This is the base type that features can transform into their own shapes.
+ */
+export interface PoolData {
   exists: boolean;
   lpMint: string;
   reserveX: number;
@@ -23,7 +27,6 @@ interface PoolData {
   tokenXMint: string;
   tokenYMint: string;
   lastUpdate: number;
-  // Add new fields for transformer
   totalReserveXRaw?: number;
   totalReserveYRaw?: number;
   protocolFeeX?: number;
@@ -47,20 +50,33 @@ const REFETCH_INTERVAL_CONFIG = {
 } as const;
 
 /**
- * Hook to fetch and transform pool data with configurable priority.
+ * Generic hook to fetch pool data. Returns raw API data by default.
+ * Consumers can provide a select function to transform the data to their feature-specific types.
  *
- * Following Answer #5 best practice: Use TanStack Query's `select` for transformations.
- * This ensures components only re-render when the transformed data changes, not on every
- * raw API response change.
+ * Following Implementation Answer #3: Shared hooks should not depend on feature types.
+ * This pattern keeps the hook reusable while allowing features to define their own transformations.
  *
- * @param params - tokenXMint, tokenYMint, and optional priority
- * @returns TanStack Query result with transformed PoolDetails
+ * @example
+ * // Use raw data
+ * const { data } = usePoolData({ tokenXMint, tokenYMint });
+ *
+ * @example
+ * // Transform to feature-specific type
+ * const { data } = usePoolData<PoolDetails>({
+ *   tokenXMint,
+ *   tokenYMint,
+ *   select: transformToPoolDetails,
+ * });
+ *
+ * @param params - tokenXMint, tokenYMint, optional priority, and optional select function
+ * @returns TanStack Query result with either raw PoolData or transformed TData
  */
-export function usePoolData({
-  tokenXMint,
-  tokenYMint,
-  priority = "normal",
-}: UsePoolDataParams) {
+export function usePoolData<TData = PoolData>(
+  params: UsePoolDataParams & {
+    select?: (data: PoolData) => TData;
+  },
+) {
+  const { tokenXMint, tokenYMint, priority = "normal", select } = params;
   const poolKey = createSortedPoolKey(tokenXMint, tokenYMint);
 
   return useQuery({
@@ -78,34 +94,9 @@ export function usePoolData({
       return failureCount < maxRetries;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    // Transform data within select for optimal performance
-    // Component only re-renders when transformed PoolDetails changes
-    select: (data): PoolDetails | null => {
-      if (!data || !data.exists) return null;
-
-      // Transform to PoolDetails format used by liquidity forms
-      return {
-        fee: undefined,
-        poolAddress: data.lpMint,
-        price: undefined,
-        protocolFeeX: data.protocolFeeX,
-        protocolFeeY: data.protocolFeeY,
-        tokenXMint,
-        tokenXReserve: data.reserveX,
-        tokenXReserveRaw: data.reserveXRaw,
-        tokenYMint,
-        tokenYReserve: data.reserveY,
-        tokenYReserveRaw: data.reserveYRaw,
-        totalReserveXRaw: data.totalReserveXRaw,
-        totalReserveYRaw: data.totalReserveYRaw,
-        totalSupply: data.totalLpSupply,
-        totalSupplyRaw: data.totalLpSupplyRaw,
-        userLockedX: data.userLockedX,
-        userLockedY: data.userLockedY,
-      };
-    },
+    select,
     staleTime: STALE_TIME_CONFIG[priority],
-  });
+  } as UseQueryOptions<PoolData, Error, TData>);
 }
 
 function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {

@@ -39,7 +39,6 @@ export const liquidityMachine = setup({
     submitLiquidity: fromPromise(
       // biome-ignore lint/correctness/noUnusedFunctionParameters: input is required by xstate actor signature
       async ({ input }: { input: LiquidityFormValues }) => {
-        // This will be provided at runtime by useLiquidityTransaction
         return { result: "submitted" };
       },
     ),
@@ -168,15 +167,12 @@ export const liquidityMachine = setup({
       },
     },
     success: {
-      after: {
-        1000: {
-          actions: ["resetState", "resetForm"],
-          target: "ready.idle",
-        },
-      },
+      // Following Implementation Answer #9: User-controlled form reset
+      // For financial applications, users should explicitly control when to start a new transaction
+      // Form fields remain populated and disabled, allowing users to review their inputs
       on: {
         RESET: {
-          actions: "resetState",
+          actions: ["resetState", "resetForm"],
           target: "ready.idle",
         },
       },

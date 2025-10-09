@@ -25,13 +25,11 @@ describe("LiquidityMachine", () => {
 
     it("should not store server data in context", () => {
       const context = actor.getSnapshot().context;
-      // Ensure no server data is stored in machine context
       expect(context).not.toHaveProperty("poolDetails");
       expect(context).not.toHaveProperty("buyTokenAccount");
       expect(context).not.toHaveProperty("sellTokenAccount");
       expect(context).not.toHaveProperty("tokenAccounts");
       expect(context).not.toHaveProperty("userLiquidity");
-      // Only workflow state should be present
       expect(Object.keys(context)).toEqual(
         expect.arrayContaining([
           "error",

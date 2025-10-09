@@ -55,14 +55,7 @@ export const AppFooter = () => {
         </Text>
       </div>
       <div className="flex flex-col items-start gap-5">
-        {/*
-        <Text.Link className="inline-flex items-baseline justify-center leading-none no-underline">
-          MEV
-        </Text.Link>
-        <Text.Link className="inline-flex items-baseline justify-center text-green-300 leading-none no-underline">
-          What is MEV?
-        </Text.Link>
-        */}
+        {}
         <Text
           as={Link}
           className="inline-flex items-baseline justify-center gap-2 text-green-300 no-underline"

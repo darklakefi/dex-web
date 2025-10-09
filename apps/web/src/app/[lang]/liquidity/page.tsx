@@ -29,7 +29,6 @@ export default async function Page({
   const isCreatePoolMode =
     parsedSearchParams.type === LIQUIDITY_PAGE_TYPE.CREATE_POOL;
 
-  // Prefetch pool data for liquidity form
   const queryClient = new QueryClient();
   const { tokenAAddress, tokenBAddress } = parsedSearchParams;
 

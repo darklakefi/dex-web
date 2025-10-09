@@ -2,6 +2,7 @@
 
 import { ERROR_MESSAGES } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
+import type { TokenOrderContext } from "@dex-web/utils";
 import { parseAmount } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useCallback, useRef } from "react";
@@ -21,15 +22,18 @@ import {
   trackLiquidityError,
   trackSigned,
 } from "../_utils/liquidityTransactionAnalytics";
-import { showStepToast } from "../_utils/liquidityTransactionToasts";
+import {
+  showErrorToast,
+  showInfoToast,
+  showStepToast,
+} from "../_utils/liquidityTransactionToasts";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
 import {
   buildRequestPayload,
+  classifyTransactionError,
   fetchTokenMetadata,
-  handleTransactionError,
   validateTransactionInputs,
 } from "../_utils/transactionHelpers";
-
 import { useLiquidityTransactionCore } from "./useLiquidityTransactionCore";
 import { useLiquidityTransactionQueries } from "./useLiquidityTransactionQueries";
 
@@ -38,6 +42,7 @@ interface UseLiquidityTransactionParams {
   readonly tokenBAddress: string | null;
   readonly poolDetails: PoolDetails | null;
   readonly resetForm?: () => void;
+  readonly orderContext: TokenOrderContext | null;
 }
 
 export function useLiquidityTransaction({
@@ -45,6 +50,7 @@ export function useLiquidityTransaction({
   tokenBAddress,
   poolDetails,
   resetForm,
+  orderContext,
 }: UseLiquidityTransactionParams) {
   const { signTransaction, wallet, publicKey } = useWallet();
   const { data: walletAdapter } = useWalletAdapter();
@@ -63,12 +69,21 @@ export function useLiquidityTransaction({
 
       const effectivePublicKey = publicKey || wallet?.adapter?.publicKey;
 
-      validateTransactionInputs({
-        currentPoolData,
-        effectivePublicKey,
-        wallet,
-        walletAdapter,
-      });
+      try {
+        validateTransactionInputs({
+          currentPoolData,
+          effectivePublicKey,
+          wallet,
+          walletAdapter,
+        });
+      } catch (validationError) {
+        const errorMessage =
+          validationError instanceof Error
+            ? validationError.message
+            : String(validationError);
+        showErrorToast({ message: errorMessage });
+        throw validationError;
+      }
 
       if (!effectivePublicKey) {
         throw new Error(ERROR_MESSAGES.MISSING_WALLET_INFO);
@@ -133,9 +148,14 @@ export function useLiquidityTransaction({
 
         const newTrackingId = generateTrackingId();
 
+        if (!orderContext) {
+          throw new Error("Token order context is required for transaction");
+        }
+
         const requestPayload = buildRequestPayload({
           currentPoolData: poolDataForCalculation,
           effectivePublicKey,
+          orderContext,
           tokenAMeta,
           tokenBMeta,
           trimmedTokenAAddress,
@@ -180,19 +200,34 @@ export function useLiquidityTransaction({
         }
       } catch (error) {
         console.error("Submit transaction failed:", error);
-        handleTransactionError({
+
+        const errorInfo = classifyTransactionError({
           error,
           tokenAAddress,
           tokenAAmount: values.tokenAAmount,
           tokenBAddress,
           tokenBAmount: values.tokenBAmount,
         });
+
+        if (errorInfo.isWarning) {
+          showInfoToast({
+            context: errorInfo.context,
+            message: errorInfo.message,
+          });
+        } else {
+          showErrorToast({
+            context: errorInfo.context,
+            message: errorInfo.message,
+          });
+        }
+
         trackLiquidityError(trackError, error, {
           amountA: values.tokenAAmount,
           amountB: values.tokenBAmount,
           tokenA: tokenAAddress,
           tokenB: tokenBAddress,
         });
+
         throw error;
       }
     },
@@ -209,6 +244,7 @@ export function useLiquidityTransaction({
       invalidateQueries,
       trackError,
       signTransaction,
+      orderContext,
     ],
   );
 
@@ -217,8 +253,23 @@ export function useLiquidityTransaction({
     submitTransaction,
   });
 
+  const handleFormSubmit = useCallback(
+    ({ value }: { value: LiquidityFormValues }) => {
+      console.log("🔥 handleFormSubmit called with value:", value);
+      if (transaction.isError) {
+        console.log("🔄 Retrying transaction...");
+        transaction.send({ type: "RETRY" });
+      } else {
+        console.log("📤 Sending SUBMIT event to XState machine");
+        transaction.send({ data: value, type: "SUBMIT" });
+      }
+    },
+    [transaction.isError, transaction.send],
+  );
+
   return {
     ...transaction,
+    handleFormSubmit,
     publicKey: publicKey || wallet?.adapter?.publicKey || null,
   };
 }

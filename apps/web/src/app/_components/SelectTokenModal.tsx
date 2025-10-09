@@ -84,10 +84,8 @@ export function SelectTokenModal({
   const [isClosing, setIsClosing] = useState(false);
 
   const handleClose = useCallback(() => {
-    // Immediate visual feedback
     setIsClosing(true);
 
-    // Defer navigation to next tick to allow React to update
     setTimeout(() => {
       const from = searchParams.get("from");
       if (from) {
@@ -123,7 +121,6 @@ export function SelectTokenModal({
     [connectedWalletAddress, searchedTokens, setSearchedTokens],
   );
 
-  // Memoize callbacks to prevent unnecessary re-renders
   const handleSelectToken = useCallback(
     (selectedToken: Token, e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
@@ -178,7 +175,6 @@ export function SelectTokenModal({
   const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 300);
   const queryClient = useQueryClient();
 
-  // Memoize query input to prevent unnecessary re-renders
   const queryInput = useMemo(
     () => ({
       limit: 8,
@@ -189,7 +185,6 @@ export function SelectTokenModal({
     [debouncedQuery],
   );
 
-  // Main query with optimized configuration
   const { data } = useSuspenseQuery({
     ...tanstackClient.tokens.getTokensWithPools.queryOptions({
       input: queryInput,
@@ -202,9 +197,8 @@ export function SelectTokenModal({
       : QUERY_CONFIG.tokens.staleTime,
   });
 
-  // Prefetch popular tokens on mount for instant results
   useEffect(() => {
-    if (isClosing) return; // Skip if closing
+    if (isClosing) return;
 
     const popularSearches = ["SOL", "USDC", "USDT"];
     popularSearches.forEach((searchTerm) => {
@@ -221,21 +215,17 @@ export function SelectTokenModal({
     });
   }, [queryClient, isClosing]);
 
-  // Prefetch next likely query as user types (predictive prefetching)
   const prefetchTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
-    // Clear any existing timer
     if (prefetchTimerRef.current) {
       clearTimeout(prefetchTimerRef.current);
     }
 
-    // Skip if closing
     if (isClosing) return;
 
     if (rawQuery.length >= 2 && rawQuery.length < 10) {
       prefetchTimerRef.current = setTimeout(() => {
-        // Prefetch with the current partial query
         queryClient.prefetchQuery(
           tanstackClient.tokens.getTokensWithPools.queryOptions({
             input: {
@@ -249,7 +239,6 @@ export function SelectTokenModal({
       }, 100);
     }
 
-    // Cleanup on unmount
     return () => {
       if (prefetchTimerRef.current) {
         clearTimeout(prefetchTimerRef.current);
@@ -263,7 +252,6 @@ export function SelectTokenModal({
     });
   }, []);
 
-  // Early return if closing to prevent unnecessary renders
   if (isClosing) {
     return null;
   }

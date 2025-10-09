@@ -7,6 +7,8 @@ describe("transformAddLiquidityInput", () => {
     overrides: Partial<AddLiquidityInput> = {},
   ): AddLiquidityInput => ({
     poolReserves: {
+      lockedX: 0n,
+      lockedY: 0n,
       protocolFeeX: 0n,
       protocolFeeY: 0n,
       reserveX: 1000000000n,
@@ -86,6 +88,8 @@ describe("transformAddLiquidityInput", () => {
     it("should calculate LP tokens for balanced pool", () => {
       const input = createValidInput({
         poolReserves: {
+          lockedX: 0n,
+          lockedY: 0n,
           protocolFeeX: 0n,
           protocolFeeY: 0n,
           reserveX: 1000000000n,
@@ -105,6 +109,8 @@ describe("transformAddLiquidityInput", () => {
     it("should calculate LP tokens for new pool", () => {
       const input = createValidInput({
         poolReserves: {
+          lockedX: 0n,
+          lockedY: 0n,
           protocolFeeX: 0n,
           protocolFeeY: 0n,
           reserveX: 0n,

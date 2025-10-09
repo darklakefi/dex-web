@@ -23,7 +23,6 @@ export function NoResultFound({
   handleSelect,
   allowUnknownTokens = false,
 }: NoResultFoundProps) {
-  // Only query if the search is a valid Solana address and unknown tokens are allowed
   const shouldQueryOwner = allowUnknownTokens && isValidSolanaAddress(search);
 
   const { data: tokenOwner } = useQuery({

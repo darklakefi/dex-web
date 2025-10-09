@@ -26,12 +26,9 @@ export function useLiquidityTransactionCore({
   const [state, send] = useMachine(
     liquidityMachine.provide({
       actions: {
-        // Provide form reset action at runtime
         resetForm: () => resetForm?.(),
       },
       actors: {
-        // The machine actor invokes the mutation via submitTransaction
-        // This keeps the workflow logic self-contained in the machine definition
         submitLiquidity: fromPromise(async ({ input }) => {
           await submitTransaction({ values: input });
           return { result: "submitted" };
@@ -40,7 +37,6 @@ export function useLiquidityTransactionCore({
     }),
   );
 
-  // Derived state selectors
   const isSubmitting = state.matches("submitting");
   const isSuccess = state.matches("success");
   const isError = state.matches("error");

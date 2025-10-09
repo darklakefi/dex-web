@@ -57,15 +57,11 @@ function TokenListComponent({ tokens, onSelect, title }: TokenListProps) {
   );
 }
 
-// Memoize the component to prevent unnecessary re-renders
-// Only re-render if tokens array reference, onSelect callback, or title changes
 export const TokenList = memo(TokenListComponent, (prevProps, nextProps) => {
-  // Custom comparison function for better performance
   if (prevProps.title !== nextProps.title) return false;
   if (prevProps.onSelect !== nextProps.onSelect) return false;
   if (prevProps.tokens.length !== nextProps.tokens.length) return false;
 
-  // Check if token addresses are the same (shallow comparison)
   for (let i = 0; i < prevProps.tokens.length; i++) {
     if (prevProps.tokens[i]!.address !== nextProps.tokens[i]!.address) {
       return false;
