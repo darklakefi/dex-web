@@ -1,17 +1,21 @@
 "use client";
 
-import { ERROR_MESSAGES } from "@dex-web/core";
+import { ERROR_MESSAGES, useTransactionToasts } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
 import type { TokenOrderContext } from "@dex-web/utils";
 import { parseAmount } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useRef } from "react";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import {
   useWalletAdapter,
   useWalletPublicKey,
 } from "../../../../hooks/useWalletCache";
+import { useReferralCode } from "../../../_components/ReferralCodeProvider";
 import { generateTrackingId } from "../../../_utils/generateTrackingId";
+import { isSquadsX } from "../../../_utils/isSquadsX";
+import { dismissToast, toast } from "../../../_utils/toast";
 import type {
   LiquidityFormValues,
   PoolDetails,
@@ -22,11 +26,6 @@ import {
   trackLiquidityError,
   trackSigned,
 } from "../_utils/liquidityTransactionAnalytics";
-import {
-  showErrorToast,
-  showInfoToast,
-  showStepToast,
-} from "../_utils/liquidityTransactionToasts";
 import { requestLiquidityTransactionSigning } from "../_utils/requestLiquidityTransactionSigning";
 import {
   buildRequestPayload,
@@ -56,11 +55,30 @@ export function useLiquidityTransaction({
   const { data: walletAdapter } = useWalletAdapter();
   const { data: walletPublicKey } = useWalletPublicKey();
   const { trackLiquidity, trackError } = useAnalytics();
+  const { incomingReferralCode } = useReferralCode();
+  const t = useTranslations("liquidity");
 
   const { addLiquidityMutation, invalidateQueries } =
     useLiquidityTransactionQueries();
 
   const lastSubmittedValuesRef = useRef<LiquidityFormValues | null>(null);
+
+  const toasts = useTransactionToasts({
+    customMessages: {
+      squadsXFailure: {
+        description: t("squadsX.responseStatus.failed.description"),
+        title: t("squadsX.responseStatus.failed.title"),
+      },
+      squadsXSuccess: {
+        description: t("squadsX.responseStatus.confirmed.description"),
+        title: t("squadsX.responseStatus.confirmed.title"),
+      },
+    },
+    dismissToast,
+    isSquadsX: isSquadsX(walletAdapter?.wallet),
+    toast,
+    transactionType: "LIQUIDITY",
+  });
 
   const submitTransaction = useCallback(
     async ({ values }: { values: LiquidityFormValues }) => {
@@ -81,7 +99,7 @@ export function useLiquidityTransaction({
           validationError instanceof Error
             ? validationError.message
             : String(validationError);
-        showErrorToast({ message: errorMessage });
+        toasts.showErrorToast(errorMessage);
         throw validationError;
       }
 
@@ -93,7 +111,7 @@ export function useLiquidityTransaction({
         throw new Error("Pool data is required");
       }
 
-      showStepToast(1);
+      toasts.showStepToast(1);
 
       const tokenAAmount = parseAmount(values.tokenAAmount);
       const tokenBAmount = parseAmount(values.tokenBAmount);
@@ -145,6 +163,7 @@ export function useLiquidityTransaction({
           currentPoolData: updatedPoolData,
           effectivePublicKey,
           orderContext,
+          refCode: incomingReferralCode || "",
           tokenAMeta,
           tokenBMeta,
           trimmedTokenAAddress,
@@ -164,6 +183,8 @@ export function useLiquidityTransaction({
           });
           await requestLiquidityTransactionSigning({
             onSuccess: async () => {
+              toasts.showSuccessToast();
+
               if (poolDetails && walletPublicKey) {
                 await invalidateQueries(walletPublicKey, poolDetails);
               }
@@ -179,10 +200,12 @@ export function useLiquidityTransaction({
             publicKey: effectivePublicKey,
             setLiquidityStep: () => {},
             signTransaction,
+            toasts,
             tokenXMint: requestPayload.tokenMintX,
             tokenYMint: requestPayload.tokenMintY,
             trackingId: newTrackingId,
             unsignedTransaction: response.unsignedTransaction,
+            wallet: walletAdapter?.wallet,
           });
         } else {
           throw new Error("Failed to create liquidity transaction");
@@ -199,15 +222,9 @@ export function useLiquidityTransaction({
         });
 
         if (errorInfo.isWarning) {
-          showInfoToast({
-            context: errorInfo.context,
-            message: errorInfo.message,
-          });
+          toasts.showWarningToast(errorInfo.message, errorInfo.context);
         } else {
-          showErrorToast({
-            context: errorInfo.context,
-            message: errorInfo.message,
-          });
+          toasts.showErrorToast(errorInfo.message, errorInfo.context);
         }
 
         trackLiquidityError(trackError, error, {
@@ -234,6 +251,8 @@ export function useLiquidityTransaction({
       trackError,
       signTransaction,
       orderContext,
+      toasts,
+      incomingReferralCode,
     ],
   );
 

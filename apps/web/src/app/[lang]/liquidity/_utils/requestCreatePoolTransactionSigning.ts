@@ -1,3 +1,5 @@
+import type { UseTransactionToastsReturn } from "@dex-web/core";
+import type { Wallet } from "@solana/wallet-adapter-react";
 import type {
   PublicKey,
   Transaction,
@@ -19,6 +21,8 @@ interface RequestCreatePoolTransactionSigningProps {
   onSuccess: () => void;
   showCreatePoolStepToast: (step: number) => void;
   trackingId: string;
+  wallet?: Wallet | null | undefined;
+  toasts?: UseTransactionToastsReturn;
 }
 
 export async function requestCreatePoolTransactionSigning({
@@ -31,10 +35,12 @@ export async function requestCreatePoolTransactionSigning({
   onSuccess,
   showCreatePoolStepToast,
   trackingId,
+  wallet,
+  toasts,
 }: RequestCreatePoolTransactionSigningProps): Promise<void> {
   const setStepWithToast = (step: number) => {
     setCreateStep(step);
-    if (step > 1) {
+    if (step > 1 && !toasts) {
       showCreatePoolStepToast(step);
     }
   };
@@ -44,11 +50,13 @@ export async function requestCreatePoolTransactionSigning({
     publicKey,
     setStep: setStepWithToast,
     signTransaction,
+    toasts,
     tokenXMint,
     tokenYMint,
     trackingId,
     transactionType: "createPool",
     unsignedTransaction,
     userAddress: publicKey.toBase58(),
+    wallet,
   });
 }

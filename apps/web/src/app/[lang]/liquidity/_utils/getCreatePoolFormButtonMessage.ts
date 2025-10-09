@@ -5,9 +5,9 @@ import { EMPTY_TOKEN } from "../../../_utils/constants";
 
 const BUTTON_MESSAGE = {
   CREATE_POOL: "Create Pool",
-  CREATE_STEP_1: "Preparing pool creation [1/3]",
-  CREATE_STEP_2: "Confirm transaction in your wallet [2/3]",
-  CREATE_STEP_3: "Processing pool creation [3/3]",
+  CREATE_STEP_1: "Preparing pool creation",
+  CREATE_STEP_2: "Confirm transaction in your wallet",
+  CREATE_STEP_3: "Processing pool creation",
   ENTER_AMOUNTS: "Enter token amounts",
   INSUFFICIENT_BALANCE: "Insufficient balance",
   INVALID_PRICE: "Invalid price",

@@ -245,10 +245,10 @@ describe("useTokenOrder - real-world scenarios", () => {
   });
 
   it("maintains stable reference across unrelated re-renders", () => {
-    let _renderCount = 0;
+    let renderCount = 0;
 
-    const _TestComponent = () => {
-      _renderCount++;
+    const TestComponent = () => {
+      renderCount++;
       const context = useTokenOrder();
       return <div>{context?.ui.tokenA}</div>;
     };

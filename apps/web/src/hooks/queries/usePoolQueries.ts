@@ -47,9 +47,12 @@ export function usePoolReserves(
   return useQuery({
     ...tanstackClient.pools.getPoolReserves.queryOptions({
       input: { tokenXMint, tokenYMint },
-      ...options,
     }),
     queryKey: queryKeys.pools.reserves(tokenXMint, tokenYMint),
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 30_000,
+    ...options,
   });
 }
 

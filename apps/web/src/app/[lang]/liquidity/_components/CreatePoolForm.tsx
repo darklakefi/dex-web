@@ -29,6 +29,7 @@ import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
 import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
+import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { WalletButton } from "../../../_components/WalletButton";
@@ -124,6 +125,11 @@ export function CreatePoolForm() {
     tokenAAddress,
     tokenBAddress,
   });
+
+  const { prices: tokenPrices } = useTokenPricesMap([
+    tokenAAddress,
+    tokenBAddress,
+  ]);
 
   const metadata = tokenMetadata as Record<string, Token>;
   const tokenADetails = metadata[tokenXMint];
@@ -295,10 +301,12 @@ export function CreatePoolForm() {
           setCreateStep: createState.setStep,
           showCreatePoolStepToast,
           signTransaction,
+          toasts,
           tokenXMint: tokenXAddress,
           tokenYMint: tokenYAddress,
           trackingId: newTrackingId,
           unsignedTransaction: response.transaction,
+          wallet,
         });
       } else {
         throw new Error("Failed to create pool transaction");
@@ -309,55 +317,6 @@ export function CreatePoolForm() {
         error instanceof Error ? error.message : "Unknown error occurred",
       );
       createState.reset();
-    }
-  };
-
-  const handleInitialPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const price = e.target.value;
-    const tokenBAmount = form.state.values.tokenBAmount.replace(/,/g, "");
-    if (
-      price &&
-      tokenBAmount &&
-      BigNumber(price).gt(0) &&
-      BigNumber(tokenBAmount).gt(0)
-    ) {
-      let calculatedTokenA: string;
-
-      if (initialPriceTokenOrder === "ab") {
-        calculatedTokenA = BigNumber(tokenBAmount)
-          .multipliedBy(price)
-          .toString();
-      } else {
-        calculatedTokenA = BigNumber(tokenBAmount).dividedBy(price).toString();
-      }
-
-      form.setFieldValue("tokenAAmount", calculatedTokenA);
-    }
-  };
-
-  const handleAmountChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: "buy" | "sell",
-  ) => {
-    const value = e.target.value.replace(/,/g, "");
-    const price = form.state.values.initialPrice || "1";
-
-    if (type === "sell") {
-      if (BigNumber(value).gt(0) && BigNumber(price).gt(0)) {
-        const calculatedTokenA =
-          initialPriceTokenOrder === "ab"
-            ? BigNumber(value).multipliedBy(price).toString()
-            : BigNumber(value).dividedBy(price).toString();
-        form.setFieldValue("tokenAAmount", calculatedTokenA);
-      }
-    } else {
-      if (BigNumber(value).gt(0) && BigNumber(price).gt(0)) {
-        const calculatedTokenB =
-          initialPriceTokenOrder === "ab"
-            ? BigNumber(value).dividedBy(price).toString()
-            : BigNumber(value).multipliedBy(price).toString();
-        form.setFieldValue("tokenBAmount", calculatedTokenB);
-      }
     }
   };
 
@@ -396,6 +355,23 @@ export function CreatePoolForm() {
               <SelectTokenButton returnUrl="liquidity" type="sell" />
             </div>
             <form.Field
+              listeners={{
+                onChange: ({ value, fieldApi }) => {
+                  const cleanValue = value.replace(/,/g, "");
+                  const price = fieldApi.form.state.values.initialPrice || "1";
+
+                  if (BigNumber(cleanValue).gt(0) && BigNumber(price).gt(0)) {
+                    const calculatedTokenA =
+                      initialPriceTokenOrder === "ab"
+                        ? BigNumber(cleanValue).multipliedBy(price).toString()
+                        : BigNumber(cleanValue).dividedBy(price).toString();
+                    fieldApi.form.setFieldValue(
+                      "tokenAAmount",
+                      calculatedTokenA,
+                    );
+                  }
+                },
+              }}
               name="tokenBAmount"
               validators={{
                 onChange: ({ value }) => {
@@ -404,7 +380,6 @@ export function CreatePoolForm() {
                     tokenAccount: sellTokenAccount?.tokenAccounts[0],
                   });
                 },
-                onChangeListenTo: ["tokenAAmount"],
               }}
             >
               {(field) => (
@@ -413,10 +388,10 @@ export function CreatePoolForm() {
                   name={field.name}
                   onBlur={field.handleBlur}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "sell");
                     field.handleChange(e.target.value);
                   }}
                   tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                  tokenPrice={tokenBAddress ? tokenPrices[tokenBAddress] : null}
                   value={field.state.value}
                 />
               )}
@@ -440,6 +415,23 @@ export function CreatePoolForm() {
               <SelectTokenButton returnUrl="liquidity" type="buy" />
             </div>
             <form.Field
+              listeners={{
+                onChange: ({ value, fieldApi }) => {
+                  const cleanValue = value.replace(/,/g, "");
+                  const price = fieldApi.form.state.values.initialPrice || "1";
+
+                  if (BigNumber(cleanValue).gt(0) && BigNumber(price).gt(0)) {
+                    const calculatedTokenB =
+                      initialPriceTokenOrder === "ab"
+                        ? BigNumber(cleanValue).dividedBy(price).toString()
+                        : BigNumber(cleanValue).multipliedBy(price).toString();
+                    fieldApi.form.setFieldValue(
+                      "tokenBAmount",
+                      calculatedTokenB,
+                    );
+                  }
+                },
+              }}
               name="tokenAAmount"
               validators={{
                 onChange: ({ value }) => {
@@ -448,7 +440,6 @@ export function CreatePoolForm() {
                     tokenAccount: buyTokenAccount?.tokenAccounts[0],
                   });
                 },
-                onChangeListenTo: ["tokenBAmount"],
               }}
             >
               {(field) => (
@@ -457,10 +448,10 @@ export function CreatePoolForm() {
                   name={field.name}
                   onBlur={field.handleBlur}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleAmountChange(e, "buy");
                     field.handleChange(e.target.value);
                   }}
                   tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                  tokenPrice={tokenAAddress ? tokenPrices[tokenAAddress] : null}
                   value={field.state.value}
                 />
               )}
@@ -498,7 +489,38 @@ export function CreatePoolForm() {
                     </Text.Body2>
                   </div>
                 </div>
-                <form.Field name="initialPrice">
+                <form.Field
+                  listeners={{
+                    onChange: ({ value, fieldApi }) => {
+                      const tokenBAmount =
+                        fieldApi.form.state.values.tokenBAmount.replace(
+                          /,/g,
+                          "",
+                        );
+                      if (
+                        value &&
+                        tokenBAmount &&
+                        BigNumber(value).gt(0) &&
+                        BigNumber(tokenBAmount).gt(0)
+                      ) {
+                        const calculatedTokenA =
+                          initialPriceTokenOrder === "ab"
+                            ? BigNumber(tokenBAmount)
+                                .multipliedBy(value)
+                                .toString()
+                            : BigNumber(tokenBAmount)
+                                .dividedBy(value)
+                                .toString();
+
+                        fieldApi.form.setFieldValue(
+                          "tokenAAmount",
+                          calculatedTokenA,
+                        );
+                      }
+                    },
+                  }}
+                  name="initialPrice"
+                >
                   {(field) => (
                     <FormFieldset
                       controls={
@@ -514,7 +536,6 @@ export function CreatePoolForm() {
                       name={field.name}
                       onBlur={field.handleBlur}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        handleInitialPriceChange(e);
                         field.handleChange(e.target.value);
                       }}
                       value={field.state.value}

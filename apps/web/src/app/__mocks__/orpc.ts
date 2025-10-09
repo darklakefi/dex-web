@@ -9,6 +9,16 @@ export const mockTanstackClient = {
         lpTokenAmountDisplay: 1000,
         lpTokenDecimals: 9n,
       }),
+      queryOptions: vi.fn(() => ({
+        queryFn: () =>
+          Promise.resolve({
+            lpTokenAmount: 1000000000n,
+            lpTokenAmountDisplay: 1000,
+            lpTokenDecimals: 9n,
+          }),
+        queryKey: ["quoteAddLiquidity"],
+        staleTime: 30000,
+      })),
     },
   },
   liquidity: {

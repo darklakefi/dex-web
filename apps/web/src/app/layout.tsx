@@ -21,7 +21,7 @@ const bitsumishiRegular = localFont({
 
 const classicConsoleNeue = localFont({
   display: "swap",
-  preload: false,
+  preload: true,
   src: "./_fonts/classic-console-neue.woff2",
   style: "normal",
   variable: "--font-classic-console-neue",

@@ -35,6 +35,7 @@ import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
+import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import {
   useWalletAdapter,
   useWalletPublicKey,
@@ -294,6 +295,11 @@ export function SwapForm() {
     tokenBAddress,
   });
 
+  const { prices: tokenPrices } = useTokenPricesMap([
+    tokenAAddress,
+    tokenBAddress,
+  ]);
+
   const [quote, setQuote] = useState<GetQuoteOutput | null>(null);
 
   const isXtoY = poolDetails?.tokenXMint === tokenBAddress;
@@ -446,7 +452,7 @@ export function SwapForm() {
         requestSigning(
           response.unsignedTransaction,
           response.tradeId,
-          response.trackingId,
+          response.trackingId || `swap-${Date.now()}`,
         );
       } else {
         throw new Error("Failed to create swap transaction");
@@ -682,6 +688,9 @@ export function SwapForm() {
                       field.handleChange(e.target.value);
                     }}
                     tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                    tokenPrice={
+                      tokenAAddress ? tokenPrices[tokenAAddress] : null
+                    }
                     value={field.state.value}
                   />
                 )}
@@ -714,6 +723,9 @@ export function SwapForm() {
                       field.handleChange(e.target.value);
                     }}
                     tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                    tokenPrice={
+                      tokenBAddress ? tokenPrices[tokenBAddress] : null
+                    }
                     value={field.state.value}
                   />
                 )}

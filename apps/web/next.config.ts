@@ -8,6 +8,15 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
   experimental: {
+    optimizePackageImports: [
+      "@dex-web/ui",
+      "@dex-web/core",
+      "@solana/wallet-adapter-react",
+      "@solana/web3.js",
+      "@tanstack/react-query",
+      "bignumber.js",
+      "date-fns",
+    ],
     reactCompiler: true,
     webpackBuildWorker: true,
   },
@@ -23,7 +32,6 @@ const nextConfig = {
     remotePatterns: [
       {
         hostname: "raw.githubusercontent.com",
-        pathname: "/solana-labs/token-list/**",
         protocol: "https",
       },
       {
@@ -32,7 +40,6 @@ const nextConfig = {
       },
       {
         hostname: "arweave.net",
-        pathname: "/**",
         protocol: "https",
       },
       {
@@ -41,12 +48,10 @@ const nextConfig = {
       },
       {
         hostname: "ipfs.io",
-        pathname: "/ipfs/**",
         protocol: "https",
       },
       {
         hostname: "shdw-drive.genesysgo.net",
-        pathname: "/**",
         protocol: "https",
       },
       {
@@ -55,6 +60,14 @@ const nextConfig = {
       },
       {
         hostname: "cdn.helius-rpc.com",
+        protocol: "https",
+      },
+      {
+        hostname: "*.amazonaws.com",
+        protocol: "https",
+      },
+      {
+        hostname: "*.cloudfront.net",
         protocol: "https",
       },
     ],

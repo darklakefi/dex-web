@@ -136,6 +136,7 @@ export function buildRequestPayload(params: {
   values: LiquidityFormValues;
   effectivePublicKey: PublicKey;
   orderContext: TokenOrderContext;
+  refCode?: string;
 }): AddLiquidityVariables {
   const { orderContext } = params;
 
@@ -182,7 +183,7 @@ export function buildRequestPayload(params: {
     label: "",
     maxAmountX,
     maxAmountY,
-    refCode: "",
+    refCode: params.refCode || "",
     tokenMintX: protocolAmounts.tokenX,
     tokenMintY: protocolAmounts.tokenY,
     userAddress: params.effectivePublicKey.toBase58(),

@@ -36,13 +36,7 @@ export function TokenSelectorContent({
   if (isInitialLoad) {
     return (
       <>
-        {recentTokens.length > 0 && (
-          <TokenList
-            onSelect={onSelectToken}
-            title="Recently Searches"
-            tokens={recentTokens}
-          />
-        )}
+        {}
         <TokenList
           onSelect={onSelectToken}
           title="tokens by 24h volume"

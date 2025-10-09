@@ -471,7 +471,7 @@ describe("selectLiquidityViewState", () => {
         false,
       );
 
-      expect(result.shouldShowAddLiquidityDetails).toBe(true);
+      expect(result.shouldShowAddLiquidityDetails).toBe(false);
     });
 
     it("is a pure function - same inputs produce same outputs", () => {

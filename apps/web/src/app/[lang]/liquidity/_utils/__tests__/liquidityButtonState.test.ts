@@ -57,7 +57,6 @@ function createButtonStateProps(
     hasAnyAmount: false,
     hasWallet: true,
     isCalculating: false,
-    isError: false,
     isFormSubmitting: false,
     isPoolLoading: false,
     isTokenAccountsLoading: false,
@@ -69,11 +68,6 @@ function createButtonStateProps(
 
 describe("getLiquidityButtonState", () => {
   describe("priority states (checked first)", () => {
-    it("returns ERROR when isError is true", () => {
-      const props = createButtonStateProps({ isError: true });
-      expect(getLiquidityButtonState(props)).toBe("ERROR");
-    });
-
     it("returns SUBMITTING when isFormSubmitting is true", () => {
       const props = createButtonStateProps({ isFormSubmitting: true });
       expect(getLiquidityButtonState(props)).toBe("SUBMITTING");
@@ -192,25 +186,30 @@ describe("getLiquidityButtonState", () => {
       expect(getLiquidityButtonState(props)).toBe("ADD_LIQUIDITY");
     });
 
-    it("returns CALCULATING when has amounts but form cannot submit", () => {
+    it("returns CALCULATING when has amounts, form cannot submit, and is calculating", () => {
       const props = createButtonStateProps({
         formCanSubmit: false,
+        hasWallet: true,
+        isCalculating: true,
         poolDetails: createMockPoolDetails(),
         validation: createMockValidation({ hasAmounts: true }),
       });
       expect(getLiquidityButtonState(props)).toBe("CALCULATING");
     });
+
+    it("returns ENTER_AMOUNT when has amounts but form cannot submit and not calculating", () => {
+      const props = createButtonStateProps({
+        formCanSubmit: false,
+        hasWallet: true,
+        isCalculating: false,
+        poolDetails: createMockPoolDetails(),
+        validation: createMockValidation({ hasAmounts: true }),
+      });
+      expect(getLiquidityButtonState(props)).toBe("ENTER_AMOUNT");
+    });
   });
 
   describe("state priority order", () => {
-    it("ERROR takes priority over SUBMITTING", () => {
-      const props = createButtonStateProps({
-        isError: true,
-        isFormSubmitting: true,
-      });
-      expect(getLiquidityButtonState(props)).toBe("ERROR");
-    });
-
     it("SUBMITTING takes priority over LOADING", () => {
       const props = createButtonStateProps({
         isFormSubmitting: true,
@@ -284,10 +283,6 @@ describe("getButtonMessage", () => {
     expect(getButtonMessage("ENTER_AMOUNTS")).toBe("Enter token amounts");
   });
 
-  it("returns correct message for ERROR", () => {
-    expect(getButtonMessage("ERROR")).toBe("Retry Transaction");
-  });
-
   it("returns correct message for INSUFFICIENT_BALANCE", () => {
     expect(getButtonMessage("INSUFFICIENT_BALANCE")).toBe(
       "Insufficient balance",
@@ -318,7 +313,6 @@ describe("getButtonMessage", () => {
       "DISABLED",
       "ENTER_AMOUNT",
       "ENTER_AMOUNTS",
-      "ERROR",
       "INSUFFICIENT_BALANCE",
       "INVALID_PRICE",
       "LOADING",
@@ -374,10 +368,6 @@ describe("isButtonDisabled", () => {
     expect(isButtonDisabled("CREATE_POOL")).toBe(false);
   });
 
-  it("returns false for ERROR", () => {
-    expect(isButtonDisabled("ERROR")).toBe(false);
-  });
-
   it("returns false for SUBMITTING", () => {
     expect(isButtonDisabled("SUBMITTING")).toBe(false);
   });
@@ -404,10 +394,6 @@ describe("isButtonLoading", () => {
     expect(isButtonLoading("CREATE_POOL")).toBe(false);
   });
 
-  it("returns false for ERROR", () => {
-    expect(isButtonLoading("ERROR")).toBe(false);
-  });
-
   it("returns false for DISABLED", () => {
     expect(isButtonLoading("DISABLED")).toBe(false);
   });
@@ -419,7 +405,6 @@ describe("isButtonLoading", () => {
       "DISABLED",
       "ENTER_AMOUNT",
       "ENTER_AMOUNTS",
-      "ERROR",
       "INSUFFICIENT_BALANCE",
       "INVALID_PRICE",
       "LOADING",
@@ -443,10 +428,6 @@ describe("getButtonSeverity", () => {
 
   it("returns error for INVALID_PRICE", () => {
     expect(getButtonSeverity("INVALID_PRICE")).toBe("error");
-  });
-
-  it("returns error for ERROR", () => {
-    expect(getButtonSeverity("ERROR")).toBe("error");
   });
 
   it("returns info for ENTER_AMOUNTS", () => {
@@ -487,7 +468,6 @@ describe("getButtonSeverity", () => {
         "INSUFFICIENT_BALANCE",
         "SAME_TOKENS",
         "INVALID_PRICE",
-        "ERROR",
       ];
 
       errorStates.forEach((state) => {
@@ -542,11 +522,5 @@ describe("button state helpers integration", () => {
       expect(isButtonLoading(state)).toBe(false);
       expect(getButtonSeverity(state)).toBe("success");
     });
-  });
-
-  it("error states are not loading but not disabled (to allow retry)", () => {
-    expect(isButtonLoading("ERROR")).toBe(false);
-    expect(isButtonDisabled("ERROR")).toBe(false);
-    expect(getButtonSeverity("ERROR")).toBe("error");
   });
 });

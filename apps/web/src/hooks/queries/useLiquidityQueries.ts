@@ -29,9 +29,12 @@ export function useUserLiquidity(
   return useQuery({
     ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
       input: { ownerAddress, tokenXMint, tokenYMint },
-      ...options,
     }),
     queryKey: queryKeys.liquidity.user(ownerAddress, tokenXMint, tokenYMint),
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 30_000,
+    ...options,
   });
 }
 

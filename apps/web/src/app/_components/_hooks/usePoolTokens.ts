@@ -1,6 +1,6 @@
 import { QUERY_CONFIG, tanstackClient, tokenQueryKeys } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas/index";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 /**
@@ -9,12 +9,18 @@ import { useMemo } from "react";
  * This hook:
  * 1. Fetches all pools using getAllPools (suspense)
  * 2. Extracts unique token mint addresses from pools
- * 3. Fetches metadata for those tokens via getTokenMetadataList (regular query, non-blocking)
+ * 3. Fetches metadata for those tokens via getTokenMetadataList (suspense, dependent query)
  * 4. Returns tokens with metadata when available, fallback data otherwise
  *
  * Uses dedicated cache strategy:
  * - Pool list: 2min staleTime (pools change when liquidity added)
  * - Token metadata: 10min staleTime (metadata is stable)
+ *
+ * Implementation pattern (per React Query Suspense docs):
+ * - Both queries use useSuspenseQuery for consistent suspense behavior
+ * - Dependent queries fetch serially with suspense (expected/intended behavior)
+ * - Cannot use `enabled` option with useSuspenseQuery
+ * - Suspense boundary handles loading states
  *
  * @returns Query result with unique tokens from pools
  */
@@ -40,7 +46,7 @@ export function usePoolTokens() {
     return Array.from(addressSet);
   }, [poolsQuery.data.pools]);
 
-  const tokensQuery = useQuery({
+  const tokensQuery = useSuspenseQuery({
     ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
       input: {
         $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
@@ -57,7 +63,6 @@ export function usePoolTokens() {
         }),
       },
     }),
-    enabled: uniqueTokenAddresses.length > 0,
     gcTime: QUERY_CONFIG.poolTokensMetadata.gcTime,
     queryKey: tokenQueryKeys.metadata.poolTokens(),
     retry: QUERY_CONFIG.poolTokensMetadata.retry,
@@ -66,7 +71,7 @@ export function usePoolTokens() {
 
   const tokens: Token[] = useMemo(() => {
     const tokenMetadataMap = new Map(
-      tokensQuery.data?.tokens.map((token) => [token.address, token]) ?? [],
+      tokensQuery.data.tokens.map((token) => [token.address, token]),
     );
 
     const result = uniqueTokenAddresses.map((address) => {
@@ -91,19 +96,13 @@ export function usePoolTokens() {
     });
 
     return result;
-  }, [tokensQuery.data?.tokens, uniqueTokenAddresses]);
+  }, [tokensQuery.data.tokens, uniqueTokenAddresses]);
 
   return {
     data: tokens,
-    error: tokensQuery.error || poolsQuery.error,
-    isError: tokensQuery.isError || poolsQuery.isError,
-    isLoading: tokensQuery.isLoading || poolsQuery.isLoading,
-    isPending: tokensQuery.isPending || poolsQuery.isPending,
-    isSuccess: tokensQuery.isSuccess && poolsQuery.isSuccess,
     refetch: () => {
       poolsQuery.refetch();
       tokensQuery.refetch();
     },
-    status: tokensQuery.status,
   };
 }

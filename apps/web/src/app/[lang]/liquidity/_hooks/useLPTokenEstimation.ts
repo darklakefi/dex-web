@@ -17,9 +17,15 @@
 
 import { tanstackClient } from "@dex-web/orpc";
 import type { TokenOrderContext } from "@dex-web/utils";
-import { toRawUnitsBigNumberAsBigInt, useDebouncedValue } from "@dex-web/utils";
+import { useDebouncedValue } from "@dex-web/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import {
+  convertLPTokenResponse,
+  convertToAtomicAmounts,
+  mapUIToProtocolOrder,
+  shouldEnableQuery,
+} from "../_utils/lpEstimationHelpers";
 import { createLPEstimationQueryKey } from "../_utils/queryKeys";
 
 export interface UseLPTokenEstimationParams {
@@ -50,6 +56,9 @@ export interface UseLPTokenEstimationParams {
 
   /**
    * Slippage tolerance as percentage string (e.g., "0.5" for 0.5%)
+   * Note: This is currently not used in the estimation query to avoid backend
+   * math overflow errors. The quote API always uses 0 slippage for estimation.
+   * Slippage is applied during the actual transaction via max_amount_x/y.
    */
   slippage: string;
 
@@ -148,121 +157,82 @@ export function useLPTokenEstimation({
   tokenBAmount,
   tokenADecimals,
   tokenBDecimals,
-  slippage,
+  slippage: _slippage,
   enabled = true,
 }: UseLPTokenEstimationParams): UseLPTokenEstimationResult {
   const debouncedTokenAAmount = useDebouncedValue(tokenAAmount, 500);
   const debouncedTokenBAmount = useDebouncedValue(tokenBAmount, 500);
-  const debouncedSlippage = useDebouncedValue(slippage, 500);
 
   const { tokenXAmount, tokenYAmount, tokenXDecimals, tokenYDecimals } =
-    useMemo(() => {
-      if (!orderContext) {
-        return {
-          tokenXAmount: "0",
-          tokenXDecimals: 0,
-          tokenYAmount: "0",
-          tokenYDecimals: 0,
-        };
-      }
+    useMemo(
+      () =>
+        mapUIToProtocolOrder(
+          orderContext,
+          debouncedTokenAAmount,
+          debouncedTokenBAmount,
+          tokenADecimals,
+          tokenBDecimals,
+        ),
+      [
+        orderContext,
+        debouncedTokenAAmount,
+        debouncedTokenBAmount,
+        tokenADecimals,
+        tokenBDecimals,
+      ],
+    );
 
-      const isTokenAIsX = orderContext.mapping.tokenAIsX;
-
-      return {
-        tokenXAmount: isTokenAIsX
-          ? debouncedTokenAAmount
-          : debouncedTokenBAmount,
-        tokenXDecimals: isTokenAIsX ? tokenADecimals : tokenBDecimals,
-        tokenYAmount: isTokenAIsX
-          ? debouncedTokenBAmount
-          : debouncedTokenAAmount,
-        tokenYDecimals: isTokenAIsX ? tokenBDecimals : tokenADecimals,
-      };
-    }, [
-      orderContext,
-      debouncedTokenAAmount,
-      debouncedTokenBAmount,
-      tokenADecimals,
-      tokenBDecimals,
-    ]);
-
-  const atomicAmounts = useMemo(() => {
-    try {
-      const tokenXAtomicAmount = toRawUnitsBigNumberAsBigInt(
-        Number.parseFloat(tokenXAmount) || 0,
+  const atomicAmounts = useMemo(
+    () =>
+      convertToAtomicAmounts(
+        tokenXAmount,
+        tokenYAmount,
         tokenXDecimals,
-      );
-      const tokenYAtomicAmount = toRawUnitsBigNumberAsBigInt(
-        Number.parseFloat(tokenYAmount) || 0,
         tokenYDecimals,
-      );
+      ),
+    [tokenXAmount, tokenYAmount, tokenXDecimals, tokenYDecimals],
+  );
 
-      const slippageNum = Number.parseFloat(debouncedSlippage) || 0;
-      const slippageBasisPoints = Math.round(slippageNum * 100);
-
-      return {
-        slippageAtomic: BigInt(slippageBasisPoints),
-        tokenXAtomicAmount,
-        tokenYAtomicAmount,
-      };
-    } catch {
-      return {
-        slippageAtomic: 0n,
-        tokenXAtomicAmount: 0n,
-        tokenYAtomicAmount: 0n,
-      };
-    }
-  }, [
-    tokenXAmount,
-    tokenYAmount,
-    tokenXDecimals,
-    tokenYDecimals,
-    debouncedSlippage,
-  ]);
-
-  const isQueryEnabled = useMemo(() => {
-    if (!enabled || !orderContext) return false;
-
-    const tokenXNum = Number.parseFloat(tokenXAmount);
-    const tokenYNum = Number.parseFloat(tokenYAmount);
-
-    const hasValidAmounts =
-      !Number.isNaN(tokenXNum) &&
-      !Number.isNaN(tokenYNum) &&
-      tokenXNum > 0 &&
-      tokenYNum > 0;
-
-    return hasValidAmounts;
-  }, [enabled, orderContext, tokenXAmount, tokenYAmount]);
+  const isQueryEnabled = useMemo(
+    () =>
+      shouldEnableQuery(
+        enabled,
+        orderContext,
+        tokenXAmount,
+        tokenYAmount,
+        atomicAmounts.tokenXAtomicAmount,
+        atomicAmounts.tokenYAtomicAmount,
+      ),
+    [
+      enabled,
+      orderContext,
+      tokenXAmount,
+      tokenYAmount,
+      atomicAmounts.tokenXAtomicAmount,
+      atomicAmounts.tokenYAtomicAmount,
+    ],
+  );
 
   const queryKey = createLPEstimationQueryKey(
     orderContext,
     tokenXAmount,
     tokenYAmount,
-    debouncedSlippage,
   );
 
   const query = useQuery({
+    ...tanstackClient.dexGateway.quoteAddLiquidity.queryOptions({
+      input: {
+        $typeName: "darklake.v1.QuoteAddLiquidityRequest",
+        slippageTolerance: atomicAmounts.slippageAtomic,
+        tokenMintX: orderContext?.protocol.tokenX ?? "",
+        tokenMintY: orderContext?.protocol.tokenY ?? "",
+        tokenXAmount: atomicAmounts.tokenXAtomicAmount,
+        tokenYAmount: atomicAmounts.tokenYAtomicAmount,
+      },
+    }),
     enabled: isQueryEnabled,
     gcTime: 120_000,
-    queryFn: async () => {
-      if (!orderContext) {
-        throw new Error("Token order context is required");
-      }
-
-      const response = await tanstackClient.dexGateway.quoteAddLiquidity.query({
-        input: {
-          $typeName: "darklake.v1.QuoteAddLiquidityRequest",
-          slippageTolerance: atomicAmounts.slippageAtomic,
-          tokenMintX: orderContext.protocol.tokenX,
-          tokenMintY: orderContext.protocol.tokenY,
-          tokenXAmount: atomicAmounts.tokenXAtomicAmount,
-          tokenYAmount: atomicAmounts.tokenYAtomicAmount,
-        },
-      });
-
-      return response;
-    },
+    placeholderData: (previousData) => previousData,
     queryKey,
     retry: 1,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
@@ -272,19 +242,10 @@ export function useLPTokenEstimation({
   const data: LPEstimationData | undefined = useMemo(() => {
     if (!query.data) return undefined;
 
-    const lpTokenDecimals = Number(query.data.lpTokenDecimals);
-    const lpTokenAmountRaw = query.data.lpTokenAmount;
-
-    const estimatedLPTokens = (
-      Number(lpTokenAmountRaw) /
-      10 ** lpTokenDecimals
-    ).toString();
-
-    return {
-      estimatedLPTokens,
-      lpTokenAmountRaw,
-      lpTokenDecimals,
-    };
+    return convertLPTokenResponse(
+      query.data.lpTokenAmount,
+      query.data.lpTokenDecimals,
+    );
   }, [query.data]);
 
   return {
@@ -292,6 +253,6 @@ export function useLPTokenEstimation({
     error: query.error,
     isEnabled: isQueryEnabled,
     isError: query.isError,
-    isLoading: query.isLoading || query.isFetching,
+    isLoading: query.isLoading,
   };
 }

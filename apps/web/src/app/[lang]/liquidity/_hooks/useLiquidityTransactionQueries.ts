@@ -11,7 +11,7 @@ export function useLiquidityTransactionQueries() {
 
   const invalidateQueries = useCallback(
     async (walletPublicKey: PublicKey, poolDetails: PoolDetails) => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       await queryClient.invalidateQueries({
         queryKey: queryKeys.liquidity.user(

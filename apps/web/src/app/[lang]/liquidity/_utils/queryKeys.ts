@@ -65,12 +65,13 @@ export function createPoolQueryKey(
 /**
  * Creates a standardized query key for LP token estimation.
  *
- * Includes amounts and slippage in the key since estimation varies with these.
+ * Includes amounts in the key since estimation varies with these.
+ * Note: Slippage is not included as the quote API uses 0 slippage for estimation
+ * to avoid backend math overflow errors. Actual slippage is applied during transaction execution.
  *
  * @param orderContext - Token order context
  * @param amountX - Amount of token X (in protocol order)
  * @param amountY - Amount of token Y (in protocol order)
- * @param slippage - Slippage percentage
  * @returns Tuple for React Query queryKey
  *
  * @example
@@ -82,8 +83,7 @@ export function createPoolQueryKey(
  *   queryKey: createLPEstimationQueryKey(
  *     orderContext,
  *     protocolAmounts.amountX,
- *     protocolAmounts.amountY,
- *     slippage
+ *     protocolAmounts.amountY
  *   ),
  *   queryFn: () => estimateLP(...),
  * });
@@ -93,17 +93,9 @@ export function createLPEstimationQueryKey(
   orderContext: TokenOrderContext | null,
   amountX: string | number,
   amountY: string | number,
-  slippage: string | number,
-): readonly [
-  string,
-  string,
-  string,
-  string | number,
-  string | number,
-  string | number,
-] {
+): readonly [string, string, string, string | number, string | number] {
   if (!orderContext) {
-    return ["lp-estimation", "", "", 0, 0, 0] as const;
+    return ["lp-estimation", "", "", 0, 0] as const;
   }
 
   return [
@@ -112,7 +104,6 @@ export function createLPEstimationQueryKey(
     orderContext.protocol.tokenY,
     amountX,
     amountY,
-    slippage,
   ] as const;
 }
 

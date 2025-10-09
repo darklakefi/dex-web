@@ -1,13 +1,14 @@
 "use client";
 
+import type { GetTokenPriceOutput } from "@dex-web/orpc/schemas/index";
 import { Box, Icon, Text } from "@dex-web/ui";
 import {
-  convertToDecimal,
   formatAmountInput,
   parseAmountBigNumber,
   validateHasSufficientBalance,
 } from "@dex-web/utils";
 import { Field } from "@tanstack/react-form";
+import { useRef } from "react";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { SkeletonTokenInput } from "../../../_components/SkeletonTokenInput";
@@ -29,14 +30,16 @@ interface LiquidityTokenInputsProps {
   tokenAAddress: string | null;
   tokenBAddress: string | null;
   poolDetails: PoolDetails | null;
-  isDisabled?: boolean;
-  onSubmit?: () => void;
   calculateProportionalAmount: (params: {
     inputAmount: string;
     editedToken: "tokenA" | "tokenB";
     tokenAAddress: string;
     tokenBAddress: string;
   }) => number | null;
+  /**
+   * Token prices to avoid suspense waterfall in FormFieldset
+   */
+  tokenPrices?: Record<string, GetTokenPriceOutput | undefined>;
 }
 
 export function LiquidityTokenInputs({
@@ -50,100 +53,10 @@ export function LiquidityTokenInputs({
   tokenAAddress: _tokenAAddress,
   tokenBAddress: _tokenBAddress,
   poolDetails,
-  onSubmit: _onSubmit,
   calculateProportionalAmount,
+  tokenPrices = {},
 }: LiquidityTokenInputsProps) {
-  const handleHalfMaxClick = (
-    type: "half" | "max",
-    tokenType: "tokenA" | "tokenB",
-  ) => {
-    const currentTokenAccount =
-      tokenType === "tokenA" ? buyTokenAccount : sellTokenAccount;
-
-    if (!currentTokenAccount?.tokenAccounts?.[0]) return;
-    if (!_tokenAAddress || !_tokenBAddress) return;
-
-    const currentAmount = currentTokenAccount.tokenAccounts[0].amount;
-    const currentDecimals = currentTokenAccount.tokenAccounts[0].decimals;
-
-    const currentValue =
-      type === "half"
-        ? convertToDecimal(currentAmount, currentDecimals)
-            .div(2)
-            .toFixed(MAX_DECIMALS)
-            .toString()
-        : convertToDecimal(currentAmount, currentDecimals)
-            .toFixed(MAX_DECIMALS)
-            .toString();
-
-    if (poolDetails && parseAmountBigNumber(currentValue).gt(0)) {
-      const currentFieldName =
-        tokenType === "tokenA"
-          ? FORM_FIELD_NAMES.TOKEN_A_AMOUNT
-          : FORM_FIELD_NAMES.TOKEN_B_AMOUNT;
-
-      form.setFieldValue(currentFieldName, currentValue);
-
-      const output = calculateProportionalAmount({
-        editedToken: tokenType,
-        inputAmount: currentValue,
-        tokenAAddress: _tokenAAddress,
-        tokenBAddress: _tokenBAddress,
-      });
-
-      if (output != null) {
-        const targetField =
-          tokenType === "tokenA"
-            ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
-            : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
-        form.setFieldValue(targetField, String(output));
-        form.validateAllFields("change");
-      }
-    }
-  };
-
-  const handleAmountChange = (
-    value: string,
-    tokenType: "tokenA" | "tokenB",
-  ) => {
-    const formattedValue = formatAmountInput(value);
-
-    if (
-      poolDetails &&
-      parseAmountBigNumber(formattedValue).gt(0) &&
-      _tokenAAddress &&
-      _tokenBAddress
-    ) {
-      const output = calculateProportionalAmount({
-        editedToken: tokenType,
-        inputAmount: formattedValue,
-        tokenAAddress: _tokenAAddress,
-        tokenBAddress: _tokenBAddress,
-      });
-
-      if (output != null) {
-        const targetField =
-          tokenType === "tokenA"
-            ? FORM_FIELD_NAMES.TOKEN_B_AMOUNT
-            : FORM_FIELD_NAMES.TOKEN_A_AMOUNT;
-        form.setFieldValue(targetField, String(output));
-        form.validateAllFields("change");
-      }
-    } else if (!poolDetails) {
-      if (tokenType === "tokenA") {
-        const price = form.state.values.initialPrice || DEFAULT_PRICE;
-        if (
-          parseAmountBigNumber(formattedValue).gt(0) &&
-          parseAmountBigNumber(price).gt(0)
-        ) {
-          const calculatedTokenB = parseAmountBigNumber(formattedValue)
-            .multipliedBy(price)
-            .toString();
-          form.setFieldValue(FORM_FIELD_NAMES.TOKEN_B_AMOUNT, calculatedTokenB);
-        }
-      }
-    }
-  };
+  const isUpdatingRef = useRef(false);
 
   return (
     <fieldset
@@ -170,6 +83,51 @@ export function LiquidityTokenInputs({
           </div>
           <Field
             form={form}
+            listeners={{
+              onChange: ({ value, fieldApi }) => {
+                if (typeof value !== "string") return;
+
+                if (isUpdatingRef.current) return;
+
+                const formattedValue = formatAmountInput(value);
+
+                if (
+                  poolDetails &&
+                  parseAmountBigNumber(formattedValue).gt(0) &&
+                  _tokenAAddress &&
+                  _tokenBAddress
+                ) {
+                  const output = calculateProportionalAmount({
+                    editedToken: "tokenB",
+                    inputAmount: formattedValue,
+                    tokenAAddress: _tokenAAddress,
+                    tokenBAddress: _tokenBAddress,
+                  });
+
+                  if (output != null) {
+                    const targetDecimals =
+                      buyTokenAccount?.tokenAccounts?.[0]?.decimals ??
+                      MAX_DECIMALS;
+                    const preciseDecimals = Math.min(
+                      targetDecimals,
+                      MAX_DECIMALS,
+                    );
+
+                    let finalOutput = output.toFixed(preciseDecimals);
+                    finalOutput = finalOutput.replace(/\.?0+$/, "");
+
+                    isUpdatingRef.current = true;
+                    fieldApi.form.setFieldValue(
+                      FORM_FIELD_NAMES.TOKEN_A_AMOUNT,
+                      finalOutput,
+                    );
+                    Promise.resolve().then(() => {
+                      isUpdatingRef.current = false;
+                    });
+                  }
+                }
+              },
+            }}
             name={FORM_FIELD_NAMES.TOKEN_B_AMOUNT}
             validators={{
               onChange: ({ value }: { value: unknown }) => {
@@ -188,7 +146,6 @@ export function LiquidityTokenInputs({
 
                 return undefined;
               },
-              onChangeListenTo: [FORM_FIELD_NAMES.TOKEN_A_AMOUNT],
             }}
           >
             {(field) => (
@@ -205,11 +162,8 @@ export function LiquidityTokenInputs({
                 name={field.name}
                 onBlur={field.handleBlur}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const value = e.target.value;
-                  handleAmountChange(value, "tokenB");
-                  field.handleChange(value);
+                  field.handleChange(e.target.value);
                 }}
-                onHalfMaxClick={(type) => handleHalfMaxClick(type, "tokenB")}
                 tokenAccount={
                   sellTokenAccount?.tokenAccounts?.[0]
                     ? {
@@ -218,6 +172,9 @@ export function LiquidityTokenInputs({
                           sellTokenAccount.tokenAccounts[0].address || "",
                       }
                     : undefined
+                }
+                tokenPrice={
+                  _tokenBAddress ? tokenPrices[_tokenBAddress] : undefined
                 }
                 value={
                   typeof field.state.value === "string" ? field.state.value : ""
@@ -258,6 +215,73 @@ export function LiquidityTokenInputs({
           </div>
           <Field
             form={form}
+            listeners={{
+              onChange: ({ value, fieldApi }) => {
+                if (typeof value !== "string") return;
+
+                if (isUpdatingRef.current) return;
+
+                const formattedValue = formatAmountInput(value);
+
+                if (
+                  poolDetails &&
+                  parseAmountBigNumber(formattedValue).gt(0) &&
+                  _tokenAAddress &&
+                  _tokenBAddress
+                ) {
+                  const output = calculateProportionalAmount({
+                    editedToken: "tokenA",
+                    inputAmount: formattedValue,
+                    tokenAAddress: _tokenAAddress,
+                    tokenBAddress: _tokenBAddress,
+                  });
+
+                  if (output != null) {
+                    const targetDecimals =
+                      sellTokenAccount?.tokenAccounts?.[0]?.decimals ??
+                      MAX_DECIMALS;
+                    const preciseDecimals = Math.min(
+                      targetDecimals,
+                      MAX_DECIMALS,
+                    );
+
+                    let finalOutput = output.toFixed(preciseDecimals);
+                    finalOutput = finalOutput.replace(/\.?0+$/, "");
+
+                    isUpdatingRef.current = true;
+                    fieldApi.form.setFieldValue(
+                      FORM_FIELD_NAMES.TOKEN_B_AMOUNT,
+                      finalOutput,
+                    );
+                    Promise.resolve().then(() => {
+                      isUpdatingRef.current = false;
+                    });
+                  }
+                } else if (
+                  !poolDetails &&
+                  parseAmountBigNumber(formattedValue).gt(0)
+                ) {
+                  const price =
+                    fieldApi.form.state.values.initialPrice || DEFAULT_PRICE;
+                  if (parseAmountBigNumber(price).gt(0)) {
+                    const calculatedTokenB = parseAmountBigNumber(
+                      formattedValue,
+                    )
+                      .multipliedBy(price)
+                      .toString();
+
+                    isUpdatingRef.current = true;
+                    fieldApi.form.setFieldValue(
+                      FORM_FIELD_NAMES.TOKEN_B_AMOUNT,
+                      calculatedTokenB,
+                    );
+                    Promise.resolve().then(() => {
+                      isUpdatingRef.current = false;
+                    });
+                  }
+                }
+              },
+            }}
             name={FORM_FIELD_NAMES.TOKEN_A_AMOUNT}
             validators={{
               onChange: ({ value }: { value: unknown }) => {
@@ -276,7 +300,6 @@ export function LiquidityTokenInputs({
 
                 return undefined;
               },
-              onChangeListenTo: [FORM_FIELD_NAMES.TOKEN_B_AMOUNT],
             }}
           >
             {(field) => (
@@ -293,11 +316,8 @@ export function LiquidityTokenInputs({
                 name={field.name}
                 onBlur={field.handleBlur}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const value = e.target.value;
-                  handleAmountChange(value, "tokenA");
-                  field.handleChange(value);
+                  field.handleChange(e.target.value);
                 }}
-                onHalfMaxClick={(type) => handleHalfMaxClick(type, "tokenA")}
                 tokenAccount={
                   buyTokenAccount?.tokenAccounts?.[0]
                     ? {
@@ -305,6 +325,9 @@ export function LiquidityTokenInputs({
                         address: buyTokenAccount.tokenAccounts[0].address || "",
                       }
                     : undefined
+                }
+                tokenPrice={
+                  _tokenAAddress ? tokenPrices[_tokenAAddress] : undefined
                 }
                 value={
                   typeof field.state.value === "string" ? field.state.value : ""

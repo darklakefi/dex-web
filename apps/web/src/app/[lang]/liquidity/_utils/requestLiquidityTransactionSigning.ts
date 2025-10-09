@@ -1,3 +1,5 @@
+import type { UseTransactionToastsReturn } from "@dex-web/core";
+import type { Wallet } from "@solana/wallet-adapter-react";
 import type {
   PublicKey,
   Transaction,
@@ -18,6 +20,8 @@ interface RequestLiquidityTransactionSigningProps {
   tokenYMint: string;
   onSuccess: () => void;
   trackingId: string;
+  wallet: Wallet | null | undefined;
+  toasts: UseTransactionToastsReturn;
 }
 
 export async function requestLiquidityTransactionSigning({
@@ -29,17 +33,21 @@ export async function requestLiquidityTransactionSigning({
   tokenYMint,
   onSuccess,
   trackingId,
+  wallet,
+  toasts,
 }: RequestLiquidityTransactionSigningProps): Promise<void> {
   return requestTransactionSigning({
     onSuccess,
     publicKey,
     setStep: setLiquidityStep,
     signTransaction,
+    toasts,
     tokenXMint,
     tokenYMint,
     trackingId,
     transactionType: "addLiquidity",
     unsignedTransaction,
     userAddress: publicKey.toBase58(),
+    wallet,
   });
 }

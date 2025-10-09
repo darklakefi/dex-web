@@ -2,47 +2,18 @@ import {
   getUserFriendlyErrorMessage,
   isWarningMessage,
   signTransactionWithRecovery,
+  type UseTransactionToastsReturn,
 } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
 import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
+import type { Wallet } from "@solana/wallet-adapter-react";
 import type {
   PublicKey,
   Transaction,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { dismissToast, toast } from "./toast";
 
 export type TransactionType = "addLiquidity" | "createPool";
-
-interface TransactionMessages {
-  step2Title?: string;
-  step2Description?: string;
-  step3Title?: string;
-  step3Description?: string;
-  successTitle?: string;
-  successDescription?: string;
-}
-
-const DEFAULT_MESSAGES: Record<TransactionType, TransactionMessages> = {
-  addLiquidity: {
-    step2Description:
-      "Tokens will be secured until slippage verification completes.",
-    step2Title: "Confirm liquidity [2/3]",
-    step3Description: "Submitting liquidity transaction to Solana network.",
-    step3Title: "Confirming transaction [3/3]",
-    successDescription: "Your liquidity has been added to the pool.",
-    successTitle: "CONFIRMED / DEPOSITED LIQUIDITY",
-  },
-  createPool: {
-    step2Description:
-      "Tokens will be secured until slippage verification completes.",
-    step2Title: "Confirm pool creation [2/3]",
-    step3Description: "Submitting pool creation transaction to Solana network.",
-    step3Title: "Confirming transaction [3/3]",
-    successDescription: "Your pool has been created successfully.",
-    successTitle: "CONFIRMED / CREATED POOL",
-  },
-};
 
 interface RequestTransactionSigningParams {
   publicKey: PublicKey;
@@ -58,8 +29,9 @@ interface RequestTransactionSigningParams {
   onSuccess: () => void;
   transactionType: TransactionType;
   setStep?: (step: number) => void;
-  customMessages?: TransactionMessages;
   trackingId?: string;
+  wallet?: Wallet | null | undefined;
+  toasts?: UseTransactionToastsReturn;
 }
 
 export async function requestTransactionSigning({
@@ -70,27 +42,21 @@ export async function requestTransactionSigning({
   tokenYMint,
   userAddress,
   onSuccess,
-  transactionType,
+  transactionType: _transactionType,
   setStep,
-  customMessages,
   trackingId: _trackingId,
+  wallet,
+  toasts,
 }: RequestTransactionSigningParams): Promise<void> {
   try {
     if (!publicKey) throw new Error("Wallet not connected!");
     if (!signTransaction)
       throw new Error("Wallet does not support transaction signing!");
 
-    const messages = {
-      ...DEFAULT_MESSAGES[transactionType],
-      ...customMessages,
-    };
-
     setStep?.(2);
-    toast({
-      description: messages.step2Description ?? "",
-      title: messages.step2Title ?? "Confirm transaction",
-      variant: "loading",
-    });
+    if (toasts) {
+      toasts.showStepToast(2);
+    }
 
     const transaction = deserializeVersionedTransaction(unsignedTransaction);
     const signedTransaction = await signTransactionWithRecovery(
@@ -102,11 +68,9 @@ export async function requestTransactionSigning({
     ).toString("base64");
 
     setStep?.(3);
-    toast({
-      description: messages.step3Description ?? "",
-      title: messages.step3Title ?? "Confirming transaction",
-      variant: "loading",
-    });
+    if (toasts) {
+      toasts.showStepToast(3);
+    }
 
     const response = await client.liquidity.submitAddLiquidity({
       signedTransaction: signedTransactionBase64,
@@ -116,12 +80,6 @@ export async function requestTransactionSigning({
     });
 
     if (response.success) {
-      dismissToast();
-      toast({
-        description: messages.successDescription ?? "",
-        title: messages.successTitle ?? "Success",
-        variant: "success",
-      });
       onSuccess();
     } else {
       const errorMessage = response.error || "Unknown error occurred";
@@ -129,22 +87,22 @@ export async function requestTransactionSigning({
         error: response.error,
         signature: response.signature,
         success: response.success,
-        transactionType,
       });
       throw new Error(`Transaction failed: ${errorMessage}`);
     }
   } catch (error) {
     console.error("Transaction signing error:", error);
-    dismissToast();
 
     const userMessage = getUserFriendlyErrorMessage(error);
     const isWarning = isWarningMessage(error);
 
-    toast({
-      description: userMessage,
-      title: isWarning ? "Transaction Warning" : "FAILED",
-      variant: isWarning ? "warning" : "error",
-    });
+    if (toasts) {
+      if (isWarning) {
+        toasts.showWarningToast(userMessage);
+      } else {
+        toasts.showErrorToast(userMessage);
+      }
+    }
 
     setStep?.(0);
     throw error;

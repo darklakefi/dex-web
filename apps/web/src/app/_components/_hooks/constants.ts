@@ -1,5 +1,5 @@
 /**
- * Token search configuration constants
+ * Token search and prefetch configuration constants
  */
 
 /**
@@ -13,3 +13,14 @@ export const TOKEN_SEARCH_FETCH_SIZE = 10000;
  * Keeps the interface clean and performant.
  */
 export const TOKEN_SEARCH_DISPLAY_SIZE = 8;
+
+/**
+ * Delay before starting prefetch operations (in milliseconds).
+ * Used as fallback when requestIdleCallback is not available.
+ */
+export const PREFETCH_DELAY_MS = 100;
+
+/**
+ * Popular token symbols to prefetch for instant search results.
+ */
+export const POPULAR_TOKEN_SEARCHES = ["SOL", "USDC", "USDT"] as const;

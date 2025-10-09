@@ -31,6 +31,7 @@ export const AppFooter = () => {
             alt="Beta logo"
             className="h-auto w-full object-fill"
             fill
+            sizes="200px"
             src="/images/logo-beta.svg"
           />
         </div>

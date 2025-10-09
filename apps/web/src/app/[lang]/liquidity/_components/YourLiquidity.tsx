@@ -11,10 +11,8 @@ import BigNumber from "bignumber.js";
 import { useState } from "react";
 import { useUserLiquidity } from "../../../../hooks/queries/useLiquidityQueries";
 import { usePoolReserves } from "../../../../hooks/queries/usePoolQueries";
-import {
-  useTokenMetadataSuspense,
-  useTokenPriceSuspense,
-} from "../../../../hooks/queries/useTokenQueries";
+import { useTokenMetadataSuspense } from "../../../../hooks/queries/useTokenQueries";
+import { useTokenPricesBatch } from "../../../../hooks/useTokenPrices";
 import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import {
   DEFAULT_BUY_TOKEN,
@@ -66,8 +64,9 @@ export function YourLiquidity({
       enabled: shouldFetchLiquidity,
     });
 
-  const { data: tokenXPrice } = useTokenPriceSuspense(tokenXAddress);
-  const { data: tokenYPrice } = useTokenPriceSuspense(tokenYAddress);
+  const priceResults = useTokenPricesBatch([tokenXAddress, tokenYAddress]);
+  const tokenXPrice = priceResults[0]?.data;
+  const tokenYPrice = priceResults[1]?.data;
 
   const tokenMetadataMap =
     (tokenMetadata as Record<string, Token | undefined>) ?? {};
@@ -105,10 +104,10 @@ export function YourLiquidity({
     const userTokenYAmount = userLpShare.mul(poolReserves.reserveY).toNumber();
 
     const tokenXValue = BigNumber(userTokenXAmount).multipliedBy(
-      tokenXPrice.price || 0,
+      tokenXPrice?.price || 0,
     );
     const tokenYValue = BigNumber(userTokenYAmount).multipliedBy(
-      tokenYPrice.price || 0,
+      tokenYPrice?.price || 0,
     );
 
     liquidityCalculations = {
@@ -245,8 +244,14 @@ export function YourLiquidity({
         poolReserves={poolReserves}
         tokenXAddress={tokenXAddress}
         tokenXDetails={tokenXDetails}
+        tokenXPrice={
+          tokenXPrice || { mint: tokenXAddress, price: 0, quoteCurrency: "USD" }
+        }
         tokenYAddress={tokenYAddress}
         tokenYDetails={tokenYDetails}
+        tokenYPrice={
+          tokenYPrice || { mint: tokenYAddress, price: 0, quoteCurrency: "USD" }
+        }
         userLiquidity={userLiquidity}
       />
     </div>

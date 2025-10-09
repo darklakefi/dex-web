@@ -8,6 +8,7 @@ import {
 import { Field, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
+import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import {
@@ -23,7 +24,6 @@ import {
   selectLiquidityViewState,
 } from "../_utils/liquiditySelectors";
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
-import { CalculationLoadingIndicator } from "./CalculationLoadingIndicator";
 import { LiquidityActionButton } from "./LiquidityActionButton";
 import { LiquidityErrorBoundary } from "./LiquidityErrorBoundary";
 import {
@@ -45,7 +45,6 @@ export function LiquidityForm() {
     poolDetails,
     tokenAccountsData,
     publicKey,
-    isCalculating,
     isPoolLoading,
     isSubmitting,
     send,
@@ -84,6 +83,11 @@ export function LiquidityForm() {
 
   const orderContext = useTokenOrder();
 
+  const { prices: tokenPrices } = useTokenPricesMap([
+    tokenAAddress,
+    tokenBAddress,
+  ]);
+
   const lpEstimation = useLPTokenEstimation({
     enabled: !!poolDetails && !!orderContext,
     orderContext,
@@ -93,6 +97,8 @@ export function LiquidityForm() {
     tokenBAmount,
     tokenBDecimals,
   });
+
+  const isCalculating = lpEstimation.isLoading;
 
   if (viewState.isInitialLoading) {
     return (
@@ -133,7 +139,6 @@ export function LiquidityForm() {
                   });
                 }}
                 form={form}
-                isDisabled={false}
                 isLoadingBuy={tokenAccountsData.isLoadingBuy}
                 isLoadingSell={tokenAccountsData.isLoadingSell}
                 isRefreshingBuy={tokenAccountsData.isRefreshingBuy}
@@ -142,9 +147,8 @@ export function LiquidityForm() {
                 sellTokenAccount={tokenAccountsData.sellTokenAccount}
                 tokenAAddress={tokenAAddress}
                 tokenBAddress={tokenBAddress}
+                tokenPrices={tokenPrices}
               />
-
-              {isCalculating && <CalculationLoadingIndicator />}
 
               <LiquidityActionButton
                 buyTokenAccount={tokenAccountsData.buyTokenAccount}

@@ -119,10 +119,10 @@ export function LiquidityActionButton({
       "aria-describedby": isDisabled
         ? `${buttonState.toLowerCase()}-help`
         : undefined,
-      "aria-label": _getAriaLabel(buttonState, getButtonMessage(buttonState)),
+      "aria-label": getAriaLabel(buttonState, getButtonMessage(buttonState)),
       isDisabled,
       isLoading,
-      variant: _getButtonVariant(buttonState),
+      variant: getButtonVariant(buttonState),
     };
   };
 
@@ -197,7 +197,7 @@ function isPositiveNumber(value: string): boolean {
   return Number.isFinite(parsed) && parsed > 0;
 }
 
-function _getButtonVariant(
+function getButtonVariant(
   buttonState: ButtonState,
 ): "primary" | "secondary" | "danger" {
   switch (buttonState) {
@@ -212,10 +212,7 @@ function _getButtonVariant(
   }
 }
 
-function _getAriaLabel(
-  buttonState: ButtonState,
-  buttonMessage: string,
-): string {
+function getAriaLabel(buttonState: ButtonState, buttonMessage: string): string {
   const stateDescriptions: Record<ButtonState, string> = {
     ADD_LIQUIDITY: "Add liquidity to existing pool",
     CALCULATING: "Calculating optimal amounts, please wait",

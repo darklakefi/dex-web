@@ -1,4 +1,4 @@
-import { client } from "@dex-web/orpc";
+import { client, tanstackClient, tokenQueryKeys } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import {
@@ -12,12 +12,19 @@ import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
 import { SkeletonForm } from "../../_components/SkeletonForm";
+import { TokenModalPrefetch } from "../../_components/TokenModalPrefetch";
 import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
 import { liquidityPageCache } from "../../_utils/searchParams";
 import { CreatePoolForm } from "./_components/CreatePoolForm";
 import { GlobalLoadingIndicator } from "./_components/GlobalLoadingIndicator";
 import { LiquidityForm } from "./_components/LiquidityForm";
 import { YourLiquidity } from "./_components/YourLiquidity";
+
+export const metadata = {
+  description:
+    "Provide liquidity on Darklake and earn MEV-protected yields. Higher returns through MEV profit recovery.",
+  title: "Liquidity | Darklake",
+};
 
 export default async function Page({
   searchParams,
@@ -33,13 +40,13 @@ export default async function Page({
   const { tokenAAddress, tokenBAddress } = parsedSearchParams;
 
   if (tokenAAddress && tokenBAddress && !isCreatePoolMode) {
-    try {
-      const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
-        tokenAAddress,
-        tokenBAddress,
-      );
+    const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+      tokenAAddress,
+      tokenBAddress,
+    );
 
-      await queryClient.prefetchQuery({
+    await Promise.allSettled([
+      queryClient.prefetchQuery({
         queryFn: async (): Promise<PoolData | null> => {
           const result = await client.pools.getPoolReserves({
             tokenXMint: tokenXAddress,
@@ -53,16 +60,81 @@ export default async function Page({
           return result;
         },
         queryKey: queryKeys.pools.reserves(tokenXAddress, tokenYAddress),
-      });
-    } catch (error) {
-      console.error("Failed to prefetch pool reserves", error);
-    }
+      }),
+
+      queryClient.prefetchQuery(
+        tanstackClient.pools.getPoolDetails.queryOptions({
+          input: {
+            tokenXMint: tokenXAddress,
+            tokenYMint: tokenYAddress,
+          },
+        }),
+      ),
+
+      queryClient.prefetchQuery({
+        ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
+          input: {
+            $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
+            filterBy: {
+              case: "addressesList" as const,
+              value: {
+                $typeName: "darklake.v1.TokenAddressesList" as const,
+                tokenAddresses: [tokenXAddress, tokenYAddress],
+              },
+            },
+            pageNumber: 1,
+            pageSize: 2,
+          },
+        }),
+        gcTime: 30 * 60 * 1000,
+        queryKey: tokenQueryKeys.metadata.byAddresses([
+          tokenXAddress,
+          tokenYAddress,
+        ]),
+        staleTime: 10 * 60 * 1000,
+      }),
+
+      queryClient.prefetchQuery({
+        ...tanstackClient.tokens.getTokenPrice.queryOptions({
+          input: {
+            amount: 1,
+            mint: tokenXAddress,
+            quoteCurrency: "USD",
+          },
+        }),
+        gcTime: 30 * 1000,
+        queryKey: queryKeys.tokens.price(tokenXAddress),
+        staleTime: 5 * 1000,
+      }),
+
+      queryClient.prefetchQuery({
+        ...tanstackClient.tokens.getTokenPrice.queryOptions({
+          input: {
+            amount: 1,
+            mint: tokenYAddress,
+            quoteCurrency: "USD",
+          },
+        }),
+        gcTime: 30 * 1000,
+        queryKey: queryKeys.tokens.price(tokenYAddress),
+        staleTime: 5 * 1000,
+      }),
+
+      queryClient.prefetchQuery(
+        tanstackClient.pools.getPinedPool.queryOptions({}),
+      ),
+    ]);
+  } else if (isCreatePoolMode) {
+    await queryClient.prefetchQuery(
+      tanstackClient.pools.getPinedPool.queryOptions({}),
+    );
   }
 
   const dehydratedState = dehydrate(queryClient);
 
   return (
     <>
+      <TokenModalPrefetch />
       <GlobalLoadingIndicator />
       <div className="flex justify-center gap-12">
         <div className="flex w-full max-w-xl flex-col items-center justify-center">
