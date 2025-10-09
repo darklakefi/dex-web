@@ -41,17 +41,18 @@ export function useLPTokenEstimation({
   const tokenXMint = orderContext?.protocol.tokenX || "";
   const tokenYMint = orderContext?.protocol.tokenY || "";
 
-  const shouldFetch =
+  const shouldFetch = Boolean(
     enabled &&
-    orderContext &&
-    tokenAAddress &&
-    tokenBAddress &&
-    tokenAAmount &&
-    tokenBAmount &&
-    Number(tokenAAmount) > 0 &&
-    Number(tokenBAmount) > 0 &&
-    !Number.isNaN(Number(tokenAAmount)) &&
-    !Number.isNaN(Number(tokenBAmount));
+      orderContext &&
+      tokenAAddress &&
+      tokenBAddress &&
+      tokenAAmount &&
+      tokenBAmount &&
+      Number(tokenAAmount) > 0 &&
+      Number(tokenBAmount) > 0 &&
+      !Number.isNaN(Number(tokenAAmount)) &&
+      !Number.isNaN(Number(tokenBAmount)),
+  );
 
   const protocolAmounts =
     orderContext && shouldFetch
@@ -81,7 +82,7 @@ export function useLPTokenEstimation({
     ...tanstackClient.pools.getLPRate.queryOptions({
       input: queryInput!,
     }),
-    enabled: shouldFetch && queryInput !== null,
+    enabled: Boolean(shouldFetch && queryInput),
     queryKey: [
       "lp-estimation",
       tokenXMint,
@@ -92,8 +93,11 @@ export function useLPTokenEstimation({
     ],
     refetchInterval: 10000,
     select: (data): LPEstimationData => ({
-      estimatedLPTokens: data.estimatedLPTokens,
-      estimatedLPTokensNumber: Number(data.estimatedLPTokens),
+      estimatedLPTokens: (data as { estimatedLPTokens: string })
+        .estimatedLPTokens,
+      estimatedLPTokensNumber: Number(
+        (data as { estimatedLPTokens: string }).estimatedLPTokens,
+      ),
     }),
     staleTime: 5000,
   });

@@ -21,7 +21,7 @@ vi.mock("../../tokens/getTokenMetadata.handler", () => ({
   getTokenMetadataHandler: vi.fn(),
 }));
 vi.mock("@dex-web/utils", () => ({
-  toRawUnits: vi.fn((amount: string, decimals: number) => {
+  toRawUnitsBigNumber: vi.fn((amount: string, decimals: number) => {
     return new BigNumber(amount).multipliedBy(new BigNumber(10).pow(decimals));
   }),
 }));

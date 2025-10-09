@@ -5,7 +5,7 @@ import { calculateLpTokensToReceive } from "./liquidityCalculations";
 import {
   applySlippageToMax,
   parseAmountSafe,
-  toRawUnits,
+  toRawUnitsDecimal,
 } from "./liquidityParsers";
 import {
   type AddLiquidityInput,
@@ -104,7 +104,9 @@ export function transformAddLiquidityInput(
 
   const tokenAAmountDecimal = parseAmountSafe(validated.tokenAAmount);
   const tokenBAmountDecimal = parseAmountSafe(validated.tokenBAmount);
-  const slippagePercent = parseAmountSafe(validated.slippage);
+  const slippagePercent = new Decimal(
+    validated.slippage.replace(/,/g, "").trim(),
+  );
 
   const { amountXDecimal, amountYDecimal, decimalsX, decimalsY } =
     mapTokensToSortedOrder(
@@ -114,8 +116,8 @@ export function transformAddLiquidityInput(
       tokenBAmountDecimal,
     );
 
-  const amountXRaw = toRawUnits(amountXDecimal, decimalsX);
-  const amountYRaw = toRawUnits(amountYDecimal, decimalsY);
+  const amountXRaw = toRawUnitsDecimal(amountXDecimal, decimalsX);
+  const amountYRaw = toRawUnitsDecimal(amountYDecimal, decimalsY);
 
   const lpTokensRaw = calculateLpTokensToReceive({
     amountX: amountXRaw,

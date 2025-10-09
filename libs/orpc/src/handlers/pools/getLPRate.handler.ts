@@ -1,5 +1,5 @@
 "use server";
-import { toRawUnits } from "@dex-web/utils";
+import { toRawUnitsBigNumber } from "@dex-web/utils";
 import { PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import { getHelius } from "../../getHelius";
@@ -89,8 +89,14 @@ export async function getLPRateHandler(
     })) as Record<string, Token>;
     const tokenX = tokenMetadata[tokenXMint];
     const tokenY = tokenMetadata[tokenYMint];
-    const scaledTokenXAmount = toRawUnits(tokenXAmount, tokenX?.decimals ?? 0);
-    const scaledTokenYAmount = toRawUnits(tokenYAmount, tokenY?.decimals ?? 0);
+    const scaledTokenXAmount = toRawUnitsBigNumber(
+      tokenXAmount,
+      tokenX?.decimals ?? 0,
+    );
+    const scaledTokenYAmount = toRawUnitsBigNumber(
+      tokenYAmount,
+      tokenY?.decimals ?? 0,
+    );
 
     const estimatedLP = estimateLPTokens(
       scaledTokenXAmount,

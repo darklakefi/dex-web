@@ -10,8 +10,10 @@ import { client, tanstackClient } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Icon, Modal, Text } from "@dex-web/ui";
 import {
+  calculateWithdrawalDetails,
   convertToDecimal,
   getExplorerUrl,
+  InputType,
   numberFormatHelper,
   truncate,
 } from "@dex-web/utils";
@@ -31,10 +33,6 @@ import {
 } from "../../../_utils/constants";
 import { isSquadsX } from "../../../_utils/isSquadsX";
 import { dismissToast, toast } from "../../../_utils/toast";
-import {
-  calculateWithdrawalDetails,
-  InputType,
-} from "../_utils/calculateWithdrawalDetails";
 
 type WithdrawLiquidityFormSchema = z.infer<typeof withdrawLiquidityFormSchema>;
 
@@ -159,6 +157,8 @@ export function WithdrawLiquidityModal({
     }
 
     const details = calculateWithdrawalDetails({
+      defaultBuyToken: DEFAULT_BUY_TOKEN,
+      defaultSellToken: DEFAULT_SELL_TOKEN,
       inputType: InputType.Percentage,
       poolReserves,
       tokenAAddress: tokenXAddress,
@@ -357,6 +357,8 @@ export function WithdrawLiquidityModal({
       );
 
       const withdrawalDetails = calculateWithdrawalDetails({
+        defaultBuyToken: DEFAULT_BUY_TOKEN,
+        defaultSellToken: DEFAULT_SELL_TOKEN,
         inputType: InputType.Percentage,
         poolReserves,
         tokenAAddress: tokenXAddress,

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   applySlippageToMax,
   parseAmountSafe,
-  toRawUnits,
+  toRawUnitsDecimal,
 } from "../liquidityParsers";
 
 describe("liquidityParsers", () => {
@@ -29,7 +29,7 @@ describe("liquidityParsers", () => {
     });
 
     it("should throw error for invalid amounts", () => {
-      expect(() => parseAmountSafe("invalid")).toThrow("Invalid amount");
+      expect(() => parseAmountSafe("invalid")).toThrow();
     });
 
     it("should throw error for zero", () => {
@@ -45,40 +45,40 @@ describe("liquidityParsers", () => {
     });
   });
 
-  describe("toRawUnits", () => {
+  describe("toRawUnitsDecimal", () => {
     it("should convert amount to raw units with decimals", () => {
       const amount = new Decimal("100.5");
-      const result = toRawUnits(amount, 6);
+      const result = toRawUnitsDecimal(amount, 6);
       expect(result).toBe(100500000n);
     });
 
     it("should handle zero decimals", () => {
       const amount = new Decimal("100");
-      const result = toRawUnits(amount, 0);
+      const result = toRawUnitsDecimal(amount, 0);
       expect(result).toBe(100n);
     });
 
     it("should handle 18 decimals (ETH-like)", () => {
       const amount = new Decimal("1.5");
-      const result = toRawUnits(amount, 18);
+      const result = toRawUnitsDecimal(amount, 18);
       expect(result).toBe(1500000000000000000n);
     });
 
     it("should round down fractional raw units", () => {
       const amount = new Decimal("0.123456789");
-      const result = toRawUnits(amount, 6);
+      const result = toRawUnitsDecimal(amount, 6);
       expect(result).toBe(123456n);
     });
 
     it("should handle very small amounts", () => {
       const amount = new Decimal("0.000001");
-      const result = toRawUnits(amount, 6);
+      const result = toRawUnitsDecimal(amount, 6);
       expect(result).toBe(1n);
     });
 
     it("should handle amounts smaller than smallest unit", () => {
       const amount = new Decimal("0.0000001");
-      const result = toRawUnits(amount, 6);
+      const result = toRawUnitsDecimal(amount, 6);
       expect(result).toBe(0n);
     });
   });

@@ -17,12 +17,14 @@ export function parseAmountSafe(value: string): Decimal {
 }
 
 /**
- * Convert a Decimal amount to raw units (multiplied by 10^decimals).
- * @param amount - The amount in human-readable units
+ * Convert a Decimal amount to raw units using Decimal.js (for client-side liquidity calculations).
+ * Provides high precision with configurable rounding for protocol accuracy.
+ *
+ * @param amount - The amount in human-readable units (Decimal)
  * @param decimals - The number of decimal places for the token
  * @returns Raw units as bigint
  */
-export function toRawUnits(amount: Decimal, decimals: number): bigint {
+export function toRawUnitsDecimal(amount: Decimal, decimals: number): bigint {
   const multiplier = new Decimal(10).pow(decimals);
   const rawAmount = amount.mul(multiplier);
   return BigInt(rawAmount.toFixed(0, Decimal.ROUND_DOWN));

@@ -5,7 +5,6 @@ import { useMachine } from "@xstate/react";
 import { createContext, type ReactNode, useContext } from "react";
 import type { LiquidityMachineEvent } from "../_machines/liquidityMachine";
 import { liquidityMachine } from "../_machines/liquidityMachine";
-import { usePoolData } from "./LiquidityDataProvider";
 
 interface LiquidityStateContextValue {
   state: ReturnType<typeof useMachine>[0];
@@ -28,8 +27,6 @@ interface LiquidityStateProviderProps {
 export function LiquidityStateProvider({
   children,
 }: LiquidityStateProviderProps) {
-  const { poolDetails, tokenAccountsData } = usePoolData();
-
   const [state, send] = useMachine(liquidityMachine);
 
   const value: LiquidityStateContextValue = {

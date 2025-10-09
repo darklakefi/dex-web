@@ -1,8 +1,8 @@
 "use client";
 
+import type { GetPoolReservesOutput } from "@dex-web/orpc";
 import { tanstackClient } from "@dex-web/orpc";
 import { sortSolanaAddresses } from "@dex-web/utils";
-import type { UseQueryOptions } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
 interface UsePoolDataParams {
@@ -15,25 +15,7 @@ interface UsePoolDataParams {
  * Raw pool data returned from the API.
  * This is the base type that features can transform into their own shapes.
  */
-export interface PoolData {
-  exists: boolean;
-  lpMint: string;
-  reserveX: number;
-  reserveXRaw?: number;
-  reserveY: number;
-  reserveYRaw?: number;
-  totalLpSupply: number;
-  totalLpSupplyRaw?: number;
-  tokenXMint: string;
-  tokenYMint: string;
-  lastUpdate: number;
-  totalReserveXRaw?: number;
-  totalReserveYRaw?: number;
-  protocolFeeX?: number;
-  protocolFeeY?: number;
-  userLockedX?: number;
-  userLockedY?: number;
-}
+export type PoolData = GetPoolReservesOutput;
 
 const STALE_TIME_CONFIG = {
   critical: 3_000,
@@ -96,7 +78,7 @@ export function usePoolData<TData = PoolData>(
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     select,
     staleTime: STALE_TIME_CONFIG[priority],
-  } as UseQueryOptions<PoolData, Error, TData>);
+  });
 }
 
 function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {
@@ -107,4 +89,4 @@ function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {
   return `${tokenXAddress}-${tokenYAddress}`;
 }
 
-export type { PoolData, UsePoolDataParams };
+export type { UsePoolDataParams };

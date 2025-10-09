@@ -1,198 +1,186 @@
-# Liquidity Utilities
+# Token Order Management
 
-This directory contains pure, testable utilities for liquidity pool calculations in the DEX application.
+## Overview
+
+This module manages the critical distinction between **UI Order** (how users select tokens) and **Protocol Order** (how Solana sorts tokens).
+
+## The Core Problem
+
+When a user adds liquidity to a pool:
+1. They select Token A and Token B in their preferred order
+2. Solana's protocol requires tokens in a **deterministic sorted order**
+3. We must correctly map between these two representations
+
+## Critical: Solana Buffer Sorting
+
+⚠️ **Solana does NOT use lexicographic string sorting** ⚠️
+
+Solana uses **buffer comparison** of the underlying public key bytes, NOT alphabetical sorting of the base58 string representation.
+
+### Example
+
+```typescript
+// ❌ WRONG: String lexicographic order
+const tokens = ["EPjFW...(USDC)", "So111...(SOL)"].sort();
+// Result: ["EPjFW...", "So111..."]  ← INCORRECT!
+
+// ✅ CORRECT: Solana buffer comparison
+const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
+  "So11111111111111111111111111111111111111112"   // SOL
+);
+// Result: tokenX = SOL, tokenY = USDC  ← CORRECT!
+```
+
+### Real-World Token Sorting
+
+| Token | Address Prefix | String Sort Position | Buffer Sort Position |
+|-------|---------------|---------------------|---------------------|
+| USDC  | `EPjF...`     | 1st (E < S)        | **3rd** ⚠️          |
+| USDT  | `Es9v...`     | 2nd (E < S)        | **2nd** ⚠️          |
+| SOL   | `So11...`     | 3rd (S last)       | **1st** ⚠️          |
 
 ## Architecture
 
-The liquidity module is organized into focused, single-responsibility files:
+### Files
 
-### Core Files
+- **`tokenOrder.ts`** - Pure functions for creating contexts and mapping amounts
+- **`tokenOrderTypes.ts`** - Type definitions using branded types for compile-time safety
+- **`tokenOrder.test.ts`** - Comprehensive test suite (100% coverage)
 
-- **`addLiquidityTransformer.ts`** - Main entry point that orchestrates the transformation of user input into protocol payloads
-- **`liquiditySchemas.ts`** - Zod validation schemas for type-safe input/output
-- **`liquidityParsers.ts`** - Pure parsing functions for amounts and slippage
-- **`liquidityCalculations.ts`** - Core LP token calculation algorithms
-- **`decimalConfig.ts`** - Centralized Decimal.js configuration
-- **`liquidityMath.ts`** - Additional liquidity math utilities
-- **`calculateProportionalAmount.ts`** - Proportional amount calculations for UI
+### Key Functions
 
-### Design Principles
-
-1. **Pure Functions**: All functions are pure with no side effects, making them easy to test and reason about
-2. **Single Responsibility**: Each module has a clear, focused purpose
-3. **Type Safety**: Comprehensive Zod schemas validate all inputs and outputs
-4. **Testability**: Small, focused functions with clear inputs/outputs
-5. **No Console Logging**: Errors are thrown with descriptive messages instead of logging
-
-## Usage
-
-### Basic Usage
+#### `createTokenOrderContext()`
+Creates the single source of truth for token ordering. Call this ONCE per token pair.
 
 ```typescript
-import { transformAddLiquidityInput } from '@dex-web/utils';
-
-const payload = transformAddLiquidityInput({
-  tokenAAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-  tokenAAmount: "100",
-  tokenADecimals: 6,
-  tokenBAddress: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-  tokenBAmount: "200",
-  tokenBDecimals: 6,
-  slippage: "0.5",
-  poolReserves: {
-    reserveX: 1000000000n,
-    reserveY: 2000000000n,
-    totalLpSupply: 1414213562n,
-    protocolFeeX: 0n,
-    protocolFeeY: 0n,
-    userLockedX: 0n,
-    userLockedY: 0n,
-  },
-  userAddress: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
-});
+const context = createTokenOrderContext(userTokenA, userTokenB);
+// context.ui         - User's selection order
+// context.protocol   - Solana's sorted order
+// context.mapping    - How to convert between them
 ```
 
-### Using Individual Utilities
+#### `mapAmountsToProtocol()`
+Converts user input amounts to protocol-ready payload.
 
 ```typescript
-import { parseAmountSafe, toRawUnits, applySlippageToMax } from '@dex-web/utils';
-import { Decimal } from 'decimal.js';
-
-// Parse and validate amounts
-const amount = parseAmountSafe("100.5"); // Decimal(100.5)
-
-// Convert to raw units
-const rawAmount = toRawUnits(amount, 6); // 100500000n
-
-// Apply slippage
-const slippage = new Decimal("0.5");
-const maxAmount = applySlippageToMax(amount, slippage); // Decimal(101.005)
+const protocolPayload = mapAmountsToProtocol(
+  { amountA: "100", amountB: "200", ...uiTokens },
+  context
+);
+// Ready to send to blockchain
 ```
 
-### LP Token Calculations
+#### `mapAmountsToUI()`
+Converts protocol response back to user's original order.
 
 ```typescript
-import { calculateLpTokensToReceive } from '@dex-web/utils';
-
-// For existing pools
-const lpTokens = calculateLpTokensToReceive({
-  amountX: 100000000n,
-  amountY: 200000000n,
-  availableReserveX: 1000000000n,
-  availableReserveY: 2000000000n,
-  totalLpSupply: 1414213562n,
-});
-
-// For new pools (returns sqrt(x * y))
-const newPoolLpTokens = calculateLpTokensToReceive({
-  amountX: 100000000n,
-  amountY: 100000000n,
-  availableReserveX: 0n,
-  availableReserveY: 0n,
-  totalLpSupply: 0n,
-});
+const displayAmounts = mapAmountsToUI(protocolResult, context);
+// Safe to show to user in their expected order
 ```
 
-## Testing
+## Usage Patterns
 
-All modules have comprehensive unit tests in the `__tests__` directory:
+### ✅ Correct Usage
 
-```bash
-# Run all liquidity tests
-pnpm --filter @dex-web/utils test src/liquidity/__tests__
+```typescript
+// 1. Create context ONCE
+const context = createTokenOrderContext(tokenA, tokenB);
 
-# Run specific test file
-pnpm --filter @dex-web/utils test src/liquidity/__tests__/liquidityParsers.test.ts
+// 2. Store context, use everywhere
+const protocolData = mapAmountsToProtocol(userInput, context);
+const queryKey = [context.protocol.tokenX, context.protocol.tokenY];
+const displayData = mapAmountsToUI(protocolResponse, context);
 ```
 
-### Test Coverage
+### ❌ Incorrect Usage
 
-- **Schemas**: Validation rules, edge cases, type transformations
-- **Parsers**: Amount parsing, decimal conversion, slippage calculations
-- **Calculations**: LP token formulas, reserve calculations, rounding behavior
-- **Transformer**: End-to-end transformation, token sorting, payload generation
+```typescript
+// ❌ DON'T: Call sortSolanaAddresses multiple times
+const sort1 = sortSolanaAddresses(tokenA, tokenB);
+const sort2 = sortSolanaAddresses(tokenA, tokenB); // Redundant!
 
-## Key Algorithms
+// ❌ DON'T: Sort strings
+const sorted = [tokenA, tokenB].sort(); // Wrong order!
 
-### LP Token Calculation
-
-For new pools:
-```
-lpTokens = sqrt(amountX * amountY)
+// ❌ DON'T: Manually swap logic
+if (tokenA > tokenB) { /* manual swap */ } // Incorrect comparison!
 ```
 
-For existing pools:
+## Testing Philosophy
+
+Our tests verify:
+
+1. **Actual Solana behavior** - Not our assumptions
+2. **Round-trip correctness** - UI → Protocol → UI preserves data
+3. **Determinism** - Same inputs always produce same outputs
+4. **Edge cases** - Same token twice, invalid addresses, decimals
+
+All tests use **real token addresses** to catch buffer sorting bugs.
+
+## Common Pitfalls
+
+### 1. Assuming Alphabetical Order
+
+```typescript
+// ❌ Intuition says USDC < SOL alphabetically
+// ✅ Reality: SOL < USDC in buffer comparison
 ```
-lpFromX = (amountX / reserveX) * totalLpSupply
-lpFromY = (amountY / reserveY) * totalLpSupply
-lpTokens = min(lpFromX, lpFromY)
+
+### 2. Inconsistent Ordering
+
+```typescript
+// ❌ Sorting in some places, not others
+const poolKey1 = [tokenA, tokenB].sort();
+const poolKey2 = [tokenX, tokenY]; // Unsorted!
+
+// ✅ Always use context
+const poolKey = [context.protocol.tokenX, context.protocol.tokenY];
 ```
 
-### Available Reserves
+### 3. Forgetting Amounts Swap Too
 
-Reserves available for trading after subtracting protocol fees and locked amounts:
-```
-availableReserveX = reserveX - protocolFeeX - userLockedX
-availableReserveY = reserveY - protocolFeeY - userLockedY
-```
+```typescript
+// ❌ Swapping tokens but not amounts
+const tokenX = tokenA > tokenB ? tokenB : tokenA;
+const amountX = amountA; // Wrong!
 
-### Slippage for Max Amounts
-
-```
-maxAmount = amount * (1 + slippagePercent / 100)
+// ✅ Use the mapping functions
+const { amountX, amountY } = mapAmountsToProtocol(uiAmounts, context);
 ```
 
-## Decimal Precision
+## Integration with React
 
-All calculations use Decimal.js with:
-- **Precision**: 40 digits (to avoid floating point errors)
-- **Rounding**: ROUND_DOWN (conservative for user funds)
+### Hooks Pattern
 
-This ensures accurate calculations even with large numbers and many decimal places.
+```typescript
+function LiquidityForm() {
+  // 1. Get context from URL params
+  const context = useTokenOrder(); // Custom hook wrapping createTokenOrderContext
+  
+  // 2. Use for queries
+  const { data } = usePoolData({
+    tokenX: context?.protocol.tokenX,
+    tokenY: context?.protocol.tokenY,
+  });
+  
+  // 3. Transform for submission
+  const onSubmit = (formData) => {
+    const protocolPayload = mapAmountsToProtocol(formData, context);
+    submitTransaction(protocolPayload);
+  };
+}
+```
 
-## Migration from Old Code
+## Performance Considerations
 
-The refactored code maintains backward compatibility:
+All functions are:
+- **Pure** - No side effects, safe to memoize
+- **Fast** - O(1) operations, no sorting after initial context creation
+- **Cacheable** - Same inputs = same outputs (referential equality with React.useMemo)
 
-- All exports from `addLiquidityTransformer.ts` remain unchanged
-- The `transformAddLiquidityInput` function has the same signature
-- Internal implementation is now modular and testable
+## Further Reading
 
-### What Changed
-
-**Before**: Monolithic file with mixed concerns, console.log statements, hard to test
-**After**: Modular architecture with:
-- Separated validation (schemas)
-- Pure parsing functions
-- Isolated calculation logic
-- Comprehensive test coverage
-- No side effects
-
-### Removed
-
-- Console.log statements (replaced with proper error handling)
-- Unused `_calculateLpTokensToReceive` function (replaced with exported version)
-- Inline Decimal.js configuration (moved to separate module)
-
-## Best Practices
-
-1. **Always validate inputs** using the provided Zod schemas
-2. **Use bigint for raw token amounts** to avoid precision loss
-3. **Use Decimal.js for intermediate calculations** to maintain precision
-4. **Round down amounts** when converting to raw units (protects users)
-5. **Round up max amounts** with slippage (allows transactions to succeed)
-6. **Test edge cases**: zero amounts, new pools, very large/small numbers
-
-## Related Modules
-
-- `blockchain/sortSolanaAddresses.ts` - Token address sorting for X/Y convention
-- `common/unitConversion.ts` - Generic unit conversion utilities
-- `common/amountUtils.ts` - Amount formatting and parsing
-
-## Future Improvements
-
-- [ ] Add JSDoc examples to all public functions
-- [ ] Create benchmark tests for large calculations
-- [ ] Add property-based tests with fast-check
-- [ ] Consider extracting common Decimal operations
-- [ ] Add integration tests with mock pool data
+- [Solana PublicKey Documentation](https://solana-labs.github.io/solana-web3.js/classes/PublicKey.html)
+- [Buffer.compare() Semantics](https://nodejs.org/api/buffer.html#bufcompareotherbuffer)
+- See `TOKEN_ORDER_*.md` files in project root for implementation history

@@ -1,9 +1,6 @@
+import { calculateWithdrawalDetails, InputType } from "@dex-web/utils";
 import Decimal from "decimal.js";
 import { describe, expect, it, vi } from "vitest";
-import {
-  calculateWithdrawalDetails,
-  InputType,
-} from "../calculateWithdrawalDetails";
 
 vi.mock("@dex-web/utils", () => ({
   convertToDecimal: vi.fn((amount: number, decimals: number) => {

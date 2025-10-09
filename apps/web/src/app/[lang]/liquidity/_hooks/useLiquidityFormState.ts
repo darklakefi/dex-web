@@ -1,16 +1,12 @@
 "use client";
 
-import type { PublicKey } from "@solana/web3.js";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import {
   FORM_FIELD_NAMES,
   LIQUIDITY_CONSTANTS,
 } from "../_constants/liquidityConstants";
-import type {
-  LiquidityFormValues,
-  UseRealtimeTokenAccountsReturn,
-} from "../_types/liquidity.types";
+import type { LiquidityFormValues } from "../_types/liquidity.types";
 import { liquidityFormSchema } from "../_types/liquidity.types";
 
 const { fieldContext, formContext } = createFormHookContexts();
@@ -25,8 +21,6 @@ const { useAppForm } = createFormHook({
 });
 
 interface UseLiquidityFormStateOptions {
-  readonly walletPublicKey: PublicKey | null;
-  readonly tokenAccountsData: UseRealtimeTokenAccountsReturn;
   readonly onSubmit: ({
     value,
   }: {
@@ -43,8 +37,6 @@ interface UseLiquidityFormStateOptions {
  */
 export function useLiquidityFormState({
   onSubmit,
-  tokenAccountsData,
-  walletPublicKey,
 }: UseLiquidityFormStateOptions) {
   const defaultValues: LiquidityFormValues = {
     [FORM_FIELD_NAMES.INITIAL_PRICE]: LIQUIDITY_CONSTANTS.DEFAULT_INITIAL_PRICE,
@@ -63,5 +55,7 @@ export function useLiquidityFormState({
     },
   });
 
-  return { form } as const;
+  return form;
 }
+
+export type LiquidityFormApi = ReturnType<typeof useLiquidityFormState>;

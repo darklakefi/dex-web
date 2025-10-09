@@ -7,4 +7,5 @@ export {
 export { QUERY_CONFIG, tokenQueryKeys } from "./lib/queryKeys";
 export { type AppRouter, appRouter } from "./routers/app.router";
 export { rpcHandler } from "./rpcHandler";
+export * from "./schemas";
 export { batchClients, createBatchClient } from "./utils/batchClient";

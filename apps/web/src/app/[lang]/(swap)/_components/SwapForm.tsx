@@ -22,7 +22,7 @@ import {
   parseAmount,
   parseAmountBigNumber,
   sortSolanaAddresses,
-  toRawUnitsBigint,
+  toRawUnitsBigNumberAsBigInt,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
@@ -420,7 +420,10 @@ export function SwapForm() {
         sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
       const buyTokenDecimals = buyTokenAccount?.tokenAccounts[0]?.decimals || 0;
 
-      const buyAmountRaw = toRawUnitsBigint(buyAmount, buyTokenDecimals);
+      const buyAmountRaw = toRawUnitsBigNumberAsBigInt(
+        buyAmount,
+        buyTokenDecimals,
+      );
       const slippageFactor = BigNumber(1).minus(
         BigNumber(slippage || 0).dividedBy(100),
       );
@@ -429,7 +432,7 @@ export function SwapForm() {
         .integerValue(BigNumber.ROUND_DOWN);
 
       const response = await client.dexGateway.getSwap({
-        amountIn: toRawUnitsBigint(sellAmount, sellTokenDecimals),
+        amountIn: toRawUnitsBigNumberAsBigInt(sellAmount, sellTokenDecimals),
         isSwapXToY: isXtoY,
         minOut: BigInt(minOutRaw.toString()),
         refCode: incomingReferralCode || "",

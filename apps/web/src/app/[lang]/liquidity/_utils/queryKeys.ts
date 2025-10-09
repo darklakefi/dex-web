@@ -47,7 +47,7 @@ export function createPoolQueryKey(
   orderContext: TokenOrderContext | null,
 ):
   | readonly [string, string, string]
-  | readonly [string, string, string, string, string] {
+  | readonly [string, string, string, string] {
   if (!orderContext) {
     return ["pool", "", ""] as const;
   }

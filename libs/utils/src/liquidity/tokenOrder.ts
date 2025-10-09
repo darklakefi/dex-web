@@ -11,6 +11,22 @@
  * - Single responsibility - each function does one thing well
  * - Type-safe transformations using branded types
  *
+ * ## Important: Solana Buffer Comparison vs Lexicographic Sorting
+ *
+ * Solana uses **buffer comparison** (byte-level comparison of public key buffers)
+ * to determine token order, NOT lexicographic string sorting.
+ *
+ * This means:
+ * - Two addresses starting with the same letter may NOT sort together
+ * - The base58 string representation order ≠ actual protocol order
+ * - Always use `sortSolanaAddresses()` - never sort strings directly
+ *
+ * Example with real tokens:
+ * ```
+ * Lexicographic string order:  USDC(E...) < USDT(E...) < SOL(S...)
+ * Actual Solana buffer order:  SOL < USDT < USDC
+ * ```
+ *
  * @module tokenOrder
  */
 

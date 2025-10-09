@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "composite": true,
     "incremental": true,
     "jsx": "preserve",
     "lib": ["dom", "dom.iterable", "esnext"],

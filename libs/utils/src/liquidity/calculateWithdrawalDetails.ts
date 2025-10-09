@@ -1,16 +1,20 @@
-import { convertToDecimal, sortSolanaAddresses } from "@dex-web/utils";
-import Decimal from "decimal.js";
-import {
-  DEFAULT_BUY_TOKEN,
-  DEFAULT_SELL_TOKEN,
-} from "../../../_utils/constants";
+import { Decimal } from "decimal.js";
+import { sortSolanaAddresses } from "../blockchain/sortSolanaAddresses";
+import { convertToDecimal } from "../number";
+import "./decimalConfig";
 
+/**
+ * Input type for withdrawal calculations
+ */
 export enum InputType {
   Percentage = "percentage",
   Raw = "raw",
 }
 
-interface WithdrawalCalculationParams {
+/**
+ * Parameters for withdrawal calculation
+ */
+export interface WithdrawalCalculationParams {
   userLiquidity: {
     lpTokenBalance: number;
     decimals: number;
@@ -26,8 +30,17 @@ interface WithdrawalCalculationParams {
   tokenAPrice: { price: number };
   tokenBPrice: { price: number };
   inputType?: InputType;
+  defaultBuyToken?: string;
+  defaultSellToken?: string;
 }
 
+/**
+ * Calculate withdrawal details for removing liquidity.
+ * Supports both percentage-based and raw amount inputs.
+ *
+ * @param params - Withdrawal calculation parameters
+ * @returns Calculated withdrawal amounts and USD value
+ */
 export function calculateWithdrawalDetails({
   userLiquidity,
   poolReserves,
@@ -37,6 +50,8 @@ export function calculateWithdrawalDetails({
   tokenAPrice,
   tokenBPrice,
   inputType = InputType.Percentage,
+  defaultBuyToken = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  defaultSellToken = "So11111111111111111111111111111111111111112",
 }: WithdrawalCalculationParams) {
   if (
     !userLiquidity ||
@@ -107,8 +122,8 @@ export function calculateWithdrawalDetails({
   const tokenXAmount = withdrawLpShare.mul(reserveXDecimal).toNumber();
   const tokenYAmount = withdrawLpShare.mul(reserveYDecimal).toNumber();
 
-  const tokenA = tokenAAddress || DEFAULT_BUY_TOKEN;
-  const tokenB = tokenBAddress || DEFAULT_SELL_TOKEN;
+  const tokenA = tokenAAddress || defaultBuyToken;
+  const tokenB = tokenBAddress || defaultSellToken;
   const { tokenXAddress } = sortSolanaAddresses(tokenA, tokenB);
 
   const tokenAAmount = tokenA === tokenXAddress ? tokenXAmount : tokenYAmount;

@@ -3,13 +3,14 @@
 import { Button } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
-import type { FormApi } from "@tanstack/react-form";
 import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { liquidityPageParsers } from "../../../_utils/searchParams";
+import type { LiquidityFormApi } from "../_hooks/useLiquidityFormState";
 import { useLiquidityValidation } from "../_hooks/useLiquidityValidation";
+import type { LiquidityMachineEvent } from "../_machines/liquidityMachine";
 import type {
   LiquidityFormValues,
   PoolDetails,
@@ -22,9 +23,7 @@ import {
 } from "../_utils/liquidityButtonState";
 
 interface LiquidityActionButtonProps {
-  // Use specific FormApi type for better type safety
-  // This ensures the component can only be used with forms managing LiquidityFormValues
-  form: FormApi<LiquidityFormValues, unknown>;
+  form: LiquidityFormApi;
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
@@ -38,6 +37,7 @@ interface LiquidityActionButtonProps {
   isSubmitting: boolean;
   isSuccess: boolean;
   onReset: () => void;
+  send: (event: LiquidityMachineEvent) => void;
 }
 
 const serialize = createSerializer(liquidityPageParsers);
@@ -57,6 +57,7 @@ export function LiquidityActionButton({
   isSubmitting,
   isSuccess,
   onReset,
+  send,
 }: LiquidityActionButtonProps) {
   const router = useRouter();
   const { wallet, connected } = useWallet();
@@ -222,7 +223,7 @@ export function LiquidityActionButton({
             className="flex-1 cursor-pointer py-3 leading-6"
             onClick={() => {
               console.log("🔄 User clicked 'Retry'");
-              onReset(); // TODO: Send RETRY event instead of RESET
+              send({ type: "RETRY" });
             }}
             type="button"
             variant="primary"
@@ -234,7 +235,7 @@ export function LiquidityActionButton({
             className="flex-1 cursor-pointer py-3 leading-6"
             onClick={() => {
               console.log("❌ User clicked 'Dismiss'");
-              onReset(); // TODO: Send DISMISS event
+              send({ type: "DISMISS" });
             }}
             type="button"
             variant="secondary"

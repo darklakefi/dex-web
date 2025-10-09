@@ -51,7 +51,7 @@ export function useLiquidityFormLogic({
     ((args: { value: LiquidityFormValues }) => void) | null
   >(null);
 
-  const { form } = useLiquidityFormState({
+  const form = useLiquidityFormState({
     onSubmit: ({ value }) => {
       handleFormSubmitRef.current?.({ value });
     },
@@ -61,7 +61,7 @@ export function useLiquidityFormLogic({
 
   const transaction = useLiquidityTransaction({
     orderContext,
-    poolDetails,
+    poolDetails: poolDetails ?? null,
     resetForm: () => form.reset(),
     tokenAAddress,
     tokenBAddress,

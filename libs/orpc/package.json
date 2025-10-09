@@ -12,6 +12,7 @@
     "./procedures/*": "./src/procedures/*.ts",
     "./routers": "./src/routers/index.ts",
     "./routers/*": "./src/routers/*.ts",
+    "./schemas": "./src/schemas/index.ts",
     "./schemas/*": "./src/schemas/*.ts",
     "./utils/*": "./src/utils/*.ts"
   },

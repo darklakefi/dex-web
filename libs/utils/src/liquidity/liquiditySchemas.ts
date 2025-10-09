@@ -16,6 +16,11 @@ export const numericStringSchema = z.string().refine((val) => {
   return !Number.isNaN(Number(cleaned)) && Number(cleaned) > 0;
 }, "Must be a valid positive number");
 
+export const numericStringSchemaAllowZero = z.string().refine((val) => {
+  const cleaned = val.replace(/,/g, "");
+  return !Number.isNaN(Number(cleaned)) && Number(cleaned) >= 0;
+}, "Must be a valid non-negative number");
+
 export const toBigIntSafe = (fieldName: string) =>
   z
     .union([z.number().nonnegative(), z.bigint().nonnegative(), z.string()])
@@ -45,7 +50,7 @@ export const poolReservesSchema = z.object({
 
 export const addLiquidityInputSchema = z.object({
   poolReserves: poolReservesSchema,
-  slippage: numericStringSchema,
+  slippage: numericStringSchemaAllowZero,
   tokenAAddress: solanaAddressSchema,
   tokenAAmount: numericStringSchema,
   tokenADecimals: z.number().int().min(0).max(18),
