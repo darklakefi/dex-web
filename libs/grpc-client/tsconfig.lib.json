@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "declarationDir": "../../dist/libs/grpc-client",
     "noEmit": false,
     "outDir": "../../dist/libs/grpc-client",

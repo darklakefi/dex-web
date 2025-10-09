@@ -2,6 +2,7 @@
 
 import { tanstackClient } from "@dex-web/orpc";
 import { mapAmountsToProtocol } from "@dex-web/utils";
+import type { UseQueryResult } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 import { useTokenOrder } from "./useTokenOrder";
 
@@ -35,7 +36,7 @@ export function useLPTokenEstimation({
   tokenBAmount,
   slippage = "0.5",
   enabled = true,
-}: UseLPTokenEstimationParams) {
+}: UseLPTokenEstimationParams): UseQueryResult<LPEstimationData, Error> {
   const orderContext = useTokenOrder();
 
   const tokenXMint = orderContext?.protocol.tokenX || "";

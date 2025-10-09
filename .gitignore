@@ -72,3 +72,4 @@ result
 man
 
 .pre-commit-config.yaml
+*.local.md

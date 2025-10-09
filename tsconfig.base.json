@@ -21,6 +21,6 @@
     "target": "es2022",
     "typeRoots": ["types", "node_modules", "node_modules/@types"],
     "types": ["svg", "css", "image"],
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": true
   }
 }

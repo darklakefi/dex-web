@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "declarationDir": "../../dist/libs/orpc",
     "outDir": "../../dist/libs/orpc",
     "resolveJsonModule": true,

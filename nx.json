@@ -142,11 +142,14 @@
     "@nx/next:server": {
       "configurations": {
         "development": {
+          "buildLibsFromSource": true,
           "turbo": true
+        },
+        "production": {
+          "buildLibsFromSource": false
         }
       },
       "options": {
-        "buildLibsFromSource": true,
         "port": 4200
       }
     },
@@ -206,7 +209,8 @@
       "outputs": ["{options.reportsDirectory}"]
     },
     "typecheck": {
-      "cache": true
+      "cache": true,
+      "dependsOn": ["^build"]
     }
   }
 }

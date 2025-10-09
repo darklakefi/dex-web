@@ -2,20 +2,24 @@ import { BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CACHE_CONFIG } from "../../../config/constants";
-import type { HeliusClientWithConnection } from "../../../getHelius";
 import { CacheService } from "../../../services/CacheService";
 import { LoggerService } from "../../../services/LoggerService";
 import { MonitoringService } from "../../../services/MonitoringService";
 import { IDL_CODER } from "../../../utils/solana";
-import { getTokenMetadataHandler } from "../../tokens/getTokenMetadata.handler";
-import { clearPoolsCache, getAllPoolsHandler } from "../getAllPools.handler";
 
-vi.mock("../../../getHelius", () => ({
-  getHelius: vi.fn(() => ({
-    connection: {
-      getProgramAccounts: vi.fn(),
-    },
-  })),
+const { mockGetProgramAccounts } = vi.hoisted(() => ({
+  mockGetProgramAccounts: vi.fn(),
+}));
+
+vi.mock("../../../getHelius.ts", () => ({
+  getHelius: () => {
+    console.log("getHelius mock called!");
+    return {
+      connection: {
+        getProgramAccounts: mockGetProgramAccounts,
+      },
+    };
+  },
 }));
 
 vi.mock("../../tokens/getTokenMetadata.handler", () => ({
@@ -34,13 +38,13 @@ vi.mock("../../../utils/solana", async () => {
   };
 });
 
+import { getTokenMetadataHandler } from "../../tokens/getTokenMetadata.handler";
+import { clearPoolsCache, getAllPoolsHandler } from "../getAllPools.handler";
+
 describe("getAllPoolsHandler", () => {
   let cacheService: CacheService;
   let loggerService: LoggerService;
   let monitoringService: MonitoringService;
-  let mockConnection: {
-    getProgramAccounts: ReturnType<typeof vi.fn>;
-  };
 
   const mockPoolAccount1 = {
     authority: new PublicKey("11111111111111111111111111111112"),
@@ -117,7 +121,7 @@ describe("getAllPoolsHandler", () => {
     },
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
 
     cacheService = CacheService.getInstance();
@@ -125,14 +129,6 @@ describe("getAllPoolsHandler", () => {
 
     loggerService = LoggerService.getInstance();
     monitoringService = MonitoringService.getInstance();
-
-    const { getHelius } = vi.mocked(await import("../../../getHelius"));
-    mockConnection = {
-      getProgramAccounts: vi.fn(),
-    };
-    getHelius.mockReturnValue({
-      connection: mockConnection,
-    } as unknown as HeliusClientWithConnection);
 
     vi.mocked(getTokenMetadataHandler).mockResolvedValue(mockTokenMetadata);
   });
@@ -150,7 +146,11 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
+      console.log(
+        "Mock setup done, mockGetProgramAccounts:",
+        mockGetProgramAccounts,
+      );
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)
@@ -196,7 +196,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)
@@ -224,7 +224,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)
@@ -243,7 +243,7 @@ describe("getAllPoolsHandler", () => {
     });
 
     it("should return empty array when no pools exist", async () => {
-      mockConnection.getProgramAccounts.mockResolvedValue([]);
+      mockGetProgramAccounts.mockResolvedValue([]);
 
       const result = await getAllPoolsHandler({});
 
@@ -269,7 +269,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)
@@ -294,7 +294,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValueOnce(
         mockPoolAccount1,
@@ -324,7 +324,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValue(mockPoolAccount1)
@@ -403,25 +403,25 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
     });
 
     it("should cache results", async () => {
       await getAllPoolsHandler({});
 
-      expect(mockConnection.getProgramAccounts).toHaveBeenCalledTimes(1);
+      expect(mockGetProgramAccounts).toHaveBeenCalledTimes(1);
 
       await getAllPoolsHandler({});
 
-      expect(mockConnection.getProgramAccounts).toHaveBeenCalledTimes(1);
+      expect(mockGetProgramAccounts).toHaveBeenCalledTimes(1);
     });
 
     it("should use different cache keys for different parameters", async () => {
       await getAllPoolsHandler({ includeEmpty: false });
       await getAllPoolsHandler({ includeEmpty: true, search: undefined });
 
-      expect(mockConnection.getProgramAccounts).toHaveBeenCalledTimes(2);
+      expect(mockGetProgramAccounts).toHaveBeenCalledTimes(2);
     });
 
     it("should cache with correct TTL", async () => {
@@ -452,7 +452,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
 
       await getAllPoolsHandler({});
@@ -465,15 +465,13 @@ describe("getAllPoolsHandler", () => {
 
       expect(result.pools).toHaveLength(2);
       expect(result.total).toBe(3);
-      expect(mockConnection.getProgramAccounts).toHaveBeenCalledTimes(1);
+      expect(mockGetProgramAccounts).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("Error handling", () => {
     it("should handle connection errors gracefully", async () => {
-      mockConnection.getProgramAccounts.mockRejectedValue(
-        new Error("Connection failed"),
-      );
+      mockGetProgramAccounts.mockRejectedValue(new Error("Connection failed"));
 
       const result = await getAllPoolsHandler({});
 
@@ -493,7 +491,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
 
       vi.mocked(IDL_CODER.accounts.decode)
         .mockImplementationOnce(() => {
@@ -515,7 +513,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
       vi.mocked(getTokenMetadataHandler).mockRejectedValue(
         new Error("Token metadata fetch failed"),
@@ -537,7 +535,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
     });
 
@@ -563,9 +561,7 @@ describe("getAllPoolsHandler", () => {
 
     it("should record error metrics on failure", async () => {
       const spy = vi.spyOn(monitoringService, "recordError");
-      mockConnection.getProgramAccounts.mockRejectedValue(
-        new Error("Test error"),
-      );
+      mockGetProgramAccounts.mockRejectedValue(new Error("Test error"));
 
       await getAllPoolsHandler({});
 
@@ -595,9 +591,7 @@ describe("getAllPoolsHandler", () => {
 
     it("should log errors with stack trace", async () => {
       const spy = vi.spyOn(loggerService, "errorWithStack");
-      mockConnection.getProgramAccounts.mockRejectedValue(
-        new Error("Test error"),
-      );
+      mockGetProgramAccounts.mockRejectedValue(new Error("Test error"));
 
       await getAllPoolsHandler({});
 
@@ -647,7 +641,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(largePoolAccount);
 
       const result = await getAllPoolsHandler({
@@ -668,7 +662,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
       vi.mocked(getTokenMetadataHandler).mockResolvedValue({});
 
@@ -690,7 +684,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
 
       const result = await getAllPoolsHandler({ search: "" });
@@ -706,7 +700,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(mockPoolAccount1);
 
       const result = await getAllPoolsHandler({
@@ -731,7 +725,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode).mockReturnValue(partiallyEmptyPool);
 
       const result = await getAllPoolsHandler({ includeEmpty: false });
@@ -751,7 +745,7 @@ describe("getAllPoolsHandler", () => {
         },
       ];
 
-      mockConnection.getProgramAccounts.mockResolvedValue(mockAccounts);
+      mockGetProgramAccounts.mockResolvedValue(mockAccounts);
       vi.mocked(IDL_CODER.accounts.decode)
         .mockReturnValueOnce(mockPoolAccount1)
         .mockReturnValueOnce(mockPoolAccount1);

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "incremental": true,
     "jsx": "preserve",
     "noEmit": true,

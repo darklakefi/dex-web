@@ -8,10 +8,25 @@
  */
 
 import { renderHook, waitFor } from "@testing-library/react";
-import { NuqsAdapter } from "nuqs/adapters/test";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import type { ReactNode } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useTokenOrder, useTokenOrderRequired } from "../useTokenOrder";
+
+// Mock sortSolanaAddresses to skip validation for test addresses
+vi.mock("@dex-web/utils", async () => {
+  const actual = await vi.importActual<typeof import("@dex-web/utils")>();
+  return {
+    ...actual,
+    sortSolanaAddresses: (addrA: string, addrB: string) => {
+      const sorted = [addrA, addrB].sort();
+      return {
+        tokenXAddress: sorted[0] as string,
+        tokenYAddress: sorted[1] as string,
+      };
+    },
+  };
+});
 
 const USDC = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const SOL = "So11111111111111111111111111111111111111112";
@@ -21,7 +36,11 @@ const SOL = "So11111111111111111111111111111111111111112";
  */
 function createWrapper(searchParams: Record<string, string> = {}) {
   return function Wrapper({ children }: { children: ReactNode }) {
-    return <NuqsAdapter searchParams={searchParams}>{children}</NuqsAdapter>;
+    return (
+      <NuqsTestingAdapter searchParams={searchParams}>
+        {children}
+      </NuqsTestingAdapter>
+    );
   };
 }
 

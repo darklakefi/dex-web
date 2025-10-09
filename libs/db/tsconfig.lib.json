@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "declarationDir": "../../dist/libs/db",
     "outDir": "../../dist/libs/db"
   },

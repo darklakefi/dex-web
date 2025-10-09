@@ -55,8 +55,6 @@ export function useLiquidityFormLogic({
     onSubmit: ({ value }) => {
       handleFormSubmitRef.current?.({ value });
     },
-    tokenAccountsData,
-    walletPublicKey: publicKey || null,
   });
 
   const transaction = useLiquidityTransaction({

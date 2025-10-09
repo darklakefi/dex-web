@@ -17,6 +17,7 @@
     "./utils/*": "./src/utils/*.ts"
   },
   "name": "@dex-web/orpc",
+  "sideEffects": false,
   "type": "module",
   "types": "./src/index.ts",
   "version": "0.0.1"

@@ -10,6 +10,21 @@ import {
   DEFAULT_SELL_TOKEN,
 } from "../../../../_utils/constants";
 
+// Mock sortSolanaAddresses to skip validation for test addresses
+vi.mock("@dex-web/utils", async () => {
+  const actual = await vi.importActual<typeof import("@dex-web/utils")>();
+  return {
+    ...actual,
+    sortSolanaAddresses: (addrA: string, addrB: string) => {
+      const sorted = [addrA, addrB].sort();
+      return {
+        tokenXAddress: sorted[0] as string,
+        tokenYAddress: sorted[1] as string,
+      };
+    },
+  };
+});
+
 vi.mock("next/navigation", () => ({
   usePathname: () => "/liquidity",
   useRouter: () => ({ push: vi.fn() }),

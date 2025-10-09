@@ -3,6 +3,7 @@
 import type { GetPoolReservesOutput } from "@dex-web/orpc";
 import { tanstackClient } from "@dex-web/orpc";
 import { sortSolanaAddresses } from "@dex-web/utils";
+import type { UseQueryResult } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
 interface UsePoolDataParams {
@@ -57,7 +58,7 @@ export function usePoolData<TData = PoolData>(
   params: UsePoolDataParams & {
     select?: (data: PoolData) => TData;
   },
-) {
+): UseQueryResult<TData, Error> {
   const { tokenXMint, tokenYMint, priority = "normal", select } = params;
   const poolKey = createSortedPoolKey(tokenXMint, tokenYMint);
 

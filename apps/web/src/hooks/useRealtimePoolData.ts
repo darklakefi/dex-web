@@ -1,5 +1,6 @@
 "use client";
 
+import type { UseQueryResult } from "@tanstack/react-query";
 import type { PoolDetails } from "../app/[lang]/liquidity/_types/liquidity.types";
 import { transformToPoolDetails } from "../app/[lang]/liquidity/_utils/poolDataTransformers";
 import { usePoolData } from "./usePoolData";
@@ -20,7 +21,7 @@ export function useRealtimePoolData({
   tokenXMint,
   tokenYMint,
   priority = "high",
-}: UseRealtimePoolDataParams) {
+}: UseRealtimePoolDataParams): UseQueryResult<PoolDetails | null, Error> {
   return usePoolData<PoolDetails | null>({
     priority,
     select: (data) => transformToPoolDetails(data, tokenXMint, tokenYMint),

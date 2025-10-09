@@ -65,6 +65,8 @@ export const getTokensWithPoolsHandler = async (
     search: undefined,
   });
 
+  console.log("poolsResult", poolsResult);
+
   const poolTokenAddresses = Array.from(
     new Set(
       poolsResult.pools.flatMap((pool) => [pool.tokenXMint, pool.tokenYMint]),
@@ -128,6 +130,8 @@ export const getTokensWithPoolsHandler = async (
     name: token.name,
     symbol: token.symbol,
   }));
+
+  console.log("gatewayTokens", gatewayTokens);
 
   if (trimmedQuery.length > 0) {
     const lowerQuery = trimmedQuery.toLowerCase();

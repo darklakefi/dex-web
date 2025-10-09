@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "composite": true,
     "incremental": true,
     "jsx": "preserve",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -34,9 +33,6 @@
     },
     {
       "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
     }
   ]
 }

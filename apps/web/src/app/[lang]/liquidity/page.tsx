@@ -50,16 +50,7 @@ export default async function Page({
             return null;
           }
 
-          return {
-            exists: result.exists,
-            lastUpdate: Date.now(),
-            lpMint: result.lpMint,
-            reserveX: result.reserveX,
-            reserveY: result.reserveY,
-            tokenXMint: tokenXAddress,
-            tokenYMint: tokenYAddress,
-            totalLpSupply: result.totalLpSupply,
-          };
+          return result;
         },
         queryKey: queryKeys.pools.reserves(tokenXAddress, tokenYAddress),
       });

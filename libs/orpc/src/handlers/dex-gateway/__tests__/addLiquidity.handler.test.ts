@@ -1,6 +1,7 @@
 import { create } from "@bufbuild/protobuf";
 import { AddLiquidityRequestPB } from "@dex-web/grpc-client";
 import { ORPCError } from "@orpc/server";
+import type { Mock } from "vitest";
 import { describe, expect, it, vi } from "vitest";
 import { addLiquidityHandler } from "../addLiquidity.handler";
 
@@ -28,6 +29,27 @@ vi.mock("../../../services/MonitoringService", () => ({
   },
 }));
 
+// Helper to create a mock gRPC client with all required methods
+function createMockGrpcClient(overrides: { addLiquidity?: Mock } = {}) {
+  return {
+    addLiquidity: vi.fn(),
+    checkTradeStatus: vi.fn(),
+    createCustomToken: vi.fn(),
+    createUnsignedTransaction: vi.fn(),
+    deleteCustomToken: vi.fn(),
+    editCustomToken: vi.fn(),
+    getCustomToken: vi.fn(),
+    getCustomTokens: vi.fn(),
+    getTokenMetadata: vi.fn(),
+    getTokenMetadataList: vi.fn(),
+    getTradesListByUser: vi.fn(),
+    initPool: vi.fn(),
+    removeLiquidity: vi.fn(),
+    sendSignedTransaction: vi.fn(),
+    ...overrides,
+  };
+}
+
 describe("addLiquidityHandler", () => {
   const validInput = create(AddLiquidityRequestPB, {
     amountLp: BigInt("1000000"),
@@ -49,12 +71,12 @@ describe("addLiquidityHandler", () => {
         ),
       );
 
-    const mockClient = {
+    const mockClient = createMockGrpcClient({
       addLiquidity: mockAddLiquidity,
-    };
+    });
 
     const { getDexGatewayClient } = await import("../../../dex-gateway");
-    vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
+    vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient as any);
 
     await expect(addLiquidityHandler(validInput)).rejects.toThrow(ORPCError);
 
@@ -78,12 +100,12 @@ describe("addLiquidityHandler", () => {
         ),
       );
 
-    const mockClient = {
+    const mockClient = createMockGrpcClient({
       addLiquidity: mockAddLiquidity,
-    };
+    });
 
     const { getDexGatewayClient } = await import("../../../dex-gateway");
-    vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
+    vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient as any);
 
     await expect(addLiquidityHandler(validInput)).rejects.toThrow(ORPCError);
 
@@ -102,12 +124,12 @@ describe("addLiquidityHandler", () => {
       .fn()
       .mockRejectedValue(new Error("insufficient balance for token"));
 
-    const mockClient = {
+    const mockClient = createMockGrpcClient({
       addLiquidity: mockAddLiquidity,
-    };
+    });
 
     const { getDexGatewayClient } = await import("../../../dex-gateway");
-    vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
+    vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient as any);
 
     await expect(addLiquidityHandler(validInput)).rejects.toThrow(ORPCError);
 
@@ -126,12 +148,12 @@ describe("addLiquidityHandler", () => {
       .fn()
       .mockRejectedValue(new Error("network timeout occurred"));
 
-    const mockClient = {
+    const mockClient = createMockGrpcClient({
       addLiquidity: mockAddLiquidity,
-    };
+    });
 
     const { getDexGatewayClient } = await import("../../../dex-gateway");
-    vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
+    vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient as any);
 
     await expect(addLiquidityHandler(validInput)).rejects.toThrow(ORPCError);
 
@@ -150,12 +172,12 @@ describe("addLiquidityHandler", () => {
       .fn()
       .mockRejectedValue(new Error("Some unknown gRPC error"));
 
-    const mockClient = {
+    const mockClient = createMockGrpcClient({
       addLiquidity: mockAddLiquidity,
-    };
+    });
 
     const { getDexGatewayClient } = await import("../../../dex-gateway");
-    vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
+    vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient as any);
 
     await expect(addLiquidityHandler(validInput)).rejects.toThrow(ORPCError);
 

@@ -29,6 +29,7 @@ interface LiquidityTokenInputsProps {
   tokenAAddress: string | null;
   tokenBAddress: string | null;
   poolDetails: PoolDetails | null;
+  isDisabled?: boolean;
   onSubmit?: () => void;
   calculateProportionalAmount: (params: {
     inputAmount: string;

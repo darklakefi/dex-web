@@ -1,19 +1,20 @@
 import { calculateWithdrawalDetails, InputType } from "@dex-web/utils";
-import Decimal from "decimal.js";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@dex-web/utils", () => ({
-  convertToDecimal: vi.fn((amount: number, decimals: number) => {
-    return new Decimal(amount).div(new Decimal(10).pow(decimals));
-  }),
-  sortSolanaAddresses: vi.fn((tokenA: string, tokenB: string) => {
-    const sorted = [tokenA, tokenB].sort();
-    return {
-      tokenXAddress: sorted[0],
-      tokenYAddress: sorted[1],
-    };
-  }),
-}));
+// Mock sortSolanaAddresses to skip validation for test addresses
+vi.mock("@dex-web/utils", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@dex-web/utils")>();
+  return {
+    ...actual,
+    sortSolanaAddresses: (addrA: string, addrB: string) => {
+      const sorted = [addrA, addrB].sort();
+      return {
+        tokenXAddress: sorted[0] as string,
+        tokenYAddress: sorted[1] as string,
+      };
+    },
+  };
+});
 
 describe("calculateWithdrawalDetails - Fixed Tests", () => {
   const mockUserLiquidity = {
