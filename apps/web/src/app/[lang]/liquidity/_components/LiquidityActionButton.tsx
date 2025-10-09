@@ -74,9 +74,10 @@ export function LiquidityActionButton({
     form.store,
     (state) => state.values.initialPrice,
   );
+  const slippage = useStore(form.store, (state) => state.values.slippage);
   const formValues: LiquidityFormValues = {
     initialPrice,
-    slippage: undefined,
+    slippage,
     tokenAAmount,
     tokenBAmount,
   };

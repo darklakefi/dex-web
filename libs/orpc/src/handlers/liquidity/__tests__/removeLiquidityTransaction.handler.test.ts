@@ -1,3 +1,4 @@
+import type { AnchorProvider } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { describe, expect, it, vi } from "vitest";
 import type { RemoveLiquidityTransactionInput } from "../../../schemas/liquidity/removeLiquidityTransaction.schema";
@@ -38,11 +39,17 @@ const USER = "BXqAmer56m2vNvEFpfG6pBSdRM6JvJ2GeBq3kArGr3Jn";
 const TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 
 describe("removeLiquidityTransactionHandler", () => {
+  const mockProvider = {
+    connection: {},
+    publicKey: new PublicKey(USER),
+    wallet: {},
+  } as AnchorProvider;
+
   const baseInput: RemoveLiquidityTransactionInput = {
     lpTokensToBurn: "1000000000",
     minAmountX: "1000000",
     minAmountY: "1000000",
-    provider: {} as any,
+    provider: mockProvider,
     tokenXMint: USDC,
     tokenXProgramId: TOKEN_PROGRAM,
     tokenYMint: WSOL,
