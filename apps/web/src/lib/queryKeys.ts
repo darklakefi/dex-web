@@ -23,6 +23,28 @@ export const queryKeys = {
   },
   liquidity: {
     all: ["liquidity"] as const,
+    allUserPositions: (ownerAddress: string) =>
+      [...queryKeys.liquidity.all, "allUserPositions", ownerAddress] as const,
+    quote: (
+      tokenXMint: string,
+      tokenYMint: string,
+      tokenXAmount: string,
+      tokenYAmount: string,
+      slippageTolerance: string,
+      tokenXDecimals: number,
+      tokenYDecimals: number,
+    ) =>
+      [
+        ...queryKeys.liquidity.all,
+        "quote",
+        tokenXMint,
+        tokenYMint,
+        tokenXAmount,
+        tokenYAmount,
+        slippageTolerance,
+        tokenXDecimals,
+        tokenYDecimals,
+      ] as const,
     review: (
       tokenXMint: string,
       tokenYMint: string,

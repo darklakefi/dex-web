@@ -20,6 +20,11 @@ export type {
   GetAddLiquidityReviewOutput,
 } from "./liquidity/getAddLiquidityReview.schema";
 export type {
+  GetAllUserLiquidityInput,
+  GetAllUserLiquidityOutput,
+  UserLiquidityPosition,
+} from "./liquidity/getAllUserLiquidity.schema";
+export type {
   RemoveLiquidityTransactionInput,
   RemoveLiquidityTransactionOutput,
 } from "./liquidity/removeLiquidityTransaction.schema";

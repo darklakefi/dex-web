@@ -126,7 +126,7 @@ export function useLiquidityTransaction({
           throw new Error("Failed to fetch fresh pool reserves");
         }
 
-        const poolDataForCalculation: PoolDetails = {
+        const updatedPoolData: PoolDetails = {
           ...currentPoolData,
           tokenXMint: currentPoolData.tokenXMint,
           tokenXReserveRaw: freshPoolData.reserveXRaw,
@@ -141,8 +141,8 @@ export function useLiquidityTransaction({
           throw new Error("Token order context is required for transaction");
         }
 
-        const requestPayload = buildRequestPayload({
-          currentPoolData: poolDataForCalculation,
+        const requestPayload = await buildRequestPayload({
+          currentPoolData: updatedPoolData,
           effectivePublicKey,
           orderContext,
           tokenAMeta,
@@ -244,13 +244,9 @@ export function useLiquidityTransaction({
 
   const handleFormSubmit = useCallback(
     ({ value }: { value: LiquidityFormValues }) => {
-      if (transaction.isError) {
-        transaction.send({ type: "RETRY" });
-      } else {
-        transaction.send({ data: value, type: "SUBMIT" });
-      }
+      transaction.send({ data: value, type: "SUBMIT" });
     },
-    [transaction.isError, transaction.send],
+    [transaction.send],
   );
 
   return {

@@ -1,14 +1,13 @@
 import { ERROR_MESSAGES, isWarningMessage } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
 import {
-  addLiquidityInputSchema,
   mapAmountsToProtocol,
   type TokenOrderContext,
-  transformAddLiquidityInput,
+  toRawUnitsBigNumberAsBigInt,
 } from "@dex-web/utils";
 import type { Wallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
-import { LIQUIDITY_CONSTANTS } from "../_constants/liquidityConstants";
+import type { AddLiquidityVariables } from "../../../../hooks/mutations/useAddLiquidityMutation";
 import type {
   LiquidityFormValues,
   PoolDetails,
@@ -137,7 +136,7 @@ export function buildRequestPayload(params: {
   values: LiquidityFormValues;
   effectivePublicKey: PublicKey;
   orderContext: TokenOrderContext;
-}) {
+}): AddLiquidityVariables {
   const { orderContext } = params;
 
   const uiAmounts = {
@@ -149,31 +148,65 @@ export function buildRequestPayload(params: {
 
   const protocolAmounts = mapAmountsToProtocol(uiAmounts, orderContext);
 
-  const poolReserves = {
-    protocolFeeX: String(params.currentPoolData.protocolFeeX || 0),
-    protocolFeeY: String(params.currentPoolData.protocolFeeY || 0),
-    reserveX: String(params.currentPoolData.tokenXReserveRaw || 0),
-    reserveY: String(params.currentPoolData.tokenYReserveRaw || 0),
-    totalLpSupply: String(params.currentPoolData.totalSupplyRaw || 0),
-    userLockedX: String(params.currentPoolData.userLockedX || 0),
-    userLockedY: String(params.currentPoolData.userLockedY || 0),
-  };
+  const tokenXDecimals = orderContext.mapping.tokenAIsX
+    ? params.tokenAMeta.decimals
+    : params.tokenBMeta.decimals;
+  const tokenYDecimals = orderContext.mapping.tokenAIsX
+    ? params.tokenBMeta.decimals
+    : params.tokenAMeta.decimals;
 
-  const transformInput = addLiquidityInputSchema.parse({
-    poolReserves,
-    slippage: params.values.slippage || LIQUIDITY_CONSTANTS.DEFAULT_SLIPPAGE,
-    tokenAAddress: protocolAmounts.tokenX,
-    tokenAAmount: protocolAmounts.amountX,
-    tokenADecimals: orderContext.mapping.tokenAIsX
-      ? params.tokenAMeta.decimals
-      : params.tokenBMeta.decimals,
-    tokenBAddress: protocolAmounts.tokenY,
-    tokenBAmount: protocolAmounts.amountY,
-    tokenBDecimals: orderContext.mapping.tokenAIsX
-      ? params.tokenBMeta.decimals
-      : params.tokenAMeta.decimals,
+  const maxAmountX = toRawUnitsBigNumberAsBigInt(
+    Number.parseFloat(protocolAmounts.amountX) || 0,
+    tokenXDecimals,
+  );
+  const maxAmountY = toRawUnitsBigNumberAsBigInt(
+    Number.parseFloat(protocolAmounts.amountY) || 0,
+    tokenYDecimals,
+  );
+
+  const reserveX = BigInt(params.currentPoolData.tokenXReserveRaw || 0);
+  const reserveY = BigInt(params.currentPoolData.tokenYReserveRaw || 0);
+  const totalLpSupply = BigInt(params.currentPoolData.totalSupplyRaw || 0);
+
+  let amountLp: bigint;
+  if (totalLpSupply === 0n) {
+    amountLp = sqrt(maxAmountX * maxAmountY);
+  } else {
+    const lpFromX = (maxAmountX * totalLpSupply) / reserveX;
+    const lpFromY = (maxAmountY * totalLpSupply) / reserveY;
+    amountLp = lpFromX < lpFromY ? lpFromX : lpFromY;
+  }
+
+  return {
+    amountLp,
+    label: "",
+    maxAmountX,
+    maxAmountY,
+    refCode: "",
+    tokenMintX: protocolAmounts.tokenX,
+    tokenMintY: protocolAmounts.tokenY,
     userAddress: params.effectivePublicKey.toBase58(),
-  });
+  };
+}
 
-  return transformAddLiquidityInput(transformInput);
+/**
+ * Integer square root using Newton's method for bigint
+ */
+function sqrt(value: bigint): bigint {
+  if (value < 0n) {
+    throw new Error("Square root of negative number");
+  }
+  if (value < 2n) {
+    return value;
+  }
+
+  let x0 = value / 2n;
+  let x1 = (x0 + value / x0) / 2n;
+
+  while (x1 < x0) {
+    x0 = x1;
+    x1 = (x0 + value / x0) / 2n;
+  }
+
+  return x0;
 }

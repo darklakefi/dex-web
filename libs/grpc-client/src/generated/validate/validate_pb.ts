@@ -1,4 +1,5 @@
 /* eslint-disable */
+
 import type { Message } from "@bufbuild/protobuf";
 import type {
   GenEnum,
@@ -24,6 +25,7 @@ import {
   file_google_protobuf_duration,
   file_google_protobuf_timestamp,
 } from "@bufbuild/protobuf/wkt";
+
 /**
  * Describes the file validate/validate.proto.
  */
@@ -35,6 +37,7 @@ export const file_validate_validate: GenFile = fileDesc(
     file_google_protobuf_timestamp,
   ],
 );
+
 /**
  * FieldRules encapsulates the rules for each type of field. Depending on the
  * field, the correct set should be used to ensure proper validations.
@@ -46,6 +49,7 @@ export type FieldRules = Message<"validate.FieldRules"> & {
    * @generated from field: optional validate.MessageRules message = 17;
    */
   message?: MessageRules;
+
   /**
    * @generated from oneof validate.FieldRules.type
    */
@@ -205,6 +209,7 @@ export type FieldRules = Message<"validate.FieldRules"> & {
       }
     | { case: undefined; value?: undefined };
 };
+
 /**
  * Describes the message validate.FieldRules.
  * Use `create(FieldRulesSchema)` to create a new message.
@@ -213,6 +218,7 @@ export const FieldRulesSchema: GenMessage<FieldRules> = messageDesc(
   file_validate_validate,
   0,
 );
+
 /**
  * FloatRules describes the constraints applied to `float` values
  *
@@ -225,6 +231,7 @@ export type FloatRules = Message<"validate.FloatRules"> & {
    * @generated from field: optional float const = 1;
    */
   const: number;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -232,6 +239,7 @@ export type FloatRules = Message<"validate.FloatRules"> & {
    * @generated from field: optional float lt = 2;
    */
   lt: number;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -239,6 +247,7 @@ export type FloatRules = Message<"validate.FloatRules"> & {
    * @generated from field: optional float lte = 3;
    */
   lte: number;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -247,6 +256,7 @@ export type FloatRules = Message<"validate.FloatRules"> & {
    * @generated from field: optional float gt = 4;
    */
   gt: number;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -255,6 +265,7 @@ export type FloatRules = Message<"validate.FloatRules"> & {
    * @generated from field: optional float gte = 5;
    */
   gte: number;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -262,6 +273,7 @@ export type FloatRules = Message<"validate.FloatRules"> & {
    * @generated from field: repeated float in = 6;
    */
   in: number[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -269,6 +281,7 @@ export type FloatRules = Message<"validate.FloatRules"> & {
    * @generated from field: repeated float not_in = 7;
    */
   notIn: number[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -277,6 +290,7 @@ export type FloatRules = Message<"validate.FloatRules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.FloatRules.
  * Use `create(FloatRulesSchema)` to create a new message.
@@ -285,6 +299,7 @@ export const FloatRulesSchema: GenMessage<FloatRules> = messageDesc(
   file_validate_validate,
   1,
 );
+
 /**
  * DoubleRules describes the constraints applied to `double` values
  *
@@ -297,6 +312,7 @@ export type DoubleRules = Message<"validate.DoubleRules"> & {
    * @generated from field: optional double const = 1;
    */
   const: number;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -304,6 +320,7 @@ export type DoubleRules = Message<"validate.DoubleRules"> & {
    * @generated from field: optional double lt = 2;
    */
   lt: number;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -311,6 +328,7 @@ export type DoubleRules = Message<"validate.DoubleRules"> & {
    * @generated from field: optional double lte = 3;
    */
   lte: number;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -319,6 +337,7 @@ export type DoubleRules = Message<"validate.DoubleRules"> & {
    * @generated from field: optional double gt = 4;
    */
   gt: number;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -327,6 +346,7 @@ export type DoubleRules = Message<"validate.DoubleRules"> & {
    * @generated from field: optional double gte = 5;
    */
   gte: number;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -334,6 +354,7 @@ export type DoubleRules = Message<"validate.DoubleRules"> & {
    * @generated from field: repeated double in = 6;
    */
   in: number[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -341,6 +362,7 @@ export type DoubleRules = Message<"validate.DoubleRules"> & {
    * @generated from field: repeated double not_in = 7;
    */
   notIn: number[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -349,6 +371,7 @@ export type DoubleRules = Message<"validate.DoubleRules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.DoubleRules.
  * Use `create(DoubleRulesSchema)` to create a new message.
@@ -357,6 +380,7 @@ export const DoubleRulesSchema: GenMessage<DoubleRules> = messageDesc(
   file_validate_validate,
   2,
 );
+
 /**
  * Int32Rules describes the constraints applied to `int32` values
  *
@@ -369,6 +393,7 @@ export type Int32Rules = Message<"validate.Int32Rules"> & {
    * @generated from field: optional int32 const = 1;
    */
   const: number;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -376,6 +401,7 @@ export type Int32Rules = Message<"validate.Int32Rules"> & {
    * @generated from field: optional int32 lt = 2;
    */
   lt: number;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -383,6 +409,7 @@ export type Int32Rules = Message<"validate.Int32Rules"> & {
    * @generated from field: optional int32 lte = 3;
    */
   lte: number;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -391,6 +418,7 @@ export type Int32Rules = Message<"validate.Int32Rules"> & {
    * @generated from field: optional int32 gt = 4;
    */
   gt: number;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -399,6 +427,7 @@ export type Int32Rules = Message<"validate.Int32Rules"> & {
    * @generated from field: optional int32 gte = 5;
    */
   gte: number;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -406,6 +435,7 @@ export type Int32Rules = Message<"validate.Int32Rules"> & {
    * @generated from field: repeated int32 in = 6;
    */
   in: number[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -413,6 +443,7 @@ export type Int32Rules = Message<"validate.Int32Rules"> & {
    * @generated from field: repeated int32 not_in = 7;
    */
   notIn: number[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -421,6 +452,7 @@ export type Int32Rules = Message<"validate.Int32Rules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.Int32Rules.
  * Use `create(Int32RulesSchema)` to create a new message.
@@ -429,6 +461,7 @@ export const Int32RulesSchema: GenMessage<Int32Rules> = messageDesc(
   file_validate_validate,
   3,
 );
+
 /**
  * Int64Rules describes the constraints applied to `int64` values
  *
@@ -441,6 +474,7 @@ export type Int64Rules = Message<"validate.Int64Rules"> & {
    * @generated from field: optional int64 const = 1;
    */
   const: bigint;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -448,6 +482,7 @@ export type Int64Rules = Message<"validate.Int64Rules"> & {
    * @generated from field: optional int64 lt = 2;
    */
   lt: bigint;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -455,6 +490,7 @@ export type Int64Rules = Message<"validate.Int64Rules"> & {
    * @generated from field: optional int64 lte = 3;
    */
   lte: bigint;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -463,6 +499,7 @@ export type Int64Rules = Message<"validate.Int64Rules"> & {
    * @generated from field: optional int64 gt = 4;
    */
   gt: bigint;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -471,6 +508,7 @@ export type Int64Rules = Message<"validate.Int64Rules"> & {
    * @generated from field: optional int64 gte = 5;
    */
   gte: bigint;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -478,6 +516,7 @@ export type Int64Rules = Message<"validate.Int64Rules"> & {
    * @generated from field: repeated int64 in = 6;
    */
   in: bigint[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -485,6 +524,7 @@ export type Int64Rules = Message<"validate.Int64Rules"> & {
    * @generated from field: repeated int64 not_in = 7;
    */
   notIn: bigint[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -493,6 +533,7 @@ export type Int64Rules = Message<"validate.Int64Rules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.Int64Rules.
  * Use `create(Int64RulesSchema)` to create a new message.
@@ -501,6 +542,7 @@ export const Int64RulesSchema: GenMessage<Int64Rules> = messageDesc(
   file_validate_validate,
   4,
 );
+
 /**
  * UInt32Rules describes the constraints applied to `uint32` values
  *
@@ -513,6 +555,7 @@ export type UInt32Rules = Message<"validate.UInt32Rules"> & {
    * @generated from field: optional uint32 const = 1;
    */
   const: number;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -520,6 +563,7 @@ export type UInt32Rules = Message<"validate.UInt32Rules"> & {
    * @generated from field: optional uint32 lt = 2;
    */
   lt: number;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -527,6 +571,7 @@ export type UInt32Rules = Message<"validate.UInt32Rules"> & {
    * @generated from field: optional uint32 lte = 3;
    */
   lte: number;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -535,6 +580,7 @@ export type UInt32Rules = Message<"validate.UInt32Rules"> & {
    * @generated from field: optional uint32 gt = 4;
    */
   gt: number;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -543,6 +589,7 @@ export type UInt32Rules = Message<"validate.UInt32Rules"> & {
    * @generated from field: optional uint32 gte = 5;
    */
   gte: number;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -550,6 +597,7 @@ export type UInt32Rules = Message<"validate.UInt32Rules"> & {
    * @generated from field: repeated uint32 in = 6;
    */
   in: number[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -557,6 +605,7 @@ export type UInt32Rules = Message<"validate.UInt32Rules"> & {
    * @generated from field: repeated uint32 not_in = 7;
    */
   notIn: number[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -565,6 +614,7 @@ export type UInt32Rules = Message<"validate.UInt32Rules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.UInt32Rules.
  * Use `create(UInt32RulesSchema)` to create a new message.
@@ -573,6 +623,7 @@ export const UInt32RulesSchema: GenMessage<UInt32Rules> = messageDesc(
   file_validate_validate,
   5,
 );
+
 /**
  * UInt64Rules describes the constraints applied to `uint64` values
  *
@@ -585,6 +636,7 @@ export type UInt64Rules = Message<"validate.UInt64Rules"> & {
    * @generated from field: optional uint64 const = 1;
    */
   const: bigint;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -592,6 +644,7 @@ export type UInt64Rules = Message<"validate.UInt64Rules"> & {
    * @generated from field: optional uint64 lt = 2;
    */
   lt: bigint;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -599,6 +652,7 @@ export type UInt64Rules = Message<"validate.UInt64Rules"> & {
    * @generated from field: optional uint64 lte = 3;
    */
   lte: bigint;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -607,6 +661,7 @@ export type UInt64Rules = Message<"validate.UInt64Rules"> & {
    * @generated from field: optional uint64 gt = 4;
    */
   gt: bigint;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -615,6 +670,7 @@ export type UInt64Rules = Message<"validate.UInt64Rules"> & {
    * @generated from field: optional uint64 gte = 5;
    */
   gte: bigint;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -622,6 +678,7 @@ export type UInt64Rules = Message<"validate.UInt64Rules"> & {
    * @generated from field: repeated uint64 in = 6;
    */
   in: bigint[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -629,6 +686,7 @@ export type UInt64Rules = Message<"validate.UInt64Rules"> & {
    * @generated from field: repeated uint64 not_in = 7;
    */
   notIn: bigint[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -637,6 +695,7 @@ export type UInt64Rules = Message<"validate.UInt64Rules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.UInt64Rules.
  * Use `create(UInt64RulesSchema)` to create a new message.
@@ -645,6 +704,7 @@ export const UInt64RulesSchema: GenMessage<UInt64Rules> = messageDesc(
   file_validate_validate,
   6,
 );
+
 /**
  * SInt32Rules describes the constraints applied to `sint32` values
  *
@@ -657,6 +717,7 @@ export type SInt32Rules = Message<"validate.SInt32Rules"> & {
    * @generated from field: optional sint32 const = 1;
    */
   const: number;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -664,6 +725,7 @@ export type SInt32Rules = Message<"validate.SInt32Rules"> & {
    * @generated from field: optional sint32 lt = 2;
    */
   lt: number;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -671,6 +733,7 @@ export type SInt32Rules = Message<"validate.SInt32Rules"> & {
    * @generated from field: optional sint32 lte = 3;
    */
   lte: number;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -679,6 +742,7 @@ export type SInt32Rules = Message<"validate.SInt32Rules"> & {
    * @generated from field: optional sint32 gt = 4;
    */
   gt: number;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -687,6 +751,7 @@ export type SInt32Rules = Message<"validate.SInt32Rules"> & {
    * @generated from field: optional sint32 gte = 5;
    */
   gte: number;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -694,6 +759,7 @@ export type SInt32Rules = Message<"validate.SInt32Rules"> & {
    * @generated from field: repeated sint32 in = 6;
    */
   in: number[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -701,6 +767,7 @@ export type SInt32Rules = Message<"validate.SInt32Rules"> & {
    * @generated from field: repeated sint32 not_in = 7;
    */
   notIn: number[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -709,6 +776,7 @@ export type SInt32Rules = Message<"validate.SInt32Rules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.SInt32Rules.
  * Use `create(SInt32RulesSchema)` to create a new message.
@@ -717,6 +785,7 @@ export const SInt32RulesSchema: GenMessage<SInt32Rules> = messageDesc(
   file_validate_validate,
   7,
 );
+
 /**
  * SInt64Rules describes the constraints applied to `sint64` values
  *
@@ -729,6 +798,7 @@ export type SInt64Rules = Message<"validate.SInt64Rules"> & {
    * @generated from field: optional sint64 const = 1;
    */
   const: bigint;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -736,6 +806,7 @@ export type SInt64Rules = Message<"validate.SInt64Rules"> & {
    * @generated from field: optional sint64 lt = 2;
    */
   lt: bigint;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -743,6 +814,7 @@ export type SInt64Rules = Message<"validate.SInt64Rules"> & {
    * @generated from field: optional sint64 lte = 3;
    */
   lte: bigint;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -751,6 +823,7 @@ export type SInt64Rules = Message<"validate.SInt64Rules"> & {
    * @generated from field: optional sint64 gt = 4;
    */
   gt: bigint;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -759,6 +832,7 @@ export type SInt64Rules = Message<"validate.SInt64Rules"> & {
    * @generated from field: optional sint64 gte = 5;
    */
   gte: bigint;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -766,6 +840,7 @@ export type SInt64Rules = Message<"validate.SInt64Rules"> & {
    * @generated from field: repeated sint64 in = 6;
    */
   in: bigint[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -773,6 +848,7 @@ export type SInt64Rules = Message<"validate.SInt64Rules"> & {
    * @generated from field: repeated sint64 not_in = 7;
    */
   notIn: bigint[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -781,6 +857,7 @@ export type SInt64Rules = Message<"validate.SInt64Rules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.SInt64Rules.
  * Use `create(SInt64RulesSchema)` to create a new message.
@@ -789,6 +866,7 @@ export const SInt64RulesSchema: GenMessage<SInt64Rules> = messageDesc(
   file_validate_validate,
   8,
 );
+
 /**
  * Fixed32Rules describes the constraints applied to `fixed32` values
  *
@@ -801,6 +879,7 @@ export type Fixed32Rules = Message<"validate.Fixed32Rules"> & {
    * @generated from field: optional fixed32 const = 1;
    */
   const: number;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -808,6 +887,7 @@ export type Fixed32Rules = Message<"validate.Fixed32Rules"> & {
    * @generated from field: optional fixed32 lt = 2;
    */
   lt: number;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -815,6 +895,7 @@ export type Fixed32Rules = Message<"validate.Fixed32Rules"> & {
    * @generated from field: optional fixed32 lte = 3;
    */
   lte: number;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -823,6 +904,7 @@ export type Fixed32Rules = Message<"validate.Fixed32Rules"> & {
    * @generated from field: optional fixed32 gt = 4;
    */
   gt: number;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -831,6 +913,7 @@ export type Fixed32Rules = Message<"validate.Fixed32Rules"> & {
    * @generated from field: optional fixed32 gte = 5;
    */
   gte: number;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -838,6 +921,7 @@ export type Fixed32Rules = Message<"validate.Fixed32Rules"> & {
    * @generated from field: repeated fixed32 in = 6;
    */
   in: number[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -845,6 +929,7 @@ export type Fixed32Rules = Message<"validate.Fixed32Rules"> & {
    * @generated from field: repeated fixed32 not_in = 7;
    */
   notIn: number[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -853,6 +938,7 @@ export type Fixed32Rules = Message<"validate.Fixed32Rules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.Fixed32Rules.
  * Use `create(Fixed32RulesSchema)` to create a new message.
@@ -861,6 +947,7 @@ export const Fixed32RulesSchema: GenMessage<Fixed32Rules> = messageDesc(
   file_validate_validate,
   9,
 );
+
 /**
  * Fixed64Rules describes the constraints applied to `fixed64` values
  *
@@ -873,6 +960,7 @@ export type Fixed64Rules = Message<"validate.Fixed64Rules"> & {
    * @generated from field: optional fixed64 const = 1;
    */
   const: bigint;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -880,6 +968,7 @@ export type Fixed64Rules = Message<"validate.Fixed64Rules"> & {
    * @generated from field: optional fixed64 lt = 2;
    */
   lt: bigint;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -887,6 +976,7 @@ export type Fixed64Rules = Message<"validate.Fixed64Rules"> & {
    * @generated from field: optional fixed64 lte = 3;
    */
   lte: bigint;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -895,6 +985,7 @@ export type Fixed64Rules = Message<"validate.Fixed64Rules"> & {
    * @generated from field: optional fixed64 gt = 4;
    */
   gt: bigint;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -903,6 +994,7 @@ export type Fixed64Rules = Message<"validate.Fixed64Rules"> & {
    * @generated from field: optional fixed64 gte = 5;
    */
   gte: bigint;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -910,6 +1002,7 @@ export type Fixed64Rules = Message<"validate.Fixed64Rules"> & {
    * @generated from field: repeated fixed64 in = 6;
    */
   in: bigint[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -917,6 +1010,7 @@ export type Fixed64Rules = Message<"validate.Fixed64Rules"> & {
    * @generated from field: repeated fixed64 not_in = 7;
    */
   notIn: bigint[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -925,6 +1019,7 @@ export type Fixed64Rules = Message<"validate.Fixed64Rules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.Fixed64Rules.
  * Use `create(Fixed64RulesSchema)` to create a new message.
@@ -933,6 +1028,7 @@ export const Fixed64RulesSchema: GenMessage<Fixed64Rules> = messageDesc(
   file_validate_validate,
   10,
 );
+
 /**
  * SFixed32Rules describes the constraints applied to `sfixed32` values
  *
@@ -945,6 +1041,7 @@ export type SFixed32Rules = Message<"validate.SFixed32Rules"> & {
    * @generated from field: optional sfixed32 const = 1;
    */
   const: number;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -952,6 +1049,7 @@ export type SFixed32Rules = Message<"validate.SFixed32Rules"> & {
    * @generated from field: optional sfixed32 lt = 2;
    */
   lt: number;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -959,6 +1057,7 @@ export type SFixed32Rules = Message<"validate.SFixed32Rules"> & {
    * @generated from field: optional sfixed32 lte = 3;
    */
   lte: number;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -967,6 +1066,7 @@ export type SFixed32Rules = Message<"validate.SFixed32Rules"> & {
    * @generated from field: optional sfixed32 gt = 4;
    */
   gt: number;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -975,6 +1075,7 @@ export type SFixed32Rules = Message<"validate.SFixed32Rules"> & {
    * @generated from field: optional sfixed32 gte = 5;
    */
   gte: number;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -982,6 +1083,7 @@ export type SFixed32Rules = Message<"validate.SFixed32Rules"> & {
    * @generated from field: repeated sfixed32 in = 6;
    */
   in: number[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -989,6 +1091,7 @@ export type SFixed32Rules = Message<"validate.SFixed32Rules"> & {
    * @generated from field: repeated sfixed32 not_in = 7;
    */
   notIn: number[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -997,6 +1100,7 @@ export type SFixed32Rules = Message<"validate.SFixed32Rules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.SFixed32Rules.
  * Use `create(SFixed32RulesSchema)` to create a new message.
@@ -1005,6 +1109,7 @@ export const SFixed32RulesSchema: GenMessage<SFixed32Rules> = messageDesc(
   file_validate_validate,
   11,
 );
+
 /**
  * SFixed64Rules describes the constraints applied to `sfixed64` values
  *
@@ -1017,6 +1122,7 @@ export type SFixed64Rules = Message<"validate.SFixed64Rules"> & {
    * @generated from field: optional sfixed64 const = 1;
    */
   const: bigint;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -1024,6 +1130,7 @@ export type SFixed64Rules = Message<"validate.SFixed64Rules"> & {
    * @generated from field: optional sfixed64 lt = 2;
    */
   lt: bigint;
+
   /**
    * Lte specifies that this field must be less than or equal to the
    * specified value, inclusive
@@ -1031,6 +1138,7 @@ export type SFixed64Rules = Message<"validate.SFixed64Rules"> & {
    * @generated from field: optional sfixed64 lte = 3;
    */
   lte: bigint;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive. If the value of Gt is larger than a specified Lt or Lte, the
@@ -1039,6 +1147,7 @@ export type SFixed64Rules = Message<"validate.SFixed64Rules"> & {
    * @generated from field: optional sfixed64 gt = 4;
    */
   gt: bigint;
+
   /**
    * Gte specifies that this field must be greater than or equal to the
    * specified value, inclusive. If the value of Gte is larger than a
@@ -1047,6 +1156,7 @@ export type SFixed64Rules = Message<"validate.SFixed64Rules"> & {
    * @generated from field: optional sfixed64 gte = 5;
    */
   gte: bigint;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -1054,6 +1164,7 @@ export type SFixed64Rules = Message<"validate.SFixed64Rules"> & {
    * @generated from field: repeated sfixed64 in = 6;
    */
   in: bigint[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -1061,6 +1172,7 @@ export type SFixed64Rules = Message<"validate.SFixed64Rules"> & {
    * @generated from field: repeated sfixed64 not_in = 7;
    */
   notIn: bigint[];
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -1069,6 +1181,7 @@ export type SFixed64Rules = Message<"validate.SFixed64Rules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.SFixed64Rules.
  * Use `create(SFixed64RulesSchema)` to create a new message.
@@ -1077,6 +1190,7 @@ export const SFixed64RulesSchema: GenMessage<SFixed64Rules> = messageDesc(
   file_validate_validate,
   12,
 );
+
 /**
  * BoolRules describes the constraints applied to `bool` values
  *
@@ -1090,6 +1204,7 @@ export type BoolRules = Message<"validate.BoolRules"> & {
    */
   const: boolean;
 };
+
 /**
  * Describes the message validate.BoolRules.
  * Use `create(BoolRulesSchema)` to create a new message.
@@ -1098,6 +1213,7 @@ export const BoolRulesSchema: GenMessage<BoolRules> = messageDesc(
   file_validate_validate,
   13,
 );
+
 /**
  * StringRules describe the constraints applied to `string` values
  *
@@ -1110,6 +1226,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional string const = 1;
    */
   const: string;
+
   /**
    * Len specifies that this field must be the specified number of
    * characters (Unicode code points). Note that the number of
@@ -1118,6 +1235,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional uint64 len = 19;
    */
   len: bigint;
+
   /**
    * MinLen specifies that this field must be the specified number of
    * characters (Unicode code points) at a minimum. Note that the number of
@@ -1126,6 +1244,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional uint64 min_len = 2;
    */
   minLen: bigint;
+
   /**
    * MaxLen specifies that this field must be the specified number of
    * characters (Unicode code points) at a maximum. Note that the number of
@@ -1134,12 +1253,14 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional uint64 max_len = 3;
    */
   maxLen: bigint;
+
   /**
    * LenBytes specifies that this field must be the specified number of bytes
    *
    * @generated from field: optional uint64 len_bytes = 20;
    */
   lenBytes: bigint;
+
   /**
    * MinBytes specifies that this field must be the specified number of bytes
    * at a minimum
@@ -1147,6 +1268,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional uint64 min_bytes = 4;
    */
   minBytes: bigint;
+
   /**
    * MaxBytes specifies that this field must be the specified number of bytes
    * at a maximum
@@ -1154,6 +1276,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional uint64 max_bytes = 5;
    */
   maxBytes: bigint;
+
   /**
    * Pattern specifies that this field must match against the specified
    * regular expression (RE2 syntax). The included expression should elide
@@ -1162,6 +1285,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional string pattern = 6;
    */
   pattern: string;
+
   /**
    * Prefix specifies that this field must have the specified substring at
    * the beginning of the string.
@@ -1169,6 +1293,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional string prefix = 7;
    */
   prefix: string;
+
   /**
    * Suffix specifies that this field must have the specified substring at
    * the end of the string.
@@ -1176,6 +1301,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional string suffix = 8;
    */
   suffix: string;
+
   /**
    * Contains specifies that this field must have the specified substring
    * anywhere in the string.
@@ -1183,6 +1309,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional string contains = 9;
    */
   contains: string;
+
   /**
    * NotContains specifies that this field cannot have the specified substring
    * anywhere in the string.
@@ -1190,6 +1317,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional string not_contains = 23;
    */
   notContains: string;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -1197,6 +1325,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: repeated string in = 10;
    */
   in: string[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -1204,6 +1333,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: repeated string not_in = 11;
    */
   notIn: string[];
+
   /**
    * WellKnown rules provide advanced constraints against common string
    * patterns
@@ -1313,6 +1443,7 @@ export type StringRules = Message<"validate.StringRules"> & {
         case: "wellKnownRegex";
       }
     | { case: undefined; value?: undefined };
+
   /**
    * This applies to regexes HTTP_HEADER_NAME and HTTP_HEADER_VALUE to enable
    * strict header validation.
@@ -1323,6 +1454,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    * @generated from field: optional bool strict = 25 [default = true];
    */
   strict: boolean;
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -1331,6 +1463,7 @@ export type StringRules = Message<"validate.StringRules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.StringRules.
  * Use `create(StringRulesSchema)` to create a new message.
@@ -1339,6 +1472,7 @@ export const StringRulesSchema: GenMessage<StringRules> = messageDesc(
   file_validate_validate,
   14,
 );
+
 /**
  * BytesRules describe the constraints applied to `bytes` values
  *
@@ -1351,12 +1485,14 @@ export type BytesRules = Message<"validate.BytesRules"> & {
    * @generated from field: optional bytes const = 1;
    */
   const: Uint8Array;
+
   /**
    * Len specifies that this field must be the specified number of bytes
    *
    * @generated from field: optional uint64 len = 13;
    */
   len: bigint;
+
   /**
    * MinLen specifies that this field must be the specified number of bytes
    * at a minimum
@@ -1364,6 +1500,7 @@ export type BytesRules = Message<"validate.BytesRules"> & {
    * @generated from field: optional uint64 min_len = 2;
    */
   minLen: bigint;
+
   /**
    * MaxLen specifies that this field must be the specified number of bytes
    * at a maximum
@@ -1371,6 +1508,7 @@ export type BytesRules = Message<"validate.BytesRules"> & {
    * @generated from field: optional uint64 max_len = 3;
    */
   maxLen: bigint;
+
   /**
    * Pattern specifies that this field must match against the specified
    * regular expression (RE2 syntax). The included expression should elide
@@ -1379,6 +1517,7 @@ export type BytesRules = Message<"validate.BytesRules"> & {
    * @generated from field: optional string pattern = 4;
    */
   pattern: string;
+
   /**
    * Prefix specifies that this field must have the specified bytes at the
    * beginning of the string.
@@ -1386,6 +1525,7 @@ export type BytesRules = Message<"validate.BytesRules"> & {
    * @generated from field: optional bytes prefix = 5;
    */
   prefix: Uint8Array;
+
   /**
    * Suffix specifies that this field must have the specified bytes at the
    * end of the string.
@@ -1393,6 +1533,7 @@ export type BytesRules = Message<"validate.BytesRules"> & {
    * @generated from field: optional bytes suffix = 6;
    */
   suffix: Uint8Array;
+
   /**
    * Contains specifies that this field must have the specified bytes
    * anywhere in the string.
@@ -1400,6 +1541,7 @@ export type BytesRules = Message<"validate.BytesRules"> & {
    * @generated from field: optional bytes contains = 7;
    */
   contains: Uint8Array;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -1407,6 +1549,7 @@ export type BytesRules = Message<"validate.BytesRules"> & {
    * @generated from field: repeated bytes in = 8;
    */
   in: Uint8Array[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -1414,6 +1557,7 @@ export type BytesRules = Message<"validate.BytesRules"> & {
    * @generated from field: repeated bytes not_in = 9;
    */
   notIn: Uint8Array[];
+
   /**
    * WellKnown rules provide advanced constraints against common byte
    * patterns
@@ -1452,6 +1596,7 @@ export type BytesRules = Message<"validate.BytesRules"> & {
         case: "ipv6";
       }
     | { case: undefined; value?: undefined };
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -1460,6 +1605,7 @@ export type BytesRules = Message<"validate.BytesRules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.BytesRules.
  * Use `create(BytesRulesSchema)` to create a new message.
@@ -1468,6 +1614,7 @@ export const BytesRulesSchema: GenMessage<BytesRules> = messageDesc(
   file_validate_validate,
   15,
 );
+
 /**
  * EnumRules describe the constraints applied to enum values
  *
@@ -1480,6 +1627,7 @@ export type EnumRules = Message<"validate.EnumRules"> & {
    * @generated from field: optional int32 const = 1;
    */
   const: number;
+
   /**
    * DefinedOnly specifies that this field must be only one of the defined
    * values for this enum, failing on any undefined value.
@@ -1487,6 +1635,7 @@ export type EnumRules = Message<"validate.EnumRules"> & {
    * @generated from field: optional bool defined_only = 2;
    */
   definedOnly: boolean;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -1494,6 +1643,7 @@ export type EnumRules = Message<"validate.EnumRules"> & {
    * @generated from field: repeated int32 in = 3;
    */
   in: number[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -1502,6 +1652,7 @@ export type EnumRules = Message<"validate.EnumRules"> & {
    */
   notIn: number[];
 };
+
 /**
  * Describes the message validate.EnumRules.
  * Use `create(EnumRulesSchema)` to create a new message.
@@ -1510,6 +1661,7 @@ export const EnumRulesSchema: GenMessage<EnumRules> = messageDesc(
   file_validate_validate,
   16,
 );
+
 /**
  * MessageRules describe the constraints applied to embedded message values.
  * For message-type fields, validation is performed recursively.
@@ -1524,6 +1676,7 @@ export type MessageRules = Message<"validate.MessageRules"> & {
    * @generated from field: optional bool skip = 1;
    */
   skip: boolean;
+
   /**
    * Required specifies that this field must be set
    *
@@ -1531,6 +1684,7 @@ export type MessageRules = Message<"validate.MessageRules"> & {
    */
   required: boolean;
 };
+
 /**
  * Describes the message validate.MessageRules.
  * Use `create(MessageRulesSchema)` to create a new message.
@@ -1539,6 +1693,7 @@ export const MessageRulesSchema: GenMessage<MessageRules> = messageDesc(
   file_validate_validate,
   17,
 );
+
 /**
  * RepeatedRules describe the constraints applied to `repeated` values
  *
@@ -1552,6 +1707,7 @@ export type RepeatedRules = Message<"validate.RepeatedRules"> & {
    * @generated from field: optional uint64 min_items = 1;
    */
   minItems: bigint;
+
   /**
    * MaxItems specifies that this field must have the specified number of
    * items at a maximum
@@ -1559,6 +1715,7 @@ export type RepeatedRules = Message<"validate.RepeatedRules"> & {
    * @generated from field: optional uint64 max_items = 2;
    */
   maxItems: bigint;
+
   /**
    * Unique specifies that all elements in this field must be unique. This
    * constraint is only applicable to scalar and enum types (messages are not
@@ -1567,6 +1724,7 @@ export type RepeatedRules = Message<"validate.RepeatedRules"> & {
    * @generated from field: optional bool unique = 3;
    */
   unique: boolean;
+
   /**
    * Items specifies the constraints to be applied to each item in the field.
    * Repeated message fields will still execute validation against each item
@@ -1575,6 +1733,7 @@ export type RepeatedRules = Message<"validate.RepeatedRules"> & {
    * @generated from field: optional validate.FieldRules items = 4;
    */
   items?: FieldRules;
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -1583,6 +1742,7 @@ export type RepeatedRules = Message<"validate.RepeatedRules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.RepeatedRules.
  * Use `create(RepeatedRulesSchema)` to create a new message.
@@ -1591,6 +1751,7 @@ export const RepeatedRulesSchema: GenMessage<RepeatedRules> = messageDesc(
   file_validate_validate,
   18,
 );
+
 /**
  * MapRules describe the constraints applied to `map` values
  *
@@ -1604,6 +1765,7 @@ export type MapRules = Message<"validate.MapRules"> & {
    * @generated from field: optional uint64 min_pairs = 1;
    */
   minPairs: bigint;
+
   /**
    * MaxPairs specifies that this field must have the specified number of
    * KVs at a maximum
@@ -1611,6 +1773,7 @@ export type MapRules = Message<"validate.MapRules"> & {
    * @generated from field: optional uint64 max_pairs = 2;
    */
   maxPairs: bigint;
+
   /**
    * NoSparse specifies values in this field cannot be unset. This only
    * applies to map's with message value types.
@@ -1618,12 +1781,14 @@ export type MapRules = Message<"validate.MapRules"> & {
    * @generated from field: optional bool no_sparse = 3;
    */
   noSparse: boolean;
+
   /**
    * Keys specifies the constraints to be applied to each key in the field.
    *
    * @generated from field: optional validate.FieldRules keys = 4;
    */
   keys?: FieldRules;
+
   /**
    * Values specifies the constraints to be applied to the value of each key
    * in the field. Message values will still have their validations evaluated
@@ -1632,6 +1797,7 @@ export type MapRules = Message<"validate.MapRules"> & {
    * @generated from field: optional validate.FieldRules values = 5;
    */
   values?: FieldRules;
+
   /**
    * IgnoreEmpty specifies that the validation rules of this field should be
    * evaluated only if the field is not empty
@@ -1640,6 +1806,7 @@ export type MapRules = Message<"validate.MapRules"> & {
    */
   ignoreEmpty: boolean;
 };
+
 /**
  * Describes the message validate.MapRules.
  * Use `create(MapRulesSchema)` to create a new message.
@@ -1648,6 +1815,7 @@ export const MapRulesSchema: GenMessage<MapRules> = messageDesc(
   file_validate_validate,
   19,
 );
+
 /**
  * AnyRules describe constraints applied exclusively to the
  * `google.protobuf.Any` well-known type
@@ -1661,6 +1829,7 @@ export type AnyRules = Message<"validate.AnyRules"> & {
    * @generated from field: optional bool required = 1;
    */
   required: boolean;
+
   /**
    * In specifies that this field's `type_url` must be equal to one of the
    * specified values.
@@ -1668,6 +1837,7 @@ export type AnyRules = Message<"validate.AnyRules"> & {
    * @generated from field: repeated string in = 2;
    */
   in: string[];
+
   /**
    * NotIn specifies that this field's `type_url` must not be equal to any of
    * the specified values.
@@ -1676,6 +1846,7 @@ export type AnyRules = Message<"validate.AnyRules"> & {
    */
   notIn: string[];
 };
+
 /**
  * Describes the message validate.AnyRules.
  * Use `create(AnyRulesSchema)` to create a new message.
@@ -1684,6 +1855,7 @@ export const AnyRulesSchema: GenMessage<AnyRules> = messageDesc(
   file_validate_validate,
   20,
 );
+
 /**
  * DurationRules describe the constraints applied exclusively to the
  * `google.protobuf.Duration` well-known type
@@ -1697,12 +1869,14 @@ export type DurationRules = Message<"validate.DurationRules"> & {
    * @generated from field: optional bool required = 1;
    */
   required: boolean;
+
   /**
    * Const specifies that this field must be exactly the specified value
    *
    * @generated from field: optional google.protobuf.Duration const = 2;
    */
   const?: Duration;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -1710,6 +1884,7 @@ export type DurationRules = Message<"validate.DurationRules"> & {
    * @generated from field: optional google.protobuf.Duration lt = 3;
    */
   lt?: Duration;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * inclusive
@@ -1717,6 +1892,7 @@ export type DurationRules = Message<"validate.DurationRules"> & {
    * @generated from field: optional google.protobuf.Duration lte = 4;
    */
   lte?: Duration;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive
@@ -1724,6 +1900,7 @@ export type DurationRules = Message<"validate.DurationRules"> & {
    * @generated from field: optional google.protobuf.Duration gt = 5;
    */
   gt?: Duration;
+
   /**
    * Gte specifies that this field must be greater than the specified value,
    * inclusive
@@ -1731,6 +1908,7 @@ export type DurationRules = Message<"validate.DurationRules"> & {
    * @generated from field: optional google.protobuf.Duration gte = 6;
    */
   gte?: Duration;
+
   /**
    * In specifies that this field must be equal to one of the specified
    * values
@@ -1738,6 +1916,7 @@ export type DurationRules = Message<"validate.DurationRules"> & {
    * @generated from field: repeated google.protobuf.Duration in = 7;
    */
   in: Duration[];
+
   /**
    * NotIn specifies that this field cannot be equal to one of the specified
    * values
@@ -1746,6 +1925,7 @@ export type DurationRules = Message<"validate.DurationRules"> & {
    */
   notIn: Duration[];
 };
+
 /**
  * Describes the message validate.DurationRules.
  * Use `create(DurationRulesSchema)` to create a new message.
@@ -1754,6 +1934,7 @@ export const DurationRulesSchema: GenMessage<DurationRules> = messageDesc(
   file_validate_validate,
   21,
 );
+
 /**
  * TimestampRules describe the constraints applied exclusively to the
  * `google.protobuf.Timestamp` well-known type
@@ -1767,12 +1948,14 @@ export type TimestampRules = Message<"validate.TimestampRules"> & {
    * @generated from field: optional bool required = 1;
    */
   required: boolean;
+
   /**
    * Const specifies that this field must be exactly the specified value
    *
    * @generated from field: optional google.protobuf.Timestamp const = 2;
    */
   const?: Timestamp;
+
   /**
    * Lt specifies that this field must be less than the specified value,
    * exclusive
@@ -1780,6 +1963,7 @@ export type TimestampRules = Message<"validate.TimestampRules"> & {
    * @generated from field: optional google.protobuf.Timestamp lt = 3;
    */
   lt?: Timestamp;
+
   /**
    * Lte specifies that this field must be less than the specified value,
    * inclusive
@@ -1787,6 +1971,7 @@ export type TimestampRules = Message<"validate.TimestampRules"> & {
    * @generated from field: optional google.protobuf.Timestamp lte = 4;
    */
   lte?: Timestamp;
+
   /**
    * Gt specifies that this field must be greater than the specified value,
    * exclusive
@@ -1794,6 +1979,7 @@ export type TimestampRules = Message<"validate.TimestampRules"> & {
    * @generated from field: optional google.protobuf.Timestamp gt = 5;
    */
   gt?: Timestamp;
+
   /**
    * Gte specifies that this field must be greater than the specified value,
    * inclusive
@@ -1801,6 +1987,7 @@ export type TimestampRules = Message<"validate.TimestampRules"> & {
    * @generated from field: optional google.protobuf.Timestamp gte = 6;
    */
   gte?: Timestamp;
+
   /**
    * LtNow specifies that this must be less than the current time. LtNow
    * can only be used with the Within rule.
@@ -1808,6 +1995,7 @@ export type TimestampRules = Message<"validate.TimestampRules"> & {
    * @generated from field: optional bool lt_now = 7;
    */
   ltNow: boolean;
+
   /**
    * GtNow specifies that this must be greater than the current time. GtNow
    * can only be used with the Within rule.
@@ -1815,6 +2003,7 @@ export type TimestampRules = Message<"validate.TimestampRules"> & {
    * @generated from field: optional bool gt_now = 8;
    */
   gtNow: boolean;
+
   /**
    * Within specifies that this field must be within this duration of the
    * current time. This constraint can be used alone or with the LtNow and
@@ -1824,6 +2013,7 @@ export type TimestampRules = Message<"validate.TimestampRules"> & {
    */
   within?: Duration;
 };
+
 /**
  * Describes the message validate.TimestampRules.
  * Use `create(TimestampRulesSchema)` to create a new message.
@@ -1832,6 +2022,7 @@ export const TimestampRulesSchema: GenMessage<TimestampRules> = messageDesc(
   file_validate_validate,
   22,
 );
+
 /**
  * WellKnownRegex contain some well-known patterns.
  *
@@ -1842,12 +2033,14 @@ export enum KnownRegex {
    * @generated from enum value: UNKNOWN = 0;
    */
   UNKNOWN = 0,
+
   /**
    * HTTP header name as defined by RFC 7230.
    *
    * @generated from enum value: HTTP_HEADER_NAME = 1;
    */
   HTTP_HEADER_NAME = 1,
+
   /**
    * HTTP header value as defined by RFC 7230.
    *
@@ -1855,6 +2048,7 @@ export enum KnownRegex {
    */
   HTTP_HEADER_VALUE = 2,
 }
+
 /**
  * Describes the enum validate.KnownRegex.
  */
@@ -1862,6 +2056,7 @@ export const KnownRegexSchema: GenEnum<KnownRegex> = enumDesc(
   file_validate_validate,
   0,
 );
+
 /**
  * Disabled nullifies any validation rules for this message, including any
  * message fields associated with it that do support validation.
@@ -1872,6 +2067,7 @@ export const disabled: GenExtension<MessageOptions, boolean> = extDesc(
   file_validate_validate,
   0,
 );
+
 /**
  * Ignore skips generation of validation methods for this message.
  *
@@ -1881,6 +2077,7 @@ export const ignored: GenExtension<MessageOptions, boolean> = extDesc(
   file_validate_validate,
   1,
 );
+
 /**
  * Required ensures that exactly one the field options in a oneof is set;
  * validation fails if no fields in the oneof are set.
@@ -1891,6 +2088,7 @@ export const required: GenExtension<OneofOptions, boolean> = extDesc(
   file_validate_validate,
   2,
 );
+
 /**
  * Rules specify the validations to be performed on this field. By default,
  * no validation is performed against a field.

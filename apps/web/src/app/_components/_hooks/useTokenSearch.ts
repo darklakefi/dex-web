@@ -1,5 +1,4 @@
-import { QUERY_CONFIG, tanstackClient } from "@dex-web/orpc";
-import type { UseSuspenseQueryResult } from "@tanstack/react-query";
+import { QUERY_CONFIG, tanstackClient, tokenQueryKeys } from "@dex-web/orpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import {
@@ -34,7 +33,7 @@ export interface TokenSearchResult {
  * - MiniSearch index is created once and memoized (not recreated on every search)
  * - Query is debounced at call site (via debouncedQuery parameter)
  * - Only necessary fields are stored in search index
- * - Results are cached via React Query
+ * - Results are cached via React Query with dedicated search cache (5min staleTime)
  *
  * Search features (powered by MiniSearch):
  * - Field boosting: Symbol (3x) > Name (2x) > Address (1x)
@@ -46,9 +45,16 @@ export interface TokenSearchResult {
  * @param {string} debouncedQuery - The debounced search query
  * @returns Query result with MiniSearch-sorted token data (most relevant first)
  */
-export function useTokenSearch(
-  debouncedQuery: string,
-): UseSuspenseQueryResult<TokenSearchResult, Error> {
+export function useTokenSearch(debouncedQuery: string): {
+  data: TokenSearchResult;
+  error: unknown;
+  isError: boolean;
+  isPending: boolean;
+  isLoading: boolean;
+  isSuccess: boolean;
+  status: "pending" | "error" | "success";
+  refetch: () => void;
+} {
   const queryInput = useMemo(() => {
     const trimmedQuery = debouncedQuery.trim();
 
@@ -80,10 +86,15 @@ export function useTokenSearch(
     }),
     gcTime: debouncedQuery
       ? QUERY_CONFIG.tokenSearch.gcTime
-      : QUERY_CONFIG.tokens.gcTime,
+      : QUERY_CONFIG.tokenMetadata.gcTime,
+    queryKey: tokenQueryKeys.search.query(
+      debouncedQuery,
+      TOKEN_SEARCH_FETCH_SIZE,
+    ),
+    retry: QUERY_CONFIG.tokenSearch.retry,
     staleTime: debouncedQuery
       ? QUERY_CONFIG.tokenSearch.staleTime
-      : QUERY_CONFIG.tokens.staleTime,
+      : QUERY_CONFIG.tokenMetadata.staleTime,
   });
 
   const allTokens = useMemo(
@@ -108,14 +119,25 @@ export function useTokenSearch(
     [miniSearch, allTokens, debouncedQuery],
   );
 
-  return {
-    ...queryResult,
-    data: {
+  const data: TokenSearchResult = useMemo(
+    () => ({
       hasMore:
         queryResult.data.currentPage < queryResult.data.totalPages ||
         searchResults.length > TOKEN_SEARCH_DISPLAY_SIZE,
       tokens: searchResults.slice(0, TOKEN_SEARCH_DISPLAY_SIZE),
       total: searchResults.length,
-    },
+    }),
+    [queryResult.data.currentPage, queryResult.data.totalPages, searchResults],
+  );
+
+  return {
+    data,
+    error: queryResult.error,
+    isError: queryResult.isError,
+    isLoading: queryResult.isLoading,
+    isPending: queryResult.isPending,
+    isSuccess: queryResult.isSuccess,
+    refetch: queryResult.refetch,
+    status: queryResult.status,
   };
 }

@@ -1,3 +1,4 @@
+import BigNumber from "bignumber.js";
 import type {
   PoolDetails,
   UseRealtimeTokenAccountsReturn,
@@ -35,10 +36,10 @@ export function selectLiquidityViewState(
 ): LiquidityViewState {
   const shouldShowAddLiquidityDetails =
     Boolean(poolDetails) &&
-    tokenBAmount !== "0" &&
-    tokenAAmount !== "0" &&
+    tokenAAmount !== "" &&
     tokenBAmount !== "" &&
-    tokenAAmount !== "";
+    BigNumber(tokenAAmount).gt(0) &&
+    BigNumber(tokenBAmount).gt(0);
 
   const isInitialLoading =
     !tokenAAddress ||

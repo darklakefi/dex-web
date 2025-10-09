@@ -44,7 +44,7 @@ export async function getAllPoolsHandler(
     const accounts = await connection.getProgramAccounts(EXCHANGE_PROGRAM_ID, {
       filters: [
         {
-          dataSize: 232,
+          dataSize: 289,
         },
       ],
     });
@@ -68,8 +68,8 @@ export async function getAllPoolsHandler(
             lpTokenSupply: pool.token_lp_supply.toString(),
             protocolFeeX: pool.protocol_fee_x.toString(),
             protocolFeeY: pool.protocol_fee_y.toString(),
-            tokenXMint: pool.reserve_x.toBase58(),
-            tokenYMint: pool.reserve_y.toBase58(),
+            tokenXMint: pool.token_mint_x.toBase58(),
+            tokenYMint: pool.token_mint_y.toBase58(),
             userLockedX: pool.user_locked_x.toString(),
             userLockedY: pool.user_locked_y.toString(),
           };

@@ -30,8 +30,8 @@ const DEFAULT_MESSAGES: Record<TransactionType, TransactionMessages> = {
     step2Title: "Confirm liquidity [2/3]",
     step3Description: "Submitting liquidity transaction to Solana network.",
     step3Title: "Confirming transaction [3/3]",
-    successDescription: "Liquidity added successfully!",
-    successTitle: "Success",
+    successDescription: "Your liquidity has been added to the pool.",
+    successTitle: "CONFIRMED / DEPOSITED LIQUIDITY",
   },
   createPool: {
     step2Description:
@@ -39,8 +39,8 @@ const DEFAULT_MESSAGES: Record<TransactionType, TransactionMessages> = {
     step2Title: "Confirm pool creation [2/3]",
     step3Description: "Submitting pool creation transaction to Solana network.",
     step3Title: "Confirming transaction [3/3]",
-    successDescription: "Pool created successfully!",
-    successTitle: "Success",
+    successDescription: "Your pool has been created successfully.",
+    successTitle: "CONFIRMED / CREATED POOL",
   },
 };
 
@@ -142,7 +142,7 @@ export async function requestTransactionSigning({
 
     toast({
       description: userMessage,
-      title: isWarning ? "Transaction Warning" : "Signing Error",
+      title: isWarning ? "Transaction Warning" : "FAILED",
       variant: isWarning ? "warning" : "error",
     });
 

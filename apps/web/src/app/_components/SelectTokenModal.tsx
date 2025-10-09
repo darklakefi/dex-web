@@ -13,7 +13,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { Suspense, useCallback, useState } from "react";
 import * as z from "zod";
-import { logger } from "../../utils/logger";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { TokenSelectorContent } from "./_hooks/TokenSelectorContent";
 import { useRecentTokens } from "./_hooks/useRecentTokens";
@@ -40,9 +39,7 @@ const formConfig = {
   defaultValues: {
     query: "",
   },
-  onSubmit: ({ value }: { value: { query: string } }) => {
-    logger.log(value);
-  },
+  onSubmit: () => {},
   validators: {
     onBlur: ({ value }: { value: { query: string } }) =>
       selectTokenModalFormSchema.parse(value),

@@ -5,7 +5,7 @@ import {
   type CalculateProportionalAmountParams,
   calculateProportionalAmount,
 } from "@dex-web/utils";
-import { Field } from "@tanstack/react-form";
+import { Field, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
@@ -17,6 +17,7 @@ import {
 import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
 import { useLiquidityFormLogic } from "../_hooks/useLiquidityFormLogic";
 import { useLPTokenEstimation } from "../_hooks/useLPTokenEstimation";
+import { useTokenOrder } from "../_hooks/useTokenOrder";
 import {
   createPoolUrl,
   selectLiquidityViewState,
@@ -45,33 +46,52 @@ export function LiquidityForm() {
     tokenAccountsData,
     publicKey,
     isCalculating,
-    isError,
     isPoolLoading,
     isSubmitting,
-    isSuccess,
     send,
   } = useLiquidityFormLogic({
     tokenAAddress,
     tokenBAddress,
   });
 
+  const tokenAAmount = useStore(
+    form.store,
+    (state) => state.values[FORM_FIELD_NAMES.TOKEN_A_AMOUNT] || "0",
+  );
+  const tokenBAmount = useStore(
+    form.store,
+    (state) => state.values[FORM_FIELD_NAMES.TOKEN_B_AMOUNT] || "0",
+  );
+  const slippage = useStore(
+    form.store,
+    (state) => state.values[FORM_FIELD_NAMES.SLIPPAGE] || "0.5",
+  );
+
   const viewState = selectLiquidityViewState(
     poolDetails ?? null,
-    form.state.values.tokenAAmount,
-    form.state.values.tokenBAmount,
+    tokenAAmount,
+    tokenBAmount,
     tokenAAddress,
     tokenBAddress,
     tokenAccountsData,
     isPoolLoading,
   );
 
+  const tokenADecimals =
+    tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]?.decimals ?? 0;
+  const tokenBDecimals =
+    tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]?.decimals ?? 0;
+
+  const orderContext = useTokenOrder();
+
   const lpEstimation = useLPTokenEstimation({
-    enabled: Boolean(poolDetails && tokenAAddress && tokenBAddress),
-    slippage: form.state.values.slippage,
-    tokenAAddress,
-    tokenAAmount: form.state.values.tokenAAmount || "0",
-    tokenBAddress,
-    tokenBAmount: form.state.values.tokenBAmount || "0",
+    enabled: !!poolDetails && !!orderContext,
+    orderContext,
+    slippage,
+    tokenAAmount,
+    tokenADecimals,
+    tokenBAmount,
+    tokenBDecimals,
   });
 
   if (viewState.isInitialLoading) {
@@ -105,14 +125,6 @@ export function LiquidityForm() {
                   >,
                 ) => {
                   if (!poolDetails) return null;
-
-                  const tokenADecimals =
-                    tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
-                      ?.decimals ?? 0;
-                  const tokenBDecimals =
-                    tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]
-                      ?.decimals ?? 0;
-
                   return calculateProportionalAmount({
                     ...params,
                     poolDetails,
@@ -121,7 +133,7 @@ export function LiquidityForm() {
                   });
                 }}
                 form={form}
-                isDisabled={isSuccess || isError}
+                isDisabled={false}
                 isLoadingBuy={tokenAccountsData.isLoadingBuy}
                 isLoadingSell={tokenAccountsData.isLoadingSell}
                 isRefreshingBuy={tokenAccountsData.isRefreshingBuy}
@@ -138,15 +150,12 @@ export function LiquidityForm() {
                 buyTokenAccount={tokenAccountsData.buyTokenAccount}
                 form={form}
                 isCalculating={isCalculating}
-                isError={isError}
                 isPoolLoading={isPoolLoading}
                 isSubmitting={isSubmitting}
-                isSuccess={isSuccess}
                 isTokenAccountsLoading={
                   tokenAccountsData.isLoadingBuy ||
                   tokenAccountsData.isLoadingSell
                 }
-                onReset={() => send({ type: "RESET" })}
                 poolDetails={poolDetails ?? null}
                 publicKey={publicKey}
                 sellTokenAccount={tokenAccountsData.sellTokenAccount}
@@ -163,15 +172,13 @@ export function LiquidityForm() {
             ) : (
               <AddLiquidityDetails
                 estimatedLPTokens={lpEstimation.data?.estimatedLPTokens || ""}
+                form={form}
                 isLPEstimationLoading={lpEstimation.isLoading}
-                slippage={form.state.values.slippage || "0.5"}
-                tokenAAmount={form.state.values.tokenAAmount}
                 tokenASymbol={
                   tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
                     ?.symbol || ""
                 }
                 tokenBAddress={tokenBAddress ?? ""}
-                tokenBAmount={form.state.values.tokenBAmount}
                 tokenBSymbol={
                   tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]
                     ?.symbol || ""

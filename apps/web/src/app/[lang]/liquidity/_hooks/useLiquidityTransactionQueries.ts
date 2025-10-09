@@ -11,11 +11,18 @@ export function useLiquidityTransactionQueries() {
 
   const invalidateQueries = useCallback(
     async (walletPublicKey: PublicKey, poolDetails: PoolDetails) => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       await queryClient.invalidateQueries({
         queryKey: queryKeys.liquidity.user(
           walletPublicKey.toBase58(),
           poolDetails.tokenXMint,
           poolDetails.tokenYMint,
+        ),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.liquidity.allUserPositions(
+          walletPublicKey.toBase58(),
         ),
       });
       await queryClient.invalidateQueries({

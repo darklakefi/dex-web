@@ -1,8 +1,8 @@
 import * as z from "zod";
-import { getSwapHandler } from "../../handlers/dex-gateway/getSwap.handler";
+import { createUnsignedTransactionHandler } from "../../handlers/dex-gateway/createUnsignedTransaction.handler";
 import { baseProcedure } from "../base.procedure";
 
-const getSwapInputSchema = z.object({
+const createUnsignedTransactionInputSchema = z.object({
   $typeName: z
     .literal("darklake.v1.CreateUnsignedTransactionRequest")
     .default("darklake.v1.CreateUnsignedTransactionRequest"),
@@ -17,8 +17,8 @@ const getSwapInputSchema = z.object({
   userAddress: z.string(),
 });
 
-export const getSwap = baseProcedure
-  .input(getSwapInputSchema)
+export const createUnsignedTransaction = baseProcedure
+  .input(createUnsignedTransactionInputSchema)
   .handler(async ({ input }) => {
-    return await getSwapHandler(input);
+    return await createUnsignedTransactionHandler(input);
   });

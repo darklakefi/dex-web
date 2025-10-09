@@ -431,7 +431,7 @@ export function SwapForm() {
         .multipliedBy(slippageFactor)
         .integerValue(BigNumber.ROUND_DOWN);
 
-      const response = await client.dexGateway.getSwap({
+      const response = await client.dexGateway.createUnsignedTransaction({
         amountIn: toRawUnitsBigNumberAsBigInt(sellAmount, sellTokenDecimals),
         isSwapXToY: isXtoY,
         minOut: BigInt(minOutRaw.toString()),

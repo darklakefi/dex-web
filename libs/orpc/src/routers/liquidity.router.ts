@@ -1,4 +1,5 @@
 import { getAddLiquidityReview } from "../procedures/liquidity/getAddLiquidityReview.procedure";
+import { getAllUserLiquidity } from "../procedures/liquidity/getAllUserLiquidity.procedure";
 import { getUserLiquidity } from "../procedures/liquidity/getUserLiquidity.procedure";
 import { removeLiquidityTransaction } from "../procedures/liquidity/removeLiquidityTransaction.procedure";
 import { submitAddLiquidity } from "../procedures/liquidity/submitAddLiquidity.procedure";
@@ -7,6 +8,7 @@ import { withdrawLiquidity } from "../procedures/liquidity/withdrawLiquidity.pro
 
 export const liquidityRouter = {
   getAddLiquidityReview,
+  getAllUserLiquidity,
   getUserLiquidity,
   removeLiquidityTransaction,
   submitAddLiquidity,

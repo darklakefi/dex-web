@@ -2,6 +2,15 @@ import Decimal from "decimal.js";
 import { vi } from "vitest";
 
 export const mockTanstackClient = {
+  dexGateway: {
+    quoteAddLiquidity: {
+      query: vi.fn().mockResolvedValue({
+        lpTokenAmount: 1000000000n,
+        lpTokenAmountDisplay: 1000,
+        lpTokenDecimals: 9n,
+      }),
+    },
+  },
   liquidity: {
     createLiquidityTransaction: {
       mutate: vi.fn(),
@@ -11,16 +20,6 @@ export const mockTanstackClient = {
     },
   },
   pools: {
-    getLPRate: {
-      queryOptions: vi.fn(() => ({
-        queryFn: () =>
-          Promise.resolve({
-            estimatedLPTokens: "100",
-          }),
-        queryKey: ["getLPRate"],
-        staleTime: 5000,
-      })),
-    },
     getPoolDetails: {
       queryOptions: vi.fn(() => ({
         queryFn: () =>

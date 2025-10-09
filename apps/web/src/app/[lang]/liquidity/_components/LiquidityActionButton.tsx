@@ -33,10 +33,7 @@ interface LiquidityActionButtonProps {
   isPoolLoading: boolean;
   isTokenAccountsLoading: boolean;
   isCalculating: boolean;
-  isError: boolean;
   isSubmitting: boolean;
-  isSuccess: boolean;
-  onReset: () => void;
   send: (event: LiquidityMachineEvent) => void;
 }
 
@@ -53,11 +50,7 @@ export function LiquidityActionButton({
   isPoolLoading,
   isTokenAccountsLoading,
   isCalculating,
-  isError,
   isSubmitting,
-  isSuccess,
-  onReset,
-  send,
 }: LiquidityActionButtonProps) {
   const router = useRouter();
   const { wallet, connected } = useWallet();
@@ -100,7 +93,6 @@ export function LiquidityActionButton({
     hasAnyAmount,
     hasWallet: !!publicKey,
     isCalculating,
-    isError,
     isFormSubmitting: isSubmitting,
     isPoolLoading,
     isTokenAccountsLoading,
@@ -174,77 +166,6 @@ export function LiquidityActionButton({
     );
   }
 
-  if (isSuccess) {
-    return (
-      <div className="flex flex-col gap-3">
-        <div className="rounded-md border border-green-200 bg-green-50 p-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">✅</span>
-            <div className="font-medium text-green-800 text-sm">
-              Transaction Successful!
-            </div>
-          </div>
-          <div className="mt-1 text-green-700 text-xs">
-            Your liquidity has been added to the pool.
-          </div>
-        </div>
-        <Button
-          aria-label="Start a new liquidity transaction"
-          className="w-full cursor-pointer py-3 leading-6"
-          onClick={() => {
-            onReset();
-          }}
-          type="button"
-          variant="secondary"
-        >
-          Start New Transaction
-        </Button>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex flex-col gap-3">
-        <div className="rounded-md border border-red-200 bg-red-50 p-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">⚠️</span>
-            <div className="font-medium text-red-800 text-sm">
-              Transaction Failed
-            </div>
-          </div>
-          <div className="mt-1 text-red-700 text-xs">
-            Please review the error and try again.
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            aria-label="Retry the transaction with the same values"
-            className="flex-1 cursor-pointer py-3 leading-6"
-            onClick={() => {
-              send({ type: "RETRY" });
-            }}
-            type="button"
-            variant="primary"
-          >
-            Retry
-          </Button>
-          <Button
-            aria-label="Dismiss error and return to form"
-            className="flex-1 cursor-pointer py-3 leading-6"
-            onClick={() => {
-              send({ type: "DISMISS" });
-            }}
-            type="button"
-            variant="secondary"
-          >
-            Dismiss
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   const enhancedButtonProps = getButtonProps(buttonState);
 
   return (
@@ -265,9 +186,7 @@ export function LiquidityActionButton({
         {buttonMessage}
       </Button>
 
-      {shouldShowSecurityWarning(validation, buttonState) && (
-        <SecurityWarning buttonState={buttonState} validation={validation} />
-      )}
+      {shouldShowSecurityWarning() && <SecurityWarning />}
     </>
   );
 }
@@ -285,7 +204,6 @@ function _getButtonVariant(
     case "INSUFFICIENT_BALANCE":
     case "SAME_TOKENS":
     case "INVALID_PRICE":
-    case "ERROR":
       return "danger";
     case "CREATE_POOL":
       return "secondary";
@@ -305,7 +223,6 @@ function _getAriaLabel(
     DISABLED: "Action not available",
     ENTER_AMOUNT: "Enter an amount to add liquidity",
     ENTER_AMOUNTS: "Enter token amounts to continue",
-    ERROR: "Transaction failed, click to retry",
     INSUFFICIENT_BALANCE: "Cannot proceed due to insufficient token balance",
     INVALID_PRICE: "Cannot proceed - invalid initial price",
     LOADING: "Loading pool information",
@@ -316,13 +233,7 @@ function _getAriaLabel(
   return stateDescriptions[buttonState] || buttonMessage;
 }
 
-function SecurityWarning({
-  validation: _validation,
-  buttonState: _buttonState,
-}: {
-  validation: unknown;
-  buttonState: ButtonState;
-}) {
+function SecurityWarning() {
   return (
     <div className="mt-2 rounded-md border border-yellow-200 bg-yellow-50 p-3">
       <div className="flex">
@@ -334,9 +245,6 @@ function SecurityWarning({
   );
 }
 
-function shouldShowSecurityWarning(
-  _validation: unknown,
-  _buttonState: ButtonState,
-): boolean {
+function shouldShowSecurityWarning(): boolean {
   return false;
 }

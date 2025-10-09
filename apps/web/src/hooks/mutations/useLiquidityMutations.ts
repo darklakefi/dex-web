@@ -6,10 +6,7 @@ import type {
   SubmitWithdrawalOutput,
 } from "@dex-web/orpc/schemas/liquidity/submitWithdrawal.schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  handleMutationError,
-  handleMutationSuccess,
-} from "../../lib/mutationUtils";
+import { handleMutationError } from "../../lib/mutationUtils";
 import { queryKeys } from "../../lib/queryKeys";
 
 export function useSubmitWithdrawal() {
@@ -21,10 +18,12 @@ export function useSubmitWithdrawal() {
     onError: (error: unknown) => {
       handleMutationError(error, "Failed to submit withdrawal");
     },
-    onSuccess: (
+    onSuccess: async (
       _data: SubmitWithdrawalOutput,
       variables: SubmitWithdrawalInput,
     ) => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       queryClient.invalidateQueries({
         queryKey: queryKeys.liquidity.user(
           variables.ownerAddress,
@@ -43,7 +42,6 @@ export function useSubmitWithdrawal() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tokens.accounts(variables.ownerAddress),
       });
-      handleMutationSuccess("Withdrawal submitted successfully");
     },
   });
 }

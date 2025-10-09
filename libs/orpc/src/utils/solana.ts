@@ -28,17 +28,21 @@ export const LP_TOKEN_DECIMALS = 9;
 export const IDL_CODER = new BorshCoder(IDL as Idl);
 
 export type PoolAccount = {
-  authority: PublicKey;
-  bump: number;
+  creator: PublicKey;
+  amm_config: PublicKey;
+  token_mint_x: PublicKey;
+  token_mint_y: PublicKey;
   reserve_x: PublicKey;
   reserve_y: PublicKey;
+  token_lp_supply: number;
+  protocol_fee_x: number;
+  protocol_fee_y: number;
   locked_x: number;
   locked_y: number;
   user_locked_x: number;
   user_locked_y: number;
-  protocol_fee_x: number;
-  protocol_fee_y: number;
-  token_lp_supply: number;
+  bump: number;
+  padding: number[];
 };
 
 export async function getPoolAccount(

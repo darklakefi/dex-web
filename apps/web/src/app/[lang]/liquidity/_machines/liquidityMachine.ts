@@ -21,9 +21,7 @@ export type LiquidityMachineEvent =
   | { type: "SIGN_TRANSACTION"; signature: string }
   | { type: "SUCCESS" }
   | { type: "ERROR"; error: string }
-  | { type: "RETRY" }
-  | { type: "RESET" }
-  | { type: "DISMISS" };
+  | { type: "RESET" };
 
 export const liquidityMachine = setup({
   actions: {
@@ -61,15 +59,17 @@ export const liquidityMachine = setup({
   states: {
     error: {
       on: {
-        DISMISS: {
-          actions: "resetState",
-          target: "ready.idle",
-        },
         RESET: {
           actions: "resetState",
           target: "ready.idle",
         },
-        RETRY: {
+        SUBMIT: {
+          actions: assign({
+            lastValues: ({ event }) => {
+              assertEvent(event, "SUBMIT");
+              return event.data;
+            },
+          }),
           target: "submitting",
         },
       },
@@ -166,10 +166,25 @@ export const liquidityMachine = setup({
       },
     },
     success: {
+      after: {
+        100: {
+          target: "ready.idle",
+        },
+      },
+      entry: ["resetState", "resetForm"],
       on: {
         RESET: {
           actions: ["resetState", "resetForm"],
           target: "ready.idle",
+        },
+        SUBMIT: {
+          actions: assign({
+            lastValues: ({ event }) => {
+              assertEvent(event, "SUBMIT");
+              return event.data;
+            },
+          }),
+          target: "submitting",
         },
       },
     },

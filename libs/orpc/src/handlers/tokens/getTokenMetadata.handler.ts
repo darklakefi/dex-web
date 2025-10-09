@@ -2,7 +2,7 @@
 
 import { create } from "@bufbuild/protobuf";
 import type { TokenMetadata } from "@dex-web/grpc-client";
-import { TokenMetadataPB } from "@dex-web/grpc-client";
+import { TokenMetadataSchema } from "@dex-web/grpc-client";
 import { isSolanaAddress } from "@dex-web/utils";
 import {
   fetchAllDigitalAsset,
@@ -101,7 +101,7 @@ async function _fetchTokenMetadataFromChain(
       tokenAddress.map((address) => publicKey(address)),
     );
     return digitalAsset.map((asset) =>
-      create(TokenMetadataPB, {
+      create(TokenMetadataSchema, {
         address: asset.mint.publicKey.toString(),
         decimals: asset.mint.decimals,
         logoUri: "",

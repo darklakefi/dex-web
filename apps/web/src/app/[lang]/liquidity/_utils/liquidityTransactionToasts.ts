@@ -25,7 +25,7 @@ export function showErrorToast({
 }: ShowErrorToastParams) {
   toast({
     description: message,
-    title: "Transaction Error",
+    title: "FAILED",
     variant: "error",
   });
 }

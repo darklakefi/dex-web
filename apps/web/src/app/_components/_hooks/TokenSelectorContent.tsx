@@ -3,6 +3,7 @@
 import type { Token } from "@dex-web/orpc/schemas/index";
 import { TokenList } from "../../[lang]/(swap)/_components/TokenList";
 import { NoResultFound } from "../NoResultFound";
+import { usePoolTokens } from "./usePoolTokens";
 import { useTokenSearch } from "./useTokenSearch";
 
 interface TokenSelectorContentProps {
@@ -30,6 +31,7 @@ export function TokenSelectorContent({
   returnUrl,
 }: TokenSelectorContentProps) {
   const { data } = useTokenSearch(debouncedQuery);
+  const { data: poolTokens } = usePoolTokens();
 
   if (isInitialLoad) {
     return (
@@ -44,7 +46,7 @@ export function TokenSelectorContent({
         <TokenList
           onSelect={onSelectToken}
           title="tokens by 24h volume"
-          tokens={data.tokens}
+          tokens={poolTokens}
         />
       </>
     );

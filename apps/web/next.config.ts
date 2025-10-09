@@ -19,6 +19,45 @@ const nextConfig = {
     formats: ["image/webp", "image/avif"],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30,
+
+    remotePatterns: [
+      {
+        hostname: "raw.githubusercontent.com",
+        pathname: "/solana-labs/token-list/**",
+        protocol: "https",
+      },
+      {
+        hostname: "*.arweave.net",
+        protocol: "https",
+      },
+      {
+        hostname: "arweave.net",
+        pathname: "/**",
+        protocol: "https",
+      },
+      {
+        hostname: "*.ipfs.nftstorage.link",
+        protocol: "https",
+      },
+      {
+        hostname: "ipfs.io",
+        pathname: "/ipfs/**",
+        protocol: "https",
+      },
+      {
+        hostname: "shdw-drive.genesysgo.net",
+        pathname: "/**",
+        protocol: "https",
+      },
+      {
+        hostname: "*.helius-rpc.com",
+        protocol: "https",
+      },
+      {
+        hostname: "cdn.helius-rpc.com",
+        protocol: "https",
+      },
+    ],
     unoptimized: false,
   },
   logging: {

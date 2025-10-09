@@ -1,5 +1,5 @@
 import { create } from "@bufbuild/protobuf";
-import { AddLiquidityRequestPB } from "@dex-web/grpc-client";
+import { AddLiquidityRequestSchema } from "@dex-web/grpc-client";
 import { ORPCError } from "@orpc/server";
 import type { Mock } from "vitest";
 import { describe, expect, it, vi } from "vitest";
@@ -43,6 +43,8 @@ function createMockGrpcClient(overrides: { addLiquidity?: Mock } = {}) {
     getTokenMetadataList: vi.fn(),
     getTradesListByUser: vi.fn(),
     initPool: vi.fn(),
+    quote: vi.fn(),
+    quoteAddLiquidity: vi.fn(),
     removeLiquidity: vi.fn(),
     sendSignedTransaction: vi.fn(),
     ...overrides,
@@ -50,7 +52,7 @@ function createMockGrpcClient(overrides: { addLiquidity?: Mock } = {}) {
 }
 
 describe("addLiquidityHandler", () => {
-  const validInput = create(AddLiquidityRequestPB, {
+  const validInput = create(AddLiquidityRequestSchema, {
     amountLp: BigInt("1000000"),
     label: "",
     maxAmountX: BigInt("1000000"),

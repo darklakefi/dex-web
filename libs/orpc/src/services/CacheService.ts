@@ -86,7 +86,6 @@ export class CacheService {
     };
   }
   cleanup(): number {
-    const _now = Date.now();
     let deletedCount = 0;
     for (const [key, entry] of Array.from(this.cache.entries())) {
       if (this.isExpired(entry)) {

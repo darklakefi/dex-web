@@ -116,13 +116,18 @@ export function useAddLiquidityMutation() {
         userLiquidityQueryKey,
       };
     },
-    onSettled: (_data, _error, variables) => {
+    onSettled: async (_data, _error, variables) => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       queryClient.invalidateQueries({
         queryKey: queryKeys.liquidity.user(
           variables.userAddress,
           variables.tokenMintX,
           variables.tokenMintY,
         ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.liquidity.allUserPositions(variables.userAddress),
       });
       queryClient.invalidateQueries({
         queryKey: queryKeys.pools.reserves(

@@ -4,7 +4,7 @@ package darklake.v1;
 
 import "validate/validate.proto";
 
-
+// --------------------------------- ENUMS
 
 enum Network {
     MAINNET_BETA = 0;
@@ -22,7 +22,7 @@ enum TradeStatus {
     FAILED    = 6;
 }
 
-
+// --------------------------------- MESSAGES
 message TokenMetadata {
     string name     = 1;
     string symbol   = 2;
@@ -102,7 +102,7 @@ message CreateUnsignedTransactionRequest {
 }
 
 message CreateUnsignedTransactionResponse {
-    
+    // Base64 encoded transaction
     string unsigned_transaction = 1;
     string order_id             = 2;
     string trade_id             = 3;
@@ -235,7 +235,7 @@ message GetTokenMetadataListResponse {
     int32 current_page            = 3;
 }
 
-
+// Custom Token Management Messages
 message CreateCustomTokenRequest {
     string name = 1 [
         (validate.rules).string.min_len = 1,
@@ -344,7 +344,7 @@ message InitPoolRequest {
 }
 
 message InitPoolResponse {
-    
+    // Base64 encoded transaction
     string unsigned_transaction = 1;
 }
 
@@ -373,7 +373,7 @@ message AddLiquidityRequest {
 }
 
 message AddLiquidityResponse {
-    
+    // Base64 encoded transaction
     string unsigned_transaction = 1;
 }
 
@@ -401,8 +401,31 @@ message RemoveLiquidityRequest {
 }
 
 message RemoveLiquidityResponse {
-    
+    // Base64 encoded transaction
     string unsigned_transaction = 1;
+}
+
+message QuoteAddLiquidityRequest {
+    string token_mint_x = 1 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+
+    string token_mint_y = 2 [
+        (validate.rules).string.min_len = 1,
+        (validate.rules).string.max_len = 44,
+        (validate.rules).string.pattern = "^[A-Za-z0-9]+$"
+    ];
+    uint64 token_x_amount = 3 [(validate.rules).uint64.gt = 0];
+    uint64 token_y_amount = 4 [(validate.rules).uint64.gt = 0];
+    uint64 slippage_tolerance = 5 [(validate.rules).uint64.gte = 0, (validate.rules).uint64.lt = 1000000];
+}
+
+message QuoteAddLiquidityResponse {
+    uint64 lp_token_amount = 1;
+    uint64 lp_token_decimals = 2;
+    double lp_token_amount_display = 3;
 }
 
 
@@ -448,6 +471,12 @@ service SolanaGatewayService {
 
     rpc RemoveLiquidity(RemoveLiquidityRequest)
         returns (RemoveLiquidityResponse);
+
+    rpc Quote(QuoteRequest)
+        returns (QuoteResponse);
+
+    rpc QuoteAddLiquidity(QuoteAddLiquidityRequest)
+        returns (QuoteAddLiquidityResponse);
 }
 
 
@@ -475,6 +504,9 @@ service DarklakeIntegrationsService {
 
     rpc RemoveLiquidity(RemoveLiquidityRequest)
         returns (RemoveLiquidityResponse);
+
+    rpc QuoteAddLiquidity(QuoteAddLiquidityRequest)
+        returns (QuoteAddLiquidityResponse);
 
 }
 

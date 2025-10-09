@@ -8,7 +8,7 @@
       "Bash(git pull:*)",
       "Bash(xargs sed:*)"
     ],
-    "deny": [],
-    "ask": []
+    "ask": [],
+    "deny": []
   }
 }

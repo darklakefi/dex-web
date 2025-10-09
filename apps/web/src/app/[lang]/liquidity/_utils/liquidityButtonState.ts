@@ -12,8 +12,7 @@ export type ButtonState =
   | "SAME_TOKENS"
   | "INVALID_PRICE"
   | "LOADING"
-  | "DISABLED"
-  | "ERROR";
+  | "DISABLED";
 
 export interface ButtonStateRule {
   condition: () => boolean;
@@ -30,7 +29,6 @@ export interface ButtonStateProps {
   hasAnyAmount?: boolean;
   formCanSubmit?: boolean;
   isFormSubmitting?: boolean;
-  isError?: boolean;
 }
 
 export function getLiquidityButtonState({
@@ -43,12 +41,7 @@ export function getLiquidityButtonState({
   hasAnyAmount = false,
   formCanSubmit = false,
   isFormSubmitting = false,
-  isError = false,
 }: ButtonStateProps): ButtonState {
-  if (isError) {
-    return "ERROR";
-  }
-
   if (isFormSubmitting) {
     return "SUBMITTING";
   }
@@ -114,7 +107,6 @@ export function getButtonMessage(state: ButtonState): string {
     DISABLED: "Connect Wallet",
     ENTER_AMOUNT: "Enter an amount",
     ENTER_AMOUNTS: "Enter token amounts",
-    ERROR: "Retry Transaction",
     INSUFFICIENT_BALANCE: "Insufficient balance",
     INVALID_PRICE: "Invalid price",
     LOADING: "Loading...",
@@ -151,7 +143,6 @@ export function getButtonSeverity(
     case "INSUFFICIENT_BALANCE":
     case "SAME_TOKENS":
     case "INVALID_PRICE":
-    case "ERROR":
       return "error";
     case "ENTER_AMOUNTS":
     case "ENTER_AMOUNT":
