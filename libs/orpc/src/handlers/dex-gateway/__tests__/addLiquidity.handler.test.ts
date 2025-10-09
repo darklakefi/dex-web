@@ -5,9 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { addLiquidityHandler } from "../addLiquidity.handler";
 
 vi.mock("../../../dex-gateway", () => ({
-  getDexGatewayClient: vi.fn(() => ({
-    addLiquidity: vi.fn(),
-  })),
+  getDexGatewayClient: vi.fn(),
 }));
 
 vi.mock("../../../services/LoggerService", () => ({
@@ -43,15 +41,17 @@ describe("addLiquidityHandler", () => {
   });
 
   it("should throw POOL_NOT_FOUND error for pool not found (case sensitive)", async () => {
-    const mockClient = {
-      addLiquidity: vi
-        .fn()
-        .mockRejectedValue(
-          new Error(
-            "Failed to add liquidity: Failed to add liquidity: Failed to create add liquidity transaction: Pool not found",
-          ),
+    const mockAddLiquidity = vi
+      .fn()
+      .mockRejectedValue(
+        new Error(
+          "Failed to add liquidity: Failed to add liquidity: Failed to create add liquidity transaction: Pool not found",
         ),
-    } as any;
+      );
+
+    const mockClient = {
+      addLiquidity: mockAddLiquidity,
+    };
 
     const { getDexGatewayClient } = await import("../../../dex-gateway");
     vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
@@ -62,23 +62,25 @@ describe("addLiquidityHandler", () => {
       await addLiquidityHandler(validInput);
     } catch (error) {
       expect(error).toBeInstanceOf(ORPCError);
-      expect((error as any).code).toBe("POOL_NOT_FOUND");
-      expect((error as any).message).toBe(
-        "Pool not found for the specified tokens",
-      );
+      if (error instanceof ORPCError) {
+        expect(error.code).toBe("POOL_NOT_FOUND");
+        expect(error.message).toBe("Pool not found for the specified tokens");
+      }
     }
   });
 
   it("should handle case-insensitive pool not found error", async () => {
-    const mockClient = {
-      addLiquidity: vi
-        .fn()
-        .mockRejectedValue(
-          new Error(
-            "Failed to add liquidity: Failed to add liquidity: Failed to create add liquidity transaction: pool not found",
-          ),
+    const mockAddLiquidity = vi
+      .fn()
+      .mockRejectedValue(
+        new Error(
+          "Failed to add liquidity: Failed to add liquidity: Failed to create add liquidity transaction: pool not found",
         ),
-    } as any;
+      );
+
+    const mockClient = {
+      addLiquidity: mockAddLiquidity,
+    };
 
     const { getDexGatewayClient } = await import("../../../dex-gateway");
     vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
@@ -89,16 +91,20 @@ describe("addLiquidityHandler", () => {
       await addLiquidityHandler(validInput);
     } catch (error) {
       expect(error).toBeInstanceOf(ORPCError);
-      expect((error as any).code).toBe("POOL_NOT_FOUND");
+      if (error instanceof ORPCError) {
+        expect(error.code).toBe("POOL_NOT_FOUND");
+      }
     }
   });
 
   it("should throw INSUFFICIENT_LIQUIDITY error for insufficient balance", async () => {
+    const mockAddLiquidity = vi
+      .fn()
+      .mockRejectedValue(new Error("insufficient balance for token"));
+
     const mockClient = {
-      addLiquidity: vi
-        .fn()
-        .mockRejectedValue(new Error("insufficient balance for token")),
-    } as any;
+      addLiquidity: mockAddLiquidity,
+    };
 
     const { getDexGatewayClient } = await import("../../../dex-gateway");
     vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
@@ -109,16 +115,20 @@ describe("addLiquidityHandler", () => {
       await addLiquidityHandler(validInput);
     } catch (error) {
       expect(error).toBeInstanceOf(ORPCError);
-      expect((error as any).code).toBe("INSUFFICIENT_LIQUIDITY");
+      if (error instanceof ORPCError) {
+        expect(error.code).toBe("INSUFFICIENT_LIQUIDITY");
+      }
     }
   });
 
   it("should throw NETWORK_ERROR for network issues", async () => {
+    const mockAddLiquidity = vi
+      .fn()
+      .mockRejectedValue(new Error("network timeout occurred"));
+
     const mockClient = {
-      addLiquidity: vi
-        .fn()
-        .mockRejectedValue(new Error("network timeout occurred")),
-    } as any;
+      addLiquidity: mockAddLiquidity,
+    };
 
     const { getDexGatewayClient } = await import("../../../dex-gateway");
     vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
@@ -129,16 +139,20 @@ describe("addLiquidityHandler", () => {
       await addLiquidityHandler(validInput);
     } catch (error) {
       expect(error).toBeInstanceOf(ORPCError);
-      expect((error as any).code).toBe("NETWORK_ERROR");
+      if (error instanceof ORPCError) {
+        expect(error.code).toBe("NETWORK_ERROR");
+      }
     }
   });
 
   it("should throw GRPC_ERROR for unknown errors", async () => {
+    const mockAddLiquidity = vi
+      .fn()
+      .mockRejectedValue(new Error("Some unknown gRPC error"));
+
     const mockClient = {
-      addLiquidity: vi
-        .fn()
-        .mockRejectedValue(new Error("Some unknown gRPC error")),
-    } as any;
+      addLiquidity: mockAddLiquidity,
+    };
 
     const { getDexGatewayClient } = await import("../../../dex-gateway");
     vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
@@ -149,7 +163,9 @@ describe("addLiquidityHandler", () => {
       await addLiquidityHandler(validInput);
     } catch (error) {
       expect(error).toBeInstanceOf(ORPCError);
-      expect((error as any).code).toBe("GRPC_ERROR");
+      if (error instanceof ORPCError) {
+        expect(error.code).toBe("GRPC_ERROR");
+      }
     }
   });
 });

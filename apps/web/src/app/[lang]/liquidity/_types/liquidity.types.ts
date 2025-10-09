@@ -20,7 +20,7 @@ export const positiveNumericStringSchema = numericStringSchema.refine(
 
 export const liquidityFormSchema = z.object({
   initialPrice: positiveNumericStringSchema,
-  slippage: numericStringSchema.optional(),
+  slippage: numericStringSchema,
   tokenAAmount: numericStringSchema,
   tokenBAmount: numericStringSchema,
 });

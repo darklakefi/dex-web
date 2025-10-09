@@ -131,10 +131,22 @@ export async function getAddLiquidityReviewHandler(
       "Reserve Y",
     );
 
-    const toNum = (val: any): number => {
+    /**
+     * Converts various numeric formats from the on-chain pool account to a JavaScript number.
+     * The pool account may contain BN (BigNumber from anchor), number, or string representations.
+     */
+    const toNum = (
+      val: number | string | { toNumber?: () => number } | null | undefined,
+    ): number => {
       if (!val) return 0;
       if (typeof val === "number") return val;
-      if (typeof val.toNumber === "function") return val.toNumber();
+      if (
+        typeof val === "object" &&
+        "toNumber" in val &&
+        typeof val.toNumber === "function"
+      ) {
+        return val.toNumber();
+      }
       if (typeof val === "string") {
         const num = Number(val);
         if (!Number.isNaN(num)) return num;
