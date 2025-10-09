@@ -43,7 +43,7 @@ describe("SwapFormFieldset", () => {
         onChange={handleChange}
         tokenAccount={{
           address: "test-address",
-          amount: 1000000000, // 1000 * 10^6 (assuming 6 decimals for test)
+          amount: 1000000000,
           decimals: 6,
           symbol: "SOL",
         }}

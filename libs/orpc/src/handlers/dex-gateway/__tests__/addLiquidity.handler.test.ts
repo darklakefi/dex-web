@@ -4,7 +4,6 @@ import { ORPCError } from "@orpc/server";
 import { describe, expect, it, vi } from "vitest";
 import { addLiquidityHandler } from "../addLiquidity.handler";
 
-// Mock the external dependencies
 vi.mock("../../../dex-gateway", () => ({
   getDexGatewayClient: vi.fn(() => ({
     addLiquidity: vi.fn(),
@@ -33,9 +32,9 @@ vi.mock("../../../services/MonitoringService", () => ({
 
 describe("addLiquidityHandler", () => {
   const validInput = create(AddLiquidityRequestPB, {
-    amountLp: BigInt("1000000"), // 1 LP token
-    label: "", // Wrapped SOL
-    maxAmountX: BigInt("1000000"), // USDC
+    amountLp: BigInt("1000000"),
+    label: "",
+    maxAmountX: BigInt("1000000"),
     maxAmountY: BigInt("1000000"),
     refCode: "",
     tokenMintX: "So11111111111111111111111111111111111111112",
@@ -44,7 +43,6 @@ describe("addLiquidityHandler", () => {
   });
 
   it("should throw POOL_NOT_FOUND error for pool not found (case sensitive)", async () => {
-    // Mock the dex gateway client to throw the error
     const mockClient = {
       addLiquidity: vi
         .fn()
@@ -55,7 +53,6 @@ describe("addLiquidityHandler", () => {
         ),
     } as any;
 
-    // Update the mock to return our mock client
     const { getDexGatewayClient } = await import("../../../dex-gateway");
     vi.mocked(getDexGatewayClient).mockResolvedValue(mockClient);
 

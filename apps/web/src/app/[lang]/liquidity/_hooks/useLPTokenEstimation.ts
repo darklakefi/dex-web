@@ -1,8 +1,9 @@
 "use client";
 
 import { tanstackClient } from "@dex-web/orpc";
-import { sortSolanaAddresses } from "@dex-web/utils";
+import { mapAmountsToProtocol } from "@dex-web/utils";
 import { useQuery } from "@tanstack/react-query";
+import { useTokenOrder } from "./useTokenOrder";
 
 interface LPEstimationData {
   estimatedLPTokens: string | undefined;
@@ -23,6 +24,9 @@ interface UseLPTokenEstimationParams {
  *
  * Following Answer #5: Only use useMemo for necessary memoization.
  * Simple derivations are computed inline - React Query handles the expensive parts.
+ *
+ * Token ordering: Uses useTokenOrder to get sorted addresses from URL params.
+ * Amounts are mapped to protocol order using the pure mapAmountsToProtocol function.
  */
 export function useLPTokenEstimation({
   tokenAAddress,
@@ -31,16 +35,15 @@ export function useLPTokenEstimation({
   tokenBAmount,
   slippage = "0.5",
   enabled = true,
-}: UseLPTokenEstimationParams): any {
-  // Pure function call - no useMemo needed for deterministic operations
-  const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
-    tokenAAddress && tokenBAddress
-      ? sortSolanaAddresses(tokenAAddress, tokenBAddress)
-      : { tokenXAddress: "", tokenYAddress: "" };
+}: UseLPTokenEstimationParams) {
+  const orderContext = useTokenOrder();
 
-  // Simple boolean logic - computed inline
+  const tokenXMint = orderContext?.protocol.tokenX || "";
+  const tokenYMint = orderContext?.protocol.tokenY || "";
+
   const shouldFetch =
     enabled &&
+    orderContext &&
     tokenAAddress &&
     tokenBAddress &&
     tokenAAmount &&
@@ -50,23 +53,35 @@ export function useLPTokenEstimation({
     !Number.isNaN(Number(tokenAAmount)) &&
     !Number.isNaN(Number(tokenBAmount));
 
-  // Build query input inline - TanStack Query's queryKey handles stability
-  const tokenAIsX = tokenAAddress === tokenXMint;
-  const queryInput = shouldFetch
-    ? {
-        slippage: Number(slippage),
-        tokenXAmount: Number(tokenAIsX ? tokenAAmount : tokenBAmount),
-        tokenXMint,
-        tokenYAmount: Number(tokenAIsX ? tokenBAmount : tokenAAmount),
-        tokenYMint,
-      }
-    : null;
+  const protocolAmounts =
+    orderContext && shouldFetch
+      ? mapAmountsToProtocol(
+          {
+            amountA: tokenAAmount,
+            amountB: tokenBAmount,
+            tokenA: orderContext.ui.tokenA,
+            tokenB: orderContext.ui.tokenB,
+          },
+          orderContext,
+        )
+      : null;
+
+  const queryInput =
+    shouldFetch && protocolAmounts
+      ? {
+          slippage: Number(slippage),
+          tokenXAmount: Number(protocolAmounts.amountX),
+          tokenXMint,
+          tokenYAmount: Number(protocolAmounts.amountY),
+          tokenYMint,
+        }
+      : null;
 
   return useQuery({
     ...tanstackClient.pools.getLPRate.queryOptions({
       input: queryInput!,
     }),
-    enabled: Boolean(shouldFetch && queryInput !== null),
+    enabled: shouldFetch && queryInput !== null,
     queryKey: [
       "lp-estimation",
       tokenXMint,
@@ -75,12 +90,11 @@ export function useLPTokenEstimation({
       queryInput?.tokenYAmount,
       queryInput?.slippage,
     ],
-    refetchInterval: 10000, // 5 seconds
+    refetchInterval: 10000,
     select: (data): LPEstimationData => ({
       estimatedLPTokens: data.estimatedLPTokens,
-      // Convert back to number for easier usage
       estimatedLPTokensNumber: Number(data.estimatedLPTokens),
-    }), // Refetch every 10 seconds for real-time estimates
+    }),
     staleTime: 5000,
   });
 }

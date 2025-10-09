@@ -43,7 +43,6 @@ export function useAddLiquidityMutation() {
       return response;
     },
     onError: (_error, _variables, context) => {
-      // Rollback optimistic updates on error
       if (context) {
         if (context.previousUserLiquidity) {
           queryClient.setQueryData(
@@ -60,7 +59,6 @@ export function useAddLiquidityMutation() {
       }
     },
     onMutate: async (variables) => {
-      // Create query keys for the affected queries
       const userLiquidityQueryKey = queryKeys.liquidity.user(
         variables.userAddress,
         variables.tokenMintX,
@@ -71,21 +69,17 @@ export function useAddLiquidityMutation() {
         variables.tokenMintY,
       );
 
-      // Cancel any outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({ queryKey: userLiquidityQueryKey });
       await queryClient.cancelQueries({ queryKey: poolReservesQueryKey });
 
-      // Snapshot the previous values
       const previousUserLiquidity =
         queryClient.getQueryData<GetUserLiquidityOutput>(userLiquidityQueryKey);
       const previousPoolReserves =
         queryClient.getQueryData<GetPoolReservesOutput>(poolReservesQueryKey);
 
-      // Calculate LP tokens for optimistic update
       const maxAmountXNumber = Number(variables.maxAmountX);
       const maxAmountYNumber = Number(variables.maxAmountY);
 
-      // Optimistically update user liquidity
       if (previousUserLiquidity) {
         const optimisticLiquidity: GetUserLiquidityOutput = {
           ...previousUserLiquidity,
@@ -95,7 +89,6 @@ export function useAddLiquidityMutation() {
         };
         queryClient.setQueryData(userLiquidityQueryKey, optimisticLiquidity);
       } else {
-        // First time adding liquidity
         const optimisticLiquidity: GetUserLiquidityOutput = {
           decimals: 6,
           hasLiquidity: true,
@@ -105,7 +98,6 @@ export function useAddLiquidityMutation() {
         queryClient.setQueryData(userLiquidityQueryKey, optimisticLiquidity);
       }
 
-      // Optimistically update pool reserves
       if (previousPoolReserves) {
         const optimisticPoolReserves: GetPoolReservesOutput = {
           ...previousPoolReserves,
@@ -117,7 +109,6 @@ export function useAddLiquidityMutation() {
         queryClient.setQueryData(poolReservesQueryKey, optimisticPoolReserves);
       }
 
-      // Return context for rollback
       return {
         poolReservesQueryKey,
         previousPoolReserves,
@@ -126,7 +117,6 @@ export function useAddLiquidityMutation() {
       };
     },
     onSettled: (_data, _error, variables) => {
-      // Refetch to ensure we have the latest data from the server
       queryClient.invalidateQueries({
         queryKey: queryKeys.liquidity.user(
           variables.userAddress,

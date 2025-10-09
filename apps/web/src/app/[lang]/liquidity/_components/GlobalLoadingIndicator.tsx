@@ -11,8 +11,6 @@ export function GlobalLoadingIndicator() {
     setIsMounted(true);
   }, []);
 
-  // Don't render anything until the component is mounted on the client
-  // This prevents hydration mismatch
   if (!isMounted) {
     return null;
   }

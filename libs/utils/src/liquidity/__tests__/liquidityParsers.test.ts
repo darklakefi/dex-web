@@ -67,7 +67,6 @@ describe("liquidityParsers", () => {
     it("should round down fractional raw units", () => {
       const amount = new Decimal("0.123456789");
       const result = toRawUnits(amount, 6);
-      // 0.123456789 * 10^6 = 123456.789, rounded down to 123456
       expect(result).toBe(123456n);
     });
 
@@ -78,7 +77,7 @@ describe("liquidityParsers", () => {
     });
 
     it("should handle amounts smaller than smallest unit", () => {
-      const amount = new Decimal("0.0000001"); // Smaller than 1 unit with 6 decimals
+      const amount = new Decimal("0.0000001");
       const result = toRawUnits(amount, 6);
       expect(result).toBe(0n);
     });
@@ -87,7 +86,7 @@ describe("liquidityParsers", () => {
   describe("applySlippageToMax", () => {
     it("should add slippage to amount", () => {
       const amount = new Decimal("1000");
-      const slippage = new Decimal("0.5"); // 0.5%
+      const slippage = new Decimal("0.5");
       const result = applySlippageToMax(amount, slippage);
       expect(result.toString()).toBe("1005");
     });

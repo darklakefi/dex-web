@@ -63,7 +63,6 @@ export function calculateAvailableReserves(
  * @returns LP tokens to mint as bigint
  */
 export function calculateLpTokensToReceive(input: LpCalculationInput): bigint {
-  // New pool initialization: sqrt(x * y)
   if (
     input.totalLpSupply === BigInt(0) ||
     input.availableReserveX === BigInt(0) ||
@@ -76,7 +75,6 @@ export function calculateLpTokensToReceive(input: LpCalculationInput): bigint {
     return BigInt(sqrtProduct.toFixed(0, Decimal.ROUND_DOWN));
   }
 
-  // Existing pool: maintain ratio
   const amountXDecimal = new Decimal(input.amountX.toString());
   const amountYDecimal = new Decimal(input.amountY.toString());
   const reserveXDecimal = new Decimal(input.availableReserveX.toString());

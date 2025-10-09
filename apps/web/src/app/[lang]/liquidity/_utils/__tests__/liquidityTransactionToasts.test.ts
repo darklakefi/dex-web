@@ -5,7 +5,6 @@ import {
   showStepToast,
 } from "../liquidityTransactionToasts";
 
-// Mock the toast function
 vi.mock("../../../../_utils/toast", () => ({
   toast: vi.fn(),
 }));

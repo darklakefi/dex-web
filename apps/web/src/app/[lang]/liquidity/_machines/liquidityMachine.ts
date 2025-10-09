@@ -22,7 +22,8 @@ export type LiquidityMachineEvent =
   | { type: "SUCCESS" }
   | { type: "ERROR"; error: string }
   | { type: "RETRY" }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "DISMISS" };
 
 export const liquidityMachine = setup({
   actions: {
@@ -39,7 +40,6 @@ export const liquidityMachine = setup({
     submitLiquidity: fromPromise(
       // biome-ignore lint/correctness/noUnusedFunctionParameters: input is required by xstate actor signature
       async ({ input }: { input: LiquidityFormValues }) => {
-        // This will be provided at runtime by useLiquidityTransaction
         return { result: "submitted" };
       },
     ),
@@ -60,13 +60,11 @@ export const liquidityMachine = setup({
   initial: "ready",
   states: {
     error: {
-      after: {
-        5000: {
+      on: {
+        DISMISS: {
           actions: "resetState",
           target: "ready.idle",
         },
-      },
-      on: {
         RESET: {
           actions: "resetState",
           target: "ready.idle",
@@ -168,15 +166,9 @@ export const liquidityMachine = setup({
       },
     },
     success: {
-      after: {
-        1000: {
-          actions: ["resetState", "resetForm"],
-          target: "ready.idle",
-        },
-      },
       on: {
         RESET: {
-          actions: "resetState",
+          actions: ["resetState", "resetForm"],
           target: "ready.idle",
         },
       },

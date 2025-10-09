@@ -3,7 +3,7 @@
 import { Button } from "@dex-web/ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
-import type { AnyFormApi } from "@tanstack/react-form";
+import type { FormApi } from "@tanstack/react-form";
 import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer } from "nuqs";
@@ -22,7 +22,9 @@ import {
 } from "../_utils/liquidityButtonState";
 
 interface LiquidityActionButtonProps {
-  form: AnyFormApi;
+  // Use specific FormApi type for better type safety
+  // This ensures the component can only be used with forms managing LiquidityFormValues
+  form: FormApi<LiquidityFormValues, unknown>;
   publicKey: PublicKey | null;
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
@@ -31,7 +33,11 @@ interface LiquidityActionButtonProps {
   tokenBAddress: string | null;
   isPoolLoading: boolean;
   isTokenAccountsLoading: boolean;
+  isCalculating: boolean;
   isError: boolean;
+  isSubmitting: boolean;
+  isSuccess: boolean;
+  onReset: () => void;
 }
 
 const serialize = createSerializer(liquidityPageParsers);
@@ -46,7 +52,11 @@ export function LiquidityActionButton({
   tokenBAddress,
   isPoolLoading,
   isTokenAccountsLoading,
+  isCalculating,
   isError,
+  isSubmitting,
+  isSuccess,
+  onReset,
 }: LiquidityActionButtonProps) {
   const router = useRouter();
   const { wallet, connected } = useWallet();
@@ -71,7 +81,6 @@ export function LiquidityActionButton({
   };
   const hasAnyAmount =
     isPositiveNumber(tokenAAmount) || isPositiveNumber(tokenBAmount);
-  const isFormSubmitting = useStore(form.store, (state) => state.isSubmitting);
   const formCanSubmit = useStore(form.store, (state) => state.canSubmit);
 
   const validation = useLiquidityValidation({
@@ -88,9 +97,9 @@ export function LiquidityActionButton({
     formCanSubmit,
     hasAnyAmount,
     hasWallet: !!publicKey,
-    isCalculating: isFormSubmitting,
+    isCalculating,
     isError,
-    isFormSubmitting,
+    isFormSubmitting: isSubmitting,
     isPoolLoading,
     isTokenAccountsLoading,
     poolDetails,
@@ -160,6 +169,80 @@ export function LiquidityActionButton({
       >
         {buttonMessage}
       </Button>
+    );
+  }
+
+  if (isSuccess) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="rounded-md border border-green-200 bg-green-50 p-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">✅</span>
+            <div className="font-medium text-green-800 text-sm">
+              Transaction Successful!
+            </div>
+          </div>
+          <div className="mt-1 text-green-700 text-xs">
+            Your liquidity has been added to the pool.
+          </div>
+        </div>
+        <Button
+          aria-label="Start a new liquidity transaction"
+          className="w-full cursor-pointer py-3 leading-6"
+          onClick={() => {
+            console.log("🔄 User clicked 'Start New Transaction'");
+            onReset();
+          }}
+          type="button"
+          variant="secondary"
+        >
+          Start New Transaction
+        </Button>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="rounded-md border border-red-200 bg-red-50 p-4">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">⚠️</span>
+            <div className="font-medium text-red-800 text-sm">
+              Transaction Failed
+            </div>
+          </div>
+          <div className="mt-1 text-red-700 text-xs">
+            Please review the error and try again.
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            aria-label="Retry the transaction with the same values"
+            className="flex-1 cursor-pointer py-3 leading-6"
+            onClick={() => {
+              console.log("🔄 User clicked 'Retry'");
+              onReset(); // TODO: Send RETRY event instead of RESET
+            }}
+            type="button"
+            variant="primary"
+          >
+            Retry
+          </Button>
+          <Button
+            aria-label="Dismiss error and return to form"
+            className="flex-1 cursor-pointer py-3 leading-6"
+            onClick={() => {
+              console.log("❌ User clicked 'Dismiss'");
+              onReset(); // TODO: Send DISMISS event
+            }}
+            type="button"
+            variant="secondary"
+          >
+            Dismiss
+          </Button>
+        </div>
+      </div>
     );
   }
 

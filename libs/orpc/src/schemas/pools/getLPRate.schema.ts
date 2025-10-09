@@ -5,7 +5,7 @@ export const getLPRateInputSchema = z.object({
   tokenXAmount: z.float64().positive(),
   tokenXMint: z.string(),
   tokenYAmount: z.float64().positive(),
-  tokenYMint: z.string(), // 55.55% (expect two decimal places)
+  tokenYMint: z.string(),
 });
 
 export const getLPRateOutputSchema = z.object({

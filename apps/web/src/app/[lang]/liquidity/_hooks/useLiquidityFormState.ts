@@ -27,7 +27,7 @@ const { useAppForm } = createFormHook({
 interface UseLiquidityFormStateOptions {
   readonly walletPublicKey: PublicKey | null;
   readonly tokenAccountsData: UseRealtimeTokenAccountsReturn;
-  readonly onSubmit?: ({
+  readonly onSubmit: ({
     value,
   }: {
     value: LiquidityFormValues;
@@ -56,7 +56,6 @@ export function useLiquidityFormState({
   const form = useAppForm({
     defaultValues,
     onSubmit: async ({ value }: { value: LiquidityFormValues }) => {
-      // Form validation has passed - hand off to XState machine
       if (onSubmit) await onSubmit({ value });
     },
     validators: {

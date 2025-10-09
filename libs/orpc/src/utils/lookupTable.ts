@@ -4,7 +4,6 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 
-// Lookup table addresses from SDK constants
 const DEVNET_LOOKUP = new PublicKey(
   "fUT5cRYT7RTS4kSq7ZpPwqaH7E68soubbutFxYHeNjo",
 );
@@ -15,7 +14,6 @@ const MAINNET_LOOKUP = new PublicKey(
 export async function getOptionalLookupTable(
   connection: Connection,
 ): Promise<AddressLookupTableAccount | undefined> {
-  // Use SDK constants based on network
   const lutAddress =
     process.env.NEXT_PUBLIC_NETWORK === "2" ? DEVNET_LOOKUP : MAINNET_LOOKUP;
 

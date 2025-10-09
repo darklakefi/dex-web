@@ -13,7 +13,6 @@ export type AddLiquidityDetailsProps = {
   tokenYReserve?: number;
   tokenXMint?: string;
   tokenBAddress?: string;
-  // LP token estimation
   estimatedLPTokens?: string;
   isLPEstimationLoading?: boolean;
 };

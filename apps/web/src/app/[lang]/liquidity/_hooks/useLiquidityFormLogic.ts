@@ -1,36 +1,43 @@
 "use client";
-import { sortSolanaAddresses } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useCallback } from "react";
+import { useRef } from "react";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
 import type { LiquidityFormValues } from "../_types/liquidity.types";
 import { useLiquidityFormState } from "./useLiquidityFormState";
 import { useLiquidityTransaction } from "./useLiquidityTransaction";
+import { useTokenOrder } from "./useTokenOrder";
 
 interface UseLiquidityFormLogicProps {
   tokenAAddress: string | null;
   tokenBAddress: string | null;
 }
 
+/**
+ * Coordinator hook for liquidity forms.
+ * Following Answer #1: Inversion of Control pattern
+ *
+ * Data flow: Form → Logic Hook (orchestrator) → Transaction Hook
+ * - Form manages field state and validation
+ * - Transaction manages submission workflow and XState machine
+ * - This hook orchestrates the interaction between them
+ *
+ * Token ordering: Uses useTokenOrder to derive token order from URL params (via nuqs).
+ * This ensures a single source of truth and eliminates duplicate sorting logic.
+ */
 export function useLiquidityFormLogic({
   tokenAAddress,
   tokenBAddress,
 }: UseLiquidityFormLogicProps) {
   const { publicKey } = useWallet();
 
-  // Pure function - no useMemo needed, sortSolanaAddresses is deterministic
-  const sortedTokenAddresses = sortSolanaAddresses(
-    tokenAAddress || "",
-    tokenBAddress || "",
-  );
-  const tokenXMint = sortedTokenAddresses.tokenXAddress;
-  const tokenYMint = sortedTokenAddresses.tokenYAddress;
+  const orderContext = useTokenOrder();
+
+  const tokenXMint = orderContext?.protocol.tokenX || "";
+  const tokenYMint = orderContext?.protocol.tokenY || "";
 
   const poolDataResult = useRealtimePoolData({ tokenXMint, tokenYMint });
 
-  // Data is already transformed by query's select option (Answer #5 best practice)
-  // The query only triggers re-renders when the transformed PoolDetails changes
   const poolDetails = poolDataResult.data;
 
   const tokenAccountsData = useRealtimeTokenAccounts({
@@ -40,39 +47,27 @@ export function useLiquidityFormLogic({
     tokenBAddress,
   });
 
-  // Create transaction first (needed for send function)
-  // Note: We pass a dummy reset for now, will wire it up after form is created
-  const transaction = useLiquidityTransaction({
-    poolDetails,
-    resetForm: () => {
-      // Will be set below after form is created
+  const handleFormSubmitRef = useRef<
+    ((args: { value: LiquidityFormValues }) => void) | null
+  >(null);
+
+  const { form } = useLiquidityFormState({
+    onSubmit: ({ value }) => {
+      handleFormSubmitRef.current?.({ value });
     },
+    tokenAccountsData,
+    walletPublicKey: publicKey || null,
+  });
+
+  const transaction = useLiquidityTransaction({
+    orderContext,
+    poolDetails,
+    resetForm: () => form.reset(),
     tokenAAddress,
     tokenBAddress,
   });
 
-  // Wire up form submission to XState machine
-  // Following Answer #3: TanStack Form validates → XState executes
-  const handleFormSubmit = useCallback(
-    ({ value }: { value: LiquidityFormValues }) => {
-      console.log("🔥 handleFormSubmit called with value:", value);
-      if (transaction.isError) {
-        console.log("🔄 Retrying transaction...");
-        transaction.send({ type: "RETRY" });
-      } else {
-        console.log("📤 Sending SUBMIT event to XState machine");
-        transaction.send({ data: value, type: "SUBMIT" });
-      }
-    },
-    [transaction.isError, transaction.send],
-  );
-
-  // Create form with the correct onSubmit handler
-  const { form } = useLiquidityFormState({
-    onSubmit: handleFormSubmit,
-    tokenAccountsData,
-    walletPublicKey: publicKey || null,
-  });
+  handleFormSubmitRef.current = transaction.handleFormSubmit;
 
   return {
     form,
@@ -83,6 +78,7 @@ export function useLiquidityFormLogic({
     isSuccess: transaction.isSuccess,
     poolDetails,
     publicKey,
+    send: transaction.send,
     tokenAccountsData,
   };
 }

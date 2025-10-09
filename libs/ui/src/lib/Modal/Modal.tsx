@@ -15,7 +15,6 @@ interface ModalProps {
 export function Modal({ children, onClose, className }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  // Memoize click handler to prevent unnecessary re-renders
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDialogElement>) => {
       if (e.target === e.currentTarget) {
@@ -26,7 +25,6 @@ export function Modal({ children, onClose, className }: ModalProps) {
     [onClose],
   );
 
-  // Use event listener for escape key for better performance
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -39,7 +37,6 @@ export function Modal({ children, onClose, className }: ModalProps) {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [onClose]);
 
-  // Prevent body scroll when modal is open
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = "hidden";
@@ -58,7 +55,6 @@ export function Modal({ children, onClose, className }: ModalProps) {
       )}
       onClick={handleBackdropClick}
       onKeyDown={(e) => {
-        // Additional keyboard support for backdrop
         if (e.key === "Enter" || e.key === " ") {
           handleBackdropClick(
             e as unknown as React.MouseEvent<HTMLDialogElement>,

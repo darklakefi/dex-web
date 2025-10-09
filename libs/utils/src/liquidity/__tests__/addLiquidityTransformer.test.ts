@@ -7,6 +7,8 @@ describe("transformAddLiquidityInput", () => {
     overrides: Partial<AddLiquidityInput> = {},
   ): AddLiquidityInput => ({
     poolReserves: {
+      lockedX: 0n,
+      lockedY: 0n,
       protocolFeeX: 0n,
       protocolFeeY: 0n,
       reserveX: 1000000000n,
@@ -65,7 +67,6 @@ describe("transformAddLiquidityInput", () => {
       const input = createValidInput();
       const result = transformAddLiquidityInput(input);
 
-      // Addresses should be sorted lexicographically
       expect(result.tokenMintX < result.tokenMintY).toBe(true);
     });
 
@@ -76,9 +77,8 @@ describe("transformAddLiquidityInput", () => {
       });
       const result = transformAddLiquidityInput(input);
 
-      // With 6 decimals: 100 -> 100000000, 200 -> 200000000
       const totalMax = result.maxAmountX + result.maxAmountY;
-      expect(totalMax > 300000000n).toBe(true); // Should include slippage
+      expect(totalMax > 300000000n).toBe(true);
     });
   });
 
@@ -86,6 +86,8 @@ describe("transformAddLiquidityInput", () => {
     it("should calculate LP tokens for balanced pool", () => {
       const input = createValidInput({
         poolReserves: {
+          lockedX: 0n,
+          lockedY: 0n,
           protocolFeeX: 0n,
           protocolFeeY: 0n,
           reserveX: 1000000000n,
@@ -105,6 +107,8 @@ describe("transformAddLiquidityInput", () => {
     it("should calculate LP tokens for new pool", () => {
       const input = createValidInput({
         poolReserves: {
+          lockedX: 0n,
+          lockedY: 0n,
           protocolFeeX: 0n,
           protocolFeeY: 0n,
           reserveX: 0n,
@@ -118,7 +122,6 @@ describe("transformAddLiquidityInput", () => {
       });
 
       const result = transformAddLiquidityInput(input);
-      // sqrt(100 * 100) * 10^6 = 100 * 10^6 = 100000000
       expect(result.amountLp).toBe(100000000n);
     });
 
@@ -134,14 +137,11 @@ describe("transformAddLiquidityInput", () => {
       const input = createValidInput({
         slippage: "1",
         tokenAAmount: "100",
-        tokenBAmount: "200", // 1%
+        tokenBAmount: "200",
       });
 
       const result = transformAddLiquidityInput(input);
 
-      // With 1% slippage:
-      // 100 * 10^6 * 1.01 = 101000000
-      // 200 * 10^6 * 1.01 = 202000000
       expect(result.maxAmountX).toBeGreaterThanOrEqual(100000000n);
       expect(result.maxAmountY).toBeGreaterThanOrEqual(200000000n);
     });
@@ -155,7 +155,6 @@ describe("transformAddLiquidityInput", () => {
 
       const result = transformAddLiquidityInput(input);
 
-      // With 0% slippage, max amounts should equal input amounts
       expect(result.maxAmountX).toBe(100000000n);
       expect(result.maxAmountY).toBe(200000000n);
     });
@@ -164,14 +163,11 @@ describe("transformAddLiquidityInput", () => {
       const input = createValidInput({
         slippage: "10",
         tokenAAmount: "100",
-        tokenBAmount: "200", // 10%
+        tokenBAmount: "200",
       });
 
       const result = transformAddLiquidityInput(input);
 
-      // With 10% slippage:
-      // 100 * 10^6 * 1.10 = 110000000
-      // 200 * 10^6 * 1.10 = 220000000
       expect(result.maxAmountX).toBe(110000000n);
       expect(result.maxAmountY).toBe(220000000n);
     });

@@ -7,18 +7,23 @@ import {
   parseAmountBigNumber,
   validateHasSufficientBalance,
 } from "@dex-web/utils";
-import { type AnyFormApi, Field } from "@tanstack/react-form";
+import { Field, type FormApi } from "@tanstack/react-form";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { SkeletonTokenInput } from "../../../_components/SkeletonTokenInput";
 import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
-import type { PoolDetails, TokenAccountsData } from "../_types/liquidity.types";
+import type {
+  LiquidityFormValues,
+  PoolDetails,
+  TokenAccountsData,
+} from "../_types/liquidity.types";
 
 const MAX_DECIMALS = 5;
 const DEFAULT_PRICE = "1";
 
-interface LiquidityTokenInputsProps<T extends AnyFormApi> {
-  form: T;
+interface LiquidityTokenInputsProps {
+  // Use specific FormApi type for better type safety
+  form: FormApi<LiquidityFormValues, unknown>;
   buyTokenAccount?: TokenAccountsData | null;
   sellTokenAccount?: TokenAccountsData | null;
   isLoadingBuy: boolean;
@@ -35,9 +40,12 @@ interface LiquidityTokenInputsProps<T extends AnyFormApi> {
     tokenAAddress: string;
     tokenBAddress: string;
   }) => number | null;
+  // Disable inputs when workflow is in a final state (success/error)
+  // UI state should always reflect application logical state
+  isDisabled?: boolean;
 }
 
-export function LiquidityTokenInputs<T extends AnyFormApi>({
+export function LiquidityTokenInputs({
   form,
   buyTokenAccount,
   sellTokenAccount,
@@ -50,7 +58,8 @@ export function LiquidityTokenInputs<T extends AnyFormApi>({
   poolDetails,
   onSubmit: _onSubmit,
   calculateProportionalAmount,
-}: LiquidityTokenInputsProps<T>) {
+  isDisabled = false,
+}: LiquidityTokenInputsProps) {
   const handleHalfMaxClick = (
     type: "half" | "max",
     tokenType: "tokenA" | "tokenB",

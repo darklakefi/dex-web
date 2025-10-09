@@ -25,7 +25,6 @@ export function useSubmitWithdrawal() {
       _data: SubmitWithdrawalOutput,
       variables: SubmitWithdrawalInput,
     ) => {
-      // Invalidate liquidity queries for the specific user and token pair
       queryClient.invalidateQueries({
         queryKey: queryKeys.liquidity.user(
           variables.ownerAddress,
@@ -33,18 +32,14 @@ export function useSubmitWithdrawal() {
           variables.tokenYMint,
         ),
       });
-      // Invalidate all liquidity queries
       queryClient.invalidateQueries({ queryKey: queryKeys.liquidity.all });
-      // Invalidate pool queries since reserves changed
       queryClient.invalidateQueries({ queryKey: queryKeys.pools.all });
-      // Invalidate specific pool reserves
       queryClient.invalidateQueries({
         queryKey: queryKeys.pools.reserves(
           variables.tokenXMint,
           variables.tokenYMint,
         ),
       });
-      // Invalidate token accounts since balances changed
       queryClient.invalidateQueries({
         queryKey: queryKeys.tokens.accounts(variables.ownerAddress),
       });

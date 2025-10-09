@@ -39,7 +39,7 @@ const SLIPPAGE_ERROR_PATTERNS = [
   "slippageexceeded",
   "price impact too high",
   "minimum amount not met",
-  "custom program error: 0x1775", // Hex for error code 6005
+  "custom program error: 0x1775",
   "error code: 6005",
 ];
 
@@ -135,7 +135,6 @@ export function analyzeTransactionError(error: unknown): TransactionErrorInfo {
       isSlippageError = true;
       break;
     case "unknown":
-      // No specific error type detected
       break;
   }
 

@@ -25,10 +25,7 @@ export function ShortPoolPanel({
           <Icon className="size-4" name={icon} />
           <Text.Body2>{title}</Text.Body2>
         </div>
-        {/* <div className="flex items-center gap-2">
-          <Text.Body2 className="text-green-300">24H APR</Text.Body2>
-          <Icon className="text-green-300" name="chevron-down" />
-        </div> */}
+        {}
       </div>
       <div className="flex w-full flex-col gap-3">
         {pools.map((pool) => (
@@ -48,7 +45,7 @@ export function ShortPoolPanel({
               </Text.Body2>
             </div>
 
-            {/* <Text.Body2 className="text-green-100">{pool.apr}%</Text.Body2> */}
+            {}
           </button>
         ))}
       </div>

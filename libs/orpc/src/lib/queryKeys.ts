@@ -24,23 +24,19 @@ export const tokenQueryKeys = {
  */
 export const QUERY_CONFIG = {
   tokenDetail: {
-    gcTime: 30 * 60 * 1000, // 10 minutes
-    // Individual token metadata rarely changes
-    staleTime: 10 * 60 * 1000, // 30 minutes
+    gcTime: 30 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
   },
   tokenOwner: {
-    gcTime: 60 * 60 * 1000, // 30 minutes
-    // Owner validation is static, cache aggressively
-    staleTime: 30 * 60 * 1000, // 1 hour
+    gcTime: 60 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
   },
   tokenSearch: {
-    gcTime: 10 * 60 * 1000, // 5 minutes
-    // Search results can be cached longer since they're deterministic
-    staleTime: 5 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   },
   tokens: {
-    gcTime: 5 * 60 * 1000, // 2 minutes
-    // Token lists change frequently, keep them fresh
-    staleTime: 2 * 60 * 1000, // 5 minutes
+    gcTime: 5 * 60 * 1000,
+    staleTime: 2 * 60 * 1000,
   },
 } as const;
