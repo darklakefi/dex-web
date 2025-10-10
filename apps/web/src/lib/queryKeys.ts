@@ -99,7 +99,11 @@ export const queryKeys = {
     all: ["tokens"] as const,
     custom: () => [...queryKeys.tokens.all, "custom"] as const,
     metadata: (addresses: string[]) =>
-      [...queryKeys.tokens.all, "metadata", addresses] as const,
+      [
+        ...queryKeys.tokens.all,
+        "metadata",
+        [...addresses].sort().join(","),
+      ] as const,
     price: (address: string) =>
       [...queryKeys.tokens.all, "price", address] as const,
   },

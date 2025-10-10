@@ -35,19 +35,23 @@ export function TokenSelectorContent({
 
   if (isInitialLoad) {
     return (
-      <>
-        {}
-        <TokenList
-          onSelect={onSelectToken}
-          title="tokens by 24h volume"
-          tokens={poolTokens}
-        />
-      </>
+      <TokenList
+        key={`pool-tokens-${poolTokens.length}`}
+        onSelect={onSelectToken}
+        title="tokens by 24h volume"
+        tokens={poolTokens}
+      />
     );
   }
 
   if (data.tokens.length > 0) {
-    return <TokenList onSelect={onSelectToken} tokens={data.tokens} />;
+    return (
+      <TokenList
+        key="search-results"
+        onSelect={onSelectToken}
+        tokens={data.tokens}
+      />
+    );
   }
 
   return (

@@ -74,26 +74,22 @@ export function usePoolTokens() {
       tokensQuery.data.tokens.map((token) => [token.address, token]),
     );
 
-    const result = uniqueTokenAddresses.map((address) => {
-      const metadata = tokenMetadataMap.get(address);
+    const result = uniqueTokenAddresses
+      .map((address): Token | null => {
+        const metadata = tokenMetadataMap.get(address);
 
-      if (metadata) {
-        return {
-          address: metadata.address,
-          decimals: metadata.decimals,
-          imageUrl: metadata.logoUri || "",
-          name: metadata.name,
-          symbol: metadata.symbol,
-        };
-      }
-      return {
-        address,
-        decimals: 9,
-        imageUrl: "",
-        name: `${address.slice(0, 4)}...${address.slice(-4)}`,
-        symbol: address.slice(0, 4).toUpperCase(),
-      };
-    });
+        if (metadata?.symbol && metadata.name) {
+          return {
+            address: metadata.address,
+            decimals: metadata.decimals,
+            imageUrl: metadata.logoUri || "",
+            name: metadata.name,
+            symbol: metadata.symbol,
+          };
+        }
+        return null;
+      })
+      .filter((token): token is Token => token !== null);
 
     return result;
   }, [tokensQuery.data.tokens, uniqueTokenAddresses]);

@@ -7,11 +7,8 @@ import {
   useTransactionState,
   useTransactionToasts,
 } from "@dex-web/core";
-import { client, tanstackClient } from "@dex-web/orpc";
-import type {
-  CreatePoolTransactionInput,
-  Token,
-} from "@dex-web/orpc/schemas/index";
+import { client, tanstackClient, tokenQueryKeys } from "@dex-web/orpc";
+import type { CreatePoolTransactionInput } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import {
   numberFormatHelper,
@@ -97,22 +94,37 @@ export function CreatePoolForm() {
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
 
-  const [{ data: poolDetails }, { data: tokenMetadata }] = useSuspenseQueries({
-    queries: [
-      tanstackClient.pools.getPoolDetails.queryOptions({
-        input: {
-          tokenXMint,
-          tokenYMint,
+  const [{ data: poolDetails }, { data: tokenMetadataResponse }] =
+    useSuspenseQueries({
+      queries: [
+        tanstackClient.pools.getPoolDetails.queryOptions({
+          input: {
+            tokenXMint,
+            tokenYMint,
+          },
+        }),
+        {
+          ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
+            input: {
+              $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
+              filterBy: {
+                case: "addressesList" as const,
+                value: {
+                  $typeName: "darklake.v1.TokenAddressesList" as const,
+                  tokenAddresses: [tokenXMint, tokenYMint],
+                },
+              },
+              pageNumber: 1,
+              pageSize: 2,
+            },
+          }),
+          queryKey: tokenQueryKeys.metadata.byAddresses([
+            tokenXMint,
+            tokenYMint,
+          ]),
         },
-      }),
-      tanstackClient.tokens.getTokenMetadata.queryOptions({
-        input: {
-          addresses: [tokenXMint, tokenYMint],
-          returnAsObject: true,
-        },
-      }),
-    ],
-  });
+      ],
+    });
 
   const {
     buyTokenAccount,
@@ -131,9 +143,8 @@ export function CreatePoolForm() {
     tokenBAddress,
   ]);
 
-  const metadata = tokenMetadata as Record<string, Token>;
-  const tokenADetails = metadata[tokenXMint];
-  const tokenBDetails = metadata[tokenYMint];
+  const tokenADetails = tokenMetadataResponse.tokens[0];
+  const tokenBDetails = tokenMetadataResponse.tokens[1];
 
   const { trackSigned, trackConfirmed } = useLiquidityTracking({
     trackError: (error: unknown, context?: Record<string, unknown>) => {
@@ -471,13 +482,13 @@ export function CreatePoolForm() {
                     Set initial price
                   </Text.Body2>
                   <div className="flex items-center">
-                    {initialPriceTokenX?.imageUrl ? (
+                    {initialPriceTokenX?.logoUri ? (
                       <Image
                         alt={initialPriceTokenX?.symbol}
                         className="mr-2 size-6 overflow-hidden rounded-full"
                         height={24}
                         priority
-                        src={initialPriceTokenX?.imageUrl}
+                        src={initialPriceTokenX?.logoUri}
                         unoptimized
                         width={24}
                       />

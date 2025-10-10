@@ -194,19 +194,19 @@ export default async function Page({
             </Box>
             <div className="size-9" />
           </section>
-          {isCreatePoolMode ? (
-            <CreatePoolForm />
-          ) : (
-            <HydrationBoundary state={dehydratedState}>
+          <HydrationBoundary state={dehydratedState}>
+            {isCreatePoolMode ? (
+              <CreatePoolForm />
+            ) : (
               <Suspense fallback={<SkeletonForm type="liquidity" />}>
                 <LiquidityForm />
               </Suspense>
-            </HydrationBoundary>
-          )}
-          <YourLiquidity
-            tokenAAddress={parsedSearchParams.tokenAAddress}
-            tokenBAddress={parsedSearchParams.tokenBAddress}
-          />
+            )}
+            <YourLiquidity
+              tokenAAddress={parsedSearchParams.tokenAAddress}
+              tokenBAddress={parsedSearchParams.tokenBAddress}
+            />
+          </HydrationBoundary>
         </div>
         <div className="hidden max-w-xs md:block">
           <FeaturesAndTrendingPoolPanel />

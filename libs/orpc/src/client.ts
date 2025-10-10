@@ -12,6 +12,13 @@ declare global {
   var $client: RouterClient<typeof appRouter> | undefined;
 }
 
+/**
+ * Client context for configuring request behavior.
+ *
+ * @property cache - RequestCache mode for fetch API (e.g., 'force-cache', 'no-cache')
+ * @property dedupe - Enable request deduplication for this request
+ * @property batchGroup - Group requests for batching optimization
+ */
 export interface ClientContext {
   cache?: RequestCache;
   dedupe?: boolean;
@@ -24,6 +31,12 @@ const link = new RPCLink<ClientContext>({
       ...init,
       cache: context?.cache,
     }),
+  method: ({ context }) => {
+    if (context?.cache === "force-cache" || context?.cache === "default") {
+      return "GET";
+    }
+    return "POST";
+  },
   plugins: [
     new DedupeRequestsPlugin({
       filter: ({ request }) => request.method === "GET",
@@ -76,7 +89,8 @@ const link = new RPCLink<ClientContext>({
           condition: ({ context, request }) =>
             context?.batchGroup === "metadata" ||
             request.url.toString().includes("/metadata") ||
-            request.url.toString().includes("/details"),
+            request.url.toString().includes("/details") ||
+            request.url.toString().includes("/dexGateway/getTokenMetadata"),
           context: { batchGroup: "metadata" as const },
         },
         {
@@ -112,6 +126,21 @@ export const client: RouterClient<typeof appRouter> =
 export const tanstackClient: RouterUtils<typeof client> =
   createTanstackQueryUtils(globalThis.$client ?? client);
 
+/**
+ * Creates an oRPC client with a specific context applied to all requests.
+ *
+ * @param context - Default context to apply to all requests made with this client
+ * @returns A typed oRPC client with the context pre-applied
+ *
+ * @example
+ * ```ts
+ * // Create a client with force-cache enabled
+ * const cachedClient = createClientWithContext({ cache: 'force-cache' });
+ *
+ * // Create a client with deduplication enabled
+ * const dedupedClient = createClientWithContext({ dedupe: true });
+ * ```
+ */
 export function createClientWithContext(context: ClientContext = {}) {
   const contextualLink = new RPCLink<ClientContext>({
     fetch: (request, init, { context }) =>
@@ -119,6 +148,12 @@ export function createClientWithContext(context: ClientContext = {}) {
         ...init,
         cache: context?.cache,
       }),
+    method: ({ context }) => {
+      if (context?.cache === "force-cache" || context?.cache === "default") {
+        return "GET";
+      }
+      return "POST";
+    },
     plugins: [
       new DedupeRequestsPlugin({
         filter: ({ request }) => request.method === "GET",

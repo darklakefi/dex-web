@@ -5,13 +5,13 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
+import { SwapTransactionHistory } from "apps/web/src/app/[lang]/(swap)/_components/SwapTransactionHistory";
 import type { SearchParams } from "nuqs/server";
 import { queryKeys } from "../../../lib/queryKeys";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
 import { TokenModalPrefetch } from "../../_components/TokenModalPrefetch";
 import { selectedTokensCache } from "../../_utils/searchParams";
 import { SwapForm } from "./_components/SwapForm";
-import { SwapTransactionHistoryWrapper } from "./_components/SwapTransactionHistoryWrapper";
 
 export const metadata = {
   description:
@@ -116,7 +116,7 @@ export default async function Page({
             <div className="size-9" />
           </section>
           <SwapForm />
-          <SwapTransactionHistoryWrapper />
+          <SwapTransactionHistory />
         </div>
         <div className="hidden max-w-xs md:block">
           <FeaturesAndTrendingPoolPanel />
