@@ -26,14 +26,15 @@ import {
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useDebouncedValue } from "@tanstack/react-pacer";
+import { useQueryClient } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
-import { useEffect, useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import * as z from "zod";
+import { usePoolDetails } from "../../../../hooks/queries/usePoolQueries";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import {
@@ -275,22 +276,23 @@ export function SwapForm() {
   });
 
   const { tokenXAddress: sortedTokenXMint, tokenYAddress: sortedTokenYMint } =
-    sortSolanaAddresses(tokenAAddress || "", tokenBAddress || "");
+    useMemo(() => {
+      if (!tokenAAddress || !tokenBAddress) {
+        return {
+          tokenXAddress: tokenAAddress || "",
+          tokenYAddress: tokenBAddress || "",
+        };
+      }
+      return sortSolanaAddresses(tokenAAddress, tokenBAddress);
+    }, [tokenAAddress, tokenBAddress]);
 
-  const { data: poolDetails } = useSuspenseQuery({
-    ...tanstackClient.pools.getPoolDetails.queryOptions({
-      input: {
-        tokenXMint: sortedTokenXMint,
-        tokenYMint: sortedTokenYMint,
-      },
-    }),
-    gcTime: 5 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    retry: 2,
-    retryDelay: 1000,
-    staleTime: 60 * 1000,
-  });
+  const { data: poolDetails } = usePoolDetails(
+    sortedTokenXMint || "",
+    sortedTokenYMint || "",
+    {
+      enabled: Boolean(sortedTokenXMint && sortedTokenYMint),
+    },
+  );
 
   const {
     buyTokenAccount,
@@ -310,8 +312,18 @@ export function SwapForm() {
   ]);
 
   const [quote, setQuote] = useState<GetQuoteOutput | null>(null);
+  const [quoteParams, setQuoteParams] = useState<{
+    amountIn: string;
+    type: "buy" | "sell";
+    isXtoY: boolean;
+    slippage: number;
+    timestamp?: number;
+  } | null>(null);
 
-  const isXtoY = poolDetails?.tokenXMint === sortedTokenXMint;
+  const isXtoY = useMemo(
+    () => poolDetails?.tokenXMint === sortedTokenXMint,
+    [poolDetails?.tokenXMint, sortedTokenXMint],
+  );
 
   const resetButtonState = () => {
     swapState.reset();
@@ -491,40 +503,63 @@ export function SwapForm() {
     }).then(getSwap);
   };
 
-  const getQuote = async ({
-    amountIn,
-    type,
-    isXtoY,
-    slippage,
-  }: {
-    amountIn: string;
-    type: "buy" | "sell";
-    isXtoY: boolean;
-    slippage: number;
-  }) => {
-    const amountInNumber = parseAmount(amountIn);
-    if (!poolDetails || parseAmountBigNumber(amountIn).lte(0)) return;
+  const [debouncedQuoteParams] = useDebouncedValue(quoteParams, {
+    wait: 500,
+  });
 
-    setIsLoadingQuote(true);
-    swapState.setDisabled(true);
-    const quote = await client.swap.getSwapQuote({
-      amountIn: amountInNumber,
+  const getQuote = useCallback(
+    async ({
+      amountIn,
+      type,
       isXtoY,
       slippage,
-      tokenXMint: poolDetails.tokenXMint,
-      tokenYMint: poolDetails.tokenYMint,
-    });
-    setQuote(quote);
-    if (type === "sell") {
-      form.setFieldValue("tokenBAmount", String(quote.amountOut));
-    } else {
-      form.setFieldValue("tokenAAmount", String(quote.amountOut));
-    }
-    swapState.setDisabled(false);
-    setIsLoadingQuote(false);
-  };
+    }: {
+      amountIn: string;
+      type: "buy" | "sell";
+      isXtoY: boolean;
+      slippage: number;
+    }) => {
+      const amountInNumber = parseAmount(amountIn);
+      if (!poolDetails || parseAmountBigNumber(amountIn).lte(0)) return;
 
-  const debouncedGetQuote = useDebouncedCallback(getQuote, 500);
+      setIsLoadingQuote(true);
+      swapState.setDisabled(true);
+      const quote = await client.swap.getSwapQuote({
+        amountIn: amountInNumber,
+        isXtoY,
+        slippage,
+        tokenXMint: poolDetails.tokenXMint,
+        tokenYMint: poolDetails.tokenYMint,
+      });
+      setQuote(quote);
+      if (type === "sell") {
+        form.setFieldValue("tokenBAmount", String(quote.amountOut));
+      } else {
+        form.setFieldValue("tokenAAmount", String(quote.amountOut));
+      }
+      swapState.setDisabled(false);
+      setIsLoadingQuote(false);
+    },
+    [poolDetails, swapState, form],
+  );
+
+  useEffect(() => {
+    if (debouncedQuoteParams) {
+      getQuote(debouncedQuoteParams);
+    }
+  }, [debouncedQuoteParams, getQuote]);
+
+  const debouncedGetQuote = useCallback(
+    (params: {
+      amountIn: string;
+      type: "buy" | "sell";
+      isXtoY: boolean;
+      slippage: number;
+    }) => {
+      setQuoteParams({ ...params, timestamp: Date.now() });
+    },
+    [],
+  );
 
   useEffect(() => {
     const amountIn = form.state.values.tokenAAmount;

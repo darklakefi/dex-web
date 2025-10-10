@@ -2,15 +2,14 @@
 import { tanstackClient } from "@dex-web/orpc";
 import { Button, Icon } from "@dex-web/ui";
 import { sortSolanaAddresses } from "@dex-web/utils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useQueryStates } from "nuqs";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { EMPTY_TOKEN } from "../_utils/constants";
 import { selectedTokensParsers } from "../_utils/searchParams";
-import { POPULAR_TOKEN_ADDRESSES } from "./_hooks/constants";
 import { TokenImage } from "./TokenImage";
 
 interface SelectTokenButtonProps {
@@ -21,31 +20,28 @@ interface SelectTokenButtonProps {
 /**
  * SelectTokenButton component for selecting tokens in swap/liquidity forms.
  *
- * Performance optimizations:
  * - Uses useQuery instead of useSuspenseQuery to prevent blocking parent rendering
- * - Implements hover/touch prefetch to warm cache before modal opens
- * - Prefetches popular tokens, pools, and route on user intent
  * - Shows loading state while token metadata loads
- * - Leverages server-side prefetching for initial page loads
- *
- * This avoids request waterfalls by prefetching modal dependencies ahead of time.
  */
 export function SelectTokenButton({
   type,
   returnUrl = "",
 }: SelectTokenButtonProps) {
-  const queryClient = useQueryClient();
-  const router = useRouter();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
 
   const tokenAddress = type === "buy" ? tokenAAddress : tokenBAddress;
 
-  const { tokenXAddress, tokenYAddress } = useMemo(
-    () => sortSolanaAddresses(tokenAAddress, tokenBAddress),
-    [tokenAAddress, tokenBAddress],
-  );
+  const { tokenXAddress, tokenYAddress } = useMemo(() => {
+    if (!tokenAAddress || !tokenBAddress) {
+      return {
+        tokenXAddress: tokenAAddress || "",
+        tokenYAddress: tokenBAddress || "",
+      };
+    }
+    return sortSolanaAddresses(tokenAAddress, tokenBAddress);
+  }, [tokenAAddress, tokenBAddress]);
 
   const queryInput = useMemo(
     () => ({
@@ -54,7 +50,9 @@ export function SelectTokenButton({
         case: "addressesList" as const,
         value: {
           $typeName: "darklake.v1.TokenAddressesList" as const,
-          tokenAddresses: [tokenXAddress, tokenYAddress] as string[],
+          tokenAddresses: [tokenXAddress, tokenYAddress].filter(
+            Boolean,
+          ) as string[],
         },
       },
       pageNumber: 1,
@@ -68,6 +66,7 @@ export function SelectTokenButton({
       context: { cache: "force-cache" as RequestCache },
       input: queryInput,
     }),
+    enabled: Boolean(tokenXAddress || tokenYAddress),
   });
 
   const tokenDetails = tokenMetadata?.tokens?.find(
@@ -76,53 +75,6 @@ export function SelectTokenButton({
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  const handlePrefetch = useCallback(() => {
-    queryClient.prefetchQuery(
-      tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
-        context: { cache: "force-cache" as RequestCache },
-        input: {
-          $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
-          filterBy: {
-            case: "addressesList" as const,
-            value: {
-              $typeName: "darklake.v1.TokenAddressesList" as const,
-              tokenAddresses: POPULAR_TOKEN_ADDRESSES as string[],
-            },
-          },
-          pageNumber: 1,
-          pageSize: POPULAR_TOKEN_ADDRESSES.length,
-        },
-      }),
-    );
-
-    queryClient.prefetchQuery(
-      tanstackClient.pools.getAllPools.queryOptions({
-        input: {
-          includeEmpty: false,
-        },
-      }),
-    );
-
-    const href = buildHref(
-      type,
-      tokenAAddress,
-      tokenBAddress,
-      returnUrl,
-      pathname,
-      searchParams,
-    );
-    router.prefetch(href as any);
-  }, [
-    queryClient,
-    type,
-    tokenAAddress,
-    tokenBAddress,
-    returnUrl,
-    router,
-    pathname,
-    searchParams,
-  ]);
 
   function buildHref(
     type: string,
@@ -169,9 +121,6 @@ export function SelectTokenButton({
         pathname,
         searchParams,
       )}
-      onMouseEnter={handlePrefetch}
-      onTouchStart={handlePrefetch}
-      prefetch
       variant="secondary"
     >
       {isLoading ? (

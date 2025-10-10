@@ -17,24 +17,20 @@ export const toRawUnitsBigNumber = (
 
 /**
  * Convert amount to raw units using BigNumber, returned as bigint (for server-side orpc handlers).
- * Validates that result is an integer and within u64 range.
+ * Rounds to the nearest integer and validates within u64 range.
  *
  * @param amount - Amount in human-readable units (number, string, or BigNumber)
  * @param decimals - Number of decimal places
  * @returns Raw units as bigint
- * @throws {Error} If result is not an integer or exceeds u64 maximum
+ * @throws {Error} If result exceeds u64 maximum
  */
 export const toRawUnitsBigNumberAsBigInt = (
   amount: number | string | BigNumber,
   decimals: number,
 ): bigint => {
-  const result = BigNumber(amount).multipliedBy(BigNumber(10 ** decimals));
-
-  if (!result.isInteger()) {
-    throw new Error(
-      `Amount ${amount} with ${decimals} decimals results in non-integer: ${result.toString()}`,
-    );
-  }
+  const result = BigNumber(amount)
+    .multipliedBy(BigNumber(10 ** decimals))
+    .integerValue(BigNumber.ROUND_DOWN);
 
   const MAX_U64 = BigNumber("18446744073709551615");
   if (result.isGreaterThan(MAX_U64)) {

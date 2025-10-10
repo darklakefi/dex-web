@@ -1,25 +1,14 @@
 "use client";
 
 import type { Pool } from "@dex-web/core";
-import { tanstackClient } from "@dex-web/orpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useQueryStates } from "nuqs";
+import { usePinnedPools } from "../../hooks/queries/usePoolQueries";
 import { LIQUIDITY_PAGE_TYPE } from "../_utils/constants";
 import { liquidityPageParsers } from "../_utils/searchParams";
 import { ShortPoolPanel } from "../[lang]/(swap)/_components/ShortPoolPanel";
 
 export function FeaturesAndTrendingPoolPanel() {
-  const { data } = useSuspenseQuery({
-    ...tanstackClient.pools.getPinedPool.queryOptions({
-      context: { cache: "force-cache" as RequestCache },
-    }),
-    gcTime: 5 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    retry: 2,
-    retryDelay: 1000,
-    staleTime: 60 * 1000,
-  });
+  const { data } = usePinnedPools();
   const [_, setSelectedTokens] = useQueryStates(liquidityPageParsers);
 
   const onPoolClick = (pool: Pool) => {
@@ -30,9 +19,13 @@ export function FeaturesAndTrendingPoolPanel() {
     });
   };
 
+  if (!data?.featuredPools && !data?.trendingPools) {
+    return null;
+  }
+
   return (
     <div className="flex w-full min-w-xs flex-col items-center gap-10 bg-transparent">
-      {data.featuredPools.length > 0 && (
+      {data?.featuredPools?.length > 0 && (
         <ShortPoolPanel
           icon="crown"
           onPoolClick={onPoolClick}
@@ -40,7 +33,7 @@ export function FeaturesAndTrendingPoolPanel() {
           title="Featured Pools"
         />
       )}
-      {data.trendingPools.length > 0 && (
+      {data?.trendingPools?.length > 0 && (
         <ShortPoolPanel
           icon="fire"
           onPoolClick={onPoolClick}
@@ -48,7 +41,6 @@ export function FeaturesAndTrendingPoolPanel() {
           title="Trending Pools"
         />
       )}
-      {}
     </div>
   );
 }

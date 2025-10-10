@@ -2,13 +2,14 @@
 
 import type { Token } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Modal, TextInput } from "@dex-web/ui";
-import { pasteFromClipboard, useDebouncedValue } from "@dex-web/utils";
+import { pasteFromClipboard } from "@dex-web/utils";
 import {
   type AnyFieldApi,
   createFormHook,
   createFormHookContexts,
   useStore,
 } from "@tanstack/react-form";
+import { useDebouncedValue } from "@tanstack/react-pacer";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
 import { Suspense, useCallback, useState } from "react";
@@ -131,7 +132,9 @@ export function SelectTokenModal({
   const rawQuery = useStore(form.store, (state) => state.values.query);
   const isInitialLoad = rawQuery === "";
 
-  const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 300);
+  const [debouncedQuery] = useDebouncedValue(rawQuery, {
+    wait: isInitialLoad ? 0 : 300,
+  });
 
   const handlePaste = useCallback((field: AnyFieldApi) => {
     pasteFromClipboard((pasted: string) => {
