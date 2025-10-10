@@ -93,6 +93,11 @@ export async function getPoolAccount(
 export async function getPoolPubkey(tokenA: string, tokenB: string) {
   const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(tokenA, tokenB);
 
+  console.log(`getPoolPubkey inputs: tokenA=${tokenA}, tokenB=${tokenB}`);
+  console.log(
+    `After sorting: tokenX=${tokenXAddress}, tokenY=${tokenYAddress}`,
+  );
+
   const [ammConfigPubkey] = PublicKey.findProgramAddressSync(
     [Buffer.from("amm_config"), new BN(0).toArrayLike(Buffer, "le", 4)],
     EXCHANGE_PROGRAM_ID,
@@ -108,6 +113,8 @@ export async function getPoolPubkey(tokenA: string, tokenB: string) {
     EXCHANGE_PROGRAM_ID,
   );
 
+  console.log(`Derived pool address: ${poolPubkey.toBase58()}`);
+
   return poolPubkey;
 }
 
@@ -119,7 +126,12 @@ export async function getPoolOnChain(tokenXMint: string, tokenYMint: string) {
   try {
     const pool = await getPoolAccount(connection, poolPubkey);
     return pool;
-  } catch (_error) {
+  } catch (error) {
+    console.error(
+      `getPoolOnChain error for ${tokenXMint}/${tokenYMint}:`,
+      error,
+    );
+    console.error(`Pool address: ${poolPubkey.toBase58()}`);
     return null;
   }
 }
@@ -128,6 +140,11 @@ export async function getTokenProgramId(
   connection: Connection,
   accountPubkey: PublicKey,
 ): Promise<PublicKey> {
+  // WSOL is a special case - it's owned by System Program but uses TOKEN_PROGRAM_ID
+  if (accountPubkey.toBase58() === WSOL_MINT) {
+    return TOKEN_PROGRAM_ID;
+  }
+
   try {
     const accountInfo = await connection.getAccountInfo(accountPubkey);
     if (!accountInfo) {

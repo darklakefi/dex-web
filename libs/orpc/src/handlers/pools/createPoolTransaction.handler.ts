@@ -56,13 +56,25 @@ async function ensureAtaIx(
     await getAccount(connection, ata, "confirmed", tokenProgram);
     return null;
   } catch {
-    return createAssociatedTokenAccountIdempotentInstruction(
+    const ix = createAssociatedTokenAccountIdempotentInstruction(
       owner,
       ata,
       owner,
       mint,
       tokenProgram,
+      ASSOCIATED_TOKEN_PROGRAM_ID,
     );
+    console.log("Creating ATA instruction:", {
+      ata: ata.toBase58(),
+      keys: ix.keys.map((k) => ({
+        isSigner: k.isSigner,
+        isWritable: k.isWritable,
+        pubkey: k.pubkey.toBase58(),
+      })),
+      mint: mint.toBase58(),
+      tokenProgram: tokenProgram.toBase58(),
+    });
+    return ix;
   }
 }
 
@@ -221,6 +233,11 @@ export async function createPoolTransactionHandler(
   const { user, tokenXMint, tokenYMint, depositAmountX, depositAmountY } =
     input;
 
+  // Normalize SOL to WSOL for pool operations
+  const { normalizeTokenMintForPool } = await import("../../utils/solana");
+  const normalizedTokenXMint = normalizeTokenMintForPool(tokenXMint);
+  const normalizedTokenYMint = normalizeTokenMintForPool(tokenYMint);
+
   const helius = getHelius();
   const connection = helius.connection;
 
@@ -242,25 +259,58 @@ export async function createPoolTransactionHandler(
 
   const tokenXProgramId = await getTokenProgramId(
     connection,
-    new PublicKey(tokenXMint),
+    new PublicKey(normalizedTokenXMint),
   );
   const tokenYProgramId = await getTokenProgramId(
     connection,
-    new PublicKey(tokenYMint),
+    new PublicKey(normalizedTokenYMint),
+  );
+
+  console.log("=== Token Program IDs ===");
+  console.log(
+    `Token X: ${normalizedTokenXMint} -> ${tokenXProgramId.toBase58()}`,
+  );
+  console.log(
+    `Token Y: ${normalizedTokenYMint} -> ${tokenYProgramId.toBase58()}`,
   );
 
   try {
     const vtx = await createPool(
       new PublicKey(user),
       program,
-      new PublicKey(tokenXMint),
+      new PublicKey(normalizedTokenXMint),
       new PublicKey(tokenXProgramId),
-      new PublicKey(tokenYMint),
+      new PublicKey(normalizedTokenYMint),
       new PublicKey(tokenYProgramId),
       depositAmountX,
       depositAmountY,
       connection,
     );
+
+    // Simulate transaction before returning
+    console.log("=== Simulating pool creation transaction ===");
+    try {
+      const simulation = await connection.simulateTransaction(vtx, {
+        sigVerify: false,
+      });
+
+      console.log("Simulation result:", {
+        err: simulation.value.err,
+        logs: simulation.value.logs,
+        unitsConsumed: simulation.value.unitsConsumed,
+      });
+
+      if (simulation.value.err) {
+        console.error("Simulation failed with error:", simulation.value.err);
+        console.error("Simulation logs:", simulation.value.logs);
+        throw new Error(
+          `Transaction simulation failed: ${JSON.stringify(simulation.value.err)}`,
+        );
+      }
+    } catch (simError) {
+      console.error("Simulation error:", simError);
+      throw simError;
+    }
 
     const serializedTx = Buffer.from(vtx.serialize()).toString("base64");
 
