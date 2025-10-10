@@ -1,7 +1,7 @@
 "use client";
 
 import type { SwapTransaction } from "@dex-web/core";
-import { client, tanstackClient } from "@dex-web/orpc";
+import { tanstackClient } from "@dex-web/orpc";
 import { Box, Icon, Text } from "@dex-web/ui";
 import {
   getDateDifference,
@@ -13,53 +13,60 @@ import {
   numberFormatHelper,
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 export function SwapTransactionHistory() {
   const { publicKey } = useWallet();
+  const userAddress = publicKey?.toBase58();
 
   const limit = 20;
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [trades, setTrades] = useState<SwapTransaction[]>([]);
 
-  const fetchTransactions = async () => {
-    if (!publicKey) return;
-
-    const response = await client.dexGateway.getTradesListByUser({
-      limit,
-      offset,
-      userAddress: publicKey.toBase58(),
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      ...tanstackClient.dexGateway.getTradesListByUser.infiniteOptions({
+        getNextPageParam: (lastPage, allPages) => {
+          if (!lastPage.hasMore) return undefined;
+          return allPages.length * limit;
+        },
+        initialPageParam: 0,
+        input: (pageParam: number) => ({
+          limit,
+          offset: pageParam,
+          userAddress: userAddress || "",
+        }),
+      }),
+      enabled: !!userAddress,
+      gcTime: 5 * 60 * 1000,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      retry: 2,
+      retryDelay: 1000,
+      staleTime: 60 * 1000,
     });
 
-    setHasMore(response.hasMore);
-    setTrades(
-      [...trades, ...response.trades].filter(
-        (trade): trade is SwapTransaction => trade !== null,
-      ) satisfies SwapTransaction[],
+  const trades = useMemo(() => {
+    return (
+      data?.pages.flatMap((page) =>
+        page.trades.filter((trade) => trade !== null),
+      ) ?? []
     );
+  }, [data]) as unknown as SwapTransaction[];
 
-    if (response.hasMore) {
-      setOffset(offset + limit);
-    }
-  };
-  const groupedTrades = groupTransactionByDate(trades);
+  const groupedTrades = useMemo(() => groupTransactionByDate(trades), [trades]);
   const timezone = `(${getTimezoneString()})`;
 
-  const { data } = useSuspenseQuery(
-    tanstackClient.dexGateway.getTradesListByUser.queryOptions({
-      input: {
-        limit: 1,
-        offset: 0,
-        userAddress: publicKey?.toBase58() ?? "",
-      },
-    }),
-  );
+  if (!userAddress || isLoading) {
+    return null;
+  }
 
-  return data?.trades.length > 0 ? (
+  if (trades.length === 0) {
+    return null;
+  }
+
+  return (
     <div className="mt-20 flex w-full gap-1">
       <div className="hidden size-9 md:block" />
       <Box className="flex w-full flex-col gap-6" padding="lg">
@@ -76,7 +83,7 @@ export function SwapTransactionHistory() {
                 </Text.Body2>
               </div>
             }
-            hasMore={hasMore}
+            hasMore={hasNextPage ?? false}
             loader={
               <div className="flex items-center justify-center gap-2 py-4 text-green-200">
                 <Icon
@@ -86,7 +93,11 @@ export function SwapTransactionHistory() {
                 <Text.Body2 className="text-inherit">Loading...</Text.Body2>
               </div>
             }
-            next={fetchTransactions}
+            next={() => {
+              if (!isFetchingNextPage && hasNextPage) {
+                fetchNextPage();
+              }
+            }}
           >
             <div className="flex w-full flex-col gap-8">
               {groupedTrades.keys.map((key: string) => (
@@ -150,5 +161,5 @@ export function SwapTransactionHistory() {
       </Box>
       <div className="hidden size-9 md:block" />
     </div>
-  ) : null;
+  );
 }

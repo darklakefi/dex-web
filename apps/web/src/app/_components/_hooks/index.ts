@@ -3,6 +3,7 @@ export {
   TOKEN_SEARCH_FETCH_SIZE,
 } from "./constants";
 export { TokenSelectorContent } from "./TokenSelectorContent";
+export { usePoolTokens } from "./usePoolTokens";
 export { useRecentTokens } from "./useRecentTokens";
-export { useTokenPrefetching } from "./useTokenPrefetching";
+export { useTokenInfiniteSearch } from "./useTokenInfiniteSearch";
 export { useTokenSearch } from "./useTokenSearch";

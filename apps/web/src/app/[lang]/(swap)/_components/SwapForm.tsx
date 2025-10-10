@@ -274,14 +274,20 @@ export function SwapForm() {
     ),
   });
 
-  const { data: poolDetails } = useSuspenseQuery(
-    tanstackClient.pools.getPoolDetails.queryOptions({
+  const { data: poolDetails } = useSuspenseQuery({
+    ...tanstackClient.pools.getPoolDetails.queryOptions({
       input: {
         tokenXMint: tokenBAddress,
         tokenYMint: tokenAAddress,
       },
     }),
-  );
+    gcTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 60 * 1000,
+  });
 
   const {
     buyTokenAccount,

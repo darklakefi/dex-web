@@ -9,9 +9,17 @@ import { liquidityPageParsers } from "../_utils/searchParams";
 import { ShortPoolPanel } from "../[lang]/(swap)/_components/ShortPoolPanel";
 
 export function FeaturesAndTrendingPoolPanel() {
-  const { data } = useSuspenseQuery(
-    tanstackClient.pools.getPinedPool.queryOptions({}),
-  );
+  const { data } = useSuspenseQuery({
+    ...tanstackClient.pools.getPinedPool.queryOptions({
+      context: { cache: "force-cache" as RequestCache },
+    }),
+    gcTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 60 * 1000,
+  });
   const [_, setSelectedTokens] = useQueryStates(liquidityPageParsers);
 
   const onPoolClick = (pool: Pool) => {

@@ -27,6 +27,7 @@ export function NoResultFound({
 
   const { data: tokenOwner } = useQuery({
     ...tanstackClient.tokens.getTokenOwner.queryOptions({
+      context: { cache: "force-cache" as RequestCache },
       input: {
         address: search,
       },

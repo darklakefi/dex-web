@@ -12,7 +12,6 @@ import {
   useQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { queryKeys } from "../../lib/queryKeys";
 
 interface UserLiquidityQueryOptions
   extends Pick<UseQueryOptions<GetUserLiquidityOutput>, "enabled"> {}
@@ -20,6 +19,10 @@ interface UserLiquidityQueryOptions
 interface AddLiquidityReviewQueryOptions
   extends Pick<UseQueryOptions<GetAddLiquidityReviewOutput>, "enabled"> {}
 
+/**
+ * Hook to fetch user liquidity for a specific pool.
+ * Uses oRPC's built-in queryOptions with custom refetch settings.
+ */
 export function useUserLiquidity(
   ownerAddress: string,
   tokenXMint: string,
@@ -28,9 +31,9 @@ export function useUserLiquidity(
 ): UseQueryResult<GetUserLiquidityOutput> {
   return useQuery({
     ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
+      context: { cache: "force-cache" as RequestCache },
       input: { ownerAddress, tokenXMint, tokenYMint },
     }),
-    queryKey: queryKeys.liquidity.user(ownerAddress, tokenXMint, tokenYMint),
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     staleTime: 30_000,
@@ -38,6 +41,10 @@ export function useUserLiquidity(
   });
 }
 
+/**
+ * Hook to fetch user liquidity with suspense for a specific pool.
+ * Uses oRPC's built-in queryOptions which includes proper query keys.
+ */
 export function useUserLiquiditySuspense(
   ownerAddress: string,
   tokenXMint: string,
@@ -45,12 +52,16 @@ export function useUserLiquiditySuspense(
 ): UseSuspenseQueryResult<GetUserLiquidityOutput> {
   return useSuspenseQuery({
     ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
+      context: { cache: "force-cache" as RequestCache },
       input: { ownerAddress, tokenXMint, tokenYMint },
     }),
-    queryKey: queryKeys.liquidity.user(ownerAddress, tokenXMint, tokenYMint),
   });
 }
 
+/**
+ * Hook to fetch add liquidity review/preview data.
+ * Uses oRPC's built-in queryOptions which includes proper query keys.
+ */
 export function useAddLiquidityReview(
   tokenXMint: string,
   tokenYMint: string,
@@ -60,14 +71,9 @@ export function useAddLiquidityReview(
 ): UseQueryResult<GetAddLiquidityReviewOutput> {
   return useQuery({
     ...tanstackClient.liquidity.getAddLiquidityReview.queryOptions({
+      context: { cache: "force-cache" as RequestCache },
       input: { isTokenX, tokenAmount, tokenXMint, tokenYMint },
-      ...options,
     }),
-    queryKey: queryKeys.liquidity.review(
-      tokenXMint,
-      tokenYMint,
-      tokenAmount,
-      Number(isTokenX),
-    ),
+    ...options,
   });
 }

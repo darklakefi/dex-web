@@ -16,7 +16,6 @@ import * as z from "zod";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { TokenSelectorContent } from "./_hooks/TokenSelectorContent";
 import { useRecentTokens } from "./_hooks/useRecentTokens";
-import { useTokenPrefetching } from "./_hooks/useTokenPrefetching";
 
 const selectTokenModalFormSchema = z.object({
   query: z.string().default(""),
@@ -73,9 +72,11 @@ export function SelectTokenModal({
         router.replace(from as never);
         return;
       }
-      router.back();
+
+      const fallbackUrl = returnUrl ? `/${returnUrl}` : "/";
+      router.replace(fallbackUrl as never);
     }, 0);
-  }, [searchParams, router]);
+  }, [searchParams, router, returnUrl]);
 
   const { recentTokens, addRecentToken } = useRecentTokens();
 
@@ -131,8 +132,6 @@ export function SelectTokenModal({
   const isInitialLoad = rawQuery === "";
 
   const debouncedQuery = useDebouncedValue(rawQuery, isInitialLoad ? 0 : 300);
-
-  useTokenPrefetching(rawQuery, isClosing);
 
   const handlePaste = useCallback((field: AnyFieldApi) => {
     pasteFromClipboard((pasted: string) => {

@@ -1,15 +1,10 @@
 import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
 import { SwapTransactionHistory } from "apps/web/src/app/[lang]/(swap)/_components/SwapTransactionHistory";
 import type { SearchParams } from "nuqs/server";
+import { getQueryClient, HydrateClient } from "../../../lib/query/hydration";
 import { queryKeys } from "../../../lib/queryKeys";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
-import { TokenModalPrefetch } from "../../_components/TokenModalPrefetch";
 import { selectedTokensCache } from "../../_utils/searchParams";
 import { SwapForm } from "./_components/SwapForm";
 
@@ -25,7 +20,7 @@ export default async function Page({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await selectedTokensCache.parse(searchParams);
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
 
   await Promise.allSettled([
     params.tokenAAddress && params.tokenBAddress
@@ -84,11 +79,8 @@ export default async function Page({
       : null,
   ]);
 
-  const dehydratedState = dehydrate(queryClient);
-
   return (
-    <HydrationBoundary state={dehydratedState}>
-      <TokenModalPrefetch />
+    <HydrateClient client={queryClient}>
       <div className="flex justify-center gap-12">
         <div className="flex w-full max-w-xl flex-col items-center justify-center">
           <section className="hidden w-full items-start gap-1 md:flex">
@@ -122,6 +114,6 @@ export default async function Page({
           <FeaturesAndTrendingPoolPanel />
         </div>
       </div>
-    </HydrationBoundary>
+    </HydrateClient>
   );
 }

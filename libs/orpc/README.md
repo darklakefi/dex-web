@@ -10,13 +10,13 @@ This library provides type-safe RPC communication using oRPC. It defines API rou
 
 - **Client**: Type-safe RPC client with context management
 - **Routers**: API endpoint definitions and procedure handlers
-- **Query Keys**: TanStack Query integration and cache key management
+- **Query Config**: TanStack Query cache configuration constants
 - **Utils**: Batch client utilities for optimized requests
 
 ## Key Exports
 
 ```typescript
-import { client, tanstackClient, createClientWithContext, appRouter, rpcHandler, tokenQueryKeys, QUERY_CONFIG, batchClients, createBatchClient } from "@dex-web/orpc";
+import { client, tanstackClient, createClientWithContext, appRouter, rpcHandler, QUERY_CONFIG, batchClients, createBatchClient } from "@dex-web/orpc";
 ```
 
 ## Usage
@@ -25,10 +25,18 @@ import { client, tanstackClient, createClientWithContext, appRouter, rpcHandler,
 // Create a client with context
 const rpcClient = createClientWithContext({ userId: "123" });
 
-// Use with TanStack Query
+// Use with TanStack Query - oRPC provides built-in query key generation
 const { data } = useQuery({
-  queryKey: tokenQueryKeys.all,
-  queryFn: () => tanstackClient.tokens.getAll(),
+  ...tanstackClient.tokens.getTokenMetadata.queryOptions({
+    input: { address: "token-address" },
+  }),
+  // Optional: override cache config
+  gcTime: QUERY_CONFIG.tokenMetadata.gcTime,
+});
+
+// Invalidate queries using oRPC's key helpers
+queryClient.invalidateQueries({
+  queryKey: tanstackClient.tokens.getTokenMetadata.key(),
 });
 ```
 
@@ -58,7 +66,7 @@ pnpm nx test orpc
 When adding new RPC procedures:
 
 1. Define procedure in appropriate router file
-2. Add query keys to `lib/queryKeys.ts` if needed
+2. Use oRPC's built-in query key generation (`.key()`, `.queryKey()`, etc.)
 3. Export from `src/index.ts`
 4. Write comprehensive tests including success and error cases
 5. Document expected input/output types
