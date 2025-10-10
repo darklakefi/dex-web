@@ -4,6 +4,5 @@
   "git": {
     "deploymentEnabled": false
   },
-  "installCommand": "cd ../../ && pnpm install",
-  "outputDirectory": "../../dist/apps/web"
+  "installCommand": "cd ../../ && pnpm install"
 }
