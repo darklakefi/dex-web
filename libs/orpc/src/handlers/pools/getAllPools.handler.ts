@@ -1,3 +1,4 @@
+import bs58 from "bs58";
 import { CACHE_CONFIG, LOGGING_CONFIG } from "../../config/constants";
 import { getHelius } from "../../getHelius";
 import type {
@@ -52,7 +53,7 @@ export async function getAllPoolsHandler(
         {
           memcmp: {
             offset: 0,
-            bytes: poolDiscriminator.toString("base64"),
+            bytes: bs58.encode(poolDiscriminator),
           },
         },
       ],
