@@ -547,7 +547,6 @@ export function SwapForm() {
     form.state.values.tokenAAmount,
     isXtoY,
     slippage,
-    debouncedGetQuote,
   ]);
 
   const checkInsufficientBalanceState = (input: string) => {
