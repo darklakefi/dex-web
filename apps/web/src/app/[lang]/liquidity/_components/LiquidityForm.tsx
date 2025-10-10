@@ -1,5 +1,6 @@
 "use client";
 
+import type { GetTokenPriceOutput } from "@dex-web/orpc/schemas/index";
 import { Box, Icon } from "@dex-web/ui";
 import {
   type CalculateProportionalAmountParams,
@@ -8,7 +9,6 @@ import {
 import { Field, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
-import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import {
@@ -34,7 +34,11 @@ import { LiquidityTokenInputs } from "./LiquidityTokenInputs";
 
 const serialize = createSerializer(liquidityPageParsers);
 
-export function LiquidityForm() {
+interface LiquidityFormProps {
+  tokenPrices?: Record<string, GetTokenPriceOutput | undefined>;
+}
+
+export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
   const router = useRouter();
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
@@ -82,11 +86,6 @@ export function LiquidityForm() {
     tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]?.decimals ?? 0;
 
   const orderContext = useTokenOrder();
-
-  const { prices: tokenPrices } = useTokenPricesMap([
-    tokenAAddress,
-    tokenBAddress,
-  ]);
 
   const lpEstimation = useLPTokenEstimation({
     enabled: !!poolDetails && !!orderContext,

@@ -1,26 +1,58 @@
 /**
- * Token search and prefetch configuration constants
+ * Shared constants for token and pool queries.
  */
 
 /**
- * Maximum number of tokens to fetch from the backend for search functionality.
- * This allows the search to filter through a large pool of tokens.
+ * Popular tokens that should always be available as fallback.
+ * These are common tokens that users frequently trade.
+ *
+ * Used by:
+ * - usePoolTokens
+ * - useInfinitePoolTokens
  */
-export const TOKEN_SEARCH_FETCH_SIZE = 10000;
+export const POPULAR_TOKEN_ADDRESSES = [
+  "So11111111111111111111111111111111111111112",
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+  "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+  "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
+  "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+];
 
 /**
- * Maximum number of tokens to display in the UI.
- * Keeps the interface clean and performant.
+ * Maximum number of pool tokens to fetch in a single request.
+ * This prevents DDOS-like traffic from fetching thousands of tokens at once.
+ * Most users only interact with a small subset of available tokens.
+ */
+export const MAX_POOL_TOKENS_TO_FETCH = 500;
+
+/**
+ * Token search display size (visible results in UI).
  */
 export const TOKEN_SEARCH_DISPLAY_SIZE = 8;
 
 /**
- * Delay before starting prefetch operations (in milliseconds).
- * Used as fallback when requestIdleCallback is not available.
+ * Token search fetch size (total results fetched from API).
  */
-export const PREFETCH_DELAY_MS = 100;
+export const TOKEN_SEARCH_FETCH_SIZE = 10000;
 
 /**
- * Popular token symbols to prefetch for instant search results.
+ * Delay before triggering prefetch operations (in milliseconds).
+ * This gives the browser time to complete critical rendering before
+ * starting background prefetching operations.
  */
-export const POPULAR_TOKEN_SEARCHES = ["SOL", "USDC", "USDT"] as const;
+export const PREFETCH_DELAY_MS = 1000;
+
+/**
+ * Popular token search terms that should be prefetched in the background
+ * when the SelectTokenModal is opened. These are common tokens users
+ * frequently search for.
+ */
+export const POPULAR_TOKEN_SEARCHES = [
+  "SOL",
+  "USDC",
+  "USDT",
+  "BONK",
+  "WIF",
+  "JUP",
+];

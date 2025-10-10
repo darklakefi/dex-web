@@ -8,7 +8,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {
     ...actual,
-    useSuspenseQuery: vi.fn(() => ({
+    useQuery: vi.fn(() => ({
       data: {
         tokens: [
           {
@@ -23,6 +23,10 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
           },
         ],
       },
+      isLoading: false,
+    })),
+    useQueryClient: vi.fn(() => ({
+      prefetchQuery: vi.fn(),
     })),
   };
 });
@@ -31,6 +35,7 @@ vi.mock("@dex-web/orpc", () => ({
   tanstackClient: {
     dexGateway: {
       getTokenMetadataList: {
+        queryKey: vi.fn(() => ["tokenMetadata", "abc", "def"]),
         queryOptions: vi.fn(() => ({
           queryFn: () =>
             Promise.resolve({
@@ -51,13 +56,13 @@ vi.mock("@dex-web/orpc", () => ({
         })),
       },
     },
-  },
-  tokenQueryKeys: {
-    metadata: {
-      byAddresses: vi.fn((addresses: string[]) => [
-        "tokenMetadata",
-        ...addresses,
-      ]),
+    pools: {
+      getAllPools: {
+        queryOptions: vi.fn(() => ({
+          queryFn: () => Promise.resolve({ pools: [] }),
+          queryKey: ["pools", "all"],
+        })),
+      },
     },
   },
 }));
@@ -75,9 +80,22 @@ vi.mock("@dex-web/utils", async (importOriginal) => {
 
 vi.mock("next/link", () => ({ default: (props: object) => <a {...props} /> }));
 
+vi.mock("../_hooks/constants", () => ({
+  POPULAR_TOKEN_ADDRESSES: ["abc", "def"],
+}));
+
 vi.mock("next/navigation", () => ({
   usePathname: () => "/swap",
+  useRouter: () => ({
+    prefetch: vi.fn(),
+    push: vi.fn(),
+  }),
   useSearchParams: () => ({
+    get: vi.fn((key: string) => {
+      if (key === "tokenAAddress") return "abc";
+      if (key === "tokenBAddress") return "def";
+      return null;
+    }),
     toString: () => "tokenAAddress=abc&tokenBAddress=def",
   }),
 }));

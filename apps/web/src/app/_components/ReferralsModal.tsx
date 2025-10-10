@@ -15,7 +15,7 @@ export function ReferralsModal() {
   const [isCopied, setIsCopied] = useState(false);
 
   const handleClose = () => {
-    router.back();
+    router.push("/");
   };
 
   const handleCopy = () => {
@@ -30,13 +30,20 @@ export function ReferralsModal() {
 
   const { publicKey } = useWallet();
 
-  const { data } = useSuspenseQuery(
-    tanstackClient.integrations.createTorqueReferral.queryOptions({
+  const { data } = useSuspenseQuery({
+    ...tanstackClient.integrations.createTorqueReferral.queryOptions({
+      context: { cache: "force-cache" as RequestCache },
       input: {
         userId: publicKey?.toBase58() ?? "",
       },
     }),
-  );
+    gcTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 60 * 1000,
+  });
 
   const currentUserReferralCode = userReferralCode || data?.referralCode;
   return (

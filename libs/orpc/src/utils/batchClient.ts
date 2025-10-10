@@ -43,7 +43,7 @@ export function createBatchClient(
     },
     plugins: [
       new DedupeRequestsPlugin({
-        filter: ({ request }) => request.method === "GET",
+        filter: () => true,
         groups: [
           {
             condition: ({ context }) => context?.cache === "force-cache",
@@ -83,7 +83,17 @@ export function createBatchClient(
           "x-batch-timestamp": Date.now().toString(),
           "x-client-batch": "true",
         }),
-        mode: typeof window === "undefined" ? "buffered" : "streaming",
+        mode: (() => {
+          if (typeof window !== "undefined") {
+            return "streaming";
+          }
+
+          if (typeof globalThis.EdgeRuntime !== "undefined") {
+            return "streaming";
+          }
+
+          return "buffered";
+        })(),
       }),
     ],
     url:

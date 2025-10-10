@@ -2,7 +2,7 @@ import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { withNuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
-import { TokenList } from "../../[lang]/(swap)/_components/TokenList";
+import { TokenList } from "../../[lang]/(swap)/_components/TokenListInfinite";
 
 const tokens = [
   {
@@ -14,7 +14,7 @@ const tokens = [
     value: "SOL",
   },
 ];
-describe.skip("TokenList", () => {
+describe.skip("TokenListInfinite", () => {
   it("renders token symbol, name, and truncated address", () => {
     const onSelect = vi.fn();
     const onUrlUpdate = vi.fn();

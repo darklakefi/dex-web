@@ -1,5 +1,5 @@
-import { QUERY_CONFIG, tanstackClient, tokenQueryKeys } from "@dex-web/orpc";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { QUERY_CONFIG, tanstackClient } from "@dex-web/orpc";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import {
   ADDRESS_QUERY_THRESHOLD,
@@ -55,58 +55,56 @@ export function useTokenSearch(debouncedQuery: string): {
   status: "pending" | "error" | "success";
   refetch: () => void;
 } {
+  const trimmedQuery = debouncedQuery.trim();
+  const hasQuery = trimmedQuery.length > 0;
+
   const queryInput = useMemo(() => {
-    const trimmedQuery = debouncedQuery.trim();
+    if (!hasQuery) {
+      return null;
+    }
 
     return {
       $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
+      filterBy:
+        trimmedQuery.length > ADDRESS_QUERY_THRESHOLD
+          ? {
+              case: "addressesList" as const,
+              value: {
+                $typeName: "darklake.v1.TokenAddressesList" as const,
+                tokenAddresses: [trimmedQuery],
+              },
+            }
+          : {
+              case: "substring" as const,
+              value: trimmedQuery,
+            },
       pageNumber: 1,
       pageSize: TOKEN_SEARCH_FETCH_SIZE,
-      ...(trimmedQuery.length > 0 && {
-        filterBy:
-          trimmedQuery.length > ADDRESS_QUERY_THRESHOLD
-            ? {
-                case: "addressesList" as const,
-                value: {
-                  $typeName: "darklake.v1.TokenAddressesList" as const,
-                  tokenAddresses: [trimmedQuery],
-                },
-              }
-            : {
-                case: "substring" as const,
-                value: trimmedQuery,
-              },
-      }),
     };
-  }, [debouncedQuery]);
+  }, [trimmedQuery, hasQuery]);
 
-  const queryResult = useSuspenseQuery({
+  const queryResult = useQuery({
     ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
-      input: queryInput,
+      input: queryInput!,
     }),
-    gcTime: debouncedQuery
-      ? QUERY_CONFIG.tokenSearch.gcTime
-      : QUERY_CONFIG.tokenMetadata.gcTime,
-    queryKey: tokenQueryKeys.search.query(
-      debouncedQuery,
-      TOKEN_SEARCH_FETCH_SIZE,
-    ),
+    enabled: hasQuery,
+    gcTime: QUERY_CONFIG.tokenSearch.gcTime,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     retry: QUERY_CONFIG.tokenSearch.retry,
-    staleTime: debouncedQuery
-      ? QUERY_CONFIG.tokenSearch.staleTime
-      : QUERY_CONFIG.tokenMetadata.staleTime,
+    staleTime: QUERY_CONFIG.tokenSearch.staleTime,
   });
 
   const allTokens = useMemo(
     () =>
-      queryResult.data.tokens.map((token) => ({
+      queryResult.data?.tokens.map((token) => ({
         address: token.address,
         decimals: token.decimals,
         imageUrl: token.logoUri,
         name: token.name,
         symbol: token.symbol,
-      })),
-    [queryResult.data.tokens],
+      })) || [],
+    [queryResult.data?.tokens],
   );
 
   const miniSearch = useMemo(
@@ -122,12 +120,17 @@ export function useTokenSearch(debouncedQuery: string): {
   const data: TokenSearchResult = useMemo(
     () => ({
       hasMore:
-        queryResult.data.currentPage < queryResult.data.totalPages ||
+        (queryResult.data?.currentPage ?? 0) <
+          (queryResult.data?.totalPages ?? 0) ||
         searchResults.length > TOKEN_SEARCH_DISPLAY_SIZE,
       tokens: searchResults.slice(0, TOKEN_SEARCH_DISPLAY_SIZE),
       total: searchResults.length,
     }),
-    [queryResult.data.currentPage, queryResult.data.totalPages, searchResults],
+    [
+      queryResult.data?.currentPage,
+      queryResult.data?.totalPages,
+      searchResults,
+    ],
   );
 
   return {

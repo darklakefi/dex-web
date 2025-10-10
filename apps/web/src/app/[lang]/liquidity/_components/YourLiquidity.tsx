@@ -1,6 +1,6 @@
 "use client";
-import { tanstackClient, tokenQueryKeys } from "@dex-web/orpc";
-import type { Token } from "@dex-web/orpc/schemas/index";
+import { tanstackClient } from "@dex-web/orpc";
+import type { GetTokenPriceOutput, Token } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Text } from "@dex-web/ui";
 import {
   convertToDecimal,
@@ -13,7 +13,6 @@ import BigNumber from "bignumber.js";
 import { useState } from "react";
 import { useUserLiquidity } from "../../../../hooks/queries/useLiquidityQueries";
 import { usePoolReserves } from "../../../../hooks/queries/usePoolQueries";
-import { useTokenPricesBatch } from "../../../../hooks/useTokenPrices";
 import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import {
   DEFAULT_BUY_TOKEN,
@@ -26,6 +25,7 @@ export interface YourLiquidityProps {
   tokenBAddress?: string;
   onWithdraw?: () => void;
   onClaim?: () => void;
+  tokenPrices?: Record<string, GetTokenPriceOutput | undefined>;
 }
 
 export function YourLiquidity({
@@ -33,6 +33,7 @@ export function YourLiquidity({
   tokenBAddress,
   onWithdraw,
   onClaim,
+  tokenPrices = {},
 }: YourLiquidityProps) {
   const { data: walletPublicKey } = useWalletPublicKey();
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
@@ -49,6 +50,7 @@ export function YourLiquidity({
 
   const { data: tokenMetadataResponse } = useSuspenseQuery({
     ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
+      context: { cache: "force-cache" as RequestCache },
       input: {
         $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
         filterBy: {
@@ -62,10 +64,26 @@ export function YourLiquidity({
         pageSize: 2,
       },
     }),
-    queryKey: tokenQueryKeys.metadata.byAddresses([
-      tokenXAddress,
-      tokenYAddress,
-    ]),
+    gcTime: 5 * 60 * 1000,
+    queryKey: tanstackClient.dexGateway.getTokenMetadataList.queryKey({
+      input: {
+        $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
+        filterBy: {
+          case: "addressesList" as const,
+          value: {
+            $typeName: "darklake.v1.TokenAddressesList" as const,
+            tokenAddresses: [tokenXAddress, tokenYAddress],
+          },
+        },
+        pageNumber: 1,
+        pageSize: 2,
+      },
+    }),
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 60 * 1000,
   });
 
   const { data: userLiquidity, isFetching: isLiquidityFetching } =
@@ -81,9 +99,8 @@ export function YourLiquidity({
       enabled: shouldFetchLiquidity,
     });
 
-  const priceResults = useTokenPricesBatch([tokenXAddress, tokenYAddress]);
-  const tokenXPrice = priceResults[0]?.data;
-  const tokenYPrice = priceResults[1]?.data;
+  const tokenXPrice = tokenPrices[tokenXAddress];
+  const tokenYPrice = tokenPrices[tokenYAddress];
 
   const tokenMetadata = tokenMetadataResponse;
 

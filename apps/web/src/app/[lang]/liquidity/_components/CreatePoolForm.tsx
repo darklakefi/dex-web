@@ -7,8 +7,11 @@ import {
   useTransactionState,
   useTransactionToasts,
 } from "@dex-web/core";
-import { client, tanstackClient, tokenQueryKeys } from "@dex-web/orpc";
-import type { CreatePoolTransactionInput } from "@dex-web/orpc/schemas/index";
+import { client, tanstackClient } from "@dex-web/orpc";
+import type {
+  CreatePoolTransactionInput,
+  GetTokenPriceOutput,
+} from "@dex-web/orpc/schemas/index";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import {
   numberFormatHelper,
@@ -26,7 +29,6 @@ import { createSerializer, useQueryStates } from "nuqs";
 import { useState } from "react";
 import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
-import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import { FormFieldset } from "../../../_components/FormFieldset";
 import { SelectTokenButton } from "../../../_components/SelectTokenButton";
 import { WalletButton } from "../../../_components/WalletButton";
@@ -63,7 +65,11 @@ const { useAppForm } = createFormHook({
 
 const serialize = createSerializer(liquidityPageParsers);
 
-export function CreatePoolForm() {
+interface CreatePoolFormProps {
+  tokenPrices?: Record<string, GetTokenPriceOutput | undefined>;
+}
+
+export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
   const router = useRouter();
   const { publicKey, wallet, signTransaction } = useWallet();
   const { trackLiquidity, trackError } = useAnalytics();
@@ -97,14 +103,23 @@ export function CreatePoolForm() {
   const [{ data: poolDetails }, { data: tokenMetadataResponse }] =
     useSuspenseQueries({
       queries: [
-        tanstackClient.pools.getPoolDetails.queryOptions({
-          input: {
-            tokenXMint,
-            tokenYMint,
-          },
-        }),
+        {
+          ...tanstackClient.pools.getPoolDetails.queryOptions({
+            input: {
+              tokenXMint,
+              tokenYMint,
+            },
+          }),
+          gcTime: 5 * 60 * 1000,
+          refetchOnMount: false,
+          refetchOnWindowFocus: false,
+          retry: 2,
+          retryDelay: 1000,
+          staleTime: 60 * 1000,
+        },
         {
           ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
+            context: { cache: "force-cache" as RequestCache },
             input: {
               $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
               filterBy: {
@@ -118,10 +133,26 @@ export function CreatePoolForm() {
               pageSize: 2,
             },
           }),
-          queryKey: tokenQueryKeys.metadata.byAddresses([
-            tokenXMint,
-            tokenYMint,
-          ]),
+          gcTime: 5 * 60 * 1000,
+          queryKey: tanstackClient.dexGateway.getTokenMetadataList.queryKey({
+            input: {
+              $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
+              filterBy: {
+                case: "addressesList" as const,
+                value: {
+                  $typeName: "darklake.v1.TokenAddressesList" as const,
+                  tokenAddresses: [tokenXMint, tokenYMint],
+                },
+              },
+              pageNumber: 1,
+              pageSize: 2,
+            },
+          }),
+          refetchOnMount: false,
+          refetchOnWindowFocus: false,
+          retry: 2,
+          retryDelay: 1000,
+          staleTime: 60 * 1000,
         },
       ],
     });
@@ -137,11 +168,6 @@ export function CreatePoolForm() {
     tokenAAddress,
     tokenBAddress,
   });
-
-  const { prices: tokenPrices } = useTokenPricesMap([
-    tokenAAddress,
-    tokenBAddress,
-  ]);
 
   const tokenADetails = tokenMetadataResponse.tokens[0];
   const tokenBDetails = tokenMetadataResponse.tokens[1];

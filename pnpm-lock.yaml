@@ -371,6 +371,9 @@ importers:
       "@sentry/nextjs":
         specifier: ^10.3.0
         version: 10.17.0(@opentelemetry/context-async-hooks@2.1.0(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.1.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@15.5.4(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(sass@1.93.2))(react@19.1.1)(webpack@5.102.1(@swc/core@1.13.5(@swc/helpers@0.5.17))(esbuild@0.25.10))
+      "@tanstack/query-persist-client-core":
+        specifier: ^5.90.2
+        version: 5.90.2
       "@tanstack/react-virtual":
         specifier: ^3.13.12
         version: 3.13.12(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -7925,6 +7928,12 @@ packages:
     resolution:
       {
         integrity: sha512-GtINOPjPUH0OegJExZ70UahT9ykmAhmtNVcmtdnOZbxLwT7R5OmRztR5Ahe3/Cu7LArEmR6/588tAycuaWb1xQ==,
+      }
+
+  "@tanstack/query-persist-client-core@5.90.2":
+    resolution:
+      {
+        integrity: sha512-rgJRgqqziPc3KgK2mav2HNR4PoI5e7fkiIrkg85xZ5j29mHPzTp3A0QcceQXVaV9qcPp/SMDJA48A6BpGJGHZg==,
       }
 
   "@tanstack/react-form@1.23.5":
@@ -26969,6 +26978,10 @@ snapshots:
   "@tanstack/query-core@5.90.2": {}
 
   "@tanstack/query-devtools@5.90.1": {}
+
+  "@tanstack/query-persist-client-core@5.90.2":
+    dependencies:
+      "@tanstack/query-core": 5.90.2
 
   "@tanstack/react-form@1.23.5(react-dom@19.1.1(react@19.1.1))(react@19.1.1)":
     dependencies:

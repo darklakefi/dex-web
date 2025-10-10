@@ -35,7 +35,6 @@ import {
   useSuspenseQueries,
 } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { queryKeys } from "../lib/queryKeys";
 
 /**
  * Hook to fetch a single token price without suspense.
@@ -47,6 +46,7 @@ export function useTokenPrice(
 ): UseQueryResult<GetTokenPriceOutput> {
   return useQuery({
     ...tanstackClient.tokens.getTokenPrice.queryOptions({
+      context: { cache: "force-cache" as RequestCache },
       input: {
         amount: 1,
         mint: address || "",
@@ -55,7 +55,6 @@ export function useTokenPrice(
     }),
     enabled: !!address && (options?.enabled ?? true),
     gcTime: 30 * 1000,
-    queryKey: queryKeys.tokens.price(address || ""),
     staleTime: 5 * 1000,
   });
 }
@@ -76,13 +75,13 @@ export function useTokenPricesBatch(
   return useSuspenseQueries({
     queries: validAddresses.map((address) => ({
       ...tanstackClient.tokens.getTokenPrice.queryOptions({
+        context: { cache: "force-cache" as RequestCache },
         input: {
           amount: 1,
           mint: address,
           quoteCurrency: "USD",
         },
       }),
-      queryKey: queryKeys.tokens.price(address),
       staleTime: 5 * 1000,
     })),
   });
@@ -106,6 +105,7 @@ export function useTokenPricesMap(addresses: (string | null)[]): {
   const queries = useQueries({
     queries: validAddresses.map((address) => ({
       ...tanstackClient.tokens.getTokenPrice.queryOptions({
+        context: { cache: "force-cache" as RequestCache },
         input: {
           amount: 1,
           mint: address,
@@ -114,7 +114,6 @@ export function useTokenPricesMap(addresses: (string | null)[]): {
       }),
       enabled: !!address,
       gcTime: 30 * 1000,
-      queryKey: queryKeys.tokens.price(address),
       staleTime: 5 * 1000,
     })),
   });

@@ -1,24 +1,18 @@
-import { client, tanstackClient, tokenQueryKeys } from "@dex-web/orpc";
+import { client, tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
 import { sortSolanaAddresses } from "@dex-web/utils";
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
 import type { PoolData } from "apps/web/src/hooks/usePoolData";
+import {
+  getQueryClient,
+  HydrateClient,
+} from "apps/web/src/lib/query/hydration";
 import { queryKeys } from "apps/web/src/lib/queryKeys";
 import type { SearchParams } from "nuqs/server";
-import { Suspense } from "react";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
-import { SkeletonForm } from "../../_components/SkeletonForm";
-import { TokenModalPrefetch } from "../../_components/TokenModalPrefetch";
 import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
 import { liquidityPageCache } from "../../_utils/searchParams";
-import { CreatePoolForm } from "./_components/CreatePoolForm";
 import { GlobalLoadingIndicator } from "./_components/GlobalLoadingIndicator";
-import { LiquidityForm } from "./_components/LiquidityForm";
-import { YourLiquidity } from "./_components/YourLiquidity";
+import { LiquidityPageContent } from "./_components/LiquidityPageContent";
 
 export const metadata = {
   description:
@@ -36,7 +30,7 @@ export default async function Page({
   const isCreatePoolMode =
     parsedSearchParams.type === LIQUIDITY_PAGE_TYPE.CREATE_POOL;
 
-  const queryClient = new QueryClient();
+  const queryClient = getQueryClient();
   const { tokenAAddress, tokenBAddress } = parsedSearchParams;
 
   if (tokenAAddress && tokenBAddress && !isCreatePoolMode) {
@@ -73,6 +67,7 @@ export default async function Page({
 
       queryClient.prefetchQuery({
         ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
+          context: { cache: "force-cache" as RequestCache },
           input: {
             $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
             filterBy: {
@@ -87,10 +82,20 @@ export default async function Page({
           },
         }),
         gcTime: 30 * 60 * 1000,
-        queryKey: tokenQueryKeys.metadata.byAddresses([
-          tokenXAddress,
-          tokenYAddress,
-        ]),
+        queryKey: tanstackClient.dexGateway.getTokenMetadataList.queryKey({
+          input: {
+            $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
+            filterBy: {
+              case: "addressesList" as const,
+              value: {
+                $typeName: "darklake.v1.TokenAddressesList" as const,
+                tokenAddresses: [tokenXAddress, tokenYAddress],
+              },
+            },
+            pageNumber: 1,
+            pageSize: 2,
+          },
+        }),
         staleTime: 10 * 60 * 1000,
       }),
 
@@ -162,11 +167,8 @@ export default async function Page({
     });
   }
 
-  const dehydratedState = dehydrate(queryClient);
-
   return (
     <>
-      <TokenModalPrefetch />
       <GlobalLoadingIndicator />
       <div className="flex justify-center gap-12">
         <div className="flex w-full max-w-xl flex-col items-center justify-center">
@@ -194,19 +196,13 @@ export default async function Page({
             </Box>
             <div className="size-9" />
           </section>
-          <HydrationBoundary state={dehydratedState}>
-            {isCreatePoolMode ? (
-              <CreatePoolForm />
-            ) : (
-              <Suspense fallback={<SkeletonForm type="liquidity" />}>
-                <LiquidityForm />
-              </Suspense>
-            )}
-            <YourLiquidity
+          <HydrateClient client={queryClient}>
+            <LiquidityPageContent
+              isCreatePoolMode={isCreatePoolMode}
               tokenAAddress={parsedSearchParams.tokenAAddress}
               tokenBAddress={parsedSearchParams.tokenBAddress}
             />
-          </HydrationBoundary>
+          </HydrateClient>
         </div>
         <div className="hidden max-w-xs md:block">
           <FeaturesAndTrendingPoolPanel />
