@@ -88,24 +88,13 @@ export function TokenListInfinite({
     rowVirtualizer.getVirtualItems,
   ]);
 
-  // Force remeasure when tokens change or when parent mounts
   useLayoutEffect(() => {
     if (tokens.length > 0 && parentRef.current) {
       setIsMeasured(false);
-      // Small delay to ensure parent is mounted and sized
-      requestAnimationFrame(() => {
-        rowVirtualizer.measure();
-        setIsMeasured(true);
-      });
+      rowVirtualizer.measure();
+      setIsMeasured(true);
     }
   }, [tokens.length, rowVirtualizer]);
-
-  // Force initial measure on mount
-  useLayoutEffect(() => {
-    if (parentRef.current) {
-      rowVirtualizer.measure();
-    }
-  }, [rowVirtualizer]);
 
   if (tokens.length === 0 && !isLoading) {
     return (
