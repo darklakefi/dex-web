@@ -31,11 +31,16 @@ export async function getPoolDetailsHandler(
   input: GetPoolDetailsInput,
 ): Promise<GetPoolDetailsOutput | null> {
   const { tokenXMint, tokenYMint } = input;
-  let pool = getPoolOnLocalData(tokenXMint, tokenYMint);
+  // Normalize SOL to WSOL for pool operations
+  const { normalizeTokenMintForPool } = await import("../../utils/solana");
+  const normalizedTokenXMint = normalizeTokenMintForPool(tokenXMint);
+  const normalizedTokenYMint = normalizeTokenMintForPool(tokenYMint);
+
+  let pool = getPoolOnLocalData(normalizedTokenXMint, normalizedTokenYMint);
 
   if (!pool) {
     try {
-      const poolOnChain = await getPoolOnChain(tokenXMint, tokenYMint);
+      const poolOnChain = await getPoolOnChain(normalizedTokenXMint, normalizedTokenYMint);
       if (poolOnChain) {
         pool = await savePoolToLocalData(poolOnChain);
       }

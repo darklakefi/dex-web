@@ -25,6 +25,29 @@ export const MAX_PERCENTAGE = 1000000;
 
 export const LP_TOKEN_DECIMALS = 9;
 
+/**
+ * WSOL (Wrapped SOL) mint address
+ */
+export const WSOL_MINT = "So11111111111111111111111111111111111111111";
+
+/**
+ * SOL representation in UI (WSOL + 1)
+ * Used to distinguish native SOL from WSOL in the UI
+ */
+export const SOL_MINT = "So11111111111111111111111111111111111111112";
+
+/**
+ * Normalizes SOL/WSOL addresses for pool and gateway operations.
+ * SOL (WSOL+1) should be converted to WSOL for all pool operations
+ * because pools only exist for WSOL, not for the SOL representation.
+ *
+ * @param mint - Token mint address (could be SOL or WSOL)
+ * @returns WSOL address if input is SOL, otherwise returns the input unchanged
+ */
+export function normalizeTokenMintForPool(mint: string): string {
+  return mint === SOL_MINT ? WSOL_MINT : mint;
+}
+
 export const IDL_CODER = new BorshCoder(IDL as Idl);
 
 export type PoolAccount = {

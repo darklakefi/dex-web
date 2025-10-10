@@ -132,6 +132,11 @@ export async function getSwapRateHandler(
   try {
     const { amountIn, isXtoY, tokenXMint, tokenYMint } = input;
 
+    // Normalize SOL to WSOL for pool operations
+    const { normalizeTokenMintForPool } = await import("../../utils/solana");
+    const normalizedTokenXMint = normalizeTokenMintForPool(tokenXMint);
+    const normalizedTokenYMint = normalizeTokenMintForPool(tokenYMint);
+
     const helius = getHelius();
 
     const amm_config_index = Buffer.alloc(4);
@@ -146,8 +151,8 @@ export async function getSwapRateHandler(
       [
         Buffer.from("pool"),
         ammConfigPubkey.toBuffer(),
-        new PublicKey(tokenXMint).toBuffer(),
-        new PublicKey(tokenYMint).toBuffer(),
+        new PublicKey(normalizedTokenXMint).toBuffer(),
+        new PublicKey(normalizedTokenYMint).toBuffer(),
       ],
       EXCHANGE_PROGRAM_ID,
     );
@@ -181,12 +186,12 @@ export async function getSwapRateHandler(
       .minus(new BigNumber(pool.protocol_fee_y.toString()));
 
     const tokenMetadata = (await getTokenMetadataHandler({
-      addresses: [tokenXMint, tokenYMint],
+      addresses: [normalizedTokenXMint, normalizedTokenYMint],
       returnAsObject: true,
     })) as Record<string, Token>;
 
-    const tokenX = tokenMetadata[tokenXMint]!;
-    const tokenY = tokenMetadata[tokenYMint]!;
+    const tokenX = tokenMetadata[normalizedTokenXMint]!;
+    const tokenY = tokenMetadata[normalizedTokenYMint]!;
 
     const scaledInput = toRawUnitsBigNumber(
       amountIn,

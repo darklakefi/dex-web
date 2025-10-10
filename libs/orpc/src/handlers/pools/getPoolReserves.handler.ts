@@ -75,6 +75,11 @@ export async function getPoolReservesHandler({
   tokenXMint,
   tokenYMint,
 }: GetPoolReservesInput): Promise<GetPoolReservesOutput> {
+  // Normalize SOL to WSOL for pool operations
+  const { normalizeTokenMintForPool } = await import("../../utils/solana");
+  const normalizedTokenXMint = normalizeTokenMintForPool(tokenXMint);
+  const normalizedTokenYMint = normalizeTokenMintForPool(tokenYMint);
+
   const helius = getHelius();
   const connection = helius.connection;
 
@@ -87,33 +92,33 @@ export async function getPoolReservesHandler({
   };
 
   try {
-    const poolData = await getPoolOnChain(tokenXMint, tokenYMint);
+    const poolData = await getPoolOnChain(normalizedTokenXMint, normalizedTokenYMint);
     if (!poolData) {
       return emptyResult;
     }
 
-    const lpTokenMint = await getLpTokenMint(tokenXMint, tokenYMint);
+    const lpTokenMint = await getLpTokenMint(normalizedTokenXMint, normalizedTokenYMint);
     const totalLpSupplyRaw = toNumber(poolData.token_lp_supply);
     const totalLpSupply = totalLpSupplyRaw / 10 ** LP_TOKEN_DECIMALS;
 
     const tokenXProgramId = await detectTokenProgram(
       connection,
-      new PublicKey(tokenXMint),
+      new PublicKey(normalizedTokenXMint),
     );
     const tokenYProgramId = await detectTokenProgram(
       connection,
-      new PublicKey(tokenYMint),
+      new PublicKey(normalizedTokenYMint),
     );
 
     const tokenXMintInfo = await getMint(
       connection,
-      new PublicKey(tokenXMint),
+      new PublicKey(normalizedTokenXMint),
       "confirmed",
       tokenXProgramId,
     );
     const tokenYMintInfo = await getMint(
       connection,
-      new PublicKey(tokenYMint),
+      new PublicKey(normalizedTokenYMint),
       "confirmed",
       tokenYProgramId,
     );
