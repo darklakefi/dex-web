@@ -41,10 +41,19 @@ export async function getAllPoolsHandler(
   const connection = helius.connection;
   const startTime = performance.now();
   try {
+    // Use Anchor discriminator to filter Pool accounts
+    // The discriminator is the first 8 bytes of sha256("account:Pool")
+    const poolDiscriminator = Buffer.from(
+      IDL_CODER.accounts.accountDiscriminator("Pool"),
+    );
+
     const accounts = await connection.getProgramAccounts(EXCHANGE_PROGRAM_ID, {
       filters: [
         {
-          dataSize: 289,
+          memcmp: {
+            offset: 0,
+            bytes: poolDiscriminator.toString("base64"),
+          },
         },
       ],
     });
