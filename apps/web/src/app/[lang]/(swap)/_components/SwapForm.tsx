@@ -504,21 +504,39 @@ export function SwapForm() {
 
     setIsLoadingQuote(true);
     swapState.setDisabled(true);
-    const quote = await client.swap.getSwapQuote({
-      amountIn: amountInNumber,
-      isXtoY,
-      slippage,
-      tokenXMint: poolDetails.tokenXMint,
-      tokenYMint: poolDetails.tokenYMint,
-    });
-    setQuote(quote);
-    if (type === "sell") {
-      form.setFieldValue("tokenBAmount", String(quote.amountOut));
-    } else {
-      form.setFieldValue("tokenAAmount", String(quote.amountOut));
+
+    try {
+      const quote = await client.swap.getSwapQuote({
+        amountIn: amountInNumber,
+        isXtoY,
+        slippage,
+        tokenXMint: poolDetails.tokenXMint,
+        tokenYMint: poolDetails.tokenYMint,
+      });
+      setQuote(quote);
+      if (type === "sell") {
+        form.setFieldValue("tokenBAmount", String(quote.amountOut));
+      } else {
+        form.setFieldValue("tokenAAmount", String(quote.amountOut));
+      }
+    } catch (error) {
+      // Handle pool not found or other errors gracefully
+      if (error instanceof Error && error.message.includes("Pool not found")) {
+        // Clear the quote and output amount when pool doesn't exist
+        setQuote(null);
+        if (type === "sell") {
+          form.setFieldValue("tokenBAmount", "");
+        } else {
+          form.setFieldValue("tokenAAmount", "");
+        }
+      } else {
+        // Log other unexpected errors
+        console.error("Failed to get swap quote:", error);
+      }
+    } finally {
+      swapState.setDisabled(false);
+      setIsLoadingQuote(false);
     }
-    swapState.setDisabled(false);
-    setIsLoadingQuote(false);
   };
 
   const debouncedGetQuote = useDebouncedCallback(getQuote, 500);
