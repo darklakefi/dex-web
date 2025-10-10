@@ -26,7 +26,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createSerializer, useQueryStates } from "nuqs";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import { FormFieldset } from "../../../_components/FormFieldset";
@@ -87,15 +87,16 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
   const isMissingTokens =
     tokenAAddress === EMPTY_TOKEN || tokenBAddress === EMPTY_TOKEN;
 
-  const sortedTokenAddresses = isMissingTokens
-    ? { tokenXAddress: tokenAAddress, tokenYAddress: tokenBAddress }
-    : (() => {
-        try {
-          return sortSolanaAddresses(tokenAAddress, tokenBAddress);
-        } catch (_error) {
-          return { tokenXAddress: tokenAAddress, tokenYAddress: tokenBAddress };
-        }
-      })();
+  const sortedTokenAddresses = useMemo(() => {
+    if (isMissingTokens) {
+      return { tokenXAddress: tokenAAddress, tokenYAddress: tokenBAddress };
+    }
+    try {
+      return sortSolanaAddresses(tokenAAddress, tokenBAddress);
+    } catch (_error) {
+      return { tokenXAddress: tokenAAddress, tokenYAddress: tokenBAddress };
+    }
+  }, [isMissingTokens, tokenAAddress, tokenBAddress]);
 
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;

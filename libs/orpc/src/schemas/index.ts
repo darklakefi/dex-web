@@ -44,6 +44,7 @@ export type {
   CreatePoolTransactionInput,
   CreatePoolTransactionOutput,
 } from "./pools/createPoolTransaction.schema";
+export type { GetPinedPoolOutput } from "./pools/getPinedPool.schema";
 export type {
   GetPoolDetailsInput,
   GetPoolDetailsOutput,

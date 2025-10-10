@@ -30,7 +30,9 @@ export function LiquidityPageContent({
   return (
     <>
       {isCreatePoolMode ? (
-        <CreatePoolForm tokenPrices={tokenPrices} />
+        <Suspense fallback={<SkeletonForm type="liquidity" />}>
+          <CreatePoolForm tokenPrices={tokenPrices} />
+        </Suspense>
       ) : (
         <Suspense fallback={<SkeletonForm type="liquidity" />}>
           <LiquidityForm tokenPrices={tokenPrices} />

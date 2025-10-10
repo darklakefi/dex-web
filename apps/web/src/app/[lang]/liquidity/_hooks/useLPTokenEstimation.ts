@@ -17,7 +17,7 @@
 
 import { tanstackClient } from "@dex-web/orpc";
 import type { TokenOrderContext } from "@dex-web/utils";
-import { useDebouncedValue } from "@dex-web/utils";
+import { useDebouncedValue } from "@tanstack/react-pacer";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import {
@@ -160,8 +160,12 @@ export function useLPTokenEstimation({
   slippage: _slippage,
   enabled = true,
 }: UseLPTokenEstimationParams): UseLPTokenEstimationResult {
-  const debouncedTokenAAmount = useDebouncedValue(tokenAAmount, 500);
-  const debouncedTokenBAmount = useDebouncedValue(tokenBAmount, 500);
+  const [debouncedTokenAAmount] = useDebouncedValue(tokenAAmount, {
+    wait: 500,
+  });
+  const [debouncedTokenBAmount] = useDebouncedValue(tokenBAmount, {
+    wait: 500,
+  });
 
   const { tokenXAmount, tokenYAmount, tokenXDecimals, tokenYDecimals } =
     useMemo(

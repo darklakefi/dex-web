@@ -2,6 +2,7 @@
 
 import { tanstackClient } from "@dex-web/orpc";
 import type {
+  GetPinedPoolOutput,
   GetPoolDetailsOutput,
   GetPoolReservesOutput,
 } from "@dex-web/orpc/schemas/index";
@@ -89,7 +90,7 @@ export function usePoolReservesSuspense(
  */
 export function usePinnedPools(options?: {
   enabled?: boolean;
-}): UseQueryResult<unknown> {
+}): UseQueryResult<GetPinedPoolOutput> {
   return useQuery({
     ...tanstackClient.pools.getPinedPool.queryOptions({
       context: { cache: "force-cache" as RequestCache },
