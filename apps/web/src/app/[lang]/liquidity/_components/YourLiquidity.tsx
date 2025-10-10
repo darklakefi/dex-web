@@ -305,3 +305,6 @@ export function YourLiquidity({
     </div>
   );
 }
+
+// Enable why-did-you-render tracking for this component
+YourLiquidity.whyDidYouRender = true;

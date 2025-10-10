@@ -1,3 +1,4 @@
+import "../lib/wdyr";
 import { Box, backgroundImage, PageLayout, Text } from "@dex-web/ui";
 import localFont from "next/font/local";
 import { Toaster } from "sonner";

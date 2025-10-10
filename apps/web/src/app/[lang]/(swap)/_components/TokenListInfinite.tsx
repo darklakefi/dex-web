@@ -248,3 +248,6 @@ export function TokenListInfinite({
     </div>
   );
 }
+
+// Enable why-did-you-render tracking for this component
+TokenListInfinite.whyDidYouRender = true;

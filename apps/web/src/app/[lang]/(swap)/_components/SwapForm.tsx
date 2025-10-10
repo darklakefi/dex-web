@@ -795,3 +795,6 @@ export function SwapForm() {
     </div>
   );
 }
+
+// Enable why-did-you-render tracking for this component
+SwapForm.whyDidYouRender = true;
