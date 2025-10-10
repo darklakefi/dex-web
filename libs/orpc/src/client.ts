@@ -36,7 +36,7 @@ const link = new RPCLink<ClientContext>({
       ...init,
       cache: context?.cache,
     }),
-  method: ({ context }) => {
+  method: () => {
     return "POST";
   },
   plugins: [
@@ -60,7 +60,7 @@ const link = new RPCLink<ClientContext>({
       ],
     }),
     new BatchLinkPlugin({
-      exclude: ({ path }) => {
+      exclude: () => {
         return true;
       },
       groups: [
@@ -165,7 +165,7 @@ export function createClientWithContext(context: ClientContext = {}) {
         ...init,
         cache: context?.cache,
       }),
-    method: ({ context }) => {
+    method: () => {
       return "POST";
     },
     plugins: [
@@ -189,7 +189,7 @@ export function createClientWithContext(context: ClientContext = {}) {
         ],
       }),
       new BatchLinkPlugin({
-        exclude: ({ path }) => {
+        exclude: () => {
           return true;
         },
         groups: [

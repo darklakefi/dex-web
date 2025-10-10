@@ -12,7 +12,6 @@ import {
   useTransactionToasts,
 } from "@dex-web/core";
 import { client, tanstackClient } from "@dex-web/orpc";
-import type { GetQuoteOutput } from "@dex-web/orpc/schemas/index";
 import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import { Box, Button, Text } from "@dex-web/ui";
 import {
@@ -27,12 +26,12 @@ import {
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { useDebouncedValue } from "@tanstack/react-pacer";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as z from "zod";
 import { usePoolDetails } from "../../../../hooks/queries/usePoolQueries";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
@@ -104,7 +103,6 @@ export function SwapForm() {
   const { incomingReferralCode } = useReferralCode();
 
   const swapState = useTransactionState(0, false, true);
-  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [_trackDetails, setTrackDetails] = useState<{
     tradeId: string;
     trackingId: string;
@@ -311,19 +309,73 @@ export function SwapForm() {
     tokenBAddress,
   ]);
 
-  const [quote, setQuote] = useState<GetQuoteOutput | null>(null);
-  const [quoteParams, setQuoteParams] = useState<{
-    amountIn: string;
-    type: "buy" | "sell";
-    isXtoY: boolean;
-    slippage: number;
-    timestamp?: number;
-  } | null>(null);
+  const [amountIn, setAmountIn] = useState<string>("");
+  const [swapType, setSwapType] = useState<"buy" | "sell">("sell");
 
   const isXtoY = useMemo(
     () => poolDetails?.tokenXMint === sortedTokenXMint,
     [poolDetails?.tokenXMint, sortedTokenXMint],
   );
+
+  // Debounce the amount input for quote fetching
+  const [debouncedAmountIn] = useDebouncedValue(amountIn, { wait: 500 });
+
+  // Use TanStack Query for quote fetching with automatic refetching
+  const {
+    data: quote,
+    isLoading: isLoadingQuote,
+    refetch: refetchQuote,
+  } = useQuery({
+    enabled: Boolean(
+      poolDetails &&
+        debouncedAmountIn &&
+        parseAmountBigNumber(debouncedAmountIn).gt(0),
+    ),
+    queryFn: async () => {
+      if (!poolDetails || !debouncedAmountIn) return null;
+
+      const amountInNumber = parseAmount(debouncedAmountIn);
+      if (parseAmountBigNumber(debouncedAmountIn).lte(0)) return null;
+
+      const result = await client.swap.getSwapQuote({
+        amountIn: amountInNumber,
+        isXtoY,
+        slippage: parseFloat(slippage),
+        tokenXMint: poolDetails.tokenXMint,
+        tokenYMint: poolDetails.tokenYMint,
+      });
+
+      return result;
+    },
+    queryKey: [
+      "swap-quote",
+      debouncedAmountIn,
+      isXtoY,
+      slippage,
+      poolDetails?.tokenXMint,
+      poolDetails?.tokenYMint,
+    ],
+    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchIntervalInBackground: false,
+    staleTime: 5000,
+  });
+
+  // Update form field when quote changes
+  useEffect(() => {
+    if (quote) {
+      if (swapType === "sell") {
+        form.setFieldValue("tokenBAmount", String(quote.amountOut));
+      } else {
+        form.setFieldValue("tokenAAmount", String(quote.amountOut));
+      }
+      swapState.setDisabled(false);
+    }
+  }, [quote, swapType, form.setFieldValue, swapState.setDisabled]);
+
+  // Disable swap button when loading quote
+  useEffect(() => {
+    swapState.setDisabled(isLoadingQuote);
+  }, [isLoadingQuote, swapState]);
 
   const resetButtonState = () => {
     swapState.reset();
@@ -495,95 +547,10 @@ export function SwapForm() {
   };
 
   const handleSwap = async () => {
-    getQuote({
-      amountIn: form.state.values.tokenAAmount,
-      isXtoY,
-      slippage: parseFloat(slippage),
-      type: "sell",
-    }).then(getSwap);
+    // Ensure we have the latest quote before swapping
+    await refetchQuote();
+    getSwap();
   };
-
-  const [debouncedQuoteParams] = useDebouncedValue(quoteParams, {
-    wait: 500,
-  });
-
-  const getQuote = useCallback(
-    async ({
-      amountIn,
-      type,
-      isXtoY,
-      slippage,
-    }: {
-      amountIn: string;
-      type: "buy" | "sell";
-      isXtoY: boolean;
-      slippage: number;
-    }) => {
-      const amountInNumber = parseAmount(amountIn);
-      if (!poolDetails || parseAmountBigNumber(amountIn).lte(0)) return;
-
-      setIsLoadingQuote(true);
-      swapState.setDisabled(true);
-      const quote = await client.swap.getSwapQuote({
-        amountIn: amountInNumber,
-        isXtoY,
-        slippage,
-        tokenXMint: poolDetails.tokenXMint,
-        tokenYMint: poolDetails.tokenYMint,
-      });
-      setQuote(quote);
-      if (type === "sell") {
-        form.setFieldValue("tokenBAmount", String(quote.amountOut));
-      } else {
-        form.setFieldValue("tokenAAmount", String(quote.amountOut));
-      }
-      swapState.setDisabled(false);
-      setIsLoadingQuote(false);
-    },
-    [poolDetails, swapState, form],
-  );
-
-  useEffect(() => {
-    if (debouncedQuoteParams) {
-      getQuote(debouncedQuoteParams);
-    }
-  }, [debouncedQuoteParams, getQuote]);
-
-  const debouncedGetQuote = useCallback(
-    (params: {
-      amountIn: string;
-      type: "buy" | "sell";
-      isXtoY: boolean;
-      slippage: number;
-    }) => {
-      setQuoteParams({ ...params, timestamp: Date.now() });
-    },
-    [],
-  );
-
-  useEffect(() => {
-    const amountIn = form.state.values.tokenAAmount;
-    const amountInNumber = amountIn?.replace(/,/g, "") || "0";
-
-    if (poolDetails && BigNumber(amountInNumber).gt(0)) {
-      const intervalId = setInterval(() => {
-        debouncedGetQuote({
-          amountIn,
-          isXtoY,
-          slippage: parseFloat(slippage),
-          type: "sell",
-        });
-      }, 10000);
-
-      return () => clearInterval(intervalId);
-    }
-  }, [
-    poolDetails,
-    form.state.values.tokenAAmount,
-    isXtoY,
-    slippage,
-    debouncedGetQuote,
-  ]);
 
   const checkInsufficientBalanceState = (input: string) => {
     const hasInsufficientBalance = checkInsufficientBalance(
@@ -601,16 +568,11 @@ export function SwapForm() {
 
     if (type === "sell") {
       checkInsufficientBalanceState(value);
+      setAmountIn(value);
+      setSwapType(type);
     }
 
-    if (parseAmountBigNumber(value).gt(0)) {
-      debouncedGetQuote({
-        amountIn: value,
-        isXtoY,
-        slippage: parseFloat(slippage),
-        type,
-      });
-    } else {
+    if (parseAmountBigNumber(value).lte(0)) {
       swapState.setDisabled(true);
     }
   };
@@ -620,12 +582,9 @@ export function SwapForm() {
     checkInsufficientBalanceState(String(sellAmount));
     if (!poolDetails || parseAmountBigNumber(String(sellAmount)).lte(0)) return;
 
-    debouncedGetQuote({
-      amountIn: form.state.values.tokenAAmount,
-      isXtoY: !isXtoY,
-      slippage: parseFloat(slippage),
-      type: "sell",
-    });
+    // Trigger a refetch with the current amount
+    setAmountIn(form.state.values.tokenAAmount);
+    setSwapType("sell");
   };
 
   const getButtonMessage = () => {
@@ -679,14 +638,9 @@ export function SwapForm() {
     return message;
   };
 
-  const onChangeSlippage = (slippage: string) => {
-    setSlippage(slippage);
-    debouncedGetQuote({
-      amountIn: form.state.values.tokenAAmount,
-      isXtoY,
-      slippage: parseFloat(slippage),
-      type: "sell",
-    });
+  const onChangeSlippage = (newSlippage: string) => {
+    setSlippage(newSlippage);
+    // Changing slippage will automatically trigger a refetch via queryKey dependency
   };
 
   return (
@@ -697,12 +651,7 @@ export function SwapForm() {
           <TokenTransactionSettingsButton onChange={onChangeSlippage} />
           <SwapPageRefreshButton
             onClick={() => {
-              debouncedGetQuote({
-                amountIn: form.state.values.tokenAAmount,
-                isXtoY,
-                slippage: parseFloat(slippage),
-                type: "sell",
-              });
+              refetchQuote();
             }}
           />
         </div>
@@ -818,13 +767,7 @@ export function SwapForm() {
           <SwapPageRefreshButton
             isLoading={isLoadingQuote}
             onClick={() => {
-              debouncedGetQuote({
-                amountIn: form.state.values.tokenAAmount,
-                isXtoY,
-                slippage: parseFloat(slippage),
-                type: "sell",
-              });
-
+              refetchQuote();
               refetchBuyTokenAccount();
               refetchSellTokenAccount();
             }}
