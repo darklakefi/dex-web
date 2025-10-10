@@ -274,11 +274,14 @@ export function SwapForm() {
     ),
   });
 
+  const { tokenXAddress: sortedTokenXMint, tokenYAddress: sortedTokenYMint } =
+    sortSolanaAddresses(tokenAAddress || "", tokenBAddress || "");
+
   const { data: poolDetails } = useSuspenseQuery({
     ...tanstackClient.pools.getPoolDetails.queryOptions({
       input: {
-        tokenXMint: tokenBAddress,
-        tokenYMint: tokenAAddress,
+        tokenXMint: sortedTokenXMint,
+        tokenYMint: sortedTokenYMint,
       },
     }),
     gcTime: 5 * 60 * 1000,
@@ -308,7 +311,7 @@ export function SwapForm() {
 
   const [quote, setQuote] = useState<GetQuoteOutput | null>(null);
 
-  const isXtoY = poolDetails?.tokenXMint === tokenBAddress;
+  const isXtoY = poolDetails?.tokenXMint === sortedTokenXMint;
 
   const resetButtonState = () => {
     swapState.reset();
@@ -417,8 +420,8 @@ export function SwapForm() {
 
     try {
       const formState = form.state.values;
-      const sellAmount = parseAmount(formState.tokenAAmount);
-      const buyAmount = parseAmount(formState.tokenBAmount);
+      const sellAmount = formatAmountInput(formState.tokenAAmount);
+      const buyAmount = formatAmountInput(formState.tokenBAmount);
 
       if (!tokenAAddress || !tokenBAddress) {
         throw new Error(ERROR_MESSAGES.MISSING_TOKEN_ADDRESSES);
