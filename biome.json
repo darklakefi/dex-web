@@ -19,7 +19,6 @@
       "!**/dist/**",
       "!**/node_modules/**",
       "!**/coverage/**",
-      "!**/storybook-static/**",
       "!**/out-tsc/**",
       "!**/test-results/**"
     ],

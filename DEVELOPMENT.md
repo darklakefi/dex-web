@@ -1,6 +1,6 @@
 # DEX Front-end Web Development Guide
 
-> **Project:** Nx monorepo for the DEX Front-end Web platform, using Next.js, Vite, Playwright, Biome, and pnpm. Includes all frontend apps, E2E tests, and shared libraries.
+> **Project:** Nx monorepo for the DEX Front-end Web platform, using Next.js, Vite, Biome, and pnpm. Includes the web app and shared libraries.
 
 > For a quick overview and common commands, see [README.md](./README.md).
 
@@ -10,12 +10,10 @@
 - [Architectural Principles](#architectural-principles)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
-- [Database Setup](#database-setup)
 - [Development Workflow](#development-workflow)
 - [Conventional Commits](#conventional-commits)
 - [Signed Commits](#signed-commits)
 - [Common Nx Commands](#common-nx-commands)
-- [Storybook](#storybook)
 - [CircleCI](#circleci)
 - [Knip](#knip)
 - [Recommended Extensions](#recommended-extensions)
@@ -25,7 +23,7 @@
 
 ## Overview
 
-This repository is managed as an [Nx](https://nx.dev/) monorepo. It contains the entire frontend platform for the DEX, including the main Next.js application, shared libraries, and E2E tests.
+This repository is managed as an [Nx](https://nx.dev/) monorepo. It contains the entire frontend platform for the DEX, including the main Next.js application and shared libraries.
 
 The architecture is built on a strong separation of concerns, featuring:
 
@@ -61,7 +59,6 @@ Before you begin, make sure you have the following installed **on your local mac
 - **Node.js:** `v24.0.0` or higher (use `nvm` or `asdf`).
 - **pnpm:** `v10.12.4`.
 - **Git**
-- **Docker Desktop** (for the database).
 
 ## Quick Start 🚀
 
@@ -71,92 +68,17 @@ Before you begin, make sure you have the following installed **on your local mac
     cd dex-web
     pnpm install
     ```
-2.  **Install Playwright browsers:**
-    ```sh
-    npx playwright install
-    ```
-3.  **Set up the database** (see [Database Setup](#database-setup) below).
-4.  **Start the development server:**
+2.  **Start the development server:**
     ```sh
     pnpm start
     ```
     The application will be running at [http://localhost:3000](http://localhost:3000).
-
-## Database Setup
-
-This project uses PostgreSQL with Drizzle ORM.
-
-### 1. Start PostgreSQL Server
-
-```sh
-docker-compose up -d postgres
-```
-
-### 2. Environment Configuration
-
-Create a `.env` file in the project root with your database connection string:
-
-```bash
-# .env
-POSTGRES_HOSTNAME="localhost"
-POSTGRES_DB="postgres"
-POSTGRES_USER="postgres"
-POSTGRES_PASSWORD="password"
-DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOSTNAME}:5432/${POSTGRES_DB}?schema=public"
-```
-
-### 3. Database Schema & Migrations
-
-The database schema is defined in `libs/db/src/schema.ts`. For local development, you can push schema changes directly.
-
-Run database migrations:
-
-```bash
-pnpm db:migrate
-```
-
-This command uses drizzle-kit push to synchronize your database with the schema.
-
-Generate migration files (for production):
-
-```bash
-pnpm nx run db:generate
-```
-
-### 4. Seeding the Database
-
-Populate your database with sample data using the seed script.
-
-```bash
-pnpm db:seed
-```
-
-The seeding logic is defined in `libs/db/src/seed.ts`.
-
-### 5. Open Drizzle Studio
-
-To browse and edit your database, open Drizzle Studio:
-
-```bash
-pnpm db:studio
-```
-
-This opens a web interface at http://localhost:4983.
-
-### 6. Reset the database (removes all data):
-
-```bash
-docker-compose down --volumes
-docker-compose up -d postgres
-pnpm db:migrate
-```
 
 ## Development Workflow
 
 - **Start dev server:** `pnpm start`
 - **Build the app:** `pnpm build`
 - **Run tests:** `pnpm test`
-- **Run E2E tests:** `pnpm e2e`
 - **Format code:** `pnpm format`
 - **View dependency graph:** `pnpm dep-graph`
 
@@ -176,20 +98,8 @@ All commits to this repository must be signed. Unsigned commits will be rejected
 | `pnpm build`      | Build the web app                  |
 | `pnpm test`       | Run tests                          |
 | `pnpm lint`       | Lint the codebase                  |
-| `pnpm e2e`        | Run E2E tests                      |
 | `pnpm format`     | Format the codebase                |
 | `pnpm dep-graph`  | Visualize project dependencies     |
-| `pnpm db:migrate` | Apply database schema changes      |
-| `pnpm db:seed`    | Seed the database with sample data |
-| `pnpm db:studio`  | Open the Drizzle Studio web UI     |
-
-## Storybook
-
-Storybook is used for developing UI components in isolation.
-
-```bash
-pnpm nx storybook ui
-```
 
 ## CircleCI
 

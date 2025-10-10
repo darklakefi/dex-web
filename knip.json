@@ -39,15 +39,7 @@
       ],
       "project": ["src/**/*.{ts,tsx}"]
     },
-    "apps/web-e2e": {
-      "entry": ["e2e/**/*.spec.ts"],
-      "project": ["e2e/**/*.ts", "helpers/**/*.ts"]
-    },
     "libs/core": {
-      "entry": ["src/index.ts"],
-      "project": ["src/**/*.{ts,tsx}"]
-    },
-    "libs/db": {
       "entry": ["src/index.ts"],
       "project": ["src/**/*.{ts,tsx}"]
     },

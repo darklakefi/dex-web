@@ -32,9 +32,6 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s",
       "!{projectRoot}/biome.json",
-      "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
-      "!{projectRoot}/.storybook/**/*",
-      "!{projectRoot}/tsconfig.storybook.json",
       "!{projectRoot}/**/__tests__/**/*",
       "!{projectRoot}/**/__mocks__/**/*"
     ],
@@ -77,13 +74,6 @@
     },
     {
       "options": {
-        "ciTargetName": "e2e-ci",
-        "targetName": "e2e"
-      },
-      "plugin": "@nx/playwright/plugin"
-    },
-    {
-      "options": {
         "buildTargetName": "build",
         "previewTargetName": "preview",
         "serveStaticTargetName": "serve-static",
@@ -102,15 +92,6 @@
         "watchDepsTargetName": "watch-deps"
       },
       "plugin": "@nx/react/router-plugin"
-    },
-    {
-      "options": {
-        "buildStorybookTargetName": "build-storybook",
-        "serveStorybookTargetName": "storybook",
-        "staticStorybookTargetName": "static-storybook",
-        "testStorybookTargetName": "test-storybook"
-      },
-      "plugin": "@nx/storybook/plugin"
     }
   ],
   "release": {
@@ -181,10 +162,6 @@
       "outputs": ["{options.reportsDirectory}"]
     },
     "build": {
-      "cache": true,
-      "dependsOn": ["^build"]
-    },
-    "e2e": {
       "cache": true,
       "dependsOn": ["^build"]
     },

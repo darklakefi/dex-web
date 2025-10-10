@@ -1,7 +1,6 @@
 {
   "devDependencies": {
     "@dex-web/core": "workspace:*",
-    "@dex-web/db": "workspace:*",
     "@dex-web/grpc-client": "workspace:*",
     "@dex-web/utils": "workspace:*"
   },

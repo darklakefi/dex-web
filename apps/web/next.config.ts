@@ -82,7 +82,6 @@ const nextConfig = {
   output: "standalone",
   outputFileTracingRoot: join(__dirname, "../../"),
   serverExternalPackages: [
-    "pg",
     "@grpc/grpc-js",
     "@grpc/proto-loader",
     "@connectrpc/connect-node",
@@ -175,8 +174,6 @@ const nextConfig = {
         https: false,
         net: false,
         os: false,
-        pg: false,
-        "pg-native": false,
         tls: false,
         util: false,
         zlib: false,

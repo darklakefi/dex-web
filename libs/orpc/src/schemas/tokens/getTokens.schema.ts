@@ -1,9 +1,5 @@
-import { tokens } from "@dex-web/db";
-import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { tokenSchema } from "./token.schema";
-
-export const tokenSelectSchema = createSelectSchema(tokens);
 
 export const getTokensInputSchema = z
   .object({

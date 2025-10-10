@@ -6,9 +6,13 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git pull:*)",
-      "Bash(xargs sed:*)"
+      "Bash(xargs sed:*)",
+      "Bash(source:*)",
+      "Bash(vercel logs:*)",
+      "Bash(git revert:*)",
+      "Bash(git push:*)"
     ],
-    "ask": [],
-    "deny": []
+    "deny": [],
+    "ask": []
   }
 }

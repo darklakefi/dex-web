@@ -6,11 +6,6 @@
   "tags": ["type:lib", "scope:ui", "platform:shared"],
   "targets": {
     "lint": {},
-    "storybook": {
-      "options": {
-        "port": 6006
-      }
-    },
     "test": {
       "cache": true,
       "executor": "@nx/vite:test",

@@ -4,7 +4,7 @@ Shared UI component library for the DEX Web application.
 
 ## Overview
 
-This library provides reusable React components built with Tailwind CSS. All components are documented in Storybook and designed with accessibility and user experience best practices.
+This library provides reusable React components built with Tailwind CSS and designed with accessibility and user experience best practices.
 
 ## Components
 
@@ -61,18 +61,6 @@ pnpm nx test ui
 pnpm nx lint ui
 ```
 
-## Storybook
-
-View component documentation and interactive examples:
-
-```bash
-# Run Storybook locally
-pnpm storybook
-
-# Build Storybook
-pnpm build-storybook
-```
-
 ## Testing
 
 Components are tested using Vitest and Testing Library:
@@ -90,8 +78,7 @@ All components use Tailwind CSS. Global styles and tokens are defined in the com
 When adding new components:
 
 1. Create component in `src/lib/ComponentName/`
-2. Add Storybook stories for all variants and states
-3. Write comprehensive tests (rendering, interactions, accessibility)
-4. Export from `src/index.ts`
-5. Follow existing patterns for props and styling
-6. Ensure accessibility (ARIA labels, keyboard navigation, etc.)
+2. Write comprehensive tests (rendering, interactions, accessibility)
+3. Export from `src/index.ts`
+4. Follow existing patterns for props and styling
+5. Ensure accessibility (ARIA labels, keyboard navigation, etc.)

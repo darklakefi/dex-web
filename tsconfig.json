@@ -6,13 +6,7 @@
       "path": "./apps/web"
     },
     {
-      "path": "./apps/web-e2e"
-    },
-    {
       "path": "./libs/core"
-    },
-    {
-      "path": "./libs/db"
     },
     {
       "path": "./libs/grpc-client"
