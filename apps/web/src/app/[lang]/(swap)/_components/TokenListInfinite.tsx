@@ -2,14 +2,7 @@
 import type { Token } from "@dex-web/orpc/schemas/index";
 import { Text } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { TokenImage } from "../../../_components/TokenImage";
 
 interface TokenListInfiniteProps {
@@ -24,14 +17,13 @@ interface TokenListInfiniteProps {
 }
 
 /**
- * TokenList component with infinite scroll and virtual scrolling support.
- * Implements the pattern from TanStack Virtual + TanStack Query infinite queries.
+ * Simplified TokenList component with infinite scroll.
+ * Uses IntersectionObserver for infinite scroll trigger instead of virtual scrolling.
  *
  * Features:
- * - Virtual scrolling for performance with large lists
- * - Automatic infinite scroll when reaching the end
+ * - Simple rendering with .map() (no virtualization needed for <100 tokens)
+ * - Automatic infinite scroll when reaching the bottom sentinel
  * - Loading states for initial load and pagination
- * - Loader row at the bottom to trigger next page
  */
 export function TokenListInfinite({
   tokens,
@@ -43,58 +35,41 @@ export function TokenListInfinite({
   fetchNextPage,
   isFetching = false,
 }: TokenListInfiniteProps) {
-  const parentRef = useRef<HTMLDivElement>(null);
-  const [_isMeasured, setIsMeasured] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const rowCount = hasNextPage ? tokens.length + 1 : tokens.length;
-
-  const rowVirtualizer = useVirtualizer({
-    count: rowCount,
-    estimateSize: useCallback(() => 68, []),
-    getItemKey: useCallback(
-      (index: number) => {
-        if (index >= tokens.length) return `loading-${index}`;
-        return tokens[index]?.address ?? `loading-${index}`;
-      },
-      [tokens],
-    ),
-    getScrollElement: useCallback(() => parentRef.current, []),
-    overscan: 5,
-  });
+  // Set up IntersectionObserver for infinite scroll
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [target] = entries;
+      if (
+        target?.isIntersecting &&
+        hasNextPage &&
+        !isFetchingNextPage &&
+        !isFetching &&
+        fetchNextPage
+      ) {
+        fetchNextPage();
+      }
+    },
+    [hasNextPage, isFetchingNextPage, isFetching, fetchNextPage],
+  );
 
   useEffect(() => {
-    const virtualItems = rowVirtualizer.getVirtualItems();
-    const lastItem = virtualItems[virtualItems.length - 1];
+    const element = loadMoreRef.current;
+    if (!element) return;
 
-    if (!lastItem) {
-      return;
-    }
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "100px", // Trigger 100px before reaching the sentinel
+      threshold: 0.1,
+    });
 
-    if (
-      lastItem.index >= tokens.length - 1 &&
-      hasNextPage &&
-      !isFetchingNextPage &&
-      !isFetching &&
-      fetchNextPage
-    ) {
-      fetchNextPage();
-    }
-  }, [
-    hasNextPage,
-    fetchNextPage,
-    tokens.length,
-    isFetchingNextPage,
-    isFetching,
-    rowVirtualizer.getVirtualItems,
-  ]);
+    observer.observe(element);
 
-  useLayoutEffect(() => {
-    if (tokens.length > 0 && parentRef.current) {
-      setIsMeasured(false);
-      rowVirtualizer.measure();
-      setIsMeasured(true);
-    }
-  }, [tokens.length, rowVirtualizer]);
+    return () => {
+      observer.disconnect();
+    };
+  }, [handleObserver]);
 
   if (tokens.length === 0 && !isLoading) {
     return (
@@ -106,8 +81,6 @@ export function TokenListInfinite({
       </div>
     );
   }
-
-  const virtualItems = rowVirtualizer.getVirtualItems();
 
   return (
     <div className="flex flex-col gap-4">
@@ -121,90 +94,33 @@ export function TokenListInfinite({
       )}
       <div
         className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-green-600/40 scrollbar-thumb-rounded-full hover:scrollbar-thumb-green-600/60 overflow-y-auto transition-all duration-200"
-        ref={parentRef}
         style={{
           height: "400px",
           width: "100%",
         }}
       >
-        <div
-          style={{
-            height: `${rowVirtualizer.getTotalSize()}px`,
-            position: "relative",
-            width: "100%",
-          }}
-        >
-          {virtualItems.map((virtualItem) => {
-            const isLoaderRow = virtualItem.index >= tokens.length;
-            const token = tokens[virtualItem.index];
-
-            if (isLoaderRow) {
-              return (
-                <div
-                  key={virtualItem.key}
-                  style={{
-                    height: `${virtualItem.size}px`,
-                    left: 0,
-                    position: "absolute",
-                    top: 0,
-                    transform: `translateY(${virtualItem.start}px)`,
-                    width: "100%",
-                  }}
-                >
-                  <div className="flex items-center justify-center gap-3 p-2">
-                    {hasNextPage ? (
-                      <>
-                        <div className="size-6 animate-spin rounded-full border-2 border-green-300 border-t-transparent" />
-                        <Text.Body2 className="text-green-300">
-                          Loading more...
-                        </Text.Body2>
-                      </>
-                    ) : (
-                      <Text.Body2 className="text-green-300/60">
-                        Nothing more to load
-                      </Text.Body2>
-                    )}
-                  </div>
+        {isLoading && tokens.length === 0 ? (
+          // Initial loading skeleton
+          <div className="flex flex-col gap-2">
+            {[0, 1, 2, 3, 4].map((n) => (
+              <div
+                className="flex items-center gap-3 p-2"
+                key={`skeleton-${n}`}
+              >
+                <div className="size-8 animate-pulse rounded-full bg-green-600/40" />
+                <div className="flex-1 space-y-1">
+                  <div className="h-4 w-16 animate-pulse rounded bg-green-600/40" />
+                  <div className="h-3 w-24 animate-pulse rounded bg-green-600/40" />
                 </div>
-              );
-            }
-
-            if (!token) {
-              return (
-                <div
-                  key={virtualItem.key}
-                  style={{
-                    height: `${virtualItem.size}px`,
-                    left: 0,
-                    position: "absolute",
-                    top: 0,
-                    transform: `translateY(${virtualItem.start}px)`,
-                    width: "100%",
-                  }}
-                >
-                  <div className="flex items-center gap-3 p-2">
-                    <div className="size-8 animate-pulse rounded-full bg-green-600/40" />
-                    <div className="flex-1 space-y-1">
-                      <div className="h-4 w-16 animate-pulse rounded bg-green-600/40" />
-                      <div className="h-3 w-24 animate-pulse rounded bg-green-600/40" />
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {tokens.map((token, index) => (
               <div
                 className="cursor-pointer transition-opacity duration-150 hover:opacity-70"
-                key={virtualItem.key}
-                style={{
-                  height: `${virtualItem.size}px`,
-                  left: 0,
-                  position: "absolute",
-                  top: 0,
-                  transform: `translateY(${virtualItem.start}px)`,
-                  width: "100%",
-                }}
+                key={token.address}
               >
                 <button
                   className="flex w-full cursor-pointer items-start justify-start gap-3 p-2 text-left transition-colors duration-150 hover:bg-green-600/10"
@@ -214,7 +130,7 @@ export function TokenListInfinite({
                   <TokenImage
                     address={token.address}
                     imageUrl={token.imageUrl}
-                    priority={virtualItem.index < 10}
+                    priority={index < 10}
                     size={32}
                     symbol={token.symbol}
                   />
@@ -235,11 +151,29 @@ export function TokenListInfinite({
                   </div>
                 </button>
               </div>
-            );
-          })}
-        </div>
+            ))}
+
+            {/* Infinite scroll sentinel */}
+            <div
+              className="flex items-center justify-center gap-3 p-2"
+              ref={loadMoreRef}
+            >
+              {hasNextPage ? (
+                <>
+                  <div className="size-6 animate-spin rounded-full border-2 border-green-300 border-t-transparent" />
+                  <Text.Body2 className="text-green-300">
+                    Loading more...
+                  </Text.Body2>
+                </>
+              ) : tokens.length > 0 ? (
+                <Text.Body2 className="text-green-300/60">
+                  Nothing more to load
+                </Text.Body2>
+              ) : null}
+            </div>
+          </>
+        )}
       </div>
-      {}
       {isFetching && !isFetchingNextPage && (
         <Text.Body2 className="text-center text-green-300/60 text-xs">
           Updating...
