@@ -31,6 +31,18 @@ const countryCache = new Map<string, { country: string; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
 export default function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  if (
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/rpc") ||
+    pathname.startsWith("/orpc") ||
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/_vercel") ||
+    /\.[^/]+$/.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0] ||
     request.headers.get("x-real-ip") ||

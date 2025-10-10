@@ -1,5 +1,6 @@
 import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import { SwapTransactionHistory } from "apps/web/src/app/[lang]/(swap)/_components/SwapTransactionHistory";
 import type { SearchParams } from "nuqs/server";
 import { getQueryClient, HydrateClient } from "../../../lib/query/hydration";
@@ -22,13 +23,18 @@ export default async function Page({
   const params = await selectedTokensCache.parse(searchParams);
   const queryClient = getQueryClient();
 
+  const { tokenXAddress: sortedTokenXMint, tokenYAddress: sortedTokenYMint } =
+    params.tokenAAddress && params.tokenBAddress
+      ? sortSolanaAddresses(params.tokenAAddress, params.tokenBAddress)
+      : { tokenXAddress: "", tokenYAddress: "" };
+
   await Promise.allSettled([
     params.tokenAAddress && params.tokenBAddress
       ? queryClient.prefetchQuery(
           tanstackClient.pools.getPoolDetails.queryOptions({
             input: {
-              tokenXMint: params.tokenBAddress,
-              tokenYMint: params.tokenAAddress,
+              tokenXMint: sortedTokenXMint,
+              tokenYMint: sortedTokenYMint,
             },
           }),
         )
