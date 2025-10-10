@@ -1,7 +1,7 @@
 "use client";
-import { tanstackClient } from "@dex-web/orpc";
-import type { Token } from "@dex-web/orpc/schemas/index";
+import { tanstackClient, tokenQueryKeys } from "@dex-web/orpc";
 import { Button, Icon } from "@dex-web/ui";
+import { sortSolanaAddresses } from "@dex-web/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,13 +14,11 @@ import { TokenImage } from "./TokenImage";
 interface SelectTokenButtonProps {
   type: "buy" | "sell";
   returnUrl?: string;
-  additionalParams?: Record<string, string>;
 }
 
 export function SelectTokenButton({
   type,
   returnUrl = "",
-  additionalParams: _additionalParams = {},
 }: SelectTokenButtonProps) {
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
@@ -28,14 +26,35 @@ export function SelectTokenButton({
 
   const tokenAddress = type === "buy" ? tokenAAddress : tokenBAddress;
 
-  const { data: tokenMetadata } = useSuspenseQuery(
-    tanstackClient.tokens.getTokenMetadata.queryOptions({
-      input: { addresses: [tokenAddress || ""], returnAsObject: true },
-    }),
+  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+    tokenAAddress,
+    tokenBAddress,
   );
 
-  const metadata = tokenMetadata as Record<string, Token>;
-  const tokenDetails = metadata[tokenAddress]!;
+  const { data: tokenMetadata } = useSuspenseQuery({
+    ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
+      input: {
+        $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
+        filterBy: {
+          case: "addressesList" as const,
+          value: {
+            $typeName: "darklake.v1.TokenAddressesList" as const,
+            tokenAddresses: [tokenXAddress, tokenYAddress],
+          },
+        },
+        pageNumber: 1,
+        pageSize: 2,
+      },
+    }),
+    queryKey: tokenQueryKeys.metadata.byAddresses([
+      tokenXAddress,
+      tokenYAddress,
+    ]),
+  });
+
+  const tokenDetails = tokenMetadata.tokens.find(
+    (token) => token.address === tokenAddress,
+  );
 
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -74,7 +93,7 @@ export function SelectTokenButton({
       ) : tokenDetails ? (
         <TokenImage
           address={tokenDetails.address}
-          imageUrl={tokenDetails.imageUrl}
+          imageUrl={tokenDetails.logoUri}
           priority
           size={32}
           symbol={tokenDetails.symbol}

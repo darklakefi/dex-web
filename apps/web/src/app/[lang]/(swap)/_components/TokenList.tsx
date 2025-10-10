@@ -2,7 +2,7 @@ import type { Token } from "@dex-web/orpc/schemas/index";
 import { Text } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { TokenImage } from "../../../_components/TokenImage";
 
 interface TokenListProps {
@@ -12,22 +12,36 @@ interface TokenListProps {
 }
 
 export function TokenList({ tokens, onSelect, title }: TokenListProps) {
-  const parentRef = useRef(null);
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
     count: tokens.length,
     estimateSize: () => 68,
     getItemKey: (index) => tokens[index]?.address ?? index,
     getScrollElement: () => parentRef.current,
-    overscan: 5,
+    overscan: 10,
   });
+
+  useEffect(() => {
+    if (tokens.length > 0 && parentRef.current) {
+      requestAnimationFrame(() => {
+        rowVirtualizer.measure();
+      });
+    }
+  }, [tokens.length, rowVirtualizer]);
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
 
   return (
     <div className="flex flex-col gap-4">
       {title && <Text.Body2 className="text-green-300">{title}</Text.Body2>}
-      <ul
-        className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-green-600/40 scrollbar-thumb-rounded-full hover:scrollbar-thumb-green-600/60 relative flex h-[400px] flex-col gap-4 overflow-y-auto transition-all duration-200"
+      <div
+        className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-green-600/40 scrollbar-thumb-rounded-full hover:scrollbar-thumb-green-600/60 overflow-y-auto transition-all duration-200"
         ref={parentRef}
+        style={{
+          height: "400px",
+          width: "100%",
+        }}
       >
         <div
           style={{
@@ -36,11 +50,11 @@ export function TokenList({ tokens, onSelect, title }: TokenListProps) {
             width: "100%",
           }}
         >
-          {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+          {virtualItems.map((virtualItem) => {
             const token = tokens[virtualItem.index];
             if (!token) return null;
             return (
-              <li
+              <div
                 className="cursor-pointer hover:opacity-70"
                 key={virtualItem.key}
                 style={{
@@ -76,11 +90,11 @@ export function TokenList({ tokens, onSelect, title }: TokenListProps) {
                     <span className="text-green-300 text-sm">{token.name}</span>
                   </div>
                 </button>
-              </li>
+              </div>
             );
           })}
         </div>
-      </ul>
+      </div>
     </div>
   );
 }

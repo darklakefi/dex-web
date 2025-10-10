@@ -1,4 +1,5 @@
 "use client";
+import { tanstackClient, tokenQueryKeys } from "@dex-web/orpc";
 import type { Token } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Text } from "@dex-web/ui";
 import {
@@ -7,11 +8,11 @@ import {
   sortSolanaAddresses,
   truncate,
 } from "@dex-web/utils";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import { useState } from "react";
 import { useUserLiquidity } from "../../../../hooks/queries/useLiquidityQueries";
 import { usePoolReserves } from "../../../../hooks/queries/usePoolQueries";
-import { useTokenMetadataSuspense } from "../../../../hooks/queries/useTokenQueries";
 import { useTokenPricesBatch } from "../../../../hooks/useTokenPrices";
 import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import {
@@ -46,6 +47,27 @@ export function YourLiquidity({
 
   const shouldFetchLiquidity = !!walletPublicKey;
 
+  const { data: tokenMetadataResponse } = useSuspenseQuery({
+    ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
+      input: {
+        $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
+        filterBy: {
+          case: "addressesList" as const,
+          value: {
+            $typeName: "darklake.v1.TokenAddressesList" as const,
+            tokenAddresses: [tokenXAddress, tokenYAddress],
+          },
+        },
+        pageNumber: 1,
+        pageSize: 2,
+      },
+    }),
+    queryKey: tokenQueryKeys.metadata.byAddresses([
+      tokenXAddress,
+      tokenYAddress,
+    ]),
+  });
+
   const { data: userLiquidity, isFetching: isLiquidityFetching } =
     useUserLiquidity(
       walletPublicKey?.toBase58() ?? "",
@@ -53,11 +75,6 @@ export function YourLiquidity({
       tokenYAddress,
       { enabled: shouldFetchLiquidity },
     );
-
-  const { data: tokenMetadata } = useTokenMetadataSuspense([
-    tokenXAddress,
-    tokenYAddress,
-  ]);
 
   const { data: poolReserves, isFetching: isPoolReservesFetching } =
     usePoolReserves(tokenXAddress, tokenYAddress, {
@@ -68,8 +85,22 @@ export function YourLiquidity({
   const tokenXPrice = priceResults[0]?.data;
   const tokenYPrice = priceResults[1]?.data;
 
-  const tokenMetadataMap =
-    (tokenMetadata as Record<string, Token | undefined>) ?? {};
+  const tokenMetadata = tokenMetadataResponse;
+
+  const tokenMetadataMap: Record<string, Token | undefined> =
+    tokenMetadata.tokens.reduce(
+      (acc, token) => {
+        acc[token.address] = {
+          address: token.address,
+          decimals: token.decimals,
+          imageUrl: token.logoUri,
+          name: token.name,
+          symbol: token.symbol,
+        };
+        return acc;
+      },
+      {} as Record<string, Token>,
+    );
 
   const tokenXDetails: Token = tokenMetadataMap[tokenXAddress] ?? {
     address: tokenXAddress,
