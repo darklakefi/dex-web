@@ -88,22 +88,13 @@ export function TokenListInfinite({
     rowVirtualizer.getVirtualItems,
   ]);
 
-  const [, setForceUpdate] = useState({});
-  const triggerRerender = useCallback(() => setForceUpdate({}), []);
-
   useLayoutEffect(() => {
     if (tokens.length > 0 && parentRef.current) {
+      setIsMeasured(false);
       rowVirtualizer.measure();
       setIsMeasured(true);
     }
   }, [tokens.length, rowVirtualizer]);
-
-  useEffect(() => {
-    if (tokens.length > 0) {
-      setIsMeasured(false);
-      triggerRerender();
-    }
-  }, [tokens.length, triggerRerender]);
 
   if (tokens.length === 0 && !isLoading) {
     return (
