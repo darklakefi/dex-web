@@ -165,7 +165,7 @@ export function createClientWithContext(context: ClientContext = {}) {
         ...init,
         cache: context?.cache,
       }),
-    method: ({ context }) => {
+    method: () => {
       return "POST";
     },
     plugins: [
