@@ -60,7 +60,7 @@ export function usePoolReserves(
       context: { cache: "force-cache" as RequestCache },
       input: { tokenXMint, tokenYMint },
     }),
-    refetchOnMount: true,
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: 30_000,
     ...options,
