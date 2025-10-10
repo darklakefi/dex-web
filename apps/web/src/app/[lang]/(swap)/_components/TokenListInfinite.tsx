@@ -44,7 +44,7 @@ export function TokenListInfinite({
   isFetching = false,
 }: TokenListInfiniteProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const [isMeasured, setIsMeasured] = useState(false);
+  const [_isMeasured, setIsMeasured] = useState(false);
 
   const rowCount = hasNextPage ? tokens.length + 1 : tokens.length;
 
