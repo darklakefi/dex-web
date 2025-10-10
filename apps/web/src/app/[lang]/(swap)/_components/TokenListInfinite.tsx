@@ -1,8 +1,15 @@
+"use client";
 import type { Token } from "@dex-web/orpc/schemas/index";
 import { Text } from "@dex-web/ui";
 import { truncate } from "@dex-web/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useCallback, useEffect, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { TokenImage } from "../../../_components/TokenImage";
 
 interface TokenListInfiniteProps {
@@ -37,6 +44,7 @@ export function TokenListInfinite({
   isFetching = false,
 }: TokenListInfiniteProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  const [isMeasured, setIsMeasured] = useState(false);
 
   const rowCount = hasNextPage ? tokens.length + 1 : tokens.length;
 
@@ -80,15 +88,22 @@ export function TokenListInfinite({
     rowVirtualizer.getVirtualItems,
   ]);
 
-  useEffect(() => {
-    if (tokens.length > 0 && parentRef.current) {
-      const timeoutId = setTimeout(() => {
-        rowVirtualizer.measure();
-      }, 0);
+  const [, setForceUpdate] = useState({});
+  const triggerRerender = useCallback(() => setForceUpdate({}), []);
 
-      return () => clearTimeout(timeoutId);
+  useLayoutEffect(() => {
+    if (tokens.length > 0 && parentRef.current) {
+      rowVirtualizer.measure();
+      setIsMeasured(true);
     }
   }, [tokens.length, rowVirtualizer]);
+
+  useEffect(() => {
+    if (tokens.length > 0) {
+      setIsMeasured(false);
+      triggerRerender();
+    }
+  }, [tokens.length, triggerRerender]);
 
   if (tokens.length === 0 && !isLoading) {
     return (
