@@ -7,6 +7,7 @@ import {
   HydrateClient,
 } from "apps/web/src/lib/query/hydration";
 import { queryKeys } from "apps/web/src/lib/queryKeys";
+import { redirect } from "next/navigation";
 import type { SearchParams } from "nuqs/server";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
 import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
@@ -139,6 +140,23 @@ export default async function Page({
         staleTime: 2 * 60 * 1000,
       }),
     ]);
+
+    // SSR no-flicker redirect when pool does not exist
+    try {
+      const prefetched = queryClient.getQueryData(
+        queryKeys.pools.reserves(tokenXAddress, tokenYAddress),
+      ) as PoolData | null | undefined;
+
+      if (
+        !prefetched ||
+        ("exists" in (prefetched as any) && !(prefetched as any).exists)
+      ) {
+        const url = `/liquidity/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}&type=${LIQUIDITY_PAGE_TYPE.CREATE_POOL}`;
+        redirect(url as never);
+      }
+    } catch (_) {
+      // In case of any unexpected state, do not block rendering.
+    }
   } else if (isCreatePoolMode) {
     await Promise.allSettled([
       queryClient.prefetchQuery(

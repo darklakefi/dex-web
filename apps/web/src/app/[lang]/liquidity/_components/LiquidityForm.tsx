@@ -9,6 +9,7 @@ import {
 import { Field, useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
+import { useEffect } from "react";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import {
@@ -98,6 +99,18 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
   });
 
   const isCalculating = lpEstimation.isLoading;
+
+  // Auto-redirect to Create Pool when no pool exists
+  useEffect(() => {
+    if (!isPoolLoading && !poolDetails && tokenAAddress && tokenBAddress) {
+      const urlWithParams = serialize("liquidity", {
+        tokenAAddress,
+        tokenBAddress,
+        type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
+      });
+      router.replace(`/${urlWithParams}`);
+    }
+  }, [isPoolLoading, poolDetails, tokenAAddress, tokenBAddress, router]);
 
   if (viewState.isInitialLoading) {
     return (
