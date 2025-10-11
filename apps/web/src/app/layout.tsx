@@ -6,6 +6,7 @@ import "../lib/orpc.server";
 import Providers from "./_components/Providers";
 import "./global.css";
 import { NextIntlClientProvider } from "next-intl";
+import enMessages from "../../locale/en.json";
 import { AppFooter } from "./_components/AppFooter";
 import { AppHeader } from "./_components/AppHeader";
 import { GeolocationAwareDisclaimerProvider } from "./_components/GeolocationAware";
@@ -50,10 +51,10 @@ export default async function RootLayout({
   return (
     <html
       className={`${bitsumishiRegular.variable} ${classicConsoleNeue.variable} font-sans antialiased`}
-      lang={locale}
+      lang={"en"}
     >
       <body className="bg-green-900">
-        <NextIntlClientProvider>
+        <NextIntlClientProvider locale={"en"} messages={enMessages as Record<string, unknown>}>
           <Providers>
             <ReferralCodeProvider>
               <GeolocationAwareDisclaimerProvider />
