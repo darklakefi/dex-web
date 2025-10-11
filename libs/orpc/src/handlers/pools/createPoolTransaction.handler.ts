@@ -9,8 +9,12 @@ import { createLiquidityProgram } from "@dex-web/core";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
+  createAssociatedTokenAccountInstruction,
+  createSyncNativeInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
+  getMint,
+  TOKEN_2022_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
@@ -26,7 +30,7 @@ import type {
   CreatePoolTransactionInput,
   CreatePoolTransactionOutput,
 } from "../../schemas/pools/createPoolTransaction.schema";
-import { getTokenProgramId } from "../../utils/solana";
+import { WSOL_MINT } from "../../utils/solana";
 
 const POOL_RESERVE_SEED = "pool_reserve";
 const POOL_SEED = "pool";
@@ -56,14 +60,24 @@ async function ensureAtaIx(
     await getAccount(connection, ata, "confirmed", tokenProgram);
     return null;
   } catch {
-    const ix = createAssociatedTokenAccountIdempotentInstruction(
-      owner,
-      ata,
-      owner,
-      mint,
-      tokenProgram,
-      ASSOCIATED_TOKEN_PROGRAM_ID,
-    );
+    const isNativeWsol = mint.toBase58() === WSOL_MINT;
+    const ix = isNativeWsol
+      ? createAssociatedTokenAccountInstruction(
+          owner,
+          ata,
+          owner,
+          mint,
+          tokenProgram,
+          ASSOCIATED_TOKEN_PROGRAM_ID,
+        )
+      : createAssociatedTokenAccountIdempotentInstruction(
+          owner,
+          ata,
+          owner,
+          mint,
+          tokenProgram,
+          ASSOCIATED_TOKEN_PROGRAM_ID,
+        );
     console.log("Creating ATA instruction:", {
       ata: ata.toBase58(),
       keys: ix.keys.map((k) => ({
@@ -72,6 +86,7 @@ async function ensureAtaIx(
         pubkey: k.pubkey.toBase58(),
       })),
       mint: mint.toBase58(),
+      mode: isNativeWsol ? "legacy-create" : "idempotent-create",
       tokenProgram: tokenProgram.toBase58(),
     });
     return ix;
@@ -88,6 +103,12 @@ async function createPool(
   depositAmountX: string,
   depositAmountY: string,
   connection: web3.Connection,
+  options?: {
+    wrapNative?: {
+      xLamports?: string;
+      yLamports?: string;
+    };
+  },
 ): Promise<VersionedTransaction> {
   const [ammConfig] = PublicKey.findProgramAddressSync(
     [Buffer.from(AMM_CONFIG_SEED), new BN(0).toArrayLike(Buffer, "le", 4)],
@@ -209,6 +230,39 @@ async function createPool(
   });
 
   const instructions = [modifyComputeUnits, ...ataInstructions];
+
+  // If user selected native SOL for either side, wrap the SOL before program call
+  if (options?.wrapNative?.xLamports) {
+    const lamports = Number(options.wrapNative.xLamports);
+    if (lamports > 0) {
+      instructions.push(
+        web3.SystemProgram.transfer({
+          fromPubkey: user,
+          lamports,
+          toPubkey: userTokenAccountX,
+        }),
+      );
+      instructions.push(
+        createSyncNativeInstruction(userTokenAccountX, tokenXProgramId),
+      );
+    }
+  }
+
+  if (options?.wrapNative?.yLamports) {
+    const lamports = Number(options.wrapNative.yLamports);
+    if (lamports > 0) {
+      instructions.push(
+        web3.SystemProgram.transfer({
+          fromPubkey: user,
+          lamports,
+          toPubkey: userTokenAccountY,
+        }),
+      );
+      instructions.push(
+        createSyncNativeInstruction(userTokenAccountY, tokenYProgramId),
+      );
+    }
+  }
   for (const ix of programTx.instructions) {
     instructions.push(ix);
   }
@@ -234,7 +288,9 @@ export async function createPoolTransactionHandler(
     input;
 
   // Normalize SOL to WSOL for pool operations
-  const { normalizeTokenMintForPool } = await import("../../utils/solana");
+  const { normalizeTokenMintForPool, SOL_MINT } = await import(
+    "../../utils/solana"
+  );
   const normalizedTokenXMint = normalizeTokenMintForPool(tokenXMint);
   const normalizedTokenYMint = normalizeTokenMintForPool(tokenYMint);
 
@@ -257,12 +313,26 @@ export async function createPoolTransactionHandler(
 
   const program = createLiquidityProgram(IDL, provider);
 
-  const tokenXProgramId = await getTokenProgramId(
-    connection,
+  // Detect token program IDs robustly by probing mints under both programs
+  async function detectTokenProgram(mint: PublicKey): Promise<PublicKey> {
+    try {
+      await getMint(connection, mint, "confirmed", TOKEN_PROGRAM_ID);
+      return TOKEN_PROGRAM_ID;
+    } catch {
+      try {
+        await getMint(connection, mint, "confirmed", TOKEN_2022_PROGRAM_ID);
+        return TOKEN_2022_PROGRAM_ID;
+      } catch {
+        // Fall back to classic program to avoid hard failure; ATA creation will still fail if wrong
+        return TOKEN_PROGRAM_ID;
+      }
+    }
+  }
+
+  const tokenXProgramId = await detectTokenProgram(
     new PublicKey(normalizedTokenXMint),
   );
-  const tokenYProgramId = await getTokenProgramId(
-    connection,
+  const tokenYProgramId = await detectTokenProgram(
     new PublicKey(normalizedTokenYMint),
   );
 
@@ -285,6 +355,12 @@ export async function createPoolTransactionHandler(
       depositAmountX,
       depositAmountY,
       connection,
+      {
+        wrapNative: {
+          xLamports: tokenXMint === SOL_MINT ? depositAmountX : undefined,
+          yLamports: tokenYMint === SOL_MINT ? depositAmountY : undefined,
+        },
+      },
     );
 
     // Simulate transaction before returning

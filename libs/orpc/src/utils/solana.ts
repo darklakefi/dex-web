@@ -28,13 +28,15 @@ export const LP_TOKEN_DECIMALS = 9;
 /**
  * WSOL (Wrapped SOL) mint address
  */
-export const WSOL_MINT = "So11111111111111111111111111111111111111111";
+// Correct WSOL (native wrapped SOL) mint address
+export const WSOL_MINT = "So11111111111111111111111111111111111111112";
 
 /**
  * SOL representation in UI (WSOL + 1)
  * Used to distinguish native SOL from WSOL in the UI
  */
-export const SOL_MINT = "So11111111111111111111111111111111111111112";
+// UI-only SOL representation (distinct from WSOL)
+export const SOL_MINT = "So11111111111111111111111111111111111111111";
 
 /**
  * Normalizes SOL/WSOL addresses for pool and gateway operations.

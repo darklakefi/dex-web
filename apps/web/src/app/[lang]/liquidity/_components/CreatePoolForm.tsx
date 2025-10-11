@@ -20,7 +20,7 @@ import {
 } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
-import { useSuspenseQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -101,62 +101,60 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
   const tokenXMint = sortedTokenAddresses.tokenXAddress;
   const tokenYMint = sortedTokenAddresses.tokenYAddress;
 
-  const [{ data: poolDetails }, { data: tokenMetadataResponse }] =
-    useSuspenseQueries({
-      queries: [
-        {
-          ...tanstackClient.pools.getPoolDetails.queryOptions({
-            input: {
-              tokenXMint,
-              tokenYMint,
-            },
-          }),
-          gcTime: 5 * 60 * 1000,
-          refetchOnMount: false,
-          refetchOnWindowFocus: false,
-          retry: 2,
-          retryDelay: 1000,
-          staleTime: 60 * 1000,
+  const { data: poolDetails } = useQuery({
+    ...tanstackClient.pools.getPoolDetails.queryOptions({
+      input: {
+        tokenXMint,
+        tokenYMint,
+      },
+    }),
+    enabled: Boolean(tokenXMint && tokenYMint),
+    gcTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
+    retryDelay: 1000,
+    staleTime: 60 * 1000,
+  });
+
+  const { data: tokenMetadataResponse } = useQuery({
+    ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
+      context: { cache: "force-cache" as RequestCache },
+      input: {
+        $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
+        filterBy: {
+          case: "addressesList" as const,
+          value: {
+            $typeName: "darklake.v1.TokenAddressesList" as const,
+            tokenAddresses: [tokenXMint, tokenYMint],
+          },
         },
-        {
-          ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
-            context: { cache: "force-cache" as RequestCache },
-            input: {
-              $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
-              filterBy: {
-                case: "addressesList" as const,
-                value: {
-                  $typeName: "darklake.v1.TokenAddressesList" as const,
-                  tokenAddresses: [tokenXMint, tokenYMint],
-                },
-              },
-              pageNumber: 1,
-              pageSize: 2,
-            },
-          }),
-          gcTime: 5 * 60 * 1000,
-          queryKey: tanstackClient.dexGateway.getTokenMetadataList.queryKey({
-            input: {
-              $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
-              filterBy: {
-                case: "addressesList" as const,
-                value: {
-                  $typeName: "darklake.v1.TokenAddressesList" as const,
-                  tokenAddresses: [tokenXMint, tokenYMint],
-                },
-              },
-              pageNumber: 1,
-              pageSize: 2,
-            },
-          }),
-          refetchOnMount: false,
-          refetchOnWindowFocus: false,
-          retry: 2,
-          retryDelay: 1000,
-          staleTime: 60 * 1000,
+        pageNumber: 1,
+        pageSize: 2,
+      },
+    }),
+    enabled: Boolean(tokenXMint && tokenYMint),
+    gcTime: 5 * 60 * 1000,
+    queryKey: tanstackClient.dexGateway.getTokenMetadataList.queryKey({
+      input: {
+        $typeName: "darklake.v1.GetTokenMetadataListRequest" as const,
+        filterBy: {
+          case: "addressesList" as const,
+          value: {
+            $typeName: "darklake.v1.TokenAddressesList" as const,
+            tokenAddresses: [tokenXMint, tokenYMint],
+          },
         },
-      ],
-    });
+        pageNumber: 1,
+        pageSize: 2,
+      },
+    }),
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
+    retryDelay: 1000,
+    staleTime: 60 * 1000,
+  });
 
   const {
     buyTokenAccount,
@@ -170,8 +168,8 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
     tokenBAddress,
   });
 
-  const tokenADetails = tokenMetadataResponse.tokens[0];
-  const tokenBDetails = tokenMetadataResponse.tokens[1];
+  const tokenADetails = tokenMetadataResponse?.tokens?.[0];
+  const tokenBDetails = tokenMetadataResponse?.tokens?.[1];
 
   const { trackSigned, trackConfirmed } = useLiquidityTracking({
     trackError: (error: unknown, context?: Record<string, unknown>) => {
@@ -390,7 +388,11 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
               >
                 {tokenBAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
               </Text.Body2>
-              <SelectTokenButton returnUrl="liquidity" type="sell" />
+              <SelectTokenButton
+                prefetchEnabled={false}
+                returnUrl="liquidity"
+                type="sell"
+              />
             </div>
             <form.Field
               listeners={{
@@ -450,7 +452,11 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
               >
                 {tokenAAddress === EMPTY_TOKEN ? "SELECT TOKEN" : "TOKEN"}
               </Text.Body2>
-              <SelectTokenButton returnUrl="liquidity" type="buy" />
+              <SelectTokenButton
+                prefetchEnabled={false}
+                returnUrl="liquidity"
+                type="buy"
+              />
             </div>
             <form.Field
               listeners={{

@@ -16,6 +16,7 @@ import { TokenImage } from "./TokenImage";
 interface SelectTokenButtonProps {
   type: "buy" | "sell";
   returnUrl?: string;
+  prefetchEnabled?: boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ interface SelectTokenButtonProps {
 export function SelectTokenButton({
   type,
   returnUrl = "",
+  prefetchEnabled = true,
 }: SelectTokenButtonProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -68,6 +70,11 @@ export function SelectTokenButton({
       context: { cache: "force-cache" as RequestCache },
       input: queryInput,
     }),
+    enabled: Boolean(tokenXAddress && tokenYAddress),
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
+    staleTime: 60 * 1000,
   });
 
   const tokenDetails = tokenMetadata?.tokens?.find(
@@ -78,6 +85,7 @@ export function SelectTokenButton({
   const searchParams = useSearchParams();
 
   const handlePrefetch = useCallback(() => {
+    if (!prefetchEnabled) return;
     queryClient.prefetchQuery(
       tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
         context: { cache: "force-cache" as RequestCache },
@@ -122,6 +130,7 @@ export function SelectTokenButton({
     router,
     pathname,
     searchParams,
+    prefetchEnabled,
   ]);
 
   function buildHref(
@@ -171,7 +180,7 @@ export function SelectTokenButton({
       )}
       onMouseEnter={handlePrefetch}
       onTouchStart={handlePrefetch}
-      prefetch
+      prefetch={prefetchEnabled}
       variant="secondary"
     >
       {isLoading ? (

@@ -8,7 +8,7 @@ import {
   sortSolanaAddresses,
   truncate,
 } from "@dex-web/utils";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import { useState } from "react";
 import { useUserLiquidity } from "../../../../hooks/queries/useLiquidityQueries";
@@ -48,7 +48,7 @@ export function YourLiquidity({
 
   const shouldFetchLiquidity = !!walletPublicKey;
 
-  const { data: tokenMetadataResponse } = useSuspenseQuery({
+  const { data: tokenMetadataResponse } = useQuery({
     ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
       context: { cache: "force-cache" as RequestCache },
       input: {
@@ -64,6 +64,7 @@ export function YourLiquidity({
         pageSize: 2,
       },
     }),
+    enabled: Boolean(tokenXAddress && tokenYAddress),
     gcTime: 5 * 60 * 1000,
     queryKey: tanstackClient.dexGateway.getTokenMetadataList.queryKey({
       input: {
@@ -81,7 +82,7 @@ export function YourLiquidity({
     }),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    retry: 2,
+    retry: 1,
     retryDelay: 1000,
     staleTime: 60 * 1000,
   });

@@ -36,11 +36,13 @@ export function LiquidityPageContent({
           <LiquidityForm tokenPrices={tokenPrices} />
         </Suspense>
       )}
-      <YourLiquidity
-        tokenAAddress={tokenAAddress ?? undefined}
-        tokenBAddress={tokenBAddress ?? undefined}
-        tokenPrices={tokenPrices}
-      />
+      {!isCreatePoolMode && (
+        <YourLiquidity
+          tokenAAddress={tokenAAddress ?? undefined}
+          tokenBAddress={tokenBAddress ?? undefined}
+          tokenPrices={tokenPrices}
+        />
+      )}
     </>
   );
 }
