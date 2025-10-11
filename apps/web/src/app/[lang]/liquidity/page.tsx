@@ -158,21 +158,74 @@ export default async function Page({
       // In case of any unexpected state, do not block rendering.
     }
   } else if (isCreatePoolMode) {
-    await Promise.allSettled([
-      queryClient.prefetchQuery(
-        tanstackClient.pools.getPinedPool.queryOptions({}),
-      ),
+    // In Create Pool mode, if a pool already exists for the selected tokens,
+    // redirect to Add Liquidity to avoid a confusing UX.
+    const { tokenAAddress, tokenBAddress } = parsedSearchParams;
 
-      queryClient.prefetchQuery({
-        ...tanstackClient.pools.getAllPools.queryOptions({
-          input: {
-            includeEmpty: true,
+    if (tokenAAddress && tokenBAddress) {
+      const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
+        tokenAAddress,
+        tokenBAddress,
+      );
+
+      await Promise.allSettled([
+        queryClient.prefetchQuery({
+          queryFn: async (): Promise<PoolData | null> => {
+            const result = await client.pools.getPoolReserves({
+              tokenXMint: tokenXAddress,
+              tokenYMint: tokenYAddress,
+            });
+
+            if (!result || !result.exists) {
+              return null;
+            }
+
+            return result;
           },
+          queryKey: queryKeys.pools.reserves(tokenXAddress, tokenYAddress),
         }),
-        gcTime: 10 * 60 * 1000,
-        staleTime: 2 * 60 * 1000,
-      }),
-    ]);
+        queryClient.prefetchQuery(
+          tanstackClient.pools.getPinedPool.queryOptions({}),
+        ),
+        queryClient.prefetchQuery({
+          ...tanstackClient.pools.getAllPools.queryOptions({
+            input: {
+              includeEmpty: true,
+            },
+          }),
+          gcTime: 10 * 60 * 1000,
+          staleTime: 2 * 60 * 1000,
+        }),
+      ]);
+
+      try {
+        const prefetched = queryClient.getQueryData(
+          queryKeys.pools.reserves(tokenXAddress, tokenYAddress),
+        ) as PoolData | null | undefined;
+
+        if (prefetched && ("exists" in (prefetched as any) && (prefetched as any).exists)) {
+          const url = `/liquidity/?tokenAAddress=${tokenAAddress}&tokenBAddress=${tokenBAddress}&type=${LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY}`;
+          redirect(url as never);
+        }
+      } catch (_) {
+        // Do not block rendering if something goes wrong.
+      }
+    } else {
+      await Promise.allSettled([
+        queryClient.prefetchQuery(
+          tanstackClient.pools.getPinedPool.queryOptions({}),
+        ),
+        queryClient.prefetchQuery({
+          ...tanstackClient.pools.getAllPools.queryOptions({
+            input: {
+              includeEmpty: true,
+            },
+          }),
+          gcTime: 10 * 60 * 1000,
+          staleTime: 2 * 60 * 1000,
+        }),
+      ]);
+    }
   } else {
     await queryClient.prefetchQuery({
       ...tanstackClient.pools.getAllPools.queryOptions({

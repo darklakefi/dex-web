@@ -26,7 +26,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createSerializer, useQueryStates } from "nuqs";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import { FormFieldset } from "../../../_components/FormFieldset";
@@ -170,6 +170,18 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
 
   const tokenADetails = tokenMetadataResponse?.tokens?.[0];
   const tokenBDetails = tokenMetadataResponse?.tokens?.[1];
+
+  // If a pool already exists for the selected tokens, automatically switch to Add Liquidity.
+  useEffect(() => {
+    if (poolDetails && tokenAAddress && tokenBAddress) {
+      const urlWithParams = serialize("liquidity", {
+        tokenAAddress,
+        tokenBAddress,
+        type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
+      });
+      router.replace(`/${urlWithParams}`);
+    }
+  }, [poolDetails, tokenAAddress, tokenBAddress, router]);
 
   const { trackSigned, trackConfirmed } = useLiquidityTracking({
     trackError: (error: unknown, context?: Record<string, unknown>) => {
