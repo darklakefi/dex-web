@@ -106,7 +106,7 @@ export function YourLiquidity({
   const tokenMetadata = tokenMetadataResponse;
 
   const tokenMetadataMap: Record<string, Token | undefined> =
-    tokenMetadata.tokens.reduce(
+    tokenMetadata?.tokens?.reduce(
       (acc, token) => {
         acc[token.address] = {
           address: token.address,
@@ -118,7 +118,7 @@ export function YourLiquidity({
         return acc;
       },
       {} as Record<string, Token>,
-    );
+    ) ?? {};
 
   const tokenXDetails: Token = tokenMetadataMap[tokenXAddress] ?? {
     address: tokenXAddress,
