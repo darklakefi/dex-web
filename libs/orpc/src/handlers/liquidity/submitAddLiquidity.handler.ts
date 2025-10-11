@@ -1,7 +1,11 @@
 "use server";
 
 import { extractTransactionSignature } from "@dex-web/core";
-import { type Connection, VersionedTransaction } from "@solana/web3.js";
+import {
+  type Connection,
+  SendTransactionError,
+  VersionedTransaction,
+} from "@solana/web3.js";
 import { getHelius } from "../../getHelius";
 import type {
   SubmitAddLiquidityInput,
@@ -77,6 +81,32 @@ export async function submitAddLiquidityHandler({
         "confirmed",
       );
     } catch (confirmError) {
+      // Instrumentation: print logs if confirmation surfaced a send error context
+      try {
+        if (confirmError instanceof SendTransactionError) {
+          const logs = await confirmError.getLogs(connection);
+          if (logs && logs.length) {
+            console.error(
+              "submitAddLiquidity: confirmation logs:",
+              logs,
+            );
+          }
+        } else if (
+          confirmError &&
+          typeof confirmError === "object" &&
+          "transactionLogs" in (confirmError as Record<string, unknown>)
+        ) {
+          console.error(
+            "submitAddLiquidity: confirmation logs:",
+            (confirmError as { transactionLogs?: unknown }).transactionLogs,
+          );
+        }
+      } catch (logError) {
+        console.warn(
+          "submitAddLiquidity: failed to fetch confirmation logs:",
+          logError,
+        );
+      }
       const recovered = await attemptTransactionRecovery(
         confirmError,
         connection,
@@ -103,6 +133,27 @@ export async function submitAddLiquidityHandler({
       success: true,
     };
   } catch (error) {
+    // Instrumentation: print full transaction logs on failure when available
+    try {
+      if (error instanceof SendTransactionError) {
+        const logs = await error.getLogs(connection);
+        if (logs && logs.length) {
+          console.error("submitAddLiquidity: transaction logs:", logs);
+        }
+      } else if (
+        error &&
+        typeof error === "object" &&
+        "transactionLogs" in (error as Record<string, unknown>)
+      ) {
+        console.error(
+          "submitAddLiquidity: transaction logs:",
+          (error as { transactionLogs?: unknown }).transactionLogs,
+        );
+      }
+    } catch (logError) {
+      console.warn("submitAddLiquidity: failed to fetch logs:", logError);
+    }
+
     const recovery = await attemptTransactionRecovery(
       error,
       connection,

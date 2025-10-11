@@ -11,10 +11,11 @@ import type { Token } from "../../schemas/tokens";
 import type { TokenAccount } from "../../schemas/tokens/tokenAccount.schema";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
-const SOL_MINTS = [
-  "So11111111111111111111111111111111111111111",
-  "So11111111111111111111111111111111111111112",
-];
+import { SOL_MINT, WSOL_MINT } from "../../utils/solana";
+
+// Treat ONLY the UI SOL representation as native SOL for balance lookups.
+// WSOL is a regular SPL token and should use token account balances.
+const SOL_MINTS = [SOL_MINT];
 
 const isSolMint = (mint: string | null): boolean => {
   if (!mint) return false;
