@@ -8,12 +8,12 @@ import {
   sortSolanaAddresses,
   truncate,
 } from "@dex-web/utils";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { useQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import { useState } from "react";
 import { useUserLiquidity } from "../../../../hooks/queries/useLiquidityQueries";
 import { usePoolReserves } from "../../../../hooks/queries/usePoolQueries";
-import { useWalletPublicKey } from "../../../../hooks/useWalletCache";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
@@ -35,7 +35,7 @@ export function YourLiquidity({
   onClaim,
   tokenPrices = {},
 }: YourLiquidityProps) {
-  const { data: walletPublicKey } = useWalletPublicKey();
+  const { publicKey } = useWallet();
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
   const resolvedTokenAAddress = tokenAAddress || DEFAULT_BUY_TOKEN;
@@ -46,7 +46,7 @@ export function YourLiquidity({
     resolvedTokenBAddress,
   );
 
-  const shouldFetchLiquidity = !!walletPublicKey;
+  const shouldFetchLiquidity = !!publicKey;
 
   const { data: tokenMetadataResponse } = useQuery({
     ...tanstackClient.dexGateway.getTokenMetadataList.queryOptions({
@@ -89,7 +89,7 @@ export function YourLiquidity({
 
   const { data: userLiquidity, isFetching: isLiquidityFetching } =
     useUserLiquidity(
-      walletPublicKey?.toBase58() ?? "",
+      publicKey?.toBase58() ?? "",
       tokenXAddress,
       tokenYAddress,
       { enabled: shouldFetchLiquidity },

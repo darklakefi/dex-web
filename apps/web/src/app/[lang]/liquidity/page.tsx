@@ -1,12 +1,12 @@
-import { client, tanstackClient } from "@dex-web/orpc";
+import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
 import { sortSolanaAddresses } from "@dex-web/utils";
-import type { PoolData } from "apps/web/src/hooks/usePoolData";
 import {
   getQueryClient,
   HydrateClient,
 } from "apps/web/src/lib/query/hydration";
 import { queryKeys } from "apps/web/src/lib/queryKeys";
+import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
 import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
@@ -14,7 +14,7 @@ import { liquidityPageCache } from "../../_utils/searchParams";
 import { GlobalLoadingIndicator } from "./_components/GlobalLoadingIndicator";
 import { LiquidityPageContent } from "./_components/LiquidityPageContent";
 
-export const metadata = {
+export const metadata: Metadata = {
   description:
     "Provide liquidity on Darklake and earn MEV-protected yields. Higher returns through MEV profit recovery.",
   title: "Liquidity | Darklake",
@@ -40,21 +40,15 @@ export default async function Page({
     );
 
     await Promise.allSettled([
-      queryClient.prefetchQuery({
-        queryFn: async (): Promise<PoolData | null> => {
-          const result = await client.pools.getPoolReserves({
+      queryClient.prefetchQuery(
+        tanstackClient.pools.getPoolReserves.queryOptions({
+          context: { cache: "force-cache" as RequestCache },
+          input: {
             tokenXMint: tokenXAddress,
             tokenYMint: tokenYAddress,
-          });
-
-          if (!result || !result.exists) {
-            return null;
-          }
-
-          return result;
-        },
-        queryKey: queryKeys.pools.reserves(tokenXAddress, tokenYAddress),
-      }),
+          },
+        }),
+      ),
 
       queryClient.prefetchQuery(
         tanstackClient.pools.getPoolDetails.queryOptions({
