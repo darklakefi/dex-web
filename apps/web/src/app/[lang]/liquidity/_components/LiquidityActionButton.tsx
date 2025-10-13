@@ -25,8 +25,8 @@ import {
 interface LiquidityActionButtonProps {
   form: LiquidityFormApi;
   publicKey: PublicKey | null;
-  buyTokenAccount: TokenAccountsData | undefined;
-  sellTokenAccount: TokenAccountsData | undefined;
+  tokenAAccount: TokenAccountsData | undefined;
+  tokenBAccount: TokenAccountsData | undefined;
   poolDetails: PoolDetails | null;
   tokenAAddress: string | null;
   tokenBAddress: string | null;
@@ -40,8 +40,8 @@ interface LiquidityActionButtonProps {
 export function LiquidityActionButton({
   form,
   publicKey,
-  buyTokenAccount,
-  sellTokenAccount,
+  tokenAAccount,
+  tokenBAccount,
   poolDetails,
   tokenAAddress,
   tokenBAddress,
@@ -78,11 +78,11 @@ export function LiquidityActionButton({
   const formCanSubmit = useStore(form.store, (state) => state.canSubmit);
 
   const validation = useLiquidityValidation({
-    buyTokenAccount,
+    buyTokenAccount: tokenAAccount,
     formValues,
     hasWallet: !!publicKey,
     poolDetails,
-    sellTokenAccount,
+    sellTokenAccount: tokenBAccount,
     tokenAAddress: tokenAAddress || "",
     tokenBAddress: tokenBAddress || "",
   });
