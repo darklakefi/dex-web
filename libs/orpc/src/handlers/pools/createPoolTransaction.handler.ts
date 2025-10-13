@@ -9,8 +9,10 @@ import { createLiquidityProgram } from "@dex-web/core";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
+  createSyncNativeInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
+  NATIVE_MINT,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
@@ -153,6 +155,28 @@ async function createPool(
     tokenYProgramId,
   );
   if (ataYIx) ataInstructions.push(ataYIx);
+
+  if (tokenXMint.equals(NATIVE_MINT)) {
+    ataInstructions.push(
+      web3.SystemProgram.transfer({
+        fromPubkey: user,
+        lamports: BigInt(depositAmountX),
+        toPubkey: userTokenAccountX,
+      }),
+    );
+    ataInstructions.push(createSyncNativeInstruction(userTokenAccountX));
+  }
+
+  if (tokenYMint.equals(NATIVE_MINT)) {
+    ataInstructions.push(
+      web3.SystemProgram.transfer({
+        fromPubkey: user,
+        lamports: BigInt(depositAmountY),
+        toPubkey: userTokenAccountY,
+      }),
+    );
+    ataInstructions.push(createSyncNativeInstruction(userTokenAccountY));
+  }
 
   const [authority] = PublicKey.findProgramAddressSync(
     [Buffer.from("authority")],

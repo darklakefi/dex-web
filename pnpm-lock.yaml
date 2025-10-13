@@ -407,6 +407,9 @@ importers:
 
   libs/core:
     dependencies:
+      "@dex-web/utils":
+        specifier: workspace:*
+        version: link:../utils
       react:
         specifier: 19.1.1
         version: 19.1.1

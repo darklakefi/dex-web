@@ -669,9 +669,9 @@ export function SwapForm() {
                       handleAmountChange(e, "sell");
                       field.handleChange(e.target.value);
                     }}
-                    tokenAccount={tokenAAccount?.tokenAccounts[0]}
+                    tokenAccount={tokenBAccount?.tokenAccounts[0]}
                     tokenPrice={
-                      tokenAAddress ? tokenPrices[tokenAAddress] : null
+                      tokenBAddress ? tokenPrices[tokenBAddress] : null
                     }
                     value={field.state.value}
                   />
@@ -704,9 +704,9 @@ export function SwapForm() {
                       handleAmountChange(e, "buy");
                       field.handleChange(e.target.value);
                     }}
-                    tokenAccount={tokenBAccount?.tokenAccounts[0]}
+                    tokenAccount={tokenAAccount?.tokenAccounts[0]}
                     tokenPrice={
-                      tokenBAddress ? tokenPrices[tokenBAddress] : null
+                      tokenAAddress ? tokenPrices[tokenAAddress] : null
                     }
                     value={field.state.value}
                   />

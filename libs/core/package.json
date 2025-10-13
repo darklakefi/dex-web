@@ -1,4 +1,7 @@
 {
+  "dependencies": {
+    "@dex-web/utils": "workspace:*"
+  },
   "exports": {
     ".": {
       "default": "./src/index.ts",

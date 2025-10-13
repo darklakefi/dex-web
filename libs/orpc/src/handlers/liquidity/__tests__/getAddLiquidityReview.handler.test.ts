@@ -12,6 +12,7 @@ const { mockGetAccount, mockGetTokenMetadataHandler, mockPoolAccount } =
 
 vi.mock("@solana/spl-token", () => ({
   getAccount: mockGetAccount,
+  NATIVE_MINT: new PublicKey("So11111111111111111111111111111111111111112"),
   TOKEN_2022_PROGRAM_ID: new PublicKey(
     "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
   ),

@@ -2,12 +2,8 @@
 
 import { AnchorProvider } from "@coral-xyz/anchor";
 import { validateWithdrawalTransaction } from "@dex-web/core";
-import { sortSolanaAddresses } from "@dex-web/utils";
-import {
-  getMint,
-  TOKEN_2022_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
+import { getPoolTokenAddress, sortSolanaAddresses } from "@dex-web/utils";
+import { getMint } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 import Decimal from "decimal.js";
 import { getHelius } from "../../getHelius";
@@ -20,34 +16,20 @@ import {
   handleTransactionError,
   handleValidationError,
 } from "../../utils/orpcErrorHandling";
-import { LP_TOKEN_DECIMALS } from "../../utils/solana";
+import { getTokenProgramId, LP_TOKEN_DECIMALS } from "../../utils/solana";
 import { removeLiquidityTransactionHandler } from "./removeLiquidityTransaction.handler";
 
-async function detectTokenProgram(
-  connection: Parameters<typeof getMint>[0],
-  mint: PublicKey,
-): Promise<PublicKey> {
-  try {
-    await getMint(connection, mint, "confirmed", TOKEN_PROGRAM_ID);
-    return TOKEN_PROGRAM_ID;
-  } catch {
-    try {
-      await getMint(connection, mint, "confirmed", TOKEN_2022_PROGRAM_ID);
-      return TOKEN_2022_PROGRAM_ID;
-    } catch {
-      return TOKEN_PROGRAM_ID;
-    }
-  }
-}
-
 export async function withdrawLiquidityHandler({
-  tokenXMint,
-  tokenYMint,
+  tokenXMint: inputTokenXMint,
+  tokenYMint: inputTokenYMint,
   lpTokenAmount,
   ownerAddress,
   minTokenXOut = "0",
   minTokenYOut = "0",
 }: WithdrawLiquidityInput): Promise<WithdrawLiquidityOutput> {
+  const tokenXMint = getPoolTokenAddress(inputTokenXMint);
+  const tokenYMint = getPoolTokenAddress(inputTokenYMint);
+
   try {
     const helius = getHelius();
     const connection = helius.connection;
@@ -89,8 +71,8 @@ export async function withdrawLiquidityHandler({
     const xMintPk = new PublicKey(tokenXAddress);
     const yMintPk = new PublicKey(tokenYAddress);
 
-    const tokenXProgramId = await detectTokenProgram(connection, xMintPk);
-    const tokenYProgramId = await detectTokenProgram(connection, yMintPk);
+    const tokenXProgramId = await getTokenProgramId(connection, xMintPk);
+    const tokenYProgramId = await getTokenProgramId(connection, yMintPk);
 
     const xMintInfo = await getMint(
       connection,

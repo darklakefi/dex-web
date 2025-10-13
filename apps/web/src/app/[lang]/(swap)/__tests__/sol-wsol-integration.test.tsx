@@ -282,6 +282,7 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
       expect(shouldUseNativeSolBalance(SOL_ADDRESS)).toBe(true);
 
       const { getGatewayTokenAddress } = await import("@dex-web/utils");
+
       expect(getGatewayTokenAddress(SOL_ADDRESS)).toBe(SOL_ADDRESS);
     });
 

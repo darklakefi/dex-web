@@ -1,5 +1,6 @@
 "use server";
 
+import { shouldUseNativeSolBalance } from "@dex-web/utils";
 import { ORPCError } from "@orpc/server";
 import { PublicKey } from "@solana/web3.js";
 import { getHelius } from "../../getHelius";
@@ -11,21 +12,13 @@ import type { Token } from "../../schemas/tokens";
 import type { TokenAccount } from "../../schemas/tokens/tokenAccount.schema";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
 
-const SOL_MINTS = [
-  "So11111111111111111111111111111111111111111",
-  "So11111111111111111111111111111111111111112",
-];
-
-const isSolMint = (mint: string | null): boolean => {
-  if (!mint) return false;
-  return SOL_MINTS.includes(mint);
-};
-
 export async function getTokenAccountsHandler({
   ownerAddress,
   mint,
 }: GetTokenAccountsInput): Promise<GetTokenAccountsOutput> {
   const helius = getHelius();
+
+  const isNativeSol = shouldUseNativeSolBalance(mint ?? null);
 
   const [getTokenAccountsResponse, tokenMetadataResponse, nativeSolBalance] =
     await Promise.all([
@@ -42,7 +35,7 @@ export async function getTokenAccountsHandler({
         addresses: [mint ?? ""],
         returnAsObject: false,
       }).catch(() => null),
-      isSolMint(mint ?? null)
+      isNativeSol
         ? helius.connection
             .getBalance(new PublicKey(ownerAddress))
             .catch(() => 0)
@@ -51,10 +44,7 @@ export async function getTokenAccountsHandler({
 
   const tokenAccountsData = getTokenAccountsResponse?.token_accounts;
   const hasTokenAccounts = (tokenAccountsData?.length ?? 0) > 0;
-
   const tokenMetadata = (tokenMetadataResponse as Token[])?.[0];
-
-  const isNativeSol = isSolMint(mint ?? null);
 
   let tokenAccounts: TokenAccount[];
 
