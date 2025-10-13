@@ -13,7 +13,7 @@ interface UseRealtimeTokenAccountsParams {
   hasRecentTransaction?: boolean;
 }
 
-interface UseRealtimeTokenAccountsReturn {
+export interface UseRealtimeTokenAccountsReturn {
   buyTokenAccount: TokenAccountsData | undefined;
   sellTokenAccount: TokenAccountsData | undefined;
   refetchBuyTokenAccount: () => Promise<unknown>;

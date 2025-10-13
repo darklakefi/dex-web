@@ -2,7 +2,10 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useRef } from "react";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
-import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
+import {
+  type UseRealtimeTokenAccountsReturn,
+  useRealtimeTokenAccounts,
+} from "../../../../hooks/useRealtimeTokenAccounts";
 import { useRecentTransactionTracker } from "../../../../hooks/useRecentTransactionTracker";
 import type { LiquidityFormValues } from "../_types/liquidity.types";
 import { useLiquidityFormState } from "./useLiquidityFormState";
@@ -14,10 +17,23 @@ interface UseLiquidityFormLogicProps {
   tokenBAddress: string | null;
 }
 
+export interface UseLiquidityFormLogicReturn {
+  form: ReturnType<typeof useLiquidityFormState>;
+  isCalculating: boolean;
+  isError: boolean;
+  isPoolLoading: boolean;
+  isSubmitting: boolean;
+  isSuccess: boolean;
+  poolDetails: ReturnType<typeof useRealtimePoolData>["data"];
+  publicKey: ReturnType<typeof useWallet>["publicKey"];
+  send: ReturnType<typeof useLiquidityTransaction>["send"];
+  tokenAccountsData: UseRealtimeTokenAccountsReturn;
+}
+
 export function useLiquidityFormLogic({
   tokenAAddress,
   tokenBAddress,
-}: UseLiquidityFormLogicProps) {
+}: UseLiquidityFormLogicProps): UseLiquidityFormLogicReturn {
   const { publicKey } = useWallet();
 
   const orderContext = useTokenOrder();

@@ -49,22 +49,13 @@ function bnToNumberWithDecimals(bn: BN, decimals: number): number {
   return Number.isFinite(result) && result >= 0 ? result : 0;
 }
 
-function bnToSafeNumber(bn: BN): number {
-  const str = bn.toString();
-  const num = Number(str);
-
-  if (
-    !Number.isFinite(num) ||
-    num > Number.MAX_SAFE_INTEGER ||
-    num < Number.MIN_SAFE_INTEGER
-  ) {
-    console.warn(
-      `Value ${str} exceeds safe JavaScript number range, clamping to MAX_SAFE_INTEGER`,
-    );
-    return Number.MAX_SAFE_INTEGER;
-  }
-
-  return num >= 0 ? num : 0;
+/**
+ * Converts a BN to a string representation for safe BigInt conversion.
+ * Raw token amounts can exceed JavaScript's MAX_SAFE_INTEGER,
+ * so we return them as strings to preserve precision.
+ */
+function bnToString(bn: BN): string {
+  return bn.toString();
 }
 
 async function getReserveBalance(
@@ -141,16 +132,28 @@ export async function getPoolReservesHandler({
       return { ...emptyResult, lpMint: lpTokenMint.toBase58() };
     }
 
-    const totalReserveXRaw = await getReserveBalance(
-      connection,
-      poolData.reserve_x,
-      reserveXAccountInfo.owner,
-    );
-    const totalReserveYRaw = await getReserveBalance(
-      connection,
-      poolData.reserve_y,
-      reserveYAccountInfo.owner,
-    );
+    let totalReserveXRaw: BN;
+    let totalReserveYRaw: BN;
+
+    try {
+      totalReserveXRaw = await getReserveBalance(
+        connection,
+        poolData.reserve_x,
+        reserveXAccountInfo.owner,
+      );
+    } catch {
+      totalReserveXRaw = new BN(0);
+    }
+
+    try {
+      totalReserveYRaw = await getReserveBalance(
+        connection,
+        poolData.reserve_y,
+        reserveYAccountInfo.owner,
+      );
+    } catch {
+      totalReserveYRaw = new BN(0);
+    }
 
     const availableReserveXRaw = totalReserveXRaw
       .sub(poolData.protocol_fee_x)
@@ -181,13 +184,13 @@ export async function getPoolReservesHandler({
         tokenYMintInfo.decimals,
       ),
       reserveX,
-      reserveXRaw: bnToSafeNumber(availableReserveXRaw),
+      reserveXRaw: bnToString(availableReserveXRaw),
       reserveY,
-      reserveYRaw: bnToSafeNumber(availableReserveYRaw),
+      reserveYRaw: bnToString(availableReserveYRaw),
       totalLpSupply,
-      totalLpSupplyRaw: bnToSafeNumber(poolData.token_lp_supply),
-      totalReserveXRaw: bnToSafeNumber(totalReserveXRaw),
-      totalReserveYRaw: bnToSafeNumber(totalReserveYRaw),
+      totalLpSupplyRaw: bnToString(poolData.token_lp_supply),
+      totalReserveXRaw: bnToString(totalReserveXRaw),
+      totalReserveYRaw: bnToString(totalReserveYRaw),
       userLockedX: bnToNumberWithDecimals(
         poolData.user_locked_x,
         tokenXMintInfo.decimals,

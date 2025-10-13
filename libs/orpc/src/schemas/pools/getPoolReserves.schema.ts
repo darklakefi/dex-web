@@ -23,15 +23,17 @@ export const getPoolReservesOutputSchema = z.object({
   protocolFeeY: safeFinancialNumber.optional(),
   // Reserves are critical - must be finite and non-negative
   reserveX: safeFinancialNumber,
-  reserveXRaw: safeFinancialNumber.optional(),
+  // Raw values are returned as strings to preserve precision for BigInt conversion
+  // JavaScript numbers lose precision above MAX_SAFE_INTEGER (2^53 - 1)
+  reserveXRaw: z.string().optional(),
   reserveY: safeFinancialNumber,
-  reserveYRaw: safeFinancialNumber.optional(),
+  reserveYRaw: z.string().optional(),
   // LP supply must be safe
   totalLpSupply: safeFinancialNumber,
-  totalLpSupplyRaw: safeFinancialNumber.optional(),
+  totalLpSupplyRaw: z.string().optional(),
   // Total reserves must be safe
-  totalReserveXRaw: safeFinancialNumber.optional(),
-  totalReserveYRaw: safeFinancialNumber.optional(),
+  totalReserveXRaw: z.string().optional(),
+  totalReserveYRaw: z.string().optional(),
   // Locked amounts must be safe
   userLockedX: safeFinancialNumber.optional(),
   userLockedY: safeFinancialNumber.optional(),

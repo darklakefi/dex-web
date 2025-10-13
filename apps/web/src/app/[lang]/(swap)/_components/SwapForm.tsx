@@ -306,8 +306,8 @@ export function SwapForm() {
   const [swapType, setSwapType] = useState<"buy" | "sell">("sell");
 
   const isXtoY = useMemo(
-    () => poolDetails?.tokenXMint === sortedTokenXMint,
-    [poolDetails?.tokenXMint, sortedTokenXMint],
+    () => tokenAAddress === sortedTokenXMint,
+    [tokenAAddress, sortedTokenXMint],
   );
 
   const [debouncedAmountIn] = useDebouncedValue(amountIn, { wait: 500 });
@@ -334,8 +334,8 @@ export function SwapForm() {
         amountIn: amountInNumber,
         isXtoY,
         slippage: parseFloat(slippage),
-        tokenXMint: poolDetails.tokenXMint,
-        tokenYMint: poolDetails.tokenYMint,
+        tokenXMint: sortedTokenXMint,
+        tokenYMint: sortedTokenYMint,
       });
 
       return result;
@@ -345,8 +345,8 @@ export function SwapForm() {
       debouncedAmountIn,
       isXtoY,
       slippage,
-      poolDetails?.tokenXMint,
-      poolDetails?.tokenYMint,
+      sortedTokenXMint,
+      sortedTokenYMint,
     ],
     refetchInterval: isVisible ? 10000 : false,
     refetchIntervalInBackground: false,

@@ -143,6 +143,10 @@ export async function getAddLiquidityReviewHandler(
       .minus(new BigNumber(pool.protocol_fee_y.toString()))
       .toNumber();
 
+    if (liquidityReserveX <= 0 || liquidityReserveY <= 0) {
+      throw new Error("Insufficient liquidity reserves");
+    }
+
     const tokenMetadata = (await getTokenMetadataHandler({
       addresses: [tokenXMint, tokenYMint],
       returnAsObject: true,

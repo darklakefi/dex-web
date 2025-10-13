@@ -40,8 +40,8 @@ export function useSubmitAddLiquidity() {
       // Invalidate liquidity-related queries for the specific pool and tokens
       await invalidateLiquidityData(queryClient, {
         ownerAddress: variables.userAddress,
-        tokenXMint: variables.tokenMintX,
-        tokenYMint: variables.tokenMintY,
+        tokenXMint: variables.tokenXMint,
+        tokenYMint: variables.tokenYMint,
       });
     },
   });

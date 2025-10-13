@@ -3,10 +3,12 @@ import { PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockGetAccount, mockGetTokenMetadataHandler } = vi.hoisted(() => ({
-  mockGetAccount: vi.fn(),
-  mockGetTokenMetadataHandler: vi.fn(),
-}));
+const { mockGetAccount, mockGetTokenMetadataHandler, mockPoolAccount } =
+  vi.hoisted(() => ({
+    mockGetAccount: vi.fn(),
+    mockGetTokenMetadataHandler: vi.fn(),
+    mockPoolAccount: vi.fn(),
+  }));
 
 vi.mock("@solana/spl-token", () => ({
   getAccount: mockGetAccount,
@@ -33,7 +35,6 @@ vi.mock("../../tokens/getTokenMetadata.handler", () => ({
   getTokenMetadataHandler: mockGetTokenMetadataHandler,
 }));
 
-const mockPoolAccount = vi.fn();
 vi.mock("@coral-xyz/anchor", async () => {
   const actual =
     await vi.importActual<typeof import("@coral-xyz/anchor")>(

@@ -172,6 +172,8 @@ describe("getPoolReservesHandler", () => {
       mockGetLpTokenMint.mockResolvedValue(LP_MINT);
       mockGetMint
         .mockResolvedValueOnce({ decimals: 9 })
+        .mockResolvedValueOnce({ decimals: 6 })
+        .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
@@ -187,7 +189,8 @@ describe("getPoolReservesHandler", () => {
 
       expect(result.exists).toBe(true);
       expect(Number.isFinite(result.totalLpSupply)).toBe(true);
-      expect(Number.isFinite(result.totalLpSupplyRaw)).toBe(true);
+      expect(typeof result.totalLpSupplyRaw).toBe("string");
+      expect(BigInt(result.totalLpSupplyRaw || "0")).toBeGreaterThan(0n);
       expect(result.totalLpSupply).toBeGreaterThan(0);
     });
 
@@ -215,6 +218,8 @@ describe("getPoolReservesHandler", () => {
       mockGetPoolOnChain.mockResolvedValue(mockPoolData);
       mockGetLpTokenMint.mockResolvedValue(LP_MINT);
       mockGetMint
+        .mockResolvedValueOnce({ decimals: 18 })
+        .mockResolvedValueOnce({ decimals: 6 })
         .mockResolvedValueOnce({ decimals: 18 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
@@ -257,6 +262,8 @@ describe("getPoolReservesHandler", () => {
       mockGetLpTokenMint.mockResolvedValue(LP_MINT);
       mockGetMint
         .mockResolvedValueOnce({ decimals: 9 })
+        .mockResolvedValueOnce({ decimals: 6 })
+        .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
@@ -298,6 +305,8 @@ describe("getPoolReservesHandler", () => {
       mockGetPoolOnChain.mockResolvedValue(mockPoolData);
       mockGetLpTokenMint.mockResolvedValue(LP_MINT);
       mockGetMint
+        .mockResolvedValueOnce({ decimals: 9 })
+        .mockResolvedValueOnce({ decimals: 6 })
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
@@ -342,6 +351,8 @@ describe("getPoolReservesHandler", () => {
       mockGetPoolOnChain.mockResolvedValue(mockPoolData);
       mockGetLpTokenMint.mockResolvedValue(LP_MINT);
       mockGetMint
+        .mockResolvedValueOnce({ decimals: 9 })
+        .mockResolvedValueOnce({ decimals: 6 })
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
@@ -388,6 +399,8 @@ describe("getPoolReservesHandler", () => {
       mockGetPoolOnChain.mockResolvedValue(mockPoolData);
       mockGetLpTokenMint.mockResolvedValue(LP_MINT);
       mockGetMint
+        .mockResolvedValueOnce({ decimals: 9 })
+        .mockResolvedValueOnce({ decimals: 6 })
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
@@ -450,13 +463,16 @@ describe("getPoolReservesHandler", () => {
       expect(Number.isFinite(result.totalLpSupply)).toBe(true);
 
       if (result.reserveXRaw !== undefined) {
-        expect(Number.isFinite(result.reserveXRaw)).toBe(true);
+        expect(typeof result.reserveXRaw).toBe("string");
+        expect(() => BigInt(result.reserveXRaw || "0")).not.toThrow();
       }
       if (result.reserveYRaw !== undefined) {
-        expect(Number.isFinite(result.reserveYRaw)).toBe(true);
+        expect(typeof result.reserveYRaw).toBe("string");
+        expect(() => BigInt(result.reserveYRaw || "0")).not.toThrow();
       }
       if (result.totalLpSupplyRaw !== undefined) {
-        expect(Number.isFinite(result.totalLpSupplyRaw)).toBe(true);
+        expect(typeof result.totalLpSupplyRaw).toBe("string");
+        expect(() => BigInt(result.totalLpSupplyRaw || "0")).not.toThrow();
       }
       if (result.protocolFeeX !== undefined) {
         expect(Number.isFinite(result.protocolFeeX)).toBe(true);
@@ -600,6 +616,8 @@ describe("getPoolReservesHandler", () => {
       mockGetLpTokenMint.mockResolvedValue(LP_MINT);
       mockGetMint
         .mockResolvedValueOnce({ decimals: 9 })
+        .mockResolvedValueOnce({ decimals: 6 })
+        .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
@@ -629,6 +647,11 @@ describe("getPoolReservesHandler", () => {
     ])(
       "should correctly handle $nameX ($decimalsX decimals) and $nameY ($decimalsY decimals)",
       async ({ decimalsX, decimalsY }) => {
+        const protocolFeeXStr = `1${"0".repeat(decimalsX)}`;
+        const protocolFeeYStr = `1${"0".repeat(decimalsY)}`;
+        const reserveXAmountStr = `100${"0".repeat(decimalsX)}`;
+        const reserveYAmountStr = `200${"0".repeat(decimalsY)}`;
+
         const mockPoolData: PoolAccount = {
           amm_config: new PublicKey("11111111111111111111111111111111"),
           bump: 255,
@@ -636,8 +659,8 @@ describe("getPoolReservesHandler", () => {
           locked_x: new BN(0),
           locked_y: new BN(0),
           padding: [],
-          protocol_fee_x: new BN(10 ** decimalsX),
-          protocol_fee_y: new BN(10 ** decimalsY),
+          protocol_fee_x: new BN(protocolFeeXStr),
+          protocol_fee_y: new BN(protocolFeeYStr),
           reserve_x: RESERVE_X_PUBKEY,
           reserve_y: RESERVE_Y_PUBKEY,
           token_lp_supply: new BN(1000000000),
@@ -651,16 +674,18 @@ describe("getPoolReservesHandler", () => {
         mockGetLpTokenMint.mockResolvedValue(LP_MINT);
         mockGetMint
           .mockResolvedValueOnce({ decimals: decimalsX })
+          .mockResolvedValueOnce({ decimals: decimalsY })
+          .mockResolvedValueOnce({ decimals: decimalsX })
           .mockResolvedValueOnce({ decimals: decimalsY });
         mockGetAccountInfo
           .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
           .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
         mockGetAccount
           .mockResolvedValueOnce({
-            amount: BigInt(100 * 10 ** decimalsX),
+            amount: BigInt(reserveXAmountStr),
           })
           .mockResolvedValueOnce({
-            amount: BigInt(200 * 10 ** decimalsY),
+            amount: BigInt(reserveYAmountStr),
           });
 
         const result = await getPoolReservesHandler({
@@ -704,6 +729,8 @@ describe("getPoolReservesHandler", () => {
       mockGetPoolOnChain.mockResolvedValue(mockPoolData);
       mockGetLpTokenMint.mockResolvedValue(LP_MINT);
       mockGetMint
+        .mockResolvedValueOnce({ decimals: 9 })
+        .mockResolvedValueOnce({ decimals: 6 })
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
