@@ -48,7 +48,7 @@ export function ReferralCodeProvider({ children }: ReferralCodeProviderProps) {
       ...tanstackClient.integrations.createTorqueReferral.queryOptions({
         context: { cache: "force-cache" as RequestCache },
         input: {
-          userId: publicKey?.toBase58() ?? "",
+          userId: publicKey?.toBase58?.() ?? "",
         },
       }),
       enabled: !!publicKey,

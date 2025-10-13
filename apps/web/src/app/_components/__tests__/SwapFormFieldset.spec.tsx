@@ -1,7 +1,7 @@
 import { mockOrpc } from "../../[lang]/(swap)/_components/__tests__/__mocks__/mockOrpc";
 
 mockOrpc();
-import "@testing-library/jest-dom";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";

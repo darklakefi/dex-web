@@ -39,6 +39,21 @@ Object.defineProperty(HTMLElement.prototype, "focus", {
   writable: true,
 });
 
+// Mock ResizeObserver for virtual scrolling
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
+// Mock IntersectionObserver
+global.IntersectionObserver = class IntersectionObserver {
+  constructor() {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as any;
+
 afterEach(() => {
   cleanup();
 });

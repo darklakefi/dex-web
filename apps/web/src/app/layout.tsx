@@ -11,7 +11,9 @@ import { GeolocationAwareDisclaimerProvider } from "./_components/GeolocationAwa
 import { ReferralCodeProvider } from "./_components/ReferralCodeProvider";
 
 const bitsumishiRegular = localFont({
+  adjustFontFallback: "Arial",
   display: "swap",
+  fallback: ["Arial", "sans-serif"],
   preload: true,
   src: "./_fonts/bitsumishi-regular.woff2",
   style: "normal",
@@ -20,7 +22,9 @@ const bitsumishiRegular = localFont({
 });
 
 const classicConsoleNeue = localFont({
+  adjustFontFallback: "Courier New",
   display: "swap",
+  fallback: ["Courier New", "monospace"],
   preload: true,
   src: "./_fonts/classic-console-neue.woff2",
   style: "normal",

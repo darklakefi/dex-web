@@ -8,6 +8,7 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
   experimental: {
+    optimizeCss: true,
     optimizePackageImports: [
       "@dex-web/ui",
       "@dex-web/core",
@@ -100,6 +101,15 @@ const nextConfig = {
       stream: process.stderr,
     };
 
+    // Suppress bigint-buffer native bindings warning in browser
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        message: /Failed to load bindings/,
+        module: /node_modules\/bigint-buffer/,
+      },
+    ];
+
     config.module.rules.unshift({
       test: /\.svg$/,
       use: [
@@ -181,6 +191,14 @@ const nextConfig = {
         util: false,
         zlib: false,
       };
+
+      // Suppress console warnings for known safe fallbacks in Solana packages
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /bigint-buffer$/,
+          require.resolve("bigint-buffer"),
+        ),
+      );
     }
 
     return config;

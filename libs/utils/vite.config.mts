@@ -35,7 +35,7 @@ const baseConfig = {
       },
     },
     reporters: ["default", "junit"],
-    setupFiles: ["@testing-library/jest-dom"],
+    setupFiles: ["@testing-library/jest-dom/vitest"],
     teardownTimeout: 10000,
     testTimeout: 30000,
     watch: false,

@@ -115,7 +115,6 @@ export function SelectTokenButton({
         pathname,
         searchParams,
       )}
-      scroll={false}
       variant="secondary"
     >
       {isLoading ? (
