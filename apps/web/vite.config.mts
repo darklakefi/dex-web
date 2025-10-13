@@ -2,7 +2,7 @@
 
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 
 import { defineConfig, mergeConfig } from "vitest/config";
@@ -11,10 +11,16 @@ export default defineConfig(() => {
   const baseConfig = {
     cacheDir: "../../node_modules/.vite/apps/web",
     root: __dirname,
+    resolve: {
+      conditions: ["browser", "module", "import", "default"],
+    },
     test: {
       coverage: {
         provider: "v8" as const,
         reportsDirectory: "../../coverage/apps/web",
+      },
+      env: {
+        NODE_ENV: "test",
       },
       environment: "happy-dom",
       globals: true,
@@ -37,7 +43,7 @@ export default defineConfig(() => {
       reporters: ["default", "junit"],
       server: {
         deps: {
-          inline: ["@dex-web/utils"],
+          inline: ["@dex-web/utils", "react", "react-dom"],
         },
       },
       setupFiles: ["./vitest.setup.ts"],

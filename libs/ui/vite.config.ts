@@ -3,7 +3,8 @@ import { join, resolve } from "node:path";
 
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
+import reactSwc from "@vitejs/plugin-react-swc";
 import { defineConfig, mergeConfig } from "vite";
 import dts from "vite-plugin-dts";
 import svgr from "vite-plugin-svgr";
@@ -28,6 +29,9 @@ const baseConfig = {
     },
   },
   cacheDir: "../../node_modules/.vite/libs/ui",
+  resolve: {
+    conditions: ["browser", "module", "import", "default"],
+  },
   root: __dirname,
 
   test: {
@@ -36,9 +40,13 @@ const baseConfig = {
       reportsDirectory: "../../coverage/libs/ui",
     },
     deps: {
+      inline: ["react", "react-dom"],
       web: {
         transformAssets: true,
       },
+    },
+    env: {
+      NODE_ENV: "test",
     },
     environment: "happy-dom",
     globals: true,
@@ -74,7 +82,7 @@ const baseConfig = {
 
 export const config = mergeConfig(baseConfig, {
   plugins: [
-    react(),
+    reactSwc(),
     tailwindcss(),
     svgr({
       include: "src/**/*.svg",

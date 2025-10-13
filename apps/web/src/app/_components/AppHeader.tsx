@@ -14,6 +14,7 @@ const BetaLogo = () => {
         alt="Beta Logo"
         className="h-auto w-full object-fill"
         fill
+        priority
         sizes="200px"
         src="/images/logo-beta.svg"
       />

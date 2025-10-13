@@ -53,7 +53,7 @@ export function useRealtimeTokenAccounts({
     }),
     enabled: !!publicKey && !!tokenAAddress,
     placeholderData: keepPreviousData,
-    // Pause polling when page is hidden
+
     refetchInterval: isVisible ? pollingInterval : false,
     refetchIntervalInBackground: false,
     staleTime,
@@ -68,7 +68,7 @@ export function useRealtimeTokenAccounts({
     }),
     enabled: !!publicKey && !!tokenBAddress,
     placeholderData: keepPreviousData,
-    // Pause polling when page is hidden
+
     refetchInterval: isVisible ? pollingInterval : false,
     refetchIntervalInBackground: false,
     staleTime,

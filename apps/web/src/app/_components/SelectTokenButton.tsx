@@ -17,12 +17,6 @@ interface SelectTokenButtonProps {
   returnUrl?: string;
 }
 
-/**
- * SelectTokenButton component for selecting tokens in swap/liquidity forms.
- *
- * - Uses useQuery instead of useSuspenseQuery to prevent blocking parent rendering
- * - Shows loading state while token metadata loads
- */
 export function SelectTokenButton({
   type,
   returnUrl = "",
@@ -121,6 +115,7 @@ export function SelectTokenButton({
         pathname,
         searchParams,
       )}
+      scroll={false}
       variant="secondary"
     >
       {isLoading ? (

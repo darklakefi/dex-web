@@ -48,7 +48,6 @@ export async function requestCreatePoolTransactionSigning({
 
   return requestTransactionSigning({
     onSubmitTransaction: async (params) => {
-      // For create pool, we call the client directly (no mutation hook yet)
       // TODO: Create useSubmitCreatePool mutation hook following the same pattern
       return client.liquidity.submitAddLiquidity(params);
     },

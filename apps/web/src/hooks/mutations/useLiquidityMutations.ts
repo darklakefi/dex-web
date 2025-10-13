@@ -33,7 +33,6 @@ export function useSubmitWithdrawal() {
       _data: SubmitWithdrawalOutput,
       variables: SubmitWithdrawalInput,
     ) => {
-      // Invalidate all liquidity-related queries after successful blockchain transaction
       await invalidateLiquidityData(queryClient, {
         ownerAddress: variables.ownerAddress,
       });

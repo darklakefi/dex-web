@@ -127,6 +127,9 @@ importers:
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
+      uncomment-cli:
+        specifier: ^2.8.2
+        version: 2.8.2
       use-debounce:
         specifier: ^10.0.6
         version: 10.0.6(react@19.1.1)
@@ -275,6 +278,9 @@ importers:
       "@types/react-dom":
         specifier: 19.1.9
         version: 19.1.9(@types/react@19.1.16)
+      "@vitejs/plugin-react":
+        specifier: ^5.0.4
+        version: 5.0.4(vite@7.1.7(@types/node@24.6.1)(jiti@2.6.1)(less@4.4.1)(lightningcss@1.30.1)(sass-embedded@1.93.2)(sass@1.93.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
       "@vitejs/plugin-react-swc":
         specifier: ^4.1.0
         version: 4.1.0(@swc/helpers@0.5.17)(vite@7.1.7(@types/node@24.6.1)(jiti@2.6.1)(less@4.4.1)(lightningcss@1.30.1)(sass-embedded@1.93.2)(sass@1.93.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
@@ -1265,6 +1271,24 @@ packages:
     resolution:
       {
         integrity: sha512-ykDdF5yI4f1WrAolLqeF3hmYU12j9ntLQl/AOG1HAS21jxyg1Q0/J/tpREuYLfatGdGmXp/3yS0ZA76kOlVq9Q==,
+      }
+    engines: { node: ">=6.9.0" }
+    peerDependencies:
+      "@babel/core": ^7.0.0-0
+
+  "@babel/plugin-transform-react-jsx-self@7.27.1":
+    resolution:
+      {
+        integrity: sha512-6UzkCs+ejGdZ5mFFC/OCUrv028ab2fp1znZmCZjAOBKiBK2jXD1O+BPSfX8X2qjJ75fZBMSnQn3Rq2mrBJK2mw==,
+      }
+    engines: { node: ">=6.9.0" }
+    peerDependencies:
+      "@babel/core": ^7.0.0-0
+
+  "@babel/plugin-transform-react-jsx-source@7.27.1":
+    resolution:
+      {
+        integrity: sha512-zbwoTsBruTeKB9hSq73ha66iFeJHuaFkUbwvqElnygoNbj/jHRsSeokowZFN3CZ64IvEqcmmkVe89OPXc7ldAw==,
       }
     engines: { node: ">=6.9.0" }
     peerDependencies:
@@ -5436,6 +5460,12 @@ packages:
         integrity: sha512-slYrCpoxJUqzFDDNlvrOYRazQUNRvWPjXA17dAOISY3rDMxX6k8K4cj2H+hEYMHF81HO3uNd5rHVigAWRM5dSg==,
       }
 
+  "@rolldown/pluginutils@1.0.0-beta.38":
+    resolution:
+      {
+        integrity: sha512-N/ICGKleNhA5nc9XXQG/kkKHJ7S55u0x0XUJbbkmdCnFuoRkM1Il12q9q0eX19+M7KKUEPw/daUPIRnxhcxAIw==,
+      }
+
   "@rollup/plugin-babel@6.0.4":
     resolution:
       {
@@ -8773,6 +8803,15 @@ packages:
     peerDependencies:
       vite: ^4 || ^5 || ^6 || ^7
 
+  "@vitejs/plugin-react@5.0.4":
+    resolution:
+      {
+        integrity: sha512-La0KD0vGkVkSk6K+piWDKRUyg8Rl5iAIKRMH0vMJI0Eg47bq1eOxmoObAaQG37WMW9MSyk7Cs8EIWwJC1PtzKA==,
+      }
+    engines: { node: ^20.19.0 || >=22.12.0 }
+    peerDependencies:
+      vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
+
   "@vitest/browser@3.2.4":
     resolution:
       {
@@ -10450,6 +10489,13 @@ packages:
         integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==,
       }
     engines: { node: ">= 14.16.0" }
+
+  chownr@2.0.0:
+    resolution:
+      {
+        integrity: sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==,
+      }
+    engines: { node: ">=10" }
 
   chownr@3.0.0:
     resolution:
@@ -12874,6 +12920,13 @@ packages:
         integrity: sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ==,
       }
     engines: { node: ">=10" }
+
+  fs-minipass@2.1.0:
+    resolution:
+      {
+        integrity: sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg==,
+      }
+    engines: { node: ">= 8" }
 
   fs-monkey@1.1.0:
     resolution:
@@ -15509,10 +15562,24 @@ packages:
         integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==,
       }
 
+  minipass@3.3.6:
+    resolution:
+      {
+        integrity: sha512-DxiNidxSEK+tHG6zOIklvNOwm3hvCrbUrdtzY74U6HKTJxvIDfOUL5W5P2Ghd3DTkhhKPYGqeNUIh5qcM4YBfw==,
+      }
+    engines: { node: ">=8" }
+
   minipass@4.2.8:
     resolution:
       {
         integrity: sha512-fNzuVyifolSLFL4NzpF+wEF4qrgqaaKX0haXPQEdQ7NKAN+WecoKMHV09YcuL/DHxrUsYQOK3MiuDf7Ip2OXfQ==,
+      }
+    engines: { node: ">=8" }
+
+  minipass@5.0.0:
+    resolution:
+      {
+        integrity: sha512-3FnjYuehv9k6ovOEbyOswadCDPX1piCfhV8ncmYtHOjuPwylVWsghTLo7rabjC3Rx5xD4HDx8Wm1xnMF7S5qFQ==,
       }
     engines: { node: ">=8" }
 
@@ -15528,6 +15595,13 @@ packages:
       {
         integrity: sha512-dqT2XBYUOZOiC5t2HRnwADjhNS2cecp9u+TJRiJ1Qp/f5qjkeT5APcGPjHw+bz89Ms8Jp+cG4AlE+QZ/QnDglg==,
       }
+
+  minizlib@2.1.2:
+    resolution:
+      {
+        integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==,
+      }
+    engines: { node: ">= 8" }
 
   minizlib@3.1.0:
     resolution:
@@ -17620,6 +17694,13 @@ packages:
       }
     engines: { node: ">=0.10.0" }
 
+  react-refresh@0.17.0:
+    resolution:
+      {
+        integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==,
+      }
+    engines: { node: ">=0.10.0" }
+
   react-tooltip@5.29.1:
     resolution:
       {
@@ -19160,6 +19241,13 @@ packages:
       }
     engines: { node: ">=6" }
 
+  tar@6.2.1:
+    resolution:
+      {
+        integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==,
+      }
+    engines: { node: ">=10" }
+
   tar@7.5.1:
     resolution:
       {
@@ -19616,6 +19704,14 @@ packages:
       {
         integrity: sha512-ei5rfKtoRO8OyOIor2Rz5fhzjThwIHJZ3uyDPnDHTXbP0aMQ1RN/6AI5B5d9dBxJOU+BvOAk7ZQ1xphsX8Lrog==,
       }
+
+  uncomment-cli@2.8.2:
+    resolution:
+      {
+        integrity: sha512-Lz4qg7mncxgEbi4UgUejjKmfwX/fSS9+gTPt8vnb48jQNjA8O1+OE7rSzVulBmx/zL30DfFYAJI808S3Se2hjg==,
+      }
+    engines: { node: ">=14" }
+    hasBin: true
 
   uncrypto@0.1.3:
     resolution:
@@ -21257,6 +21353,16 @@ snapshots:
       "@babel/plugin-transform-react-jsx": 7.27.1(@babel/core@7.28.4)
     transitivePeerDependencies:
       - supports-color
+
+  "@babel/plugin-transform-react-jsx-self@7.27.1(@babel/core@7.28.4)":
+    dependencies:
+      "@babel/core": 7.28.4
+      "@babel/helper-plugin-utils": 7.27.1
+
+  "@babel/plugin-transform-react-jsx-source@7.27.1(@babel/core@7.28.4)":
+    dependencies:
+      "@babel/core": 7.28.4
+      "@babel/helper-plugin-utils": 7.27.1
 
   "@babel/plugin-transform-react-jsx@7.27.1(@babel/core@7.28.4)":
     dependencies:
@@ -24881,6 +24987,8 @@ snapshots:
 
   "@rolldown/pluginutils@1.0.0-beta.35": {}
 
+  "@rolldown/pluginutils@1.0.0-beta.38": {}
+
   "@rollup/plugin-babel@6.0.4(@babel/core@7.28.4)(@types/babel__core@7.20.5)(rollup@4.52.3)":
     dependencies:
       "@babel/core": 7.28.4
@@ -27705,6 +27813,18 @@ snapshots:
     transitivePeerDependencies:
       - "@swc/helpers"
 
+  "@vitejs/plugin-react@5.0.4(vite@7.1.7(@types/node@24.6.1)(jiti@2.6.1)(less@4.4.1)(lightningcss@1.30.1)(sass-embedded@1.93.2)(sass@1.93.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))":
+    dependencies:
+      "@babel/core": 7.28.4
+      "@babel/plugin-transform-react-jsx-self": 7.27.1(@babel/core@7.28.4)
+      "@babel/plugin-transform-react-jsx-source": 7.27.1(@babel/core@7.28.4)
+      "@rolldown/pluginutils": 1.0.0-beta.38
+      "@types/babel__core": 7.20.5
+      react-refresh: 0.17.0
+      vite: 7.1.7(@types/node@24.6.1)(jiti@2.6.1)(less@4.4.1)(lightningcss@1.30.1)(sass-embedded@1.93.2)(sass@1.93.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)
+    transitivePeerDependencies:
+      - supports-color
+
   "@vitest/browser@3.2.4(bufferutil@4.0.9)(playwright@1.55.1)(utf-8-validate@5.0.10)(vite@7.1.7(@types/node@24.6.1)(jiti@2.6.1)(less@4.4.1)(lightningcss@1.30.1)(sass-embedded@1.93.2)(sass@1.93.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))(vitest@3.2.4)":
     dependencies:
       "@testing-library/dom": 10.4.1
@@ -29264,6 +29384,8 @@ snapshots:
     dependencies:
       readdirp: 4.1.2
 
+  chownr@2.0.0: {}
+
   chownr@3.0.0: {}
 
   chromatic@13.3.0: {}
@@ -30760,6 +30882,10 @@ snapshots:
       graceful-fs: 4.2.11
       jsonfile: 6.2.0
       universalify: 2.0.1
+
+  fs-minipass@2.1.0:
+    dependencies:
+      minipass: 3.3.6
 
   fs-monkey@1.1.0: {}
 
@@ -32637,11 +32763,22 @@ snapshots:
 
   minimist@1.2.8: {}
 
+  minipass@3.3.6:
+    dependencies:
+      yallist: 4.0.0
+
   minipass@4.2.8: {}
+
+  minipass@5.0.0: {}
 
   minipass@7.1.2: {}
 
   minisearch@7.2.0: {}
+
+  minizlib@2.1.2:
+    dependencies:
+      minipass: 3.3.6
+      yallist: 4.0.0
 
   minizlib@3.1.0:
     dependencies:
@@ -34068,6 +34205,8 @@ snapshots:
 
   react-refresh@0.14.2: {}
 
+  react-refresh@0.17.0: {}
+
   react-tooltip@5.29.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
     dependencies:
       "@floating-ui/dom": 1.7.4
@@ -35076,6 +35215,15 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
 
+  tar@6.2.1:
+    dependencies:
+      chownr: 2.0.0
+      fs-minipass: 2.1.0
+      minipass: 5.0.0
+      minizlib: 2.1.2
+      mkdirp: 1.0.4
+      yallist: 4.0.0
+
   tar@7.5.1:
     dependencies:
       "@isaacs/fs-minipass": 4.0.1
@@ -35301,6 +35449,10 @@ snapshots:
   uint8arrays@3.1.0:
     dependencies:
       multiformats: 9.9.0
+
+  uncomment-cli@2.8.2:
+    dependencies:
+      tar: 6.2.1
 
   uncrypto@0.1.3: {}
 
