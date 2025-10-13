@@ -165,9 +165,9 @@ export function buildRequestPayload(params: {
     tokenYDecimals,
   );
 
-  const reserveX = BigInt(params.currentPoolData.tokenXReserveRaw || 0);
-  const reserveY = BigInt(params.currentPoolData.tokenYReserveRaw || 0);
-  const totalLpSupply = BigInt(params.currentPoolData.totalSupplyRaw || 0);
+  const reserveX = BigInt(params.currentPoolData.tokenXReserveRaw || "0");
+  const reserveY = BigInt(params.currentPoolData.tokenYReserveRaw || "0");
+  const totalLpSupply = BigInt(params.currentPoolData.totalSupplyRaw || "0");
 
   let amountLp: bigint;
   if (totalLpSupply === 0n) {

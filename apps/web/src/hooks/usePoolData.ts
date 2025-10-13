@@ -2,14 +2,19 @@
 
 import type { GetPoolReservesOutput } from "@dex-web/orpc";
 import { tanstackClient } from "@dex-web/orpc";
-import { sortSolanaAddresses } from "@dex-web/utils";
 import type { UseQueryResult } from "@tanstack/react-query";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  QUERY_REFETCH_INTERVALS,
+  QUERY_STALE_TIMES,
+  type QueryPriority,
+} from "./queryConfig";
+import { usePageVisibility } from "./usePageVisibility";
 
 interface UsePoolDataParams {
   tokenXMint: string;
   tokenYMint: string;
-  priority?: "low" | "normal" | "high" | "critical";
+  priority?: QueryPriority;
 }
 
 /**
@@ -18,41 +23,21 @@ interface UsePoolDataParams {
  */
 export type PoolData = GetPoolReservesOutput;
 
-const STALE_TIME_CONFIG = {
-  critical: 3_000,
-  high: 7_000,
-  low: 60_000,
-  normal: 30_000,
-} as const;
-
-const REFETCH_INTERVAL_CONFIG = {
-  critical: 5_000,
-  high: 10_000,
-  low: 60_000,
-  normal: 30_000,
-} as const;
-
 /**
- * Generic hook to fetch pool data. Returns raw API data by default.
- * Consumers can provide a select function to transform the data to their feature-specific types.
+ * Fetches pool reserve data with configurable polling and caching.
  *
- * Following Implementation Answer #3: Shared hooks should not depend on feature types.
- * This pattern keeps the hook reusable while allowing features to define their own transformations.
- *
- * @example
- * // Use raw data
- * const { data } = usePoolData({ tokenXMint, tokenYMint });
+ * @param tokenXMint - First token mint address (sorted)
+ * @param tokenYMint - Second token mint address (sorted)
+ * @param priority - Controls polling frequency: "critical" (5s), "high" (10s), "normal" (30s), "low" (60s)
+ * @param select - Optional transformer function to reshape data
  *
  * @example
- * // Transform to feature-specific type
- * const { data } = usePoolData<PoolDetails>({
+ * const { data } = usePoolData({
  *   tokenXMint,
  *   tokenYMint,
- *   select: transformToPoolDetails,
+ *   priority: "high",
+ *   select: (data) => transformToPoolDetails(data, tokenXMint, tokenYMint),
  * });
- *
- * @param params - tokenXMint, tokenYMint, optional priority, and optional select function
- * @returns TanStack Query result with either raw PoolData or transformed TData
  */
 export function usePoolData<TData = PoolData>(
   params: UsePoolDataParams & {
@@ -60,34 +45,27 @@ export function usePoolData<TData = PoolData>(
   },
 ): UseQueryResult<TData, Error> {
   const { tokenXMint, tokenYMint, priority = "normal", select } = params;
-  const poolKey = createSortedPoolKey(tokenXMint, tokenYMint);
+  const isVisible = usePageVisibility();
 
   return useQuery({
     ...tanstackClient.pools.getPoolReserves.queryOptions({
       input: { tokenXMint, tokenYMint },
     }),
     gcTime: 5 * 60 * 1000,
-    queryKey: ["pool", poolKey, tokenXMint, tokenYMint],
-    refetchInterval: REFETCH_INTERVAL_CONFIG[priority],
-    refetchIntervalInBackground: true,
+    placeholderData: keepPreviousData,
+    // Pause polling when page is hidden to save battery and bandwidth
+    refetchInterval: isVisible ? QUERY_REFETCH_INTERVALS[priority] : false,
+    refetchIntervalInBackground: false,
     refetchOnWindowFocus: priority === "critical" || priority === "high",
-    retry: (failureCount, _error) => {
+    retry: (failureCount) => {
       const maxRetries =
         priority === "critical" ? 3 : priority === "high" ? 2 : 1;
       return failureCount < maxRetries;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     select,
-    staleTime: STALE_TIME_CONFIG[priority],
+    staleTime: QUERY_STALE_TIMES[priority],
   });
-}
-
-function createSortedPoolKey(tokenXMint: string, tokenYMint: string): string {
-  const { tokenXAddress, tokenYAddress } = sortSolanaAddresses(
-    tokenXMint,
-    tokenYMint,
-  );
-  return `${tokenXAddress}-${tokenYAddress}`;
 }
 
 export type { UsePoolDataParams };

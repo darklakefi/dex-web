@@ -1,7 +1,6 @@
 "use client";
 
 import { ERROR_MESSAGES, useTransactionToasts } from "@dex-web/core";
-import { client } from "@dex-web/orpc";
 import type { TokenOrderContext } from "@dex-web/utils";
 import { parseAmount } from "@dex-web/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -133,32 +132,17 @@ export function useLiquidityTransaction({
           trimmedTokenBAddress,
         });
 
-        const freshPoolData = await client.pools.getPoolReserves({
-          tokenXMint: currentPoolData.tokenXMint,
-          tokenYMint: currentPoolData.tokenYMint,
-        });
-
-        if (!freshPoolData || !freshPoolData.exists) {
-          throw new Error("Failed to fetch fresh pool reserves");
-        }
-
-        const updatedPoolData: PoolDetails = {
-          ...currentPoolData,
-          tokenXMint: currentPoolData.tokenXMint,
-          tokenXReserveRaw: freshPoolData.reserveXRaw,
-          tokenYMint: currentPoolData.tokenYMint,
-          tokenYReserveRaw: freshPoolData.reserveYRaw,
-          totalSupplyRaw: freshPoolData.totalLpSupplyRaw,
-        };
-
         const newTrackingId = generateTrackingId();
 
         if (!orderContext) {
           throw new Error("Token order context is required for transaction");
         }
 
+        // Use the current pool data from polling - no need to refetch
+        // The polling system keeps this data fresh, and refetching adds latency
+        // Slippage protection should be handled by the smart contract
         const requestPayload = await buildRequestPayload({
-          currentPoolData: updatedPoolData,
+          currentPoolData,
           effectivePublicKey,
           orderContext,
           refCode: incomingReferralCode || "",

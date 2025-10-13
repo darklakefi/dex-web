@@ -131,40 +131,21 @@ export async function getAddLiquidityReviewHandler(
       "Reserve Y",
     );
 
-    /**
-     * Converts various numeric formats from the on-chain pool account to a JavaScript number.
-     * The pool account may contain BN (BigNumber from anchor), number, or string representations.
-     */
-    const toNum = (
-      val: number | string | { toNumber?: () => number } | null | undefined,
-    ): number => {
-      if (!val) return 0;
-      if (typeof val === "number") return val;
-      if (
-        typeof val === "object" &&
-        "toNumber" in val &&
-        typeof val.toNumber === "function"
-      ) {
-        return val.toNumber();
-      }
-      if (typeof val === "string") {
-        const num = Number(val);
-        if (!Number.isNaN(num)) return num;
-        return parseInt(val, 16);
-      }
-      return 0;
-    };
+    const liquidityReserveX = new BigNumber(reserveXBalance)
+      .minus(new BigNumber(pool.user_locked_x.toString()))
+      .minus(new BigNumber(pool.locked_x.toString()))
+      .minus(new BigNumber(pool.protocol_fee_x.toString()))
+      .toNumber();
 
-    const liquidityReserveX =
-      reserveXBalance -
-      toNum(pool.user_locked_x) -
-      toNum(pool.locked_x) -
-      toNum(pool.protocol_fee_x);
-    const liquidityReserveY =
-      reserveYBalance -
-      toNum(pool.user_locked_y) -
-      toNum(pool.locked_y) -
-      toNum(pool.protocol_fee_y);
+    const liquidityReserveY = new BigNumber(reserveYBalance)
+      .minus(new BigNumber(pool.user_locked_y.toString()))
+      .minus(new BigNumber(pool.locked_y.toString()))
+      .minus(new BigNumber(pool.protocol_fee_y.toString()))
+      .toNumber();
+
+    if (liquidityReserveX <= 0 || liquidityReserveY <= 0) {
+      throw new Error("Insufficient liquidity reserves");
+    }
 
     const tokenMetadata = (await getTokenMetadataHandler({
       addresses: [tokenXMint, tokenYMint],

@@ -46,15 +46,17 @@ export interface PoolDetails {
   readonly tokenXMint: string;
   readonly tokenYMint: string;
   readonly tokenXReserve?: number;
-  readonly tokenXReserveRaw?: number;
+  // Raw values are strings to preserve precision for BigInt conversion
+  // JavaScript numbers lose precision above MAX_SAFE_INTEGER (2^53 - 1)
+  readonly tokenXReserveRaw?: string;
   readonly tokenYReserve?: number;
-  readonly tokenYReserveRaw?: number;
+  readonly tokenYReserveRaw?: string;
   readonly totalSupply?: number;
-  readonly totalSupplyRaw?: number;
+  readonly totalSupplyRaw?: string;
   readonly fee?: number;
   readonly price?: string;
-  readonly totalReserveXRaw?: number;
-  readonly totalReserveYRaw?: number;
+  readonly totalReserveXRaw?: string;
+  readonly totalReserveYRaw?: string;
   readonly protocolFeeX?: number;
   readonly protocolFeeY?: number;
   readonly userLockedX?: number;

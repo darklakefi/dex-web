@@ -33,8 +33,9 @@ import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
 import * as z from "zod";
-import { usePoolDetails } from "../../../../hooks/queries/usePoolQueries";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
+import { usePageVisibility } from "../../../../hooks/usePageVisibility";
+import { usePoolData } from "../../../../hooks/usePoolData";
 import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import {
   useWalletAdapter,
@@ -230,36 +231,30 @@ export function SwapForm() {
         transactionHash: _trackDetails.trackingId,
       });
 
-      refetchBuyTokenAccount();
-      refetchSellTokenAccount();
-
-      queryClient.invalidateQueries({
-        queryKey: ["token-accounts", publicKey?.toBase58()],
-      });
-
+      // Invalidate specific pool and token accounts using oRPC keys
       if (tokenAAddress && tokenBAddress) {
         const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
           sortSolanaAddresses(tokenAAddress, tokenBAddress);
 
-        const poolKey = `${tokenXMint}-${tokenYMint}`;
-
         queryClient.invalidateQueries({
-          queryKey: ["pool-details", poolKey],
+          queryKey: tanstackClient.pools.getPoolReserves.key({
+            input: { tokenXMint, tokenYMint },
+          }),
         });
 
-        const poolDetailsOpts =
-          tanstackClient.pools.getPoolDetails.queryOptions({
-            input: { tokenXMint, tokenYMint },
+        if (publicKey) {
+          queryClient.invalidateQueries({
+            queryKey: tanstackClient.helius.getTokenAccounts.key({
+              input: { mint: tokenXMint, ownerAddress: publicKey.toBase58() },
+            }),
           });
 
-        queryClient.invalidateQueries({ queryKey: poolDetailsOpts.queryKey });
-
-        queryClient.invalidateQueries({
-          queryKey: ["pool", tokenXMint, tokenYMint],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["pool", tokenYMint, tokenXMint],
-        });
+          queryClient.invalidateQueries({
+            queryKey: tanstackClient.helius.getTokenAccounts.key({
+              input: { mint: tokenYMint, ownerAddress: publicKey.toBase58() },
+            }),
+          });
+        }
       }
     },
     onTimeout: () => {
@@ -284,13 +279,11 @@ export function SwapForm() {
       return sortSolanaAddresses(tokenAAddress, tokenBAddress);
     }, [tokenAAddress, tokenBAddress]);
 
-  const { data: poolDetails } = usePoolDetails(
-    sortedTokenXMint || "",
-    sortedTokenYMint || "",
-    {
-      enabled: Boolean(sortedTokenXMint && sortedTokenYMint),
-    },
-  );
+  const { data: poolDetails } = usePoolData({
+    priority: "high",
+    tokenXMint: sortedTokenXMint || "",
+    tokenYMint: sortedTokenYMint || "",
+  });
 
   const {
     buyTokenAccount,
@@ -313,14 +306,14 @@ export function SwapForm() {
   const [swapType, setSwapType] = useState<"buy" | "sell">("sell");
 
   const isXtoY = useMemo(
-    () => poolDetails?.tokenXMint === sortedTokenXMint,
-    [poolDetails?.tokenXMint, sortedTokenXMint],
+    () => tokenAAddress === sortedTokenXMint,
+    [tokenAAddress, sortedTokenXMint],
   );
 
-  // Debounce the amount input for quote fetching
   const [debouncedAmountIn] = useDebouncedValue(amountIn, { wait: 500 });
 
-  // Use TanStack Query for quote fetching with automatic refetching
+  const isVisible = usePageVisibility();
+
   const {
     data: quote,
     isLoading: isLoadingQuote,
@@ -341,8 +334,8 @@ export function SwapForm() {
         amountIn: amountInNumber,
         isXtoY,
         slippage: parseFloat(slippage),
-        tokenXMint: poolDetails.tokenXMint,
-        tokenYMint: poolDetails.tokenYMint,
+        tokenXMint: sortedTokenXMint,
+        tokenYMint: sortedTokenYMint,
       });
 
       return result;
@@ -352,15 +345,13 @@ export function SwapForm() {
       debouncedAmountIn,
       isXtoY,
       slippage,
-      poolDetails?.tokenXMint,
-      poolDetails?.tokenYMint,
+      sortedTokenXMint,
+      sortedTokenYMint,
     ],
-    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchInterval: isVisible ? 10000 : false,
     refetchIntervalInBackground: false,
-    staleTime: 5000,
+    staleTime: 8000,
   });
-
-  // Update form field when quote changes
   useEffect(() => {
     if (quote) {
       if (swapType === "sell") {

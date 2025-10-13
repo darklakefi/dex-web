@@ -4,61 +4,116 @@ import { queryKeys } from "../queryKeys";
 
 export interface InvalidateLiquidityDataParams {
   ownerAddress: string;
+  tokenXMint?: string;
+  tokenYMint?: string;
 }
 
 export async function invalidateLiquidityData(
   queryClient: QueryClient,
-  { ownerAddress }: InvalidateLiquidityDataParams,
+  { ownerAddress, tokenXMint, tokenYMint }: InvalidateLiquidityDataParams,
 ): Promise<void> {
-  await Promise.all([
+  const invalidations = [
     queryClient.invalidateQueries({
       queryKey: tanstackClient.liquidity.key(),
       refetchType: "active",
     }),
-
-    queryClient.invalidateQueries({
-      queryKey: tanstackClient.pools.key(),
-      refetchType: "active",
-    }),
-
-    queryClient.invalidateQueries({
-      queryKey: tanstackClient.helius.getTokenAccounts.key({
-        input: { ownerAddress },
-      }),
-      refetchType: "active",
-    }),
-
     queryClient.invalidateQueries({
       queryKey: queryKeys.tokens.accounts(ownerAddress),
       refetchType: "active",
     }),
-  ]);
+  ];
+
+  if (tokenXMint && tokenYMint) {
+    invalidations.push(
+      queryClient.invalidateQueries({
+        queryKey: tanstackClient.pools.getPoolReserves.key({
+          input: { tokenXMint, tokenYMint },
+        }),
+        refetchType: "active",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: tanstackClient.helius.getTokenAccounts.key({
+          input: { mint: tokenXMint, ownerAddress },
+        }),
+        refetchType: "active",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: tanstackClient.helius.getTokenAccounts.key({
+          input: { mint: tokenYMint, ownerAddress },
+        }),
+        refetchType: "active",
+      }),
+    );
+  } else {
+    invalidations.push(
+      queryClient.invalidateQueries({
+        queryKey: tanstackClient.pools.key(),
+        refetchType: "active",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: tanstackClient.helius.getTokenAccounts.key({
+          input: { ownerAddress },
+        }),
+        refetchType: "active",
+      }),
+    );
+  }
+
+  await Promise.all(invalidations);
 }
 
 export interface InvalidateSwapDataParams {
   ownerAddress: string;
+  tokenXMint?: string;
+  tokenYMint?: string;
 }
 
 export async function invalidateSwapData(
   queryClient: QueryClient,
-  { ownerAddress }: InvalidateSwapDataParams,
+  { ownerAddress, tokenXMint, tokenYMint }: InvalidateSwapDataParams,
 ): Promise<void> {
-  await Promise.all([
-    queryClient.invalidateQueries({
-      queryKey: tanstackClient.pools.key(),
-      refetchType: "active",
-    }),
-
-    queryClient.invalidateQueries({
-      queryKey: tanstackClient.helius.getTokenAccounts.key({
-        input: { ownerAddress },
-      }),
-      refetchType: "active",
-    }),
-
+  const invalidations = [
     queryClient.invalidateQueries({
       queryKey: queryKeys.tokens.accounts(ownerAddress),
       refetchType: "active",
     }),
-  ]);
+  ];
+
+  if (tokenXMint && tokenYMint) {
+    invalidations.push(
+      queryClient.invalidateQueries({
+        queryKey: tanstackClient.pools.getPoolReserves.key({
+          input: { tokenXMint, tokenYMint },
+        }),
+        refetchType: "active",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: tanstackClient.helius.getTokenAccounts.key({
+          input: { mint: tokenXMint, ownerAddress },
+        }),
+        refetchType: "active",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: tanstackClient.helius.getTokenAccounts.key({
+          input: { mint: tokenYMint, ownerAddress },
+        }),
+        refetchType: "active",
+      }),
+    );
+  } else {
+    invalidations.push(
+      queryClient.invalidateQueries({
+        queryKey: tanstackClient.pools.key(),
+        refetchType: "active",
+      }),
+      queryClient.invalidateQueries({
+        queryKey: tanstackClient.helius.getTokenAccounts.key({
+          input: { ownerAddress },
+        }),
+        refetchType: "active",
+      }),
+    );
+  }
+
+  await Promise.all(invalidations);
 }
