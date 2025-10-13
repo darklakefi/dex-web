@@ -1,4 +1,5 @@
 "use server";
+import { BN } from "@coral-xyz/anchor";
 import { getLpTokenMint } from "@dex-web/core";
 import {
   getAccount,
@@ -31,77 +32,53 @@ async function detectTokenProgram(
   }
 }
 
-/**
- * Safely converts various numeric types to JavaScript number.
- * Throws an error if the value exceeds JavaScript's safe integer limit.
- *
- * @throws {Error} If value is too large for safe conversion
- */
-function toNumber(value: unknown): number {
-  if (!value) return 0;
-  if (typeof value === "number") return value;
-  if (typeof value === "bigint") {
-    if (value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER) {
-      throw new Error(
-        `BigInt value ${value} exceeds JavaScript safe integer limit`,
-      );
-    }
-    return Number(value);
+function bnToNumberWithDecimals(bn: BN, decimals: number): number {
+  const str = bn.toString();
+  const len = str.length;
+
+  if (len <= decimals) {
+    const padded = str.padStart(decimals + 1, "0");
+    const result = Number(`0.${padded.slice(1)}`);
+    return Number.isFinite(result) && result >= 0 ? result : 0;
   }
+
+  const integerPart = str.slice(0, len - decimals);
+  const decimalPart = str.slice(len - decimals);
+  const result = Number(`${integerPart}.${decimalPart}`);
+
+  return Number.isFinite(result) && result >= 0 ? result : 0;
+}
+
+function bnToSafeNumber(bn: BN): number {
+  const str = bn.toString();
+  const num = Number(str);
 
   if (
-    typeof value === "object" &&
-    "toString" in value &&
-    typeof value.toString === "function"
+    !Number.isFinite(num) ||
+    num > Number.MAX_SAFE_INTEGER ||
+    num < Number.MIN_SAFE_INTEGER
   ) {
-    const strValue = value.toString();
-    const numValue = Number(strValue);
-
-    if (Number.isNaN(numValue) || !Number.isFinite(numValue)) {
-      throw new Error(`Cannot convert value to number: ${strValue}`);
-    }
-
-    // Check if value is within safe integer range
-    if (
-      numValue > Number.MAX_SAFE_INTEGER ||
-      numValue < Number.MIN_SAFE_INTEGER
-    ) {
-      throw new Error(
-        `Value ${strValue} exceeds JavaScript safe integer limit (±${Number.MAX_SAFE_INTEGER})`,
-      );
-    }
-
-    return numValue;
+    console.warn(
+      `Value ${str} exceeds safe JavaScript number range, clamping to MAX_SAFE_INTEGER`,
+    );
+    return Number.MAX_SAFE_INTEGER;
   }
 
-  if (typeof value === "string") {
-    const decimal = Number(value);
-    if (!Number.isNaN(decimal) && Number.isFinite(decimal)) {
-      return decimal;
-    }
-    return parseInt(value, 16);
-  }
-
-  return 0;
+  return num >= 0 ? num : 0;
 }
 
 async function getReserveBalance(
   connection: Connection,
   reserveAddress: PublicKey,
   programId: PublicKey,
-): Promise<number> {
-  try {
-    const account = await getAccount(
-      connection,
-      reserveAddress,
-      "confirmed",
-      programId,
-    );
-    return Number(account.amount);
-  } catch (error) {
-    console.warn(`Could not read reserve ${reserveAddress.toBase58()}:`, error);
-    return 0;
-  }
+): Promise<BN> {
+  const account = await getAccount(
+    connection,
+    reserveAddress,
+    "confirmed",
+    programId,
+  );
+  return new BN(account.amount.toString());
 }
 
 export async function getPoolReservesHandler({
@@ -126,8 +103,10 @@ export async function getPoolReservesHandler({
     }
 
     const lpTokenMint = await getLpTokenMint(tokenXMint, tokenYMint);
-    const totalLpSupplyRaw = toNumber(poolData.token_lp_supply);
-    const totalLpSupply = totalLpSupplyRaw / 10 ** LP_TOKEN_DECIMALS;
+    const totalLpSupply = bnToNumberWithDecimals(
+      poolData.token_lp_supply,
+      LP_TOKEN_DECIMALS,
+    );
 
     const tokenXProgramId = await detectTokenProgram(
       connection,
@@ -173,37 +152,50 @@ export async function getPoolReservesHandler({
       reserveYAccountInfo.owner,
     );
 
-    const availableReserveXRaw =
-      totalReserveXRaw -
-      toNumber(poolData.protocol_fee_x) -
-      toNumber(poolData.user_locked_x);
+    const availableReserveXRaw = totalReserveXRaw
+      .sub(poolData.protocol_fee_x)
+      .sub(poolData.user_locked_x);
 
-    const availableReserveYRaw =
-      totalReserveYRaw -
-      toNumber(poolData.protocol_fee_y) -
-      toNumber(poolData.user_locked_y);
+    const availableReserveYRaw = totalReserveYRaw
+      .sub(poolData.protocol_fee_y)
+      .sub(poolData.user_locked_y);
 
-    const reserveX = availableReserveXRaw / 10 ** tokenXMintInfo.decimals;
-    const reserveY = availableReserveYRaw / 10 ** tokenYMintInfo.decimals;
+    const reserveX = bnToNumberWithDecimals(
+      availableReserveXRaw,
+      tokenXMintInfo.decimals,
+    );
+    const reserveY = bnToNumberWithDecimals(
+      availableReserveYRaw,
+      tokenYMintInfo.decimals,
+    );
 
     const result: GetPoolReservesOutput = {
       exists: true,
       lpMint: lpTokenMint.toBase58(),
-      protocolFeeX: toNumber(poolData.protocol_fee_x),
-      protocolFeeY: toNumber(poolData.protocol_fee_y),
-      reserveX: Number.isFinite(reserveX) && reserveX >= 0 ? reserveX : 0,
-      reserveXRaw: availableReserveXRaw,
-      reserveY: Number.isFinite(reserveY) && reserveY >= 0 ? reserveY : 0,
-      reserveYRaw: availableReserveYRaw,
-      totalLpSupply:
-        Number.isFinite(totalLpSupply) && totalLpSupply >= 0
-          ? totalLpSupply
-          : 0,
-      totalLpSupplyRaw,
-      totalReserveXRaw,
-      totalReserveYRaw,
-      userLockedX: toNumber(poolData.user_locked_x),
-      userLockedY: toNumber(poolData.user_locked_y),
+      protocolFeeX: bnToNumberWithDecimals(
+        poolData.protocol_fee_x,
+        tokenXMintInfo.decimals,
+      ),
+      protocolFeeY: bnToNumberWithDecimals(
+        poolData.protocol_fee_y,
+        tokenYMintInfo.decimals,
+      ),
+      reserveX,
+      reserveXRaw: bnToSafeNumber(availableReserveXRaw),
+      reserveY,
+      reserveYRaw: bnToSafeNumber(availableReserveYRaw),
+      totalLpSupply,
+      totalLpSupplyRaw: bnToSafeNumber(poolData.token_lp_supply),
+      totalReserveXRaw: bnToSafeNumber(totalReserveXRaw),
+      totalReserveYRaw: bnToSafeNumber(totalReserveYRaw),
+      userLockedX: bnToNumberWithDecimals(
+        poolData.user_locked_x,
+        tokenXMintInfo.decimals,
+      ),
+      userLockedY: bnToNumberWithDecimals(
+        poolData.user_locked_y,
+        tokenYMintInfo.decimals,
+      ),
     };
 
     return result;

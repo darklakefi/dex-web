@@ -34,6 +34,7 @@ import { useQueryStates } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
 import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
+import { usePageVisibility } from "../../../../hooks/usePageVisibility";
 import { usePoolData } from "../../../../hooks/usePoolData";
 import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import {
@@ -309,10 +310,10 @@ export function SwapForm() {
     [poolDetails?.tokenXMint, sortedTokenXMint],
   );
 
-  // Debounce the amount input for quote fetching
   const [debouncedAmountIn] = useDebouncedValue(amountIn, { wait: 500 });
 
-  // Use TanStack Query for quote fetching with automatic refetching
+  const isVisible = usePageVisibility();
+
   const {
     data: quote,
     isLoading: isLoadingQuote,
@@ -347,12 +348,10 @@ export function SwapForm() {
       poolDetails?.tokenXMint,
       poolDetails?.tokenYMint,
     ],
-    refetchInterval: 10000, // Refetch every 10 seconds
+    refetchInterval: isVisible ? 10000 : false,
     refetchIntervalInBackground: false,
-    staleTime: 5000,
+    staleTime: 8000,
   });
-
-  // Update form field when quote changes
   useEffect(() => {
     if (quote) {
       if (swapType === "sell") {

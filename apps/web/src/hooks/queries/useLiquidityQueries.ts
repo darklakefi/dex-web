@@ -12,9 +12,12 @@ import {
   useQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import { usePageVisibility } from "../usePageVisibility";
 
 interface UserLiquidityQueryOptions
-  extends Pick<UseQueryOptions<GetUserLiquidityOutput>, "enabled"> {}
+  extends Pick<UseQueryOptions<GetUserLiquidityOutput>, "enabled"> {
+  isActivelyTrading?: boolean;
+}
 
 interface AddLiquidityReviewQueryOptions
   extends Pick<UseQueryOptions<GetAddLiquidityReviewOutput>, "enabled"> {}
@@ -25,16 +28,20 @@ export function useUserLiquidity(
   tokenYMint: string,
   options?: UserLiquidityQueryOptions,
 ): UseQueryResult<GetUserLiquidityOutput> {
+  const isVisible = usePageVisibility();
+  const pollingInterval = options?.isActivelyTrading ? 2000 : 10000;
+
   return useQuery({
     ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
       context: { cache: "force-cache" as RequestCache },
       input: { ownerAddress, tokenXMint, tokenYMint },
     }),
-    refetchInterval: 2000,
+    enabled: !!ownerAddress && !!tokenXMint && !!tokenYMint,
+    refetchInterval: isVisible ? pollingInterval : false,
     refetchIntervalInBackground: false,
     refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    staleTime: 1000,
+    refetchOnWindowFocus: true,
+    staleTime: pollingInterval,
     ...options,
   });
 }
@@ -64,6 +71,7 @@ export function useAddLiquidityReview(
       context: { cache: "force-cache" as RequestCache },
       input: { isTokenX, tokenAmount, tokenXMint, tokenYMint },
     }),
+    staleTime: 5000,
     ...options,
   });
 }

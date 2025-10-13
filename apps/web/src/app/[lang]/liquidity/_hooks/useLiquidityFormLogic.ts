@@ -14,18 +14,6 @@ interface UseLiquidityFormLogicProps {
   tokenBAddress: string | null;
 }
 
-/**
- * Coordinator hook for liquidity forms.
- * Following Answer #1: Inversion of Control pattern
- *
- * Data flow: Form → Logic Hook (orchestrator) → Transaction Hook
- * - Form manages field state and validation
- * - Transaction manages submission workflow and XState machine
- * - This hook orchestrates the interaction between them
- *
- * Token ordering: Uses useTokenOrder to derive token order from URL params (via nuqs).
- * This ensures a single source of truth and eliminates duplicate sorting logic.
- */
 export function useLiquidityFormLogic({
   tokenAAddress,
   tokenBAddress,
@@ -41,7 +29,6 @@ export function useLiquidityFormLogic({
 
   const poolDetails = poolDataResult.data;
 
-  // Track recent transactions to enable aggressive polling
   const { hasRecentTransaction, markTransactionComplete } =
     useRecentTransactionTracker();
 
@@ -64,12 +51,7 @@ export function useLiquidityFormLogic({
 
   const transaction = useLiquidityTransaction({
     onTransactionComplete: () => {
-      // Mark transaction complete to enable aggressive polling
       markTransactionComplete();
-
-      // Immediately refetch both token accounts after transaction
-      tokenAccountsData.refetchBuyTokenAccount();
-      tokenAccountsData.refetchSellTokenAccount();
     },
     orderContext,
     poolDetails: poolDetails ?? null,
