@@ -12,139 +12,83 @@ import {
 import { useDebouncedValue } from "@tanstack/react-pacer";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createSerializer, useQueryStates } from "nuqs";
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback } from "react";
 import * as z from "zod";
 import { selectedTokensParsers } from "../_utils/searchParams";
 import { TokenSelectorContent } from "./_hooks/TokenSelectorContent";
 import { useRecentTokens } from "./_hooks/useRecentTokens";
 
-const selectTokenModalFormSchema = z.object({
-  query: z.string().default(""),
-});
-
 const { fieldContext, formContext } = createFormHookContexts();
 const { useAppForm } = createFormHook({
-  fieldComponents: {
-    TextInput,
-  },
-
+  fieldComponents: { TextInput },
   fieldContext,
   formComponents: {},
   formContext,
 });
 
-const serialize = createSerializer(selectedTokensParsers);
-
-const formConfig = {
-  defaultValues: {
-    query: "",
-  },
-  onSubmit: () => {},
-  validators: {
-    onBlur: ({ value }: { value: { query: string } }) =>
-      selectTokenModalFormSchema.parse(value),
-  },
-};
+const serializeTokens = createSerializer(selectedTokensParsers);
 
 interface SelectTokenModalProps {
   type: "buy" | "sell";
-  returnUrl: string;
 }
 
-export function SelectTokenModal({
-  type,
-  returnUrl = "",
-}: SelectTokenModalProps) {
+export function SelectTokenModal({ type }: SelectTokenModalProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
     selectedTokensParsers,
   );
-
-  const [isClosing, setIsClosing] = useState(false);
-
-  const handleClose = useCallback(() => {
-    setIsClosing(true);
-
-    setTimeout(() => {
-      const from = searchParams.get("from");
-      if (from) {
-        router.replace(from as never);
-        return;
-      }
-
-      const fallbackUrl = returnUrl ? `/${returnUrl}` : "/";
-      router.replace(fallbackUrl as never);
-    }, 0);
-  }, [searchParams, router, returnUrl]);
-
   const { recentTokens, addRecentToken } = useRecentTokens();
 
+  const handleClose = useCallback(() => router.back(), [router]);
+
+  const from = searchParams.get("from") || "/";
+  const allowUnknownTokens = from.includes("liquidity");
+
   const handleSelectToken = useCallback(
-    (selectedToken: Token, e: React.MouseEvent<HTMLButtonElement>) => {
+    (token: Token, e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
+      addRecentToken(token);
 
-      const currentFrom = searchParams.get("from");
-      const baseReturn = currentFrom || `/${returnUrl}`;
-      const selectedTokenAddress = selectedToken.address;
-      addRecentToken(selectedToken);
+      const selectedAddress = token.address;
+      const [newTokenA, newTokenB] =
+        type === "buy"
+          ? [
+              selectedAddress,
+              selectedAddress === tokenBAddress ? tokenAAddress : tokenBAddress,
+            ]
+          : [
+              selectedAddress === tokenAAddress ? tokenBAddress : tokenAAddress,
+              selectedAddress,
+            ];
 
-      if (type === "buy") {
-        const sellAddress =
-          selectedTokenAddress === tokenBAddress
-            ? tokenAAddress
-            : tokenBAddress;
+      const targetURL = serializeTokens(from, {
+        tokenAAddress: newTokenA,
+        tokenBAddress: newTokenB,
+      });
 
-        const urlWithParams = serialize(baseReturn, {
-          tokenAAddress: selectedTokenAddress,
-          tokenBAddress: sellAddress,
-        });
-
-        router.push(urlWithParams as never);
-      } else {
-        const buyAddress =
-          selectedTokenAddress === tokenAAddress
-            ? tokenBAddress
-            : tokenAAddress;
-
-        const urlWithParams = serialize(baseReturn, {
-          tokenAAddress: buyAddress,
-          tokenBAddress: selectedTokenAddress,
-        });
-
-        router.push(urlWithParams as never);
-      }
+      router.replace(targetURL as never);
     },
-    [
-      searchParams,
-      returnUrl,
-      addRecentToken,
-      type,
-      tokenBAddress,
-      tokenAAddress,
-      router,
-    ],
+    [addRecentToken, type, tokenAAddress, tokenBAddress, from, router],
   );
 
-  const form = useAppForm(formConfig);
+  const form = useAppForm({
+    defaultValues: { query: "" },
+    onSubmit: () => {},
+    validators: {
+      onBlur: ({ value }: { value: { query: string } }) =>
+        z.object({ query: z.string().default("") }).parse(value),
+    },
+  });
 
-  const rawQuery = useStore(form.store, (state) => state.values.query);
-  const isInitialLoad = rawQuery === "";
-
-  const [debouncedQuery] = useDebouncedValue(rawQuery, {
-    wait: isInitialLoad ? 0 : 300,
+  const query = useStore(form.store, (state) => state.values.query);
+  const [debouncedQuery] = useDebouncedValue(query, {
+    wait: query === "" ? 0 : 300,
   });
 
   const handlePaste = useCallback((field: AnyFieldApi) => {
-    pasteFromClipboard((pasted: string) => {
-      field.handleChange(pasted.trim());
-    });
+    pasteFromClipboard((pasted: string) => field.handleChange(pasted.trim()));
   }, []);
-
-  if (isClosing) {
-    return null;
-  }
 
   return (
     <Modal onClose={handleClose}>
@@ -153,7 +97,7 @@ export function SelectTokenModal({
         icon="times"
         onClick={handleClose}
         variant="secondary"
-      ></Button>
+      />
       <Box className="flex max-h-full w-full max-w-sm drop-shadow-xl">
         <form.Field name="query">
           {(field) => (
@@ -184,11 +128,11 @@ export function SelectTokenModal({
           fallback={<div className="h-32 animate-pulse rounded bg-green-600" />}
         >
           <TokenSelectorContent
+            allowUnknownTokens={allowUnknownTokens}
             debouncedQuery={debouncedQuery}
-            isInitialLoad={isInitialLoad}
+            isInitialLoad={query === ""}
             onSelectToken={handleSelectToken}
             recentTokens={recentTokens}
-            returnUrl={returnUrl}
           />
         </Suspense>
       </Box>

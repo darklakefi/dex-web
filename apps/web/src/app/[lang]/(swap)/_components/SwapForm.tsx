@@ -231,7 +231,6 @@ export function SwapForm() {
         transactionHash: _trackDetails.trackingId,
       });
 
-      // Invalidate specific pool and token accounts using oRPC keys
       if (tokenAAddress && tokenBAddress) {
         const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
           sortSolanaAddresses(tokenAAddress, tokenBAddress);
@@ -363,7 +362,6 @@ export function SwapForm() {
     }
   }, [quote, swapType, form.setFieldValue, swapState.setDisabled]);
 
-  // Disable swap button when loading quote
   useEffect(() => {
     swapState.setDisabled(isLoadingQuote);
   }, [isLoadingQuote, swapState]);
@@ -538,7 +536,6 @@ export function SwapForm() {
   };
 
   const handleSwap = async () => {
-    // Ensure we have the latest quote before swapping
     await refetchQuote();
     getSwap();
   };
@@ -573,7 +570,6 @@ export function SwapForm() {
     checkInsufficientBalanceState(String(sellAmount));
     if (!poolDetails || parseAmountBigNumber(String(sellAmount)).lte(0)) return;
 
-    // Trigger a refetch with the current amount
     setAmountIn(form.state.values.tokenAAmount);
     setSwapType("sell");
   };
@@ -631,7 +627,6 @@ export function SwapForm() {
 
   const onChangeSlippage = (newSlippage: string) => {
     setSlippage(newSlippage);
-    // Changing slippage will automatically trigger a refetch via queryKey dependency
   };
 
   return (

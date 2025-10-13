@@ -35,7 +35,7 @@ commands:
     description: "Common setup steps for all jobs"
     steps:
       - node/install-pnpm:
-          version: 10.12.4
+          version: 10.17.0
 
       - node/install-packages:
           pkg-manager: pnpm
@@ -45,7 +45,7 @@ commands:
 jobs:
   main:
     docker:
-      - image: cimg/node:24.3.0
+      - image: cimg/node:24.9.0
     resource_class: large
     steps:
       - checkout
@@ -88,7 +88,7 @@ jobs:
 
   chromatic:
     docker:
-      - image: cimg/node:24.3.0
+      - image: cimg/node:24.9.0
     resource_class: medium
     environment:
       CI: true
@@ -103,7 +103,7 @@ jobs:
 
   deploy-preview:
     docker:
-      - image: cimg/node:24.3.0
+      - image: cimg/node:24.9.0
     resource_class: large
     steps:
       - checkout
@@ -163,7 +163,7 @@ jobs:
 
   deploy-production:
     docker:
-      - image: cimg/node:24.3.0
+      - image: cimg/node:24.9.0
     resource_class: medium
     steps:
       - checkout

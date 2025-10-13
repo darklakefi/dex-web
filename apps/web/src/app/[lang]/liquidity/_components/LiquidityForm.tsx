@@ -7,22 +7,15 @@ import {
   calculateProportionalAmount,
 } from "@dex-web/utils";
 import { Field, useStore } from "@tanstack/react-form";
-import { useRouter } from "next/navigation";
-import { createSerializer, useQueryStates } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { TokenTransactionSettingsButton } from "../../../_components/TokenTransactionSettingsButton";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
-import {
-  liquidityPageParsers,
-  selectedTokensParsers,
-} from "../../../_utils/searchParams";
+import { liquidityPageParsers } from "../../../_utils/searchParams";
 import { FORM_FIELD_NAMES } from "../_constants/liquidityConstants";
 import { useLiquidityFormLogic } from "../_hooks/useLiquidityFormLogic";
 import { useLPTokenEstimation } from "../_hooks/useLPTokenEstimation";
 import { useTokenOrder } from "../_hooks/useTokenOrder";
-import {
-  createPoolUrl,
-  selectLiquidityViewState,
-} from "../_utils/liquiditySelectors";
+import { selectLiquidityViewState } from "../_utils/liquiditySelectors";
 import { AddLiquidityDetails } from "./AddLiquidityDetail";
 import { LiquidityActionButton } from "./LiquidityActionButton";
 import { LiquidityErrorBoundary } from "./LiquidityErrorBoundary";
@@ -32,17 +25,13 @@ import {
 } from "./LiquidityFormSkeletons";
 import { LiquidityTokenInputs } from "./LiquidityTokenInputs";
 
-const serialize = createSerializer(liquidityPageParsers);
-
 interface LiquidityFormProps {
   tokenPrices?: Record<string, GetTokenPriceOutput | undefined>;
 }
 
 export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
-  const router = useRouter();
-  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
-    selectedTokensParsers,
-  );
+  const [{ tokenAAddress, tokenBAddress }, setLiquidityParams] =
+    useQueryStates(liquidityPageParsers);
 
   const {
     form,
@@ -205,12 +194,12 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
           <button
             aria-label="change mode"
             className="inline-flex cursor-pointer items-center justify-center bg-green-800 p-2 text-green-300 hover:text-green-200 focus:text-green-200"
-            onClick={() => {
-              const url = createPoolUrl(
-                serialize,
-                LIQUIDITY_PAGE_TYPE.CREATE_POOL,
-              );
-              router.push(url as Parameters<typeof router.push>[0]);
+            onClick={async () => {
+              await setLiquidityParams({
+                tokenAAddress,
+                tokenBAddress,
+                type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
+              });
             }}
             type="button"
           >

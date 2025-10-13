@@ -37,7 +37,6 @@ export function useSubmitAddLiquidity() {
       _data: SubmitAddLiquidityOutput,
       variables: SubmitAddLiquidityInput,
     ) => {
-      // Invalidate liquidity-related queries for the specific pool and tokens
       await invalidateLiquidityData(queryClient, {
         ownerAddress: variables.userAddress,
         tokenXMint: variables.tokenXMint,

@@ -20,22 +20,18 @@ export function useRecentTransactionTracker(cooldownMs = 30000) {
   const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const markTransactionComplete = useCallback(() => {
-    // Clear any existing cooldown
     if (cooldownTimerRef.current) {
       clearTimeout(cooldownTimerRef.current);
     }
 
-    // Enable aggressive polling
     setHasRecentTransaction(true);
 
-    // Schedule return to normal polling
     cooldownTimerRef.current = setTimeout(() => {
       setHasRecentTransaction(false);
       cooldownTimerRef.current = null;
     }, cooldownMs);
   }, [cooldownMs]);
 
-  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
       if (cooldownTimerRef.current) {

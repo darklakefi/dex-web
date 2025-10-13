@@ -10,18 +10,17 @@ interface UseRealtimePoolDataParams {
   tokenXMint: string;
   tokenYMint: string;
   priority?: Extract<QueryPriority, "high" | "critical">;
+  hasRecentTransaction?: boolean;
 }
 
-/**
- * Convenience wrapper for pool data with liquidity-specific transformation.
- * Transforms raw pool reserves into the PoolDetails shape used by liquidity components.
- */
 export function useRealtimePoolData({
   tokenXMint,
   tokenYMint,
   priority = "high",
+  hasRecentTransaction = false,
 }: UseRealtimePoolDataParams): UseQueryResult<PoolDetails | null, Error> {
   return usePoolData<PoolDetails | null>({
+    hasRecentTransaction,
     priority,
     select: (data) => transformToPoolDetails(data, tokenXMint, tokenYMint),
     tokenXMint,

@@ -43,7 +43,7 @@ export default async function Page({
           </div>
         }
       >
-        <SelectTokenModal returnUrl={""} type={(await params).type} />
+        <SelectTokenModal type={(await params).type} />
       </Suspense>
     </HydrateClient>
   );

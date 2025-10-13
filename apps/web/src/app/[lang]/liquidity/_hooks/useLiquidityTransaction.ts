@@ -138,9 +138,6 @@ export function useLiquidityTransaction({
           throw new Error("Token order context is required for transaction");
         }
 
-        // Use the current pool data from polling - no need to refetch
-        // The polling system keeps this data fresh, and refetching adds latency
-        // Slippage protection should be handled by the smart contract
         const requestPayload = await buildRequestPayload({
           currentPoolData,
           effectivePublicKey,
@@ -165,14 +162,11 @@ export function useLiquidityTransaction({
           });
           await requestLiquidityTransactionSigning({
             onSubmitTransaction: async (params) => {
-              // Use the mutation which handles query invalidation automatically
               return submitAddLiquidityMutation.mutateAsync(params);
             },
             onSuccess: async () => {
               toasts.showSuccessToast();
 
-              // Trigger immediate refetch + enable aggressive polling
-              // This provides instant feedback while query invalidation propagates
               onTransactionComplete?.();
 
               trackConfirmed(trackLiquidity, {

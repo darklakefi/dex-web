@@ -41,12 +41,16 @@ export function useLiquidityFormLogic({
   const tokenXMint = orderContext?.protocol.tokenX || "";
   const tokenYMint = orderContext?.protocol.tokenY || "";
 
-  const poolDataResult = useRealtimePoolData({ tokenXMint, tokenYMint });
-
-  const poolDetails = poolDataResult.data;
-
   const { hasRecentTransaction, markTransactionComplete } =
     useRecentTransactionTracker();
+
+  const poolDataResult = useRealtimePoolData({
+    hasRecentTransaction,
+    tokenXMint,
+    tokenYMint,
+  });
+
+  const poolDetails = poolDataResult.data;
 
   const tokenAccountsData = useRealtimeTokenAccounts({
     hasRecentTransaction,

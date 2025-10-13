@@ -58,8 +58,8 @@ To contribute effectively, you must understand and respect these core principles
 
 Before you begin, make sure you have the following installed **on your local machine**:
 
-- **Node.js:** `v24.0.0` or higher (use `nvm` or `asdf`).
-- **pnpm:** `v10.12.4`.
+- **Node.js:** `v22.0.0` or higher (use `nvm` or `asdf`).
+- **pnpm:** `v10.17.0` or higher.
 - **Git**
 - **Docker Desktop** (for the database).
 
@@ -176,8 +176,11 @@ All commits to this repository must be signed. Unsigned commits will be rejected
 | `pnpm build`      | Build the web app                  |
 | `pnpm test`       | Run tests                          |
 | `pnpm lint`       | Lint the codebase                  |
+| `pnpm lint:fix`   | Fix only linting issues            |
 | `pnpm e2e`        | Run E2E tests                      |
 | `pnpm format`     | Format the codebase                |
+| `pnpm format:check` | Check if code is formatted          |
+| `pnpm fix`        | Fix all auto-fixable issues (lint + format) |
 | `pnpm dep-graph`  | Visualize project dependencies     |
 | `pnpm db:migrate` | Apply database schema changes      |
 | `pnpm db:seed`    | Seed the database with sample data |
@@ -204,6 +207,59 @@ pnpm knip
 ```
 
 Run this before submitting a PR to help keep the codebase tidy.
+
+## Comment Removal with Uncomment
+
+The project includes `uncomment-cli`, a tree-sitter-based tool for removing comments from code. This is particularly useful for cleaning up AI-generated code or refactoring modules.
+
+### When to Use
+
+- **After AI code generation:** Clean up excessive comments from AI assistants
+- **During refactoring:** Remove outdated or redundant comments
+- **Manual cleanup:** Targeted removal in specific files or directories
+
+### Configuration
+
+The project has a `.uncommentrc.toml` configuration that:
+
+- Preserves TODO, FIXME, and documentation comments by default
+- Keeps all linting directives (ESLint, Biome, TypeScript, etc.)
+- Protects test files, configs, and type definitions
+- Respects `.gitignore` rules
+
+### Usage Examples
+
+```bash
+# Show usage information
+pnpm uncomment
+
+# Preview changes before applying (recommended first step)
+pnpm uncomment --dry-run apps/web/src/app/[lang]/swap/
+
+# Remove comments from a specific directory
+pnpm uncomment apps/web/src/app/_components/
+
+# Remove including TODOs (use carefully)
+pnpm uncomment --remove-todo apps/web/src/utils/
+
+# Process with verbose output to see what's happening
+pnpm uncomment --verbose apps/web/src/hooks/
+
+# Override thread count (8 threads instead of auto-detect)
+pnpm uncomment --threads 8 apps/web/src/components/
+
+# Disable parallel processing (single-threaded)
+pnpm uncomment --threads 1 apps/web/src/components/
+```
+
+### Best Practices
+
+- **Always use `--dry-run` first** to preview changes
+- Use on specific directories rather than the entire codebase
+- Review changes before committing
+- Don't remove comments that explain complex Solana logic or business rules
+
+**Note:** This tool is **not** part of pre-commit hooks and should be used intentionally, not automatically.
 
 ## Recommended Extensions
 

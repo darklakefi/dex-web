@@ -46,8 +46,7 @@ export interface PoolDetails {
   readonly tokenXMint: string;
   readonly tokenYMint: string;
   readonly tokenXReserve?: number;
-  // Raw values are strings to preserve precision for BigInt conversion
-  // JavaScript numbers lose precision above MAX_SAFE_INTEGER (2^53 - 1)
+
   readonly tokenXReserveRaw?: string;
   readonly tokenYReserve?: number;
   readonly tokenYReserveRaw?: string;

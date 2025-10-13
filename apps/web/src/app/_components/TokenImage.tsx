@@ -12,10 +12,6 @@ interface TokenImageProps {
   className?: string;
 }
 
-/**
- * Known safe domains that are configured in next.config.ts remotePatterns.
- * Images from these domains will use Next.js built-in optimization.
- */
 const KNOWN_SAFE_DOMAINS = [
   "raw.githubusercontent.com",
   "arweave.net",
@@ -28,9 +24,6 @@ const KNOWN_SAFE_DOMAINS = [
   "cloudfront.net",
 ];
 
-/**
- * Check if a URL's hostname matches any of the known safe domains.
- */
 function isKnownSafeDomain(url: string): boolean {
   try {
     const { hostname } = new URL(url);
@@ -42,9 +35,6 @@ function isKnownSafeDomain(url: string): boolean {
   }
 }
 
-/**
- * Custom loader for unknown domains - proxies through our API route.
- */
 function tokenImageLoader({
   src,
   width,
@@ -61,24 +51,6 @@ function tokenImageLoader({
   return `/api/image-proxy?${params.toString()}`;
 }
 
-/**
- * Optimized token image component with:
- * - Automatic Next.js image optimization (WebP/AVIF, responsive sizing)
- * - 30-day caching via next.config
- * - Graceful fallback to symbol initials
- * - Error boundary for failed loads
- * - Multiple size variants for different contexts
- * - Support for unknown image domains via proxy
- *
- * @example
- * <TokenImage
- *   address="So11111111111111111111111111111111111111112"
- *   symbol="SOL"
- *   imageUrl="https://raw.githubusercontent.com/..."
- *   size={32}
- *   priority={true}
- * />
- */
 export function TokenImage({
   symbol,
   imageUrl,
@@ -103,16 +75,21 @@ export function TokenImage({
     !imageUrl.startsWith("/") && !isKnownSafeDomain(imageUrl);
 
   return (
-    <Image
-      alt={`${symbol} token icon`}
-      className={`rounded-full object-cover ${className}`}
-      height={size}
-      loader={useCustomLoader ? tokenImageLoader : undefined}
-      onError={() => setHasError(true)}
-      priority={priority}
-      src={imageUrl}
-      unoptimized={useCustomLoader}
-      width={size}
-    />
+    <div
+      className={`overflow-hidden rounded-full ${className}`}
+      style={{ height: size, width: size }}
+    >
+      <Image
+        alt={`${symbol} token icon`}
+        height={size}
+        loader={useCustomLoader ? tokenImageLoader : undefined}
+        onError={() => setHasError(true)}
+        priority={priority}
+        src={imageUrl}
+        style={{ height: "100%", objectFit: "cover", width: "100%" }}
+        unoptimized={useCustomLoader}
+        width={size}
+      />
+    </div>
   );
 }

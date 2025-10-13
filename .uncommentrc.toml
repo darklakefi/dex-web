@@ -1,0 +1,171 @@
+# Uncomment Configuration for Dex Web
+# Configuration for removing comments from source code using tree-sitter AST parsing
+# See: https://github.com/Goldziher/uncomment
+
+[global]
+# Preserve TODO/FIXME/documentation by default
+remove_todos = false
+remove_fixme = false
+remove_docs = false
+
+# Preserve important comment patterns
+preserve_patterns = [
+  "~keep",
+  "IMPORTANT",
+  "NOTE",
+  "WARNING",
+  "HACK",
+  "Security:",
+  "Performance:",
+  "Solana:",
+  "NFT:",
+]
+
+# Use default preservation patterns for linting tools
+# (eslint, biome, typescript, prettier, etc.)
+use_default_ignores = true
+
+# Respect .gitignore rules
+respect_gitignore = true
+
+# Multi-threading configuration is handled via the package.json script
+# which defaults to --threads 0 (auto-detect optimal thread count)
+# This can be overridden via CLI: --threads N
+#
+# Performance benchmarks:
+# - 1 thread:  ~1,500 files/second
+# - 4 threads: ~3,900 files/second (2.6x speedup)
+# - 8 threads: ~5,100 files/second (3.4x speedup)
+
+# ==========================================
+# Language-Specific Configurations
+# ==========================================
+
+[languages.typescript]
+extensions = ["ts", "tsx", "mts", "cts"]
+preserve_patterns = [
+  "@ts-ignore",
+  "@ts-expect-error",
+  "@ts-nocheck",
+  "@ts-check",
+  "eslint-",
+  "biome-ignore",
+  "prettier-ignore",
+  "v8 ignore",
+  "c8 ignore",
+  "istanbul ignore",
+  "/// <reference",
+  "/// <amd-module",
+]
+
+[languages.javascript]
+extensions = ["js", "jsx", "mjs", "cjs"]
+preserve_patterns = [
+  "eslint-",
+  "biome-ignore",
+  "prettier-ignore",
+  "v8 ignore",
+  "c8 ignore",
+  "istanbul ignore",
+]
+
+[languages.json]
+extensions = ["json", "jsonc"]
+# JSON typically doesn't have comments, but JSONC does
+
+[languages.yaml]
+extensions = ["yml", "yaml"]
+preserve_patterns = [
+  "yamllint",
+]
+
+# ==========================================
+# Path-Specific Overrides
+# ==========================================
+
+# Preserve all comments in test files (redundant settings removed since global config already preserves)
+[patterns."**/__tests__/**/*.{ts,tsx}"]
+# All comments preserved
+
+[patterns."**/__mocks__/**/*.{ts,tsx}"]
+# All comments preserved
+
+[patterns."**/*.spec.{ts,tsx}"]
+# All comments preserved
+
+[patterns."**/*.test.{ts,tsx}"]
+# All comments preserved
+
+# Preserve comments in Storybook stories
+[patterns."**/*.stories.{ts,tsx}"]
+# All comments preserved
+
+[patterns."**/.storybook/**/*.{ts,tsx}"]
+# All comments preserved
+
+# Preserve comments in configuration files
+[patterns."**/vitest.setup.{ts,tsx}"]
+# All comments preserved
+
+[patterns."**/playwright.config.{ts,tsx}"]
+# All comments preserved
+
+[patterns."**/vite.config.{ts,tsx}"]
+# All comments preserved
+
+[patterns."**/*.config.{ts,tsx,js}"]
+# All comments preserved
+
+# Preserve comments in type definition files
+[patterns."**/*.d.ts"]
+# All comments preserved
+
+# Preserve comments in CI/CD configuration
+[patterns.".circleci/**/*.yml"]
+# All comments preserved
+
+[patterns.".github/**/*.yml"]
+# All comments preserved
+
+# ==========================================
+# Excluded Paths (Disable comment removal entirely)
+# ==========================================
+# Note: uncomment respects .gitignore by default
+# These patterns disable comment removal for generated/sensitive files
+
+[patterns."**/node_modules/**"]
+remove_todos = false
+remove_fixme = false
+remove_docs = false
+
+[patterns."**/dist/**"]
+remove_todos = false
+remove_fixme = false
+remove_docs = false
+
+[patterns."**/.next/**"]
+remove_todos = false
+remove_fixme = false
+remove_docs = false
+
+[patterns."**/coverage/**"]
+remove_todos = false
+remove_fixme = false
+remove_docs = false
+
+# Exclude lock files and generated schemas
+[patterns."**/pnpm-lock.yaml"]
+remove_todos = false
+remove_fixme = false
+remove_docs = false
+
+[patterns."**/package-lock.json"]
+remove_todos = false
+remove_fixme = false
+remove_docs = false
+
+# Exclude scripts directory
+[patterns."scripts/**"]
+remove_todos = false
+remove_fixme = false
+remove_docs = false

@@ -14,22 +14,15 @@ interface TokenSelectorContentProps {
     e: React.MouseEvent<HTMLButtonElement>,
   ) => void;
   recentTokens: Token[];
-  returnUrl: string;
+  allowUnknownTokens: boolean;
 }
 
-const allowUnknownTokenReturnUrls = ["liquidity"];
-
-/**
- * Component responsible for rendering token lists based on search state.
- * Handles initial load (recent + popular), search results with infinite scroll, and empty states.
- * Now includes proper loading states, error handling, and infinite scroll support.
- */
 export function TokenSelectorContent({
   debouncedQuery,
   isInitialLoad,
   onSelectToken,
   recentTokens: _recentTokens,
-  returnUrl,
+  allowUnknownTokens,
 }: TokenSelectorContentProps) {
   const {
     tokens: searchTokens,
@@ -137,7 +130,7 @@ export function TokenSelectorContent({
 
   return (
     <NoResultFound
-      allowUnknownTokens={allowUnknownTokenReturnUrls.includes(returnUrl)}
+      allowUnknownTokens={allowUnknownTokens}
       className="py-20"
       handleSelect={onSelectToken}
       search={debouncedQuery}

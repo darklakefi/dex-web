@@ -87,7 +87,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe("SelectTokenModal", () => {
   it.skip("renders search input and token list", async () => {
     await act(async () => {
-      render(<SelectTokenModal returnUrl="/" type="buy" />, {
+      render(<SelectTokenModal type="buy" />, {
         wrapper,
       });
     });

@@ -1,7 +1,28 @@
 {
   "mcpServers": {
-    "nx-mcp": {
-      "url": "http://localhost:9492/sse"
+    "filesystem": {
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}"
+      ],
+      "command": "npx"
+    },
+    "nx-workspace": {
+      "args": ["${workspaceFolder}/.cursor/nx-mcp-server.js"],
+      "command": "node"
+    },
+    "postgres": {
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "${env:DATABASE_URL}"
+      ],
+      "command": "npx"
+    },
+    "project-context": {
+      "args": ["${workspaceFolder}/.cursor/mcp-server.js"],
+      "command": "node"
     }
   }
 }

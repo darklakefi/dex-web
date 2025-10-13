@@ -78,8 +78,6 @@ export async function requestTransactionSigning({
       toasts.showStepToast(3);
     }
 
-    // Use the provided onSubmitTransaction callback (which should be a mutation)
-    // This allows proper query invalidation via TanStack Query's onSuccess
     const response = await onSubmitTransaction({
       signedTransaction: signedTransactionBase64,
       tokenXMint,

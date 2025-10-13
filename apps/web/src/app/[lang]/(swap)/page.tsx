@@ -10,6 +10,9 @@ import { selectedTokensCache } from "../../_utils/searchParams";
 import { SwapForm } from "./_components/SwapForm";
 
 export const metadata = {
+  alternates: {
+    canonical: "/",
+  },
   description:
     "MEV-protected token swaps on Solana. Trade with better prices and protection from front-running attacks.",
   title: "Swap | Darklake",

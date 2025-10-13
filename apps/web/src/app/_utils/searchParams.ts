@@ -5,15 +5,11 @@ import {
   LIQUIDITY_PAGE_TYPE,
 } from "./constants";
 
-/**
- * Custom nuqs parser that validates Solana addresses.
- * Returns default value if invalid.
- *
- * Note: We use parseAsString directly as the validation is handled
- * at the component level where we have access to the full token data.
- */
 function createSolanaAddressParser(defaultValue: string) {
-  return parseAsString.withDefault(defaultValue);
+  return parseAsString.withDefault(defaultValue).withOptions({
+    history: "replace",
+    shallow: true,
+  });
 }
 
 export const selectedTokensParsers = {
@@ -26,6 +22,11 @@ export const selectedTokensCache = createSearchParamsCache(
 
 export const liquidityPageParsers = {
   ...selectedTokensParsers,
-  type: parseAsString.withDefault(LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY),
+  type: parseAsString
+    .withDefault(LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY)
+    .withOptions({
+      history: "replace",
+      shallow: true,
+    }),
 };
 export const liquidityPageCache = createSearchParamsCache(liquidityPageParsers);

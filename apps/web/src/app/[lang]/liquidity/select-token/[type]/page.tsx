@@ -1,36 +1,31 @@
 import { redirect } from "next/navigation";
 import type { SearchParams } from "nuqs/server";
-import { Suspense } from "react";
-import {
-  getQueryClient,
-  HydrateClient,
-} from "../../../../../lib/query/hydration";
-import { SelectTokenModal } from "../../../../_components/SelectTokenModal";
-import { selectedTokensCache } from "../../../../_utils/searchParams";
 
 export default async function Page({
   searchParams,
   params,
 }: {
   searchParams: Promise<SearchParams>;
-  params: Promise<{ type: "buy" | "sell" }>;
+  params: Promise<{ lang: string; type: "buy" | "sell" }>;
 }) {
   const resolvedSearchParams = await searchParams;
-  const from = resolvedSearchParams.from;
+  const resolvedParams = await params;
 
-  if (from && typeof from === "string") {
-    redirect(from as never);
+  const queryString = new URLSearchParams();
+  for (const [key, value] of Object.entries(resolvedSearchParams)) {
+    if (value !== null && value !== undefined) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          queryString.append(key, String(item));
+        }
+      } else {
+        queryString.set(key, String(value));
+      }
+    }
   }
+  const queryStringText = queryString.toString();
 
-  await selectedTokensCache.parse(searchParams);
+  const redirectUrl = `/${resolvedParams.lang}/liquidity${queryStringText ? `?${queryStringText}` : ""}`;
 
-  const queryClient = getQueryClient();
-
-  return (
-    <HydrateClient client={queryClient}>
-      <Suspense fallback={<div>Loading...</div>}>
-        <SelectTokenModal returnUrl={"liquidity"} type={(await params).type} />
-      </Suspense>
-    </HydrateClient>
-  );
+  redirect(redirectUrl as never);
 }

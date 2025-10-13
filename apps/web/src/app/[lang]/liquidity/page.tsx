@@ -6,7 +6,6 @@ import {
   HydrateClient,
 } from "apps/web/src/lib/query/hydration";
 import { queryKeys } from "apps/web/src/lib/queryKeys";
-import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
 import { LIQUIDITY_PAGE_TYPE } from "../../_utils/constants";
@@ -14,7 +13,10 @@ import { liquidityPageCache } from "../../_utils/searchParams";
 import { GlobalLoadingIndicator } from "./_components/GlobalLoadingIndicator";
 import { LiquidityPageContent } from "./_components/LiquidityPageContent";
 
-export const metadata: Metadata = {
+export const metadata = {
+  alternates: {
+    canonical: "/liquidity",
+  },
   description:
     "Provide liquidity on Darklake and earn MEV-protected yields. Higher returns through MEV profit recovery.",
   title: "Liquidity | Darklake",
