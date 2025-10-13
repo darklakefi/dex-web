@@ -1,4 +1,5 @@
 import type { UseTransactionToastsReturn } from "@dex-web/core";
+import { client } from "@dex-web/orpc";
 import type { Wallet } from "@solana/wallet-adapter-react";
 import type {
   PublicKey,
@@ -46,6 +47,11 @@ export async function requestCreatePoolTransactionSigning({
   };
 
   return requestTransactionSigning({
+    onSubmitTransaction: async (params) => {
+      // For create pool, we call the client directly (no mutation hook yet)
+      // TODO: Create useSubmitCreatePool mutation hook following the same pattern
+      return client.liquidity.submitAddLiquidity(params);
+    },
     onSuccess,
     publicKey,
     setStep: setStepWithToast,

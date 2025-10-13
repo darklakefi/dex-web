@@ -4,7 +4,6 @@ import {
   signTransactionWithRecovery,
   type UseTransactionToastsReturn,
 } from "@dex-web/core";
-import { client } from "@dex-web/orpc";
 import { deserializeVersionedTransaction } from "@dex-web/orpc/utils/solana";
 import type { Wallet } from "@solana/wallet-adapter-react";
 import type {
@@ -27,6 +26,12 @@ interface RequestTransactionSigningParams {
   tokenYMint: string;
   userAddress: string;
   onSuccess: () => void;
+  onSubmitTransaction: (params: {
+    signedTransaction: string;
+    tokenXMint: string;
+    tokenYMint: string;
+    userAddress: string;
+  }) => Promise<{ success: boolean; error?: string; signature?: string }>;
   transactionType: TransactionType;
   setStep?: (step: number) => void;
   trackingId?: string;
@@ -42,6 +47,7 @@ export async function requestTransactionSigning({
   tokenYMint,
   userAddress,
   onSuccess,
+  onSubmitTransaction,
   transactionType: _transactionType,
   setStep,
   trackingId: _trackingId,
@@ -72,7 +78,9 @@ export async function requestTransactionSigning({
       toasts.showStepToast(3);
     }
 
-    const response = await client.liquidity.submitAddLiquidity({
+    // Use the provided onSubmitTransaction callback (which should be a mutation)
+    // This allows proper query invalidation via TanStack Query's onSuccess
+    const response = await onSubmitTransaction({
       signedTransaction: signedTransactionBase64,
       tokenXMint,
       tokenYMint,

@@ -13,10 +13,6 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 
-/**
- * Hook to fetch pool details for a token pair.
- * Uses oRPC's built-in queryOptions which includes proper query keys.
- */
 export function usePoolDetails(
   tokenXMint: string,
   tokenYMint: string,
@@ -27,14 +23,13 @@ export function usePoolDetails(
       context: { cache: "force-cache" as RequestCache },
       input: { tokenXMint, tokenYMint },
     }),
+    refetchInterval: 3000,
+    refetchIntervalInBackground: false,
+    staleTime: 1500,
     ...options,
   });
 }
 
-/**
- * Hook to fetch pool details with suspense for a token pair.
- * Uses oRPC's built-in queryOptions which includes proper query keys.
- */
 export function usePoolDetailsSuspense(
   tokenXMint: string,
   tokenYMint: string,
@@ -47,10 +42,6 @@ export function usePoolDetailsSuspense(
   });
 }
 
-/**
- * Hook to fetch pool reserves for a token pair.
- * Uses oRPC's built-in queryOptions with custom refetch settings.
- */
 export function usePoolReserves(
   tokenXMint: string,
   tokenYMint: string,
@@ -61,17 +52,15 @@ export function usePoolReserves(
       context: { cache: "force-cache" as RequestCache },
       input: { tokenXMint, tokenYMint },
     }),
+    refetchInterval: 2000,
+    refetchIntervalInBackground: false,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
-    staleTime: 30_000,
+    staleTime: 1000,
     ...options,
   });
 }
 
-/**
- * Hook to fetch pool reserves with suspense for a token pair.
- * Uses oRPC's built-in queryOptions which includes proper query keys.
- */
 export function usePoolReservesSuspense(
   tokenXMint: string,
   tokenYMint: string,
@@ -84,10 +73,6 @@ export function usePoolReservesSuspense(
   });
 }
 
-/**
- * Hook to fetch pinned pools.
- * Uses oRPC's built-in queryOptions which includes proper query keys.
- */
 export function usePinnedPools(options?: {
   enabled?: boolean;
 }): UseQueryResult<GetPinedPoolOutput> {

@@ -8,10 +8,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useRef } from "react";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
-import {
-  useWalletAdapter,
-  useWalletPublicKey,
-} from "../../../../hooks/useWalletCache";
+import { useWalletAdapter } from "../../../../hooks/useWalletCache";
 import { useReferralCode } from "../../../_components/ReferralCodeProvider";
 import { generateTrackingId } from "../../../_utils/generateTrackingId";
 import { isSquadsX } from "../../../_utils/isSquadsX";
@@ -41,6 +38,7 @@ interface UseLiquidityTransactionParams {
   readonly tokenBAddress: string | null;
   readonly poolDetails: PoolDetails | null;
   readonly resetForm?: () => void;
+  readonly onTransactionComplete?: () => void;
   readonly orderContext: TokenOrderContext | null;
 }
 
@@ -49,16 +47,16 @@ export function useLiquidityTransaction({
   tokenBAddress,
   poolDetails,
   resetForm,
+  onTransactionComplete,
   orderContext,
 }: UseLiquidityTransactionParams) {
   const { signTransaction, wallet, publicKey } = useWallet();
   const { data: walletAdapter } = useWalletAdapter();
-  const { data: walletPublicKey } = useWalletPublicKey();
   const { trackLiquidity, trackError } = useAnalytics();
   const { incomingReferralCode } = useReferralCode();
   const t = useTranslations("liquidity");
 
-  const { addLiquidityMutation, invalidateQueries } =
+  const { addLiquidityMutation, submitAddLiquidityMutation } =
     useLiquidityTransactionQueries();
 
   const lastSubmittedValuesRef = useRef<LiquidityFormValues | null>(null);
@@ -182,12 +180,16 @@ export function useLiquidityTransaction({
             tokenB: tokenBAddress || "",
           });
           await requestLiquidityTransactionSigning({
+            onSubmitTransaction: async (params) => {
+              // Use the mutation which handles query invalidation automatically
+              return submitAddLiquidityMutation.mutateAsync(params);
+            },
             onSuccess: async () => {
               toasts.showSuccessToast();
 
-              if (poolDetails && walletPublicKey) {
-                await invalidateQueries(walletPublicKey, poolDetails);
-              }
+              // Trigger immediate refetch + enable aggressive polling
+              // This provides instant feedback while query invalidation propagates
+              onTransactionComplete?.();
 
               trackConfirmed(trackLiquidity, {
                 amountA: tokenAAmount,
@@ -246,8 +248,8 @@ export function useLiquidityTransaction({
       tokenBAddress,
       trackLiquidity,
       addLiquidityMutation,
-      walletPublicKey,
-      invalidateQueries,
+      submitAddLiquidityMutation,
+      onTransactionComplete,
       trackError,
       signTransaction,
       orderContext,

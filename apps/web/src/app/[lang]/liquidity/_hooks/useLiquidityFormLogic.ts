@@ -3,6 +3,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useRef } from "react";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import { useRealtimeTokenAccounts } from "../../../../hooks/useRealtimeTokenAccounts";
+import { useRecentTransactionTracker } from "../../../../hooks/useRecentTransactionTracker";
 import type { LiquidityFormValues } from "../_types/liquidity.types";
 import { useLiquidityFormState } from "./useLiquidityFormState";
 import { useLiquidityTransaction } from "./useLiquidityTransaction";
@@ -40,8 +41,12 @@ export function useLiquidityFormLogic({
 
   const poolDetails = poolDataResult.data;
 
+  // Track recent transactions to enable aggressive polling
+  const { hasRecentTransaction, markTransactionComplete } =
+    useRecentTransactionTracker();
+
   const tokenAccountsData = useRealtimeTokenAccounts({
-    hasRecentTransaction: false,
+    hasRecentTransaction,
     publicKey: publicKey || null,
     tokenAAddress,
     tokenBAddress,
@@ -58,6 +63,14 @@ export function useLiquidityFormLogic({
   });
 
   const transaction = useLiquidityTransaction({
+    onTransactionComplete: () => {
+      // Mark transaction complete to enable aggressive polling
+      markTransactionComplete();
+
+      // Immediately refetch both token accounts after transaction
+      tokenAccountsData.refetchBuyTokenAccount();
+      tokenAccountsData.refetchSellTokenAccount();
+    },
     orderContext,
     poolDetails: poolDetails ?? null,
     resetForm: () => form.reset(),

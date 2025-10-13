@@ -19,10 +19,6 @@ interface UserLiquidityQueryOptions
 interface AddLiquidityReviewQueryOptions
   extends Pick<UseQueryOptions<GetAddLiquidityReviewOutput>, "enabled"> {}
 
-/**
- * Hook to fetch user liquidity for a specific pool.
- * Uses oRPC's built-in queryOptions with custom refetch settings.
- */
 export function useUserLiquidity(
   ownerAddress: string,
   tokenXMint: string,
@@ -34,17 +30,15 @@ export function useUserLiquidity(
       context: { cache: "force-cache" as RequestCache },
       input: { ownerAddress, tokenXMint, tokenYMint },
     }),
+    refetchInterval: 2000,
+    refetchIntervalInBackground: false,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
-    staleTime: 30_000,
+    staleTime: 1000,
     ...options,
   });
 }
 
-/**
- * Hook to fetch user liquidity with suspense for a specific pool.
- * Uses oRPC's built-in queryOptions which includes proper query keys.
- */
 export function useUserLiquiditySuspense(
   ownerAddress: string,
   tokenXMint: string,
@@ -58,10 +52,6 @@ export function useUserLiquiditySuspense(
   });
 }
 
-/**
- * Hook to fetch add liquidity review/preview data.
- * Uses oRPC's built-in queryOptions which includes proper query keys.
- */
 export function useAddLiquidityReview(
   tokenXMint: string,
   tokenYMint: string,
