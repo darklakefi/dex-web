@@ -1,8 +1,10 @@
 /// <reference types="vitest" />
+import { resolve } from "node:path";
 import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
+import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
   const baseConfig = {
     cacheDir: "../../node_modules/.vite/libs/core",
     plugins: [nxViteTsPaths()],
@@ -11,6 +13,12 @@ export default defineConfig(() => {
       coverage: {
         provider: "v8" as const,
         reportsDirectory: "../../coverage/libs/core",
+      },
+      deps: {
+        inline: ["react", "react-dom"],
+        web: {
+          transformAssets: true,
+        },
       },
       environment: "happy-dom",
       globals: true,
@@ -31,11 +39,22 @@ export default defineConfig(() => {
         },
       },
       reporters: ["default", "junit"],
+      setupFiles: [resolve(__dirname, "vitest.setup.ts")],
       teardownTimeout: 10000,
       testTimeout: 30000,
+      transformMode: {
+        web: ["**/*.{js,ts,jsx,tsx}"],
+      },
       watch: false,
     },
   };
+
+  if (mode === "test") {
+    return {
+      ...baseConfig,
+      plugins: [react(), nxViteTsPaths()],
+    };
+  }
 
   return baseConfig;
 });

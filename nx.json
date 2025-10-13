@@ -170,7 +170,7 @@
       "dependsOn": ["^build"],
       "inputs": [
         "default",
-        "^production",
+        "^default",
         {
           "externalDependencies": ["vitest"]
         }
@@ -179,10 +179,6 @@
         "coverage": true
       },
       "outputs": ["{options.reportsDirectory}"]
-    },
-    "build": {
-      "cache": true,
-      "dependsOn": ["^build"]
     },
     "e2e": {
       "cache": true,

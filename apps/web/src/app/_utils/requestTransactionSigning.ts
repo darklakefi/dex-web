@@ -25,12 +25,14 @@ interface RequestTransactionSigningParams {
   tokenXMint: string;
   tokenYMint: string;
   userAddress: string;
+  lpTokenAmount?: bigint;
   onSuccess: () => void;
   onSubmitTransaction: (params: {
     signedTransaction: string;
     tokenXMint: string;
     tokenYMint: string;
     userAddress: string;
+    lpTokenAmount?: bigint;
   }) => Promise<{ success: boolean; error?: string; signature?: string }>;
   transactionType: TransactionType;
   setStep?: (step: number) => void;
@@ -46,6 +48,7 @@ export async function requestTransactionSigning({
   tokenXMint,
   tokenYMint,
   userAddress,
+  lpTokenAmount,
   onSuccess,
   onSubmitTransaction,
   transactionType: _transactionType,
@@ -79,6 +82,7 @@ export async function requestTransactionSigning({
     }
 
     const response = await onSubmitTransaction({
+      lpTokenAmount,
       signedTransaction: signedTransactionBase64,
       tokenXMint,
       tokenYMint,

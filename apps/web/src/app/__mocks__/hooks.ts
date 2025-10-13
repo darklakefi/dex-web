@@ -43,6 +43,19 @@ export const mockUseRealtimeTokenAccounts = vi.fn(() => ({
     decimals: 6,
     symbol: "USDC",
   },
+
+  tokenAAccount: {
+    address: "mock-buy-address",
+    amount: 1000000000,
+    decimals: 9,
+    symbol: "SOL",
+  },
+  tokenBAccount: {
+    address: "mock-sell-address",
+    amount: 500000000,
+    decimals: 6,
+    symbol: "USDC",
+  },
 }));
 
 export const mockUseAnalytics = vi.fn(() => ({

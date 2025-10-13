@@ -21,8 +21,8 @@ const DEFAULT_PRICE = "1";
 
 interface LiquidityTokenInputsProps {
   form: LiquidityFormApi;
-  buyTokenAccount?: TokenAccountsData | null;
-  sellTokenAccount?: TokenAccountsData | null;
+  tokenAAccount?: TokenAccountsData | null;
+  tokenBAccount?: TokenAccountsData | null;
   isLoadingBuy: boolean;
   isLoadingSell: boolean;
   isRefreshingBuy: boolean;
@@ -44,8 +44,8 @@ interface LiquidityTokenInputsProps {
 
 export function LiquidityTokenInputs({
   form,
-  buyTokenAccount,
-  sellTokenAccount,
+  tokenAAccount,
+  tokenBAccount,
   isLoadingBuy,
   isLoadingSell,
   isRefreshingBuy,
@@ -63,7 +63,7 @@ export function LiquidityTokenInputs({
       aria-labelledby="liquidity-inputs-heading"
       className="flex flex-col gap-4"
     >
-      {isLoadingSell && !sellTokenAccount ? (
+      {isLoadingSell && !tokenBAccount ? (
         <SkeletonTokenInput label="TOKEN" />
       ) : (
         <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
@@ -106,7 +106,7 @@ export function LiquidityTokenInputs({
 
                   if (output != null) {
                     const targetDecimals =
-                      buyTokenAccount?.tokenAccounts?.[0]?.decimals ??
+                      tokenAAccount?.tokenAccounts?.[0]?.decimals ??
                       MAX_DECIMALS;
                     const preciseDecimals = Math.min(
                       targetDecimals,
@@ -135,7 +135,7 @@ export function LiquidityTokenInputs({
 
                 const balanceValidation = validateHasSufficientBalance({
                   amount: value,
-                  tokenAccount: sellTokenAccount?.tokenAccounts?.[0],
+                  tokenAccount: tokenBAccount?.tokenAccounts?.[0],
                 });
 
                 if (balanceValidation) return balanceValidation;
@@ -165,11 +165,10 @@ export function LiquidityTokenInputs({
                   field.handleChange(e.target.value);
                 }}
                 tokenAccount={
-                  sellTokenAccount?.tokenAccounts?.[0]
+                  tokenBAccount?.tokenAccounts?.[0]
                     ? {
-                        ...sellTokenAccount.tokenAccounts[0],
-                        address:
-                          sellTokenAccount.tokenAccounts[0].address || "",
+                        ...tokenBAccount.tokenAccounts[0],
+                        address: tokenBAccount.tokenAccounts[0].address || "",
                       }
                     : undefined
                 }
@@ -195,7 +194,7 @@ export function LiquidityTokenInputs({
         </div>
       </div>
 
-      {isLoadingBuy && !buyTokenAccount ? (
+      {isLoadingBuy && !tokenAAccount ? (
         <SkeletonTokenInput label="TOKEN" />
       ) : (
         <Box className="flex-row border border-green-400 bg-green-600 pt-3 pb-3 hover:border-green-300">
@@ -238,7 +237,7 @@ export function LiquidityTokenInputs({
 
                   if (output != null) {
                     const targetDecimals =
-                      sellTokenAccount?.tokenAccounts?.[0]?.decimals ??
+                      tokenBAccount?.tokenAccounts?.[0]?.decimals ??
                       MAX_DECIMALS;
                     const preciseDecimals = Math.min(
                       targetDecimals,
@@ -289,7 +288,7 @@ export function LiquidityTokenInputs({
 
                 const balanceValidation = validateHasSufficientBalance({
                   amount: value,
-                  tokenAccount: buyTokenAccount?.tokenAccounts?.[0],
+                  tokenAccount: tokenAAccount?.tokenAccounts?.[0],
                 });
 
                 if (balanceValidation) return balanceValidation;
@@ -319,10 +318,10 @@ export function LiquidityTokenInputs({
                   field.handleChange(e.target.value);
                 }}
                 tokenAccount={
-                  buyTokenAccount?.tokenAccounts?.[0]
+                  tokenAAccount?.tokenAccounts?.[0]
                     ? {
-                        ...buyTokenAccount.tokenAccounts[0],
-                        address: buyTokenAccount.tokenAccounts[0].address || "",
+                        ...tokenAAccount.tokenAccounts[0],
+                        address: tokenAAccount.tokenAccounts[0].address || "",
                       }
                     : undefined
                 }

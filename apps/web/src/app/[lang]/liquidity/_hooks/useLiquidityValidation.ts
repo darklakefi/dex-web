@@ -24,8 +24,8 @@ export interface ValidationState {
 
 export interface ValidationProps {
   formValues: LiquidityFormValues;
-  buyTokenAccount?: TokenAccountsData | null;
-  sellTokenAccount?: TokenAccountsData | null;
+  tokenAAccount?: TokenAccountsData | null;
+  tokenBAccount?: TokenAccountsData | null;
   poolDetails: PoolDetails | null;
   tokenAAddress: string;
   tokenBAddress: string;
@@ -34,8 +34,8 @@ export interface ValidationProps {
 
 export function useLiquidityValidation({
   formValues,
-  buyTokenAccount,
-  sellTokenAccount,
+  tokenAAccount,
+  tokenBAccount,
   poolDetails,
   tokenAAddress,
   tokenBAddress,
@@ -62,32 +62,32 @@ export function useLiquidityValidation({
     let hasInsufficientBalance = false;
 
     if (hasWallet && sellAmount && BigNumber(sellAmount).gt(0)) {
-      const sellTokenAcc = sellTokenAccount?.tokenAccounts?.[0];
-      if (sellTokenAcc) {
+      const tokenBAcc = tokenBAccount?.tokenAccounts?.[0];
+      if (tokenBAcc) {
         if (
           exceedsBalance(
             sellAmount,
-            sellTokenAcc.amount || 0,
-            sellTokenAcc.decimals || 0,
+            tokenBAcc.amount || 0,
+            tokenBAcc.decimals || 0,
           )
         ) {
-          errors.tokenBAmount = `Insufficient ${sellTokenAcc.symbol || "token"} balance`;
+          errors.tokenBAmount = `Insufficient ${tokenBAcc.symbol || "token"} balance`;
           hasInsufficientBalance = true;
         }
       }
     }
 
     if (hasWallet && buyAmount && BigNumber(buyAmount).gt(0)) {
-      const buyTokenAcc = buyTokenAccount?.tokenAccounts?.[0];
-      if (buyTokenAcc) {
+      const tokenAAcc = tokenAAccount?.tokenAccounts?.[0];
+      if (tokenAAcc) {
         if (
           exceedsBalance(
             buyAmount,
-            buyTokenAcc.amount || 0,
-            buyTokenAcc.decimals || 0,
+            tokenAAcc.amount || 0,
+            tokenAAcc.decimals || 0,
           )
         ) {
-          errors.tokenAAmount = `Insufficient ${buyTokenAcc.symbol || "token"} balance`;
+          errors.tokenAAmount = `Insufficient ${tokenAAcc.symbol || "token"} balance`;
           hasInsufficientBalance = true;
         }
       }
@@ -110,8 +110,8 @@ export function useLiquidityValidation({
     };
   }, [
     formValues,
-    buyTokenAccount,
-    sellTokenAccount,
+    tokenAAccount,
+    tokenBAccount,
     poolDetails,
     tokenAAddress,
     tokenBAddress,

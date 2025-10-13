@@ -8,6 +8,7 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
   experimental: {
+    optimizeCss: true,
     optimizePackageImports: [
       "@dex-web/ui",
       "@dex-web/core",
@@ -99,6 +100,14 @@ const nextConfig = {
       level: "warn",
       stream: process.stderr,
     };
+
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        message: /Failed to load bindings/,
+        module: /node_modules\/bigint-buffer/,
+      },
+    ];
 
     config.module.rules.unshift({
       test: /\.svg$/,

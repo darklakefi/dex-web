@@ -2,7 +2,7 @@ import { randUuid, seed } from "@ngneat/falso";
 import { FIXED_SEED } from "../../../mocks/helpers/constants";
 import { getTokenAccountsHandler } from "../getTokenAccounts.handler";
 
-describe.skip("getTokenAccountsHandler", () => {
+describe("getTokenAccountsHandler", () => {
   seed(FIXED_SEED);
   const ownerAddress = randUuid();
 

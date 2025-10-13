@@ -84,6 +84,13 @@ export function useLiquidityTransaction({
 
       const effectivePublicKey = publicKey || wallet?.adapter?.publicKey;
 
+      if (!currentPoolData) {
+        console.warn(
+          "Attempted to add liquidity to non-existent pool. User should create pool first.",
+        );
+        return;
+      }
+
       try {
         validateTransactionInputs({
           currentPoolData,
@@ -161,6 +168,7 @@ export function useLiquidityTransaction({
             tokenB: tokenBAddress || "",
           });
           await requestLiquidityTransactionSigning({
+            lpTokenAmount: requestPayload.amountLp,
             onSubmitTransaction: async (params) => {
               return submitAddLiquidityMutation.mutateAsync(params);
             },

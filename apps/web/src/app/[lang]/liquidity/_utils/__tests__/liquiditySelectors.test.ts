@@ -43,12 +43,21 @@ function createMockTokenAccountsData(
     buyTokenAccount: undefined,
     isLoadingBuy: false,
     isLoadingSell: false,
+    isLoadingTokenA: false,
+    isLoadingTokenB: false,
     isRealtime: false,
     isRefreshingBuy: false,
     isRefreshingSell: false,
+    isRefreshingTokenA: false,
+    isRefreshingTokenB: false,
     refetchBuyTokenAccount: () => {},
     refetchSellTokenAccount: () => {},
+    refetchTokenAAccount: () => {},
+    refetchTokenBAccount: () => {},
     sellTokenAccount: undefined,
+
+    tokenAAccount: undefined,
+    tokenBAccount: undefined,
     ...overrides,
   };
 }

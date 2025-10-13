@@ -14,6 +14,7 @@ import type {
 } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import {
+  getGatewayTokenAddress,
   numberFormatHelper,
   parseAmount,
   sortSolanaAddresses,
@@ -153,10 +154,10 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
     });
 
   const {
-    buyTokenAccount,
-    sellTokenAccount,
-    refetchBuyTokenAccount,
-    refetchSellTokenAccount,
+    tokenAAccount,
+    tokenBAccount,
+    refetchTokenAAccount,
+    refetchTokenBAccount,
   } = useTokenAccounts({
     publicKey,
     tanstackClient,
@@ -277,6 +278,9 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
           ? tokenADetails?.decimals || 0
           : tokenBDetails?.decimals || 0;
 
+      const gatewayTokenXAddress = getGatewayTokenAddress(tokenXAddress);
+      const gatewayTokenYAddress = getGatewayTokenAddress(tokenYAddress);
+
       const response = await client.pools.createPoolTransaction({
         depositAmountX: BigNumber(depositAmountX)
           .multipliedBy(10 ** tokenXDecimals)
@@ -284,8 +288,8 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
         depositAmountY: BigNumber(depositAmountY)
           .multipliedBy(10 ** tokenYDecimals)
           .toFixed(0),
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
+        tokenXMint: gatewayTokenXAddress,
+        tokenYMint: gatewayTokenYAddress,
         user: publicKey.toBase58(),
       } satisfies CreatePoolTransactionInput);
 
@@ -319,8 +323,8 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
               : undefined;
 
             toasts.showSuccessToast(successMessage);
-            refetchBuyTokenAccount();
-            refetchSellTokenAccount();
+            refetchTokenAAccount();
+            refetchTokenBAccount();
 
             await setLiquidityParams({
               tokenAAddress,
@@ -408,7 +412,7 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                 onChange: ({ value }) => {
                   return validateHasSufficientBalance({
                     amount: value,
-                    tokenAccount: sellTokenAccount?.tokenAccounts[0],
+                    tokenAccount: tokenBAccount?.tokenAccounts[0],
                   });
                 },
               }}
@@ -421,7 +425,7 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     field.handleChange(e.target.value);
                   }}
-                  tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                  tokenAccount={tokenBAccount?.tokenAccounts[0]}
                   tokenPrice={tokenBAddress ? tokenPrices[tokenBAddress] : null}
                   value={field.state.value}
                 />
@@ -468,7 +472,7 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                 onChange: ({ value }) => {
                   return validateHasSufficientBalance({
                     amount: value,
-                    tokenAccount: buyTokenAccount?.tokenAccounts[0],
+                    tokenAccount: tokenAAccount?.tokenAccounts[0],
                   });
                 },
               }}
@@ -481,7 +485,7 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     field.handleChange(e.target.value);
                   }}
-                  tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                  tokenAccount={tokenAAccount?.tokenAccounts[0]}
                   tokenPrice={tokenAAddress ? tokenPrices[tokenAAddress] : null}
                   value={field.state.value}
                 />
@@ -618,13 +622,13 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                     }
                   >
                     {getCreatePoolFormButtonMessage({
-                      buyTokenAccount,
                       createStep: createState.step,
                       initialPrice: values.initialPrice,
                       publicKey,
-                      sellTokenAccount,
+                      tokenAAccount: tokenAAccount,
                       tokenAAddress,
                       tokenAAmount: values.tokenAAmount,
+                      tokenBAccount: tokenBAccount,
                       tokenBAddress,
                       tokenBAmount: values.tokenBAmount,
                     })}
@@ -656,7 +660,7 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                               trimTrailingZeros: true,
                               value: tokenAAmount,
                             })}{" "}
-                            {buyTokenAccount?.tokenAccounts[0]?.symbol}
+                            {tokenAAccount?.tokenAccounts[0]?.symbol}
                           </Text.Body2>
                           <Text.Body2 className="text-green-200">
                             {numberFormatHelper({
@@ -664,7 +668,7 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                               trimTrailingZeros: true,
                               value: tokenBAmount,
                             })}{" "}
-                            {sellTokenAccount?.tokenAccounts[0]?.symbol}
+                            {tokenBAccount?.tokenAccounts[0]?.symbol}
                           </Text.Body2>
                         </div>
                       </div>
@@ -674,9 +678,9 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                           Initial Price
                         </Text.Body2>
                         <Text.Body2 className="text-green-200">
-                          1 {buyTokenAccount?.tokenAccounts[0]?.symbol} ={" "}
+                          1 {tokenAAccount?.tokenAccounts[0]?.symbol} ={" "}
                           {values.initialPrice}{" "}
-                          {sellTokenAccount?.tokenAccounts[0]?.symbol}
+                          {tokenBAccount?.tokenAccounts[0]?.symbol}
                         </Text.Body2>
                       </div>
 

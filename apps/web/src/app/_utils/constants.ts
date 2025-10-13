@@ -1,3 +1,17 @@
+export {
+  getGatewayTokenAddress,
+  getSolTokenDisplayName,
+  getSolTokenType,
+  isSolToken,
+  isSolVariant,
+  isWsolToken,
+  SOL_MINTS,
+  SOL_TOKEN_ADDRESS,
+  SolTokenType,
+  shouldUseNativeSolBalance,
+  WSOL_TOKEN_ADDRESS,
+} from "@dex-web/utils";
+
 export const DEFAULT_SELL_TOKEN =
   process.env.NEXT_PUBLIC_DEFAULT_SELL_TOKEN ||
   "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump";

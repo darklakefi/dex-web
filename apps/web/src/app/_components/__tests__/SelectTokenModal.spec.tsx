@@ -1,5 +1,4 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import "@testing-library/jest-dom";
 import { act, render, screen } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { describe, expect, it, vi } from "vitest";
@@ -72,6 +71,8 @@ vi.mock("../../hooks/useWalletCache", () => ({
 }));
 vi.mock("@dex-web/utils", () => ({
   pasteFromClipboard: vi.fn(),
+  SOL_TOKEN_ADDRESS: "So11111111111111111111111111111111111111111",
+  WSOL_TOKEN_ADDRESS: "So11111111111111111111111111111111111111112",
 }));
 vi.mock("use-local-storage-state", () => ({
   default: vi.fn().mockReturnValue([[], vi.fn()]),

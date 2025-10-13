@@ -18,12 +18,14 @@ interface RequestLiquidityTransactionSigningProps {
   unsignedTransaction: string;
   tokenXMint: string;
   tokenYMint: string;
+  lpTokenAmount: bigint;
   onSuccess: () => void;
   onSubmitTransaction: (params: {
     signedTransaction: string;
     tokenXMint: string;
     tokenYMint: string;
     userAddress: string;
+    lpTokenAmount?: bigint;
   }) => Promise<{ success: boolean; error?: string; signature?: string }>;
   trackingId: string;
   wallet: Wallet | null | undefined;
@@ -37,6 +39,7 @@ export async function requestLiquidityTransactionSigning({
   unsignedTransaction,
   tokenXMint,
   tokenYMint,
+  lpTokenAmount,
   onSuccess,
   onSubmitTransaction,
   trackingId,
@@ -44,6 +47,7 @@ export async function requestLiquidityTransactionSigning({
   toasts,
 }: RequestLiquidityTransactionSigningProps): Promise<void> {
   return requestTransactionSigning({
+    lpTokenAmount,
     onSubmitTransaction,
     onSuccess,
     publicKey,

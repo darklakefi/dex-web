@@ -68,10 +68,10 @@ export const TEST_SCENARIOS = {
   },
 
   INSUFFICIENT_BALANCE: {
-    buyTokenAccount: createMockTokenAccountsData([
+    formValues: createMockFormValues({ tokenAAmount: "1000" }),
+    tokenAAccount: createMockTokenAccountsData([
       createMockTokenAccount({ amount: 50, symbol: "SOL" }),
     ]),
-    formValues: createMockFormValues({ tokenAAmount: "1000" }),
   },
 
   MISSING_POOL: {
@@ -79,13 +79,13 @@ export const TEST_SCENARIOS = {
     poolDetails: null,
   },
   VALID_TRANSACTION: {
-    buyTokenAccount: createMockTokenAccountsData([
-      createMockTokenAccount({ amount: 2000000, symbol: "SOL" }),
-    ]),
     formValues: createMockFormValues(),
     poolDetails: createMockPoolDetails(),
     publicKey: createMockPublicKey(),
-    sellTokenAccount: createMockTokenAccountsData([
+    tokenAAccount: createMockTokenAccountsData([
+      createMockTokenAccount({ amount: 2000000, symbol: "SOL" }),
+    ]),
+    tokenBAccount: createMockTokenAccountsData([
       createMockTokenAccount({ amount: 1000000000, symbol: "USDC" }),
     ]),
     walletAdapter: createMockWalletAdapter(),

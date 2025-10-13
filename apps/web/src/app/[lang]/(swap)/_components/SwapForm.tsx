@@ -18,6 +18,7 @@ import {
   checkInsufficientBalance,
   convertToDecimal,
   formatAmountInput,
+  getGatewayTokenAddress,
   parseAmount,
   parseAmountBigNumber,
   sortSolanaAddresses,
@@ -285,10 +286,10 @@ export function SwapForm() {
   });
 
   const {
-    buyTokenAccount,
-    sellTokenAccount,
-    refetchBuyTokenAccount,
-    refetchSellTokenAccount,
+    tokenAAccount,
+    tokenBAccount,
+    refetchTokenAAccount,
+    refetchTokenBAccount,
   } = useTokenAccounts({
     publicKey: publicKey || null,
     tanstackClient,
@@ -484,9 +485,8 @@ export function SwapForm() {
 
       const { tokenXAddress, tokenYAddress } = sortedTokens;
 
-      const sellTokenDecimals =
-        sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
-      const buyTokenDecimals = buyTokenAccount?.tokenAccounts[0]?.decimals || 0;
+      const sellTokenDecimals = tokenAAccount?.tokenAccounts[0]?.decimals || 0;
+      const buyTokenDecimals = tokenBAccount?.tokenAccounts[0]?.decimals || 0;
 
       const buyAmountRaw = toRawUnitsBigNumberAsBigInt(
         buyAmount,
@@ -499,13 +499,16 @@ export function SwapForm() {
         .multipliedBy(slippageFactor)
         .integerValue(BigNumber.ROUND_DOWN);
 
+      const gatewayTokenXAddress = getGatewayTokenAddress(tokenXAddress);
+      const gatewayTokenYAddress = getGatewayTokenAddress(tokenYAddress);
+
       const response = await client.dexGateway.createUnsignedTransaction({
         amountIn: toRawUnitsBigNumberAsBigInt(sellAmount, sellTokenDecimals),
         isSwapXToY: isXtoY,
         minOut: BigInt(minOutRaw.toString()),
         refCode: incomingReferralCode || "",
-        tokenMintX: tokenXAddress,
-        tokenMintY: tokenYAddress,
+        tokenMintX: gatewayTokenXAddress,
+        tokenMintY: gatewayTokenYAddress,
         trackingId: `swap-${Date.now()}`,
         userAddress: publicKey.toBase58(),
       });
@@ -543,7 +546,7 @@ export function SwapForm() {
   const checkInsufficientBalanceState = (input: string) => {
     const hasInsufficientBalance = checkInsufficientBalance(
       input,
-      sellTokenAccount?.tokenAccounts[0],
+      tokenAAccount?.tokenAccounts[0],
     );
     setIsInsufficientBalance(hasInsufficientBalance);
   };
@@ -599,9 +602,9 @@ export function SwapForm() {
         return BUTTON_MESSAGES.ENTER_AMOUNT;
       }
 
-      const accountAmount = sellTokenAccount?.tokenAccounts[0]?.amount || 0;
-      const decimal = sellTokenAccount?.tokenAccounts[0]?.decimals || 0;
-      const symbol = sellTokenAccount?.tokenAccounts[0]?.symbol || "";
+      const accountAmount = tokenAAccount?.tokenAccounts[0]?.amount || 0;
+      const decimal = tokenAAccount?.tokenAccounts[0]?.decimals || 0;
+      const symbol = tokenAAccount?.tokenAccounts[0]?.symbol || "";
 
       if (
         convertToDecimal(parseAmountBigNumber(inputClean).toString(), 0).gt(
@@ -666,7 +669,7 @@ export function SwapForm() {
                       handleAmountChange(e, "sell");
                       field.handleChange(e.target.value);
                     }}
-                    tokenAccount={sellTokenAccount?.tokenAccounts[0]}
+                    tokenAccount={tokenAAccount?.tokenAccounts[0]}
                     tokenPrice={
                       tokenAAddress ? tokenPrices[tokenAAddress] : null
                     }
@@ -701,7 +704,7 @@ export function SwapForm() {
                       handleAmountChange(e, "buy");
                       field.handleChange(e.target.value);
                     }}
-                    tokenAccount={buyTokenAccount?.tokenAccounts[0]}
+                    tokenAccount={tokenBAccount?.tokenAccounts[0]}
                     tokenPrice={
                       tokenBAddress ? tokenPrices[tokenBAddress] : null
                     }
@@ -754,8 +757,8 @@ export function SwapForm() {
             isLoading={isLoadingQuote}
             onClick={() => {
               refetchQuote();
-              refetchBuyTokenAccount();
-              refetchSellTokenAccount();
+              refetchTokenAAccount();
+              refetchTokenBAccount();
             }}
           />
         </div>

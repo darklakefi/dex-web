@@ -13,6 +13,7 @@ import {
   calculateWithdrawalDetails,
   convertToDecimal,
   getExplorerUrl,
+  getGatewayTokenAddress,
   InputType,
   numberFormatHelper,
   truncate,
@@ -377,13 +378,16 @@ export function WithdrawLiquidityModal({
         .toDecimalPlaces(0, Decimal.ROUND_FLOOR)
         .toString();
 
+      const gatewayTokenXAddress = getGatewayTokenAddress(tokenXAddress);
+      const gatewayTokenYAddress = getGatewayTokenAddress(tokenYAddress);
+
       const response = await client.liquidity.withdrawLiquidity({
         lpTokenAmount: withdrawLpAmount.toString(),
         minTokenXOut: minXOut,
         minTokenYOut: minYOut,
         ownerAddress: publicKey.toBase58(),
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
+        tokenXMint: gatewayTokenXAddress,
+        tokenYMint: gatewayTokenYAddress,
       });
 
       if (response.success && response.unsignedTransaction) {
@@ -391,8 +395,8 @@ export function WithdrawLiquidityModal({
           lpTokenAmount: withdrawLpAmount.toString(),
           minTokenXOut: minXOut,
           minTokenYOut: minYOut,
-          tokenXMint: tokenXAddress,
-          tokenYMint: tokenYAddress,
+          tokenXMint: gatewayTokenXAddress,
+          tokenYMint: gatewayTokenYAddress,
         });
       } else {
         throw new Error(

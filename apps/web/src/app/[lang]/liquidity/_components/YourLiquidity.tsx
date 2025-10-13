@@ -97,6 +97,7 @@ export function YourLiquidity({
 
   const { data: poolReserves, isFetching: isPoolReservesFetching } =
     usePoolData({
+      enabled: !!publicKey && !!tokenAAddress && !!tokenBAddress,
       priority: "normal",
       tokenXMint: tokenXAddress,
       tokenYMint: tokenYAddress,
