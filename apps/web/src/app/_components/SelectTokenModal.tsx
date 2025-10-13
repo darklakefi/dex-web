@@ -11,7 +11,7 @@ import {
 } from "@tanstack/react-form";
 import { useDebouncedValue } from "@tanstack/react-pacer";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createSerializer, useQueryStates } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { Suspense, useCallback, useState } from "react";
 import * as z from "zod";
 import { selectedTokensParsers } from "../_utils/searchParams";
@@ -32,8 +32,6 @@ const { useAppForm } = createFormHook({
   formComponents: {},
   formContext,
 });
-
-const serialize = createSerializer(selectedTokensParsers);
 
 const formConfig = {
   defaultValues: {
@@ -58,7 +56,7 @@ export function SelectTokenModal({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
+  const [{ tokenAAddress, tokenBAddress }, setTokens] = useQueryStates(
     selectedTokensParsers,
   );
 
@@ -82,11 +80,9 @@ export function SelectTokenModal({
   const { recentTokens, addRecentToken } = useRecentTokens();
 
   const handleSelectToken = useCallback(
-    (selectedToken: Token, e: React.MouseEvent<HTMLButtonElement>) => {
+    async (selectedToken: Token, e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
 
-      const currentFrom = searchParams.get("from");
-      const baseReturn = currentFrom || `/${returnUrl}`;
       const selectedTokenAddress = selectedToken.address;
       addRecentToken(selectedToken);
 
@@ -96,34 +92,31 @@ export function SelectTokenModal({
             ? tokenAAddress
             : tokenBAddress;
 
-        const urlWithParams = serialize(baseReturn, {
+        await setTokens({
           tokenAAddress: selectedTokenAddress,
           tokenBAddress: sellAddress,
         });
-
-        router.push(urlWithParams as never);
       } else {
         const buyAddress =
           selectedTokenAddress === tokenAAddress
             ? tokenBAddress
             : tokenAAddress;
 
-        const urlWithParams = serialize(baseReturn, {
+        await setTokens({
           tokenAAddress: buyAddress,
           tokenBAddress: selectedTokenAddress,
         });
-
-        router.push(urlWithParams as never);
       }
+
+      handleClose();
     },
     [
-      searchParams,
-      returnUrl,
       addRecentToken,
       type,
       tokenBAddress,
       tokenAAddress,
-      router,
+      setTokens,
+      handleClose,
     ],
   );
 

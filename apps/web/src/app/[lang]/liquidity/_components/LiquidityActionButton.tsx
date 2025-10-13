@@ -5,7 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import type { PublicKey } from "@solana/web3.js";
 import { useStore } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
-import { createSerializer } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { liquidityPageParsers } from "../../../_utils/searchParams";
 import type { LiquidityFormApi } from "../_hooks/useLiquidityFormState";
@@ -37,8 +37,6 @@ interface LiquidityActionButtonProps {
   send: (event: LiquidityMachineEvent) => void;
 }
 
-const serialize = createSerializer(liquidityPageParsers);
-
 export function LiquidityActionButton({
   form,
   publicKey,
@@ -54,6 +52,7 @@ export function LiquidityActionButton({
 }: LiquidityActionButtonProps) {
   const router = useRouter();
   const { wallet, connected } = useWallet();
+  const [_, setLiquidityParams] = useQueryStates(liquidityPageParsers);
 
   const tokenAAmount = useStore(
     form.store,
@@ -152,13 +151,12 @@ export function LiquidityActionButton({
       <Button
         aria-label={`Create new liquidity pool for ${tokenAAddress} and ${tokenBAddress}`}
         className="w-full cursor-pointer py-3 leading-6"
-        onClick={() => {
-          const urlWithParams = serialize("liquidity", {
+        onClick={async () => {
+          await setLiquidityParams({
             tokenAAddress,
             tokenBAddress,
             type: LIQUIDITY_PAGE_TYPE.CREATE_POOL,
           });
-          router.push(`/${urlWithParams}`);
         }}
       >
         {buttonMessage}

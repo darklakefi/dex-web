@@ -25,7 +25,7 @@ import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { createSerializer, useQueryStates } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { useMemo, useState } from "react";
 import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
@@ -35,10 +35,7 @@ import { WalletButton } from "../../../_components/WalletButton";
 import { EMPTY_TOKEN, LIQUIDITY_PAGE_TYPE } from "../../../_utils/constants";
 import { generateTrackingId } from "../../../_utils/generateTrackingId";
 import { isSquadsX } from "../../../_utils/isSquadsX";
-import {
-  liquidityPageParsers,
-  selectedTokensParsers,
-} from "../../../_utils/searchParams";
+import { liquidityPageParsers } from "../../../_utils/searchParams";
 import { dismissToast, toast } from "../../../_utils/toast";
 import { getCreatePoolFormButtonMessage } from "../_utils/getCreatePoolFormButtonMessage";
 import { requestCreatePoolTransactionSigning } from "../_utils/requestCreatePoolTransactionSigning";
@@ -63,19 +60,16 @@ const { useAppForm } = createFormHook({
   formContext,
 });
 
-const serialize = createSerializer(liquidityPageParsers);
-
 interface CreatePoolFormProps {
   tokenPrices?: Record<string, GetTokenPriceOutput | undefined>;
 }
 
 export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const { publicKey, wallet, signTransaction } = useWallet();
   const { trackLiquidity, trackError } = useAnalytics();
-  const [{ tokenAAddress, tokenBAddress }] = useQueryStates(
-    selectedTokensParsers,
-  );
+  const [{ tokenAAddress, tokenBAddress }, setLiquidityParams] =
+    useQueryStates(liquidityPageParsers);
   const createState = useTransactionState(0, false, false);
 
   const tx = useTranslations("liquidity");
@@ -307,7 +301,7 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
         });
 
         requestCreatePoolTransactionSigning({
-          onSuccess: () => {
+          onSuccess: async () => {
             createState.reset();
             form.reset();
 
@@ -328,12 +322,11 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
             refetchBuyTokenAccount();
             refetchSellTokenAccount();
 
-            const urlWithParams = serialize("liquidity", {
+            await setLiquidityParams({
               tokenAAddress,
               tokenBAddress,
               type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
             });
-            router.push(`/${urlWithParams}`);
           },
           publicKey,
           setCreateStep: createState.setStep,
@@ -595,14 +588,12 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
             ) : poolDetails ? (
               <Button
                 className="w-full cursor-pointer py-3 leading-6"
-                onClick={() => {
-                  const urlWithParams = serialize("liquidity", {
+                onClick={async () => {
+                  await setLiquidityParams({
                     tokenAAddress,
                     tokenBAddress,
                     type: LIQUIDITY_PAGE_TYPE.ADD_LIQUIDITY,
                   });
-                  router.push(`/${urlWithParams}`);
-                  return;
                 }}
               >
                 {tx("createPool.poolExists")}

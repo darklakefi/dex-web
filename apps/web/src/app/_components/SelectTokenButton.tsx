@@ -106,7 +106,7 @@ export function SelectTokenButton({
     const basePath = `select-token/${type}?tokenAAddress=${tokenA}&tokenBAddress=${tokenB}&from=${encodeURIComponent(
       from,
     )}${additionalParamsString ? `&${additionalParamsString}` : ""}`;
-    return returnUrl ? `${returnUrl}/${basePath}` : `/${basePath}`;
+    return returnUrl ? `/${returnUrl}/${basePath}` : `/${basePath}`;
   }
 
   return (
