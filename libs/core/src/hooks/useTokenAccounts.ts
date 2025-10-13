@@ -67,17 +67,40 @@ export interface TokenAccountsData {
 }
 
 export interface UseTokenAccountsReturn {
+  // NEW - Preferred naming (tokenA = first token, tokenB = second token)
+  tokenAAccount: TokenAccountsData | undefined;
+  tokenBAccount: TokenAccountsData | undefined;
+  refetchTokenAAccount: () => Promise<unknown>;
+  refetchTokenBAccount: () => Promise<unknown>;
+  isLoadingTokenA: boolean;
+  isLoadingTokenB: boolean;
+  errorTokenA: Error | null;
+  errorTokenB: Error | null;
+  /** Whether token A uses native SOL balance */
+  tokenAUsesNativeSol: boolean;
+  /** Whether token B uses native SOL balance */
+  tokenBUsesNativeSol: boolean;
+
+  // DEPRECATED - Keep for backwards compatibility (will be removed in future version)
+  /** @deprecated Use tokenAAccount instead */
   buyTokenAccount: TokenAccountsData | undefined;
+  /** @deprecated Use tokenBAccount instead */
   sellTokenAccount: TokenAccountsData | undefined;
+  /** @deprecated Use refetchTokenAAccount instead */
   refetchBuyTokenAccount: () => Promise<unknown>;
+  /** @deprecated Use refetchTokenBAccount instead */
   refetchSellTokenAccount: () => Promise<unknown>;
+  /** @deprecated Use isLoadingTokenA instead */
   isLoadingBuy: boolean;
+  /** @deprecated Use isLoadingTokenB instead */
   isLoadingSell: boolean;
+  /** @deprecated Use errorTokenA instead */
   errorBuy: Error | null;
+  /** @deprecated Use errorTokenB instead */
   errorSell: Error | null;
-  /** Whether buy token uses native SOL balance */
+  /** @deprecated Use tokenAUsesNativeSol instead */
   buyTokenUsesNativeSol: boolean;
-  /** Whether sell token uses native SOL balance */
+  /** @deprecated Use tokenBUsesNativeSol instead */
   sellTokenUsesNativeSol: boolean;
 }
 
@@ -105,61 +128,75 @@ export const useTokenAccounts = ({
   const networkKey = resolveNetwork(network);
 
   // Determine if tokens use native SOL balance
-  const buyTokenUsesNativeSol = shouldUseNativeSolBalance(tokenAAddress);
-  const sellTokenUsesNativeSol = shouldUseNativeSolBalance(tokenBAddress);
+  const tokenAUsesNativeSol = shouldUseNativeSolBalance(tokenAAddress);
+  const tokenBUsesNativeSol = shouldUseNativeSolBalance(tokenBAddress);
 
-  const buyQueryOptions = tanstackClient.helius.getTokenAccounts.queryOptions({
-    input: {
-      mint: tokenAAddress || "",
-      ownerAddress: publicKey?.toBase58() || "",
-    },
-  });
+  const tokenAQueryOptions =
+    tanstackClient.helius.getTokenAccounts.queryOptions({
+      input: {
+        mint: tokenAAddress || "",
+        ownerAddress: publicKey?.toBase58?.() || "",
+      },
+    });
 
-  const sellQueryOptions = tanstackClient.helius.getTokenAccounts.queryOptions({
-    input: {
-      mint: tokenBAddress || "",
-      ownerAddress: publicKey?.toBase58() || "",
-    },
-  });
+  const tokenBQueryOptions =
+    tanstackClient.helius.getTokenAccounts.queryOptions({
+      input: {
+        mint: tokenBAddress || "",
+        ownerAddress: publicKey?.toBase58?.() || "",
+      },
+    });
 
   const {
-    data: buyTokenAccount,
-    refetch: refetchBuyTokenAccount,
-    isLoading: isLoadingBuy,
-    error: errorBuy,
+    data: tokenAAccount,
+    refetch: refetchTokenAAccount,
+    isLoading: isLoadingTokenA,
+    error: errorTokenA,
   } = useQuery({
-    ...buyQueryOptions,
+    ...tokenAQueryOptions,
     enabled: !!publicKey && !!tokenAAddress,
     gcTime: 5 * 60 * 1000,
     placeholderData: (previousData) => previousData,
-    queryKey: [...buyQueryOptions.queryKey, networkKey] as const,
+    queryKey: [...tokenAQueryOptions.queryKey, networkKey] as const,
     staleTime: 30 * 1000,
   });
 
   const {
-    data: sellTokenAccount,
-    refetch: refetchSellTokenAccount,
-    isLoading: isLoadingSell,
-    error: errorSell,
+    data: tokenBAccount,
+    refetch: refetchTokenBAccount,
+    isLoading: isLoadingTokenB,
+    error: errorTokenB,
   } = useQuery({
-    ...sellQueryOptions,
+    ...tokenBQueryOptions,
     enabled: !!publicKey && !!tokenBAddress,
     gcTime: 5 * 60 * 1000,
     placeholderData: (previousData) => previousData,
-    queryKey: [...sellQueryOptions.queryKey, networkKey] as const,
+    queryKey: [...tokenBQueryOptions.queryKey, networkKey] as const,
     staleTime: 30 * 1000,
   });
 
   return {
-    buyTokenAccount: buyTokenAccount as TokenAccountsData | undefined,
-    buyTokenUsesNativeSol,
-    errorBuy,
-    errorSell,
-    isLoadingBuy,
-    isLoadingSell,
-    refetchBuyTokenAccount,
-    refetchSellTokenAccount,
-    sellTokenAccount: sellTokenAccount as TokenAccountsData | undefined,
-    sellTokenUsesNativeSol,
+    // Deprecated aliases (backwards compatibility)
+    buyTokenAccount: tokenAAccount as TokenAccountsData | undefined,
+    buyTokenUsesNativeSol: tokenAUsesNativeSol,
+    errorBuy: errorTokenA,
+    errorSell: errorTokenB,
+    errorTokenA,
+    errorTokenB,
+    isLoadingBuy: isLoadingTokenA,
+    isLoadingSell: isLoadingTokenB,
+    isLoadingTokenA,
+    isLoadingTokenB,
+    refetchBuyTokenAccount: refetchTokenAAccount,
+    refetchSellTokenAccount: refetchTokenBAccount,
+    refetchTokenAAccount,
+    refetchTokenBAccount,
+    sellTokenAccount: tokenBAccount as TokenAccountsData | undefined,
+    sellTokenUsesNativeSol: tokenBUsesNativeSol,
+    // New naming
+    tokenAAccount: tokenAAccount as TokenAccountsData | undefined,
+    tokenAUsesNativeSol,
+    tokenBAccount: tokenBAccount as TokenAccountsData | undefined,
+    tokenBUsesNativeSol,
   };
 };

@@ -114,15 +114,34 @@ export interface UseRealtimePoolDataReturn {
 }
 
 export interface UseRealtimeTokenAccountsReturn {
-  readonly buyTokenAccount: TokenAccountsData | undefined;
-  readonly sellTokenAccount: TokenAccountsData | undefined;
-  readonly refetchBuyTokenAccount: () => void;
-  readonly refetchSellTokenAccount: () => void;
-  readonly isLoadingBuy: boolean;
-  readonly isLoadingSell: boolean;
-  readonly isRefreshingBuy: boolean;
-  readonly isRefreshingSell: boolean;
+  // NEW - Preferred naming
+  readonly tokenAAccount: TokenAccountsData | undefined;
+  readonly tokenBAccount: TokenAccountsData | undefined;
+  readonly refetchTokenAAccount: () => void;
+  readonly refetchTokenBAccount: () => void;
+  readonly isLoadingTokenA: boolean;
+  readonly isLoadingTokenB: boolean;
+  readonly isRefreshingTokenA: boolean;
+  readonly isRefreshingTokenB: boolean;
   readonly isRealtime: boolean;
+
+  // DEPRECATED - Keep for backwards compatibility
+  /** @deprecated Use tokenAAccount instead */
+  readonly buyTokenAccount: TokenAccountsData | undefined;
+  /** @deprecated Use tokenBAccount instead */
+  readonly sellTokenAccount: TokenAccountsData | undefined;
+  /** @deprecated Use refetchTokenAAccount instead */
+  readonly refetchBuyTokenAccount: () => void;
+  /** @deprecated Use refetchTokenBAccount instead */
+  readonly refetchSellTokenAccount: () => void;
+  /** @deprecated Use isLoadingTokenA instead */
+  readonly isLoadingBuy: boolean;
+  /** @deprecated Use isLoadingTokenB instead */
+  readonly isLoadingSell: boolean;
+  /** @deprecated Use isRefreshingTokenA instead */
+  readonly isRefreshingBuy: boolean;
+  /** @deprecated Use isRefreshingTokenB instead */
+  readonly isRefreshingSell: boolean;
 }
 
 export interface LiquidityComponentProps {
