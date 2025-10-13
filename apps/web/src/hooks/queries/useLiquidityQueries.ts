@@ -27,7 +27,6 @@ import {
   useQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { usePageVisibility } from "../usePageVisibility";
 
 interface UserLiquidityQueryOptions
   extends Pick<UseQueryOptions<GetUserLiquidityOutput>, "enabled"> {
@@ -67,9 +66,6 @@ export function useUserLiquidity(
   tokenYMint: string,
   options?: UserLiquidityQueryOptions,
 ): UseQueryResult<GetUserLiquidityOutput> {
-  const isVisible = usePageVisibility();
-  const pollingInterval = options?.isActivelyTrading ? 2000 : 10000;
-
   return useQuery({
     ...tanstackClient.liquidity.getUserLiquidity.queryOptions({
       context: { cache: "force-cache" as RequestCache },
@@ -80,11 +76,12 @@ export function useUserLiquidity(
       !!tokenXMint &&
       !!tokenYMint &&
       (options?.enabled ?? true),
-    refetchInterval: isVisible ? pollingInterval : false,
+
+    refetchInterval: false,
     refetchIntervalInBackground: false,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    staleTime: pollingInterval,
+    staleTime: 30000,
   });
 }
 

@@ -5,7 +5,7 @@
 
 import type { Token } from "@dex-web/orpc/schemas/index";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { vi } from "vitest";
+import { afterEach, vi } from "vitest";
 import { TokenListInfinite } from "../TokenListInfinite";
 
 vi.mock("@tanstack/react-virtual", () => ({
@@ -53,6 +53,11 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   describe("Token Display - Acceptance Criteria", () => {

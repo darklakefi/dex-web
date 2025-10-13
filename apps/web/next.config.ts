@@ -190,13 +190,6 @@ const nextConfig = {
         util: false,
         zlib: false,
       };
-
-      config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(
-          /bigint-buffer$/,
-          require.resolve("bigint-buffer"),
-        ),
-      );
     }
 
     return config;

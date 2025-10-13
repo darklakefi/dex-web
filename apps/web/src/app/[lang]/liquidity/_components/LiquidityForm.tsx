@@ -106,6 +106,10 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
+
+              if (!poolDetails) {
+                return;
+              }
               form.handleSubmit();
             }}
           >

@@ -46,11 +46,10 @@ global.ResizeObserver = class ResizeObserver {
 };
 
 global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
   observe() {}
   unobserve() {}
   disconnect() {}
-} as any;
+} as unknown as typeof IntersectionObserver;
 
 afterEach(() => {
   cleanup();

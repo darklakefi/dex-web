@@ -1,9 +1,10 @@
 /// <reference types="vitest" />
 import { resolve } from "node:path";
 import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
+import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
   const baseConfig = {
     cacheDir: "../../node_modules/.vite/libs/core",
     plugins: [nxViteTsPaths()],
@@ -47,6 +48,13 @@ export default defineConfig(() => {
       watch: false,
     },
   };
+
+  if (mode === "test") {
+    return {
+      ...baseConfig,
+      plugins: [react(), nxViteTsPaths()],
+    };
+  }
 
   return baseConfig;
 });

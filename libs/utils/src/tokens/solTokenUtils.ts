@@ -39,8 +39,8 @@ export function isWsolToken(address: string | null | undefined): boolean {
  * Check if a token address is either SOL or WSOL
  */
 export function isSolVariant(address: string | null | undefined): boolean {
-  if (!address) return false;
-  return SOL_MINTS.includes(address as (typeof SOL_MINTS)[number]);
+  if (!address || typeof address !== "string") return false;
+  return (SOL_MINTS as readonly string[]).includes(address);
 }
 
 /**
@@ -73,20 +73,22 @@ export function getSolTokenDisplayName(
 
 /**
  * Get the appropriate token address to send to the gateway
- * For SOL: returns SOL address
- * For WSOL: returns WSOL address
- * For others: returns the original address
+ *
+ * This function ensures that token addresses are properly formatted
+ * for gateway communication. Currently, all token addresses (including
+ * SOL and WSOL) are sent as-is to the gateway.
+ *
+ * @param address - The token mint address
+ * @returns The address to send to the gateway, or empty string if invalid
  */
 export function getGatewayTokenAddress(
   address: string | null | undefined,
 ): string {
-  if (!address) return "";
-
-  if (isSolVariant(address)) {
-    return address;
+  if (!address || typeof address !== "string" || address.trim() === "") {
+    return "";
   }
 
-  return address;
+  return address.trim();
 }
 
 /**

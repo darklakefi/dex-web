@@ -7,7 +7,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import { vi } from "vitest";
+import { afterEach, vi } from "vitest";
 
 vi.mock("@solana/wallet-adapter-react");
 vi.mock("@dex-web/orpc");
@@ -95,6 +95,11 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
       tradeId: "mock-trade-id",
       unsignedTransaction: "mock-transaction",
     });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   describe("Complete SOL Flow - Acceptance Criteria", () => {

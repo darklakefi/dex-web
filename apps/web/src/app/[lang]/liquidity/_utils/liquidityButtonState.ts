@@ -68,6 +68,9 @@ export function getLiquidityButtonState({
 
   if (!poolDetails) {
     if (!validation.hasAmounts) {
+      if (hasAnyAmount) {
+        return "CALCULATING";
+      }
       return "ENTER_AMOUNTS";
     }
 
@@ -79,7 +82,7 @@ export function getLiquidityButtonState({
       return "CREATE_POOL";
     }
 
-    return "ENTER_AMOUNTS";
+    return "CALCULATING";
   } else {
     if (!validation.hasAmounts) {
       if (hasAnyAmount) {
