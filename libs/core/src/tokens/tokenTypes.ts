@@ -2,7 +2,14 @@
  * Core token type definitions for SOL/WSOL handling
  */
 
-import type { SolTokenType } from "@dex-web/utils";
+/**
+ * Token type enum for SOL variants
+ */
+export enum SolTokenType {
+  NATIVE_SOL = "NATIVE_SOL",
+  WRAPPED_SOL = "WRAPPED_SOL",
+  OTHER = "OTHER",
+}
 
 /**
  * Extended token interface that includes SOL variant information

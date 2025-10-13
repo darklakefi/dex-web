@@ -1,8 +1,28 @@
 "use client";
 
-import { type SolTokenType, shouldUseNativeSolBalance } from "@dex-web/utils";
 import type { PublicKey } from "@solana/web3.js";
 import { type QueryFunctionContext, useQuery } from "@tanstack/react-query";
+
+/**
+ * Token type enum for SOL variants
+ */
+export enum SolTokenType {
+  NATIVE_SOL = "NATIVE_SOL",
+  WRAPPED_SOL = "WRAPPED_SOL",
+  OTHER = "OTHER",
+}
+
+const SOL_TOKEN_ADDRESS = "So11111111111111111111111111111111111111111";
+
+/**
+ * Determine if native SOL balance should be used for this token
+ * Returns true only for native SOL, false for WSOL and other tokens
+ */
+function shouldUseNativeSolBalance(
+  address: string | null | undefined,
+): boolean {
+  return address === SOL_TOKEN_ADDRESS;
+}
 
 export interface TokenAccountsQueryClient {
   helius: {
