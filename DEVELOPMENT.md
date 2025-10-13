@@ -176,8 +176,11 @@ All commits to this repository must be signed. Unsigned commits will be rejected
 | `pnpm build`      | Build the web app                  |
 | `pnpm test`       | Run tests                          |
 | `pnpm lint`       | Lint the codebase                  |
+| `pnpm lint:fix`   | Fix only linting issues            |
 | `pnpm e2e`        | Run E2E tests                      |
 | `pnpm format`     | Format the codebase                |
+| `pnpm format:check` | Check if code is formatted          |
+| `pnpm fix`        | Fix all auto-fixable issues (lint + format) |
 | `pnpm dep-graph`  | Visualize project dependencies     |
 | `pnpm db:migrate` | Apply database schema changes      |
 | `pnpm db:seed`    | Seed the database with sample data |

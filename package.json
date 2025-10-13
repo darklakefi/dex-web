@@ -148,7 +148,6 @@
     "fix": "biome check --fix",
     "format": "nx format:write",
     "format:check": "biome format --check",
-    "format:write": "nx format:write",
     "help": "nx help",
     "knip": "knip",
     "lint": "nx workspace-lint && nx lint",

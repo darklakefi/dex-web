@@ -10,10 +10,10 @@ import { defineConfig, mergeConfig } from "vitest/config";
 export default defineConfig(() => {
   const baseConfig = {
     cacheDir: "../../node_modules/.vite/apps/web",
-    root: __dirname,
     resolve: {
       conditions: ["browser", "module", "import", "default"],
     },
+    root: __dirname,
     test: {
       coverage: {
         provider: "v8" as const,
