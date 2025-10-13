@@ -1,5 +1,6 @@
 "use server";
 
+import { getPoolTokenAddress } from "@dex-web/utils";
 import { MAINNET_POOLS, MOCK_POOLS } from "../../mocks/pool.mock";
 import type {
   GetPoolDetailsInput,
@@ -30,7 +31,9 @@ async function savePoolToLocalData(pool: PoolAccount) {
 export async function getPoolDetailsHandler(
   input: GetPoolDetailsInput,
 ): Promise<GetPoolDetailsOutput | null> {
-  const { tokenXMint, tokenYMint } = input;
+  const tokenXMint = getPoolTokenAddress(input.tokenXMint);
+  const tokenYMint = getPoolTokenAddress(input.tokenYMint);
+
   let pool = getPoolOnLocalData(tokenXMint, tokenYMint);
 
   if (!pool) {

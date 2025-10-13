@@ -3,6 +3,7 @@ import { BN, BorshCoder } from "@coral-xyz/anchor";
 import { sortSolanaAddresses } from "@dex-web/utils";
 import {
   getAccount,
+  NATIVE_MINT,
   TOKEN_2022_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
@@ -103,23 +104,24 @@ export async function getPoolOnChain(tokenXMint: string, tokenYMint: string) {
 
 export async function getTokenProgramId(
   connection: Connection,
-  accountPubkey: PublicKey,
+  mintPubkey: PublicKey,
 ): Promise<PublicKey> {
+  if (mintPubkey.equals(NATIVE_MINT)) {
+    return TOKEN_PROGRAM_ID;
+  }
+
   try {
-    const accountInfo = await connection.getAccountInfo(accountPubkey);
+    const accountInfo = await connection.getAccountInfo(mintPubkey);
     if (!accountInfo) {
-      throw new Error("Account not found");
+      return TOKEN_PROGRAM_ID;
     }
 
     if (accountInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
       return TOKEN_2022_PROGRAM_ID;
-    } else if (accountInfo.owner.equals(TOKEN_PROGRAM_ID)) {
-      return TOKEN_PROGRAM_ID;
-    } else {
-      throw new Error("Invalid token program ID");
     }
-  } catch (error) {
-    console.error("Failed to determine token program ID:", error);
+
+    return TOKEN_PROGRAM_ID;
+  } catch {
     return TOKEN_PROGRAM_ID;
   }
 }

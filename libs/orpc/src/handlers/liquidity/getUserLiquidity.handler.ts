@@ -1,6 +1,7 @@
 "use server";
 
 import { getLpTokenMint } from "@dex-web/core";
+import { getPoolTokenAddress } from "@dex-web/utils";
 import { getHelius } from "../../getHelius";
 import type {
   GetUserLiquidityInput,
@@ -9,10 +10,12 @@ import type {
 import { LP_TOKEN_DECIMALS } from "../../utils/solana";
 
 export async function getUserLiquidityHandler({
-  tokenXMint,
-  tokenYMint,
+  tokenXMint: inputTokenXMint,
+  tokenYMint: inputTokenYMint,
   ownerAddress,
 }: GetUserLiquidityInput): Promise<GetUserLiquidityOutput> {
+  const tokenXMint = getPoolTokenAddress(inputTokenXMint);
+  const tokenYMint = getPoolTokenAddress(inputTokenYMint);
   const helius = getHelius();
 
   try {

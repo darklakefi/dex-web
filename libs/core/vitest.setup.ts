@@ -2,11 +2,16 @@ import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import * as React from "react";
-import { act as reactDomAct } from "react-dom/test-utils";
 
 if (typeof React.act === "undefined") {
-  // @ts-expect-error - Adding act to React for test compatibility
-  React.act = reactDomAct;
+  // @ts-expect-error - Polyfilling React.act for compatibility
+  React.act = (callback: () => void | Promise<void>) => {
+    const result = callback();
+    if (result && typeof result.then === "function") {
+      return result;
+    }
+    return Promise.resolve();
+  };
 }
 
 Object.defineProperty(window, "focus", {

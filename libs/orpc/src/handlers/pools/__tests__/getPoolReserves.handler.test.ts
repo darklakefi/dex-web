@@ -1,6 +1,27 @@
 import { BN } from "@coral-xyz/anchor";
+import { MintLayout } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+// Zero PublicKey for mint authority/freeze authority when not set
+const ZERO_PUBKEY = new PublicKey("11111111111111111111111111111111");
+
+const encodeMintData = (decimals: number) => {
+  const buffer = Buffer.alloc(MintLayout.span);
+  MintLayout.encode(
+    {
+      decimals,
+      freezeAuthority: ZERO_PUBKEY,
+      freezeAuthorityOption: 0,
+      isInitialized: true,
+      mintAuthority: ZERO_PUBKEY,
+      mintAuthorityOption: 0,
+      supply: BigInt(0),
+    },
+    buffer,
+  );
+  return buffer;
+};
 
 const {
   mockGetPoolOnChain,
@@ -20,16 +41,14 @@ vi.mock("@dex-web/core", () => ({
   getLpTokenMint: mockGetLpTokenMint,
 }));
 
-vi.mock("@solana/spl-token", () => ({
-  getAccount: mockGetAccount,
-  getMint: mockGetMint,
-  TOKEN_2022_PROGRAM_ID: new PublicKey(
-    "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
-  ),
-  TOKEN_PROGRAM_ID: new PublicKey(
-    "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-  ),
-}));
+vi.mock("@solana/spl-token", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solana/spl-token")>();
+  return {
+    ...actual,
+    getAccount: mockGetAccount,
+    getMint: mockGetMint,
+  };
+});
 
 vi.mock("../../getHelius", () => ({
   getHelius: vi.fn(() => ({
@@ -65,6 +84,9 @@ describe("getPoolReservesHandler", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetMint.mockReset();
+    mockGetAccountInfo.mockReset();
+    mockGetAccount.mockReset();
   });
 
   describe("Pool existence", () => {
@@ -115,6 +137,16 @@ describe("getPoolReservesHandler", () => {
         .mockResolvedValueOnce({ decimals: 6 });
 
       mockGetAccountInfo
+        .mockResolvedValueOnce({
+          data: encodeMintData(9),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({
+          data: encodeMintData(6),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
 
@@ -176,6 +208,16 @@ describe("getPoolReservesHandler", () => {
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
+        .mockResolvedValueOnce({
+          data: encodeMintData(9),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({
+          data: encodeMintData(6),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
       mockGetAccount
@@ -223,10 +265,20 @@ describe("getPoolReservesHandler", () => {
         .mockResolvedValueOnce({ decimals: 18 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
+        .mockResolvedValueOnce({
+          data: encodeMintData(18),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({
+          data: encodeMintData(6),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
       mockGetAccount
-        .mockResolvedValueOnce({ amount: largeAmount.toString() })
+        .mockResolvedValueOnce({ amount: BigInt(largeAmount.toString()) })
         .mockResolvedValueOnce({ amount: BigInt(1000000) });
 
       const result = await getPoolReservesHandler({
@@ -266,6 +318,16 @@ describe("getPoolReservesHandler", () => {
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
+        .mockResolvedValueOnce({
+          data: encodeMintData(9),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({
+          data: encodeMintData(6),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
       mockGetAccount
@@ -310,11 +372,21 @@ describe("getPoolReservesHandler", () => {
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
+        .mockResolvedValueOnce({
+          data: encodeMintData(9),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({
+          data: encodeMintData(6),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
       mockGetAccount
-        .mockResolvedValueOnce({ amount: BigInt(1000000) })
-        .mockResolvedValueOnce({ amount: BigInt(500) });
+        .mockResolvedValueOnce({ amount: BigInt(100) })
+        .mockResolvedValueOnce({ amount: BigInt(50) });
 
       const result = await getPoolReservesHandler({
         tokenXMint: TOKEN_X_MINT,
@@ -356,6 +428,16 @@ describe("getPoolReservesHandler", () => {
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
+        .mockResolvedValueOnce({
+          data: encodeMintData(9),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({
+          data: encodeMintData(6),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
       mockGetAccount
@@ -404,6 +486,16 @@ describe("getPoolReservesHandler", () => {
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
+        .mockResolvedValueOnce({
+          data: encodeMintData(9),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({
+          data: encodeMintData(6),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
       mockGetAccount
@@ -564,8 +656,15 @@ describe("getPoolReservesHandler", () => {
         .mockResolvedValueOnce({ decimals: 6 });
 
       mockGetAccountInfo
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce({
+          data: encodeMintData(9),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({
+          data: encodeMintData(6),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValue(null);
 
       const result = await getPoolReservesHandler({
         tokenXMint: TOKEN_X_MINT,
@@ -620,6 +719,16 @@ describe("getPoolReservesHandler", () => {
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
+        .mockResolvedValueOnce({
+          data: encodeMintData(9),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({
+          data: encodeMintData(6),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
 
@@ -674,10 +783,18 @@ describe("getPoolReservesHandler", () => {
         mockGetLpTokenMint.mockResolvedValue(LP_MINT);
         mockGetMint
           .mockResolvedValueOnce({ decimals: decimalsX })
-          .mockResolvedValueOnce({ decimals: decimalsY })
-          .mockResolvedValueOnce({ decimals: decimalsX })
           .mockResolvedValueOnce({ decimals: decimalsY });
         mockGetAccountInfo
+          .mockResolvedValueOnce({
+            data: encodeMintData(decimalsX),
+            owner: TOKEN_PROGRAM_ID,
+          })
+          .mockResolvedValueOnce({
+            data: encodeMintData(decimalsY),
+            owner: TOKEN_PROGRAM_ID,
+          })
+          .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
+          .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
           .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
           .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
         mockGetAccount
@@ -734,6 +851,16 @@ describe("getPoolReservesHandler", () => {
         .mockResolvedValueOnce({ decimals: 9 })
         .mockResolvedValueOnce({ decimals: 6 });
       mockGetAccountInfo
+        .mockResolvedValueOnce({
+          data: encodeMintData(9),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({
+          data: encodeMintData(6),
+          owner: TOKEN_PROGRAM_ID,
+        })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
+        .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID })
         .mockResolvedValueOnce({ owner: TOKEN_PROGRAM_ID });
       mockGetAccount

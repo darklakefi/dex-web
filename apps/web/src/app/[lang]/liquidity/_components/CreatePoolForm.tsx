@@ -27,7 +27,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import * as z from "zod";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
 import { FormFieldset } from "../../../_components/FormFieldset";
@@ -78,6 +78,7 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
   const [initialPriceTokenOrder, setInitialPriceDirection] = useState<
     "ab" | "ba"
   >("ab");
+  const isUpdatingRef = useRef(false);
 
   const isMissingTokens =
     tokenAAddress === EMPTY_TOKEN || tokenBAddress === EMPTY_TOKEN;
@@ -392,6 +393,7 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
             <form.Field
               listeners={{
                 onChange: ({ value, fieldApi }) => {
+                  if (isUpdatingRef.current) return;
                   const cleanValue = value.replace(/,/g, "");
                   const price = fieldApi.form.state.values.initialPrice || "1";
 
@@ -400,10 +402,13 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                       initialPriceTokenOrder === "ab"
                         ? BigNumber(cleanValue).multipliedBy(price).toString()
                         : BigNumber(cleanValue).dividedBy(price).toString();
+
+                    isUpdatingRef.current = true;
                     fieldApi.form.setFieldValue(
                       "tokenAAmount",
                       calculatedTokenA,
                     );
+                    isUpdatingRef.current = false;
                   }
                 },
               }}
@@ -452,6 +457,7 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
             <form.Field
               listeners={{
                 onChange: ({ value, fieldApi }) => {
+                  if (isUpdatingRef.current) return;
                   const cleanValue = value.replace(/,/g, "");
                   const price = fieldApi.form.state.values.initialPrice || "1";
 
@@ -460,10 +466,13 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                       initialPriceTokenOrder === "ab"
                         ? BigNumber(cleanValue).dividedBy(price).toString()
                         : BigNumber(cleanValue).multipliedBy(price).toString();
+
+                    isUpdatingRef.current = true;
                     fieldApi.form.setFieldValue(
                       "tokenBAmount",
                       calculatedTokenB,
                     );
+                    isUpdatingRef.current = false;
                   }
                 },
               }}

@@ -98,6 +98,10 @@ describe("removeLiquidityTransactionHandler", () => {
   });
 
   it("should handle errors gracefully", async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
     const invalidInput: RemoveLiquidityTransactionInput = {
       ...baseInput,
       tokenXMint: "invalid-address",
@@ -107,5 +111,7 @@ describe("removeLiquidityTransactionHandler", () => {
 
     expect(result.success).toBe(false);
     expect(result.transaction).toBeNull();
+
+    consoleErrorSpy.mockRestore();
   });
 });

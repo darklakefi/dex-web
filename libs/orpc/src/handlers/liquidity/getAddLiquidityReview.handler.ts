@@ -2,11 +2,8 @@
 
 import type { Idl } from "@coral-xyz/anchor";
 import { BorshCoder } from "@coral-xyz/anchor";
-import {
-  getAccount,
-  TOKEN_2022_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
+import { getPoolTokenAddress } from "@dex-web/utils";
+import { getAccount } from "@solana/spl-token";
 import { type Connection, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import IDL from "../../darklake-idl";
@@ -16,31 +13,12 @@ import type {
   GetAddLiquidityReviewOutput,
 } from "../../schemas/liquidity/getAddLiquidityReview.schema";
 import type { Token } from "../../schemas/tokens/token.schema";
-import { EXCHANGE_PROGRAM_ID, type PoolAccount } from "../../utils/solana";
+import {
+  EXCHANGE_PROGRAM_ID,
+  getTokenProgramId,
+  type PoolAccount,
+} from "../../utils/solana";
 import { getTokenMetadataHandler } from "../tokens/getTokenMetadata.handler";
-
-async function getTokenProgramId(
-  connection: Connection,
-  accountPubkey: PublicKey,
-): Promise<PublicKey> {
-  try {
-    const accountInfo = await connection.getAccountInfo(accountPubkey);
-    if (!accountInfo) {
-      throw new Error("Account not found");
-    }
-
-    if (accountInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
-      return TOKEN_2022_PROGRAM_ID;
-    } else if (accountInfo.owner.equals(TOKEN_PROGRAM_ID)) {
-      return TOKEN_PROGRAM_ID;
-    } else {
-      throw new Error("Invalid token program ID");
-    }
-  } catch (error) {
-    console.error("Failed to determine token program ID:", error);
-    return TOKEN_PROGRAM_ID;
-  }
-}
 
 async function getTokenBalance(
   connection: Connection,
@@ -91,7 +69,9 @@ export async function getAddLiquidityReviewHandler(
   input: GetAddLiquidityReviewInput,
 ): Promise<GetAddLiquidityReviewOutput> {
   try {
-    const { tokenAmount, tokenXMint, tokenYMint, isTokenX } = input;
+    const tokenXMint = getPoolTokenAddress(input.tokenXMint);
+    const tokenYMint = getPoolTokenAddress(input.tokenYMint);
+    const { tokenAmount, isTokenX } = input;
 
     const helius = getHelius();
 

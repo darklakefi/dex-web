@@ -1,13 +1,11 @@
 "use server";
 import { BN } from "@coral-xyz/anchor";
 import { getLpTokenMint } from "@dex-web/core";
-import {
-  getAccount,
-  getMint,
-  TOKEN_2022_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
-import { type Connection, PublicKey } from "@solana/web3.js";
+import { getPoolTokenAddress } from "@dex-web/utils";
+import { getAccount, MintLayout } from "@solana/spl-token";
+import type { Connection } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
+import { Decimal } from "decimal.js";
 import { getHelius } from "../../getHelius";
 import type {
   GetPoolReservesInput,
@@ -15,38 +13,9 @@ import type {
 } from "../../schemas/pools/getPoolReserves.schema";
 import { getPoolOnChain, LP_TOKEN_DECIMALS } from "../../utils/solana";
 
-async function detectTokenProgram(
-  connection: Connection,
-  mint: PublicKey,
-): Promise<PublicKey> {
-  try {
-    await getMint(connection, mint, "confirmed", TOKEN_PROGRAM_ID);
-    return TOKEN_PROGRAM_ID;
-  } catch {
-    try {
-      await getMint(connection, mint, "confirmed", TOKEN_2022_PROGRAM_ID);
-      return TOKEN_2022_PROGRAM_ID;
-    } catch {
-      return TOKEN_PROGRAM_ID;
-    }
-  }
-}
-
 function bnToNumberWithDecimals(bn: BN, decimals: number): number {
-  const str = bn.toString();
-  const len = str.length;
-
-  if (len <= decimals) {
-    const padded = str.padStart(decimals + 1, "0");
-    const result = Number(`0.${padded.slice(1)}`);
-    return Number.isFinite(result) && result >= 0 ? result : 0;
-  }
-
-  const integerPart = str.slice(0, len - decimals);
-  const decimalPart = str.slice(len - decimals);
-  const result = Number(`${integerPart}.${decimalPart}`);
-
-  return Number.isFinite(result) && result >= 0 ? result : 0;
+  const result = new Decimal(bn.toString()).div(new Decimal(10).pow(decimals));
+  return result.toNumber();
 }
 
 /**
@@ -56,6 +25,26 @@ function bnToNumberWithDecimals(bn: BN, decimals: number): number {
  */
 function bnToString(bn: BN): string {
   return bn.toString();
+}
+
+async function getMintInfo(
+  connection: Connection,
+  mintPubkey: PublicKey,
+): Promise<{ decimals: number; programId: PublicKey }> {
+  const accountInfo = await connection.getAccountInfo(mintPubkey);
+  if (!accountInfo) {
+    throw new Error("Mint account not found");
+  }
+  const programId = accountInfo.owner;
+  const mint = MintLayout.decode(accountInfo.data);
+  if (
+    typeof mint.decimals !== "number" ||
+    mint.decimals < 0 ||
+    mint.decimals > 20
+  ) {
+    throw new Error("Invalid mint data");
+  }
+  return { decimals: mint.decimals, programId };
 }
 
 async function getReserveBalance(
@@ -73,9 +62,12 @@ async function getReserveBalance(
 }
 
 export async function getPoolReservesHandler({
-  tokenXMint,
-  tokenYMint,
+  tokenXMint: inputTokenXMint,
+  tokenYMint: inputTokenYMint,
 }: GetPoolReservesInput): Promise<GetPoolReservesOutput> {
+  const tokenXMint = getPoolTokenAddress(inputTokenXMint);
+  const tokenYMint = getPoolTokenAddress(inputTokenYMint);
+
   const helius = getHelius();
   const connection = helius.connection;
 
@@ -89,44 +81,28 @@ export async function getPoolReservesHandler({
 
   try {
     const poolData = await getPoolOnChain(tokenXMint, tokenYMint);
+
     if (!poolData) {
       return emptyResult;
     }
 
     const lpTokenMint = await getLpTokenMint(tokenXMint, tokenYMint);
-    const totalLpSupply = bnToNumberWithDecimals(
-      poolData.token_lp_supply,
-      LP_TOKEN_DECIMALS,
-    );
 
-    const tokenXProgramId = await detectTokenProgram(
-      connection,
-      new PublicKey(tokenXMint),
-    );
-    const tokenYProgramId = await detectTokenProgram(
-      connection,
-      new PublicKey(tokenYMint),
-    );
+    const tokenXMintPubkey = new PublicKey(tokenXMint);
+    const tokenYMintPubkey = new PublicKey(tokenYMint);
 
-    const tokenXMintInfo = await getMint(
-      connection,
-      new PublicKey(tokenXMint),
-      "confirmed",
-      tokenXProgramId,
-    );
-    const tokenYMintInfo = await getMint(
-      connection,
-      new PublicKey(tokenYMint),
-      "confirmed",
-      tokenYProgramId,
-    );
+    const [tokenXInfo, tokenYInfo] = await Promise.all([
+      getMintInfo(connection, tokenXMintPubkey),
+      getMintInfo(connection, tokenYMintPubkey),
+    ]);
 
-    const reserveXAccountInfo = await connection.getAccountInfo(
-      poolData.reserve_x,
-    );
-    const reserveYAccountInfo = await connection.getAccountInfo(
-      poolData.reserve_y,
-    );
+    const tokenXMintInfo = { decimals: tokenXInfo.decimals };
+    const tokenYMintInfo = { decimals: tokenYInfo.decimals };
+
+    const [reserveXAccountInfo, reserveYAccountInfo] = await Promise.all([
+      connection.getAccountInfo(poolData.reserve_x),
+      connection.getAccountInfo(poolData.reserve_y),
+    ]);
 
     if (!reserveXAccountInfo || !reserveYAccountInfo) {
       return { ...emptyResult, lpMint: lpTokenMint.toBase58() };
@@ -139,7 +115,7 @@ export async function getPoolReservesHandler({
       totalReserveXRaw = await getReserveBalance(
         connection,
         poolData.reserve_x,
-        reserveXAccountInfo.owner,
+        tokenXInfo.programId,
       );
     } catch {
       totalReserveXRaw = new BN(0);
@@ -149,7 +125,7 @@ export async function getPoolReservesHandler({
       totalReserveYRaw = await getReserveBalance(
         connection,
         poolData.reserve_y,
-        reserveYAccountInfo.owner,
+        tokenYInfo.programId,
       );
     } catch {
       totalReserveYRaw = new BN(0);
@@ -163,14 +139,12 @@ export async function getPoolReservesHandler({
       .sub(poolData.protocol_fee_y)
       .sub(poolData.user_locked_y);
 
-    const reserveX = bnToNumberWithDecimals(
-      availableReserveXRaw,
-      tokenXMintInfo.decimals,
-    );
-    const reserveY = bnToNumberWithDecimals(
-      availableReserveYRaw,
-      tokenYMintInfo.decimals,
-    );
+    const reserveX = availableReserveXRaw.isNeg()
+      ? 0
+      : bnToNumberWithDecimals(availableReserveXRaw, tokenXMintInfo.decimals);
+    const reserveY = availableReserveYRaw.isNeg()
+      ? 0
+      : bnToNumberWithDecimals(availableReserveYRaw, tokenYMintInfo.decimals);
 
     const result: GetPoolReservesOutput = {
       exists: true,
@@ -184,10 +158,17 @@ export async function getPoolReservesHandler({
         tokenYMintInfo.decimals,
       ),
       reserveX,
-      reserveXRaw: bnToString(availableReserveXRaw),
+      reserveXRaw: availableReserveXRaw.isNeg()
+        ? "0"
+        : bnToString(availableReserveXRaw),
       reserveY,
-      reserveYRaw: bnToString(availableReserveYRaw),
-      totalLpSupply,
+      reserveYRaw: availableReserveYRaw.isNeg()
+        ? "0"
+        : bnToString(availableReserveYRaw),
+      totalLpSupply: bnToNumberWithDecimals(
+        poolData.token_lp_supply,
+        LP_TOKEN_DECIMALS,
+      ),
       totalLpSupplyRaw: bnToString(poolData.token_lp_supply),
       totalReserveXRaw: bnToString(totalReserveXRaw),
       totalReserveYRaw: bnToString(totalReserveYRaw),

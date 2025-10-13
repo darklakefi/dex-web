@@ -7,7 +7,7 @@ import { defineConfig } from "vite";
 export default defineConfig(({ mode }) => {
   const baseConfig = {
     cacheDir: "../../node_modules/.vite/libs/core",
-    plugins: [nxViteTsPaths()],
+    plugins: [react(), nxViteTsPaths()],
     root: __dirname,
     test: {
       coverage: {
@@ -42,19 +42,9 @@ export default defineConfig(({ mode }) => {
       setupFiles: [resolve(__dirname, "vitest.setup.ts")],
       teardownTimeout: 10000,
       testTimeout: 30000,
-      transformMode: {
-        web: ["**/*.{js,ts,jsx,tsx}"],
-      },
       watch: false,
     },
   };
-
-  if (mode === "test") {
-    return {
-      ...baseConfig,
-      plugins: [react(), nxViteTsPaths()],
-    };
-  }
 
   return baseConfig;
 });

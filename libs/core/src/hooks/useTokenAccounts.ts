@@ -1,28 +1,8 @@
 "use client";
 
+import { shouldUseNativeSolBalance } from "@dex-web/utils";
 import type { PublicKey } from "@solana/web3.js";
 import { type QueryFunctionContext, useQuery } from "@tanstack/react-query";
-
-/**
- * Token type enum for SOL variants
- */
-export enum SolTokenType {
-  NATIVE_SOL = "NATIVE_SOL",
-  WRAPPED_SOL = "WRAPPED_SOL",
-  OTHER = "OTHER",
-}
-
-const SOL_TOKEN_ADDRESS = "So11111111111111111111111111111111111111111";
-
-/**
- * Determine if native SOL balance should be used for this token
- * Returns true only for native SOL, false for WSOL and other tokens
- */
-function shouldUseNativeSolBalance(
-  address: string | null | undefined,
-): boolean {
-  return address === SOL_TOKEN_ADDRESS;
-}
 
 export interface TokenAccountsQueryClient {
   helius: {
@@ -56,10 +36,6 @@ export interface TokenAccount {
   decimals: number;
   mint: string;
   symbol: string;
-  /** Whether this represents native SOL balance */
-  isNativeSol?: boolean;
-  /** The SOL token type */
-  solTokenType?: SolTokenType;
 }
 
 export interface TokenAccountsData {
@@ -75,31 +51,17 @@ export interface UseTokenAccountsReturn {
   isLoadingTokenB: boolean;
   errorTokenA: Error | null;
   errorTokenB: Error | null;
-  /** Whether token A uses native SOL balance */
   tokenAUsesNativeSol: boolean;
-  /** Whether token B uses native SOL balance */
   tokenBUsesNativeSol: boolean;
-
-  // DEPRECATED - Keep for backwards compatibility (will be removed in future version)
-  /** @deprecated Use tokenAAccount instead */
   buyTokenAccount: TokenAccountsData | undefined;
-  /** @deprecated Use tokenBAccount instead */
   sellTokenAccount: TokenAccountsData | undefined;
-  /** @deprecated Use refetchTokenAAccount instead */
   refetchBuyTokenAccount: () => Promise<unknown>;
-  /** @deprecated Use refetchTokenBAccount instead */
   refetchSellTokenAccount: () => Promise<unknown>;
-  /** @deprecated Use isLoadingTokenA instead */
   isLoadingBuy: boolean;
-  /** @deprecated Use isLoadingTokenB instead */
   isLoadingSell: boolean;
-  /** @deprecated Use errorTokenA instead */
   errorBuy: Error | null;
-  /** @deprecated Use errorTokenB instead */
   errorSell: Error | null;
-  /** @deprecated Use tokenAUsesNativeSol instead */
   buyTokenUsesNativeSol: boolean;
-  /** @deprecated Use tokenBUsesNativeSol instead */
   sellTokenUsesNativeSol: boolean;
 }
 
