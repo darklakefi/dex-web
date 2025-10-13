@@ -1,4 +1,3 @@
-// Re-export SOL/WSOL utilities from libs/utils
 export {
   getGatewayTokenAddress,
   getSolTokenDisplayName,

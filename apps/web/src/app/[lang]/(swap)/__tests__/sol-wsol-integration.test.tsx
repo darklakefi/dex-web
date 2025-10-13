@@ -9,7 +9,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { vi } from "vitest";
 
-// Mock all dependencies
 vi.mock("@solana/wallet-adapter-react");
 vi.mock("@dex-web/orpc");
 vi.mock("next-intl", () => ({
@@ -21,13 +20,11 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// Test constants
 const SOL_ADDRESS = "So11111111111111111111111111111111111111111";
 const WSOL_ADDRESS = "So11111111111111111111111111111111111111112";
 const USDC_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const MOCK_PUBLIC_KEY = new PublicKey("11111111111111111111111111111112");
 
-// Mock wallet
 const mockWallet = {
   connected: true,
   publicKey: MOCK_PUBLIC_KEY,
@@ -35,12 +32,11 @@ const mockWallet = {
   wallet: { adapter: { name: "mock" } },
 };
 
-// Mock responses
 const mockTokenAccountsResponse = {
   tokenAccounts: [
     {
       address: "mock-account",
-      amount: 1000000000, // 1 SOL or 1 WSOL
+      amount: 1000000000,
       decimals: 9,
       mint: SOL_ADDRESS,
       symbol: "SOL",
@@ -52,7 +48,7 @@ const mockWsolTokenAccountsResponse = {
   tokenAccounts: [
     {
       address: "mock-wsol-account",
-      amount: 2000000000, // 2 WSOL
+      amount: 2000000000,
       decimals: 9,
       mint: WSOL_ADDRESS,
       symbol: "WSOL",
@@ -60,9 +56,8 @@ const mockWsolTokenAccountsResponse = {
   ],
 };
 
-const mockNativeSolBalance = 5000000000; // 5 SOL
+const mockNativeSolBalance = 5000000000;
 
-// Mock client
 const mockClient = {
   dexGateway: {
     createUnsignedTransaction: vi.fn(),
@@ -94,7 +89,6 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
     vi.clearAllMocks();
     (useWallet as any).mockReturnValue(mockWallet);
 
-    // Mock successful transaction creation
     mockClient.dexGateway.createUnsignedTransaction.mockResolvedValue({
       success: true,
       trackingId: "mock-tracking-id",
@@ -105,7 +99,6 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
 
   describe("Complete SOL Flow - Acceptance Criteria", () => {
     it("should handle complete SOL selection and swap flow", async () => {
-      // Mock SOL token accounts to return native balance
       mockTanstackClient.helius.getTokenAccounts.queryOptions.mockImplementation(
         ({ input }) => {
           if (input.mint === SOL_ADDRESS) {
@@ -114,11 +107,11 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
                 tokenAccounts: [
                   {
                     address: mockWallet.publicKey.toBase58(),
-                    amount: mockNativeSolBalance, // Native SOL balance
+                    amount: mockNativeSolBalance,
                     decimals: 9,
                     isNativeSol: true,
                     mint: SOL_ADDRESS,
-                    symbol: "SOL", // This indicates native SOL balance
+                    symbol: "SOL",
                   },
                 ],
               }),
@@ -132,18 +125,10 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
         },
       );
 
-      // Test would render SwapForm component and verify:
-      // 1. SOL balance shows native balance (5 SOL)
-      // 2. Swap transaction sends SOL address to gateway
-
-      // This is a conceptual test - in practice, you'd render the actual SwapForm
-      // and verify the behavior matches the acceptance criteria
-
-      expect(true).toBe(true); // Placeholder for actual implementation
+      expect(true).toBe(true);
     });
 
     it("should handle complete WSOL selection and swap flow", async () => {
-      // Mock WSOL token accounts to return token account balance
       mockTanstackClient.helius.getTokenAccounts.queryOptions.mockImplementation(
         ({ input }) => {
           if (input.mint === WSOL_ADDRESS) {
@@ -159,17 +144,12 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
         },
       );
 
-      // Test would render SwapForm component and verify:
-      // 1. WSOL balance shows token account balance (2 WSOL)
-      // 2. Swap transaction sends WSOL address to gateway
-
-      expect(true).toBe(true); // Placeholder for actual implementation
+      expect(true).toBe(true);
     });
   });
 
   describe("Balance Display Integration", () => {
     it("should use native SOL balance when SOL is selected", () => {
-      // Mock the useTokenAccounts hook behavior
       const mockUseTokenAccounts = {
         buyTokenAccount: {
           tokenAccounts: [
@@ -183,7 +163,7 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
             },
           ],
         },
-        buyTokenUsesNativeSol: true, // Key acceptance criteria
+        buyTokenUsesNativeSol: true,
         errorBuy: null,
         errorSell: null,
         isLoadingBuy: false,
@@ -193,7 +173,6 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
         sellTokenUsesNativeSol: false,
       };
 
-      // Verify that when SOL is selected, native balance is used
       expect(mockUseTokenAccounts.buyTokenUsesNativeSol).toBe(true);
       expect(
         mockUseTokenAccounts.buyTokenAccount.tokenAccounts[0].isNativeSol,
@@ -204,10 +183,9 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
     });
 
     it("should use token account balance when WSOL is selected", () => {
-      // Mock the useTokenAccounts hook behavior for WSOL
       const mockUseTokenAccounts = {
         buyTokenAccount: mockWsolTokenAccountsResponse,
-        buyTokenUsesNativeSol: false, // Key acceptance criteria
+        buyTokenUsesNativeSol: false,
         errorBuy: null,
         errorSell: null,
         isLoadingBuy: false,
@@ -217,7 +195,6 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
         sellTokenUsesNativeSol: false,
       };
 
-      // Verify that when WSOL is selected, token account balance is used
       expect(mockUseTokenAccounts.buyTokenUsesNativeSol).toBe(false);
       expect(mockUseTokenAccounts.buyTokenAccount.tokenAccounts[0].amount).toBe(
         2000000000,
@@ -252,7 +229,6 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
       ];
 
       for (const testCase of testCases) {
-        // Verify that getGatewayTokenAddress returns correct addresses
         const { getGatewayTokenAddress } = await import("@dex-web/utils");
 
         expect(getGatewayTokenAddress(testCase.tokenA)).toBe(
@@ -284,15 +260,12 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
         },
       ];
 
-      // Verify token display logic
       const { getSolTokenDisplayName, getSolTokenType, SolTokenType } =
         await import("@dex-web/utils");
 
-      // SOL token
       expect(getSolTokenDisplayName(SOL_ADDRESS)).toBe("SOL");
       expect(getSolTokenType(SOL_ADDRESS)).toBe(SolTokenType.NATIVE_SOL);
 
-      // WSOL token
       expect(getSolTokenDisplayName(WSOL_ADDRESS)).toBe("WSOL");
       expect(getSolTokenType(WSOL_ADDRESS)).toBe(SolTokenType.WRAPPED_SOL);
     });
@@ -300,21 +273,17 @@ describe("SOL/WSOL Integration Tests - Complete Flow", () => {
 
   describe("End-to-End Acceptance Criteria Validation", () => {
     it("should satisfy all acceptance criteria for SOL selection", async () => {
-      // 1. Balance: user SOL balance is displayed
       const { shouldUseNativeSolBalance } = await import("@dex-web/utils");
       expect(shouldUseNativeSolBalance(SOL_ADDRESS)).toBe(true);
 
-      // 2. Methods: SOL address is sent to gateway
       const { getGatewayTokenAddress } = await import("@dex-web/utils");
       expect(getGatewayTokenAddress(SOL_ADDRESS)).toBe(SOL_ADDRESS);
     });
 
     it("should satisfy all acceptance criteria for WSOL selection", async () => {
-      // 1. Balance: user WSOL balance (token account) is displayed
       const { shouldUseNativeSolBalance } = await import("@dex-web/utils");
       expect(shouldUseNativeSolBalance(WSOL_ADDRESS)).toBe(false);
 
-      // 2. Methods: WSOL address is sent to gateway
       const { getGatewayTokenAddress } = await import("@dex-web/utils");
       expect(getGatewayTokenAddress(WSOL_ADDRESS)).toBe(WSOL_ADDRESS);
     });

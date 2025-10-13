@@ -101,7 +101,6 @@ const nextConfig = {
       stream: process.stderr,
     };
 
-    // Suppress bigint-buffer native bindings warning in browser
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       {
@@ -192,7 +191,6 @@ const nextConfig = {
         zlib: false,
       };
 
-      // Suppress console warnings for known safe fallbacks in Solana packages
       config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(
           /bigint-buffer$/,

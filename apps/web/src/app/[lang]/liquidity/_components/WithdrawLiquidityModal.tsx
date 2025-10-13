@@ -378,7 +378,6 @@ export function WithdrawLiquidityModal({
         .toDecimalPlaces(0, Decimal.ROUND_FLOOR)
         .toString();
 
-      // Ensure we send the correct token addresses to the gateway
       const gatewayTokenXAddress = getGatewayTokenAddress(tokenXAddress);
       const gatewayTokenYAddress = getGatewayTokenAddress(tokenYAddress);
 

@@ -114,7 +114,6 @@ export interface UseRealtimePoolDataReturn {
 }
 
 export interface UseRealtimeTokenAccountsReturn {
-  // NEW - Preferred naming
   readonly tokenAAccount: TokenAccountsData | undefined;
   readonly tokenBAccount: TokenAccountsData | undefined;
   readonly refetchTokenAAccount: () => void;
@@ -150,8 +149,8 @@ export interface LiquidityComponentProps {
   readonly tokenAAddress: string | null;
   readonly tokenBAddress: string | null;
   readonly poolDetails: PoolDetails | null;
-  readonly buyTokenAccount: TokenAccountsData | undefined;
-  readonly sellTokenAccount: TokenAccountsData | undefined;
+  readonly tokenAAccount: TokenAccountsData | undefined;
+  readonly tokenBAccount: TokenAccountsData | undefined;
 }
 
 export interface LiquidityFormProviderProps {

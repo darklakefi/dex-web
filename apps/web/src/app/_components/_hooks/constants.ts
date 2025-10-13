@@ -13,13 +13,13 @@
 import { SOL_TOKEN_ADDRESS, WSOL_TOKEN_ADDRESS } from "@dex-web/utils";
 
 export const POPULAR_TOKEN_ADDRESSES = [
-  SOL_TOKEN_ADDRESS, // Native SOL
-  WSOL_TOKEN_ADDRESS, // Wrapped SOL (WSOL)
-  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
-  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // USDT
-  "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", // BONK
-  "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs", // WIF
-  "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN", // JUP
+  SOL_TOKEN_ADDRESS,
+  WSOL_TOKEN_ADDRESS,
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+  "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+  "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
+  "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
 ];
 
 /**

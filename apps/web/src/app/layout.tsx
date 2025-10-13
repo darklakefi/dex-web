@@ -22,7 +22,7 @@ const bitsumishiRegular = localFont({
 });
 
 const classicConsoleNeue = localFont({
-  adjustFontFallback: "Courier New",
+  adjustFontFallback: false,
   display: "swap",
   fallback: ["Courier New", "monospace"],
   preload: true,

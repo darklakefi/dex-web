@@ -1,10 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
 import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
-import { SkeletonForm } from "../../../_components/SkeletonForm";
-import { CreatePoolForm } from "./CreatePoolForm";
-import { LiquidityForm } from "./LiquidityForm";
+import { LiquidityPageRouter } from "./LiquidityPageRouter";
 import { YourLiquidity } from "./YourLiquidity";
 
 interface LiquidityPageContentProps {
@@ -29,15 +26,12 @@ export function LiquidityPageContent({
 
   return (
     <>
-      {isCreatePoolMode ? (
-        <Suspense fallback={<SkeletonForm type="liquidity" />}>
-          <CreatePoolForm tokenPrices={tokenPrices} />
-        </Suspense>
-      ) : (
-        <Suspense fallback={<SkeletonForm type="liquidity" />}>
-          <LiquidityForm tokenPrices={tokenPrices} />
-        </Suspense>
-      )}
+      <LiquidityPageRouter
+        isCreatePoolMode={isCreatePoolMode}
+        tokenAAddress={tokenAAddress}
+        tokenBAddress={tokenBAddress}
+        tokenPrices={tokenPrices}
+      />
       <YourLiquidity
         tokenAAddress={tokenAAddress ?? undefined}
         tokenBAddress={tokenBAddress ?? undefined}

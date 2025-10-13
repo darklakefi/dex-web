@@ -8,9 +8,9 @@ describe("useLiquidityForm", () => {
   it("returns form object with correct default values", () => {
     const { result } = renderHook(() =>
       useLiquidityForm({
-        buyTokenAccount: undefined,
         onSubmit: mockOnSubmit,
         publicKey: null,
+        tokenAAccount: undefined,
       }),
     );
 
@@ -25,9 +25,9 @@ describe("useLiquidityForm", () => {
   it("returns resetFormToDefaults function", () => {
     const { result } = renderHook(() =>
       useLiquidityForm({
-        buyTokenAccount: undefined,
         onSubmit: mockOnSubmit,
         publicKey: null,
+        tokenAAccount: undefined,
       }),
     );
 
@@ -38,9 +38,9 @@ describe("useLiquidityForm", () => {
   it("returns validateSufficientBalance function", () => {
     const { result } = renderHook(() =>
       useLiquidityForm({
-        buyTokenAccount: undefined,
         onSubmit: mockOnSubmit,
         publicKey: null,
+        tokenAAccount: undefined,
       }),
     );
 

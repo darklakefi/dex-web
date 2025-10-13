@@ -15,7 +15,6 @@ import { vi } from "vitest";
 import { ReferralCodeProvider } from "../../../../_components/ReferralCodeProvider";
 import { SwapForm } from "../SwapForm";
 
-// Mock dependencies
 vi.mock("@solana/wallet-adapter-react");
 vi.mock("@dex-web/orpc", () => ({
   client: {
@@ -85,20 +84,18 @@ vi.mock("next/navigation", () => ({
 vi.mock("nuqs", () => ({
   useQueryStates: () => [
     {
-      tokenAAddress: "So11111111111111111111111111111111111111111", // SOL
-      tokenBAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
+      tokenAAddress: "So11111111111111111111111111111111111111111",
+      tokenBAddress: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
     },
     vi.fn(),
   ],
 }));
 
-// Test constants
 const SOL_ADDRESS = "So11111111111111111111111111111111111111111";
 const WSOL_ADDRESS = "So11111111111111111111111111111111111111112";
 const USDC_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const MOCK_PUBLIC_KEY = new PublicKey("11111111111111111111111111111112");
 
-// Mock wallet
 const mockWallet = {
   connected: true,
   publicKey: MOCK_PUBLIC_KEY,
@@ -106,7 +103,6 @@ const mockWallet = {
   wallet: { adapter: { name: "mock" } },
 };
 
-// Mock client responses
 const mockCreateUnsignedTransaction = vi.fn();
 const mockClient = {
   dexGateway: {
@@ -156,7 +152,6 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
 
   describe("Gateway Address Handling - Acceptance Criteria", () => {
     it("should send SOL address to gateway when SOL is selected", async () => {
-      // Mock SOL -> USDC swap
       vi.doMock("nuqs", () => ({
         useQueryStates: () => [
           {
@@ -173,7 +168,6 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
         </TestWrapper>,
       );
 
-      // Simulate user entering amount and triggering swap
       const amountInput = screen.getByRole("textbox");
       fireEvent.change(amountInput, { target: { value: "1" } });
 
@@ -183,7 +177,7 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
       await waitFor(() => {
         expect(mockCreateUnsignedTransaction).toHaveBeenCalledWith(
           expect.objectContaining({
-            tokenMintX: SOL_ADDRESS, // Should send SOL address
+            tokenMintX: SOL_ADDRESS,
             tokenMintY: USDC_ADDRESS,
           }),
         );
@@ -191,7 +185,6 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
     });
 
     it("should send WSOL address to gateway when WSOL is selected", async () => {
-      // Mock WSOL -> USDC swap
       vi.doMock("nuqs", () => ({
         useQueryStates: () => [
           {
@@ -208,7 +201,6 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
         </TestWrapper>,
       );
 
-      // Simulate user entering amount and triggering swap
       const amountInput = screen.getByRole("textbox");
       fireEvent.change(amountInput, { target: { value: "1" } });
 
@@ -218,7 +210,7 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
       await waitFor(() => {
         expect(mockCreateUnsignedTransaction).toHaveBeenCalledWith(
           expect.objectContaining({
-            tokenMintX: WSOL_ADDRESS, // Should send WSOL address
+            tokenMintX: WSOL_ADDRESS,
             tokenMintY: USDC_ADDRESS,
           }),
         );
@@ -226,7 +218,6 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
     });
 
     it("should handle SOL to WSOL swap correctly", async () => {
-      // Mock SOL -> WSOL swap
       vi.doMock("nuqs", () => ({
         useQueryStates: () => [
           {
@@ -243,7 +234,6 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
         </TestWrapper>,
       );
 
-      // Simulate user entering amount and triggering swap
       const amountInput = screen.getByRole("textbox");
       fireEvent.change(amountInput, { target: { value: "1" } });
 
@@ -253,15 +243,14 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
       await waitFor(() => {
         expect(mockCreateUnsignedTransaction).toHaveBeenCalledWith(
           expect.objectContaining({
-            tokenMintX: SOL_ADDRESS, // Native SOL address
-            tokenMintY: WSOL_ADDRESS, // WSOL address
+            tokenMintX: SOL_ADDRESS,
+            tokenMintY: WSOL_ADDRESS,
           }),
         );
       });
     });
 
     it("should handle WSOL to SOL swap correctly", async () => {
-      // Mock WSOL -> SOL swap
       vi.doMock("nuqs", () => ({
         useQueryStates: () => [
           {
@@ -278,7 +267,6 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
         </TestWrapper>,
       );
 
-      // Simulate user entering amount and triggering swap
       const amountInput = screen.getByRole("textbox");
       fireEvent.change(amountInput, { target: { value: "1" } });
 
@@ -288,8 +276,8 @@ describe.skip("SwapForm SOL/WSOL Gateway Address Tests", () => {
       await waitFor(() => {
         expect(mockCreateUnsignedTransaction).toHaveBeenCalledWith(
           expect.objectContaining({
-            tokenMintX: WSOL_ADDRESS, // WSOL address
-            tokenMintY: SOL_ADDRESS, // Native SOL address
+            tokenMintX: WSOL_ADDRESS,
+            tokenMintY: SOL_ADDRESS,
           }),
         );
       });

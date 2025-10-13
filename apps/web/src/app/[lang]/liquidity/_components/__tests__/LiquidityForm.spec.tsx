@@ -125,6 +125,8 @@ vi.mock("@dex-web/core", () => ({
   useTokenAccounts: () => ({
     buyTokenAccount: null,
     sellTokenAccount: null,
+    tokenAAccount: null,
+    tokenBAccount: null,
   }),
   useTransactionStatus: () => ({
     checkTransactionStatus: vi.fn(),

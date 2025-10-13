@@ -31,8 +31,8 @@ interface CreatePoolFormButtonMessageProps {
   createStep: number;
   tokenBAddress: string;
   tokenAAddress: string;
-  buyTokenAccount?: TokenAccountData | null;
-  sellTokenAccount?: TokenAccountData | null;
+  tokenAAccount?: TokenAccountData | null;
+  tokenBAccount?: TokenAccountData | null;
   publicKey: PublicKey;
 }
 
@@ -43,8 +43,8 @@ export function getCreatePoolFormButtonMessage({
   createStep,
   tokenBAddress,
   tokenAAddress,
-  buyTokenAccount,
-  sellTokenAccount,
+  tokenAAccount,
+  tokenBAccount,
   publicKey,
 }: CreatePoolFormButtonMessageProps) {
   if (tokenAAddress === EMPTY_TOKEN || tokenBAddress === EMPTY_TOKEN) {
@@ -63,11 +63,11 @@ export function getCreatePoolFormButtonMessage({
   }
 
   if (publicKey && sellAmount && BigNumber(sellAmount).gt(0)) {
-    const sellTokenAcc = sellTokenAccount?.tokenAccounts?.[0];
-    if (sellTokenAcc) {
+    const tokenBAcc = tokenBAccount?.tokenAccounts?.[0];
+    if (tokenBAcc) {
       const maxBalance = convertToDecimal(
-        sellTokenAcc.amount || 0,
-        sellTokenAcc.decimals || 0,
+        tokenBAcc.amount || 0,
+        tokenBAcc.decimals || 0,
       );
       if (BigNumber(sellAmount).gt(maxBalance.toString())) {
         return BUTTON_MESSAGE.INSUFFICIENT_BALANCE;
@@ -76,11 +76,11 @@ export function getCreatePoolFormButtonMessage({
   }
 
   if (publicKey && buyAmount && BigNumber(buyAmount).gt(0)) {
-    const buyTokenAcc = buyTokenAccount?.tokenAccounts?.[0];
-    if (buyTokenAcc) {
+    const tokenAAcc = tokenAAccount?.tokenAccounts?.[0];
+    if (tokenAAcc) {
       const maxBalance = convertToDecimal(
-        buyTokenAcc.amount || 0,
-        buyTokenAcc.decimals || 0,
+        tokenAAcc.amount || 0,
+        tokenAAcc.decimals || 0,
       );
       if (BigNumber(buyAmount).gt(maxBalance.toString())) {
         return BUTTON_MESSAGE.INSUFFICIENT_BALANCE;

@@ -11,13 +11,11 @@ import type {
 } from "../../../_types/liquidity";
 import { buildRequestPayload } from "../transactionHelpers";
 
-// Test constants
 const SOL_ADDRESS = "So11111111111111111111111111111111111111111";
 const WSOL_ADDRESS = "So11111111111111111111111111111111111111112";
 const USDC_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const MOCK_PUBLIC_KEY = new PublicKey("11111111111111111111111111111112");
 
-// Mock data
 const mockPoolData: PoolDetails = {
   address: "mock-pool-address",
   lockedX: "1000000000",
@@ -72,7 +70,6 @@ describe("transactionHelpers SOL/WSOL Gateway Address Tests", () => {
         values: mockFormValues,
       });
 
-      // Key acceptance criteria: SOL selection should send SOL address to gateway
       expect(result.tokenMintX).toBe(SOL_ADDRESS);
       expect(result.tokenMintY).toBe(USDC_ADDRESS);
     });
@@ -109,7 +106,6 @@ describe("transactionHelpers SOL/WSOL Gateway Address Tests", () => {
         values: mockFormValues,
       });
 
-      // Key acceptance criteria: WSOL selection should send WSOL address to gateway
       expect(result.tokenMintX).toBe(WSOL_ADDRESS);
       expect(result.tokenMintY).toBe(USDC_ADDRESS);
     });
@@ -147,17 +143,17 @@ describe("transactionHelpers SOL/WSOL Gateway Address Tests", () => {
         values: mockFormValues,
       });
 
-      expect(result.tokenMintX).toBe(SOL_ADDRESS); // Native SOL
-      expect(result.tokenMintY).toBe(WSOL_ADDRESS); // WSOL
+      expect(result.tokenMintX).toBe(SOL_ADDRESS);
+      expect(result.tokenMintY).toBe(WSOL_ADDRESS);
     });
 
     it("should handle reversed token order correctly", () => {
       const orderContext: TokenOrderContext = {
         mapping: {
-          tokenAIsX: false, // Token A (USDC) maps to Y, Token B (SOL) maps to X
+          tokenAIsX: false,
         },
         protocol: {
-          tokenX: SOL_ADDRESS, // Protocol order is different from UI order
+          tokenX: SOL_ADDRESS,
           tokenY: USDC_ADDRESS,
         },
         ui: {
@@ -178,7 +174,6 @@ describe("transactionHelpers SOL/WSOL Gateway Address Tests", () => {
         values: mockFormValues,
       });
 
-      // Even with reversed UI order, should send correct addresses to gateway
       expect(result.tokenMintX).toBe(SOL_ADDRESS);
       expect(result.tokenMintY).toBe(USDC_ADDRESS);
     });
@@ -243,20 +238,19 @@ describe("transactionHelpers SOL/WSOL Gateway Address Tests", () => {
         currentPoolData: mockPoolData,
         effectivePublicKey: MOCK_PUBLIC_KEY,
         orderContext,
-        refCode: "", // SOL has 9 decimals
-        tokenAMeta: { decimals: 9 }, // USDC has 6 decimals
+        refCode: "",
+        tokenAMeta: { decimals: 9 },
         tokenBMeta: { decimals: 6 },
         trimmedTokenAAddress: SOL_ADDRESS,
         trimmedTokenBAddress: USDC_ADDRESS,
         values: {
-          tokenAAmount: "1", // 1 SOL
-          tokenBAmount: "100", // 100 USDC
+          tokenAAmount: "1",
+          tokenBAmount: "100",
         },
       });
 
-      // 1 SOL = 1 * 10^9 = 1000000000
       expect(result.maxAmountX).toBe(BigInt("1000000000"));
-      // 100 USDC = 100 * 10^6 = 100000000
+
       expect(result.maxAmountY).toBe(BigInt("100000000"));
     });
   });

@@ -70,7 +70,25 @@ const mockTokenAccounts = {
   isRealtime: true,
   refetchBuyTokenAccount: vi.fn(),
   refetchSellTokenAccount: vi.fn(),
+  refetchTokenAAccount: vi.fn(),
+  refetchTokenBAccount: vi.fn(),
   sellTokenAccount: {
+    tokenAccounts: [
+      { address: "usdc-account", amount: 1000000, decimals: 6, symbol: "USDC" },
+    ],
+  },
+
+  tokenAAccount: {
+    tokenAccounts: [
+      {
+        address: "sol-account",
+        amount: 1000000000,
+        decimals: 9,
+        symbol: "SOL",
+      },
+    ],
+  },
+  tokenBAccount: {
     tokenAccounts: [
       { address: "usdc-account", amount: 1000000, decimals: 6, symbol: "USDC" },
     ],

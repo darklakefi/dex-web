@@ -67,7 +67,6 @@ export interface TokenAccountsData {
 }
 
 export interface UseTokenAccountsReturn {
-  // NEW - Preferred naming (tokenA = first token, tokenB = second token)
   tokenAAccount: TokenAccountsData | undefined;
   tokenBAccount: TokenAccountsData | undefined;
   refetchTokenAAccount: () => Promise<unknown>;
@@ -127,7 +126,6 @@ export const useTokenAccounts = ({
 }: UseTokenAccountsParams): UseTokenAccountsReturn => {
   const networkKey = resolveNetwork(network);
 
-  // Determine if tokens use native SOL balance
   const tokenAUsesNativeSol = shouldUseNativeSolBalance(tokenAAddress);
   const tokenBUsesNativeSol = shouldUseNativeSolBalance(tokenBAddress);
 
@@ -176,7 +174,6 @@ export const useTokenAccounts = ({
   });
 
   return {
-    // Deprecated aliases (backwards compatibility)
     buyTokenAccount: tokenAAccount as TokenAccountsData | undefined,
     buyTokenUsesNativeSol: tokenAUsesNativeSol,
     errorBuy: errorTokenA,
@@ -193,7 +190,7 @@ export const useTokenAccounts = ({
     refetchTokenBAccount,
     sellTokenAccount: tokenBAccount as TokenAccountsData | undefined,
     sellTokenUsesNativeSol: tokenBUsesNativeSol,
-    // New naming
+
     tokenAAccount: tokenAAccount as TokenAccountsData | undefined,
     tokenAUsesNativeSol,
     tokenBAccount: tokenBAccount as TokenAccountsData | undefined,

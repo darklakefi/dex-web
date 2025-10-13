@@ -186,7 +186,6 @@ describe("solTokenUtils", () => {
   describe("Acceptance Criteria Tests", () => {
     describe("Balance Display Logic", () => {
       it("should use native SOL balance for SOL token", () => {
-        // This is the key acceptance criteria test
         expect(shouldUseNativeSolBalance(SOL_TOKEN_ADDRESS)).toBe(true);
         expect(getSolTokenType(SOL_TOKEN_ADDRESS)).toBe(
           SolTokenType.NATIVE_SOL,
@@ -194,7 +193,6 @@ describe("solTokenUtils", () => {
       });
 
       it("should use token account balance for WSOL token", () => {
-        // This is the key acceptance criteria test
         expect(shouldUseNativeSolBalance(WSOL_TOKEN_ADDRESS)).toBe(false);
         expect(getSolTokenType(WSOL_TOKEN_ADDRESS)).toBe(
           SolTokenType.WRAPPED_SOL,
@@ -204,14 +202,12 @@ describe("solTokenUtils", () => {
 
     describe("Gateway Address Logic", () => {
       it("should send SOL address to gateway for SOL selection", () => {
-        // This is the key acceptance criteria test
         expect(getGatewayTokenAddress(SOL_TOKEN_ADDRESS)).toBe(
           SOL_TOKEN_ADDRESS,
         );
       });
 
       it("should send WSOL address to gateway for WSOL selection", () => {
-        // This is the key acceptance criteria test
         expect(getGatewayTokenAddress(WSOL_TOKEN_ADDRESS)).toBe(
           WSOL_TOKEN_ADDRESS,
         );

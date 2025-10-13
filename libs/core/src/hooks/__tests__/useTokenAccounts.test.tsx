@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import { vi } from "vitest";
 import { useTokenAccounts } from "../useTokenAccounts";
 
-// Mock the token accounts query client
 const mockTokenAccountsQueryClient = {
   helius: {
     getTokenAccounts: {
@@ -17,13 +16,11 @@ const mockTokenAccountsQueryClient = {
   },
 };
 
-// Test addresses
 const SOL_ADDRESS = "So11111111111111111111111111111111111111111";
 const WSOL_ADDRESS = "So11111111111111111111111111111111111111112";
 const USDC_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const MOCK_PUBLIC_KEY = new PublicKey("11111111111111111111111111111112");
 
-// Test wrapper component
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -146,7 +143,7 @@ describe("useTokenAccounts", () => {
       const { result } = renderHook(
         () =>
           useTokenAccounts({
-            publicKey: MOCK_PUBLIC_KEY, // SOL selected as buy token
+            publicKey: MOCK_PUBLIC_KEY,
             tanstackClient: mockTokenAccountsQueryClient,
             tokenAAddress: SOL_ADDRESS,
             tokenBAddress: USDC_ADDRESS,
@@ -154,7 +151,6 @@ describe("useTokenAccounts", () => {
         { wrapper: createWrapper() },
       );
 
-      // Key acceptance criteria: SOL selection should use native SOL balance
       expect(result.current.buyTokenUsesNativeSol).toBe(true);
     });
 
@@ -162,7 +158,7 @@ describe("useTokenAccounts", () => {
       const { result } = renderHook(
         () =>
           useTokenAccounts({
-            publicKey: MOCK_PUBLIC_KEY, // WSOL selected as buy token
+            publicKey: MOCK_PUBLIC_KEY,
             tanstackClient: mockTokenAccountsQueryClient,
             tokenAAddress: WSOL_ADDRESS,
             tokenBAddress: USDC_ADDRESS,
@@ -170,7 +166,6 @@ describe("useTokenAccounts", () => {
         { wrapper: createWrapper() },
       );
 
-      // Key acceptance criteria: WSOL selection should use token account balance
       expect(result.current.buyTokenUsesNativeSol).toBe(false);
     });
   });

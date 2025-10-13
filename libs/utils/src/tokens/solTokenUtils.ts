@@ -5,11 +5,9 @@
  * native SOL vs wrapped SOL (WSOL) tokens in the application.
  */
 
-// Token addresses
 export const SOL_TOKEN_ADDRESS = "So11111111111111111111111111111111111111111";
 export const WSOL_TOKEN_ADDRESS = "So11111111111111111111111111111111111111112";
 
-// Array of SOL mint addresses for easy checking
 export const SOL_MINTS = [SOL_TOKEN_ADDRESS, WSOL_TOKEN_ADDRESS] as const;
 
 /**
@@ -84,7 +82,6 @@ export function getGatewayTokenAddress(
 ): string {
   if (!address) return "";
 
-  // For SOL and WSOL, return the address as-is since they should be handled differently
   if (isSolVariant(address)) {
     return address;
   }

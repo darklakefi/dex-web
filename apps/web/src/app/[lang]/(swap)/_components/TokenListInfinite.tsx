@@ -207,7 +207,6 @@ export function TokenListInfinite({
               );
             }
 
-            // Determine display properties for SOL variants
             const solTokenType = getSolTokenType(token.address);
             const displaySymbol =
               solTokenType !== SolTokenType.OTHER

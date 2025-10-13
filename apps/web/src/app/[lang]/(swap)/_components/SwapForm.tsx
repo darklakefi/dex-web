@@ -499,7 +499,6 @@ export function SwapForm() {
         .multipliedBy(slippageFactor)
         .integerValue(BigNumber.ROUND_DOWN);
 
-      // Ensure we send the correct token addresses to the gateway
       const gatewayTokenXAddress = getGatewayTokenAddress(tokenXAddress);
       const gatewayTokenYAddress = getGatewayTokenAddress(tokenYAddress);
 

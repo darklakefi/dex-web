@@ -27,7 +27,7 @@ interface TokenAccountData {
 
 interface UseLiquidityFormProps {
   publicKey: PublicKey | null;
-  buyTokenAccount: TokenAccountData | undefined;
+  tokenAAccount: TokenAccountData | undefined;
   onSubmit: (values: LiquidityFormValues) => Promise<void>;
 }
 
@@ -52,7 +52,7 @@ const { useAppForm } = createFormHook({
 
 export function useLiquidityForm({
   publicKey,
-  buyTokenAccount,
+  tokenAAccount,
   onSubmit,
 }: UseLiquidityFormProps) {
   const formConfig = useMemo(
@@ -72,13 +72,13 @@ export function useLiquidityForm({
           if (
             value[FORM_FIELD_NAMES.TOKEN_A_AMOUNT] &&
             publicKey &&
-            buyTokenAccount?.tokenAccounts?.[0]
+            tokenAAccount?.tokenAccounts?.[0]
           ) {
             const tokenANumericValue = formatAmountInput(
               value[FORM_FIELD_NAMES.TOKEN_A_AMOUNT],
             );
             if (parseAmountBigNumber(tokenANumericValue).gt(0)) {
-              const tokenAccount = buyTokenAccount.tokenAccounts[0];
+              const tokenAccount = tokenAAccount.tokenAccounts[0];
               const maxBalance = convertToDecimal(
                 tokenAccount.amount || 0,
                 tokenAccount.decimals || 0,
@@ -99,7 +99,7 @@ export function useLiquidityForm({
         },
       },
     }),
-    [publicKey, buyTokenAccount, onSubmit],
+    [publicKey, tokenAAccount, onSubmit],
   );
 
   const form = useAppForm(formConfig);

@@ -8,7 +8,6 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 import { TokenListInfinite } from "../TokenListInfinite";
 
-// Mock @tanstack/react-virtual
 vi.mock("@tanstack/react-virtual", () => ({
   useVirtualizer: () => ({
     getTotalSize: () => 204,
@@ -21,12 +20,10 @@ vi.mock("@tanstack/react-virtual", () => ({
   }),
 }));
 
-// Test constants
 const SOL_ADDRESS = "So11111111111111111111111111111111111111111";
 const WSOL_ADDRESS = "So11111111111111111111111111111111111111112";
 const USDC_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
-// Mock tokens
 const mockTokens: Token[] = [
   {
     address: SOL_ADDRESS,
@@ -62,34 +59,32 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
     it("should display SOL with correct symbol and name", async () => {
       render(
         <TokenListInfinite
-          onSelect={mockOnSelect} // SOL token
+          onSelect={mockOnSelect}
           title="Test Tokens"
           tokens={[mockTokens[0]]}
         />,
       );
 
-      // Should display "SOL" as symbol
       await waitFor(() => {
         expect(screen.getByText("SOL")).toBeInTheDocument();
       });
-      // Should display "Solana" as name
+
       expect(screen.getByText("Solana")).toBeInTheDocument();
     });
 
     it("should display WSOL with correct symbol and name", async () => {
       render(
         <TokenListInfinite
-          onSelect={mockOnSelect} // WSOL token
+          onSelect={mockOnSelect}
           title="Test Tokens"
           tokens={[mockTokens[1]]}
         />,
       );
 
-      // Should display "WSOL" as symbol
       await waitFor(() => {
         expect(screen.getByText("WSOL")).toBeInTheDocument();
       });
-      // Should display "Wrapped Solana" as name
+
       expect(screen.getByText("Wrapped Solana")).toBeInTheDocument();
     });
 
@@ -102,14 +97,12 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
         />,
       );
 
-      // Both should be visible as separate entries
       await waitFor(() => {
         expect(screen.getByText("SOL")).toBeInTheDocument();
         expect(screen.getByText("WSOL")).toBeInTheDocument();
         expect(screen.getByText("Solana")).toBeInTheDocument();
         expect(screen.getByText("Wrapped Solana")).toBeInTheDocument();
 
-        // Should also show USDC
         expect(screen.getByText("USDC")).toBeInTheDocument();
         expect(screen.getByText("USD Coin")).toBeInTheDocument();
       });
@@ -118,16 +111,15 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
     it("should display correct addresses for SOL and WSOL", async () => {
       render(
         <TokenListInfinite
-          onSelect={mockOnSelect} // SOL and WSOL
+          onSelect={mockOnSelect}
           title="Test Tokens"
           tokens={[mockTokens[0], mockTokens[1]]}
         />,
       );
 
-      // Check that addresses are displayed (truncated)
       await waitFor(() => {
-        expect(screen.getByText("So11...1111")).toBeInTheDocument(); // SOL address truncated
-        expect(screen.getByText("So11...1112")).toBeInTheDocument(); // WSOL address truncated
+        expect(screen.getByText("So11...1111")).toBeInTheDocument();
+        expect(screen.getByText("So11...1112")).toBeInTheDocument();
       });
     });
   });
@@ -136,7 +128,7 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
     it("should call onSelect with SOL token when SOL is clicked", async () => {
       render(
         <TokenListInfinite
-          onSelect={mockOnSelect} // SOL token
+          onSelect={mockOnSelect}
           title="Test Tokens"
           tokens={[mockTokens[0]]}
         />,
@@ -150,14 +142,14 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
           address: SOL_ADDRESS,
           symbol: "SOL",
         }),
-        expect.any(Object), // MouseEvent
+        expect.any(Object),
       );
     });
 
     it("should call onSelect with WSOL token when WSOL is clicked", async () => {
       render(
         <TokenListInfinite
-          onSelect={mockOnSelect} // WSOL token
+          onSelect={mockOnSelect}
           title="Test Tokens"
           tokens={[mockTokens[1]]}
         />,
@@ -171,14 +163,14 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
           address: WSOL_ADDRESS,
           symbol: "WSOL",
         }),
-        expect.any(Object), // MouseEvent
+        expect.any(Object),
       );
     });
 
     it("should handle selection of both SOL and WSOL correctly", async () => {
       render(
         <TokenListInfinite
-          onSelect={mockOnSelect} // SOL and WSOL
+          onSelect={mockOnSelect}
           title="Test Tokens"
           tokens={[mockTokens[0], mockTokens[1]]}
         />,
@@ -186,14 +178,12 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
 
       const buttons = await waitFor(() => screen.getAllByRole("button"));
 
-      // Click SOL (first button)
       fireEvent.click(buttons[0]);
       expect(mockOnSelect).toHaveBeenCalledWith(
         expect.objectContaining({ address: SOL_ADDRESS }),
         expect.any(Object),
       );
 
-      // Click WSOL (second button)
       fireEvent.click(buttons[1]);
       expect(mockOnSelect).toHaveBeenCalledWith(
         expect.objectContaining({ address: WSOL_ADDRESS }),
@@ -208,13 +198,12 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
     it("should display other tokens normally", async () => {
       render(
         <TokenListInfinite
-          onSelect={mockOnSelect} // USDC token
+          onSelect={mockOnSelect}
           title="Test Tokens"
           tokens={[mockTokens[2]]}
         />,
       );
 
-      // Should display original symbol and name for non-SOL tokens
       await waitFor(() => {
         expect(screen.getByText("USDC")).toBeInTheDocument();
         expect(screen.getByText("USD Coin")).toBeInTheDocument();
@@ -232,10 +221,8 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
 
       const buttons = await waitFor(() => screen.getAllByRole("button"));
 
-      // All tokens should be rendered as buttons
       expect(buttons).toHaveLength(3);
 
-      // Each should have the expected structure
       buttons.forEach((button) => {
         expect(button).toHaveClass("flex", "w-full", "cursor-pointer");
       });
@@ -272,7 +259,6 @@ describe("TokenListInfinite SOL/WSOL Display Tests", () => {
         />,
       );
 
-      // Should still display SOL correctly even with empty original metadata
       await waitFor(() => {
         expect(screen.getByText("SOL")).toBeInTheDocument();
         expect(screen.getByText("Solana")).toBeInTheDocument();

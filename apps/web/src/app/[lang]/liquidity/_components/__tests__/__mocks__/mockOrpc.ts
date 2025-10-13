@@ -58,6 +58,8 @@ export const mockOrpc = () => {
     useTokenAccounts: vi.fn().mockReturnValue({
       buyTokenAccount: null,
       sellTokenAccount: null,
+      tokenAAccount: null,
+      tokenBAccount: null,
     }),
     useTransactionStatus: vi.fn().mockReturnValue({
       checkTransactionStatus: vi.fn(),

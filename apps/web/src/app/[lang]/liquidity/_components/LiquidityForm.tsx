@@ -111,7 +111,6 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
           >
             <div className="flex flex-col gap-4">
               <LiquidityTokenInputs
-                buyTokenAccount={tokenAccountsData.tokenAAccount}
                 calculateProportionalAmount={(
                   params: Omit<
                     CalculateProportionalAmountParams,
@@ -132,14 +131,14 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
                 isRefreshingBuy={tokenAccountsData.isRefreshingBuy}
                 isRefreshingSell={tokenAccountsData.isRefreshingSell}
                 poolDetails={poolDetails ?? null}
-                sellTokenAccount={tokenAccountsData.tokenBAccount}
+                tokenAAccount={tokenAccountsData.tokenAAccount}
                 tokenAAddress={tokenAAddress}
+                tokenBAccount={tokenAccountsData.tokenBAccount}
                 tokenBAddress={tokenBAddress}
                 tokenPrices={tokenPrices}
               />
 
               <LiquidityActionButton
-                buyTokenAccount={tokenAccountsData.tokenAAccount}
                 form={form}
                 isCalculating={isCalculating}
                 isPoolLoading={isPoolLoading}
@@ -150,9 +149,10 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
                 }
                 poolDetails={poolDetails ?? null}
                 publicKey={publicKey}
-                sellTokenAccount={tokenAccountsData.tokenBAccount}
                 send={send}
+                tokenAAccount={tokenAccountsData.tokenAAccount}
                 tokenAAddress={tokenAAddress}
+                tokenBAccount={tokenAccountsData.tokenBAccount}
                 tokenBAddress={tokenBAddress}
               />
             </div>

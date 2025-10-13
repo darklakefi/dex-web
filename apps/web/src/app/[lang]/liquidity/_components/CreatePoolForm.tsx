@@ -278,7 +278,6 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
           ? tokenADetails?.decimals || 0
           : tokenBDetails?.decimals || 0;
 
-      // Ensure we send the correct token addresses to the gateway
       const gatewayTokenXAddress = getGatewayTokenAddress(tokenXAddress);
       const gatewayTokenYAddress = getGatewayTokenAddress(tokenYAddress);
 
@@ -324,8 +323,8 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
               : undefined;
 
             toasts.showSuccessToast(successMessage);
-            refetchBuyTokenAccount();
-            refetchSellTokenAccount();
+            refetchTokenAAccount();
+            refetchTokenBAccount();
 
             await setLiquidityParams({
               tokenAAddress,
@@ -623,13 +622,13 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
                     }
                   >
                     {getCreatePoolFormButtonMessage({
-                      buyTokenAccount: tokenAAccount,
                       createStep: createState.step,
                       initialPrice: values.initialPrice,
                       publicKey,
-                      sellTokenAccount: tokenBAccount,
+                      tokenAAccount: tokenAAccount,
                       tokenAAddress,
                       tokenAAmount: values.tokenAAmount,
+                      tokenBAccount: tokenBAccount,
                       tokenBAddress,
                       tokenBAmount: values.tokenBAmount,
                     })}

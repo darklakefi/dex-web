@@ -15,7 +15,6 @@ interface UseRealtimeTokenAccountsParams {
 }
 
 export interface UseRealtimeTokenAccountsReturn {
-  // NEW - Preferred naming (tokenA = first token, tokenB = second token)
   tokenAAccount: TokenAccountsData | undefined;
   tokenBAccount: TokenAccountsData | undefined;
   refetchTokenAAccount: () => Promise<unknown>;
@@ -80,7 +79,6 @@ export function useRealtimeTokenAccounts({
   const pollingInterval = hasRecentTransaction ? 3000 : 15000;
   const staleTime = hasRecentTransaction ? 2000 : 10000;
 
-  // Determine if tokens use native SOL balance
   const tokenAUsesNativeSol = shouldUseNativeSolBalance(tokenAAddress);
   const tokenBUsesNativeSol = shouldUseNativeSolBalance(tokenBAddress);
 
@@ -118,7 +116,6 @@ export function useRealtimeTokenAccounts({
   const isRefreshingTokenB = tokenBQuery.isFetching && !tokenBQuery.isPending;
 
   return {
-    // Deprecated aliases (backwards compatibility)
     buyTokenAccount: tokenAQuery.data,
     buyTokenUsesNativeSol: tokenAUsesNativeSol,
     errorBuy: tokenAQuery.error,
@@ -144,7 +141,7 @@ export function useRealtimeTokenAccounts({
     refetchTokenBAccount: tokenBQuery.refetch,
     sellTokenAccount: tokenBQuery.data,
     sellTokenUsesNativeSol: tokenBUsesNativeSol,
-    // New naming
+
     tokenAAccount: tokenAQuery.data,
     tokenAUsesNativeSol,
     tokenBAccount: tokenBQuery.data,

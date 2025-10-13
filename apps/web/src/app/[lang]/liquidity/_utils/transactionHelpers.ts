@@ -179,7 +179,6 @@ export function buildRequestPayload(params: {
     amountLp = lpFromX < lpFromY ? lpFromX : lpFromY;
   }
 
-  // Ensure we send the correct token addresses to the gateway
   const gatewayTokenX = getGatewayTokenAddress(protocolAmounts.tokenX);
   const gatewayTokenY = getGatewayTokenAddress(protocolAmounts.tokenY);
 

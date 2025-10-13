@@ -78,12 +78,12 @@ export function LiquidityActionButton({
   const formCanSubmit = useStore(form.store, (state) => state.canSubmit);
 
   const validation = useLiquidityValidation({
-    buyTokenAccount: tokenAAccount,
     formValues,
     hasWallet: !!publicKey,
     poolDetails,
-    sellTokenAccount: tokenBAccount,
+    tokenAAccount: tokenAAccount,
     tokenAAddress: tokenAAddress || "",
+    tokenBAccount: tokenBAccount,
     tokenBAddress: tokenBAddress || "",
   });
 
@@ -159,7 +159,7 @@ export function LiquidityActionButton({
           });
         }}
       >
-        {buttonMessage}
+        Create Pool
       </Button>
     );
   }
