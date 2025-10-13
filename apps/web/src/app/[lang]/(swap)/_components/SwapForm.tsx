@@ -18,6 +18,7 @@ import {
   checkInsufficientBalance,
   convertToDecimal,
   formatAmountInput,
+  getGatewayTokenAddress,
   parseAmount,
   parseAmountBigNumber,
   sortSolanaAddresses,
@@ -499,13 +500,17 @@ export function SwapForm() {
         .multipliedBy(slippageFactor)
         .integerValue(BigNumber.ROUND_DOWN);
 
+      // Ensure we send the correct token addresses to the gateway
+      const gatewayTokenXAddress = getGatewayTokenAddress(tokenXAddress);
+      const gatewayTokenYAddress = getGatewayTokenAddress(tokenYAddress);
+
       const response = await client.dexGateway.createUnsignedTransaction({
         amountIn: toRawUnitsBigNumberAsBigInt(sellAmount, sellTokenDecimals),
         isSwapXToY: isXtoY,
         minOut: BigInt(minOutRaw.toString()),
         refCode: incomingReferralCode || "",
-        tokenMintX: tokenXAddress,
-        tokenMintY: tokenYAddress,
+        tokenMintX: gatewayTokenXAddress,
+        tokenMintY: gatewayTokenYAddress,
         trackingId: `swap-${Date.now()}`,
         userAddress: publicKey.toBase58(),
       });

@@ -2,6 +2,7 @@
 
 import type { TokenAccountsData } from "@dex-web/core";
 import { tanstackClient } from "@dex-web/orpc";
+import { shouldUseNativeSolBalance } from "@dex-web/utils";
 import type { PublicKey } from "@solana/web3.js";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePageVisibility } from "./usePageVisibility";
@@ -27,6 +28,10 @@ export interface UseRealtimeTokenAccountsReturn {
   isRealtimeBuy: boolean;
   isRealtimeSell: boolean;
   isRealtime: boolean;
+  /** Whether buy token uses native SOL balance */
+  buyTokenUsesNativeSol: boolean;
+  /** Whether sell token uses native SOL balance */
+  sellTokenUsesNativeSol: boolean;
 }
 
 /**
@@ -43,6 +48,10 @@ export function useRealtimeTokenAccounts({
   const isVisible = usePageVisibility();
   const pollingInterval = hasRecentTransaction ? 3000 : 15000;
   const staleTime = hasRecentTransaction ? 2000 : 10000;
+
+  // Determine if tokens use native SOL balance
+  const buyTokenUsesNativeSol = shouldUseNativeSolBalance(tokenAAddress);
+  const sellTokenUsesNativeSol = shouldUseNativeSolBalance(tokenBAddress);
 
   const buyQuery = useQuery({
     ...tanstackClient.helius.getTokenAccounts.queryOptions({
@@ -79,6 +88,7 @@ export function useRealtimeTokenAccounts({
 
   return {
     buyTokenAccount: buyQuery.data,
+    buyTokenUsesNativeSol,
     errorBuy: buyQuery.error,
     errorSell: sellQuery.error,
     isLoadingBuy: buyQuery.isPending,
@@ -91,5 +101,6 @@ export function useRealtimeTokenAccounts({
     refetchBuyTokenAccount: buyQuery.refetch,
     refetchSellTokenAccount: sellQuery.refetch,
     sellTokenAccount: sellQuery.data,
+    sellTokenUsesNativeSol,
   };
 }

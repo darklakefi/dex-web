@@ -1,4 +1,6 @@
 {
+  "implicitDependencies": ["grpc-client"],
+  "name": "proto-definitions",
   "targets": {
     "generate": {
       "executor": "nx:run-commands",

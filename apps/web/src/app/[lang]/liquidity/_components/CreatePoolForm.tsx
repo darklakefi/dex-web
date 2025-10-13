@@ -14,6 +14,7 @@ import type {
 } from "@dex-web/orpc/schemas/index";
 import { Box, Button, Icon, Text } from "@dex-web/ui";
 import {
+  getGatewayTokenAddress,
   numberFormatHelper,
   parseAmount,
   sortSolanaAddresses,
@@ -277,6 +278,10 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
           ? tokenADetails?.decimals || 0
           : tokenBDetails?.decimals || 0;
 
+      // Ensure we send the correct token addresses to the gateway
+      const gatewayTokenXAddress = getGatewayTokenAddress(tokenXAddress);
+      const gatewayTokenYAddress = getGatewayTokenAddress(tokenYAddress);
+
       const response = await client.pools.createPoolTransaction({
         depositAmountX: BigNumber(depositAmountX)
           .multipliedBy(10 ** tokenXDecimals)
@@ -284,8 +289,8 @@ export function CreatePoolForm({ tokenPrices = {} }: CreatePoolFormProps) {
         depositAmountY: BigNumber(depositAmountY)
           .multipliedBy(10 ** tokenYDecimals)
           .toFixed(0),
-        tokenXMint: tokenXAddress,
-        tokenYMint: tokenYAddress,
+        tokenXMint: gatewayTokenXAddress,
+        tokenYMint: gatewayTokenYAddress,
         user: publicKey.toBase58(),
       } satisfies CreatePoolTransactionInput);
 

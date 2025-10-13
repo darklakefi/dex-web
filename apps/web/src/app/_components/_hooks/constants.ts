@@ -10,13 +10,16 @@
  * - usePoolTokens
  * - useInfinitePoolTokens
  */
+import { SOL_TOKEN_ADDRESS, WSOL_TOKEN_ADDRESS } from "@dex-web/utils";
+
 export const POPULAR_TOKEN_ADDRESSES = [
-  "So11111111111111111111111111111111111111112",
-  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-  "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
-  "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
-  "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+  SOL_TOKEN_ADDRESS, // Native SOL
+  WSOL_TOKEN_ADDRESS, // Wrapped SOL (WSOL)
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
+  "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // USDT
+  "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", // BONK
+  "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs", // WIF
+  "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN", // JUP
 ];
 
 /**
@@ -47,9 +50,12 @@ export const PREFETCH_DELAY_MS = 1000;
  * Popular token search terms that should be prefetched in the background
  * when the SelectTokenModal is opened. These are common tokens users
  * frequently search for.
+ *
+ * Updated to include both SOL and WSOL as separate search terms.
  */
 export const POPULAR_TOKEN_SEARCHES = [
   "SOL",
+  "WSOL",
   "USDC",
   "USDT",
   "BONK",

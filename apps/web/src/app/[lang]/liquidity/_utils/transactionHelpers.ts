@@ -1,6 +1,7 @@
 import { ERROR_MESSAGES, isWarningMessage } from "@dex-web/core";
 import { client } from "@dex-web/orpc";
 import {
+  getGatewayTokenAddress,
   mapAmountsToProtocol,
   type TokenOrderContext,
   toRawUnitsBigNumberAsBigInt,
@@ -178,14 +179,18 @@ export function buildRequestPayload(params: {
     amountLp = lpFromX < lpFromY ? lpFromX : lpFromY;
   }
 
+  // Ensure we send the correct token addresses to the gateway
+  const gatewayTokenX = getGatewayTokenAddress(protocolAmounts.tokenX);
+  const gatewayTokenY = getGatewayTokenAddress(protocolAmounts.tokenY);
+
   return {
     amountLp,
     label: "",
     maxAmountX,
     maxAmountY,
     refCode: params.refCode || "",
-    tokenMintX: protocolAmounts.tokenX,
-    tokenMintY: protocolAmounts.tokenY,
+    tokenMintX: gatewayTokenX,
+    tokenMintY: gatewayTokenY,
     userAddress: params.effectivePublicKey.toBase58(),
   };
 }

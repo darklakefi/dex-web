@@ -1,5 +1,6 @@
 "use client";
 
+import { type SolTokenType, shouldUseNativeSolBalance } from "@dex-web/utils";
 import type { PublicKey } from "@solana/web3.js";
 import { type QueryFunctionContext, useQuery } from "@tanstack/react-query";
 
@@ -35,6 +36,10 @@ export interface TokenAccount {
   decimals: number;
   mint: string;
   symbol: string;
+  /** Whether this represents native SOL balance */
+  isNativeSol?: boolean;
+  /** The SOL token type */
+  solTokenType?: SolTokenType;
 }
 
 export interface TokenAccountsData {
@@ -50,6 +55,10 @@ export interface UseTokenAccountsReturn {
   isLoadingSell: boolean;
   errorBuy: Error | null;
   errorSell: Error | null;
+  /** Whether buy token uses native SOL balance */
+  buyTokenUsesNativeSol: boolean;
+  /** Whether sell token uses native SOL balance */
+  sellTokenUsesNativeSol: boolean;
 }
 
 const DEFAULT_NETWORK = "mainnet";
@@ -74,6 +83,10 @@ export const useTokenAccounts = ({
   network,
 }: UseTokenAccountsParams): UseTokenAccountsReturn => {
   const networkKey = resolveNetwork(network);
+
+  // Determine if tokens use native SOL balance
+  const buyTokenUsesNativeSol = shouldUseNativeSolBalance(tokenAAddress);
+  const sellTokenUsesNativeSol = shouldUseNativeSolBalance(tokenBAddress);
 
   const buyQueryOptions = tanstackClient.helius.getTokenAccounts.queryOptions({
     input: {
@@ -119,6 +132,7 @@ export const useTokenAccounts = ({
 
   return {
     buyTokenAccount: buyTokenAccount as TokenAccountsData | undefined,
+    buyTokenUsesNativeSol,
     errorBuy,
     errorSell,
     isLoadingBuy,
@@ -126,5 +140,6 @@ export const useTokenAccounts = ({
     refetchBuyTokenAccount,
     refetchSellTokenAccount,
     sellTokenAccount: sellTokenAccount as TokenAccountsData | undefined,
+    sellTokenUsesNativeSol,
   };
 };

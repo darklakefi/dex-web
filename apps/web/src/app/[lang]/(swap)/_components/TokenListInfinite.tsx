@@ -1,7 +1,12 @@
 "use client";
 import type { Token } from "@dex-web/orpc/schemas/index";
 import { Text } from "@dex-web/ui";
-import { truncate } from "@dex-web/utils";
+import {
+  getSolTokenDisplayName,
+  getSolTokenType,
+  SolTokenType,
+  truncate,
+} from "@dex-web/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   useCallback,
@@ -202,6 +207,19 @@ export function TokenListInfinite({
               );
             }
 
+            // Determine display properties for SOL variants
+            const solTokenType = getSolTokenType(token.address);
+            const displaySymbol =
+              solTokenType !== SolTokenType.OTHER
+                ? getSolTokenDisplayName(token.address)
+                : token.symbol;
+            const displayName =
+              solTokenType === SolTokenType.NATIVE_SOL
+                ? "Solana"
+                : solTokenType === SolTokenType.WRAPPED_SOL
+                  ? "Wrapped Solana"
+                  : token.name;
+
             return (
               <div
                 className="cursor-pointer transition-opacity duration-150 hover:opacity-70"
@@ -225,12 +243,12 @@ export function TokenListInfinite({
                     imageUrl={token.imageUrl}
                     priority={virtualItem.index < 10}
                     size={32}
-                    symbol={token.symbol}
+                    symbol={displaySymbol}
                   />
                   <div className="flex min-w-0 flex-1 flex-col items-start">
                     <div className="flex min-w-0 gap-3">
                       <Text.Body2 as="span" className="font-medium">
-                        {token.symbol}
+                        {displaySymbol}
                       </Text.Body2>
                       <div className="flex-shrink-0">
                         <span className="bg-green-600 px-1 text-green-300 text-sm">
@@ -239,7 +257,7 @@ export function TokenListInfinite({
                       </div>
                     </div>
                     <span className="truncate text-green-300 text-sm">
-                      {token.name}
+                      {displayName}
                     </span>
                   </div>
                 </button>
