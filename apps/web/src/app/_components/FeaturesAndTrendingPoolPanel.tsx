@@ -2,7 +2,7 @@
 
 import type { Pool } from "@dex-web/core";
 import { useQueryStates } from "nuqs";
-import { usePinnedPools } from "../../hooks/queries/usePoolQueries";
+import { usePinnedPools } from "../../hooks/queries/usePinnedPools";
 import { LIQUIDITY_PAGE_TYPE } from "../_utils/constants";
 import { liquidityPageParsers } from "../_utils/searchParams";
 import { ShortPoolPanel } from "../[lang]/(swap)/_components/ShortPoolPanel";

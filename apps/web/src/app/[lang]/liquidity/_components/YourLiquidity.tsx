@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import { useState } from "react";
 import { useUserLiquidity } from "../../../../hooks/queries/useLiquidityQueries";
-import { usePoolReserves } from "../../../../hooks/queries/usePoolQueries";
+import { usePoolData } from "../../../../hooks/usePoolData";
 import {
   DEFAULT_BUY_TOKEN,
   DEFAULT_SELL_TOKEN,
@@ -96,8 +96,10 @@ export function YourLiquidity({
     );
 
   const { data: poolReserves, isFetching: isPoolReservesFetching } =
-    usePoolReserves(tokenXAddress, tokenYAddress, {
-      enabled: shouldFetchLiquidity,
+    usePoolData({
+      priority: "normal",
+      tokenXMint: tokenXAddress,
+      tokenYMint: tokenYAddress,
     });
 
   const tokenXPrice = tokenPrices[tokenXAddress];

@@ -31,21 +31,54 @@ async function detectTokenProgram(
   }
 }
 
+/**
+ * Safely converts various numeric types to JavaScript number.
+ * Throws an error if the value exceeds JavaScript's safe integer limit.
+ *
+ * @throws {Error} If value is too large for safe conversion
+ */
 function toNumber(value: unknown): number {
   if (!value) return 0;
   if (typeof value === "number") return value;
+  if (typeof value === "bigint") {
+    if (value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER) {
+      throw new Error(
+        `BigInt value ${value} exceeds JavaScript safe integer limit`,
+      );
+    }
+    return Number(value);
+  }
 
   if (
     typeof value === "object" &&
-    "toNumber" in value &&
-    typeof value.toNumber === "function"
+    "toString" in value &&
+    typeof value.toString === "function"
   ) {
-    return value.toNumber();
+    const strValue = value.toString();
+    const numValue = Number(strValue);
+
+    if (Number.isNaN(numValue) || !Number.isFinite(numValue)) {
+      throw new Error(`Cannot convert value to number: ${strValue}`);
+    }
+
+    // Check if value is within safe integer range
+    if (
+      numValue > Number.MAX_SAFE_INTEGER ||
+      numValue < Number.MIN_SAFE_INTEGER
+    ) {
+      throw new Error(
+        `Value ${strValue} exceeds JavaScript safe integer limit (±${Number.MAX_SAFE_INTEGER})`,
+      );
+    }
+
+    return numValue;
   }
 
   if (typeof value === "string") {
     const decimal = Number(value);
-    if (!Number.isNaN(decimal)) return decimal;
+    if (!Number.isNaN(decimal) && Number.isFinite(decimal)) {
+      return decimal;
+    }
     return parseInt(value, 16);
   }
 

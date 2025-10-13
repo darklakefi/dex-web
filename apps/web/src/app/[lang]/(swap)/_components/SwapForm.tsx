@@ -33,8 +33,8 @@ import { useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
 import * as z from "zod";
-import { usePoolDetails } from "../../../../hooks/queries/usePoolQueries";
 import { useAnalytics } from "../../../../hooks/useAnalytics";
+import { usePoolData } from "../../../../hooks/usePoolData";
 import { useTokenPricesMap } from "../../../../hooks/useTokenPrices";
 import {
   useWalletAdapter,
@@ -230,36 +230,30 @@ export function SwapForm() {
         transactionHash: _trackDetails.trackingId,
       });
 
-      refetchBuyTokenAccount();
-      refetchSellTokenAccount();
-
-      queryClient.invalidateQueries({
-        queryKey: ["token-accounts", publicKey?.toBase58()],
-      });
-
+      // Invalidate specific pool and token accounts using oRPC keys
       if (tokenAAddress && tokenBAddress) {
         const { tokenXAddress: tokenXMint, tokenYAddress: tokenYMint } =
           sortSolanaAddresses(tokenAAddress, tokenBAddress);
 
-        const poolKey = `${tokenXMint}-${tokenYMint}`;
-
         queryClient.invalidateQueries({
-          queryKey: ["pool-details", poolKey],
+          queryKey: tanstackClient.pools.getPoolReserves.key({
+            input: { tokenXMint, tokenYMint },
+          }),
         });
 
-        const poolDetailsOpts =
-          tanstackClient.pools.getPoolDetails.queryOptions({
-            input: { tokenXMint, tokenYMint },
+        if (publicKey) {
+          queryClient.invalidateQueries({
+            queryKey: tanstackClient.helius.getTokenAccounts.key({
+              input: { mint: tokenXMint, ownerAddress: publicKey.toBase58() },
+            }),
           });
 
-        queryClient.invalidateQueries({ queryKey: poolDetailsOpts.queryKey });
-
-        queryClient.invalidateQueries({
-          queryKey: ["pool", tokenXMint, tokenYMint],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["pool", tokenYMint, tokenXMint],
-        });
+          queryClient.invalidateQueries({
+            queryKey: tanstackClient.helius.getTokenAccounts.key({
+              input: { mint: tokenYMint, ownerAddress: publicKey.toBase58() },
+            }),
+          });
+        }
       }
     },
     onTimeout: () => {
@@ -284,13 +278,11 @@ export function SwapForm() {
       return sortSolanaAddresses(tokenAAddress, tokenBAddress);
     }, [tokenAAddress, tokenBAddress]);
 
-  const { data: poolDetails } = usePoolDetails(
-    sortedTokenXMint || "",
-    sortedTokenYMint || "",
-    {
-      enabled: Boolean(sortedTokenXMint && sortedTokenYMint),
-    },
-  );
+  const { data: poolDetails } = usePoolData({
+    priority: "high",
+    tokenXMint: sortedTokenXMint || "",
+    tokenYMint: sortedTokenYMint || "",
+  });
 
   const {
     buyTokenAccount,

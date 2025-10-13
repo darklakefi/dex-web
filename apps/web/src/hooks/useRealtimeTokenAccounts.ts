@@ -1,14 +1,10 @@
 "use client";
 
-import {
-  type TokenAccountsData,
-  type UseTokenAccountsReturn,
-  useTokenAccounts,
-} from "@dex-web/core";
+import type { TokenAccountsData } from "@dex-web/core";
 import { tanstackClient } from "@dex-web/orpc";
 import type { PublicKey } from "@solana/web3.js";
-import { QueryClient as QueryClientClass } from "@tanstack/react-query";
-import { usePollingQuery } from "./usePollingQuery";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { usePageVisibility } from "./usePageVisibility";
 
 interface UseRealtimeTokenAccountsParams {
   publicKey: PublicKey | null;
@@ -17,92 +13,83 @@ interface UseRealtimeTokenAccountsParams {
   hasRecentTransaction?: boolean;
 }
 
-export function useRealtimeTokenAccounts({
-  publicKey,
-  tokenAAddress,
-  tokenBAddress,
-  hasRecentTransaction = false,
-}: UseRealtimeTokenAccountsParams): UseTokenAccountsReturn & {
+interface UseRealtimeTokenAccountsReturn {
+  buyTokenAccount: TokenAccountsData | undefined;
+  sellTokenAccount: TokenAccountsData | undefined;
+  refetchBuyTokenAccount: () => Promise<unknown>;
+  refetchSellTokenAccount: () => Promise<unknown>;
+  isLoadingBuy: boolean;
+  isLoadingSell: boolean;
+  errorBuy: Error | null;
+  errorSell: Error | null;
   isRefreshingBuy: boolean;
   isRefreshingSell: boolean;
   isRealtimeBuy: boolean;
   isRealtimeSell: boolean;
   isRealtime: boolean;
-} {
-  const tokenAccountsResult = useTokenAccounts({
-    publicKey,
-    tanstackClient,
-    tokenAAddress,
-    tokenBAddress,
+}
+
+/**
+ * Fetches token account balances with dynamic polling intervals.
+ * Uses TanStack Query v5's keepPreviousData to prevent UI flicker during refetches.
+ * Polling interval adapts based on recent transaction activity.
+ */
+export function useRealtimeTokenAccounts({
+  publicKey,
+  tokenAAddress,
+  tokenBAddress,
+  hasRecentTransaction = false,
+}: UseRealtimeTokenAccountsParams): UseRealtimeTokenAccountsReturn {
+  const isVisible = usePageVisibility();
+  const pollingInterval = hasRecentTransaction ? 3000 : 15000;
+  const staleTime = hasRecentTransaction ? 2000 : 10000;
+
+  const buyQuery = useQuery({
+    ...tanstackClient.helius.getTokenAccounts.queryOptions({
+      input: {
+        mint: tokenAAddress || "",
+        ownerAddress: publicKey?.toBase58() || "",
+      },
+    }),
+    enabled: !!publicKey && !!tokenAAddress,
+    placeholderData: keepPreviousData,
+    // Pause polling when page is hidden
+    refetchInterval: isVisible ? pollingInterval : false,
+    refetchIntervalInBackground: false,
+    staleTime,
   });
 
-  const { data: liveBuyTokenAccount } = usePollingQuery<TokenAccountsData>(
-    ["token-accounts-live", publicKey?.toBase58(), tokenAAddress],
-    async () => {
-      const queryOptions = tanstackClient.helius.getTokenAccounts.queryOptions({
-        input: {
-          mint: tokenAAddress || "",
-          ownerAddress: publicKey?.toBase58() || "",
-        },
-      });
-      return queryOptions.queryFn({
-        client: new QueryClientClass(),
-        meta: undefined,
-        queryKey: queryOptions.queryKey,
-        signal: new AbortController().signal,
-      });
-    },
-    {
-      enabled: !!publicKey && !!tokenAAddress,
-      placeholderData: (previousData) => previousData,
-      pollingInterval: hasRecentTransaction ? 3000 : 15000,
-      staleTime: hasRecentTransaction ? 2000 : 30000,
-    },
-  );
+  const sellQuery = useQuery({
+    ...tanstackClient.helius.getTokenAccounts.queryOptions({
+      input: {
+        mint: tokenBAddress || "",
+        ownerAddress: publicKey?.toBase58() || "",
+      },
+    }),
+    enabled: !!publicKey && !!tokenBAddress,
+    placeholderData: keepPreviousData,
+    // Pause polling when page is hidden
+    refetchInterval: isVisible ? pollingInterval : false,
+    refetchIntervalInBackground: false,
+    staleTime,
+  });
 
-  const { data: liveSellTokenAccount } = usePollingQuery<TokenAccountsData>(
-    ["token-accounts-live", publicKey?.toBase58(), tokenBAddress],
-    async () => {
-      const queryOptions = tanstackClient.helius.getTokenAccounts.queryOptions({
-        input: {
-          mint: tokenBAddress || "",
-          ownerAddress: publicKey?.toBase58() || "",
-        },
-      });
-      return queryOptions.queryFn({
-        client: new QueryClientClass(),
-        meta: undefined,
-        queryKey: queryOptions.queryKey,
-        signal: new AbortController().signal,
-      });
-    },
-    {
-      enabled: !!publicKey && !!tokenBAddress,
-      placeholderData: (previousData) => previousData,
-      pollingInterval: hasRecentTransaction ? 3000 : 15000,
-      staleTime: hasRecentTransaction ? 2000 : 30000,
-    },
-  );
-
-  const isRefreshingBuy =
-    tokenAccountsResult.isLoadingBuy && !!tokenAccountsResult.buyTokenAccount;
-  const isRefreshingSell =
-    tokenAccountsResult.isLoadingSell && !!tokenAccountsResult.sellTokenAccount;
+  const isRefreshingBuy = buyQuery.isFetching && !buyQuery.isPending;
+  const isRefreshingSell = sellQuery.isFetching && !sellQuery.isPending;
 
   return {
-    buyTokenAccount: liveBuyTokenAccount || tokenAccountsResult.buyTokenAccount,
-    errorBuy: tokenAccountsResult.errorBuy,
-    errorSell: tokenAccountsResult.errorSell,
-    isLoadingBuy: tokenAccountsResult.isLoadingBuy,
-    isLoadingSell: tokenAccountsResult.isLoadingSell,
+    buyTokenAccount: buyQuery.data,
+    errorBuy: buyQuery.error,
+    errorSell: sellQuery.error,
+    isLoadingBuy: buyQuery.isPending,
+    isLoadingSell: sellQuery.isPending,
     isRealtime: !!publicKey && !!tokenAAddress && !!tokenBAddress,
     isRealtimeBuy: !!publicKey && !!tokenAAddress,
     isRealtimeSell: !!publicKey && !!tokenBAddress,
     isRefreshingBuy,
     isRefreshingSell,
-    refetchBuyTokenAccount: tokenAccountsResult.refetchBuyTokenAccount,
-    refetchSellTokenAccount: tokenAccountsResult.refetchSellTokenAccount,
-    sellTokenAccount:
-      liveSellTokenAccount || tokenAccountsResult.sellTokenAccount,
+    refetchBuyTokenAccount: buyQuery.refetch,
+    refetchSellTokenAccount: sellQuery.refetch,
+    sellTokenAccount: sellQuery.data,
   };
 }

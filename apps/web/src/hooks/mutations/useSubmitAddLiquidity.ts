@@ -37,9 +37,11 @@ export function useSubmitAddLiquidity() {
       _data: SubmitAddLiquidityOutput,
       variables: SubmitAddLiquidityInput,
     ) => {
-      // Invalidate all liquidity-related queries after successful blockchain transaction
+      // Invalidate liquidity-related queries for the specific pool and tokens
       await invalidateLiquidityData(queryClient, {
         ownerAddress: variables.userAddress,
+        tokenXMint: variables.tokenMintX,
+        tokenYMint: variables.tokenMintY,
       });
     },
   });

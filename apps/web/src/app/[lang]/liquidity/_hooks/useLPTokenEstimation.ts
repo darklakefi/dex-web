@@ -26,7 +26,6 @@ import {
   mapUIToProtocolOrder,
   shouldEnableQuery,
 } from "../_utils/lpEstimationHelpers";
-import { createLPEstimationQueryKey } from "../_utils/queryKeys";
 
 export interface UseLPTokenEstimationParams {
   /**
@@ -217,12 +216,6 @@ export function useLPTokenEstimation({
     ],
   );
 
-  const queryKey = createLPEstimationQueryKey(
-    orderContext,
-    tokenXAmount,
-    tokenYAmount,
-  );
-
   const query = useQuery({
     ...tanstackClient.dexGateway.quoteAddLiquidity.queryOptions({
       input: {
@@ -236,8 +229,6 @@ export function useLPTokenEstimation({
     }),
     enabled: isQueryEnabled,
     gcTime: 120_000,
-    placeholderData: (previousData) => previousData,
-    queryKey,
     retry: 1,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
     staleTime: 30_000,
