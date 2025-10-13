@@ -70,9 +70,9 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
   );
 
   const tokenADecimals =
-    tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]?.decimals ?? 0;
+    tokenAccountsData.tokenAAccount?.tokenAccounts?.[0]?.decimals ?? 0;
   const tokenBDecimals =
-    tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]?.decimals ?? 0;
+    tokenAccountsData.tokenBAccount?.tokenAccounts?.[0]?.decimals ?? 0;
 
   const orderContext = useTokenOrder();
 
@@ -111,7 +111,7 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
           >
             <div className="flex flex-col gap-4">
               <LiquidityTokenInputs
-                buyTokenAccount={tokenAccountsData.buyTokenAccount}
+                buyTokenAccount={tokenAccountsData.tokenAAccount}
                 calculateProportionalAmount={(
                   params: Omit<
                     CalculateProportionalAmountParams,
@@ -132,14 +132,14 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
                 isRefreshingBuy={tokenAccountsData.isRefreshingBuy}
                 isRefreshingSell={tokenAccountsData.isRefreshingSell}
                 poolDetails={poolDetails ?? null}
-                sellTokenAccount={tokenAccountsData.sellTokenAccount}
+                sellTokenAccount={tokenAccountsData.tokenBAccount}
                 tokenAAddress={tokenAAddress}
                 tokenBAddress={tokenBAddress}
                 tokenPrices={tokenPrices}
               />
 
               <LiquidityActionButton
-                buyTokenAccount={tokenAccountsData.buyTokenAccount}
+                buyTokenAccount={tokenAccountsData.tokenAAccount}
                 form={form}
                 isCalculating={isCalculating}
                 isPoolLoading={isPoolLoading}
@@ -150,7 +150,7 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
                 }
                 poolDetails={poolDetails ?? null}
                 publicKey={publicKey}
-                sellTokenAccount={tokenAccountsData.sellTokenAccount}
+                sellTokenAccount={tokenAccountsData.tokenBAccount}
                 send={send}
                 tokenAAddress={tokenAAddress}
                 tokenBAddress={tokenBAddress}
@@ -167,13 +167,13 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
                 form={form}
                 isLPEstimationLoading={lpEstimation.isLoading}
                 tokenASymbol={
-                  tokenAccountsData.buyTokenAccount?.tokenAccounts?.[0]
-                    ?.symbol || ""
+                  tokenAccountsData.tokenAAccount?.tokenAccounts?.[0]?.symbol ||
+                  ""
                 }
                 tokenBAddress={tokenBAddress ?? ""}
                 tokenBSymbol={
-                  tokenAccountsData.sellTokenAccount?.tokenAccounts?.[0]
-                    ?.symbol || ""
+                  tokenAccountsData.tokenBAccount?.tokenAccounts?.[0]?.symbol ||
+                  ""
                 }
                 tokenXMint={poolDetails?.tokenXMint}
                 tokenXReserve={poolDetails?.tokenXReserve}
