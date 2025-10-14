@@ -214,12 +214,12 @@ export function SwapForm() {
         return;
       }
 
-      swapState.reset();
-      form.reset();
       const successMessage = isSquadsX(walletAdapter?.wallet)
         ? undefined
         : `SWAPPED ${form.state.values.tokenAAmount} ${tokenBAddress} FOR ${form.state.values.tokenBAmount} ${tokenAAddress}. protected from MEV attacks.`;
 
+      swapState.reset();
+      form.reset();
       toasts.dismiss();
 
       toasts.showSuccessToast(successMessage);
