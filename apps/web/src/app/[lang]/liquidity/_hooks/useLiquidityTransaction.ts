@@ -39,6 +39,8 @@ interface UseLiquidityTransactionParams {
   readonly resetForm?: () => void;
   readonly onTransactionComplete?: () => void;
   readonly orderContext: TokenOrderContext | null;
+  readonly tokenASymbol: string;
+  readonly tokenBSymbol: string;
 }
 
 export function useLiquidityTransaction({
@@ -48,6 +50,8 @@ export function useLiquidityTransaction({
   resetForm,
   onTransactionComplete,
   orderContext,
+  tokenASymbol,
+  tokenBSymbol,
 }: UseLiquidityTransactionParams) {
   const { signTransaction, wallet, publicKey } = useWallet();
   const { data: walletAdapter } = useWalletAdapter();
@@ -115,7 +119,22 @@ export function useLiquidityTransaction({
         throw new Error("Pool data is required");
       }
 
-      toasts.showStepToast(1);
+      toasts.showStepToast(1, [
+        {
+          key: "token-x-symbol",
+          value:
+            currentPoolData.tokenXMint === tokenAAddress
+              ? tokenASymbol
+              : tokenBSymbol,
+        },
+        {
+          key: "token-y-symbol",
+          value:
+            currentPoolData.tokenYMint === tokenBAddress
+              ? tokenBSymbol
+              : tokenASymbol,
+        },
+      ]);
 
       const tokenAAmount = parseAmount(values.tokenAAmount);
       const tokenBAmount = parseAmount(values.tokenBAmount);
@@ -232,6 +251,8 @@ export function useLiquidityTransaction({
       walletAdapter,
       tokenAAddress,
       tokenBAddress,
+      tokenASymbol,
+      tokenBSymbol,
       trackLiquidity,
       addLiquidityMutation,
       submitAddLiquidityMutation,

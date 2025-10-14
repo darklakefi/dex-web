@@ -35,7 +35,10 @@ export interface UseTransactionToastsParams {
 }
 
 export interface UseTransactionToastsReturn {
-  showStepToast: (step: number) => void;
+  showStepToast: (
+    step: number,
+    params?: { key: string; value: string }[],
+  ) => void;
   showSuccessToast: (message?: string, customAction?: React.ReactNode) => void;
   showErrorToast: (
     error: string | Error,
@@ -87,15 +90,23 @@ export const useTransactionToasts = ({
   customMessages,
 }: UseTransactionToastsParams): UseTransactionToastsReturn => {
   const showStepToast = useCallback(
-    (step: number) => {
+    (step: number, params?: { key: string; value: string }[]) => {
       const stepKey = `STEP_${step}` as keyof typeof TRANSACTION_STEPS;
       const stepData = TRANSACTION_STEPS[stepKey];
       const descriptionData = TRANSACTION_DESCRIPTIONS[stepKey];
 
       if (stepData && descriptionData) {
+        let title: string = stepData[transactionType];
+
+        if (params && params.length > 0) {
+          params.forEach(({ key, value }) => {
+            title = title.replace(`{${key}}`, value);
+          });
+        }
+
         toast({
           description: descriptionData[transactionType],
-          title: stepData[transactionType],
+          title,
           variant: "loading",
         });
       }
