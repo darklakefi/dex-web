@@ -267,7 +267,7 @@ export function WithdrawLiquidityModal({
                 ? `Transaction initiated. You can now cast votes for this proposal on the Squads app.`
                 : isSubmitted
                   ? submittedToast.description
-                  : `Successfully withdrew ${form.state.values.withdrawalAmount}% of your liquidity. Transaction: ${submitRes.signature}`}
+                  : `Successfully withdrew ${opts.minTokenYOut} ${tokenYSymbol} + ${opts.minTokenXOut} ${tokenXSymbol}. Transaction: ${submitRes.signature}`}
             </Text.Body2>
           </div>
         ),
