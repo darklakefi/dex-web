@@ -21,16 +21,18 @@ export function Hero({
 }: HeroProps) {
   return (
     <div
-      className={twMerge("flex items-center justify-between", className)}
+      className={twMerge(
+        "relative flex items-center justify-between",
+        className,
+      )}
       {...props}
     >
       {imagePosition === "start" && (
         <Image
           alt="Waddles"
-          className={twMerge("self-start", imageClassName)}
+          className={twMerge("absolute left-0 self-start", imageClassName)}
           height={imageHeight ?? 420}
           src={image}
-          style={{ height: "auto", width: "auto" }}
           width={imageWidth ?? 200}
         />
       )}
@@ -38,10 +40,9 @@ export function Hero({
       {imagePosition === "end" && (
         <Image
           alt="Waddles"
-          className={twMerge("self-end", imageClassName)}
+          className={twMerge("absolute right-0 self-end", imageClassName)}
           height={imageHeight ?? 420}
           src={image}
-          style={{ height: "auto", width: "auto" }}
           width={imageWidth ?? 200}
         />
       )}

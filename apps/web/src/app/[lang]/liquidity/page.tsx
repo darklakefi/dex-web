@@ -170,14 +170,16 @@ export default async function Page({
         <div className="flex w-full max-w-xl flex-col items-center justify-center">
           <section className="hidden w-full items-start gap-1 md:flex">
             <div className="size-9" />
-            <Box className="mb-0 bg-green-800 pb-0">
+            <Box className="mb-0 bg-green-800 p-0">
               <Hero
                 className="gap-4"
-                image="/images/waddles/pose4.png"
-                imageClassName="scale-x-[-1]"
+                image="/images/waddles/pose3.png"
+                imageClassName="right-6"
+                imageHeight={198}
                 imagePosition="end"
+                imageWidth={180}
               >
-                <div className="flex flex-col gap-3 uppercase">
+                <div className="flex flex-col gap-3 py-4 pl-6 uppercase">
                   <Text.Heading>liquidity</Text.Heading>
                   <div className="flex flex-col text-md">
                     <Text.Body2 className="text-md md:text-lg">
