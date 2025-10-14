@@ -158,20 +158,15 @@ export function FormFieldset({
               {(isLoading && !tokenAccount) || !tokenAccount ? (
                 <SkeletonLoader className="w-28" variant="balance" />
               ) : (
-                <>
-                  <span>
-                    {numberFormatHelper({
-                      decimalScale: 2,
-                      thousandSeparator: true,
-                      trimTrailingZeros: true,
-                      value: convertToDecimal(amount, decimals).toString(),
-                    })}{" "}
-                    {tokenSymbol}
-                  </span>
-                  {isRefreshing && (
-                    <div className="ml-2 h-3 w-3 animate-spin rounded-full border border-green-300 border-t-transparent opacity-70"></div>
-                  )}
-                </>
+                <span>
+                  {numberFormatHelper({
+                    decimalScale: 2,
+                    thousandSeparator: true,
+                    trimTrailingZeros: true,
+                    value: convertToDecimal(amount, decimals).toString(),
+                  })}{" "}
+                  {tokenSymbol}
+                </span>
               )}
             </span>
             {tokenAccount && (
