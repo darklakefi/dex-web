@@ -98,9 +98,10 @@ export default async function Page({
               <Hero
                 className="gap-4"
                 image="/images/waddles/pose4.png"
-                imageClassName="scale-x-[-1] "
+                imageClassName="scale-x-[-1] right-4"
                 imageHeight={195}
                 imagePosition="end"
+                imageWidth={200}
               >
                 <div className="flex flex-col gap-3 py-4 pl-6 uppercase">
                   <Text.Heading>swap</Text.Heading>

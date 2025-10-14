@@ -82,7 +82,7 @@ export default async function RootLayout({
                     </Text.Body2>
                   </div>
                 </Box>
-                <div className="hidden md:block">{children}</div>
+                <div className="mt-20 hidden md:block">{children}</div>
               </PageLayout>
               {modal}
             </ReferralCodeProvider>

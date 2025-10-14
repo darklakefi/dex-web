@@ -33,7 +33,6 @@ export function Hero({
           className={twMerge("absolute left-0 self-start", imageClassName)}
           height={imageHeight ?? 420}
           src={image}
-          style={{ height: "auto", width: "auto" }}
           width={imageWidth ?? 200}
         />
       )}
@@ -44,7 +43,6 @@ export function Hero({
           className={twMerge("absolute right-0 self-end", imageClassName)}
           height={imageHeight ?? 420}
           src={image}
-          style={{ height: "auto", width: "auto" }}
           width={imageWidth ?? 200}
         />
       )}

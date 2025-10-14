@@ -173,10 +173,11 @@ export default async function Page({
             <Box className="mb-0 bg-green-800 p-0">
               <Hero
                 className="gap-4"
-                image="/images/waddles/pose4.png"
-                imageClassName="scale-x-[-1]"
-                imageHeight={195}
+                image="/images/waddles/pose3.png"
+                imageClassName="right-6"
+                imageHeight={198}
                 imagePosition="end"
+                imageWidth={180}
               >
                 <div className="flex flex-col gap-3 py-4 pl-6 uppercase">
                   <Text.Heading>liquidity</Text.Heading>
