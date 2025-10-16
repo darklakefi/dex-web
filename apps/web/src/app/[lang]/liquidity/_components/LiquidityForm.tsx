@@ -41,6 +41,8 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
     isPoolLoading,
     isSubmitting,
     send,
+    tokenASymbol,
+    tokenBSymbol,
   } = useLiquidityFormLogic({
     tokenAAddress,
     tokenBAddress,
@@ -170,15 +172,9 @@ export function LiquidityForm({ tokenPrices = {} }: LiquidityFormProps) {
                 estimatedLPTokens={lpEstimation.data?.estimatedLPTokens || ""}
                 form={form}
                 isLPEstimationLoading={lpEstimation.isLoading}
-                tokenASymbol={
-                  tokenAccountsData.tokenAAccount?.tokenAccounts?.[0]?.symbol ||
-                  ""
-                }
+                tokenASymbol={tokenASymbol}
                 tokenBAddress={tokenBAddress ?? ""}
-                tokenBSymbol={
-                  tokenAccountsData.tokenBAccount?.tokenAccounts?.[0]?.symbol ||
-                  ""
-                }
+                tokenBSymbol={tokenBSymbol}
                 tokenXMint={poolDetails?.tokenXMint}
                 tokenXReserve={poolDetails?.tokenXReserve}
                 tokenYReserve={poolDetails?.tokenYReserve}

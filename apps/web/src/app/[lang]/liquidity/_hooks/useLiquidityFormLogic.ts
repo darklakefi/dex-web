@@ -1,5 +1,6 @@
 "use client";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { truncate } from "libs/utils/src/common/truncate";
 import { useRef } from "react";
 import { useRealtimePoolData } from "../../../../hooks/useRealtimePoolData";
 import {
@@ -28,6 +29,8 @@ export interface UseLiquidityFormLogicReturn {
   publicKey: ReturnType<typeof useWallet>["publicKey"];
   send: ReturnType<typeof useLiquidityTransaction>["send"];
   tokenAccountsData: UseRealtimeTokenAccountsReturn;
+  tokenASymbol: string;
+  tokenBSymbol: string;
 }
 
 export function useLiquidityFormLogic({
@@ -69,6 +72,13 @@ export function useLiquidityFormLogic({
     },
   });
 
+  const tokenASymbol =
+    tokenAccountsData.tokenAAccount?.tokenAccounts?.[0]?.symbol ||
+    truncate(tokenAAddress || "");
+  const tokenBSymbol =
+    tokenAccountsData.tokenBAccount?.tokenAccounts?.[0]?.symbol ||
+    truncate(tokenBAddress || "");
+
   const transaction = useLiquidityTransaction({
     onTransactionComplete: () => {
       markTransactionComplete();
@@ -77,7 +87,9 @@ export function useLiquidityFormLogic({
     poolDetails: poolDetails ?? null,
     resetForm: () => form.reset(),
     tokenAAddress,
+    tokenASymbol,
     tokenBAddress,
+    tokenBSymbol,
   });
 
   handleFormSubmitRef.current = transaction.handleFormSubmit;
@@ -93,5 +105,7 @@ export function useLiquidityFormLogic({
     publicKey,
     send: transaction.send,
     tokenAccountsData,
+    tokenASymbol,
+    tokenBSymbol,
   };
 }
