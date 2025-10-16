@@ -183,6 +183,8 @@ export function WithdrawLiquidityModal({
     opts: {
       minTokenXOut: string;
       minTokenYOut: string;
+      tokenXOut: string;
+      tokenYOut: string;
       tokenXMint: string;
       tokenYMint: string;
       lpTokenAmount: string;
@@ -267,7 +269,7 @@ export function WithdrawLiquidityModal({
                 ? `Transaction initiated. You can now cast votes for this proposal on the Squads app.`
                 : isSubmitted
                   ? submittedToast.description
-                  : `Successfully withdrew ${form.state.values.withdrawalAmount}% of your liquidity. Transaction: ${submitRes.signature}`}
+                  : `Successfully withdrew ${opts.tokenYOut} ${tokenYSymbol} + ${opts.tokenXOut} ${tokenXSymbol}. Transaction: ${submitRes.signature}`}
             </Text.Body2>
           </div>
         ),
@@ -396,7 +398,9 @@ export function WithdrawLiquidityModal({
           minTokenXOut: minXOut,
           minTokenYOut: minYOut,
           tokenXMint: gatewayTokenXAddress,
+          tokenXOut: expectedX.toString(),
           tokenYMint: gatewayTokenYAddress,
+          tokenYOut: expectedY.toString(),
         });
       } else {
         throw new Error(
