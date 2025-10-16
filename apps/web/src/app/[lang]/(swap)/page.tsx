@@ -1,8 +1,10 @@
 import { tanstackClient } from "@dex-web/orpc";
 import { Box, Hero, Text } from "@dex-web/ui";
 import { sortSolanaAddresses } from "@dex-web/utils";
+import { SkeletonForm } from "apps/web/src/app/_components/SkeletonForm";
 import { SwapTransactionHistory } from "apps/web/src/app/[lang]/(swap)/_components/SwapTransactionHistory";
 import type { SearchParams } from "nuqs/server";
+import { Suspense } from "react";
 import { getQueryClient, HydrateClient } from "../../../lib/query/hydration";
 import { queryKeys } from "../../../lib/queryKeys";
 import { FeaturesAndTrendingPoolPanel } from "../../_components/FeaturesAndTrendingPoolPanel";
@@ -116,7 +118,10 @@ export default async function Page({
             </Box>
             <div className="size-9" />
           </section>
-          <SwapForm />
+          <Suspense fallback={<SkeletonForm />}>
+            <SwapForm />
+          </Suspense>
+
           <SwapTransactionHistory />
         </div>
         <div className="hidden max-w-xs md:block">
